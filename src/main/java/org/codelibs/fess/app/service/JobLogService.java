@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.JobLogPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.JobLogCB;
 import org.codelibs.fess.es.exbhv.JobLogBhv;
 import org.codelibs.fess.es.exentity.JobLog;
@@ -51,7 +50,7 @@ public class JobLogService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(jobLogList, jobLogPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(jobLogList, jobLogPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         jobLogPager.setPageNumberList(jobLogList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,7 +71,7 @@ public class JobLogService implements Serializable {
         return jobLog;
     }
 
-    public void store(final JobLog jobLog) throws CrudMessageException {
+    public void store(final JobLog jobLog) {
         setupStoreCondition(jobLog);
 
         jobLogBhv.insertOrUpdate(jobLog, op -> {
@@ -81,7 +80,7 @@ public class JobLogService implements Serializable {
 
     }
 
-    public void delete(final JobLog jobLog) throws CrudMessageException {
+    public void delete(final JobLog jobLog) {
         setupDeleteCondition(jobLog);
 
         jobLogBhv.delete(jobLog, op -> {

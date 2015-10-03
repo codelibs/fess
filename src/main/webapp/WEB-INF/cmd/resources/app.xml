@@ -29,7 +29,7 @@
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
-	<component name="indexUpdater" class="org.codelibs.fess.solr.IndexUpdater"
+	<component name="indexUpdater" class="org.codelibs.fess.indexer.IndexUpdater"
 		instance="prototype">
 		<!-- 
 		<property name="maxDocumentCacheSize">5</property>
@@ -37,7 +37,7 @@
 		<property name="threadDump">false</property>
 		<postConstruct name="addBoostDocumentRule">
 			<arg>
-				<component class="org.codelibs.fess.solr.BoostDocumentRule">
+				<component class="org.codelibs.fess.indexer.BoostDocumentRule">
 					<property name="matchExpression">"url.matches(\".*fess.*\")"</property>
 					<property name="boostExpression">"1000.0"</property>
 				</component>

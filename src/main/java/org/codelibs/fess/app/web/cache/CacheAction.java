@@ -32,12 +32,12 @@ public class CacheAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
     private static final Logger logger = LoggerFactory.getLogger(CacheAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
 
     // ===================================================================================
     //                                                                               Hook

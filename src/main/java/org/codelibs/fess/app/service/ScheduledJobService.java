@@ -25,8 +25,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ScheduledJobPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.ScheduledJobCB;
 import org.codelibs.fess.es.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.exentity.ScheduledJob;
@@ -52,7 +50,7 @@ public class ScheduledJobService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(scheduledJobList, scheduledJobPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(scheduledJobList, scheduledJobPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         scheduledJobPager.setPageNumberList(scheduledJobList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -73,7 +71,7 @@ public class ScheduledJobService implements Serializable {
         return scheduledJob;
     }
 
-    public void delete(final ScheduledJob scheduledJob) throws CrudMessageException {
+    public void delete(final ScheduledJob scheduledJob) {
         setupDeleteCondition(scheduledJob);
 
         scheduledJobBhv.delete(scheduledJob, op -> {

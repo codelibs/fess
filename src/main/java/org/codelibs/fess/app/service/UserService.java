@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.UserCB;
 import org.codelibs.fess.es.exbhv.UserBhv;
 import org.codelibs.fess.es.exentity.User;
@@ -50,7 +49,7 @@ public class UserService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(userList, userPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(userList, userPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         userPager.setPageNumberList(userList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -71,7 +70,7 @@ public class UserService implements Serializable {
         return user;
     }
 
-    public void store(final User user) throws CrudMessageException {
+    public void store(final User user) {
         setupStoreCondition(user);
 
         userBhv.insertOrUpdate(user, op -> {
@@ -80,7 +79,7 @@ public class UserService implements Serializable {
 
     }
 
-    public void delete(final User user) throws CrudMessageException {
+    public void delete(final User user) {
         setupDeleteCondition(user);
 
         userBhv.delete(user, op -> {

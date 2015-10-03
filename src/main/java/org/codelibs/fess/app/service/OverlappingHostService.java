@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.OverlappingHostPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.OverlappingHostCB;
 import org.codelibs.fess.es.exbhv.OverlappingHostBhv;
 import org.codelibs.fess.es.exentity.OverlappingHost;
@@ -50,7 +49,7 @@ public class OverlappingHostService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(overlappingHostList, overlappingHostPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(overlappingHostList, overlappingHostPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         overlappingHostPager.setPageNumberList(overlappingHostList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -71,7 +70,7 @@ public class OverlappingHostService implements Serializable {
         return overlappingHost;
     }
 
-    public void store(final OverlappingHost overlappingHost) throws CrudMessageException {
+    public void store(final OverlappingHost overlappingHost) {
         setupStoreCondition(overlappingHost);
 
         overlappingHostBhv.insertOrUpdate(overlappingHost, op -> {
@@ -80,7 +79,7 @@ public class OverlappingHostService implements Serializable {
 
     }
 
-    public void delete(final OverlappingHost overlappingHost) throws CrudMessageException {
+    public void delete(final OverlappingHost overlappingHost) {
         setupDeleteCondition(overlappingHost);
 
         overlappingHostBhv.delete(overlappingHost, op -> {

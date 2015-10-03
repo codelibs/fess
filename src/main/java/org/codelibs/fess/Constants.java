@@ -88,12 +88,6 @@ public class Constants extends CoreLibConstants {
 
     public static final long DEFAULT_CRAWLING_EXECUTION_INTERVAL = 5000L;
 
-    /** Solr Status: Active */
-    public static final String ACTIVE = "ACTIVE";
-
-    /** Solr Status: Inactive */
-    public static final String INACTIVE = "INACTIVE";
-
     // fess properties
     public static final String USER_INFO_PROPERTY = "user.info";
 
@@ -232,9 +226,9 @@ public class Constants extends CoreLibConstants {
     public static final String[] RESERVED = { "+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^", "~", "*", "?", "\\", ";", ":",
             "/" };
 
-    public static final Pattern SOLR_FIELD_RESERVED_PATTERN = Pattern.compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
+    public static final Pattern LUCENE_FIELD_RESERVED_PATTERN = Pattern.compile("([+\\-!\\(\\){}\\[\\]^\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))"); // "*", "?",
 
-    public static final Pattern SOLR_RANGE_FIELD_RESERVED_PATTERN = Pattern.compile("([!\\(\\){}\\[\\]\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))");
+    public static final Pattern LUCENE_RANGE_FIELD_RESERVED_PATTERN = Pattern.compile("([!\\(\\){}\\[\\]\"~\\\\:\\p{Zs}]|(&&)|(\\|\\|))");
 
     public static final String SEARCH_LOG_ACCESS_TYPE = "searchLogAccessType";
 
@@ -251,8 +245,6 @@ public class Constants extends CoreLibConstants {
     public static final String USER_CODE = "userCode";
 
     public static final String SEARCH_FIELD_LOG_SEARCH_QUERY = "query";
-
-    public static final String SEARCH_FIELD_LOG_SOLR_QUERY = "solrQuery";
 
     public static final String STATS_REPORT_TYPE = "reportType";
 
@@ -326,4 +318,13 @@ public class Constants extends CoreLibConstants {
     public static final long ONE_DAY_IN_MILLIS = 24L * 60L * 60L * 1000L;
 
     public static final String GUEST_USER = "guest";
+
+    public static final String[] PAGER_CONVERSION_RULE = { "allRecordCount", "pageSize", "currentPageNumber", "allPageCount",
+            "existPrePage", "existNextPage" };
+
+    // TODO remove searchParams
+    public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "crudMode", "createdBy", "createdTime",
+            "updatedBy", "updatedTime" };
+
+    public static final String USER_INFO = "LoginInfo";
 }

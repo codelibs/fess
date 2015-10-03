@@ -5,7 +5,7 @@
 	<include path="s2robot/container.xml" />
 
 	<component name="intervalController"
-		class="org.codelibs.fess.interval.FessIntervalController"
+		class="org.codelibs.fess.crawler.interval.FessIntervalController"
 		instance="prototype">
 	</component>
 </components>

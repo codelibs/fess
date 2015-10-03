@@ -23,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

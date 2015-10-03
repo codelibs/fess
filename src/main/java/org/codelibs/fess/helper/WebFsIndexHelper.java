@@ -31,11 +31,11 @@ import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.es.exentity.WebConfig;
-import org.codelibs.fess.interval.FessIntervalController;
-import org.codelibs.fess.solr.IndexUpdater;
+import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2Robot;
 import org.codelibs.robot.S2RobotContext;
@@ -388,7 +388,7 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setDaemon(true);
         indexUpdater.setS2RobotList(s2RobotList);
         for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
-            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.solr.BoostDocumentRule(rule));
+            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.indexer.BoostDocumentRule(rule));
         }
         indexUpdater.start();
 

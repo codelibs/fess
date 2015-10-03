@@ -21,7 +21,7 @@
 	</component>
 
 	<!-- Robot Thread -->
-	<component name="robotThread" class="org.codelibs.fess.robot.FessS2RobotThread" instance="prototype" >
+	<component name="robotThread" class="org.codelibs.fess.crawler.FessS2RobotThread" instance="prototype" >
 	</component>
 
 	<!-- Entity -->

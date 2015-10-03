@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.GroupCB;
 import org.codelibs.fess.es.exbhv.GroupBhv;
 import org.codelibs.fess.es.exentity.Group;
@@ -46,7 +45,7 @@ public class GroupService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(groupList, groupPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(groupList, groupPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         groupPager.setPageNumberList(groupList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -67,7 +66,7 @@ public class GroupService implements Serializable {
         return group;
     }
 
-    public void store(final Group group) throws CrudMessageException {
+    public void store(final Group group) {
         setupStoreCondition(group);
 
         groupBhv.insertOrUpdate(group, op -> {
@@ -76,7 +75,7 @@ public class GroupService implements Serializable {
 
     }
 
-    public void delete(final Group group) throws CrudMessageException {
+    public void delete(final Group group) {
         setupDeleteCondition(group);
 
         groupBhv.delete(group, op -> {

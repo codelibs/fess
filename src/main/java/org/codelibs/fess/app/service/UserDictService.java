@@ -23,8 +23,8 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserDictPager;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.dict.DictionaryExpiredException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
@@ -44,7 +44,7 @@ public class UserDictService {
                 userDictFile.selectList((userDictPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
         // update pager
-        BeanUtil.copyBeanToBean(userDictList, userDictPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(userDictList, userDictPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         userDictList.setPageRangeSize(5);
         userDictPager.setPageNumberList(userDictList.createPageNumberList());
 

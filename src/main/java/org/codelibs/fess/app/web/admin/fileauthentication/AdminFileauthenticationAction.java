@@ -29,8 +29,8 @@ import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.FileAuthenticationPager;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.app.service.FileConfigService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.helper.SystemHelper;
@@ -89,7 +89,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final FileAuthenticationSearchForm form) {
-        copyBeanToBean(form.searchParams, fileAuthenticationPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, fileAuthenticationPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -114,7 +114,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         data.register("fileAuthenticationItems", fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
         data.register("displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
-        copyBeanToBean(fileAuthenticationPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(fileAuthenticationPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -127,7 +127,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final FileAuthenticationEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -139,7 +139,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadFileAuthentication(form);
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -159,7 +159,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final FileAuthenticationEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadFileAuthentication(form);
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -172,7 +172,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadFileAuthentication(form);
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -183,7 +183,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final FileAuthenticationEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadFileAuthentication(form);
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -198,7 +198,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadFileAuthentication(form);
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -249,7 +249,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final FileAuthenticationEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         fileAuthenticationService.delete(getFileAuthentication(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -274,7 +274,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         FileAuthentication fileAuthentication;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             fileAuthentication = getFileAuthentication(form);
         } else {
             fileAuthentication = new FileAuthentication();
@@ -283,7 +283,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         }
         fileAuthentication.setUpdatedBy(username);
         fileAuthentication.setUpdatedTime(currentTime);
-        copyBeanToBean(form, fileAuthentication, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, fileAuthentication, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return fileAuthentication;
     }
 

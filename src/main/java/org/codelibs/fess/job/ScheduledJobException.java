@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.job;
 
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class ScheduledJobException extends FessSystemException {
 

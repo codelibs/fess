@@ -36,13 +36,13 @@ import org.apache.commons.io.IOUtils;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.SuggestElevateWordPager;
 import org.codelibs.fess.app.service.SuggestElevateWordService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.SuggestElevateWord;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -97,7 +97,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SuggestElevateWordSearchForm form) {
-        copyBeanToBean(form.searchParams, suggestElevateWordPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, suggestElevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -121,7 +121,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     protected void searchPaging(final RenderData data, final SuggestElevateWordSearchForm form) {
         data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
         // restore from pager
-        copyBeanToBean(suggestElevateWordPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(suggestElevateWordPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -134,7 +134,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final SuggestElevateWordEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
@@ -143,7 +143,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadSuggestElevateWord(form);
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
@@ -157,7 +157,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final SuggestElevateWordEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadSuggestElevateWord(form);
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
@@ -167,7 +167,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadSuggestElevateWord(form);
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
@@ -175,7 +175,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final SuggestElevateWordEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadSuggestElevateWord(form);
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
@@ -187,7 +187,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadSuggestElevateWord(form);
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
@@ -263,7 +263,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final SuggestElevateWordEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         suggestElevateWordService.delete(getSuggestElevateWord(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -344,7 +344,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         SuggestElevateWord suggestElevateWord;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             suggestElevateWord = getSuggestElevateWord(form);
         } else {
             suggestElevateWord = new SuggestElevateWord();
@@ -353,7 +353,7 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         }
         suggestElevateWord.setUpdatedBy(username);
         suggestElevateWord.setUpdatedTime(currentTime);
-        copyBeanToBean(form, suggestElevateWord, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, suggestElevateWord, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return suggestElevateWord;
     }
 

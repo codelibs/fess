@@ -45,13 +45,13 @@ import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
 import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigType;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -103,11 +103,11 @@ public class ViewHelper implements Serializable {
 
     public String[] highlightingFields = new String[] { "hl_content", "digest" };
 
-    public boolean useSolrHighlight = false;
+    public boolean useHighlight = false;
 
-    public String solrHighlightTagPre = "<em>";
+    public String originalHighlightTagPre = "<em>";
 
-    public String solrHighlightTagPost = "</em>";
+    public String originalHighlightTagPost = "</em>";
 
     public String highlightTagPre = "<em>";
 
@@ -125,15 +125,15 @@ public class ViewHelper implements Serializable {
 
     public String cacheTemplateName = "cache";
 
-    private String escapedSolrHighlightPre = null;
+    private String escapedHighlightPre = null;
 
-    private String escapedSolrHighlightPost = null;
+    private String escapedHighlightPost = null;
 
     @PostConstruct
     public void init() {
-        if (useSolrHighlight) {
-            escapedSolrHighlightPre = LaFunctions.h(solrHighlightTagPre);
-            escapedSolrHighlightPost = LaFunctions.h(solrHighlightTagPost);
+        if (useHighlight) {
+            escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
+            escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);
         }
     }
 
@@ -165,7 +165,7 @@ public class ViewHelper implements Serializable {
         for (final String field : highlightingFields) {
             final String text = getString(document, field);
             if (StringUtil.isNotBlank(text)) {
-                if (useSolrHighlight) {
+                if (useHighlight) {
                     return escapeHighlight(text);
                 } else {
                     return highlight(LaFunctions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
@@ -177,12 +177,12 @@ public class ViewHelper implements Serializable {
     }
 
     protected String escapeHighlight(final String text) {
-        return LaFunctions.h(text).replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
-                .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
+        return LaFunctions.h(text).replaceAll(escapedHighlightPre, originalHighlightTagPre)
+                .replaceAll(escapedHighlightPost, originalHighlightTagPost);
     }
 
     protected String removeSolrHighlightTag(final String str) {
-        return str.replaceAll(solrHighlightTagPre, StringUtil.EMPTY).replaceAll(solrHighlightTagPost, StringUtil.EMPTY);
+        return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
     protected String highlight(final String content, final String[] queries) {
@@ -400,7 +400,7 @@ public class ViewHelper implements Serializable {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
         String createdStr;
-        Long created = DocumentUtil.getValue(doc, fieldHelper.createdField, Long.class);
+        final Long created = DocumentUtil.getValue(doc, fieldHelper.createdField, Long.class);
         if (created != null) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             createdStr = sdf.format(new Date(created.longValue()));
@@ -515,7 +515,7 @@ public class ViewHelper implements Serializable {
             throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
         }
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
-        StreamResponse response = new StreamResponse(StringUtil.EMPTY);
+        final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);

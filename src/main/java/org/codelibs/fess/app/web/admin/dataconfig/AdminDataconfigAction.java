@@ -29,8 +29,8 @@ import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
@@ -91,7 +91,7 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final DataConfigSearchForm form) {
-        copyBeanToBean(form.searchParams, dataConfigPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, dataConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -116,7 +116,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(dataConfigPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(dataConfigPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -129,7 +129,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final DataConfigEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -141,7 +141,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final DataConfigEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
@@ -161,7 +161,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final DataConfigEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
@@ -174,7 +174,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final DataConfigEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
@@ -185,7 +185,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final DataConfigEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadDataConfig(form);
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
@@ -201,7 +201,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         try {
             form.crudMode = crudMode;
             form.id = id;
-            verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+            verifyCrudMode(form, CrudMode.CONFIRM);
             loadDataConfig(form);
             return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
@@ -256,7 +256,7 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final DataConfigEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         dataConfigService.delete(getDataConfig(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -281,7 +281,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         DataConfig dataConfig;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             dataConfig = getDataConfig(form);
         } else {
             dataConfig = new DataConfig();
@@ -290,7 +290,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         }
         dataConfig.setUpdatedBy(username);
         dataConfig.setUpdatedTime(currentTime);
-        copyBeanToBean(form, dataConfig, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, dataConfig, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return dataConfig;
     }
 

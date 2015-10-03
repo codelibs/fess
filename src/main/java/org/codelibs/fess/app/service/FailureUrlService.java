@@ -32,8 +32,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.FailureUrlCB;
 import org.codelibs.fess.es.exbhv.FailureUrlBhv;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
@@ -66,7 +64,7 @@ public class FailureUrlService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(failureUrlList, failureUrlPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(failureUrlList, failureUrlPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         failureUrlPager.setPageNumberList(failureUrlList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -87,7 +85,7 @@ public class FailureUrlService implements Serializable {
         return failureUrl;
     }
 
-    public void store(final FailureUrl failureUrl) throws CrudMessageException {
+    public void store(final FailureUrl failureUrl) {
         setupStoreCondition(failureUrl);
 
         failureUrlBhv.insertOrUpdate(failureUrl, op -> {
@@ -96,7 +94,7 @@ public class FailureUrlService implements Serializable {
 
     }
 
-    public void delete(final FailureUrl failureUrl) throws CrudMessageException {
+    public void delete(final FailureUrl failureUrl) {
         setupDeleteCondition(failureUrl);
 
         failureUrlBhv.delete(failureUrl, op -> {

@@ -33,14 +33,14 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.InvalidQueryException;
-import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.RootForm;
 import org.codelibs.fess.app.web.base.FessSearchAction;
-import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.exentity.SearchLog;
 import org.codelibs.fess.es.exentity.UserInfo;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -57,7 +57,7 @@ public class SearchAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
     private static final Logger logger = LoggerFactory.getLogger(SearchAction.class);
 
     protected static final long DEFAULT_START_COUNT = 0;
@@ -70,7 +70,7 @@ public class SearchAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
 
     // ===================================================================================
     //                                                                               Hook
@@ -361,7 +361,6 @@ public class SearchAction extends FessSearchAction {
             searchLog.setResponseTime(Integer.valueOf((int) queryResponseList.getExecTime()));
             searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
             searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
-            searchLog.setSolrQuery(StringUtils.abbreviate(queryResponseList.getSolrQuery(), 1000));
             searchLog.setRequestedTime(now);
             searchLog.setQueryOffset(pageStart);
             searchLog.setQueryPageSize(pageNum);

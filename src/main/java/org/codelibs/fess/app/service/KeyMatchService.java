@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KeyMatchPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.KeyMatchCB;
 import org.codelibs.fess.es.exbhv.KeyMatchBhv;
 import org.codelibs.fess.es.exentity.KeyMatch;
@@ -50,7 +49,7 @@ public class KeyMatchService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(keyMatchList, keyMatchPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(keyMatchList, keyMatchPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         keyMatchPager.setPageNumberList(keyMatchList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -71,7 +70,7 @@ public class KeyMatchService implements Serializable {
         return keyMatch;
     }
 
-    public void store(final KeyMatch keyMatch) throws CrudMessageException {
+    public void store(final KeyMatch keyMatch) {
         setupStoreCondition(keyMatch);
 
         keyMatchBhv.insertOrUpdate(keyMatch, op -> {
@@ -80,7 +79,7 @@ public class KeyMatchService implements Serializable {
 
     }
 
-    public void delete(final KeyMatch keyMatch) throws CrudMessageException {
+    public void delete(final KeyMatch keyMatch) {
         setupDeleteCondition(keyMatch);
 
         keyMatchBhv.delete(keyMatch, op -> {

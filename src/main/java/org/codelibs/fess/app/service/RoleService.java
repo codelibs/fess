@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RolePager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.RoleCB;
 import org.codelibs.fess.es.exbhv.RoleBhv;
 import org.codelibs.fess.es.exentity.Role;
@@ -46,7 +45,7 @@ public class RoleService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(roleList, rolePager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(roleList, rolePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         rolePager.setPageNumberList(roleList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -67,7 +66,7 @@ public class RoleService implements Serializable {
         return role;
     }
 
-    public void store(final Role role) throws CrudMessageException {
+    public void store(final Role role) {
         setupStoreCondition(role);
 
         roleBhv.insertOrUpdate(role, op -> {
@@ -76,7 +75,7 @@ public class RoleService implements Serializable {
 
     }
 
-    public void delete(final Role role) throws CrudMessageException {
+    public void delete(final Role role) {
         setupDeleteCondition(role);
 
         roleBhv.delete(role, op -> {

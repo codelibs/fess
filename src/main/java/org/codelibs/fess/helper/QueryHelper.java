@@ -34,11 +34,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.util.QueryUtil;
 import org.lastaflute.web.ruts.message.ActionMessages;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -278,13 +278,13 @@ public class QueryHelper implements Serializable {
         final SearchQuery searchQuery = new SearchQuery();
 
         final String q = buildQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
-        String solrQuery;
+        String queryString;
         if (q == null || "()".equals(q)) {
-            solrQuery = StringUtil.EMPTY;
+            queryString = StringUtil.EMPTY;
         } else {
-            solrQuery = unbracketQuery(q);
+            queryString = unbracketQuery(q);
         }
-        searchQuery.setQuery(solrQuery);
+        searchQuery.setQuery(queryString);
 
         searchQuery.setMinimumShouldMatch(minimumShouldMatch);
         searchQuery.setDefType(defType);
@@ -773,13 +773,13 @@ public class QueryHelper implements Serializable {
 
     public String buildFacetQuery(final String query) {
         final String q = buildFacetQueryInternal(query);
-        String solrQuery;
+        String queryString;
         if (q == null || "()".equals(q)) {
-            solrQuery = StringUtil.EMPTY;
+            queryString = StringUtil.EMPTY;
         } else {
-            solrQuery = unbracketQuery(q);
+            queryString = unbracketQuery(q);
         }
-        return solrQuery;
+        return queryString;
     }
 
     protected String buildFacetQueryInternal(final String query) {

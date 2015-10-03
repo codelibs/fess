@@ -47,12 +47,12 @@
 							<c:if test="${doc.created!=null && doc.created!=''}">
 								<c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_created" />
-								<fmt:formatDate value="${fe:date(doc.created)}" type="BOTH" />
+								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
 							</c:if>
 							<c:if test="${doc.last_modified!=null && doc.last_modified!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_last_modified" />
-								<fmt:formatDate value="${fe:date(doc.last_modified)}" type="BOTH" />
+								<fmt:formatDate value="${fe:parseDate(doc.last_modified)}" type="BOTH" />
 							</c:if>
 							<c:if test="${doc.content_length!=null && doc.content_length!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>

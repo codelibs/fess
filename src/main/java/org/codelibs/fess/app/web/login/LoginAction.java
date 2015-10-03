@@ -25,11 +25,11 @@ public class LoginAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
 
     // ===================================================================================
     //                                                                               Hook
@@ -54,8 +54,8 @@ public class LoginAction extends FessSearchAction {
             form.clearSecurityInfo();
             return asHtml(path_Login_IndexJsp);
         });
-        String email = form.username;
-        String password = form.password;
+        final String email = form.username;
+        final String password = form.password;
         return fessLoginAssist.loginRedirect(email, password, op -> {}, () -> getHtmlResponse());
     }
 

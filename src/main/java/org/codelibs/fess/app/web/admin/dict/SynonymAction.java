@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.crud.util.SAStrutsUtil;
 import org.codelibs.fess.dict.DictionaryExpiredException;

@@ -19,7 +19,7 @@ package org.codelibs.fess.filter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.codelibs.fess.SSCConstants;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.entity.UserInfo;
 
@@ -30,7 +30,7 @@ public class AdminAuthFilter extends AuthFilter {
         if (session == null) {
             return null;
         }
-        final Object obj = session.getAttribute(SSCConstants.USER_INFO);
+        final Object obj = session.getAttribute(Constants.USER_INFO);
         if (obj instanceof LoginInfo) {
             final LoginInfo loginInfo = (LoginInfo) obj;
             if (loginInfo.isAdministrator()) {

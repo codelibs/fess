@@ -222,7 +222,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     }
 
     protected void handleFileUploadException(final FileUploadException e) throws ServletException {
-        // suppress logging because it can be caught by logging filter 
+        // suppress logging because it can be caught by logging filter
         //log.error("Failed to parse multipart request", e);
         throw new ServletException("Failed to upload the file.", e);
     }

@@ -35,13 +35,13 @@ public class FessBoot extends TomcatBoot {
 
     private static final String UTF_8 = "UTF-8";
 
-    public FessBoot(int port, String contextPath) {
+    public FessBoot(final int port, final String contextPath) {
         super(port, contextPath);
     }
 
     @Override
     protected String prepareWebappPath() {
-        String value = System.getProperty(FESS_WEBAPP_PATH);
+        final String value = System.getProperty(FESS_WEBAPP_PATH);
         if (value != null) {
             return value;
         }
@@ -50,7 +50,7 @@ public class FessBoot extends TomcatBoot {
 
     @Override
     protected String prepareWebXmlPath() {
-        String value = System.getProperty(FESS_WEBXML_PATH);
+        final String value = System.getProperty(FESS_WEBXML_PATH);
         if (value != null) {
             return value;
         }
@@ -59,16 +59,11 @@ public class FessBoot extends TomcatBoot {
 
     @Override
     protected String getMarkDir() {
-        String value = System.getProperty(FESS_TEMP_PATH);
-        if (value != null) {
-            System.setProperty(JAVA_IO_TMPDIR, value);
-            return new File(value, "fessboot").getAbsolutePath();
-        }
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
     }
 
     @Override
-    protected void info(String msg) {
+    protected void info(final String msg) {
         logger.info(msg);
     }
 
@@ -76,7 +71,8 @@ public class FessBoot extends TomcatBoot {
     //                                                                        main
     //                                                                        ============
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
+        // load logging.properties
         try (InputStream is = FessBoot.class.getResourceAsStream(LOGGING_PROPERTIES)) {
             if (is != null) {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -97,9 +93,16 @@ public class FessBoot extends TomcatBoot {
                     logger.info(LOGGING_PROPERTIES + " is loaded.");
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             logger.log(Level.WARNING, "Failed to load " + LOGGING_PROPERTIES, e);
         }
+
+        // update java.io.tmpdir
+        final String value = System.getProperty(FESS_TEMP_PATH);
+        if (value != null) {
+            System.setProperty(JAVA_IO_TMPDIR, value);
+        }
+
         new FessBoot(getPort(), getContextPath()).useTldDetect().asDevelopment(isNoneEnv()).bootAwait();
     }
 
@@ -108,7 +111,7 @@ public class FessBoot extends TomcatBoot {
     }
 
     protected static int getPort() {
-        String value = System.getProperty(FESS_PORT);
+        final String value = System.getProperty(FESS_PORT);
         if (value != null) {
             return Integer.parseInt(value);
         }
@@ -116,7 +119,7 @@ public class FessBoot extends TomcatBoot {
     }
 
     protected static String getContextPath() {
-        String value = System.getProperty(FESS_CONTEXT_PATH);
+        final String value = System.getProperty(FESS_CONTEXT_PATH);
         if (value != null) {
             return value;
         }

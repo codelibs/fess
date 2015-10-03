@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.SSCConstants;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -84,12 +84,12 @@ public class AdLoginInfoFilter implements Filter {
                 }
             }
 
-            LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
+            LoginInfo loginInfo = (LoginInfo) session.getAttribute(Constants.USER_INFO);
             if (loginInfo == null) {
                 loginInfo = new LoginInfo();
                 loginInfo.setUsername(userId);
                 updateRoleList(userId, loginInfo);
-                session.setAttribute(SSCConstants.USER_INFO, loginInfo);
+                session.setAttribute(Constants.USER_INFO, loginInfo);
             } else {
                 final long now = System.currentTimeMillis();
                 if (now - loginInfo.getUpdatedTime() > updateInterval) {

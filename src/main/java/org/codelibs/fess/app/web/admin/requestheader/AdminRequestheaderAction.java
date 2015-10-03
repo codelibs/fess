@@ -29,8 +29,8 @@ import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.RequestHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.RequestHeader;
 import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
@@ -89,7 +89,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final RequestHeaderSearchForm form) {
-        copyBeanToBean(form.searchParams, requestHeaderPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, requestHeaderPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -115,7 +115,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
         data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
-        copyBeanToBean(requestHeaderPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(requestHeaderPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -128,7 +128,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final RequestHeaderEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -140,7 +140,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final RequestHeaderEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadRequestHeader(form);
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -160,7 +160,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final RequestHeaderEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadRequestHeader(form);
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -173,7 +173,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final RequestHeaderEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadRequestHeader(form);
         return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -184,7 +184,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final RequestHeaderEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadRequestHeader(form);
         return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -199,7 +199,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final RequestHeaderEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadRequestHeader(form);
         return asHtml(path_AdminRequestheader_ConfirmJsp);
     }
@@ -241,7 +241,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final RequestHeaderEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         requestHeaderService.delete(getRequestHeader(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -266,7 +266,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
         RequestHeader requestHeader;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             requestHeader = getRequestHeader(form);
         } else {
             requestHeader = new RequestHeader();
@@ -275,7 +275,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
         }
         requestHeader.setUpdatedBy(username);
         requestHeader.setUpdatedTime(currentTime);
-        copyBeanToBean(form, requestHeader, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, requestHeader, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return requestHeader;
     }
 

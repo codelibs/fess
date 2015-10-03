@@ -38,7 +38,7 @@ public final class UserDictCSVUtil {
 
     /**
      * Parse CSV line
-     * 
+     *
      * @param line
      *            line containing csv-encoded data
      * @return Array of values

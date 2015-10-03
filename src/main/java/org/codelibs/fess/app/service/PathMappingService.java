@@ -24,9 +24,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.PathMappingPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.PathMappingCB;
 import org.codelibs.fess.es.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.exentity.PathMapping;
@@ -47,7 +46,7 @@ public class PathMappingService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(pathMappingList, pathMappingPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(pathMappingList, pathMappingPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         pathMappingPager.setPageNumberList(pathMappingList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -69,7 +68,7 @@ public class PathMappingService implements Serializable {
         return pathMapping;
     }
 
-    public void store(final PathMapping pathMapping) throws CrudMessageException {
+    public void store(final PathMapping pathMapping) {
         setupStoreCondition(pathMapping);
 
         pathMappingBhv.insertOrUpdate(pathMapping, op -> {
@@ -78,7 +77,7 @@ public class PathMappingService implements Serializable {
 
     }
 
-    public void delete(final PathMapping pathMapping) throws CrudMessageException {
+    public void delete(final PathMapping pathMapping) {
         setupDeleteCondition(pathMapping);
 
         pathMappingBhv.delete(pathMapping, op -> {

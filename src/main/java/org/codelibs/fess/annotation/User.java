@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author shinsuke
- * 
+ *
  */
 @Target({ ElementType.FIELD, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

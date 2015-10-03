@@ -35,11 +35,11 @@ public class UserDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((User) et).getGroups(), (et, vl) -> ((User) et).setGroups((String[]) vl), "groups");
+        setupEpg(_epgMap, et -> ((User) et).getGroups(), (et, vl) -> ((User) et).setGroups(DfTypeUtil.toString(vl)), "groups");
         setupEpg(_epgMap, et -> ((User) et).getId(), (et, vl) -> ((User) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((User) et).getName(), (et, vl) -> ((User) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((User) et).getPassword(), (et, vl) -> ((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
-        setupEpg(_epgMap, et -> ((User) et).getRoles(), (et, vl) -> ((User) et).setRoles((String[]) vl), "roles");
+        setupEpg(_epgMap, et -> ((User) et).getRoles(), (et, vl) -> ((User) et).setRoles(DfTypeUtil.toString(vl)), "roles");
     }
 
     @Override
@@ -50,7 +50,7 @@ public class UserDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String[].class, "groups", null, false, false, false,
+    protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String.class, "groups", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
             false, null, null, null, null, null, false);
@@ -58,8 +58,8 @@ public class UserDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String.class, "roles", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnGroups() {
         return _columnGroups;

@@ -35,16 +35,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.SSCConstants;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.UserInfo;
 import org.codelibs.fess.util.ActivityUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * A filter implementation to process a container based authentication.
- * 
+ *
  * @author shinsuke
- * 
+ *
  */
 public class AuthFilter implements Filter {
 
@@ -159,7 +159,7 @@ public class AuthFilter implements Filter {
     }
 
     protected UserInfo getUserInfo(final HttpServletRequest req) {
-        final Object obj = req.getSession().getAttribute(SSCConstants.USER_INFO);
+        final Object obj = req.getSession().getAttribute(Constants.USER_INFO);
         if (obj instanceof UserInfo) {
             return (UserInfo) obj;
         }

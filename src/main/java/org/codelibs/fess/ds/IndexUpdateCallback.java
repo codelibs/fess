@@ -18,7 +18,7 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 
 public interface IndexUpdateCallback {
 

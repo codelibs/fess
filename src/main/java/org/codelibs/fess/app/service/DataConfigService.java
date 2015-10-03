@@ -26,8 +26,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.DataConfigPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.DataConfigCB;
 import org.codelibs.fess.es.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.exbhv.DataConfigToLabelBhv;
@@ -63,7 +61,7 @@ public class DataConfigService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(dataConfigList, dataConfigPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(dataConfigList, dataConfigPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         dataConfigPager.setPageNumberList(dataConfigList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -71,7 +69,7 @@ public class DataConfigService implements Serializable {
         return dataConfigList;
     }
 
-    public void delete(final DataConfig dataConfig) throws CrudMessageException {
+    public void delete(final DataConfig dataConfig) {
         setupDeleteCondition(dataConfig);
 
         dataConfigBhv.delete(dataConfig, op -> {

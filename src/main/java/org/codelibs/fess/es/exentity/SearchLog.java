@@ -73,10 +73,6 @@ public class SearchLog extends BsSearchLog {
         addSearchFieldLogValue(Constants.SEARCH_FIELD_LOG_SEARCH_QUERY, query);
     }
 
-    public void setSolrQuery(final String solrQuery) {
-        addSearchFieldLogValue(Constants.SEARCH_FIELD_LOG_SOLR_QUERY, solrQuery);
-    }
-
     public OptionalEntity<UserInfo> getUserInfo() {
         if (userInfo == null) {
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);

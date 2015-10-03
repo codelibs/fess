@@ -38,15 +38,14 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.CrawlingSessionPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.CrawlingSessionCB;
 import org.codelibs.fess.es.exbhv.CrawlingSessionBhv;
 import org.codelibs.fess.es.exbhv.CrawlingSessionInfoBhv;
 import org.codelibs.fess.es.exentity.CrawlingSession;
 import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
@@ -80,7 +79,7 @@ public class CrawlingSessionService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(crawlingSessionList, crawlingSessionPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(crawlingSessionList, crawlingSessionPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         crawlingSessionPager.setPageNumberList(crawlingSessionList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -101,14 +100,14 @@ public class CrawlingSessionService implements Serializable {
         return crawlingSession;
     }
 
-    public void store(final CrawlingSession crawlingSession) throws CrudMessageException {
+    public void store(final CrawlingSession crawlingSession) {
         setupStoreCondition(crawlingSession);
 
         crawlingSessionBhv.insertOrUpdate(crawlingSession);
 
     }
 
-    public void delete(final CrawlingSession crawlingSession) throws CrudMessageException {
+    public void delete(final CrawlingSession crawlingSession) {
         setupDeleteCondition(crawlingSession);
 
         crawlingSessionBhv.delete(crawlingSession);

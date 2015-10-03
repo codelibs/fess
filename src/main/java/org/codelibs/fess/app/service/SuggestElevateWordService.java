@@ -30,9 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SuggestElevateWordPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.SuggestElevateWordCB;
 import org.codelibs.fess.es.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.es.exentity.SuggestElevateWord;
@@ -65,8 +64,7 @@ public class SuggestElevateWordService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(suggestElevateWordList, suggestElevateWordPager,
-                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(suggestElevateWordList, suggestElevateWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         suggestElevateWordPager.setPageNumberList(suggestElevateWordList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -87,7 +85,7 @@ public class SuggestElevateWordService implements Serializable {
         return suggestElevateWord;
     }
 
-    public void store(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
+    public void store(final SuggestElevateWord suggestElevateWord) {
         setupStoreCondition(suggestElevateWord);
 
         suggestElevateWordBhv.insertOrUpdate(suggestElevateWord, op -> {
@@ -96,7 +94,7 @@ public class SuggestElevateWordService implements Serializable {
 
     }
 
-    public void delete(final SuggestElevateWord suggestElevateWord) throws CrudMessageException {
+    public void delete(final SuggestElevateWord suggestElevateWord) {
         setupDeleteCondition(suggestElevateWord);
 
         suggestElevateWordBhv.delete(suggestElevateWord, op -> {

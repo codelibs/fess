@@ -19,9 +19,9 @@ package org.codelibs.fess.helper;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -125,8 +125,8 @@ public class SystemHelper implements Serializable {
         }).orElse(Constants.GUEST_USER);
     }
 
-    public LocalDateTime getCurrentTime() {
-        return LocalDateTime.now();
+    public Date getCurrentTime() {
+        return new Date();
     }
 
     public long getCurrentTimeAsLong() {

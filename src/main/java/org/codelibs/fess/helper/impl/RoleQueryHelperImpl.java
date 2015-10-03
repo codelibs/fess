@@ -30,7 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.SSCConstants;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -108,7 +108,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         if (request != null) {
             final HttpSession session = request.getSession(false);
             if (session != null) {
-                final LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
+                final LoginInfo loginInfo = (LoginInfo) session.getAttribute(Constants.USER_INFO);
                 if (loginInfo != null) {
                     roleList.addAll(loginInfo.getRoleSet());
                 }

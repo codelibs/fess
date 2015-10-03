@@ -27,7 +27,7 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;

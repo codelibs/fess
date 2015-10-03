@@ -50,12 +50,12 @@ public class AdminWizardAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
     private static final Logger logger = LoggerFactory.getLogger(AdminWizardAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
     @Resource
     protected DynamicProperties crawlerProperties;
 
@@ -100,7 +100,7 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse crawlingConfig(CrawlingConfigForm form) {
+    public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_CrawlingConfigJsp);
         });
@@ -111,7 +111,7 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse crawlingConfigNext(CrawlingConfigForm form) {
+    public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_CrawlingConfigJsp);
         });
@@ -278,7 +278,7 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse startCrawling(StartCrawlingForm form) {
+    public HtmlResponse startCrawling(final StartCrawlingForm form) {
         if (!jobHelper.isCrawlProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {

@@ -41,7 +41,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
         // TODO needed?
     }
 
-    public FessUserBean(User user) {
+    public FessUserBean(final User user) {
         this.user = user;
     }
 

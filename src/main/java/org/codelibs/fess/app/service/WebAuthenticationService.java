@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebAuthenticationPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.exentity.WebAuthentication;
@@ -50,8 +49,7 @@ public class WebAuthenticationService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(webAuthenticationList, webAuthenticationPager,
-                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(webAuthenticationList, webAuthenticationPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         webAuthenticationPager.setPageNumberList(webAuthenticationList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,7 +70,7 @@ public class WebAuthenticationService implements Serializable {
         return webAuthentication;
     }
 
-    public void store(final WebAuthentication webAuthentication) throws CrudMessageException {
+    public void store(final WebAuthentication webAuthentication) {
         setupStoreCondition(webAuthentication);
 
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
@@ -81,7 +79,7 @@ public class WebAuthenticationService implements Serializable {
 
     }
 
-    public void delete(final WebAuthentication webAuthentication) throws CrudMessageException {
+    public void delete(final WebAuthentication webAuthentication) {
         setupDeleteCondition(webAuthentication);
 
         webAuthenticationBhv.delete(webAuthentication, op -> {

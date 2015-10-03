@@ -65,8 +65,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     protected String searchQuery;
 
-    protected String solrQuery;
-
     protected long execTime;
 
     protected FacetResponse facetResponse;
@@ -346,14 +344,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     public void setSearchQuery(final String searchQuery) {
         this.searchQuery = searchQuery;
-    }
-
-    public String getSolrQuery() {
-        return solrQuery;
-    }
-
-    public void setSolrQuery(final String solrQuery) {
-        this.solrQuery = solrQuery;
     }
 
     public long getExecTime() {

@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.OverlappingHostPager;
 import org.codelibs.fess.app.service.OverlappingHostService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -79,7 +80,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final OverlappingHostSearchForm form) {
-        copyBeanToBean(form.searchParams, overlappingHostPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, overlappingHostPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminOverlappinghost_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -104,7 +105,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
         data.register("overlappingHostItems", overlappingHostService.getOverlappingHostList(overlappingHostPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(overlappingHostPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(overlappingHostPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -117,7 +118,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final OverlappingHostEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminOverlappinghost_EditJsp);
     }
 
@@ -126,7 +127,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final OverlappingHostEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadOverlappingHost(form);
         return asHtml(path_AdminOverlappinghost_EditJsp);
     }
@@ -140,7 +141,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final OverlappingHostEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadOverlappingHost(form);
         return asHtml(path_AdminOverlappinghost_EditJsp);
     }
@@ -150,7 +151,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final OverlappingHostEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadOverlappingHost(form);
         return asHtml(path_AdminOverlappinghost_ConfirmJsp);
     }
@@ -158,7 +159,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final OverlappingHostEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadOverlappingHost(form);
         return asHtml(path_AdminOverlappinghost_ConfirmJsp);
     }
@@ -170,7 +171,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final OverlappingHostEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadOverlappingHost(form);
         return asHtml(path_AdminOverlappinghost_ConfirmJsp);
     }
@@ -212,7 +213,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final OverlappingHostEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         overlappingHostService.delete(getOverlappingHost(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -237,7 +238,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
         OverlappingHost overlappingHost;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             overlappingHost = getOverlappingHost(form);
         } else {
             overlappingHost = new OverlappingHost();
@@ -246,7 +247,7 @@ public class AdminOverlappinghostAction extends FessAdminAction {
         }
         overlappingHost.setUpdatedBy(username);
         overlappingHost.setUpdatedTime(currentTime);
-        copyBeanToBean(form, overlappingHost, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, overlappingHost, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return overlappingHost;
     }
 

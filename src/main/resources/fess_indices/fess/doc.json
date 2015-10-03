@@ -458,7 +458,8 @@
         "type": "long"
       },
       "created": {
-        "type": "long"
+        "type": "date",
+        "format": "date_optional_time"
       },
       "digest": {
         "type": "string"
@@ -485,6 +486,10 @@
       "lang": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "last_modified": {
+        "type": "date",
+        "format": "date_optional_time"
       },
       "mimetype": {
         "type": "string",

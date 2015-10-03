@@ -25,7 +25,7 @@ import java.util.Queue;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.exbhv.UserInfoBhv;

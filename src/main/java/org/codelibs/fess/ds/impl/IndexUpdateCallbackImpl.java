@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
-import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;

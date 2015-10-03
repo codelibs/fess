@@ -200,7 +200,7 @@
 		</postConstruct>
 		<!-- 
 		<property name="encodeUrlLink">false</property>
-		<property name="useSolrHighlight">false</property>
+		<property name="useHighlight">false</property>
 		<property name="descriptionLength">200</property>
 		<property name="titleLength">50</property>
 		<property name="urlLinkEncoding">"UTF-8"</property>
@@ -212,19 +212,6 @@
 		 -->
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
-	</component>
-	<component name="webManagementHelper" class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl">
-		<postConstruct name="addSolrInstance">
-			<arg>
-				<component class="org.codelibs.fess.helper.impl.TomcatManagementHelperImpl$SolrInstance">
-					<property name="name">"solrServer1"</property>
-					<property name="managerUrl">"http://localhost:8080/manager/text/"</property>
-					<property name="contextPath">"/solr"</property>
-					<property name="username">"manager"</property>
-					<property name="password">"manager"</property>
-				</component>
-			</arg>
-		</postConstruct>
 	</component>
 	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
 		<property name="excludedWordPattern">java.util.regex.Pattern.compile(".*[a-zA-Z0-9_]+:.*")</property>

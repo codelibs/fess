@@ -37,7 +37,7 @@ public class FailureUrlEditForm implements Serializable {
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    //@IntegerType 
+    //@IntegerType
     // TODO necessary?
     public int crudMode;
 

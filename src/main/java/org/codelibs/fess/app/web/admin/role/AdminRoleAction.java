@@ -26,8 +26,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.Role;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -80,7 +80,7 @@ public class AdminRoleAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final RoleSearchForm form) {
-        copyBeanToBean(form.searchParams, rolePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, rolePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminRole_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -105,7 +105,7 @@ public class AdminRoleAction extends FessAdminAction {
         data.register("roleItems", roleService.getRoleList(rolePager)); // page navi
 
         // restore from pager
-        copyBeanToBean(rolePager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(rolePager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -118,7 +118,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final RoleEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminRole_EditJsp);
     }
 
@@ -127,7 +127,7 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final RoleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadRole(form);
         return asHtml(path_AdminRole_EditJsp);
     }
@@ -141,7 +141,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final RoleEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadRole(form);
         return asHtml(path_AdminRole_EditJsp);
     }
@@ -151,7 +151,7 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final RoleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadRole(form);
         return asHtml(path_AdminRole_ConfirmJsp);
     }
@@ -159,7 +159,7 @@ public class AdminRoleAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final RoleEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadRole(form);
         return asHtml(path_AdminRole_ConfirmJsp);
     }
@@ -171,7 +171,7 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final RoleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadRole(form);
         return asHtml(path_AdminRole_ConfirmJsp);
     }
@@ -213,7 +213,7 @@ public class AdminRoleAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final RoleEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         roleService.delete(getRole(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -236,12 +236,12 @@ public class AdminRoleAction extends FessAdminAction {
 
     protected Role createRole(final RoleEditForm form) {
         Role role;
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             role = getRole(form);
         } else {
             role = new Role();
         }
-        copyBeanToBean(form, role, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, role, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         role.setId(Base64.getEncoder().encodeToString(role.getName().getBytes(Constants.CHARSET_UTF_8)));
         return role;
     }

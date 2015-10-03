@@ -6,7 +6,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
-import org.codelibs.fess.crud.CommonConstants;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
 
@@ -37,7 +37,7 @@ public class CreateForm implements Serializable {
     public Long createdTime;
 
     public void initialize() {
-        crudMode = CommonConstants.CREATE_MODE;
+        crudMode = CrudMode.CREATE;
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

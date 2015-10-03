@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.CrawlingSessionPager;
 import org.codelibs.fess.app.service.CrawlingSessionService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.CrawlingSession;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -89,7 +90,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final CrawlingSessionSearchForm form) {
-        copyBeanToBean(form.searchParams, crawlingSessionPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -114,7 +115,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
         data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(crawlingSessionPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(crawlingSessionPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -128,7 +129,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final CrawlingSessionEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadCrawlingSession(form);
         return asHtml(path_AdminCrawlingsession_ConfirmJsp);
     }
@@ -136,7 +137,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final CrawlingSessionEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadCrawlingSession(form);
         return asHtml(path_AdminCrawlingsession_ConfirmJsp);
     }
@@ -148,7 +149,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final CrawlingSessionEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadCrawlingSession(form);
         return asHtml(path_AdminCrawlingsession_ConfirmJsp);
     }
@@ -158,7 +159,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                         -------------
     @Execute
     public HtmlResponse delete(final CrawlingSessionEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         crawlingSessionService.delete(getCrawlingSession(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());

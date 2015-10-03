@@ -26,11 +26,11 @@ import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.app.service.CrawlingSessionService;
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.exentity.CrawlingSession;
 import org.codelibs.fess.es.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;

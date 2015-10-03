@@ -91,13 +91,13 @@
 															<div class="body">
 																${doc.contentDescription}
 																<div style="text-align: right;">
-																	<c:if test="${!solrProcessRunning}">
+																	<c:if test="${!crawlerProcessRunning}">
 																		<la:link
 																			href="confirmDelete?query=${f:u(query)}&docId=${f:u(doc.docId)}&url=${f:u(doc.url)}">
 																			<la:message key="labels.search_list_delete_link" />
 																		</la:link>
 																	</c:if>
-																	<c:if test="${solrProcessRunning}">
+																	<c:if test="${crawlerProcessRunning}">
 																		<la:message key="labels.search_list_delete_link" />
 																	</c:if>
 																</div>

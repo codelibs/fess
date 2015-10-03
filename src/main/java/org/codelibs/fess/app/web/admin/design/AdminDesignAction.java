@@ -31,9 +31,9 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -206,7 +206,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     // -----------------------------------------------------
-    //                                                 Edit 
+    //                                                 Edit
     //                                                ------
     @Token(save = true, validate = false)
     @Execute

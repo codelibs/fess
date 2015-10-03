@@ -30,10 +30,9 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.SSCConstants;
-import org.codelibs.fess.UnsupportedSearchException;
-import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.entity.LoginInfo;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.UnsupportedSearchException;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
@@ -125,7 +124,7 @@ public abstract class FessSearchAction extends FessBaseAction {
 
         final HttpSession session = request.getSession(false);
         if (session != null) {
-            final Object obj = session.getAttribute(SSCConstants.USER_INFO);
+            final Object obj = session.getAttribute(Constants.USER_INFO);
             if (obj instanceof LoginInfo) {
                 final LoginInfo loginInfo = (LoginInfo) obj;
                 runtime.registerData("username", loginInfo.getUsername());

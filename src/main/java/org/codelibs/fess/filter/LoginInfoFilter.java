@@ -29,7 +29,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.codelibs.fess.SSCConstants;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -51,10 +51,10 @@ public class LoginInfoFilter implements Filter {
             ServletException {
         final HttpServletRequest hRequest = (HttpServletRequest) request;
         final HttpSession session = hRequest.getSession();
-        LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
+        LoginInfo loginInfo = (LoginInfo) session.getAttribute(Constants.USER_INFO);
         if (loginInfo == null) {
             loginInfo = new LoginInfo();
-            session.setAttribute(SSCConstants.USER_INFO, loginInfo);
+            session.setAttribute(Constants.USER_INFO, loginInfo);
 
             updateRoleList(hRequest, loginInfo);
         } else {

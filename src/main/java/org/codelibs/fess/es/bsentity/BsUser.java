@@ -27,7 +27,7 @@ public class BsUser extends AbstractEntity {
     //                                                                           Attribute
     //                                                                           =========
     /** groups */
-    protected String[] groups;
+    protected String groups;
 
     /** name */
     protected String name;
@@ -36,19 +36,19 @@ public class BsUser extends AbstractEntity {
     protected String password;
 
     /** roles */
-    protected String[] roles;
+    protected String roles;
 
     // [Referrers] *comment only
 
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String[] getGroups() {
+    public String getGroups() {
         checkSpecifiedProperty("groups");
         return groups;
     }
 
-    public void setGroups(String[] value) {
+    public void setGroups(String value) {
         registerModifiedProperty("groups");
         this.groups = value;
     }
@@ -83,12 +83,12 @@ public class BsUser extends AbstractEntity {
         this.password = value;
     }
 
-    public String[] getRoles() {
+    public String getRoles() {
         checkSpecifiedProperty("roles");
         return roles;
     }
 
-    public void setRoles(String[] value) {
+    public void setRoles(String value) {
         registerModifiedProperty("roles");
         this.roles = value;
     }

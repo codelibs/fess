@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -49,7 +49,7 @@ public class IndexingHelper {
             fessEsClient.addAll(fieldHelper.docIndex, fieldHelper.docType, docList);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size() + " docs (Solr: " + (System.currentTimeMillis() - execTime) + "ms)");
+            logger.info("Sent " + docList.size() + " docs (ES: " + (System.currentTimeMillis() - execTime) + "ms)");
         }
         docList.clear();
     }

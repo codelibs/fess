@@ -3,5 +3,5 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<include path="convention.xml"/>
-    <component name="pagerCreator" class="org.codelibs.fess.crud.creator.PagerCreator"/>
+    <component name="pagerCreator" class="org.codelibs.fess.mylasta.creator.PagerCreator"/>
 </components>

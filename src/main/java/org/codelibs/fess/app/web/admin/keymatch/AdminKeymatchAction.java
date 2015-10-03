@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.KeyMatchPager;
 import org.codelibs.fess.app.service.KeyMatchService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -80,7 +81,7 @@ public class AdminKeymatchAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final KeyMatchSearchForm form) {
-        copyBeanToBean(form.searchParams, keyMatchPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, keyMatchPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -105,7 +106,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         data.register("keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(keyMatchPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(keyMatchPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -118,7 +119,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final KeyMatchEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminKeymatch_EditJsp);
     }
 
@@ -127,7 +128,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final KeyMatchEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadKeyMatch(form);
         return asHtml(path_AdminKeymatch_EditJsp);
     }
@@ -141,7 +142,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final KeyMatchEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadKeyMatch(form);
         return asHtml(path_AdminKeymatch_EditJsp);
     }
@@ -151,7 +152,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final KeyMatchEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadKeyMatch(form);
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
@@ -159,7 +160,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final KeyMatchEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadKeyMatch(form);
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
@@ -171,7 +172,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final KeyMatchEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadKeyMatch(form);
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
@@ -215,7 +216,7 @@ public class AdminKeymatchAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final KeyMatchEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         keyMatchService.delete(getKeyMatch(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         ComponentUtil.getKeyMatchHelper().update();
@@ -241,7 +242,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         KeyMatch keyMatch;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             keyMatch = getKeyMatch(form);
         } else {
             keyMatch = new KeyMatch();
@@ -250,7 +251,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         }
         keyMatch.setUpdatedBy(username);
         keyMatch.setUpdatedTime(currentTime);
-        copyBeanToBean(form, keyMatch, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, keyMatch, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return keyMatch;
     }
 

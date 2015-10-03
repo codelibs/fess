@@ -23,8 +23,8 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SynonymPager;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.dict.DictionaryExpiredException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
@@ -43,7 +43,7 @@ public class SynonymService {
         final PagingList<SynonymItem> synonymList = synonymFile.selectList((synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
         // update pager
-        BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         synonymList.setPageRangeSize(5);
         synonymPager.setPageNumberList(synonymList.createPageNumberList());
 

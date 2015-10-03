@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -79,7 +80,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final JobLogSearchForm form) {
-        copyBeanToBean(form.searchParams, jobLogPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -104,7 +105,7 @@ public class AdminJoblogAction extends FessAdminAction {
         data.register("jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(jobLogPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(jobLogPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -118,7 +119,7 @@ public class AdminJoblogAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final JobLogEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadJobLog(form);
         return asHtml(path_AdminJoblog_ConfirmJsp);
     }
@@ -126,7 +127,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final JobLogEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadJobLog(form);
         return asHtml(path_AdminJoblog_ConfirmJsp);
     }
@@ -138,7 +139,7 @@ public class AdminJoblogAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final JobLogEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadJobLog(form);
         return asHtml(path_AdminJoblog_ConfirmJsp);
     }
@@ -148,7 +149,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                         -------------
     @Execute
     public HtmlResponse delete(final JobLogEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         jobLogService.delete(getJobLog(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());

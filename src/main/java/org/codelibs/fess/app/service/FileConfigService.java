@@ -26,8 +26,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.FileConfigCB;
 import org.codelibs.fess.es.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.exbhv.FileConfigToLabelBhv;
@@ -62,7 +60,7 @@ public class FileConfigService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(fileConfigList, fileConfigPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(fileConfigList, fileConfigPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         fileConfigPager.setPageNumberList(fileConfigList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -70,7 +68,7 @@ public class FileConfigService implements Serializable {
         return fileConfigList;
     }
 
-    public void delete(final FileConfig fileConfig) throws CrudMessageException {
+    public void delete(final FileConfig fileConfig) {
         setupDeleteCondition(fileConfig);
 
         fileConfigBhv.delete(fileConfig, op -> {

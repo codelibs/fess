@@ -21,10 +21,10 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -77,7 +77,7 @@ public class AdminFailureurlAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final FailureUrlSearchForm form) {
-        copyBeanToBean(form.searchParams, failureUrlPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -102,7 +102,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(failureUrlPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(failureUrlPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // -----------------------------------------------------
@@ -113,7 +113,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         // TODO
         // form.crudMode = crudMode;
         // form.id = id;
-        // verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        // verifyCrudMode(form, CrudMode.CONFIRM);
         loadFailureUrl(form);
         return asHtml(path_AdminFailureurl_ConfirmJsp);
     }
@@ -124,7 +124,7 @@ public class AdminFailureurlAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final FailureUrlEditForm form) {
-        // TODO verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        // TODO verifyCrudMode(form, CrudMode.DELETE);
         failureUrlService.delete(getFailureUrl(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());

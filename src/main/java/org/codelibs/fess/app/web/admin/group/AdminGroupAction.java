@@ -26,8 +26,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.Group;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -80,7 +80,7 @@ public class AdminGroupAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final GroupSearchForm form) {
-        copyBeanToBean(form.searchParams, groupPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, groupPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -105,7 +105,7 @@ public class AdminGroupAction extends FessAdminAction {
         data.register("groupItems", groupService.getGroupList(groupPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(groupPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(groupPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -118,7 +118,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final GroupEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminGroup_EditJsp);
     }
 
@@ -127,7 +127,7 @@ public class AdminGroupAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final GroupEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadGroup(form);
         return asHtml(path_AdminGroup_EditJsp);
     }
@@ -141,7 +141,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final GroupEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadGroup(form);
         return asHtml(path_AdminGroup_EditJsp);
     }
@@ -151,7 +151,7 @@ public class AdminGroupAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final GroupEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadGroup(form);
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
@@ -159,7 +159,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final GroupEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadGroup(form);
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
@@ -171,7 +171,7 @@ public class AdminGroupAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final GroupEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadGroup(form);
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
@@ -213,7 +213,7 @@ public class AdminGroupAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final GroupEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         groupService.delete(getGroup(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -236,12 +236,12 @@ public class AdminGroupAction extends FessAdminAction {
 
     protected Group createGroup(final GroupEditForm form) {
         Group group;
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             group = getGroup(form);
         } else {
             group = new Group();
         }
-        copyBeanToBean(form, group, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, group, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         group.setId(Base64.getEncoder().encodeToString(group.getName().getBytes(Constants.CHARSET_UTF_8)));
         return group;
     }

@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.RequestHeaderPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.RequestHeaderCB;
 import org.codelibs.fess.es.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.exentity.RequestHeader;
@@ -50,7 +49,7 @@ public class RequestHeaderService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(requestHeaderList, requestHeaderPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(requestHeaderList, requestHeaderPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -71,7 +70,7 @@ public class RequestHeaderService implements Serializable {
         return requestHeader;
     }
 
-    public void store(final RequestHeader requestHeader) throws CrudMessageException {
+    public void store(final RequestHeader requestHeader) {
         setupStoreCondition(requestHeader);
 
         requestHeaderBhv.insertOrUpdate(requestHeader, op -> {
@@ -80,7 +79,7 @@ public class RequestHeaderService implements Serializable {
 
     }
 
-    public void delete(final RequestHeader requestHeader) throws CrudMessageException {
+    public void delete(final RequestHeader requestHeader) {
         setupDeleteCondition(requestHeader);
 
         requestHeaderBhv.delete(requestHeader, op -> {

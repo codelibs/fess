@@ -25,8 +25,8 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.ScheduledJobPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -88,7 +88,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final ScheduledjobSearchForm form) {
-        copyBeanToBean(form.searchParams, scheduledJobPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, scheduledJobPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -113,7 +113,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(scheduledJobPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(scheduledJobPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(scheduledJobPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -126,7 +126,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final ScheduledjobEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
@@ -135,7 +135,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
@@ -149,7 +149,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final ScheduledjobEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
@@ -159,7 +159,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
@@ -167,7 +167,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final ScheduledjobEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
@@ -179,7 +179,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
             data.register("running", running);
@@ -227,7 +227,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         scheduledJobService.delete(getScheduledJob(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -235,7 +235,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse start(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         final ScheduledJob scheduledJob = getScheduledJob(form);
         try {
             scheduledJob.start();
@@ -250,7 +250,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse stop(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         final ScheduledJob scheduledJob = getScheduledJob(form);
         try {
             final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
@@ -288,7 +288,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         ScheduledJob scheduledJob;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             scheduledJob = getScheduledJob(form);
         } else {
             scheduledJob = new ScheduledJob();
@@ -297,7 +297,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         }
         scheduledJob.setUpdatedBy(username);
         scheduledJob.setUpdatedTime(currentTime);
-        copyBeanToBean(form, scheduledJob, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, scheduledJob, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         scheduledJob.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
         scheduledJob.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
         scheduledJob.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);

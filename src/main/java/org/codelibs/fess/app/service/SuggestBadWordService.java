@@ -30,9 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SuggestBadWordPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.SuggestBadWordCB;
 import org.codelibs.fess.es.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.es.exentity.SuggestBadWord;
@@ -67,7 +66,7 @@ public class SuggestBadWordService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(suggestBadWordList, suggestBadWordPager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(suggestBadWordList, suggestBadWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         suggestBadWordPager.setPageNumberList(suggestBadWordList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -88,7 +87,7 @@ public class SuggestBadWordService implements Serializable {
         return suggestBadWord;
     }
 
-    public void store(final SuggestBadWord suggestBadWord) throws CrudMessageException {
+    public void store(final SuggestBadWord suggestBadWord) {
         setupStoreCondition(suggestBadWord);
 
         suggestBadWordBhv.insertOrUpdate(suggestBadWord, op -> {
@@ -97,7 +96,7 @@ public class SuggestBadWordService implements Serializable {
 
     }
 
-    public void delete(final SuggestBadWord suggestBadWord) throws CrudMessageException {
+    public void delete(final SuggestBadWord suggestBadWord) {
         setupDeleteCondition(suggestBadWord);
 
         suggestBadWordBhv.delete(suggestBadWord, op -> {

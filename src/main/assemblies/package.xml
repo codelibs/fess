@@ -17,6 +17,14 @@
 				<include>org.codelibs.fess:fess</include>
 			</includes>
 		</dependencySet>
+		<dependencySet>
+			<outputDirectory>fess-${project.version}/app/WEB-INF/cmd/lib</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<includes>
+				<include>javax.servlet:javax.servlet-api</include>
+			</includes>
+			<scope>provided</scope>
+		</dependencySet>
 	</dependencySets>
 	<fileSets>
 		<!-- lib -->

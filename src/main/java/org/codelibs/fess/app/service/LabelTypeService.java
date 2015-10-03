@@ -24,9 +24,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.LabelTypePager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.LabelTypeCB;
 import org.codelibs.fess.es.exbhv.LabelToRoleBhv;
 import org.codelibs.fess.es.exbhv.LabelTypeBhv;
@@ -59,7 +58,7 @@ public class LabelTypeService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(labelTypeList, labelTypePager, option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(labelTypeList, labelTypePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         labelTypePager.setPageNumberList(labelTypeList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -67,7 +66,7 @@ public class LabelTypeService implements Serializable {
         return labelTypeList;
     }
 
-    public void delete(final LabelType labelType) throws CrudMessageException {
+    public void delete(final LabelType labelType) {
         setupDeleteCondition(labelType);
 
         labelTypeBhv.delete(labelType, op -> {

@@ -36,13 +36,13 @@ import org.apache.commons.io.IOUtils;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.SuggestBadWordPager;
 import org.codelibs.fess.app.service.SuggestBadWordService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.SuggestBadWord;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -97,7 +97,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SuggestBadWordSearchForm form) {
-        copyBeanToBean(form.searchParams, suggestBadWordPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, suggestBadWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminSuggestbadword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -121,7 +121,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     protected void searchPaging(final RenderData data, final SuggestBadWordSearchForm form) {
         data.register("suggestBadWordItems", suggestBadWordService.getSuggestBadWordList(suggestBadWordPager)); // page navi
         // restore from pager
-        copyBeanToBean(suggestBadWordPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(suggestBadWordPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -134,7 +134,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final SuggestBadWordEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
@@ -143,7 +143,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
@@ -157,7 +157,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final SuggestBadWordEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
@@ -167,7 +167,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
@@ -175,7 +175,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final SuggestBadWordEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
@@ -187,7 +187,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
@@ -263,7 +263,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final SuggestBadWordEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         suggestBadWordService.delete(getSuggestBadWord(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -344,7 +344,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         SuggestBadWord suggestBadWord;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             suggestBadWord = getSuggestBadWord(form);
         } else {
             suggestBadWord = new SuggestBadWord();
@@ -353,7 +353,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         }
         suggestBadWord.setUpdatedBy(username);
         suggestBadWord.setUpdatedTime(currentTime);
-        copyBeanToBean(form, suggestBadWord, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, suggestBadWord, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return suggestBadWord;
     }
 

@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.util;
 
-import org.codelibs.fess.WebApiException;
+import org.codelibs.fess.exception.WebApiException;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public final class WebApiUtil {

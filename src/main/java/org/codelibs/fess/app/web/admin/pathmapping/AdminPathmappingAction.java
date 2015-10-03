@@ -21,11 +21,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.PathMappingPager;
 import org.codelibs.fess.app.service.PathMappingService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.PathMapping;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -79,7 +80,7 @@ public class AdminPathmappingAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final PathMappingSearchForm form) {
-        copyBeanToBean(form.searchParams, pathMappingPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, pathMappingPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminPathmapping_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -104,7 +105,7 @@ public class AdminPathmappingAction extends FessAdminAction {
         data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMappingPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(pathMappingPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(pathMappingPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -117,7 +118,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final PathMappingEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminPathmapping_EditJsp);
     }
 
@@ -126,7 +127,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final PathMappingEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadPathMapping(form);
         return asHtml(path_AdminPathmapping_EditJsp);
     }
@@ -140,7 +141,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final PathMappingEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadPathMapping(form);
         return asHtml(path_AdminPathmapping_EditJsp);
     }
@@ -150,7 +151,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final PathMappingEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadPathMapping(form);
         return asHtml(path_AdminPathmapping_ConfirmJsp);
     }
@@ -158,7 +159,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final PathMappingEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadPathMapping(form);
         return asHtml(path_AdminPathmapping_ConfirmJsp);
     }
@@ -170,7 +171,7 @@ public class AdminPathmappingAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final PathMappingEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadPathMapping(form);
         return asHtml(path_AdminPathmapping_ConfirmJsp);
     }
@@ -212,7 +213,7 @@ public class AdminPathmappingAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final PathMappingEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         pathMappingService.delete(getPathMapping(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -237,7 +238,7 @@ public class AdminPathmappingAction extends FessAdminAction {
         PathMapping pathMapping;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             pathMapping = getPathMapping(form);
         } else {
             pathMapping = new PathMapping();
@@ -246,7 +247,7 @@ public class AdminPathmappingAction extends FessAdminAction {
         }
         pathMapping.setUpdatedBy(username);
         pathMapping.setUpdatedTime(currentTime);
-        copyBeanToBean(form, pathMapping, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, pathMapping, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return pathMapping;
     }
 

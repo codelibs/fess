@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BoostDocumentRulePager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.BoostDocumentRuleCB;
 import org.codelibs.fess.es.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
@@ -51,8 +50,7 @@ public class BoostDocumentRuleService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(boostDocumentRuleList, boostDocumentRulePager,
-                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(boostDocumentRuleList, boostDocumentRulePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -64,7 +62,7 @@ public class BoostDocumentRuleService implements Serializable {
         return boostDocumentRuleBhv.selectByPK(id);
     }
 
-    public void store(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
+    public void store(final BoostDocumentRule boostDocumentRule) {
         setupStoreCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> {
@@ -73,7 +71,7 @@ public class BoostDocumentRuleService implements Serializable {
 
     }
 
-    public void delete(final BoostDocumentRule boostDocumentRule) throws CrudMessageException {
+    public void delete(final BoostDocumentRule boostDocumentRule) {
         setupDeleteCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.delete(boostDocumentRule, op -> {

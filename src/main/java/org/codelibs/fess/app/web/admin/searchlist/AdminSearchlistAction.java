@@ -24,12 +24,12 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.InvalidQueryException;
-import org.codelibs.fess.ResultOffsetExceededException;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
@@ -119,8 +119,6 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     private void doSearchInternal(final RenderData data, final SearchListForm form) {
-        final String query = form.query;
-
         // init pager
         if (StringUtil.isBlank(form.start)) {
             form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
@@ -164,7 +162,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         try {
-            String execTime = nf.format((double) queryResponseList.getExecTime() / 1000);
+            nf.format((double) queryResponseList.getExecTime() / 1000);
         } catch (final Exception e) {}
 
         copyBeanToBean(documentItems, this, option -> option.include("pageSize", "currentPageNumber", "allRecordCount", "allPageCount",
@@ -242,7 +240,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         }
         final Thread thread = new Thread(() -> {
             if (!jobHelper.isCrawlProcessRunning()) {
-                final long time = System.currentTimeMillis();
+                System.currentTimeMillis();
                 try {
                     final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
                     fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);

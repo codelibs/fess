@@ -29,8 +29,8 @@ import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -91,7 +91,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final UserSearchForm form) {
         clearStoredPassword();
-        copyBeanToBean(form.searchParams, userPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, userPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -118,7 +118,7 @@ public class AdminUserAction extends FessAdminAction {
         data.register("userItems", userService.getUserList(userPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(userPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(userPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     private void registerForms(final RenderData data) {
@@ -137,7 +137,7 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse createpage(final UserEditForm form) {
         clearStoredPassword();
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
         });
@@ -149,7 +149,7 @@ public class AdminUserAction extends FessAdminAction {
         clearStoredPassword();
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadUser(form, false);
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
@@ -169,7 +169,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse editfromconfirm(final UserEditForm form) {
         clearStoredPassword();
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadUser(form, false);
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
@@ -182,7 +182,7 @@ public class AdminUserAction extends FessAdminAction {
         clearStoredPassword();
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadUser(form, false);
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
             registerForms(data);
@@ -193,7 +193,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse deletefromconfirm(final UserEditForm form) {
         clearStoredPassword();
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadUser(form, false);
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
             registerForms(data);
@@ -207,7 +207,7 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final UserEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         verifyPassword(form);
         loadUser(form, false);
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
@@ -262,7 +262,7 @@ public class AdminUserAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final UserEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         userService.delete(getUser(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -289,7 +289,7 @@ public class AdminUserAction extends FessAdminAction {
 
     protected User createUser(final UserEditForm form) {
         User user;
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             user = getUser(form);
         } else {
             user = new User();
@@ -320,7 +320,7 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     protected void verifyPassword(final UserEditForm form) {
-        if (form.crudMode == CommonConstants.CREATE_MODE && StringUtil.isBlank(form.password)) {
+        if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);
             }, toEditHtml());

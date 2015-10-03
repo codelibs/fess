@@ -23,9 +23,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileAuthenticationPager;
-import org.codelibs.fess.crud.CommonConstants;
-import org.codelibs.fess.crud.CrudMessageException;
 import org.codelibs.fess.es.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.exentity.FileAuthentication;
@@ -50,8 +49,7 @@ public class FileAuthenticationService implements Serializable {
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(fileAuthenticationList, fileAuthenticationPager,
-                option -> option.include(CommonConstants.PAGER_CONVERSION_RULE));
+        BeanUtil.copyBeanToBean(fileAuthenticationList, fileAuthenticationPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         fileAuthenticationPager.setPageNumberList(fileAuthenticationList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
@@ -72,7 +70,7 @@ public class FileAuthenticationService implements Serializable {
         return fileAuthentication;
     }
 
-    public void store(final FileAuthentication fileAuthentication) throws CrudMessageException {
+    public void store(final FileAuthentication fileAuthentication) {
         setupStoreCondition(fileAuthentication);
 
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
@@ -81,7 +79,7 @@ public class FileAuthenticationService implements Serializable {
 
     }
 
-    public void delete(final FileAuthentication fileAuthentication) throws CrudMessageException {
+    public void delete(final FileAuthentication fileAuthentication) {
         setupDeleteCondition(fileAuthentication);
 
         fileAuthenticationBhv.delete(fileAuthentication, op -> {

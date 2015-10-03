@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.ds;
 
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class DataStoreException extends FessSystemException {
     private static final long serialVersionUID = 1L;

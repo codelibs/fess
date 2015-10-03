@@ -47,12 +47,12 @@ public class GoAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
     private static final Logger logger = LoggerFactory.getLogger(GoAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
 
     // ===================================================================================
     //                                                                               Hook

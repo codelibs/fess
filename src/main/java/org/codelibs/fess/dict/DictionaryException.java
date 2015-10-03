@@ -16,7 +16,7 @@
 
 package org.codelibs.fess.dict;
 
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class DictionaryException extends FessSystemException {
 

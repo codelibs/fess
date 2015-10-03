@@ -55,11 +55,11 @@ public abstract class BsUserBhv extends AbstractBehavior<User, UserCB> {
     protected <RESULT extends User> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setGroups(toStringArray(source.get("groups")));
+            result.setGroups(DfTypeUtil.toString(source.get("groups")));
             result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setPassword(DfTypeUtil.toString(source.get("password")));
-            result.setRoles(toStringArray(source.get("roles")));
+            result.setRoles(DfTypeUtil.toString(source.get("roles")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -121,7 +121,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
     }
 
     @Override
-    protected String toTypedUserId(String userKey) {
+    protected String toTypedUserId(final String userKey) {
         return userKey;
     }
 }

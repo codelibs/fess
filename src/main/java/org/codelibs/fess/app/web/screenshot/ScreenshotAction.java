@@ -42,12 +42,12 @@ public class ScreenshotAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
-    //     
+    //
     private static final Logger logger = LoggerFactory.getLogger(ScreenshotAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
-    //     
+    //
     @Resource
     protected HttpServletResponse response;
 

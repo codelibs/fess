@@ -29,8 +29,8 @@ import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.WebAuthenticationPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
@@ -90,7 +90,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final WebAuthenticationSearchForm form) {
-        copyBeanToBean(form.searchParams, webAuthenticationPager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, webAuthenticationPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminWebauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -115,7 +115,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthenticationPager)); // page navi
         data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
         // restore from pager
-        copyBeanToBean(webAuthenticationPager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(webAuthenticationPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -128,7 +128,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final WebAuthenticationEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -140,7 +140,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -160,7 +160,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final WebAuthenticationEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -173,7 +173,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -184,7 +184,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final WebAuthenticationEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -199,7 +199,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final WebAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadWebAuthentication(form);
         return asHtml(path_AdminWebauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -250,7 +250,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final WebAuthenticationEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         webAuthenticationService.delete(getWebAuthentication(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -275,7 +275,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         WebAuthentication webAuthentication;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             webAuthentication = getWebAuthentication(form);
         } else {
             webAuthentication = new WebAuthentication();
@@ -284,7 +284,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
         }
         webAuthentication.setUpdatedBy(username);
         webAuthentication.setUpdatedTime(currentTime);
-        copyBeanToBean(form, webAuthentication, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, webAuthentication, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return webAuthentication;
     }
 

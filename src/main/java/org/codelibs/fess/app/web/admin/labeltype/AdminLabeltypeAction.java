@@ -21,12 +21,13 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.crud.CommonConstants;
 import org.codelibs.fess.es.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -82,7 +83,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final LabelTypeSearchForm form) {
-        copyBeanToBean(form.searchParams, labelTypePager, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form.searchParams, labelTypePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -107,7 +108,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         data.register("labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
         // restore from pager
-        copyBeanToBean(labelTypePager, form.searchParams, op -> op.exclude(CommonConstants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(labelTypePager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
     }
 
     // ===================================================================================
@@ -120,7 +121,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse createpage(final LabelTypeEditForm form) {
         form.initialize();
-        form.crudMode = CommonConstants.CREATE_MODE;
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
         });
@@ -131,7 +132,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse editpage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.EDIT_MODE);
+        verifyCrudMode(form, CrudMode.EDIT);
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
@@ -149,7 +150,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final LabelTypeEditForm form) {
-        form.crudMode = CommonConstants.EDIT_MODE;
+        form.crudMode = CrudMode.EDIT;
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
@@ -161,7 +162,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse deletepage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
@@ -171,7 +172,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final LabelTypeEditForm form) {
-        form.crudMode = CommonConstants.DELETE_MODE;
+        form.crudMode = CrudMode.DELETE;
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
@@ -185,7 +186,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final LabelTypeEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CommonConstants.CONFIRM_MODE);
+        verifyCrudMode(form, CrudMode.CONFIRM);
         loadLabelType(form);
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
             data.register("roleTypeItems", roleTypeService.getRoleTypeList());
@@ -233,7 +234,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final LabelTypeEditForm form) {
-        verifyCrudMode(form, CommonConstants.DELETE_MODE);
+        verifyCrudMode(form, CrudMode.DELETE);
         labelTypeService.delete(getLabelType(form));
         saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         return redirect(getClass());
@@ -258,7 +259,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         LabelType labelType;
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CommonConstants.EDIT_MODE) {
+        if (form.crudMode == CrudMode.EDIT) {
             labelType = getLabelType(form);
         } else {
             labelType = new LabelType();
@@ -267,7 +268,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         }
         labelType.setUpdatedBy(username);
         labelType.setUpdatedTime(currentTime);
-        copyBeanToBean(form, labelType, op -> op.exclude(CommonConstants.COMMON_CONVERSION_RULE));
+        copyBeanToBean(form, labelType, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
         return labelType;
     }
 
