@@ -236,7 +236,7 @@ public class FessEsClient implements Client {
         if (transportAddressList.isEmpty()) {
             if (runner == null) {
                 runner = new ElasticsearchClusterRunner();
-                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1);
+                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
                 final String esDir = System.getProperty("fess.es.dir");
                 if (esDir != null) {
                     config.basePath(esDir);

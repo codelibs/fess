@@ -40,6 +40,7 @@ public class FessBoot extends TomcatBoot {
         return super.prepareWebXmlPath();
     }
 
+    @Override
     protected String getMarkDir() {
         String value = System.getProperty(FESS_TEMP_PATH);
         if (value != null) {
@@ -47,6 +48,11 @@ public class FessBoot extends TomcatBoot {
             return new File(value, "fessboot").getAbsolutePath();
         }
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
+    }
+
+    @Override
+    protected void info(String msg) {
+        // TODO
     }
 
     // ===================================================================================

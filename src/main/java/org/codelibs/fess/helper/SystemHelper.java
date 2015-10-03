@@ -57,12 +57,11 @@ public class SystemHelper implements Serializable {
 
     private final Set<String> adminRoleSet = new HashSet<>();
 
-    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx512m", "-XX:MaxPermSize=128m",
-            "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC", "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+CMSIncrementalMode",
-            "-XX:+CMSIncrementalPacing", "-XX:CMSIncrementalDutyCycleMin=0", "-XX:+UseParNewGC", "-XX:+UseStringCache", "-XX:+UseTLAB",
-            "-XX:+DisableExplicitGC" };
+    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx256m", "-XX:MaxMetaspaceSize=128m",
+            "-XX:CompressedClassSpaceSize=32m", "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC",
+            "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+UseParNewGC", "-XX:+UseTLAB", "-XX:+DisableExplicitGC" };
 
-    private String logFilePath = System.getProperty("fess.log.file");
+    private String logFilePath = System.getProperty("fess.log.path", "target/logs");
 
     private String javaCommandPath = "java";
 

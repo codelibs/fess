@@ -67,10 +67,16 @@ JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
 # Ensure UTF-8 encoding by default (e.g. filenames)
 JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 
+# Application Configuration
+APP_NAME=fess
 ES_HOME=$FESS_HOME/es
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/fess"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/$APP_NAME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=8080"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webxml.path=$FESS_HOME/app/WEB-INF/web.xml"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_HOME/temp"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_HOME/logs"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=info"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=production"
 
