@@ -168,6 +168,8 @@
     <filter-name>lastaPrepareFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
 
 <!-- TODO
