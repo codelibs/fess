@@ -135,7 +135,7 @@ public class ScheduledJobService implements Serializable {
         jobScheduler.register(scheduledJob);
     }
 
-    public List<ScheduledJob> getCrawloerJobList() {
+    public List<ScheduledJob> getCrawlerJobList() {
         return scheduledJobBhv.selectList(cb -> {
             cb.query().setCrawler_Equal(Constants.T);
             cb.query().addOrderBy_SortOrder_Asc();

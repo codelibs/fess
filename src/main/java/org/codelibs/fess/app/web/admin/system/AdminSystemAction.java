@@ -70,8 +70,8 @@ public class AdminSystemAction extends FessAdminAction {
     //                                                                              Index
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SystemForm form) {
-        return asHtml(path_AdminSystem_IndexJsp).renderWith(data -> {
+    public HtmlResponse index() {
+        return asHtml(path_AdminSystem_IndexJsp).useForm(SystemForm.class).renderWith(data -> {
             data.register("clusterName", fessEsClient.getClusterName());
             data.register("clusterStatus", fessEsClient.getStatus());
             data.register("crawlerRunning", isCrawlerRunning());
@@ -80,10 +80,10 @@ public class AdminSystemAction extends FessAdminAction {
     }
 
     @Token(save = false, validate = true)
-    // @Execute(validator = true, input = "index")
+    @Execute
     public HtmlResponse start(final SystemForm form) {
         if (!jobHelper.isCrawlProcessRunning()) {
-            final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawloerJobList();
+            final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
                 scheduledJob.start();
             }
@@ -97,7 +97,7 @@ public class AdminSystemAction extends FessAdminAction {
     }
 
     @Token(save = false, validate = true)
-    //@Execute(validator = true, input = "index")
+    @Execute
     public HtmlResponse stop(final SystemForm form) {
         if (jobHelper.isCrawlProcessRunning()) {
             if (StringUtil.isNotBlank(form.sessionId)) {
