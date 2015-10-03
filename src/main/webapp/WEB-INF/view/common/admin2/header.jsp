@@ -3,7 +3,7 @@
       <header class="main-header">
 
         <!-- Logo -->
-        <a href="/admin/index" class="logo">
+        <a href="/admin/" class="logo">
           <span class="logo-mini"><la:message key="labels.header.logo_alt" /></span>
           <span class="logo-lg">Fess Dashboard</span>
         </a>

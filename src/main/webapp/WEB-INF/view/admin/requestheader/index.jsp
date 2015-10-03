@@ -32,7 +32,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
-							<la:link href="../webconfig/index" styleClass="btn btn-primary">
+							<la:link href="../webconfig/" styleClass="btn btn-primary">
 								<la:message key="labels.request_header_create_web_config" />
 							</la:link>
 						</c:if>
