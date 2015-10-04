@@ -53,7 +53,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.8.2</junit.version>
-		<utflute.version>0.5.0-sp8</utflute.version>
+		<utflute.version>0.5.1-RC2</utflute.version>
 
 		<!-- S2Robot -->
 		<s2robot.version>1.0.0-SNAPSHOT</s2robot.version>
