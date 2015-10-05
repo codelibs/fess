@@ -32,7 +32,7 @@ public interface FessEnv {
     /** The key of the configuration. e.g. [Test] */
     String MAIL_SUBJECT_TEST_PREFIX = "mail.subject.test.prefix";
 
-    /** The key of the configuration. e.g. returnpath@docksidestage.org */
+    /** The key of the configuration. e.g. root@localhost */
     String MAIL_RETURN_PATH = "mail.return.path";
 
     /**
@@ -150,7 +150,7 @@ public interface FessEnv {
 
     /**
      * Get the value for the key 'mail.return.path'. <br>
-     * The value is, e.g. returnpath@docksidestage.org <br>
+     * The value is, e.g. root@localhost <br>
      * comment: The common return path of all mail
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */

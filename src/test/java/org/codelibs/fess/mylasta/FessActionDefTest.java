@@ -1,6 +1,7 @@
 package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.dbflute.utflute.core.document.DocumentGenerator;
 
 public class FessActionDefTest extends UnitFessTestCase {
 
@@ -32,15 +33,9 @@ public class FessActionDefTest extends UnitFessTestCase {
     // ===================================================================================
     //                                                                            Document
     //                                                                            ========
-    /*
     public void test_document() throws Exception {
         DocumentGenerator documentGenerator = new DocumentGenerator();
         documentGenerator.saveLastaDocMeta();
     }
-    */
 
-    public void test_dummy() throws Exception {
-        // TODO remove
-        assertTrue(true);
-    }
 }

@@ -64,7 +64,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -72,7 +72,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final Integer pageNumber, final UserDictSearchForm form) {
         userDictPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminDictUserDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -80,7 +80,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final UserDictSearchForm form) {
         copyBeanToBean(form.searchParams, userDictPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDictUserDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -88,14 +88,14 @@ public class AdminDictUserdictAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final UserDictSearchForm form) {
         userDictPager.clear();
-        return asHtml(path_AdminDictUserDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse back(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -115,7 +115,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     public HtmlResponse createpage(final UserDictEditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminDictUserDict_EditJsp);
+        return asHtml(path_AdminDictUserdict_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -125,13 +125,13 @@ public class AdminDictUserdictAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CrudMode.EDIT);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserDict_EditJsp);
+        return asHtml(path_AdminDictUserdict_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final UserDictEditForm form) {
-        return asHtml(path_AdminDictUserDict_EditJsp);
+        return asHtml(path_AdminDictUserdict_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -139,7 +139,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final UserDictEditForm form) {
         form.crudMode = CrudMode.EDIT;
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserDict_EditJsp);
+        return asHtml(path_AdminDictUserdict_EditJsp);
     }
 
     @Token(save = true, validate = false)
@@ -149,7 +149,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CrudMode.DELETE);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserDict_ConfirmJsp);
+        return asHtml(path_AdminDictUserdict_ConfirmJsp);
     }
 
     @Token(save = true, validate = false)
@@ -157,7 +157,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final UserDictEditForm form) {
         form.crudMode = CrudMode.DELETE;
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserDict_ConfirmJsp);
+        return asHtml(path_AdminDictUserdict_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -169,21 +169,21 @@ public class AdminDictUserdictAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CrudMode.CONFIRM);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserDict_ConfirmJsp);
+        return asHtml(path_AdminDictUserdict_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromcreate(final UserDictEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminDictUserDict_ConfirmJsp);
+        return asHtml(path_AdminDictUserdict_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
     public HtmlResponse confirmfromupdate(final UserDictEditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminDictUserDict_ConfirmJsp);
+        return asHtml(path_AdminDictUserdict_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -192,7 +192,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     @Token(save = false, validate = true)
     @Execute
     public HtmlResponse downloadpage(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserDict_DownloadJsp);
+        return asHtml(path_AdminDictUserdict_DownloadJsp);
     }
 
     @Token(save = false, validate = true)
@@ -200,7 +200,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     public HtmlResponse download(final UserDictSearchForm form) {
         // TODO Download
 
-        return asHtml(path_AdminDictUserDict_DownloadJsp);
+        return asHtml(path_AdminDictUserdict_DownloadJsp);
     }
 
     // -----------------------------------------------------
@@ -211,7 +211,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     public HtmlResponse uploadpage(final UserDictUploadForm form) {
         // TODO Upload
 
-        return asHtml(path_AdminDictUserDict_UploadJsp);
+        return asHtml(path_AdminDictUserdict_UploadJsp);
     }
 
     // -----------------------------------------------------
@@ -264,7 +264,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminDictUserDict_EditJsp);
+            return asHtml(path_AdminDictUserdict_EditJsp);
         };
     }
 }

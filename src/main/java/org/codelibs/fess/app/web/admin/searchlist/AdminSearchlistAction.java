@@ -37,7 +37,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.QueryResponseList;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;

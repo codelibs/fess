@@ -78,22 +78,22 @@ public interface FessHtmlPath {
     HtmlNext path_AdminDictSynonym_UploadJsp = new HtmlNext("/admin/dict/synonym/upload.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/confirm.jsp */
-    HtmlNext path_AdminDictUserDict_ConfirmJsp = new HtmlNext("/admin/dict/userdict/confirm.jsp");
+    HtmlNext path_AdminDictUserdict_ConfirmJsp = new HtmlNext("/admin/dict/userdict/confirm.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/download.jsp */
-    HtmlNext path_AdminDictUserDict_DownloadJsp = new HtmlNext("/admin/dict/userdict/download.jsp");
+    HtmlNext path_AdminDictUserdict_DownloadJsp = new HtmlNext("/admin/dict/userdict/download.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/edit.jsp */
-    HtmlNext path_AdminDictUserDict_EditJsp = new HtmlNext("/admin/dict/userdict/edit.jsp");
+    HtmlNext path_AdminDictUserdict_EditJsp = new HtmlNext("/admin/dict/userdict/edit.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/error.jsp */
-    HtmlNext path_AdminDictUserDict_ErrorJsp = new HtmlNext("/admin/dict/userdict/error.jsp");
+    HtmlNext path_AdminDictUserdict_ErrorJsp = new HtmlNext("/admin/dict/userdict/error.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/index.jsp */
-    HtmlNext path_AdminDictUserDict_IndexJsp = new HtmlNext("/admin/dict/userdict/index.jsp");
+    HtmlNext path_AdminDictUserdict_IndexJsp = new HtmlNext("/admin/dict/userdict/index.jsp");
 
     /** The path of the HTML: /admin/dict/userdict/upload.jsp */
-    HtmlNext path_AdminDictUserDict_UploadJsp = new HtmlNext("/admin/dict/userdict/upload.jsp");
+    HtmlNext path_AdminDictUserdict_UploadJsp = new HtmlNext("/admin/dict/userdict/upload.jsp");
 
     /** The path of the HTML: /admin/failureurl/confirm.jsp */
     HtmlNext path_AdminFailureurl_ConfirmJsp = new HtmlNext("/admin/failureurl/confirm.jsp");

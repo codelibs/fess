@@ -3162,11 +3162,4 @@ public class FessMessages extends FessLabels {
         add(property, new ActionMessage(SUCCESS_crud_delete_crud_table));
         return this;
     }
-
-    /**
-     * The definition of keys for labels.
-     * @author FreeGen
-     */
-    public static interface LabelKey extends FessLabels.LabelKey {
-    }
 }
