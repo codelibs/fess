@@ -308,9 +308,9 @@
 			<url>http://maven.codelibs.org/</url>
 		</pluginRepository>
 		<pluginRepository>
-			<name>oss.sonatype.org</name>
 			<id>oss.sonatype.org</id>
-			<url>http://oss.sonatype.org/content/groups/public/</url>
+			<name>oss.sonatype.org</name>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<repositories>
@@ -320,13 +320,13 @@
 			<url>http://maven.codelibs.org/</url>
 		</repository>
 		<repository>
-			<name>oss.sonatype.org</name>
 			<id>oss.sonatype.org</id>
-			<url>http://oss.sonatype.org/content/groups/public/</url>
+			<name>oss.sonatype.org</name>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
-			<snapshots> <!-- TODO jflute temporarily for LastaFlute -->
+			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
