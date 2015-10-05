@@ -14,12 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.dict;
+package org.codelibs.fess.app.web.admin.dict.synonym;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SynonymForm {
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class SynonymEditForm implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     //@IntegerType
     public String pageNumber;
 

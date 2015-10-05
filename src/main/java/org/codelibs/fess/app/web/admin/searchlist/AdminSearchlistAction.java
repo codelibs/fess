@@ -251,8 +251,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }   );
         thread.start();
         saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
-        final String contextPath = LaRequestUtil.getRequest().getContextPath();
-        return newHtmlResponseAsRediect(contextPath + "/search/?query=" + LaFunctions.u(form.query));
+        return redirectWith(getClass(), moreUrl("search").params("query", form.query));
     }
 
     public boolean isSolrProcessRunning() {

@@ -14,12 +14,19 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.dict.synonym;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DictForm implements Serializable {
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class SynonymSearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public Map<String, String> searchParams = new HashMap<String, String>();
 }
