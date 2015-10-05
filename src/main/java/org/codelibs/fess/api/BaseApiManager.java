@@ -16,6 +16,16 @@
 
 package org.codelibs.fess.api;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.codelibs.core.exception.IORuntimeException;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
+
 public class BaseApiManager {
     protected static final String FAVORITES_API = "/favoritesApi";
 
@@ -57,6 +67,33 @@ public class BaseApiManager {
         } else {
             // default
             return FormatType.OTHER;
+        }
+    }
+
+    public static void write(final String text, String contentType, String encoding) {
+        if (contentType == null) {
+            contentType = "text/plain";
+        }
+        if (encoding == null) {
+            encoding = LaRequestUtil.getRequest().getCharacterEncoding();
+            if (encoding == null) {
+                encoding = "UTF-8";
+            }
+        }
+        final HttpServletResponse response = LaResponseUtil.getResponse();
+        response.setContentType(contentType + "; charset=" + encoding);
+        try {
+            PrintWriter out = null;
+            try {
+                out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), encoding));
+                out.print(text);
+            } finally {
+                if (out != null) {
+                    out.close();
+                }
+            }
+        } catch (final IOException e) {
+            throw new IORuntimeException(e);
         }
     }
 

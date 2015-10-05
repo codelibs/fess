@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,9 +55,9 @@ public abstract class BsWebConfigToRoleBhv extends AbstractBehavior<WebConfigToR
     protected <RESULT extends WebConfigToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(toString(source.get("id")));
-            result.setRoleTypeId(toString(source.get("roleTypeId")));
-            result.setWebConfigId(toString(source.get("webConfigId")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
+            result.setWebConfigId(DfTypeUtil.toString(source.get("webConfigId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -221,4 +222,9 @@ public abstract class BsWebConfigToRoleBhv extends AbstractBehavior<WebConfigToR
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

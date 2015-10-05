@@ -16,36 +16,28 @@
 
 package org.codelibs.fess.validator;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.validator.Field;
-import org.apache.commons.validator.Validator;
-import org.apache.commons.validator.ValidatorAction;
-import org.apache.struts.action.ActionMessages;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.FessSystemException;
-import org.seasar.struts.validator.S2FieldChecks;
 
-public class UriTypeChecks extends S2FieldChecks {
+// TODO replace with hibernate validator
+public class UriTypeChecks /*extends S2FieldChecks*/{
 
-    private static final long serialVersionUID = 1L;
-
-    public static boolean validateUriType(final Object bean, final ValidatorAction validatorAction, final Field field,
-            final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
-        final String value = getValueAsString(bean, field);
-        if (StringUtil.isNotBlank(value)) {
-            final String protocols = field.getVarValue("protocols");
-            if (StringUtil.isEmpty(protocols)) {
-                throw new FessSystemException("protocols is empty.");
+    /*
+        public static boolean validateUriType(final Object bean, final ValidatorAction validatorAction, final Field field,
+                final ActionMessages errors, final Validator validator, final HttpServletRequest request) {
+            final String value = getValueAsString(bean, field);
+            if (StringUtil.isNotBlank(value)) {
+                final String protocols = field.getVarValue("protocols");
+                if (StringUtil.isEmpty(protocols)) {
+                    throw new FessSystemException("protocols is empty.");
+                }
+                if (!check(protocols, value)) {
+                    addError(errors, field, validator, validatorAction, request);
+                    return false;
+                }
             }
-            if (!check(protocols, value)) {
-                addError(errors, field, validator, validatorAction, request);
-                return false;
-            }
+            return true;
         }
-        return true;
-    }
-
+    */
     protected static boolean check(final String protocols, final String values) {
         final String[] prtcls = protocols.split(",");
         final String[] paths = values.split("[\r\n]");

@@ -163,9 +163,22 @@ public abstract class AbstractEntity implements Entity, Serializable, Cloneable 
         return null;
     }
 
+    @Override
+    public void myunlockUndefinedClassificationAccess() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean myundefinedClassificationAccessAllowed() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     public abstract Map<String, Object> toSource();
 
-    public class DocMeta {
+    public class DocMeta implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         protected String id;
 

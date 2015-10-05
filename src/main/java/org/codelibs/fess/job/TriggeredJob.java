@@ -17,17 +17,17 @@
 package org.codelibs.fess.job;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.es.exentity.JobLog;
 import org.codelibs.fess.es.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.JobLogService;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.seasar.framework.container.SingletonS2Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class TriggeredJob implements Job {
     }
 
     private void storeJobLog(final JobLog jobLog) {
-        final JobLogService jobLogService = SingletonS2Container.getComponent(JobLogService.class);
+        final JobLogService jobLogService = SingletonLaContainer.getComponent(JobLogService.class);
         jobLogService.store(jobLog);
     }
 

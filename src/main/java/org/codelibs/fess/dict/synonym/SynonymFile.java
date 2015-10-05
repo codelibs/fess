@@ -33,11 +33,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
-import org.codelibs.robot.util.StreamUtil;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
@@ -373,7 +373,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     public void update(final InputStream in) throws IOException {
-        StreamUtil.drain(in, file);
+        CopyUtil.copy(in, file);
         reload(null);
     }
 

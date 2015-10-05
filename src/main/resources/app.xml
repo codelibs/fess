@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="convention.xml"/>
+	<include path="lastaflute.xml"/>
+
+	<include path="fess.xml"/>
+	<include path="fess_job.xml"/>
+	<include path="fess_api.xml"/>
+	<include path="fess_dict.xml"/>
+
+	<include path="s2robot/client.xml" />
+	<include path="s2robot/mimetype.xml" />
+
+	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
+        <!-- CHANGE THE FOLLOWING KEY -->
+		<property name="key">"1234567890123456"</property>
+	</component>
+	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
+	</component>
+	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">
+	</component>
+	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
+		<property name="defaultFacetInfo">
+			<component class="org.codelibs.fess.entity.FacetInfo">
+				<property name="minCount">1</property>
+				<property name="field">["label"]</property>
+				<property name="query">[
+					"last_modified:[now/d-1d TO now]",
+					"last_modified:[now/d-7d TO now]",
+					"last_modified:[now/d-1M TO now]",
+					"last_modified:[now/d-1y TO now]",
+					"content_length:[0 TO 9999]",
+					"content_length:[10000 TO 99999]",
+					"content_length:[100000 TO 499999]",
+					"content_length:[500000 TO 999999]",
+					"content_length:[1000000 TO *]",
+					"filetype:html",
+					"filetype:word",
+					"filetype:excel",
+					"filetype:powerpoint",
+					"filetype:pdf",
+					"filetype:others"
+				]</property>
+			</component>
+		</property>
+		<postConstruct name="addFieldLanguage">
+			<arg>"zh"</arg>
+			<arg>"cjk"</arg>
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
+			<arg>"zh_CN"</arg>
+			<arg>"cjk"</arg>
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
+			<arg>"zh_TW"</arg>
+			<arg>"cjk"</arg>
+		</postConstruct>
+		<postConstruct name="addFieldLanguage">
+			<arg>"ko"</arg>
+			<arg>"cjk"</arg>
+		</postConstruct>
+		<postConstruct name="setApiResponseFields">
+			<arg>(String[])["id", "docId", "score", "boost",
+            "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
+            "created", "title", "digest", "url", "urlLink", "contentDescription"]</arg>
+		</postConstruct>
+		<postConstruct name="addHighlightField">
+			<arg>"title"</arg>
+		</postConstruct>
+		<postConstruct name="addHighlightField">
+			<arg>"content"</arg>
+		</postConstruct>
+		<postConstruct name="addFieldBoost">
+			<arg>"label"</arg>
+			<arg>"0.0"</arg>
+		</postConstruct>
+		<!-- 
+		<property name="additionalGeoQuery">"location_i_i:1"</property>
+		<property name="responseFields">new String[]{ "id", "docId", "score",
+            "boost", "contentLength", "host", "site", "lastModified",
+            "mimetype", "filetype_s", "created", "title", "digest", "url",
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv",
+            "cid_s", "lang_s", "hasCache_s_s" }</property>
+		<property name="responseDocValuesFields">new String[]{
+            "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
+		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
+		<property name="searchFields">new String[]{"url", "docId", "host", 
+            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
+            "label", "segment", "lang_s" }</property>
+		<property name="facetFields">new String[]{"url", "host", 
+            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
+            "label", "segment" }</property>
+		<property name="sortPrefix">"sort:"</property>
+		<property name="supportedSortFields">new String[]{"created",
+            "contentLength", "lastModified", "clickCount_l_x_dv" }</property>
+		<property name="supportedMltFields">new String[]{"content",
+            "content_ja" }</property>
+		<property name="shards">"localhost:8983/solr,localhost:7574/solr"</property>
+		<property name="useBigram">true</property>
+		<property name="additionalQuery">""</property>
+		<property name="maxFilterQueriesForRole">3</property>
+		<property name="timeAllowed">1000</property>
+		<postConstruct name="addRequestParameter">
+			<arg>"debug.explain.structured"</arg>
+			<arg>"true"</arg>
+		</postConstruct>
+		<postConstruct name="addDefaultSortField">
+			<arg>"score"</arg>
+			<arg>"desc"</arg>
+		</postConstruct>
+		<postConstruct name="addQueryParam">
+			<arg>"word"</arg>
+			<arg>new String[]{"$query"}</arg>
+		</postConstruct>
+		-->
+	</component>
+	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
+		<postConstruct name="addFacetQueryView">
+			<arg>
+				<component class="org.codelibs.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_lastModified_title"</property>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_lastModified_1day"</arg>
+						<arg>"last_modified:[now/d-1d TO now]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_lastModified_1week"</arg>
+						<arg>"last_modified:[now/d-7d TO now]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_lastModified_1month"</arg>
+						<arg>"last_modified:[now/d-1M TO now]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_lastModified_1year"</arg>
+						<arg>"last_modified:[now/d-1y TO now]"</arg>
+					</postConstruct>
+				</component>
+			</arg>
+		</postConstruct>
+		<postConstruct name="addFacetQueryView">
+			<arg>
+				<component class="org.codelibs.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_contentLength_title"</property>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_contentLength_10k"</arg>
+						<arg>"content_length:[0 TO 9999]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_contentLength_10kto100k"</arg>
+						<arg>"content_length:[10000 TO 99999]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_contentLength_100kto500k"</arg>
+						<arg>"content_length:[100000 TO 499999]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_contentLength_500kto1m"</arg>
+						<arg>"content_length:[500000 TO 999999]"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_contentLength_1m"</arg>
+						<arg>"content_length:[1000000 TO *]"</arg>
+					</postConstruct>
+				</component>
+			</arg>
+		</postConstruct>
+		<postConstruct name="addFacetQueryView">
+			<arg>
+				<component class="org.codelibs.fess.entity.FacetQueryView">
+					<property name="title">"label.facet_filetype_title"</property>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_html"</arg>
+						<arg>"filetype:html"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_word"</arg>
+						<arg>"filetype:word"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_excel"</arg>
+						<arg>"filetype:excel"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_powerpoint"</arg>
+						<arg>"filetype:powerpoint"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_pdf"</arg>
+						<arg>"filetype:pdf"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"label.facet_filetype_others"</arg>
+						<arg>"filetype:others"</arg>
+					</postConstruct>
+				</component>
+			</arg>
+		</postConstruct>
+		<!-- 
+		<property name="encodeUrlLink">false</property>
+		<property name="useHighlight">false</property>
+		<property name="descriptionLength">200</property>
+		<property name="titleLength">50</property>
+		<property name="urlLinkEncoding">"UTF-8"</property>
+		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>
+		<postConstruct name="addInitFacetParam">
+			<arg>"facet.field"</arg>
+			<arg>"label"</arg>
+		</postConstruct>
+		 -->
+	</component>
+	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
+	</component>
+	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
+		<property name="excludedWordPattern">java.util.regex.Pattern.compile(".*[a-zA-Z0-9_]+:.*")</property>
+		<!-- 
+		<property name="size">10</property>
+		 -->
+	</component>
+	<component name="userInfoHelper" class="org.codelibs.fess.helper.impl.CookieUserInfoHelperImpl">
+		<!-- 
+		<property name="cookieName">"fu"</property>
+		<property name="cookieDomain">""</property>
+		<property name="cookieMaxAge">30 * 24 * 60 * 60</property>
+		<property name="cookiePath">""</property>
+		<property name="cookieSecure">false</property>
+		 -->
+	</component>
+	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
+		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>
+		<property name="encoding">"UTF-8"</property>
+	</component>
+	<component name="queryResponseList" class="org.codelibs.fess.util.QueryResponseList" instance="prototype">
+	</component>
+	<component name="userAgentName" class="java.lang.String">
+		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
+	</component>
+
+	<component name="adProperties" class="java.util.Properties">
+		<postConstruct name="put">
+			<arg>"java.naming.factory.initial"</arg>
+			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.provider.url"</arg>
+			<arg>"ldap://[host]:[port]"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.security.principal"</arg>
+			<arg>"[loginId]@[domain]"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.security.credentials"</arg>
+			<arg>"password"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.ldap.connect.timeout"</arg>
+			<arg>"10000"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.ldap.connect.pool"</arg>
+			<arg>"true"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.connect.pool.timeout"</arg>
+			<arg>"30000"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.connect.pool.debug"</arg>
+			<arg>"all"</arg>
+		</postConstruct>
+	</component>
+
+	<component name="adRoleHelper" class="org.codelibs.fess.helper.AdRoleHelper">
+		<postConstruct name="setAdProperties">
+			<arg>adProperties</arg>
+		</postConstruct>
+	</component>
+
+	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
+		<postConstruct name="init">
+		</postConstruct>
+	</component>
+
+	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
+		<!-- 
+		<postConstruct name="add">
+			<arg>htmlScreenShotGenerator</arg>
+		</postConstruct>
+		 -->
+	</component>
+<!--
+	<component name="webDriver" class="org.openqa.selenium.phantomjs.PhantomJSDriver">
+		<arg>
+			<component class="org.openqa.selenium.remote.DesiredCapabilities">
+				<postConstruct name="setCapability">
+					<arg>"phantomjs.binary.path"</arg>
+					<arg>"/usr/bin/phantomjs"</arg>
+				</postConstruct>
+			</component>
+		</arg>
+		<preDestroy name="quit"></preDestroy>
+	</component>
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.WebDriverGenerator">
+		<property name="webDriver">webDriver</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+	</component>
+-->
+<!--
+	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.CommandGenerator">
+		<property name="commandList">
+			{"bash", 
+			"/opt/fess/bin/html-screenshot.sh",
+			"${url}",
+			"${outputFile}"}
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+	</component>
+-->
+
+</components>

@@ -29,10 +29,13 @@ import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.util.OgnlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 
 public abstract class AbstractDataStoreImpl implements DataStore {
 
@@ -52,6 +55,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final Map<String, String> configParamMap = config.getHandlerParameterMap();
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
 
@@ -73,7 +77,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // segment
         defaultDataMap.put(fieldHelper.segmentField, initParamMap.get(Constants.SESSION_ID));
         // created
-        defaultDataMap.put(fieldHelper.createdField, "NOW");
+        defaultDataMap.put(fieldHelper.createdField, systemHelper.getCurrentTime());
         // boost
         defaultDataMap.put(fieldHelper.boostField, config.getBoost().toString());
         // label: labelType
@@ -112,8 +116,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
 
         try {
-            final Object exp = OgnlUtil.parseExpression(template);
-            final Object value = OgnlUtil.getValue(exp, paramMap);
+            final Object value = new GroovyShell(new Binding(paramMap)).evaluate(template);
             if (value == null) {
                 return null;
             }

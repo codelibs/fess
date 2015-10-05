@@ -2,14 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.crawler_configuration" /></title>
+<title>Fess | <la:message key="labels.crawler_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="crawl" />
 		</jsp:include>
 
@@ -18,14 +18,14 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.crawler_title_edit" />
+					<la:message key="labels.crawler_title_edit" />
 				</h1>
 			</section>
 
 			<section class="content">
 
 				<%-- Form --%>
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -34,170 +34,170 @@
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
-												<bean:write name="msg" ignore="true" />
+												${msg}
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-											<label for="searchLog"><bean:message key="labels.search_log_enabled" /></label>
+											<label for="searchLog"><la:message key="labels.search_log_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="searchLog" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="searchLog" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="userInfo"><bean:message key="labels.user_info_enabled" /></label>
+											<label for="userInfo"><la:message key="labels.user_info_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="userInfo" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="userInfo" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="userFavorite"><bean:message key="labels.user_favorite_enabled" /></label>
+											<label for="userFavorite"><la:message key="labels.user_favorite_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="userFavorite" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="userFavorite" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="appendQueryParameter"><bean:message key="labels.append_query_param_enabled" /></label>
+											<label for="appendQueryParameter"><la:message key="labels.append_query_param_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="appendQueryParameter" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="appendQueryParameter" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="webApiXml"><bean:message key="labels.web_api_xml_enabled" /></label>
+											<label for="webApiXml"><la:message key="labels.web_api_xml_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="webApiXml" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="webApiXml" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="webApiJson"><bean:message key="labels.web_api_json_enabled" /></label>
+											<label for="webApiJson"><la:message key="labels.web_api_json_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="webApiJson" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="webApiJson" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="defaultLabelValue"><bean:message key="labels.default_label_value" /></label>
-											<html:textarea property="defaultLabelValue" styleClass="form-control" />
+											<label for="defaultLabelValue"><la:message key="labels.default_label_value" /></label>
+											<la:textarea property="defaultLabelValue" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="supportedSearch"><bean:message key="labels.supported_search_feature" /></label>
+											<label for="supportedSearch"><la:message key="labels.supported_search_feature" /></label>
 											<div class="form-inline">
-													<html:select property="supportedSearch" styleClass="form-control">
+													<la:select property="supportedSearch" styleClass="form-control">
 															<c:forEach var="item" items="${supportedSearchItems}">
-																	<html:option value="${f:u(item.value)}">${f:h(item.label)}</html:option>
+																	<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
 															</c:forEach>
-													</html:select>
+													</la:select>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="hotSearchWord"><bean:message key="labels.hot_search_word_enabled" /></label>
+											<label for="hotSearchWord"><la:message key="labels.hot_search_word_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="hotSearchWord" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="hotSearchWord" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="purgeSearchLogDay"><bean:message key="labels.purge_search_log_day" /></label>
+											<label for="purgeSearchLogDay"><la:message key="labels.purge_search_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeSearchLogDay" styleClass="form-control" />
+													<la:text property="purgeSearchLogDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="purgeJobLogDay"><bean:message key="labels.purge_job_log_day" /></label>
+											<label for="purgeJobLogDay"><la:message key="labels.purge_job_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeJobLogDay" styleClass="form-control" />
+													<la:text property="purgeJobLogDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="purgeUserInfoDay"><bean:message key="labels.purge_user_info_day" /></label>
+											<label for="purgeUserInfoDay"><la:message key="labels.purge_user_info_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeUserInfoDay" styleClass="form-control" />
+													<la:text property="purgeUserInfoDay" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="purgeByBots"><bean:message key="labels.purge_by_bots" /></label>
-											<html:text property="purgeByBots" styleClass="form-control" />
+											<label for="purgeByBots"><la:message key="labels.purge_by_bots" /></label>
+											<la:text property="purgeByBots" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="notificationTo"><bean:message key="labels.notification_to" /></label>
-											<html:text property="notificationTo" styleClass="form-control" />
+											<label for="notificationTo"><la:message key="labels.notification_to" /></label>
+											<la:text property="notificationTo" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="csvFileEncoding"><bean:message key="labels.csv_file_encoding" /></label>
+											<label for="csvFileEncoding"><la:message key="labels.csv_file_encoding" /></label>
 											<div class="form-inline">
-													<html:text property="csvFileEncoding" styleClass="form-control" />
+													<la:text property="csvFileEncoding" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="diffCrawling"><bean:message key="labels.diff_crawling" /></label>
+											<label for="diffCrawling"><la:message key="labels.diff_crawling" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="diffCrawling" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="diffCrawling" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="useAclAsRole"><bean:message key="labels.use_acl_as_role" /></label>
+											<label for="useAclAsRole"><la:message key="labels.use_acl_as_role" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="useAclAsRole" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="useAclAsRole" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="serverRotation"><bean:message key="labels.server_rotation" /></label>
+											<label for="serverRotation"><la:message key="labels.server_rotation" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="serverRotation" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="serverRotation" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="crawlingThreadCount"><bean:message key="labels.crawling_thread_count" /></label>
+											<label for="crawlingThreadCount"><la:message key="labels.crawling_thread_count" /></label>
 											<div class="form-inline">
-													<html:text property="crawlingThreadCount" styleClass="form-control" />
+													<la:text property="crawlingThreadCount" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="dayForCleanup"><bean:message key="labels.day_for_cleanup" /></label>
+											<label for="dayForCleanup"><la:message key="labels.day_for_cleanup" /></label>
 											<div class="form-inline">
-													<html:select property="dayForCleanup" styleClass="form-control">
-															<html:option value="-1"><bean:message key="labels.none"/></html:option>
+													<la:select property="dayForCleanup" styleClass="form-control">
+															<la:option value="-1"><la:message key="labels.none"/></la:option>
 															<c:forEach var="d" items="${dayItems}">
-																	<html:option value="${f:h(d)}">${f:h(d)}</html:option>
+																	<la:option value="${f:h(d)}">${f:h(d)}</la:option>
 															</c:forEach>
-													</html:select>
-													<bean:message key="labels.day"/>
+													</la:select>
+													<la:message key="labels.day"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="ignoreFailureType"><bean:message key="labels.ignore_failure_type" /></label>
-											<html:text property="ignoreFailureType" styleClass="form-control" />
+											<label for="ignoreFailureType"><la:message key="labels.ignore_failure_type" /></label>
+											<la:text property="ignoreFailureType" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="failureCountThreshold"><bean:message key="labels.failure_count_threshold" /></label>
+											<label for="failureCountThreshold"><la:message key="labels.failure_count_threshold" /></label>
 											<div class="form-inline">
-													<html:text property="failureCountThreshold" styleClass="form-control" />
+													<la:text property="failureCountThreshold" styleClass="form-control" />
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="suggestSearchLog"><bean:message key="labels.suggest_search_log_enabled" /></label>
+											<label for="suggestSearchLog"><la:message key="labels.suggest_search_log_enabled" /></label>
 											<div styleClass="form-inline" >
-													<html:checkbox property="suggestSearchLog" />
-													<bean:message key="labels.enabled"/>
+													<la:checkbox property="suggestSearchLog" />
+													<la:message key="labels.enabled"/>
 											</div>
 									</div>
 									<div class="form-group">
-											<label for="purgeSuggestSearchLogDay"><bean:message key="labels.purge_suggest_search_log_day" /></label>
+											<label for="purgeSuggestSearchLogDay"><la:message key="labels.purge_suggest_search_log_day" /></label>
 											<div class="form-inline">
-													<html:text property="purgeSuggestSearchLogDay" styleClass="form-control" />
+													<la:text property="purgeSuggestSearchLogDay" styleClass="form-control" />
 											</div>
 									</div>
 
@@ -205,13 +205,13 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 										<input type="submit" class="btn small btn-primary" name="update"
-													 value="<bean:message key="labels.crawl_button_update"/>"
+													 value="<la:message key="labels.crawl_button_update"/>"
 										/>
 								</div>
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

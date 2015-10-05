@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,10 +55,15 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
     protected <RESULT extends ${table.camelizedName}> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
-            result.set${column.capCamelName}(to$javaNative(source.get("${column.name}")));
+#if ($tableMetaSettings.properties.get($column.name).array)
+            result.set${column.capCamelName}(to${javaNative}Array(source.get("${column.name}")));
+#else
+            result.set${column.capCamelName}(DfTypeUtil.to$javaNative(source.get("${column.name}")));
+#end
 #end
 #end
             return result;
@@ -224,5 +230,10 @@ public abstract class Bs${table.camelizedName}Bhv extends AbstractBehavior<${tab
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }
 

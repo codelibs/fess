@@ -27,7 +27,8 @@ $(function(){
 			rt = $('#rt').val(),
 			url = $(this).attr('href'),
 			buf = [];
-		buf.push('go?rt=');
+		buf.push(contextPath);
+		buf.push('/go/?rt=');
 		buf.push(rt);
 		buf.push('&docId=');
 		buf.push(docId);
@@ -50,7 +51,8 @@ $(function(){
 				url = $(this).attr('href'),
 				queryId = $queryId.val(),
 				buf = [];
-			buf.push('go?rt=');
+		    buf.push(contextPath);
+			buf.push('/go/?rt=');
 			buf.push(rt);
 			buf.push('&docId=');
 			buf.push(docId);

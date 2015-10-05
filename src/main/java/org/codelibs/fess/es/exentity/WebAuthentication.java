@@ -12,14 +12,14 @@ import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.NTLMScheme;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.es.bsentity.BsWebAuthentication;
-import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.codelibs.robot.RobotSystemException;
 import org.codelibs.robot.client.http.Authentication;
 import org.codelibs.robot.client.http.impl.AuthenticationImpl;
 import org.codelibs.robot.client.http.ntlm.JcifsEngine;
+import org.codelibs.robot.exception.RobotSystemException;
 
 /**
  * @author FreeGen
@@ -99,7 +99,7 @@ public class WebAuthentication extends BsWebAuthentication {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -107,7 +107,7 @@ public class WebAuthentication extends BsWebAuthentication {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 }

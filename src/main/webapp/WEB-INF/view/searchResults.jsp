@@ -3,12 +3,12 @@
 <div id="subheader" class="row">
 	<div class="span12">
 		<p>
-			<bean:message key="labels.search_result_status"
+			<la:message key="labels.search_result_status"
 				arg0="${f:h(displayQuery)}" arg1="${f:h(allRecordCount)}"
 				arg2="${f:h(currentStartRecordNumber)}"
 				arg3="${f:h(currentEndRecordNumber)}" />
 			<c:if test="${execTime!=null}">
-				<bean:message key="labels.search_result_time"
+				<la:message key="labels.search_result_time"
 					arg0="${f:h(execTime)}" />
 			</c:if>
 		</p>
@@ -17,7 +17,7 @@
 <c:if test="${partialResults}">
 	<div class="alert">
 		<p>
-			<bean:message key="errors.process_time_is_exceeded" />
+			<la:message key="errors.process_time_is_exceeded" />
 		</p>
 	</div>
 </c:if>
@@ -29,46 +29,46 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title ellipsis">
-						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.docId}">${f:h(doc.contentTitle)}</a>
+						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.doc_id}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.sitePath)}</cite>
 							<c:if test="${doc.hasCache_s_s=='true'}">
-								<a href="cache?docId=${doc.docId}${appendHighlightQueries}" class="cache"><bean:message
-										key="labels.search_result_cache" /></a>
+								<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightQueries}" class="cache"><la:message
+										key="labels.search_result_cache" /></la:link>
 							</c:if>
 						</div>
 						<div class="more visible-phone">
-							<a href="#result${s.index}"><bean:message key="labels.search_result_more" /></a>
+							<a href="#result${s.index}"><la:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
 							<c:if test="${doc.created!=null && doc.created!=''}">
 								<c:set var="hasInfo" value="true"/>
-								<bean:message key="labels.search_result_created" />
+								<la:message key="labels.search_result_created" />
 								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
 							</c:if>
-							<c:if test="${doc.lastModified!=null && doc.lastModified!=''}">
+							<c:if test="${doc.last_modified!=null && doc.last_modified!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<bean:message key="labels.search_result_lastModified" />
-								<fmt:formatDate value="${fe:parseDate(doc.lastModified)}" type="BOTH" />
+								<la:message key="labels.search_result_last_modified" />
+								<fmt:formatDate value="${fe:parseDate(doc.last_modified)}" type="BOTH" />
 							</c:if>
-							<c:if test="${doc.contentLength!=null && doc.contentLength!=''}">
+							<c:if test="${doc.content_length!=null && doc.content_length!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<bean:message key="labels.search_result_size"
-									arg0="${f:h(doc.contentLength)}" />
+								<la:message key="labels.search_result_size"
+									arg0="${f:h(doc.content_length)}" />
 							</c:if>
 							<c:if test="${searchLogSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<bean:message key="labels.search_click_count"
-									arg0="${f:h(doc.clickCount_l_x_dv)}" />
+								<la:message key="labels.search_click_count"
+									arg0="${f:h(doc.click_count)}" />
 							</c:if>
 							<c:if test="${favoriteSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
-								<a href="#${doc.docId}" class="favorite"><bean:message
-										key="labels.search_result_favorite" /> (${f:h(doc.favoriteCount_l_x_dv)})</a>
-								<span class="favorited"><bean:message
+								<a href="#${doc.doc_id}" class="favorite"><la:message
+										key="labels.search_result_favorite" /> (${f:h(doc.favorite_count)})</a>
+								<span class="favorited"><la:message
 										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favoriteCount_l_x_dv)})</span></span>
 							</c:if>
 						</div>
@@ -87,23 +87,23 @@
 				<ul class="nav nav-list">
 					<c:forEach var="fieldData" items="${facetResponse.fieldList}">
 						<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
-					<li class="nav-header"><bean:message key="label.facet_label_title" /></li>
+					<li class="nav-header"><la:message key="label.facet_label_title" /></li>
 							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
 								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
-					<li><s:link
-							href="search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</s:link></li>
+					<li><la:link
+							href="/search/search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</la:link></li>
 								</c:if>
 							</c:forEach>
 						</c:if>
 					</c:forEach>
 					<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
-					<li class="nav-header"><bean:message key="${facetQueryView.title}" /></li>
+					<li class="nav-header"><la:message key="${facetQueryView.title}" /></li>
 						<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 								<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
-					<li><s:link
-							href="search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-							<bean:message key="${queryEntry.key}" /> (${f:h(facetResponse.queryCountMap[queryEntry.value])})</s:link></li>
+					<li><la:link
+							href="/search/search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+							<la:message key="${queryEntry.key}" /> (${f:h(facetResponse.queryCountMap[queryEntry.value])})</la:link></li>
 								</c:if>
 						</c:forEach>
 					</c:forEach>
@@ -111,8 +111,8 @@
 				<c:if test="${!empty additional}">
 				<ul class="nav nav-list">
 					<li class="reset">
-						<s:link
-							href="search?query=${f:u(query)}"><bean:message key="label.facet_label_reset" /></s:link>
+						<la:link
+							href="/search/search?query=${f:u(query)}"><la:message key="label.facet_label_reset" /></la:link>
 					</li>
 				</ul>
 				</c:if>
@@ -124,13 +124,13 @@
 	<div id="subfooter" class="pagination">
 		<ul>
 			<c:if test="${existPrevPage}">
-				<li class="prev"><s:link
-						href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-						<bean:message key="labels.prev_page" />
-					</s:link></li>
+				<li class="prev"><la:link
+						href="/search/prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						<la:message key="labels.prev_page" />
+					</la:link></li>
 			</c:if>
 			<c:if test="${!existPrevPage}">
-				<li class="prev disabled"><a href="#"><bean:message
+				<li class="prev disabled"><a href="#"><la:message
 							key="labels.prev_page" /></a></li>
 			</c:if>
 			<c:forEach var="pageNumber" varStatus="s" items="${pageNumberList}">
@@ -138,18 +138,18 @@
 					<c:if test="${pageNumber < currentPageNumber - 2 || pageNumber > currentPageNumber + 2}">class="hidden-phone"</c:if>
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>
 					>
-					<s:link
-						href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</s:link>
+					<la:link
+						href="/search/move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
-				<li class="next"><s:link
-						href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-						<bean:message key="labels.next_page" />
-					</s:link></li>
+				<li class="next"><la:link
+						href="/search/next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						<la:message key="labels.next_page" />
+					</la:link></li>
 			</c:if>
 			<c:if test="${!existNextPage}">
-				<li class="next disabled"><a href="#"><bean:message
+				<li class="next disabled"><a href="#"><la:message
 							key="labels.next_page" /></a></li>
 			</c:if>
 		</ul>

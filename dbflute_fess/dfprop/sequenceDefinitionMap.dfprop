@@ -1,11 +1,10 @@
 # /---------------------------------------------------------------------------
-# sequenceDefinitionMap: (NotRequired - Default map:{})
-#
+# sequenceMap: (NotRequired - Default map:{})
+# 
 # The relation mappings between sequence and table.
-# If you don't specify the mappings, you cannot insert 
-# a record of the table by sequence.
+# If you don't specify the mappings, you cannot insert a record of the table by sequence. 
 # The table names are treated as case insensitive.
-#
+# 
 # Example:
 # map:{
 #     ; PURCHASE     = SEQ_PURCHASE

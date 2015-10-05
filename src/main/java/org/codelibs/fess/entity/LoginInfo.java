@@ -17,7 +17,6 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.sastruts.core.entity.UserInfo;
 
 public class LoginInfo extends UserInfo {
 

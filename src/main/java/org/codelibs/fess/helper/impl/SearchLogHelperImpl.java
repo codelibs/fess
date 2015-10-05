@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.beans.FessBeans;
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.exbhv.SearchLogBhv;
 import org.codelibs.fess.es.exbhv.UserInfoBhv;
@@ -35,7 +35,7 @@ import org.codelibs.fess.es.exentity.UserInfo;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,14 +130,14 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<UserInfo>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<UserInfo>();
-            final UserInfoBhv userInfoBhv = SingletonS2Container.getComponent(UserInfoBhv.class);
+            final UserInfoBhv userInfoBhv = SingletonLaContainer.getComponent(UserInfoBhv.class);
             final List<UserInfo> list = userInfoBhv.selectList(cb -> {
                 cb.query().setCode_InScope(userInfoMap.keySet());
             });
             for (final UserInfo userInfo : list) {
                 final String code = userInfo.getCode();
                 final UserInfo entity = userInfoMap.get(code);
-                FessBeans.copy(userInfo, entity).includes("id", "createdTime").execute();
+                BeanUtil.copyBeanToBean(userInfo, entity, option -> option.include("id", "createdTime"));
                 updateList.add(entity);
                 insertList.remove(entity);
             }
@@ -165,7 +165,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         final List<ClickLog> clickLogList = new ArrayList<ClickLog>();
         for (final ClickLog clickLog : queue) {
             try {
-                final SearchLogBhv searchLogBhv = SingletonS2Container.getComponent(SearchLogBhv.class);
+                final SearchLogBhv searchLogBhv = SingletonLaContainer.getComponent(SearchLogBhv.class);
                 final SearchLog entity = searchLogBhv.selectEntity(cb -> {
                     cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
                     cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
@@ -192,7 +192,7 @@ public class SearchLogHelperImpl extends SearchLogHelper {
         }
         if (!clickLogList.isEmpty()) {
             try {
-                final ClickLogBhv clickLogBhv = SingletonS2Container.getComponent(ClickLogBhv.class);
+                final ClickLogBhv clickLogBhv = SingletonLaContainer.getComponent(ClickLogBhv.class);
                 clickLogBhv.batchInsert(clickLogList);
             } catch (final Exception e) {
                 logger.warn("Failed to insert: " + clickLogList, e);

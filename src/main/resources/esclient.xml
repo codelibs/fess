@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="fessEsClient" class="org.codelibs.fess.es.client.FessEsClient">
+		<property name="settings">
+			{"http.cors.enabled":"true", "index.number_of_replicas":"0"}
+		</property>
+		<!-- Dictionaries -->
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"synonym.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ja/kuromoji.txt"</arg>
+		</postConstruct>
+		<!-- fess index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess/doc"</arg>
+		</postConstruct>
+		<!-- .fess_config index -->
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/boost_document_rule"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/crawling_session"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/crawling_session_info"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/data_config"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/data_config_to_label"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/data_config_to_role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/failure_url"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/file_authentication"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/file_config"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/file_config_to_label"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/file_config_to_role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/job_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/key_match"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/label_to_role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/label_type"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/overlapping_host"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/path_mapping"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/request_header"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/role_type"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/scheduled_job"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/suggest_bad_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/suggest_elevate_word"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/web_authentication"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/web_config"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/web_config_to_label"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/web_config_to_role"</arg>
+		</postConstruct>
+		<!-- .fess_user index -->
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/user"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/role"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_user/group"</arg>
+		</postConstruct>
+		<!-- fess_log index -->
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/event_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/click_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/favorite_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/search_field_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/search_log"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>"fess_log/user_info"</arg>
+		</postConstruct>
+	</component>
+</components>

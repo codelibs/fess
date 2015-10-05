@@ -19,9 +19,9 @@ package org.codelibs.fess.helper;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,17 +33,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.LocaleUtils;
-import org.apache.commons.lang.StringUtils;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.es.exentity.RoleType;
-import org.codelibs.fess.service.RoleTypeService;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.util.CharUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.util.LaRequestUtil;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -56,12 +57,11 @@ public class SystemHelper implements Serializable {
 
     private final Set<String> adminRoleSet = new HashSet<>();
 
-    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx512m", "-XX:MaxPermSize=128m",
-            "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC", "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+CMSIncrementalMode",
-            "-XX:+CMSIncrementalPacing", "-XX:CMSIncrementalDutyCycleMin=0", "-XX:+UseParNewGC", "-XX:+UseStringCache", "-XX:+UseTLAB",
-            "-XX:+DisableExplicitGC" };
+    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx256m", "-XX:MaxMetaspaceSize=128m",
+            "-XX:CompressedClassSpaceSize=32m", "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC",
+            "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+UseParNewGC", "-XX:+UseTLAB", "-XX:+DisableExplicitGC" };
 
-    private String logFilePath = System.getProperty("fess.log.file");
+    private String logFilePath = System.getProperty("fess.log.path", "target/logs");
 
     private String javaCommandPath = "java";
 
@@ -90,7 +90,7 @@ public class SystemHelper implements Serializable {
 
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         langItemsCache =
                 CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
@@ -100,7 +100,7 @@ public class SystemHelper implements Serializable {
                                 final ULocale uLocale = new ULocale(key);
                                 final Locale displayLocale = uLocale.toLocale();
                                 final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-                                final String msg = MessageResourcesUtil.getMessage(displayLocale, "labels.allLanguages");
+                                final String msg = ComponentUtil.getMessageManager().getMessage(displayLocale, "labels.allLanguages");
                                 final Map<String, String> defaultMap = new HashMap<>(2);
                                 defaultMap.put(Constants.ITEM_LABEL, msg);
                                 defaultMap.put(Constants.ITEM_VALUE, "all");
@@ -120,15 +120,13 @@ public class SystemHelper implements Serializable {
     }
 
     public String getUsername() {
-        String username = RequestUtil.getRequest().getRemoteUser();
-        if (StringUtil.isBlank(username)) {
-            username = "guest";
-        }
-        return username;
+        return ComponentUtil.getLoginAssist().getSessionUserBean().map(user -> {
+            return user.getUserId();
+        }).orElse(Constants.GUEST_USER);
     }
 
-    public LocalDateTime getCurrentTime() {
-        return LocalDateTime.now();
+    public Date getCurrentTime() {
+        return new Date();
     }
 
     public long getCurrentTimeAsLong() {
@@ -165,7 +163,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String getHelpLink(final String name) {
-        final Locale locale = RequestUtil.getRequest().getLocale();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
         if (locale != null) {
             final String lang = locale.getLanguage();
             for (final String l : supportedHelpLangs) {
@@ -195,7 +193,7 @@ public class SystemHelper implements Serializable {
     }
 
     public Set<String> getAuthenticatedRoleSet() {
-        final RoleTypeService roleTypeService = SingletonS2Container.getComponent(RoleTypeService.class);
+        final RoleTypeService roleTypeService = SingletonLaContainer.getComponent(RoleTypeService.class);
         final List<RoleType> roleTypeList = roleTypeService.getRoleTypeList();
 
         final Set<String> roleList = new HashSet<>(roleTypeList.size() + adminRoleSet.size());
@@ -350,7 +348,7 @@ public class SystemHelper implements Serializable {
             return langItemsCache.get(localeStr);
         } catch (final ExecutionException e) {
             final List<Map<String, String>> langItems = new ArrayList<>(supportedLanguages.length);
-            final String msg = MessageResourcesUtil.getMessage(locale, "labels.allLanguages");
+            final String msg = ComponentUtil.getMessageManager().getMessage(locale, "labels.allLanguages");
             final Map<String, String> defaultMap = new HashMap<>(2);
             defaultMap.put(Constants.ITEM_LABEL, msg);
             defaultMap.put(Constants.ITEM_VALUE, "all");

@@ -1,0 +1,81 @@
+map:{
+    ; ElasticsearchFessUserGen = map:{
+        ; resourceMap = map:{
+            ; resourceType = ELASTICSEARCH
+            ; resourceFile = ../src/main/config/es/fess_user.json
+        }
+        ; outputMap = map:{
+            ; templateFile = unused
+            ; outputDirectory = ../src/main/java
+            ; package = org.codelibs.fess.es
+            ; className = unused
+        }
+        ; tableMap = map:{
+            ; tablePath = .fess_user -> mappings -> map
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; string = String
+                    ; integer = Integer
+                    ; long = Long
+                    ; float = Float
+                    ; double = Double
+                    ; boolean = Boolean
+                    ; date = LocalDateTime
+                }
+            }
+        }
+    }
+    ; ElasticsearchFessConfigGen = map:{
+        ; resourceMap = map:{
+            ; resourceType = ELASTICSEARCH
+            ; resourceFile = ../src/main/config/es/fess_config.json
+        }
+        ; outputMap = map:{
+            ; templateFile = unused
+            ; outputDirectory = ../src/main/java
+            ; package = org.codelibs.fess.es
+            ; className = unused
+        }
+        ; tableMap = map:{
+            ; tablePath = .fess_config -> mappings -> map
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; string = String
+                    ; integer = Integer
+                    ; long = Long
+                    ; float = Float
+                    ; double = Double
+                    ; boolean = Boolean
+                    ; date = LocalDateTime
+                }
+            }
+        }
+    }
+    ; ElasticsearchFessLogGen = map:{
+        ; resourceMap = map:{
+            ; resourceType = ELASTICSEARCH
+            ; resourceFile = ../src/main/config/es/fess_log.json
+        }
+        ; outputMap = map:{
+            ; templateFile = unused
+            ; outputDirectory = ../src/main/java
+            ; package = org.codelibs.fess.es
+            ; className = unused
+        }
+        ; tableMap = map:{
+            ; tablePath = fess_log -> mappings -> map
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; string = String
+                    ; integer = Integer
+                    ; long = Long
+                    ; float = Float
+                    ; double = Double
+                    ; boolean = Boolean
+                    ; date = LocalDateTime
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="jobScheduler" class="org.codelibs.fess.job.JobScheduler">
+	</component>
+	<component name="groovyJobExecutor" class="org.codelibs.fess.job.impl.GroovyExecutor" instance="prototype">
+	</component>
+
+	<!-- Jobs -->
+	<component name="crawlJob" class="org.codelibs.fess.job.CrawlJob" instance="prototype">
+	</component>
+	<component name="aggregateLogJob" class="org.codelibs.fess.job.AggregateLogJob" instance="prototype">
+	</component>
+	<component name="updateHotWordJob" class="org.codelibs.fess.job.UpdateHotWordJob" instance="prototype">
+	</component>
+</components>

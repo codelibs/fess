@@ -21,16 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.codelibs.fess.FessSystemException;
-import org.codelibs.fess.client.FessEsClient;
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     private FieldHelper fieldHelper;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         fieldHelper = ComponentUtil.getFieldHelper();
     }

@@ -22,14 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.client.FessEsClient;
-import org.codelibs.fess.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.app.service.KeyMatchService;
+import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.exentity.KeyMatch;
-import org.codelibs.fess.service.KeyMatchService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 public class KeyMatchHelper {
     protected volatile Map<String, String[]> keyMatchQueryMap = Collections.emptyMap();
@@ -38,7 +39,7 @@ public class KeyMatchHelper {
 
     protected long reloadInterval = 1000L;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         reload(0);
     }
@@ -49,7 +50,7 @@ public class KeyMatchHelper {
 
     protected void reload(final long interval) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final KeyMatchService keyMatchService = SingletonS2Container.getComponent(KeyMatchService.class);
+        final KeyMatchService keyMatchService = SingletonLaContainer.getComponent(KeyMatchService.class);
         final List<KeyMatch> list = keyMatchService.getAvailableKeyMatchList();
         final Map<String, String[]> keyMatchQueryMap = new HashMap<String, String[]>(list.size());
         for (final KeyMatch keyMatch : list) {

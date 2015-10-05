@@ -26,23 +26,23 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.BoostDocumentRuleService;
+import org.codelibs.fess.app.service.FailureUrlService;
+import org.codelibs.fess.app.service.FileAuthenticationService;
+import org.codelibs.fess.app.service.FileConfigService;
+import org.codelibs.fess.app.service.WebConfigService;
+import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.es.exentity.BoostDocumentRule;
 import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.es.exentity.WebConfig;
-import org.codelibs.fess.interval.FessIntervalController;
-import org.codelibs.fess.service.BoostDocumentRuleService;
-import org.codelibs.fess.service.FailureUrlService;
-import org.codelibs.fess.service.FileAuthenticationService;
-import org.codelibs.fess.service.FileConfigService;
-import org.codelibs.fess.service.WebConfigService;
-import org.codelibs.fess.solr.IndexUpdater;
+import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.robot.S2Robot;
 import org.codelibs.robot.S2RobotContext;
 import org.codelibs.robot.service.DataService;
 import org.codelibs.robot.service.UrlFilterService;
 import org.codelibs.robot.service.UrlQueueService;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +147,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, webConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonLaContainer.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -253,7 +253,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, fileConfig);
 
             // create s2robot
-            final S2Robot s2Robot = SingletonS2Container.getComponent(S2Robot.class);
+            final S2Robot s2Robot = SingletonLaContainer.getComponent(S2Robot.class);
             s2Robot.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -388,7 +388,7 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setDaemon(true);
         indexUpdater.setS2RobotList(s2RobotList);
         for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
-            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.solr.BoostDocumentRule(rule));
+            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.indexer.BoostDocumentRule(rule));
         }
         indexUpdater.start();
 
@@ -477,15 +477,15 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         // clear url filter
-        final UrlFilterService urlFilterService = SingletonS2Container.getComponent(UrlFilterService.class);
+        final UrlFilterService urlFilterService = SingletonLaContainer.getComponent(UrlFilterService.class);
         urlFilterService.deleteAll();
 
         // clear queue
-        final UrlQueueService urlQueueService = SingletonS2Container.getComponent(UrlQueueService.class);
+        final UrlQueueService urlQueueService = SingletonLaContainer.getComponent(UrlQueueService.class);
         urlQueueService.deleteAll();
 
         // clear
-        final DataService dataService = SingletonS2Container.getComponent(DataService.class);
+        final DataService dataService = SingletonLaContainer.getComponent(DataService.class);
         dataService.deleteAll();
 
     }

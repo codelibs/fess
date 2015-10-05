@@ -4,5 +4,5 @@
 	<!-- To the right -->
 	<div class="pull-right hidden-xs"></div>
 	<!-- Default to the left -->
-	<bean:message key="labels.footer.copyright" />
+	<la:message key="labels.footer.copyright" />
 </footer>

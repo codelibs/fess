@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="s2robot">
+	<include path="s2robot/transformer_basic.xml"/>
+
+
+	<component name="fessXpathTransformer" class="org.codelibs.fess.crawler.transformer.FessXpathTransformer" instance="singleton">
+		<property name="name">"fessXpathTransformer"</property>
+		<property name="featureMap">defaultFeatureMap</property>
+		<property name="propertyMap">defaultPropertyMap</property>
+		<property name="childUrlRuleMap">htmlUrlRuleMap</property>
+		<!-- 
+		<property name="invalidUrlPattern">@java.util.regex.Pattern@compile("^\\s*javascript:|^\\s*mailto:|^\\s*irc:|^\\s*skype:|^\\s*callto:",@java.util.regex.Pattern@CASE_INSENSITIVE)</property>
+		 -->
+		<property name="convertUrlMap">
+			{"feed:" : "http:"}
+		</property>
+		<!-- 
+		<property name="cacheXpath">"//BODY"</property>
+		<property name="contentXpath">"//BODY"</property>
+		<property name="anchorXpath">"//A/@href"</property>
+		<property name="digestXpath">"//META[@name='description']/@content"</property>
+		 -->
+		<property name="replaceSiteEncodingWhenEnglish">true</property>
+		<property name="siteEncoding">"UTF-8"</property>
+		<!-- segment -->
+		<postConstruct name="addFieldRule">
+			<arg>"title"</arg>
+			<arg>"//TITLE"</arg>
+		</postConstruct>
+		<postConstruct name="addPrunedTag">
+			<arg>"noscript"</arg>
+		</postConstruct>
+		<postConstruct name="addPrunedTag">
+			<arg>"script"</arg>
+		</postConstruct>
+	</component>
+
+	<component name="fessFileTransformer" class="org.codelibs.fess.crawler.transformer.FessFileTransformer" instance="singleton">
+		<property name="name">"fessFileTransformer"</property>
+		<property name="replaceSiteEncodingWhenEnglish">true</property>
+		<property name="siteEncoding">"UTF-8"</property>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"title"</arg>
+			<arg>"title"</arg>
+		</postConstruct>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"Title"</arg>
+			<arg>"title"</arg>
+		</postConstruct>
+		<!-- 
+		<property name="ignoreEmptyContent">false</property>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"Author"</arg>
+			<arg>"author_t"</arg>
+		</postConstruct>
+		 -->
+	</component>
+
+	<component name="fessTikaTransformer" class="org.codelibs.fess.crawler.transformer.FessTikaTransformer" instance="singleton">
+		<property name="name">"fessTikaTransformer"</property>
+		<property name="replaceSiteEncodingWhenEnglish">true</property>
+		<property name="siteEncoding">"UTF-8"</property>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"title"</arg>
+			<arg>"title"</arg>
+		</postConstruct>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"Title"</arg>
+			<arg>"title"</arg>
+		</postConstruct>
+		<!-- 
+		<property name="ignoreEmptyContent">false</property>
+		<postConstruct name="addMetaContentMapping">
+			<arg>"Author"</arg>
+			<arg>"author_t"</arg>
+		</postConstruct>
+		 -->
+	</component>
+</components>

@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,15 +55,15 @@ public abstract class BsPathMappingBhv extends AbstractBehavior<PathMapping, Pat
     protected <RESULT extends PathMapping> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setId(toString(source.get("id")));
-            result.setProcessType(toString(source.get("processType")));
-            result.setRegex(toString(source.get("regex")));
-            result.setReplacement(toString(source.get("replacement")));
-            result.setSortOrder(toInteger(source.get("sortOrder")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setProcessType(DfTypeUtil.toString(source.get("processType")));
+            result.setRegex(DfTypeUtil.toString(source.get("regex")));
+            result.setReplacement(DfTypeUtil.toString(source.get("replacement")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -226,4 +227,9 @@ public abstract class BsPathMappingBhv extends AbstractBehavior<PathMapping, Pat
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

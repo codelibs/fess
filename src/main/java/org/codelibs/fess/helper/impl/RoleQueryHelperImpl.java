@@ -30,11 +30,11 @@ import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.sastruts.core.SSCConstants;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
     @Override
     public Set<String> build() {
         final Set<String> roleList = new HashSet<>();
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
 
         // request parameter
         if (request != null && StringUtil.isNotBlank(parameterKey)) {
@@ -108,7 +108,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         if (request != null) {
             final HttpSession session = request.getSession(false);
             if (session != null) {
-                final LoginInfo loginInfo = (LoginInfo) session.getAttribute(SSCConstants.USER_INFO);
+                final LoginInfo loginInfo = (LoginInfo) session.getAttribute(Constants.USER_INFO);
                 if (loginInfo != null) {
                     roleList.addAll(loginInfo.getRoleSet());
                 }

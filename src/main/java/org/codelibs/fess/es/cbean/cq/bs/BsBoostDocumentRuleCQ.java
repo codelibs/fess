@@ -2,8 +2,8 @@ package org.codelibs.fess.es.cbean.cq.bs;
 
 import java.util.Collection;
 
-import org.codelibs.fess.es.cbean.cq.BoostDocumentRuleCQ;
 import org.codelibs.fess.es.cbean.cf.BoostDocumentRuleCF;
+import org.codelibs.fess.es.cbean.cq.BoostDocumentRuleCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;

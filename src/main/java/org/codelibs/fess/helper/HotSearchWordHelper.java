@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.exbhv.SearchLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 
 public class HotSearchWordHelper {
 
@@ -40,7 +40,7 @@ public class HotSearchWordHelper {
 
     public Pattern excludedWordPattern;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         cacheMap.put(Range.ONE_DAY, getHotSearchWordListByFromDate(now - Constants.ONE_DAY_IN_MILLIS));

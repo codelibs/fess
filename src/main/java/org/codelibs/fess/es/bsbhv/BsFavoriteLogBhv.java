@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -32,7 +33,7 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
 
     @Override
     protected String asEsIndex() {
-        return "search_log";
+        return "fess_log";
     }
 
     @Override
@@ -54,10 +55,10 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
     protected <RESULT extends FavoriteLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setId(toString(source.get("id")));
-            result.setUrl(toString(source.get("url")));
-            result.setUserInfoId(toString(source.get("userInfoId")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setUrl(DfTypeUtil.toString(source.get("url")));
+            result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -221,4 +222,9 @@ public abstract class BsFavoriteLogBhv extends AbstractBehavior<FavoriteLog, Fav
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

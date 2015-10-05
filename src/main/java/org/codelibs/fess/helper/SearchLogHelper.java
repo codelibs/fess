@@ -20,13 +20,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.es.exentity.ClickLog;
 import org.codelibs.fess.es.exentity.SearchLog;
-import org.codelibs.robot.util.LruHashMap;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 
 public abstract class SearchLogHelper {
 
@@ -43,7 +43,7 @@ public abstract class SearchLogHelper {
 
     protected Map<String, Long> userInfoCache;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         userInfoCache = new LruHashMap<String, Long>(userInfoCacheSize);
     }
@@ -86,7 +86,7 @@ public abstract class SearchLogHelper {
 
     protected abstract void processClickLogQueue(Queue<ClickLog> queue);
 
-    public boolean addfavoriteLog(String userCode, String favoriteUrl) {
+    public boolean addfavoriteLog(final String userCode, final String favoriteUrl) {
         // TODO Auto-generated method stub
         return false;
     }

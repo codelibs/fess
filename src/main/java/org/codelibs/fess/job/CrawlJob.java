@@ -25,18 +25,18 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +64,8 @@ public class CrawlJob {
     protected int retryCountToDeleteTempDir = 10;
 
     protected long retryIntervalToDeleteTempDir = 5000;
+
+    protected boolean useLocaleElasticsearch = true;
 
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -110,9 +112,15 @@ public class CrawlJob {
         return this;
     }
 
-    public void retryToDeleteTempDir(final int retryCount, final long retryInterval) {
+    public CrawlJob retryToDeleteTempDir(final int retryCount, final long retryInterval) {
         retryCountToDeleteTempDir = retryCount;
         retryIntervalToDeleteTempDir = retryInterval;
+        return this;
+    }
+
+    public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
+        this.useLocaleElasticsearch = useLocaleElasticsearch;
+        return this;
     }
 
     public String execute(final JobExecutor jobExecutor) {
@@ -211,7 +219,7 @@ public class CrawlJob {
     protected void executeCrawler() {
         final List<String> crawlerCmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonS2Container.getComponent(ServletContext.class);
+        final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
 
@@ -233,7 +241,8 @@ public class CrawlJob {
         buf.append("classes");
         // target/classes
         final String userDir = System.getProperty("user.dir");
-        final File targetClassesDir = new File(userDir, "target" + File.separator + "classes");
+        final File targetDir = new File(userDir, "target");
+        final File targetClassesDir = new File(targetDir, "classes");
         if (targetClassesDir.isDirectory()) {
             buf.append(cpSeparator);
             buf.append(targetClassesDir.getAbsolutePath());
@@ -243,23 +252,32 @@ public class CrawlJob {
         // WEB-INF/cmd/lib
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/cmd/lib")), "WEB-INF/cmd" + File.separator + "lib"
                 + File.separator);
-        final File targetLibDir =
-                new File(userDir, "target" + File.separator + "fess" + File.separator + "WEB-INF" + File.separator + "lib");
+        final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
         }
         crawlerCmdList.add(buf.toString());
 
-        final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
-        if (StringUtil.isNotBlank(transportAddresses)) {
-            crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+        if (useLocaleElasticsearch) {
+            final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
+            if (StringUtil.isNotBlank(transportAddresses)) {
+                crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+            }
+            final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
+            if (StringUtil.isNotBlank(clusterName)) {
+                crawlerCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+            }
         }
 
         crawlerCmdList.add("-Dfess.crawler.process=true");
         if (logFilePath == null) {
-            logFilePath = systemHelper.getLogFilePath();
+            final String value = System.getProperty("fess.log.path");
+            logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
-        crawlerCmdList.add("-Dfess.log.file=" + logFilePath);
+        crawlerCmdList.add("-Dfess.log.path=" + logFilePath);
+        addSystemProperty(crawlerCmdList, "lasta.env", null, null);
+        addSystemProperty(crawlerCmdList, "fess.log.name", "fess-crawler", "-crawler");
+        addSystemProperty(crawlerCmdList, "fess.log.level", null, null);
         if (systemHelper.getCrawlerJavaOptions() != null) {
             for (final String value : systemHelper.getCrawlerJavaOptions()) {
                 crawlerCmdList.add(value);
@@ -347,6 +365,20 @@ public class CrawlJob {
             } finally {
                 deleteTempDir(ownTmpDir);
             }
+        }
+    }
+
+    private void addSystemProperty(final List<String> crawlerCmdList, final String name, final String defaultValue, final String appendValue) {
+        final String value = System.getProperty(name);
+        if (value != null) {
+            final StringBuilder buf = new StringBuilder();
+            buf.append("-D").append(name).append("=").append(value);
+            if (appendValue != null) {
+                buf.append(appendValue);
+            }
+            crawlerCmdList.add(buf.toString());
+        } else if (defaultValue != null) {
+            crawlerCmdList.add("-D" + name + "=" + defaultValue);
         }
     }
 

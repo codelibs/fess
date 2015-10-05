@@ -33,15 +33,17 @@ public class Bs${table.camelizedName} extends AbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+#set ($tableMetaSettings = ${table.indexSettings.settings.index.dbflute.get($table.name)})
 #foreach ($column in $table.columnList)
 #if ($column.isNormalColumn)
 #set ($javaNative = ${column.type})
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
 #if ($column.name != $idColumn)
     /** ${column.name} */
-    protected ${javaNative} ${column.uncapCamelName};
+    protected ${javaNative}${arrayType} ${column.uncapCamelName};
 
 #end
 #end
@@ -59,6 +61,7 @@ public class Bs${table.camelizedName} extends AbstractEntity {
 #elseif ($column.isRefColumn)
 #set ($javaNative = ${column.camelizedName})
 #end
+#if ($tableMetaSettings.properties.get($column.name).array)#set($arrayType = "[]")#else#set($arrayType = "")#end
 #if ($column.name != $idColumn)
 #if ($javaNative == "boolean")
     public ${javaNative} is${column.capCamelName}() {
@@ -66,13 +69,13 @@ public class Bs${table.camelizedName} extends AbstractEntity {
         return ${column.uncapCamelName};
     }
 #else
-    public ${javaNative} get${column.capCamelName}() {
+    public ${javaNative}${arrayType} get${column.capCamelName}() {
         checkSpecifiedProperty("${column.uncapCamelName}");
         return ${column.uncapCamelName};
     }
 #end
 
-    public void set${column.capCamelName}(${javaNative} value) {
+    public void set${column.capCamelName}(${javaNative}${arrayType} value) {
         registerModifiedProperty("${column.uncapCamelName}");
         this.${column.uncapCamelName} = value;
     }

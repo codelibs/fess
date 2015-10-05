@@ -18,7 +18,7 @@ package org.codelibs.fess.helper;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class UserAgentHelper {
     private static final String USER_AGENT = "user-agent";
@@ -26,7 +26,7 @@ public class UserAgentHelper {
     private static final String USER_AGENT_TYPE = "ViewHelper.UserAgent";
 
     public UserAgentType getUserAgentType() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         UserAgentType uaType = (UserAgentType) request.getAttribute(USER_AGENT_TYPE);
         if (uaType == null) {
             final String userAgent = request.getHeader(USER_AGENT);

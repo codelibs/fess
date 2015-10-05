@@ -16,15 +16,15 @@
 
 package org.codelibs.fess.helper;
 
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
-import org.codelibs.fess.service.FailureUrlService;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.RobotMultipleCrawlAccessException;
 import org.codelibs.robot.S2RobotContext;
 import org.codelibs.robot.entity.UrlQueue;
+import org.codelibs.robot.exception.RobotMultipleCrawlAccessException;
 import org.codelibs.robot.helper.impl.LogHelperImpl;
 import org.codelibs.robot.log.LogType;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +80,7 @@ public class RobotLogHelper extends LogHelperImpl {
         final CrawlingConfig crawlingConfig = getCrawlingConfig(robotContext.getSessionId());
         final String url = urlQueue.getUrl();
 
-        final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
+        final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
         failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 

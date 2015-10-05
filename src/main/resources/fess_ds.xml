@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="dataStoreFactory" class="org.codelibs.fess.ds.DataStoreFactory">
+		<postConstruct name="add">
+			<arg>"DatabaseDataStore"</arg>
+			<arg>databaseDataStore</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"CsvDataStore"</arg>
+			<arg>csvDataStore</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"FileListDataStore"</arg>
+			<arg>fileListDataStore</arg>
+		</postConstruct>
+	</component>
+
+	<component name="databaseDataStore" class="org.codelibs.fess.ds.impl.DatabaseDataStoreImpl">
+	</component>
+	<component name="csvDataStore" class="org.codelibs.fess.ds.impl.CsvDataStoreImpl">
+		<!-- 
+		<property name="csvFileSuffixs">new String[] { ".csv", ".tsv" }</property>
+		 -->
+	</component>
+	<component name="fileListDataStore" class="org.codelibs.fess.ds.impl.FileListDataStoreImpl">
+	</component>
+
+	<component name="indexUpdateCallback" class="org.codelibs.fess.ds.impl.IndexUpdateCallbackImpl" instance="prototype">
+		<!-- 
+		<property name="maxDocumentCacheSize">10</property>
+		 -->
+	</component>
+
+</components>

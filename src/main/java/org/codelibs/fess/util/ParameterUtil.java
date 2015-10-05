@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigName;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class ParameterUtil {
     protected static final String XPATH_PREFIX = "field.xpath.";

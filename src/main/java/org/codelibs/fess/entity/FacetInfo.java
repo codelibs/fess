@@ -18,29 +18,26 @@ package org.codelibs.fess.entity;
 
 import java.util.Arrays;
 
-import org.seasar.struts.annotation.IntegerType;
-import org.seasar.struts.annotation.Maxbytelength;
-
 public class FacetInfo {
-    @Maxbytelength(maxbytelength = 255)
+    //@Maxbytelength(maxbytelength = 255)
     public String[] field;
 
-    @Maxbytelength(maxbytelength = 255)
+    //@Maxbytelength(maxbytelength = 255)
     public String[] query;
 
-    @Maxbytelength(maxbytelength = 1000)
+    //@Maxbytelength(maxbytelength = 1000)
     public String prefix;
 
-    @IntegerType
+    //@IntegerType
     public String limit;
 
-    @IntegerType
+    //@IntegerType
     public String minCount;
 
-    @Maxbytelength(maxbytelength = 255)
+    //@Maxbytelength(maxbytelength = 255)
     public String sort;
 
-    @Maxbytelength(maxbytelength = 10)
+    //@Maxbytelength(maxbytelength = 10)
     public String missing;
 
     @Override

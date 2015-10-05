@@ -29,7 +29,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
@@ -37,8 +37,8 @@ import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.URLEncoderUtil;
+import org.lastaflute.di.util.LdiURLUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class FessFunctions {
 
@@ -52,7 +52,7 @@ public class FessFunctions {
 
     public static Boolean labelExists(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             return labelValueMap.get(value) != null;
         }
@@ -61,7 +61,7 @@ public class FessFunctions {
 
     public static String label(final String value) {
         @SuppressWarnings("unchecked")
-        final Map<String, String> labelValueMap = (Map<String, String>) RequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
+        final Map<String, String> labelValueMap = (Map<String, String>) LaRequestUtil.getRequest().getAttribute(Constants.LABEL_VALUE_MAP);
         if (labelValueMap != null) {
             final String name = labelValueMap.get(value);
             if (name != null) {
@@ -177,7 +177,7 @@ public class FessFunctions {
     }
 
     private static String createQuery(final String key, final String prefix) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         String query = (String) request.getAttribute(key);
         if (query == null) {
             final StringBuilder buf = new StringBuilder(100);
@@ -189,9 +189,9 @@ public class FessFunctions {
                     if (values != null) {
                         for (final String value : values) {
                             buf.append('&');
-                            buf.append(URLEncoderUtil.encode(name));
+                            buf.append(LdiURLUtil.encode(name, Constants.UTF_8));
                             buf.append('=');
-                            buf.append(URLEncoderUtil.encode(value));
+                            buf.append(LdiURLUtil.encode(value, Constants.UTF_8));
                         }
                     }
                 }
@@ -203,7 +203,7 @@ public class FessFunctions {
     }
 
     private static String createForm(final String key, final String prefix) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         String query = (String) request.getAttribute(key);
         if (query == null) {
             final StringBuilder buf = new StringBuilder(100);
@@ -215,9 +215,9 @@ public class FessFunctions {
                     if (values != null) {
                         for (final String value : values) {
                             buf.append("<input type=\"hidden\" name=\"");
-                            buf.append(StringEscapeUtils.escapeHtml(name));
+                            buf.append(StringEscapeUtils.escapeHtml4(name));
                             buf.append("\" value=\"");
-                            buf.append(StringEscapeUtils.escapeHtml(value));
+                            buf.append(StringEscapeUtils.escapeHtml4(value));
                             buf.append("\"/>");
                         }
                     }

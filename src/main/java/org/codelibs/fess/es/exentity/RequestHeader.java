@@ -1,7 +1,7 @@
 package org.codelibs.fess.es.exentity;
 
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.es.bsentity.BsRequestHeader;
-import org.codelibs.fess.service.WebConfigService;
 import org.codelibs.fess.util.ComponentUtil;
 
 /**
@@ -18,7 +18,7 @@ public class RequestHeader extends BsRequestHeader {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -26,7 +26,7 @@ public class RequestHeader extends BsRequestHeader {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 

@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -32,7 +33,7 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
 
     @Override
     protected String asEsIndex() {
-        return "search_log";
+        return "fess_log";
     }
 
     @Override
@@ -54,19 +55,19 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
     protected <RESULT extends SearchLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAccessType(toString(source.get("accessType")));
-            result.setClientIp(toString(source.get("clientIp")));
-            result.setHitCount(toLong(source.get("hitCount")));
-            result.setId(toString(source.get("id")));
-            result.setQueryOffset(toInteger(source.get("queryOffset")));
-            result.setQueryPageSize(toInteger(source.get("queryPageSize")));
-            result.setReferer(toString(source.get("referer")));
-            result.setRequestedTime(toLong(source.get("requestedTime")));
-            result.setResponseTime(toInteger(source.get("responseTime")));
-            result.setSearchWord(toString(source.get("searchWord")));
-            result.setUserAgent(toString(source.get("userAgent")));
-            result.setUserInfoId(toString(source.get("userInfoId")));
-            result.setUserSessionId(toString(source.get("userSessionId")));
+            result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
+            result.setClientIp(DfTypeUtil.toString(source.get("clientIp")));
+            result.setHitCount(DfTypeUtil.toLong(source.get("hitCount")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
+            result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
+            result.setReferer(DfTypeUtil.toString(source.get("referer")));
+            result.setRequestedTime(DfTypeUtil.toLong(source.get("requestedTime")));
+            result.setResponseTime(DfTypeUtil.toInteger(source.get("responseTime")));
+            result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
+            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
+            result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
+            result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -230,4 +231,9 @@ public abstract class BsSearchLogBhv extends AbstractBehavior<SearchLog, SearchL
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

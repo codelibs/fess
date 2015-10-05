@@ -31,19 +31,19 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.exentity.DataConfig;
-import org.codelibs.fess.service.FailureUrlService;
-import org.codelibs.robot.RobotCrawlAccessException;
-import org.codelibs.robot.RobotMultipleCrawlAccessException;
-import org.seasar.framework.container.SingletonS2Container;
+import org.codelibs.robot.exception.RobotCrawlAccessException;
+import org.codelibs.robot.exception.RobotMultipleCrawlAccessException;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.orangesignal.csv.CsvConfig;
-import jp.sf.orangesignal.csv.CsvReader;
+import com.orangesignal.csv.CsvConfig;
+import com.orangesignal.csv.CsvReader;
 
 public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     private static final Logger logger = LoggerFactory.getLogger(CsvDataStoreImpl.class);
@@ -254,13 +254,13 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                         url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
 
                     }
-                    final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
+                    final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
                 } catch (final Exception e) {
                     final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
-                    final FailureUrlService failureUrlService = SingletonS2Container.getComponent(FailureUrlService.class);
+                    final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);

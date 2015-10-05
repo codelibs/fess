@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,25 +55,25 @@ public abstract class BsFileConfigBhv extends AbstractBehavior<FileConfig, FileC
     protected <RESULT extends FileConfig> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable(toBoolean(source.get("available")));
-            result.setBoost(toFloat(source.get("boost")));
-            result.setConfigParameter(toString(source.get("configParameter")));
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setDepth(toInteger(source.get("depth")));
-            result.setExcludedDocPaths(toString(source.get("excludedDocPaths")));
-            result.setExcludedPaths(toString(source.get("excludedPaths")));
-            result.setId(toString(source.get("id")));
-            result.setIncludedDocPaths(toString(source.get("includedDocPaths")));
-            result.setIncludedPaths(toString(source.get("includedPaths")));
-            result.setIntervalTime(toInteger(source.get("intervalTime")));
-            result.setMaxAccessCount(toLong(source.get("maxAccessCount")));
-            result.setName(toString(source.get("name")));
-            result.setNumOfThread(toInteger(source.get("numOfThread")));
-            result.setPaths(toString(source.get("paths")));
-            result.setSortOrder(toInteger(source.get("sortOrder")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setAvailable(DfTypeUtil.toBoolean(source.get("available")));
+            result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
+            result.setConfigParameter(DfTypeUtil.toString(source.get("configParameter")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setDepth(DfTypeUtil.toInteger(source.get("depth")));
+            result.setExcludedDocPaths(DfTypeUtil.toString(source.get("excludedDocPaths")));
+            result.setExcludedPaths(DfTypeUtil.toString(source.get("excludedPaths")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setIncludedDocPaths(DfTypeUtil.toString(source.get("includedDocPaths")));
+            result.setIncludedPaths(DfTypeUtil.toString(source.get("includedPaths")));
+            result.setIntervalTime(DfTypeUtil.toInteger(source.get("intervalTime")));
+            result.setMaxAccessCount(DfTypeUtil.toLong(source.get("maxAccessCount")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));
+            result.setPaths(DfTypeUtil.toString(source.get("paths")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -236,4 +237,9 @@ public abstract class BsFileConfigBhv extends AbstractBehavior<FileConfig, FileC
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

@@ -16,21 +16,6 @@
 
 package org.codelibs.fess.helper;
 
-/*
- * Copyright 2009-2014 the CodeLibs Project and the Others.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,23 +27,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.InvalidQueryException;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchQuery;
 import org.codelibs.fess.entity.SearchQuery.SortField;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.util.QueryUtil;
-import org.codelibs.fess.util.SearchParamMap;
-import org.seasar.framework.container.annotation.tiger.Binding;
-import org.seasar.framework.container.annotation.tiger.BindingType;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.struts.util.RequestUtil;
+import org.lastaflute.web.ruts.message.ActionMessages;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
 
@@ -84,7 +67,6 @@ public class QueryHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Binding(bindingType = BindingType.MAY)
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
@@ -94,7 +76,6 @@ public class QueryHelper implements Serializable {
     @Resource
     protected FieldHelper fieldHelper;
 
-    @Binding(bindingType = BindingType.MAY)
     @Resource
     protected KeyMatchHelper keyMatchHelper;
 
@@ -108,7 +89,7 @@ public class QueryHelper implements Serializable {
 
     protected String[] responseDocValuesFields;
 
-    protected String[] highlightingFields;
+    protected String[] highlightedFields;
 
     protected String[] searchFields;
 
@@ -122,7 +103,7 @@ public class QueryHelper implements Serializable {
 
     protected String[] supportedAnalysisFields;
 
-    protected int highlightSnippetSize = 5;
+    protected int highlightFragmentSize = 100;
 
     protected boolean useBigram = true;
 
@@ -140,7 +121,7 @@ public class QueryHelper implements Serializable {
 
     protected List<SortField> defaultSortFieldList = new ArrayList<SortField>();
 
-    protected String highlightingPrefix = "hl_";
+    protected String highlightPrefix = "hl_";
 
     protected String minimumShouldMatch = "100%";
 
@@ -156,7 +137,7 @@ public class QueryHelper implements Serializable {
 
     protected Map<String, String> fieldBoostMap = new HashMap<String, String>();
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (responseFields == null) {
             responseFields =
@@ -177,8 +158,8 @@ public class QueryHelper implements Serializable {
         if (responseDocValuesFields == null) {
             responseDocValuesFields = new String[] { fieldHelper.clickCountField, fieldHelper.favoriteCountField };
         }
-        if (highlightingFields == null) {
-            highlightingFields = new String[] { fieldHelper.contentField };
+        if (highlightedFields == null) {
+            highlightedFields = new String[] { fieldHelper.contentField };
         }
         if (searchFields == null) {
             searchFields =
@@ -297,13 +278,13 @@ public class QueryHelper implements Serializable {
         final SearchQuery searchQuery = new SearchQuery();
 
         final String q = buildQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
-        String solrQuery;
+        String queryString;
         if (q == null || "()".equals(q)) {
-            solrQuery = StringUtil.EMPTY;
+            queryString = StringUtil.EMPTY;
         } else {
-            solrQuery = unbracketQuery(q);
+            queryString = unbracketQuery(q);
         }
-        searchQuery.setQuery(solrQuery);
+        searchQuery.setQuery(queryString);
 
         searchQuery.setMinimumShouldMatch(minimumShouldMatch);
         searchQuery.setDefType(defType);
@@ -312,7 +293,7 @@ public class QueryHelper implements Serializable {
             searchQuery.addSortField(entry.getKey(), entry.getValue());
         }
         // set queries to request for HighLight
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         if (request != null) {
             request.setAttribute(Constants.HIGHLIGHT_QUERIES, highLightQueryList.toArray(new String[highLightQueryList.size()]));
             request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
@@ -628,7 +609,8 @@ public class QueryHelper implements Serializable {
             final String value1 = split[0].trim();
             final String value2 = split[1].trim();
             if ("*".equals(value1) && "*".equals(value2)) {
-                throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
+                        "Invalid range: " + value);
             }
             buf.append(prefix);
             buf.append(QueryUtil.escapeRangeValue(value1));
@@ -636,7 +618,8 @@ public class QueryHelper implements Serializable {
             buf.append(QueryUtil.escapeRangeValue(value2));
             buf.append(suffix);
         } else {
-            throw new InvalidQueryException("errors.invalid_query_str_range", "Invalid range: " + value);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid range: " + value);
         }
     }
 
@@ -734,13 +717,17 @@ public class QueryHelper implements Serializable {
             buf.append('\\');
         }
         if (quoted) {
-            throw new InvalidQueryException("errors.invalid_query_quoted", "Invalid quoted: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryQuoted(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid quoted: " + query);
         } else if (curlyBracket > 0) {
-            throw new InvalidQueryException("errors.invalid_query_curly_bracket", "Invalid curly bracket: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCurlyBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid curly bracket: " + query);
         } else if (squareBracket > 0) {
-            throw new InvalidQueryException("errors.invalid_query_square_bracket", "Invalid square bracket: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySquareBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid square bracket: " + query);
         } else if (parenthesis > 0) {
-            throw new InvalidQueryException("errors.invalid_query_parenthesis", "Invalid parenthesis: " + query);
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParenthesis(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid parenthesis: " + query);
         }
         if (buf.length() > 0) {
             addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);
@@ -786,13 +773,13 @@ public class QueryHelper implements Serializable {
 
     public String buildFacetQuery(final String query) {
         final String q = buildFacetQueryInternal(query);
-        String solrQuery;
+        String queryString;
         if (q == null || "()".equals(q)) {
-            solrQuery = StringUtil.EMPTY;
+            queryString = StringUtil.EMPTY;
         } else {
-            solrQuery = unbracketQuery(q);
+            queryString = unbracketQuery(q);
         }
-        return solrQuery;
+        return queryString;
     }
 
     protected String buildFacetQueryInternal(final String query) {
@@ -935,7 +922,7 @@ public class QueryHelper implements Serializable {
         if (defaultQueryLanguage != null) {
             return defaultQueryLanguage;
         }
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         if (request == null) {
             return null;
         }
@@ -977,7 +964,7 @@ public class QueryHelper implements Serializable {
         return "count".equals(sort) || "index".equals(sort);
     }
 
-    public String buildOptionQuery(final SearchParamMap optionMap) {
+    public String buildOptionQuery(final Map<String, String[]> optionMap) {
         if (optionMap == null) {
             return StringUtil.EMPTY;
         }
@@ -1125,17 +1112,17 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the highlightingFields
+     * @return the highlightedFields
      */
-    public String[] getHighlightingFields() {
-        return highlightingFields;
+    public String[] getHighlightedFields() {
+        return highlightedFields;
     }
 
     /**
-     * @param highlightingFields the highlightingFields to set
+     * @param highlightedFields the highlightedFields to set
      */
-    public void setHighlightingFields(final String[] highlightingFields) {
-        this.highlightingFields = highlightingFields;
+    public void setHighlightedFields(final String[] highlightedFields) {
+        this.highlightedFields = highlightedFields;
     }
 
     /**
@@ -1199,17 +1186,17 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the highlightSnippetSize
+     * @return the highlightFragmentSize
      */
-    public int getHighlightSnippetSize() {
-        return highlightSnippetSize;
+    public int getHighlightFragmentSize() {
+        return highlightFragmentSize;
     }
 
     /**
-     * @param highlightSnippetSize the highlightSnippetSize to set
+     * @param highlightFragmentSize the highlightFragmentSize to set
      */
-    public void setHighlightSnippetSize(final int highlightSnippetSize) {
-        this.highlightSnippetSize = highlightSnippetSize;
+    public void setHighlightFragmentSize(final int highlightFragmentSize) {
+        this.highlightFragmentSize = highlightFragmentSize;
     }
 
     /**
@@ -1303,12 +1290,12 @@ public class QueryHelper implements Serializable {
         return defaultSortFieldList.toArray(new SortField[defaultSortFieldList.size()]);
     }
 
-    public void setHighlightingPrefix(final String highlightingPrefix) {
-        this.highlightingPrefix = highlightingPrefix;
+    public void setHighlightPrefix(final String highlightPrefix) {
+        this.highlightPrefix = highlightPrefix;
     }
 
-    public String getHighlightingPrefix() {
-        return highlightingPrefix;
+    public String getHighlightPrefix() {
+        return highlightPrefix;
     }
 
     public String[] getSupportedMltFields() {
@@ -1396,7 +1383,7 @@ public class QueryHelper implements Serializable {
             return additionalQueryParamMap;
         }
 
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         final Map<String, String[]> queryParamMap = new HashMap<String, String[]>();
         for (final Map.Entry<String, String[]> entry : additionalQueryParamMap.entrySet()) {
             final String[] values = entry.getValue();
@@ -1434,7 +1421,7 @@ public class QueryHelper implements Serializable {
     }
 
     protected String getDefaultOperator() {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         if (request != null) {
             final String defaultOperator = (String) request.getAttribute(Constants.DEFAULT_OPERATOR);
             if (AND.equalsIgnoreCase(defaultOperator)) {

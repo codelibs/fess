@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <bean:message key="labels.wizard_title_configuration" /></title>
+<title>Fess | <la:message key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,21 +16,21 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<bean:message key="labels.wizard_start_crawling_title" />
+					<la:message key="labels.wizard_start_crawling_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><s:link href="/admin/wizard/">
-							<bean:message key="labels.wizard_start_title" />
-						</s:link></li>
-					<li><bean:message key="labels.wizard_crawling_config_title" /></li>
-					<li class="active"><bean:message key="labels.wizard_start_crawling_title" /></li>
+					<li><la:link href="/admin/wizard/">
+							<la:message key="labels.wizard_start_title" />
+						</la:link></li>
+					<li><la:message key="labels.wizard_crawling_config_title" /></li>
+					<li class="active"><la:message key="labels.wizard_start_crawling_title" /></li>
 				</ol>
 			</section>
 
 			<!-- Main content -->
 			<section class="content">
 
-				<s:form>
+				<la:form>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box">
@@ -40,28 +40,28 @@
 								<div class="box-body">
 									<%-- Message: BEGIN --%>
 									<div>
-										<html:messages id="msg" message="true">
+										<la:info id="msg" message="true">
 											<div class="alert-message info">
-												<bean:write name="msg" ignore="true" />
+												${msg}
 											</div>
-										</html:messages>
-										<html:errors />
+										</la:info>
+										<la:errors />
 									</div>
 									<%-- Message: END --%>
 
 									<p class="span8">
-										<bean:message key="labels.wizard_start_crawling_desc" />
+										<la:message key="labels.wizard_start_crawling_desc" />
 									</p>
 								</div>
 								<div class="box-footer">
 									<input type="submit" class="btn btn-primary" name="startCrawling"
-										value="<bean:message key="labels.wizard_button_start_crawling"/>"
-									/> <input type="submit" class="btn" name="index" value="<bean:message key="labels.wizard_button_finish"/>" />
+										value="<la:message key="labels.wizard_button_start_crawling"/>"
+									/> <input type="submit" class="btn" name="index" value="<la:message key="labels.wizard_button_finish"/>" />
 								</div>
 							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 
 			</section>
 		</div>

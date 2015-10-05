@@ -1,0 +1,90 @@
+{
+  ".fess_user" : {
+    "mappings" : {
+      "role" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "user" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "groups" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "password" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roles" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "group" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "refresh_interval" : "1s",
+        "dbflute" : {
+          "user" : {
+            "properties" : {
+              "groups" : {
+                "array" : "true"
+              },
+              "roles" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
+        "number_of_replicas" : "0"
+      }
+    }
+  }
+}

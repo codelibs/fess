@@ -32,7 +32,7 @@ public class SearchLog extends BsSearchLog {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -40,11 +40,11 @@ public class SearchLog extends BsSearchLog {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 
-    public void setClickLogList(List<ClickLog> clickLogList) {
+    public void setClickLogList(final List<ClickLog> clickLogList) {
         this.clickLogList = clickLogList;
 
     }
@@ -73,10 +73,6 @@ public class SearchLog extends BsSearchLog {
         addSearchFieldLogValue(Constants.SEARCH_FIELD_LOG_SEARCH_QUERY, query);
     }
 
-    public void setSolrQuery(final String solrQuery) {
-        addSearchFieldLogValue(Constants.SEARCH_FIELD_LOG_SOLR_QUERY, solrQuery);
-    }
-
     public OptionalEntity<UserInfo> getUserInfo() {
         if (userInfo == null) {
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
@@ -87,7 +83,7 @@ public class SearchLog extends BsSearchLog {
         return userInfo;
     }
 
-    public void setUserInfo(OptionalEntity<UserInfo> userInfo) {
+    public void setUserInfo(final OptionalEntity<UserInfo> userInfo) {
         this.userInfo = userInfo;
     }
 

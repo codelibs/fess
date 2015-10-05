@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,20 +55,20 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
     protected <RESULT extends ScheduledJob> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setAvailable(toBoolean(source.get("available")));
-            result.setCrawler(toBoolean(source.get("crawler")));
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setCronExpression(toString(source.get("cronExpression")));
-            result.setId(toString(source.get("id")));
-            result.setJobLogging(toBoolean(source.get("jobLogging")));
-            result.setName(toString(source.get("name")));
-            result.setScriptData(toString(source.get("scriptData")));
-            result.setScriptType(toString(source.get("scriptType")));
-            result.setSortOrder(toInteger(source.get("sortOrder")));
-            result.setTarget(toString(source.get("target")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setAvailable(DfTypeUtil.toBoolean(source.get("available")));
+            result.setCrawler(DfTypeUtil.toBoolean(source.get("crawler")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setCronExpression(DfTypeUtil.toString(source.get("cronExpression")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setJobLogging(DfTypeUtil.toBoolean(source.get("jobLogging")));
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setScriptData(DfTypeUtil.toString(source.get("scriptData")));
+            result.setScriptType(DfTypeUtil.toString(source.get("scriptType")));
+            result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setTarget(DfTypeUtil.toString(source.get("target")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -231,4 +232,9 @@ public abstract class BsScheduledJobBhv extends AbstractBehavior<ScheduledJob, S
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

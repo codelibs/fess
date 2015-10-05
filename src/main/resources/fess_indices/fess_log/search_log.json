@@ -1,0 +1,62 @@
+{
+  "search_log": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "_id": {
+      "path": "id"
+    },
+    "properties": {
+      "id": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "searchWord": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "requestedTime": {
+        "type": "long"
+      },
+      "responseTime": {
+        "type": "integer"
+      },
+      "hitCount": {
+        "type": "long"
+      },
+      "queryOffset": {
+        "type": "integer"
+      },
+      "queryPageSize": {
+        "type": "integer"
+      },
+      "userAgent": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "referer": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "clientIp": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "userSessionId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "accessType": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "userInfoId": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

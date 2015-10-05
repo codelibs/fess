@@ -9,20 +9,20 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.RequestHeaderService;
+import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.es.bsentity.BsWebConfig;
 import org.codelibs.fess.es.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.es.exbhv.WebConfigToRoleBhv;
-import org.codelibs.fess.service.RequestHeaderService;
-import org.codelibs.fess.service.WebAuthenticationService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.client.http.Authentication;
 import org.codelibs.robot.client.http.HcHttpClient;
 import org.dbflute.cbean.result.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * @author FreeGen
@@ -233,8 +233,8 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final WebAuthenticationService webAuthenticationService = SingletonS2Container.getComponent(WebAuthenticationService.class);
-        final RequestHeaderService requestHeaderService = SingletonS2Container.getComponent(RequestHeaderService.class);
+        final WebAuthenticationService webAuthenticationService = SingletonLaContainer.getComponent(WebAuthenticationService.class);
+        final RequestHeaderService requestHeaderService = SingletonLaContainer.getComponent(RequestHeaderService.class);
 
         // HttpClient Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -286,7 +286,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -294,7 +294,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 }

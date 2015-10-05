@@ -23,12 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.codelibs.core.lang.StringUtil;
-import org.seasar.extension.timer.TimeoutManager;
-import org.seasar.extension.timer.TimeoutTarget;
-import org.seasar.extension.timer.TimeoutTask;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.lastaflute.di.helper.timer.TimeoutManager;
+import org.lastaflute.di.helper.timer.TimeoutTarget;
+import org.lastaflute.di.helper.timer.TimeoutTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +48,14 @@ public class DictionaryManager {
 
     protected List<DictionaryLocator> locatorList = new ArrayList<DictionaryLocator>();
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         // start
         final WatcherTarget watcherTarget = new WatcherTarget();
         watcherTargetTask = TimeoutManager.getInstance().addTimeoutTarget(watcherTarget, watcherTimeout, true);
     }
 
-    @DestroyMethod
+    @PreDestroy
     public void destroy() {
         if (watcherTargetTask != null && !watcherTargetTask.isStopped()) {
             watcherTargetTask.stop();

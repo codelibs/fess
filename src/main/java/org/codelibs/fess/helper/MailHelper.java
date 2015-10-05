@@ -29,7 +29,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class MailHelper implements Serializable {
 

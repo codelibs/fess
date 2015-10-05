@@ -572,6 +572,28 @@ public abstract class AbstractConditionBean implements ConditionBean {
         // do nothing
     }
 
+    @Override
+    public boolean hasSpecifiedLocalColumn() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void enableUndefinedClassificationSelect() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void disableUndefinedClassificationSelect() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean isUndefinedClassificationSelectAllowed() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     public SearchRequestParams request() {
         return _searchRequestParams;
     }

@@ -9,20 +9,20 @@ import java.util.regex.Pattern;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.es.bsentity.BsFileConfig;
 import org.codelibs.fess.es.exbhv.FileConfigToLabelBhv;
 import org.codelibs.fess.es.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.exbhv.RoleTypeBhv;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.service.FileAuthenticationService;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.client.smb.SmbAuthentication;
 import org.codelibs.robot.client.smb.SmbClient;
 import org.dbflute.cbean.result.ListResultBean;
-import org.seasar.framework.container.SingletonS2Container;
+import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * @author FreeGen
@@ -229,7 +229,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     @Override
     public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
-        final FileAuthenticationService fileAuthenticationService = SingletonS2Container.getComponent(FileAuthenticationService.class);
+        final FileAuthenticationService fileAuthenticationService = SingletonLaContainer.getComponent(FileAuthenticationService.class);
 
         //  Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -279,7 +279,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 
@@ -287,7 +287,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         return asDocMeta().version();
     }
 
-    public void setVersionNo(Long version) {
+    public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
 }

@@ -16,6 +16,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -54,16 +55,16 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
     protected <RESULT extends SuggestElevateWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setBoost(toFloat(source.get("boost")));
-            result.setCreatedBy(toString(source.get("createdBy")));
-            result.setCreatedTime(toLong(source.get("createdTime")));
-            result.setId(toString(source.get("id")));
-            result.setReading(toString(source.get("reading")));
-            result.setSuggestWord(toString(source.get("suggestWord")));
-            result.setTargetLabel(toString(source.get("targetLabel")));
-            result.setTargetRole(toString(source.get("targetRole")));
-            result.setUpdatedBy(toString(source.get("updatedBy")));
-            result.setUpdatedTime(toLong(source.get("updatedTime")));
+            result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
+            result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
+            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setId(DfTypeUtil.toString(source.get("id")));
+            result.setReading(DfTypeUtil.toString(source.get("reading")));
+            result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
+            result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));
+            result.setTargetRole(DfTypeUtil.toString(source.get("targetRole")));
+            result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
+            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
@@ -228,4 +229,9 @@ public abstract class BsSuggestElevateWordBhv extends AbstractBehavior<SuggestEl
     }
 
     // TODO create, modify, remove
+
+    @Override
+    protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
+        return true;
+    }
 }

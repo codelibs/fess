@@ -2,8 +2,8 @@ package org.codelibs.fess.es.cbean.cq.bs;
 
 import java.util.Collection;
 
-import org.codelibs.fess.es.cbean.cq.DataConfigToLabelCQ;
 import org.codelibs.fess.es.cbean.cf.DataConfigToLabelCF;
+import org.codelibs.fess.es.cbean.cq.DataConfigToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;

@@ -24,19 +24,20 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
+import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.util.LruHashMap;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.struts.util.RequestUtil;
+import org.codelibs.fess.util.DocumentUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public class ScreenShotManager {
 
     private Thread screenshotGeneratorThread;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (baseDir == null) {
             final String path = application.getRealPath(DEFAULT_SCREENSHOT_DIR);
@@ -102,7 +103,7 @@ public class ScreenShotManager {
         screenshotGeneratorThread.start();
     }
 
-    @DestroyMethod
+    @PreDestroy
     public void destroy() {
         generating = false;
         screenshotGeneratorThread.interrupt();
@@ -112,7 +113,7 @@ public class ScreenShotManager {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String url = (String) docMap.get(fieldHelper.urlField);
+                final String url = DocumentUtil.getValue(docMap, fieldHelper.urlField, String.class);
                 final String path = getImageFilename(docMap);
                 if (!screenShotTaskQueue.offer(new ScreenShotTask(url, new File(baseDir, path), generator))) {
                     logger.warn("Failed to offer a screenshot task: " + url + " -> " + path);
@@ -125,7 +126,7 @@ public class ScreenShotManager {
     protected String getImageFilename(final Map<String, Object> docMap) {
         final StringBuilder buf = new StringBuilder(50);
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final String docid = (String) docMap.get(fieldHelper.docIdField);
+        final String docid = DocumentUtil.getValue(docMap, fieldHelper.docIdField, String.class);
         for (int i = 0; i < docid.length(); i++) {
             if (i > 0 && i % splitSize == 0) {
                 buf.append('/');
@@ -146,12 +147,12 @@ public class ScreenShotManager {
                 dataMap.put(docid, screenShotPath);
             }
         }
-        final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(RequestUtil.getRequest().getSession());
+        final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(LaRequestUtil.getRequest().getSession());
         screenShotPathCache.put(queryId, dataMap);
     }
 
     public File getScreenShotFile(final String queryId, final String docId) {
-        final HttpSession session = RequestUtil.getRequest().getSession(false);
+        final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
             final Map<String, Map<String, String>> screenShotPathCache = getScreenShotPathCache(session);
             final Map<String, String> dataMap = screenShotPathCache.get(queryId);

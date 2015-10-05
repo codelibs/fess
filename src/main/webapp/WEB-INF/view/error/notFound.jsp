@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="content-style-type" content="text/css" />
 <meta http-equiv="content-script-type" content="text/javascript" />
-<title><bean:message key="labels.system_error_title" /></title>
+<title><la:message key="labels.system_error_title" /></title>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet"
@@ -18,10 +18,10 @@
 			<div class="center row">
 				<div class="span10">
 					<h2>
-						<bean:message key="labels.page_not_found_title" />
+						<la:message key="labels.page_not_found_title" />
 					</h2>
 					<div class="message">
-						<bean:message key="labels.check_url" />
+						<la:message key="labels.check_url" />
 						<br /> ${f:h(url)}
 					</div>
 				</div>

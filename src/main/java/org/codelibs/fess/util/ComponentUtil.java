@@ -19,12 +19,12 @@ package org.codelibs.fess.util;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
-import org.codelibs.fess.client.FessEsClient;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.ds.DataStoreFactory;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.DatabaseHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -42,17 +42,23 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.ViewHelper;
+import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.solr.IndexUpdater;
+import org.codelibs.robot.entity.EsAccessResult;
 import org.codelibs.robot.extractor.ExtractorFactory;
-import org.seasar.framework.container.SingletonS2Container;
+import org.codelibs.robot.service.DataService;
+import org.lastaflute.core.message.MessageManager;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public final class ComponentUtil {
+    private static final String DATA_SERVICE = "dataService";
+
+    private static final String MESSAGE_MANAGER = "messageManager";
+
     private static final String USER_AGENT_NAME = "userAgentName";
 
     private static final String INDEX_UPDATER = "indexUpdater";
-
-    private static final String DATABASE_HELPER = "databaseHelper";
 
     private static final String MAIL_HELPER = "mailHelper";
 
@@ -114,135 +120,147 @@ public final class ComponentUtil {
     }
 
     public static CachedCipher getCipher(final String cipherName) {
-        return SingletonS2Container.getComponent(cipherName);
+        return SingletonLaContainer.getComponent(cipherName);
     }
 
     public static QueryResponseList getQueryResponseList() {
-        return SingletonS2Container.getComponent(QUERY_RESPONSE_LIST);
+        return SingletonLaContainer.getComponent(QUERY_RESPONSE_LIST);
     }
 
     public static DynamicProperties getSolrGroupProperties(final String groupName) {
-        return SingletonS2Container.getComponent(groupName + PROPERTIES_SUFFIX);
+        return SingletonLaContainer.getComponent(groupName + PROPERTIES_SUFFIX);
     }
 
     public static DynamicProperties getCrawlerProperties() {
-        return SingletonS2Container.getComponent(CRAWLER_PROPERTIES);
+        return SingletonLaContainer.getComponent(CRAWLER_PROPERTIES);
     }
 
     public static SystemHelper getSystemHelper() {
-        return SingletonS2Container.getComponent(SYSTEM_HELPER);
+        return SingletonLaContainer.getComponent(SYSTEM_HELPER);
     }
 
     public static ViewHelper getViewHelper() {
-        return SingletonS2Container.getComponent(VIEW_HELPER);
+        return SingletonLaContainer.getComponent(VIEW_HELPER);
     }
 
     public static SambaHelper getSambaHelper() {
-        return SingletonS2Container.getComponent(SAMBA_HELPER);
+        return SingletonLaContainer.getComponent(SAMBA_HELPER);
     }
 
     public static QueryHelper getQueryHelper() {
-        return SingletonS2Container.getComponent(QUERY_HELPER);
+        return SingletonLaContainer.getComponent(QUERY_HELPER);
     }
 
     public static LabelTypeHelper getLabelTypeHelper() {
-        return SingletonS2Container.getComponent(LABEL_TYPE_HELPER);
+        return SingletonLaContainer.getComponent(LABEL_TYPE_HELPER);
     }
 
     public static SearchLogHelper getSearchLogHelper() {
-        return SingletonS2Container.getComponent(SEARCH_LOG_HELPER);
+        return SingletonLaContainer.getComponent(SEARCH_LOG_HELPER);
     }
 
     public static CrawlingConfigHelper getCrawlingConfigHelper() {
-        return SingletonS2Container.getComponent(CRAWLING_CONFIG_HELPER);
+        return SingletonLaContainer.getComponent(CRAWLING_CONFIG_HELPER);
     }
 
     public static CrawlingSessionHelper getCrawlingSessionHelper() {
-        return SingletonS2Container.getComponent(CRAWLING_SESSION_HELPER);
+        return SingletonLaContainer.getComponent(CRAWLING_SESSION_HELPER);
     }
 
     public static HotSearchWordHelper getHotSearchWordHelper() {
-        return SingletonS2Container.getComponent(HOT_SEARCH_WORD_HELPER);
+        return SingletonLaContainer.getComponent(HOT_SEARCH_WORD_HELPER);
     }
 
     public static PathMappingHelper getPathMappingHelper() {
-        return SingletonS2Container.getComponent(PATH_MAPPING_HELPER);
+        return SingletonLaContainer.getComponent(PATH_MAPPING_HELPER);
     }
 
     public static OverlappingHostHelper getOverlappingHostHelper() {
-        return SingletonS2Container.getComponent(OVERLAPPING_HOST_HELPER);
+        return SingletonLaContainer.getComponent(OVERLAPPING_HOST_HELPER);
     }
 
     public static JobHelper getJobHelper() {
-        return SingletonS2Container.getComponent(JOB_HELPER);
+        return SingletonLaContainer.getComponent(JOB_HELPER);
     }
 
     public static WebApiManagerFactory getWebApiManagerFactory() {
-        return SingletonS2Container.getComponent(WEB_API_MANAGER_FACTORY);
+        return SingletonLaContainer.getComponent(WEB_API_MANAGER_FACTORY);
     }
 
     public static UserAgentHelper getUserAgentHelper() {
-        return SingletonS2Container.getComponent(USER_AGENT_HELPER);
+        return SingletonLaContainer.getComponent(USER_AGENT_HELPER);
     }
 
     public static DataStoreFactory getDataStoreFactory() {
-        return SingletonS2Container.getComponent(DATA_STORE_FACTORY);
+        return SingletonLaContainer.getComponent(DATA_STORE_FACTORY);
     }
 
     public static IntervalControlHelper getIntervalControlHelper() {
-        return SingletonS2Container.getComponent(INTERVAL_CONTROL_HELPER);
+        return SingletonLaContainer.getComponent(INTERVAL_CONTROL_HELPER);
     }
 
     public static ExtractorFactory getExtractorFactory() {
-        return SingletonS2Container.getComponent(EXTRACTOR_FACTORY);
+        return SingletonLaContainer.getComponent(EXTRACTOR_FACTORY);
     }
 
     public static JobExecutor getJobExecutor(final String name) {
-        return SingletonS2Container.getComponent(name + JOB_EXECUTOR_SUFFIX);
+        return SingletonLaContainer.getComponent(name + JOB_EXECUTOR_SUFFIX);
     }
 
     public static MailHelper getMailHelper() {
-        return SingletonS2Container.getComponent(MAIL_HELPER);
+        return SingletonLaContainer.getComponent(MAIL_HELPER);
     }
 
     public static FileTypeHelper getFileTypeHelper() {
-        return SingletonS2Container.getComponent(FILE_TYPE_HELPER);
-    }
-
-    public static DatabaseHelper getDatabaseHelper() {
-        return SingletonS2Container.getComponent(DATABASE_HELPER);
+        return SingletonLaContainer.getComponent(FILE_TYPE_HELPER);
     }
 
     public static AdRoleHelper getAdRoleHelper() {
-        return SingletonS2Container.getComponent(AD_ROLE_HELPER);
+        return SingletonLaContainer.getComponent(AD_ROLE_HELPER);
     }
 
     public static IndexUpdater getIndexUpdater() {
-        return SingletonS2Container.getComponent(INDEX_UPDATER);
+        return SingletonLaContainer.getComponent(INDEX_UPDATER);
     }
 
     public static String getUserAgentName() {
-        return SingletonS2Container.getComponent(USER_AGENT_NAME);
+        return SingletonLaContainer.getComponent(USER_AGENT_NAME);
     }
 
     public static KeyMatchHelper getKeyMatchHelper() {
-        return SingletonS2Container.getComponent(KEY_MATCH_HELPER);
+        return SingletonLaContainer.getComponent(KEY_MATCH_HELPER);
     }
 
     public static IndexingHelper getIndexingHelper() {
-        return SingletonS2Container.getComponent(INDEXING_HELPER);
+        return SingletonLaContainer.getComponent(INDEXING_HELPER);
     }
 
     public static FieldHelper getFieldHelper() {
-        return SingletonS2Container.getComponent(FIELD_HELPER);
+        return SingletonLaContainer.getComponent(FIELD_HELPER);
     }
 
     public static FessEsClient getElasticsearchClient() {
-        return SingletonS2Container.getComponent(ELASTICSEARCH_CLIENT);
+        return SingletonLaContainer.getComponent(ELASTICSEARCH_CLIENT);
     }
 
-    public static <T> T getComponent(Class<T> clazz) {
-        return SingletonS2Container.getComponent(clazz);
+    public static MessageManager getMessageManager() {
+        return SingletonLaContainer.getComponent(MESSAGE_MANAGER);
+    }
+
+    public static DataService<EsAccessResult> getDataService() {
+        return SingletonLaContainer.getComponent(DATA_SERVICE);
+    }
+
+    public static FessLoginAssist getLoginAssist() {
+        return getComponent(FessLoginAssist.class);
+    }
+
+    public static <T> T getComponent(final Class<T> clazz) {
+        return SingletonLaContainer.getComponent(clazz);
+    }
+
+    public static boolean hasQueryHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
 
 }

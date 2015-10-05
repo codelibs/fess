@@ -16,7 +16,10 @@
 
 package org.codelibs.fess.helper;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -31,26 +34,39 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.app.service.DataConfigService;
+import org.codelibs.fess.app.service.FileConfigService;
+import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.entity.FacetQueryView;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.es.exentity.CrawlingConfig.ConfigType;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.codelibs.robot.builder.RequestDataBuilder;
+import org.codelibs.robot.client.S2RobotClient;
+import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.util.CharUtil;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
-import org.seasar.framework.util.URLUtil;
-import org.seasar.struts.taglib.S2Functions;
-import org.seasar.struts.util.MessageResourcesUtil;
-import org.seasar.struts.util.RequestUtil;
-import org.seasar.struts.util.ServletContextUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.taglib.function.LaFunctions;
+import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
+import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,11 +103,11 @@ public class ViewHelper implements Serializable {
 
     public String[] highlightingFields = new String[] { "hl_content", "digest" };
 
-    public boolean useSolrHighlight = false;
+    public boolean useHighlight = false;
 
-    public String solrHighlightTagPre = "<em>";
+    public String originalHighlightTagPre = "<em>";
 
-    public String solrHighlightTagPost = "</em>";
+    public String originalHighlightTagPost = "</em>";
 
     public String highlightTagPre = "<em>";
 
@@ -109,15 +125,15 @@ public class ViewHelper implements Serializable {
 
     public String cacheTemplateName = "cache";
 
-    private String escapedSolrHighlightPre = null;
+    private String escapedHighlightPre = null;
 
-    private String escapedSolrHighlightPost = null;
+    private String escapedHighlightPost = null;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
-        if (useSolrHighlight) {
-            escapedSolrHighlightPre = S2Functions.h(solrHighlightTagPre);
-            escapedSolrHighlightPost = S2Functions.h(solrHighlightTagPost);
+        if (useHighlight) {
+            escapedHighlightPre = LaFunctions.h(originalHighlightTagPre);
+            escapedHighlightPost = LaFunctions.h(originalHighlightTagPost);
         }
     }
 
@@ -142,17 +158,17 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentDescription(final Map<String, Object> document) {
-        final HttpServletRequest request = RequestUtil.getRequest();
+        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
         final String[] queries = request == null ? StringUtil.EMPTY_STRINGS : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         final int size = descriptionLength;
 
         for (final String field : highlightingFields) {
             final String text = getString(document, field);
             if (StringUtil.isNotBlank(text)) {
-                if (useSolrHighlight) {
+                if (useHighlight) {
                     return escapeHighlight(text);
                 } else {
-                    return highlight(S2Functions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
+                    return highlight(LaFunctions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
                 }
             }
         }
@@ -161,12 +177,12 @@ public class ViewHelper implements Serializable {
     }
 
     protected String escapeHighlight(final String text) {
-        return S2Functions.h(text).replaceAll(escapedSolrHighlightPre, solrHighlightTagPre)
-                .replaceAll(escapedSolrHighlightPost, solrHighlightTagPost);
+        return LaFunctions.h(text).replaceAll(escapedHighlightPre, originalHighlightTagPre)
+                .replaceAll(escapedHighlightPost, originalHighlightTagPost);
     }
 
     protected String removeSolrHighlightTag(final String str) {
-        return str.replaceAll(solrHighlightTagPre, StringUtil.EMPTY).replaceAll(solrHighlightTagPost, StringUtil.EMPTY);
+        return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
     protected String highlight(final String content, final String[] queries) {
@@ -297,7 +313,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendPDFSearchWord(final String url) {
-        final String[] queries = (String[]) RequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String[] queries = (String[]) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
@@ -314,7 +330,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String getPagePath(final String page) {
-        final Locale locale = RequestUtil.getRequest().getLocale();
+        final Locale locale = LaRequestUtil.getRequest().getLocale();
         final String lang = locale.getLanguage();
         final String country = locale.getCountry();
 
@@ -365,7 +381,7 @@ public class ViewHelper implements Serializable {
     }
 
     private boolean existsPage(final String path) {
-        final String realPath = ServletContextUtil.getServletContext().getRealPath(path);
+        final String realPath = LaServletContextUtil.getServletContext().getRealPath(path);
         final File file = new File(realPath);
         return file.isFile();
     }
@@ -375,22 +391,24 @@ public class ViewHelper implements Serializable {
         final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
         final Handlebars handlebars = new Handlebars(loader);
 
-        Locale locale = RequestUtil.getRequest().getLocale();
+        Locale locale = LaRequestUtil.getRequest().getLocale();
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
-        String url = (String) doc.get("urlLink");
+        String url = DocumentUtil.getValue(doc, "urlLink", String.class);
         if (url == null) {
-            url = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
+            url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        Object created = doc.get(fieldHelper.createdField);
-        if (created instanceof Date) {
+        String createdStr;
+        final Long created = DocumentUtil.getValue(doc, fieldHelper.createdField, Long.class);
+        if (created != null) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            created = sdf.format((Date) created);
+            createdStr = sdf.format(new Date(created.longValue()));
         } else {
-            created = MessageResourcesUtil.getMessage(locale, "labels.search_unknown");
+            createdStr = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        doc.put("cacheMsg", MessageResourcesUtil.getMessage(locale, "labels.search_cache_msg", url, created));
+        doc.put("cacheMsg",
+                ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", new Object[] { url, createdStr }));
 
         doc.put("queries", queries);
 
@@ -455,6 +473,134 @@ public class ViewHelper implements Serializable {
             return StringUtils.abbreviate(urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""), sitePathLength);
         }
         return null;
+    }
+
+    public StreamResponse asContentResponse(final Map<String, Object> doc) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("writing the content of: " + doc);
+        }
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
+        final Object configIdObj = doc.get(fieldHelper.configIdField);
+        if (configIdObj == null) {
+            throw new FessSystemException("configId is null.");
+        }
+        final String configId = configIdObj.toString();
+        if (configId.length() < 2) {
+            throw new FessSystemException("Invalid configId: " + configIdObj);
+        }
+        final ConfigType configType = crawlingConfigHelper.getConfigType(configId);
+        CrawlingConfig config = null;
+        if (logger.isDebugEnabled()) {
+            logger.debug("configType: " + configType + ", configId: " + configId);
+        }
+        if (ConfigType.WEB == configType) {
+            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
+            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId));
+        } else if (ConfigType.FILE == configType) {
+            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
+            config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId));
+        } else if (ConfigType.DATA == configType) {
+            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
+            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId));
+        }
+        if (config == null) {
+            throw new FessSystemException("No crawlingConfig: " + configIdObj);
+        }
+        final String url = (String) doc.get(fieldHelper.urlField);
+        final S2RobotClientFactory robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
+        config.initializeClientFactory(robotClientFactory);
+        final S2RobotClient client = robotClientFactory.getClient(url);
+        if (client == null) {
+            throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
+        }
+        final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
+        final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
+        writeFileName(response, responseData);
+        writeContentType(response, responseData);
+        writeNoCache(response, responseData);
+        response.stream(out -> {
+            try (InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
+                out.write(is);
+            } catch (final IOException e) {
+                if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
+                    throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
+                }
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Finished to write " + url);
+            }
+        });
+        return response;
+    }
+
+    protected void writeNoCache(final StreamResponse response, final ResponseData responseData) {
+        response.header("Pragma", "no-cache");
+        response.header("Cache-Control", "no-cache");
+        response.header("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+    }
+
+    protected void writeFileName(final StreamResponse response, final ResponseData responseData) {
+        final UserAgentHelper userAgentHelper = ComponentUtil.getUserAgentHelper();
+        final UserAgentType userAgentType = userAgentHelper.getUserAgentType();
+        String charset = responseData.getCharSet();
+        if (charset == null) {
+            charset = Constants.UTF_8;
+        }
+        final String name;
+        final String url = responseData.getUrl();
+        final int pos = url.lastIndexOf('/');
+        try {
+            if (pos >= 0 && pos + 1 < url.length()) {
+                name = URLDecoder.decode(url.substring(pos + 1), charset);
+            } else {
+                name = URLDecoder.decode(url, charset);
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("userAgentType: " + userAgentType + ", charset: " + charset + ", name: " + name);
+            }
+
+            switch (userAgentType) {
+            case IE:
+                response.header("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(name, Constants.UTF_8) + "\"");
+                break;
+            case OPERA:
+                response.header("Content-Disposition", "attachment; filename*=utf-8'ja'" + URLEncoder.encode(name, Constants.UTF_8));
+                break;
+            case SAFARI:
+                response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                break;
+            case CHROME:
+            case FIREFOX:
+            case OTHER:
+            default:
+                response.header("Content-Disposition",
+                        "attachment; filename=\"=?utf-8?B?" + Base64Util.encode(name.getBytes(Constants.UTF_8)) + "?=\"");
+                break;
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to write a filename: " + responseData, e);
+        }
+    }
+
+    protected void writeContentType(final StreamResponse response, final ResponseData responseData) {
+        final String mimeType = responseData.getMimeType();
+        if (logger.isDebugEnabled()) {
+            logger.debug("mimeType: " + mimeType);
+        }
+        if (mimeType == null) {
+            response.contentTypeOctetStream();
+            return;
+        }
+        if (mimeType.startsWith("text/")) {
+            final String charset = LaResponseUtil.getResponse().getCharacterEncoding();
+            if (charset != null) {
+                response.contentType(mimeType + "; charset=" + charset);
+                return;
+            }
+        }
+        response.contentType(mimeType);
     }
 
     public boolean isUseSession() {

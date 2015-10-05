@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.imageio.ImageIO;
 
 import org.openqa.selenium.Dimension;
@@ -29,8 +31,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.seasar.framework.container.annotation.tiger.DestroyMethod;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
     public String imageFormatName = "png";
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         if (webDriver == null) {
             webDriver = new PhantomJSDriver();
@@ -56,7 +56,7 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
         webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
     }
 
-    @DestroyMethod
+    @PreDestroy
     public void destroy() {
         webDriver.close();
     }

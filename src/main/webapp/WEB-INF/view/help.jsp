@@ -6,7 +6,7 @@
 <meta http-equiv="content-style-type" content="text/css" />
 <meta http-equiv="content-script-type" content="text/javascript" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><bean:message key="labels.search_title" /></title>
+<title><la:message key="labels.search_title" /></title>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
@@ -22,7 +22,7 @@
 			</div>
 		</div>
 		<p class="pull-right move-to-top">
-			<a href="#"><bean:message key="labels.footer_back_to_top" /></a>
+			<a href="#"><la:message key="labels.footer_back_to_top" /></a>
 		</p>
 		<jsp:include page="footer.jsp" />
 	</div>

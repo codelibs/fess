@@ -23,11 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.exentity.PathMapping;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.container.annotation.tiger.InitMethod;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +42,14 @@ public class PathMappingHelper implements Serializable {
 
     volatile List<PathMapping> cachedPathMappingList = null;
 
-    @InitMethod
+    @PostConstruct
     public void init() {
         final List<String> ptList = new ArrayList<>();
         ptList.add(Constants.PROCESS_TYPE_DISPLAYING);
         ptList.add(Constants.PROCESS_TYPE_BOTH);
 
         try {
-            final PathMappingBhv pathMappingBhv = SingletonS2Container.getComponent(PathMappingBhv.class);
+            final PathMappingBhv pathMappingBhv = SingletonLaContainer.getComponent(PathMappingBhv.class);
             cachedPathMappingList = pathMappingBhv.selectList(cb -> {
                 cb.query().addOrderBy_SortOrder_Asc();
                 cb.query().setProcessType_InScope(ptList);

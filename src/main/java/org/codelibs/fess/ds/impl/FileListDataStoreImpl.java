@@ -22,34 +22,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.codelibs.core.collection.LruHashMap;
+import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.client.FessEsClient;
 import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.RobotSystemException;
 import org.codelibs.robot.builder.RequestDataBuilder;
 import org.codelibs.robot.client.S2RobotClient;
 import org.codelibs.robot.client.S2RobotClientFactory;
 import org.codelibs.robot.entity.ResponseData;
 import org.codelibs.robot.entity.ResultData;
+import org.codelibs.robot.exception.RobotSystemException;
 import org.codelibs.robot.processor.ResponseProcessor;
 import org.codelibs.robot.processor.impl.DefaultResponseProcessor;
 import org.codelibs.robot.rule.Rule;
 import org.codelibs.robot.rule.RuleManager;
 import org.codelibs.robot.transformer.Transformer;
-import org.codelibs.robot.util.LruHashMap;
-import org.seasar.framework.container.SingletonS2Container;
-import org.seasar.framework.util.SerializeUtil;
+import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jp.sf.orangesignal.csv.CsvConfig;
+import com.orangesignal.csv.CsvConfig;
 
 public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
@@ -75,7 +75,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
     protected CrawlingSessionHelper crawlingSessionHelper;
 
-    public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
+    public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<>(1000));
 
     public String[] ignoreFieldNames = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
 
@@ -92,7 +92,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     @Override
     public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
 
-        robotClientFactory = SingletonS2Container.getComponent(S2RobotClientFactory.class);
+        robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
 
         config.initializeClientFactory(robotClientFactory);
 
@@ -181,7 +181,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     responseData.setExecutionTime(System.currentTimeMillis() - startTime);
                     responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
 
-                    final RuleManager ruleManager = SingletonS2Container.getComponent(RuleManager.class);
+                    final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
                     final Rule rule = ruleManager.getRule(responseData);
                     if (rule == null) {
                         logger.warn("No url rule. Data: " + dataMap);

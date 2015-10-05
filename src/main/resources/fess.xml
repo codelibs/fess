@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="fess_ds.xml"/>
+	<include path="fess_es.xml"/>
+
+	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
+		<arg>
+			org.codelibs.fess.util.ResourceUtil.getConfPath("crawler.properties")
+		</arg>
+	</component>
+
+	<component name="searchLogHelper" class="org.codelibs.fess.helper.impl.SearchLogHelperImpl">
+		<!-- 
+		<property name="userCheckInterval">5 * 60 * 1000</property>
+		<property name="userInfoCacheSize">1000</property>
+		 -->
+	</component>
+	<component name="crawlingConfigHelper" class="org.codelibs.fess.helper.CrawlingConfigHelper">
+	</component>
+    <component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
+    </component>
+	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
+	</component>
+	<component name="fieldHelper" class="org.codelibs.fess.helper.FieldHelper">
+	</component>
+	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
+		<!--
+		<property name="javaCommandPath">"java"</property>
+		<property name="filterPathEncoding">"UTF-8"</property>
+		<property name="useOwnTmpDir">true</property>
+		<property name="baseHelpLink">"http://fess.codelibs.org/{lang}/9.1/admin/"</property>
+		<property name="supportedLanguages">new String[] { "ar", "bg", "ca",
+            "cz", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
+            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
+            "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" }</property>
+		-->
+        <property name="logFilePath">
+            java.lang.System.getProperty("fess.log.file") == null ? 
+            java.lang.System.getProperty("java.io.tmpdir") + "/fess_crawler.out" :
+            java.lang.System.getProperty("fess.log.file").replaceAll(".out", "_crawler.out")
+        </property>
+        <property name="crawlerJavaOptions">
+[
+"-Djava.awt.headless=true",
+"-server",
+"-Xmx256m",
+"-XX:MaxMetaspaceSize=128m",
+"-XX:CompressedClassSpaceSize=32m",
+"-XX:-UseGCOverheadLimit",
+"-XX:+UseConcMarkSweepGC",
+"-XX:CMSInitiatingOccupancyFraction=75",
+"-XX:+UseParNewGC",
+"-XX:+UseTLAB",
+"-XX:+DisableExplicitGC"
+]
+</property>
+<!-- remote debug
+"-Xdebug",
+"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
+ -->
+ 		<postConstruct name="addAdminRoles">
+ 			<arg>["fess"]</arg>
+ 		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"index"</arg>
+			<arg>"index.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"header"</arg>
+			<arg>"header.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"footer"</arg>
+			<arg>"footer.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"search"</arg>
+			<arg>"search.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"searchResults"</arg>
+			<arg>"searchResults.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"searchNoResult"</arg>
+			<arg>"searchNoResult.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"help"</arg>
+			<arg>"help.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"error"</arg>
+			<arg>"error.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorHeader"</arg>
+			<arg>"error/header.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorFooter"</arg>
+			<arg>"error/footer.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorNotFound"</arg>
+			<arg>"error/notFound.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorSystem"</arg>
+			<arg>"error/system.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorRedirect"</arg>
+			<arg>"error/redirect.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"errorBadRequest"</arg>
+			<arg>"error/badRequest.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"cache"</arg>
+			<arg>"cache.hbs"</arg>
+		</postConstruct>
+	</component>
+	<component name="crawlingSessionHelper" class="org.codelibs.fess.helper.CrawlingSessionHelper">
+	</component>
+	<component name="mailHelper" class="org.codelibs.fess.helper.MailHelper">
+		<postConstruct name="addProperty">
+			<arg>"mail.smtp.host"</arg>
+			<arg>"localhost"</arg>
+		</postConstruct>
+		<!--
+		<property name="from">"Administrator &lt;root@localhost&gt;"</property>
+		-->
+	</component>
+	<component name="roleQueryHelper" class="org.codelibs.fess.helper.impl.RoleQueryHelperImpl">
+		<!-- ex. parameter: fessRoles=123%0aadmin -->
+		<!-- 
+		<property name="parameterKey">"fessRoles"</property>
+		<property name="encryptedParameterValue">false</property>
+		<property name="headerKey">"fessRoles"</property>
+		<property name="encryptedHeaderValue">true</property>
+		<property name="cookieKey">"fessRoles"</property>
+		<property name="encryptedCookieValue">true</property>
+		<property name="cipher">
+			<component class="org.codelibs.core.crypto.CachedCipher">
+				<property name="key">"1234567890123456"</property>
+			</component>
+		</property>
+		<property name="defaultRoleList">
+			{"guest"}
+		</property>
+		<property name="valueSeparator">"\\n"</property>
+		<property name="roleSeparator">","</property>
+		 -->
+	</component>
+</components>

@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.FessSystemException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.exentity.DataConfig;
+import org.codelibs.fess.exception.FessSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

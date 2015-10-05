@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.codelibs.fess.FessSystemException;
+import org.codelibs.fess.exception.FessSystemException;
 
 public class IntervalControlHelper {
     private volatile boolean crawlerRunning = true;

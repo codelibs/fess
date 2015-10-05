@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
- * Copyright 2004-2006 the Seasar Foundation and the Others.
+ * Copyright 2009-2015 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
 -->
-<web-app
-    xmlns="http://java.sun.com/xml/ns/j2ee"
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
-    version="2.4">
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1">
 
-  <context-param>
-    <param-name>sastruts.VIEW_PREFIX</param-name>
-    <param-value>/WEB-INF/view</param-value>
-  </context-param>
-
+  <!-- ================================================================================= -->
+  <!--                                                                    Servlet Filter -->
+  <!--                                                                    ============== -->
   <filter>
-    <filter-name>encodingfilter</filter-name>
-    <filter-class>org.codelibs.fess.filter.FessEncodingFilter</filter-class>
+    <filter-name>encodingFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.EncodingFilter</filter-class>
     <init-param>
       <param-name>encoding</param-name>
       <param-value>UTF-8</param-value>
@@ -36,16 +33,6 @@
       <param-name>encodingRules</param-name>
       <param-value>sjis:Shift_JIS,eucjp:EUC-JP</param-value>
     </init-param>
-  </filter>
-
-  <filter>
-    <filter-name>s2filter</filter-name>
-    <filter-class>org.seasar.framework.container.filter.S2ContainerFilter</filter-class>
-  </filter>
-
-  <filter>
-    <filter-name>hotdeployfilter</filter-name>
-    <filter-class>org.seasar.framework.container.hotdeploy.HotdeployFilter</filter-class>
   </filter>
 
   <filter>
@@ -71,20 +58,18 @@
   </filter>
 
   <filter>
-    <filter-name>routingfilter</filter-name>
-    <filter-class>org.seasar.struts.filter.RoutingFilter</filter-class>
-    <!-- 
-    <filter-class>org.dbflute.saflute.web.servlet.filter.RequestRoutingFilter</filter-class>
-     -->
-    <init-param>
-      <param-name>jspDirectAccess</param-name>
-      <param-value>false</param-value>
-    </init-param>
+    <filter-name>lastaPrepareFilter</filter-name>
+    <filter-class>org.lastaflute.web.servlet.filter.LastaPrepareFilter</filter-class>
   </filter>
 
   <filter>
-    <filter-name>requestLoggingFilter</filter-name>
-    <filter-class>org.dbflute.saflute.web.servlet.filter.RequestLoggingFilter</filter-class>
+    <filter-name>lastaShowbaseFilter</filter-name>
+    <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
+  </filter>
+
+  <filter>
+    <filter-name>lastaToActionFilter</filter-name>
+    <filter-class>org.lastaflute.web.servlet.filter.LastaToActionFilter</filter-class>
   </filter>
 
   <!--
@@ -169,43 +154,30 @@
   </filter>
 -->
 
+  <!-- ================================================================================= -->
+  <!--                                                                    Filter Mapping -->
+  <!--                                                                    ============== -->
   <filter-mapping>
-    <filter-name>encodingfilter</filter-name>
+    <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>FORWARD</dispatcher><!-- TODO -->
   </filter-mapping>
 
   <filter-mapping>
-    <filter-name>s2filter</filter-name>
-    <url-pattern>/*</url-pattern>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-    <dispatcher>INCLUDE</dispatcher>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>hotdeployfilter</filter-name>
+    <filter-name>lastaPrepareFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
 
-  <!--
-   basically you should set original filters after Seasar's basic filters
-   because request and session might be filtered by the filters
-   (e.g. session attributes are wrapped in holder when hot-deploy)
-   -->
-  <filter-mapping>
-    <filter-name>requestLoggingFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
-
+<!-- TODO
   <filter-mapping>
     <filter-name>authenticationFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+ -->
 
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
@@ -214,7 +186,13 @@
   </filter-mapping>
 
   <filter-mapping>
-    <filter-name>routingfilter</filter-name>
+    <filter-name>lastaShowbaseFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>lastaToActionFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
@@ -232,71 +210,41 @@
   </filter-mapping>
 -->
 
-  <servlet>
-    <servlet-name>action</servlet-name>
-    <servlet-class>org.codelibs.sastruts.core.servlet.SSCActionServlet</servlet-class>
-    <init-param>
-      <param-name>config</param-name>
-      <param-value>/WEB-INF/struts-config.xml</param-value>
-    </init-param>
-    <init-param>
-      <param-name>configFactory</param-name>
-      <param-value>org.seasar.struts.config.S2ModuleConfigFactory</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
+  <!-- ================================================================================= -->
+  <!--                                                                           Servlet -->
+  <!--                                                                           ======= -->
 
-<!-- BEGIN: H2 -->
-  <servlet>
-    <servlet-name>h2ConfigServlet</servlet-name>
-    <servlet-class>org.codelibs.fess.servlet.H2ConfigServlet</servlet-class>
-    <init-param>
-      <param-name>tcpPort</param-name>
-      <param-value>19092</param-value>
-    </init-param>
-    <load-on-startup>2</load-on-startup>
-  </servlet>
- <!-- END: H2 -->
+  <!-- ================================================================================= -->
+  <!--                                                                   Servlet Mapping -->
+  <!--                                                                   =============== -->
 
-  <servlet>
-    <servlet-name>tomcat7ConfigServlet</servlet-name>
-    <servlet-class>org.codelibs.fess.servlet.Tomcat7ConfigServlet</servlet-class>
-    <load-on-startup>3</load-on-startup>
-  </servlet>
-
-  <servlet>
-    <servlet-name>s2container</servlet-name>
-    <servlet-class>org.dbflute.saflute.web.servlet.ContainerManagementServlet</servlet-class>
-    <load-on-startup>4</load-on-startup>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>action</servlet-name>
-    <url-pattern>*.do</url-pattern>
-  </servlet-mapping>
-
-<!--
-  <servlet-mapping>
-    <servlet-name>s2container</servlet-name>
-    <url-pattern>/s2container</url-pattern>
-  </servlet-mapping>
--->
-
+  <!-- ================================================================================= -->
+  <!--                                                                  Servlet Listener -->
+  <!--                                                                  ================ -->
   <listener>
   	<listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
   </listener>
 
+  <!-- ================================================================================= -->
+  <!--                                                                    Session Config -->
+  <!--                                                                    ============== -->
 <!--
     <session-config>
         <session-timeout>1</session-timeout>
     </session-config>
 	-->
 
+  <!-- ================================================================================= -->
+  <!--                                                                      Welcome File -->
+  <!--                                                                      ============ -->
 <!--
     <welcome-file-list>
     </welcome-file-list>
 	-->
 
+  <!-- ================================================================================= -->
+  <!--                                                                        JSP Config -->
+  <!--                                                                        ========== -->
   <jsp-config>
     <jsp-property-group>
       <url-pattern>*.jsp</url-pattern>
@@ -307,31 +255,9 @@
     </jsp-property-group>
   </jsp-config>
 
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Fess Authentication</web-resource-name>
-      <url-pattern>/login/login</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>fess</role-name>
-      <!--
-      <role-name>role1</role-name>
-      -->
-    </auth-constraint>
-  </security-constraint>
-
-  <security-role>
-    <role-name>fess</role-name>
-  </security-role>
-
-  <login-config>
-    <auth-method>FORM</auth-method>
-    <form-login-config>
-      <form-login-page>/WEB-INF/view/login/index.jsp</form-login-page>
-      <form-error-page>/WEB-INF/view/login/error.jsp</form-error-page>
-    </form-login-config>
-  </login-config>
-
+  <!-- ================================================================================= -->
+  <!--                                                                        Error Page -->
+  <!--                                                                        ========== -->
   <error-page>
   	<error-code>400</error-code>
   	<location>/WEB-INF/view/error/redirect.jsp?type=badRequest</location>
@@ -352,5 +278,4 @@
   	<error-code>500</error-code>
   	<location>/WEB-INF/view/error/redirect.jsp?type=systemError</location>
   </error-page>
-
 </web-app>

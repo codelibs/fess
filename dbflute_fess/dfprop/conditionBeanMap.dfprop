@@ -1,0 +1,101 @@
+# /---------------------------------------------------------------------------
+# includeQueryMap: (NotRequired - Default map:{})
+#
+# Specification:
+# map:{
+#     ; [property-type] = map:{
+#         ; [condition-key] = map:{ [table] = list:{ [column] ; [column] } }
+# }
+#
+# property-type: String, Number, Date, OrderBy, ...
+# condition-key: NotEqual, GreaterThan, LessThan, GreaterEqual, LessEqual
+#              , InScope, NotInScope, PrefixSearch, LikeSearch, NotLikeSearch
+#              , EmptyString, FromTo, DateFromTo, RangeOf, ...
+#              , (and prefix '!' means excluding, '%' means reviving)
+# table: table name (hint) or $$ALL$$
+# column: column name (hint) or $$CommonColumn$$ or $$VersionNo$$
+#
+# Example:
+# map:{
+#     # This means that String includes GreaterThan at MEMBER.MEMBER_ACCOUNT only
+#     # and LessThan at PRODUCT.PRODUCT_NAME and PRODUCT.PRODUCT_HANDLE_CODE,
+#     # and InScope for LONGVARCHAR(e.g. text type) is excluded.
+#     ; String = map:{
+#         ; GreaterThan = map:{ MEMBER = list:{ MEMBER_ACCOUNT } }
+#         ; LessThan = map:{ PRODUCT = list:{ PRODUCT_NAME ; PRODUCT_HANDLE_CODE } }
+#         ; !InScope = map:{ $$ALL$$ = list:{ type:LONGVARCHAR } }
+#     }
+#     # This means that Number excludes all version-no's NotEqual.
+#     ; Number = map:{
+#         ; !NotEqual = map:{ $$ALL$$ = list:{ $$VersionNo$$ } }
+#     }
+#     # This means that Date does not includes NotEqual at all tables.  
+#     ; Date = map:{
+#         ; NotEqual = map:{}
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    ; String = map:{
+        # [Include]
+        # String columns may not be needed
+        # to be set these condition-keys basically.
+        ; GreaterThan = map:{}
+        ; LessThan = map:{}
+        ; GreaterEqual = map:{}
+        ; LessEqual = map:{}
+
+        # [Exclude]
+        # Common columns of String type may not be needed
+        # to be set these condition-keys basically.
+        ; !NotEqual      = map:{ $$ALL$$ = list:{ $$CommonColumn$$ ; type:LONGVARCHAR ; suffix:_NAME } }
+        ; !InScope       = map:{ $$ALL$$ = list:{ $$CommonColumn$$ ; type:LONGVARCHAR ; suffix:_NAME } }
+        ; !NotInScope    = map:{ $$ALL$$ = list:{ $$CommonColumn$$ ; type:LONGVARCHAR ; suffix:_NAME } }
+        ; !PrefixSearch  = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !LikeSearch    = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !NotLikeSearch = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+    }
+    ; Number = map:{
+        # [Include]
+        # ...
+
+        # [Exclude]
+        # VersionNo column may not be needed
+        # to be set these condition-keys basically.
+        ; !NotEqual     = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        ; !GreaterThan  = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        ; !LessThan     = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        ; !GreaterEqual = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        ; !LessEqual    = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        # RangeOf only valid just in case
+        #; !RangeOf = map:{ $$ALL$$ = list:{ $$VersionNo$$ } }
+        ; !InScope      = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+        ; !NotInScope   = map:{ $$ALL$$ = list:{ $$VersionNo$$ ; DISPLAY_ORDER } }
+    }
+    ; Date = map:{
+        # [Include]
+        # Date columns may not be needed
+        # to be set these condition-keys basically.
+        ; NotEqual = map:{}
+        ; InScope = map:{}
+        ; NotInScope = map:{}
+
+        # [Exclude]
+        # Common columns of Date type may not be needed
+        # to be set these condition-keys basically.
+        ; !GreaterThan  = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !LessThan     = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !GreaterEqual = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !LessEqual    = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        # RangeOf only valid just in case
+        #; !FromTo       = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+        ; !DateFromTo   = map:{ $$ALL$$ = list:{ $$CommonColumn$$ } }
+    }
+    ; OrderBy = map:{
+        ; !Asc  = map:{ $$ALL$$ = list:{ type:LONGVARCHAR } }
+        ; !Desc = map:{ $$ALL$$ = list:{ type:LONGVARCHAR } }
+    }
+}
+# ----------------/

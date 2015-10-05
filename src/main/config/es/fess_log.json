@@ -1,0 +1,203 @@
+{
+  "fess_log" : {
+    "mappings" : {
+      "search_field_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "name" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "searchLogId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "value" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "favorite_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "url" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userInfoId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "event_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "createdAt" : {
+            "type" : "date",
+            "format" : "dateOptionalTime"
+          },
+          "createdBy" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "eventType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "click_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "requestedTime" : {
+            "type" : "long"
+          },
+          "searchLogId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "url" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "search_log" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "accessType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "clientIp" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "hitCount" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "queryOffset" : {
+            "type" : "integer"
+          },
+          "queryPageSize" : {
+            "type" : "integer"
+          },
+          "referer" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "requestedTime" : {
+            "type" : "long"
+          },
+          "responseTime" : {
+            "type" : "integer"
+          },
+          "searchWord" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userAgent" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userInfoId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userSessionId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
+      "user_info" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "_id" : {
+          "path" : "id"
+        },
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "createdTime" : {
+            "type" : "long"
+          },
+          "id" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "updatedTime" : {
+            "type" : "long"
+          }
+        }
+      }
+    },
+    "settings" : {
+      "index" : {
+        "refresh_interval" : "60s",
+        "number_of_shards" : "10",
+        "number_of_replicas" : "0"
+      }
+    }
+  }
+}
