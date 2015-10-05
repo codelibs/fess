@@ -39,7 +39,7 @@
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
-					<la:link href="../index">
+					<la:link href="../">
 						<la:message key="labels.dict_list_link" />
 					</la:link>
 					</span>

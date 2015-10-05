@@ -115,15 +115,6 @@
 					<source>1.8</source>
 					<target>1.8</target>
 					<encoding>UTF-8</encoding>
-					<!-- TODO remove -->
-					<excludes>
-						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/dict/UserDictAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/dict/SynonymAction.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/DictForm.java</exclude>
-						<exclude>org/codelibs/fess/app/web/admin/DictAction.java</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
