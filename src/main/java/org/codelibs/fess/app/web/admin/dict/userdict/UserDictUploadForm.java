@@ -14,12 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin;
+package org.codelibs.fess.app.web.admin.dict.userdict;
 
 import java.io.Serializable;
 
-public class DictForm implements Serializable {
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class UserDictUploadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public MultipartFormFile userDictFile;
 
 }

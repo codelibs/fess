@@ -21,7 +21,7 @@
 			<la:message key="labels.dict_userdict_title" />
 		</h1>
 		<ol class="breadcrumb">
-			<li class="active"><la:link href="index">
+			<li class="active"><la:link href="">
 			<la:message key="labels.dict_userdict_list_link" />
 			</la:link></li>
 		</ol>
@@ -39,7 +39,7 @@
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
-					<la:link href="../index">
+					<la:link href="..">
 						<la:message key="labels.dict_list_link" />
 					</la:link>
 					</span>
@@ -97,7 +97,7 @@
 					</thead>
 					<tbody>
 						<c:forEach var="data" varStatus="s" items="${userDictItemItems}">
-						    <tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/dict/userDict/confirmpage/${f:u(dictId)}/4/${f:u(data.id)}">
+						    <tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/dict/userdict/confirmpage/${f:u(dictId)}/4/${f:u(data.id)}">
 							<td>${f:h(data.token)}</td>
 							<td>${f:h(data.reading)}</td>
 						</tr>

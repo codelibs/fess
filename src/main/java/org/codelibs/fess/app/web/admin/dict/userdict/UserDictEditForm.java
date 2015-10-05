@@ -14,12 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.dict;
+package org.codelibs.fess.app.web.admin.dict.userdict;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserDictForm {
+/**
+ * @author codelibs
+ * @author Keiichi Watanabe
+ */
+public class UserDictEditForm implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     //@IntegerType
     public String pageNumber;
 

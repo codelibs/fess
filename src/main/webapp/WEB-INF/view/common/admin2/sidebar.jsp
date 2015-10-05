@@ -54,10 +54,10 @@
 							<span><la:message key="labels.menu.design" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='dict'}">class="active"</c:if>><todo:link href="/admin/dict/">
+					<li <c:if test="${param.menuType=='dict'}">class="active"</c:if>><la:link href="/admin/dict/">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu.dict" /></span>
-						</todo:link></li>
+						</la:link></li>
 
 				</ul>
 			</li>
