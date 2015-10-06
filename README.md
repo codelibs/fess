@@ -5,7 +5,7 @@ Enterprise Search Server: Fess
 
 Fess is very powerful and easily deployable Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.
 
-Fess is Solr based search server, but knowledge/experience about Solr is NOT needed because of All-in-One Enterprise Search Server. Fess provides Administration GUI to configure the system on your browser. Fess also contains a crawler, which can crawl documents on Web/File System/DB and support many file formats, such as MS Office, pdf and zip.
+Fess is Elasticsearch based search server, but knowledge/experience about Elasticsearch is NOT needed because of All-in-One Enterprise Search Server. Fess provides Administration GUI to configure the system on your browser. Fess also contains a crawler, which can crawl documents on Web/File System/DB and supports many file formats, such as MS Office, pdf and zip.
 
 ## Web Sites
 
@@ -16,6 +16,24 @@ Fess is Solr based search server, but knowledge/experience about Solr is NOT nee
 
 Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 (Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
+
+## Getting Started
+
+### Download
+
+Fess 10 is under development.
+Fess 9.x (Solr based) is [HERE](http://fess.codelibs.org/downloads.html "download").
+
+### Run Fess
+
+    $ unzip fess-x.x.x.zip
+    $ cd fess-x.x.x
+    $ ./bin/fess
+
+### Access Fess
+
+- Search UI: http://localhost:8080/
+- Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
 
 ## Development
 
@@ -38,3 +56,8 @@ Run antrun:run to download plugins into plugins directory:
 
 Run or debug org.codelibs.fess.FessBoot on IDE, and then access http://localhost:8080/fess/
 
+### Build Package
+
+Run package goal and then the release file is created in target/releases.
+
+    $ mvn package
