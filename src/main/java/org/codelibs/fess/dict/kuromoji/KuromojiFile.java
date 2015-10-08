@@ -36,6 +36,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.util.KuromojiCSVUtil;
+import org.dbflute.optional.OptionalEntity;
 
 public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     private static final String KUROMOJI = "kuromoji";
@@ -57,13 +58,17 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     }
 
     @Override
-    public KuromojiItem get(final long id) {
+    public OptionalEntity<KuromojiItem> get(final long id) {
+        if (kuromojiItemList == null) {
+            reload(null);
+        }
+
         for (final KuromojiItem kuromojiItem : kuromojiItemList) {
             if (id == kuromojiItem.getId()) {
-                return kuromojiItem;
+                return OptionalEntity.of(kuromojiItem);
             }
         }
-        return null;
+        return OptionalEntity.empty();
     }
 
     @Override

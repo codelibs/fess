@@ -21,7 +21,7 @@
 			<la:message key="labels.dict_synonym_title" />
 		</h1>
 		<ol class="breadcrumb">
-			<li class="active"><la:link href="index">
+			<li class="active"><la:link href="list">
 			<la:message key="labels.dict_synonym_list_link" />
 			</la:link></li>
 		</ol>
@@ -49,17 +49,17 @@
 					</a>
 					</span>
 					<span class="label label-default">
-					<la:link href="createpage?dictId=${f:u(dictId)}">
+					<la:link href="createpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_create" />
 					</la:link>
 					</span>
 					<span class="label label-default">
-					<la:link href="downloadpage?dictId=${f:u(dictId)}">
+					<la:link href="downloadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_download" />
 					</la:link>
 					</span>
 					<span class="label label-default">
-					<la:link href="uploadpage?dictId=${f:u(dictId)}">
+					<la:link href="uploadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_upload" />
 					</la:link>
 					</span>

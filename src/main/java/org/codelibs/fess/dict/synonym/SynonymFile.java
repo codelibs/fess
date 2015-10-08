@@ -35,6 +35,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
+import org.dbflute.optional.OptionalEntity;
 
 public class SynonymFile extends DictionaryFile<SynonymItem> {
     private static final String SYNONYM = "synonym";
@@ -51,13 +52,17 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     @Override
-    public SynonymItem get(final long id) {
+    public OptionalEntity<SynonymItem> get(final long id) {
+        if (synonymItemList == null) {
+            reload(null);
+        }
+
         for (final SynonymItem synonymItem : synonymItemList) {
             if (id == synonymItem.getId()) {
-                return synonymItem;
+                return OptionalEntity.of(synonymItem);
             }
         }
-        return null;
+        return OptionalEntity.empty();
     }
 
     @Override

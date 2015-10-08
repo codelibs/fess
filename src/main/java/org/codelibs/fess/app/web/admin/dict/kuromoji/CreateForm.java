@@ -18,20 +18,41 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import java.io.Serializable;
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+import javax.validation.constraints.Size;
+
+import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class UploadForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    public MultipartFormFile kuromojiFile;
 
     @Required
     public String dictId;
 
+    public Integer crudMode;
+
+    @Required
+    @Size(max = 1000)
+    public String token;
+
+    @Required
+    @Size(max = 1000)
+    public String segmentation;
+
+    @Required
+    @Size(max = 1000)
+    public String reading;
+
+    @Required
+    @Size(max = 1000)
+    public String pos;
+
+    public void initialize() {
+        crudMode = CrudMode.CREATE;
+    }
 }

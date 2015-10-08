@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.dict_userdict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_kuromoji_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -17,7 +17,7 @@
 	    <%-- Content Header --%>
 	    <section class="content-header">
 		<h1>
-		    <la:message key="labels.dict_userdict_title" />
+		    <la:message key="labels.dict_kuromoji_title" />
 		</h1>
 	    </section>
 
@@ -37,59 +37,59 @@
 				<div class="box-header with-border">
 				    <h3 class="box-title">
 					<c:if test="${crudMode == 1}">
-					    <la:message key="labels.dict_userdict_link_create" />
+					    <la:message key="labels.dict_kuromoji_link_create" />
 					</c:if>
 					<c:if test="${crudMode == 2}">
-					    <la:message key="labels.dict_userdict_link_update" />
+					    <la:message key="labels.dict_kuromoji_link_update" />
 					</c:if>
 				    </h3>
 				    <div class="box-tools pull-right">
 					<span class="label label-default">
-					    <la:link href="../index">
+					    <la:link href="../list">
 						<la:message key="labels.dict_list_link" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
-					    <la:link href="index?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_list_link" />
+					    <la:link href="list/1?dictId=${f:u(dictId)}">
+						<la:message key="labels.dict_kuromoji_list_link" />
 					    </la:link>
 					</span>
 					<c:if test="${crudMode == 1}">
 					    <span class="label label-default">
 						<a href="#">
-						    <la:message key="labels.dict_userdict_link_create" />
+						    <la:message key="labels.dict_kuromoji_link_create" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 2}">
 					    <span class="label label-default">
 						<a href="#">
-						    <la:message key="labels.dict_userdict_link_update" />
+						    <la:message key="labels.dict_kuromoji_link_update" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 3}">
 					    <span class="label label-default">
 						<a href="#">
-						    <la:message key="labels.dict_userdict_link_delete" />
+						    <la:message key="labels.dict_kuromoji_link_delete" />
 						</a>
 					    </span>
 					</c:if>
 					<c:if test="${crudMode == 4}">
 					    <span class="label label-default">
 						<a href="#">
-						    <la:message key="labels.dict_userdict_link_confirm" />
+						    <la:message key="labels.dict_kuromoji_link_confirm" />
 						</a>
 					    </span>
 					</c:if>
 					<span class="label label-default">
-					    <la:link href="downloadpage?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_link_download" />
+					    <la:link href="downloadpage/${f:u(dictId)}">
+						<la:message key="labels.dict_kuromoji_link_download" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
-					    <la:link href="uploadpage?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_link_upload" />
+					    <la:link href="uploadpage/${f:u(dictId)}">
+						<la:message key="labels.dict_kuromoji_link_upload" />
 					    </la:link>
 					</span>
 				    </div>
@@ -108,19 +108,19 @@
 
 				    <%-- Form Fields --%>
 				    <div class="form-group">
-					<label for="token"><la:message key="labels.dict_userdict_token" /></label>
+					<label for="token"><la:message key="labels.dict_kuromoji_token" /></label>
 					<la:text property="token" styleClass="form-control" />
 				    </div>
 				    <div class="form-group">
-					<label for="segmentation"><la:message key="labels.dict_userdict_segmentation" /></label>
+					<label for="segmentation"><la:message key="labels.dict_kuromoji_segmentation" /></label>
 					<la:text property="segmentation" styleClass="form-control" />
 				    </div>
 				    <div class="form-group">
-					<label for="reading"><la:message key="labels.dict_userdict_reading" /></label>
+					<label for="reading"><la:message key="labels.dict_kuromoji_reading" /></label>
 					<la:text property="reading" styleClass="form-control" />
 				    </div>
 				    <div class="form-group">
-					<label for="pos"><la:message key="labels.dict_userdict_pos" /></label>
+					<label for="pos"><la:message key="labels.dict_kuromoji_pos" /></label>
 					<la:text property="pos" styleClass="form-control" />
 				    </div>
 				</div>

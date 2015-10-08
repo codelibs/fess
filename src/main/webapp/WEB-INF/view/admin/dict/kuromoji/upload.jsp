@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.dict_userdict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_kuromoji_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -18,11 +18,11 @@
 		<%-- Content Header --%>
 		<section class="content-header">
 		<h1>
-			<la:message key="labels.dict_userdict_title" />
+			<la:message key="labels.dict_kuromoji_title" />
 		</h1>
 		<ol class="breadcrumb">
 			<li class="active"><la:link href="index">
-			<la:message key="labels.dict_userdict_link_upload" />
+			<la:message key="labels.dict_kuromoji_link_upload" />
 			</la:link></li>
 		</ol>
 		</section>
@@ -35,7 +35,7 @@
 				<%-- Box Header --%>
 				<div class="box-header with-border">
 				<h3 class="box-title">
-					<la:message key="labels.dict_userdict_link_upload" />
+					<la:message key="labels.dict_kuromoji_link_upload" />
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
@@ -45,22 +45,22 @@
 					</span>
 					<span class="label label-default">
 					<a href="#">
-						<la:message key="labels.dict_userdict_list_link" />
+						<la:message key="labels.dict_kuromoji_list_link" />
 					</a>
 					</span>
 					<span class="label label-default">
 					<la:link href="createpage?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_link_create" />
+						<la:message key="labels.dict_kuromoji_link_create" />
 					</la:link>
 					</span>
 					<span class="label label-default">
 					<la:link href="downloadpage?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_link_download" />
+						<la:message key="labels.dict_kuromoji_link_download" />
 					</la:link>
 					</span>
 					<span class="label label-default">
 					<la:link href="uploadpage?dictId=${f:u(dictId)}">
-						<la:message key="labels.dict_userdict_link_upload" />
+						<la:message key="labels.dict_kuromoji_link_upload" />
 					</la:link>
 					</span>
 				</div>
@@ -88,10 +88,10 @@
 						</tr>
 						<tr>
 							<th>
-							<la:message key="labels.dict_userdict_file" />
+							<la:message key="labels.dict_kuromoji_file" />
 							</th>
 							<td>
-							<input type="file" name="userdictFile"  />
+							<input type="file" name="kuromojiFile"  />
 							</td>
 						</tr>
 						</tbody>
@@ -99,7 +99,7 @@
 						<tr>
 							<td colspan="2">
 							<input type="submit" class="btn small" name="upload"
-								   value="<la:message key="labels.dict_userdict_button_upload"/>" />
+								   value="<la:message key="labels.dict_kuromoji_button_upload"/>" />
 							</td>
 						</tr>
 						</tfoot>

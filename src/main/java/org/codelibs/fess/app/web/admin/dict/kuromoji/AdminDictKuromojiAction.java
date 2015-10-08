@@ -18,15 +18,19 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.app.service.KuromojiService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.suggestelevateword.SuggestElevateWordEditForm;
+import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.dict.kuromoji.KuromojiItem;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -56,7 +60,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("userDict"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("kuromoji"));
     }
 
     // ===================================================================================
@@ -64,6 +68,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -71,6 +76,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         kuromojiPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -79,7 +85,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form.searchParams, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        validate(form, messages -> {}, toIndexHtml());
+        copyBeanToBean(form, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -87,6 +94,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         kuromojiPager.clear();
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -95,13 +103,20 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        // TODO
+        // page navi
+        data.register("kuromojiItemItems", kuromojiService.getKuromojiList(form.dictId, kuromojiPager));
+
+        // restore from pager
+        BeanUtil.copyBeanToBean(kuromojiPager, form, op -> {
+            op.exclude(Constants.PAGER_CONVERSION_RULE);
+        });
     }
 
     // ===================================================================================
@@ -112,51 +127,85 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final EditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminDictKuromoji_EditJsp);
+    public HtmlResponse createpage(final String dictId) {
+        return asHtml(path_AdminDictKuromoji_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final EditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        // TODO loadUserDict(form);
-        return asHtml(path_AdminDictKuromoji_EditJsp);
+    public HtmlResponse editpage(final String dictId, final int crudMode, final long id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminDictKuromoji_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        // TODO loadUserDict(form);
+        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
+        });
         return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final EditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        // TODO loadUserDict(form);
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
+    public HtmlResponse deletepage(final String dictId, final int crudMode, final long id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
     public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        // TODO loadUserDict(form);
+        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
+        });
         return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
@@ -164,18 +213,28 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final EditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        // TODO loadUserDict(form);
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
+    public HtmlResponse confirmpage(final String dictId, final int crudMode, final long id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), toEditHtml());
+                });
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final EditForm form) {
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
@@ -183,6 +242,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
@@ -191,15 +251,18 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse downloadpage(final SearchForm form) {
-        return asHtml(path_AdminDictKuromoji_DownloadJsp);
+    public HtmlResponse downloadpage(final String dictId) {
+        return asHtml(path_AdminDictKuromoji_DownloadJsp).useForm(DownloadForm.class, op -> {
+            op.setup(form -> {
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse download(final SearchForm form) {
+    public HtmlResponse download(final DownloadForm form) {
         // TODO Download
-
         return asHtml(path_AdminDictKuromoji_DownloadJsp);
     }
 
@@ -208,33 +271,12 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse uploadpage(final UploadForm form) {
-        // TODO Upload
-
-        return asHtml(path_AdminDictKuromoji_UploadJsp);
-    }
-
-    // -----------------------------------------------------
-    //                                         Actually Crud
-    //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
-    public HtmlResponse create(final EditForm form) {
-        // TODO
-        return redirect(getClass());
-    }
-
-    @Token(save = false, validate = true)
-    @Execute
-    public HtmlResponse update(final EditForm form) {
-        // TODO
-        return redirect(getClass());
-    }
-
-    @Execute
-    public HtmlResponse delete(final EditForm form) {
-        // TODO
-        return redirect(getClass());
+    public HtmlResponse uploadpage(final String dictId) {
+        return asHtml(path_AdminDictKuromoji_UploadJsp).useForm(UploadForm.class, op -> {
+            op.setup(form -> {
+                form.dictId = dictId;
+            });
+        });
     }
 
     @Token(save = false, validate = true)
@@ -244,22 +286,96 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    // -----------------------------------------------------
+    //                                         Actually Crud
+    //                                         -------------
+    @Token(save = false, validate = true)
+    @Execute
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
+        createKuromojiItem(form).ifPresent(entity -> {
+            entity.setNewToken(form.token);
+            entity.setNewSegmentation(form.segmentation);
+            entity.setNewReading(form.reading);
+            entity.setNewPos(form.pos);
+            kuromojiService.store(form.dictId, entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
+        return redirect(getClass());
+    }
+
+    @Token(save = false, validate = true)
+    @Execute
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
+        createKuromojiItem(form).ifPresent(entity -> {
+            entity.setNewToken(form.token);
+            entity.setNewSegmentation(form.segmentation);
+            entity.setNewReading(form.reading);
+            entity.setNewPos(form.pos);
+            kuromojiService.store(form.dictId, entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
+        });
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+            kuromojiService.delete(form.dictId, entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
+        });
+        return redirect(getClass());
+    }
+
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadUserDict(final SuggestElevateWordEditForm form) {
-        // TODO
+
+    protected OptionalEntity<KuromojiItem> createKuromojiItem(CreateForm form) {
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final KuromojiItem entity = new KuromojiItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return kuromojiService.getKuromoji(form.dictId, ((EditForm) form).id);
+            }
+            break;
+        default:
+            break;
+        }
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final EditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
+    }
+
+    protected VaErrorHook toIndexHtml() {
+        return () -> {
+            return redirect(AdminDictAction.class);
+        };
     }
 
     protected VaErrorHook toEditHtml() {

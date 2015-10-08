@@ -30,6 +30,7 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
 import org.codelibs.fess.dict.synonym.SynonymItem;
+import org.dbflute.optional.OptionalEntity;
 
 public class SynonymService {
     @Resource
@@ -55,7 +56,7 @@ public class SynonymService {
                 .orElseThrow(() -> new DictionaryExpiredException());
     }
 
-    public SynonymItem getSynonym(final String dictId, final Map<String, String> paramMap) {
+    public OptionalEntity<SynonymItem> getSynonym(final String dictId, final Map<String, String> paramMap) {
         final SynonymFile synonymFile = getSynonymFile(dictId);
 
         final String idStr = paramMap.get("id");
@@ -68,7 +69,7 @@ public class SynonymService {
             }
         }
 
-        return null;
+        return OptionalEntity.empty();
     }
 
     public void store(final String dictId, final SynonymItem synonymItem) {

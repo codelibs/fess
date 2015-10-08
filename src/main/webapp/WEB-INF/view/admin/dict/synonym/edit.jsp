@@ -45,12 +45,12 @@
 				    </h3>
 				    <div class="box-tools pull-right">
 					<span class="label label-default">
-					    <la:link href="../index">
+					    <la:link href="../list">
 						<la:message key="labels.dict_list_link" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
-					    <la:link href="index?dictId=${f:u(dictId)}">
+					    <la:link href="list/1?dictId=${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_list_link" />
 					    </la:link>
 					</span>

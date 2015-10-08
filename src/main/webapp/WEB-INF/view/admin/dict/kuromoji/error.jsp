@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.dict_userdict_configuration" /></title>
+<title>Fess | <la:message key="labels.dict_kuromoji_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -20,7 +20,7 @@
 				</h1>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/dict/">
-							<la:message key="labels.dict_userdict_link_list" />
+							<la:message key="labels.dict_kuromoji_link_list" />
 						</la:link></li>
 				</ol>
 			</section>
@@ -34,7 +34,7 @@
 					</p>
 					<p>
 						<la:link href="index">
-							<la:message key="labels.dict_userdict_button_back" />
+							<la:message key="labels.dict_kuromoji_button_back" />
 						</la:link>
 					</p>
 				</div>
@@ -49,7 +49,7 @@
 </body>
 </html>
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><tilela:insert template="/WEB-INF/view/common/admin/layout.jsp" flush="true">
-	<tilela:put name="title"><la:message key="labels.dict_userdict_configuration" /></tilela:put>
+	<tilela:put name="title"><la:message key="labels.dict_kuromoji_configuration" /></tilela:put>
 	<tilela:put name="header" value="/WEB-INF/view/common/admin/header.jsp" />
 	<tilela:put name="footer" value="/WEB-INF/view/common/admin/footer.jsp" />
 	<tilela:put name="menu" value="/WEB-INF/view/common/admin/menu.jsp" />

@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.dbflute.optional.OptionalEntity;
+
 public abstract class DictionaryFile<T extends DictionaryItem> {
     protected DictionaryManager dictionaryManager;
 
@@ -59,7 +61,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
 
     public abstract PagingList<T> selectList(int offset, int size);
 
-    public abstract T get(long id);
+    public abstract OptionalEntity<T> get(long id);
 
     public abstract void insert(T item);
 

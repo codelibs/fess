@@ -17,8 +17,8 @@
 package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.lastaflute.web.validation.Required;
 
 /**
  * @author codelibs
@@ -28,5 +28,6 @@ public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    @Required
+    public String dictId;
 }

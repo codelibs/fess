@@ -2963,70 +2963,70 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_dict_synonym_file = "{labels.dict_synonym_file}";
 
     /** The key of the message: UserDict List */
-    public static final String LABELS_dict_userdict_configuration = "{labels.dict_userdict_configuration}";
+    public static final String LABELS_dict_kuromoji_configuration = "{labels.dict_kuromoji_configuration}";
 
     /** The key of the message: UserDict List */
-    public static final String LABELS_dict_userdict_title = "{labels.dict_userdict_title}";
+    public static final String LABELS_dict_kuromoji_title = "{labels.dict_kuromoji_title}";
 
     /** The key of the message: List */
-    public static final String LABELS_dict_userdict_list_link = "{labels.dict_userdict_list_link}";
+    public static final String LABELS_dict_kuromoji_list_link = "{labels.dict_kuromoji_list_link}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_dict_userdict_link_create = "{labels.dict_userdict_link_create}";
+    public static final String LABELS_dict_kuromoji_link_create = "{labels.dict_kuromoji_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_dict_userdict_link_update = "{labels.dict_userdict_link_update}";
+    public static final String LABELS_dict_kuromoji_link_update = "{labels.dict_kuromoji_link_update}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_dict_userdict_link_delete = "{labels.dict_userdict_link_delete}";
+    public static final String LABELS_dict_kuromoji_link_delete = "{labels.dict_kuromoji_link_delete}";
 
     /** The key of the message: Confirm */
-    public static final String LABELS_dict_userdict_link_confirm = "{labels.dict_userdict_link_confirm}";
+    public static final String LABELS_dict_kuromoji_link_confirm = "{labels.dict_kuromoji_link_confirm}";
 
     /** The key of the message: Download */
-    public static final String LABELS_dict_userdict_link_download = "{labels.dict_userdict_link_download}";
+    public static final String LABELS_dict_kuromoji_link_download = "{labels.dict_kuromoji_link_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_dict_userdict_link_upload = "{labels.dict_userdict_link_upload}";
+    public static final String LABELS_dict_kuromoji_link_upload = "{labels.dict_kuromoji_link_upload}";
 
     /** The key of the message: Token */
-    public static final String LABELS_dict_userdict_token = "{labels.dict_userdict_token}";
+    public static final String LABELS_dict_kuromoji_token = "{labels.dict_kuromoji_token}";
 
     /** The key of the message: Segmentation */
-    public static final String LABELS_dict_userdict_segmentation = "{labels.dict_userdict_segmentation}";
+    public static final String LABELS_dict_kuromoji_segmentation = "{labels.dict_kuromoji_segmentation}";
 
     /** The key of the message: Reading */
-    public static final String LABELS_dict_userdict_reading = "{labels.dict_userdict_reading}";
+    public static final String LABELS_dict_kuromoji_reading = "{labels.dict_kuromoji_reading}";
 
     /** The key of the message: POS */
-    public static final String LABELS_dict_userdict_pos = "{labels.dict_userdict_pos}";
+    public static final String LABELS_dict_kuromoji_pos = "{labels.dict_kuromoji_pos}";
 
     /** The key of the message: Create */
-    public static final String LABELS_dict_userdict_button_create = "{labels.dict_userdict_button_create}";
+    public static final String LABELS_dict_kuromoji_button_create = "{labels.dict_kuromoji_button_create}";
 
     /** The key of the message: Back */
-    public static final String LABELS_dict_userdict_button_back = "{labels.dict_userdict_button_back}";
+    public static final String LABELS_dict_kuromoji_button_back = "{labels.dict_kuromoji_button_back}";
 
     /** The key of the message: Confirm */
-    public static final String LABELS_dict_userdict_button_confirm = "{labels.dict_userdict_button_confirm}";
+    public static final String LABELS_dict_kuromoji_button_confirm = "{labels.dict_kuromoji_button_confirm}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_dict_userdict_button_edit = "{labels.dict_userdict_button_edit}";
+    public static final String LABELS_dict_kuromoji_button_edit = "{labels.dict_kuromoji_button_edit}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_dict_userdict_button_delete = "{labels.dict_userdict_button_delete}";
+    public static final String LABELS_dict_kuromoji_button_delete = "{labels.dict_kuromoji_button_delete}";
 
     /** The key of the message: Update */
-    public static final String LABELS_dict_userdict_button_update = "{labels.dict_userdict_button_update}";
+    public static final String LABELS_dict_kuromoji_button_update = "{labels.dict_kuromoji_button_update}";
 
     /** The key of the message: Download */
-    public static final String LABELS_dict_userdict_button_download = "{labels.dict_userdict_button_download}";
+    public static final String LABELS_dict_kuromoji_button_download = "{labels.dict_kuromoji_button_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_dict_userdict_button_upload = "{labels.dict_userdict_button_upload}";
+    public static final String LABELS_dict_kuromoji_button_upload = "{labels.dict_kuromoji_button_upload}";
 
     /** The key of the message: UserDict File */
-    public static final String LABELS_dict_userdict_file = "{labels.dict_userdict_file}";
+    public static final String LABELS_dict_kuromoji_file = "{labels.dict_kuromoji_file}";
 
     /** The key of the message: Doc Boost */
     public static final String LABELS_boost_document_rule_configuration = "{labels.boost_document_rule_configuration}";

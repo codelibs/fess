@@ -44,6 +44,8 @@
 		<%-- Form --%>
 		<la:form>
 			<la:hidden property="crudMode" />
+            <la:hidden property="dictId" />
+            <la:hidden property="id" />
 			<div class="row">
 			<div class="col-md-12">
 				<div class="box">
@@ -70,7 +72,7 @@
 						</la:link>
 					</span>
 					<span class="label label-default">
-						<la:link href="index?dictId=${f:u(dictId)}">
+						<la:link href="list/1?dictId=${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_list_link" />
 						</la:link>
 					</span>
@@ -103,12 +105,12 @@
 						</span>
 					</c:if>
 					<span class="label label-default">
-						<la:link href="downloadpage?dictId=${f:u(dictId)}">
+						<la:link href="downloadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_download" />
 						</la:link>
 					</span>
 					<span class="label label-default">
-						<la:link href="uploadpage?dictId=${f:u(dictId)}">
+						<la:link href="uploadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_upload" />
 						</la:link>
 					</span>

@@ -346,13 +346,13 @@ public class FessMessages extends FessLabels {
     public static final String ERRORS_failed_to_upload_synonym_file = "{errors.failed_to_upload_synonym_file}";
 
     /** The key of the message: Synonym file is not found */
-    public static final String ERRORS_userdict_file_is_not_found = "{errors.userdict_file_is_not_found}";
+    public static final String ERRORS_kuromoji_file_is_not_found = "{errors.kuromoji_file_is_not_found}";
 
     /** The key of the message: Failed to download the UserDict file. */
-    public static final String ERRORS_failed_to_download_userdict_file = "{errors.failed_to_download_userdict_file}";
+    public static final String ERRORS_failed_to_download_kuromoji_file = "{errors.failed_to_download_kuromoji_file}";
 
     /** The key of the message: Failed to upload the UserDict file. */
-    public static final String ERRORS_failed_to_upload_userdict_file = "{errors.failed_to_upload_userdict_file}";
+    public static final String ERRORS_failed_to_upload_kuromoji_file = "{errors.failed_to_upload_kuromoji_file}";
 
     /** The key of the message: Password is required. */
     public static final String ERRORS_blank_password = "{errors.blank_password}";
@@ -463,7 +463,7 @@ public class FessMessages extends FessLabels {
     public static final String SUCCESS_upload_synonym_file = "{success.upload_synonym_file}";
 
     /** The key of the message: Uploaded UserDict file. */
-    public static final String SUCCESS_upload_userdict_file = "{success.upload_userdict_file}";
+    public static final String SUCCESS_upload_kuromoji_file = "{success.upload_kuromoji_file}";
 
     /** The key of the message: Uploaded Additional Word file. */
     public static final String SUCCESS_upload_suggest_elevate_word = "{success.upload_suggest_elevate_word}";
@@ -2175,44 +2175,44 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.userdict_file_is_not_found' with parameters.
+     * Add the created action message for the key 'errors.kuromoji_file_is_not_found' with parameters.
      * <pre>
      * message: Synonym file is not found
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorsUserdictFileIsNotFound(String property) {
+    public FessMessages addErrorsKuromojiFileIsNotFound(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_userdict_file_is_not_found));
+        add(property, new ActionMessage(ERRORS_kuromoji_file_is_not_found));
         return this;
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_download_userdict_file' with parameters.
+     * Add the created action message for the key 'errors.failed_to_download_kuromoji_file' with parameters.
      * <pre>
      * message: Failed to download the UserDict file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorsFailedToDownloadUserdictFile(String property) {
+    public FessMessages addErrorsFailedToDownloadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_userdict_file));
+        add(property, new ActionMessage(ERRORS_failed_to_download_kuromoji_file));
         return this;
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_upload_userdict_file' with parameters.
+     * Add the created action message for the key 'errors.failed_to_upload_kuromoji_file' with parameters.
      * <pre>
      * message: Failed to upload the UserDict file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorsFailedToUploadUserdictFile(String property) {
+    public FessMessages addErrorsFailedToUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_userdict_file));
+        add(property, new ActionMessage(ERRORS_failed_to_upload_kuromoji_file));
         return this;
     }
 
@@ -2727,16 +2727,16 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.upload_userdict_file' with parameters.
+     * Add the created action message for the key 'success.upload_kuromoji_file' with parameters.
      * <pre>
      * message: Uploaded UserDict file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessUploadUserdictFile(String property) {
+    public FessMessages addSuccessUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_userdict_file));
+        add(property, new ActionMessage(SUCCESS_upload_kuromoji_file));
         return this;
     }
 

@@ -17,12 +17,10 @@
 package org.codelibs.fess.app.service;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.dict.DictionaryExpiredException;
@@ -30,13 +28,14 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.kuromoji.KuromojiFile;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
+import org.dbflute.optional.OptionalEntity;
 
 public class KuromojiService {
     @Resource
     protected DictionaryManager dictionaryManager;
 
-    public List<KuromojiItem> getUserDictList(final String dictId, final KuromojiPager kuromojiPager) {
-        final KuromojiFile kuromojiFile = getUserDictFile(dictId);
+    public List<KuromojiItem> getKuromojiList(final String dictId, final KuromojiPager kuromojiPager) {
+        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
 
         final int pageSize = kuromojiPager.getPageSize();
         final PagingList<KuromojiItem> userDictList =
@@ -51,29 +50,18 @@ public class KuromojiService {
 
     }
 
-    public KuromojiFile getUserDictFile(final String dictId) {
+    public KuromojiFile getKuromojiFile(final String dictId) {
         return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof KuromojiFile).map(file -> (KuromojiFile) file)
                 .orElseThrow(() -> new DictionaryExpiredException());
     }
 
-    public KuromojiItem getUserDict(final String dictId, final Map<String, String> paramMap) {
-        final KuromojiFile kuromojiFile = getUserDictFile(dictId);
-
-        final String idStr = paramMap.get("id");
-        if (StringUtil.isNotBlank(idStr)) {
-            try {
-                final long id = Long.parseLong(idStr);
-                return kuromojiFile.get(id);
-            } catch (final NumberFormatException e) {
-                // ignore
-            }
-        }
-
-        return null;
+    public OptionalEntity<KuromojiItem> getKuromoji(final String dictId, final long id) {
+        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
+        return kuromojiFile.get(id);
     }
 
     public void store(final String dictId, final KuromojiItem kuromojiItem) {
-        final KuromojiFile kuromojiFile = getUserDictFile(dictId);
+        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
 
         if (kuromojiItem.getId() == 0) {
             kuromojiFile.insert(kuromojiItem);
@@ -83,7 +71,7 @@ public class KuromojiService {
     }
 
     public void delete(final String dictId, final KuromojiItem kuromojiItem) {
-        final KuromojiFile kuromojiFile = getUserDictFile(dictId);
+        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
         kuromojiFile.delete(kuromojiItem);
     }
 }
