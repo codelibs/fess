@@ -14,11 +14,11 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.dict.userdict;
+package org.codelibs.fess.dict.kuromoji;
 
 import org.codelibs.fess.dict.DictionaryItem;
 
-public class UserDictItem extends DictionaryItem {
+public class KuromojiItem extends DictionaryItem {
     private final String token;
 
     private final String segmentation;
@@ -35,7 +35,7 @@ public class UserDictItem extends DictionaryItem {
 
     private String newPos;
 
-    public UserDictItem(final long id, final String token, final String segmentation, final String reading, final String pos) {
+    public KuromojiItem(final long id, final String token, final String segmentation, final String reading, final String pos) {
         this.id = id;
         this.token = token;
         this.segmentation = segmentation;
@@ -129,7 +129,7 @@ public class UserDictItem extends DictionaryItem {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final UserDictItem other = (UserDictItem) obj;
+        final KuromojiItem other = (KuromojiItem) obj;
         if (pos == null) {
             if (other.pos != null) {
                 return false;
@@ -163,7 +163,7 @@ public class UserDictItem extends DictionaryItem {
 
     @Override
     public String toString() {
-        return "UserDictItem [token=" + token + ", segmentation=" + segmentation + ", reading=" + reading + ", pos=" + pos + ", newToken="
+        return "KuromojiItem [token=" + token + ", segmentation=" + segmentation + ", reading=" + reading + ", pos=" + pos + ", newToken="
                 + newToken + ", newSegmentation=" + newSegmentation + ", newReading=" + newReading + ", newPos=" + newPos + "]";
     }
 

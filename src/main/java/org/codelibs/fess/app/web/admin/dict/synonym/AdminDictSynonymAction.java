@@ -63,14 +63,14 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SynonymSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SynonymSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         synonymPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -78,7 +78,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final SynonymSearchForm form) {
+    public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form.searchParams, synonymPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -86,7 +86,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse reset(final SynonymSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         synonymPager.clear();
         return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -94,13 +94,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final SynonymSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final SynonymSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         // TODO
     }
 
@@ -112,7 +112,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final SynonymEditForm form) {
+    public HtmlResponse createpage(final EditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminDictSynonym_EditJsp);
@@ -120,7 +120,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final SynonymEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.EDIT);
@@ -130,13 +130,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final SynonymEditForm form) {
+    public HtmlResponse editagain(final EditForm form) {
         return asHtml(path_AdminDictSynonym_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final SynonymEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
         form.crudMode = CrudMode.EDIT;
         // TODO loadSynonym(form);
         return asHtml(path_AdminDictSynonym_EditJsp);
@@ -144,7 +144,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final SynonymEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.DELETE);
@@ -154,7 +154,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final SynonymEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         // TODO loadSynonym(form);
         return asHtml(path_AdminDictSynonym_ConfirmJsp);
@@ -164,7 +164,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final SynonymEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.CONFIRM);
@@ -174,14 +174,14 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final SynonymEditForm form) {
+    public HtmlResponse confirmfromcreate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDictSynonym_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final SynonymEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDictSynonym_ConfirmJsp);
     }
@@ -191,13 +191,13 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse downloadpage(final SynonymSearchForm form) {
+    public HtmlResponse downloadpage(final SearchForm form) {
         return asHtml(path_AdminDictSynonym_DownloadJsp);
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse download(final SynonymSearchForm form) {
+    public HtmlResponse download(final SearchForm form) {
         // TODO Download
 
         return asHtml(path_AdminDictSynonym_DownloadJsp);
@@ -208,7 +208,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse uploadpage(final SynonymUploadForm form) {
+    public HtmlResponse uploadpage(final UploadForm form) {
         // TODO Upload
 
         return asHtml(path_AdminDictSynonym_UploadJsp);
@@ -219,27 +219,27 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final SynonymEditForm form) {
+    public HtmlResponse create(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final SynonymEditForm form) {
+    public HtmlResponse update(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final SynonymEditForm form) {
+    public HtmlResponse delete(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse upload(final SynonymUploadForm form) {
+    public HtmlResponse upload(final UploadForm form) {
         // TODO
         return redirect(getClass());
     }
@@ -254,7 +254,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final SynonymEditForm form, final int expectedMode) {
+    protected void verifyCrudMode(final EditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));

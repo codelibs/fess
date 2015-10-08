@@ -9,7 +9,7 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
 
@@ -63,7 +63,7 @@
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
 														<td>${f:h(data.type)}</td>
-														<td><la:link href="${f:h(data.type)}/index?dictId=${f:h(data.id)}">${f:h(data.name)}</la:link></td>
+														<td><la:link href="${f:h(data.type)}/?dictId=${f:h(data.id)}">${f:h(data.path)}</la:link></td>
 												</tr>
 											</c:forEach>
 										</tbody>

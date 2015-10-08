@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * @author Keiichi Watanabe
  */
-public class DictForm implements Serializable {
+public class ListForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

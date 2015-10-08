@@ -14,138 +14,104 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.dict.userdict;
+package org.codelibs.fess.dict.kuromoji;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
-import org.codelibs.fess.util.UserDictCSVUtil;
+import org.codelibs.fess.util.KuromojiCSVUtil;
 
-public class UserDictFile extends DictionaryFile<UserDictItem> {
-    private static final String USERDICT = "userDict";
+public class KuromojiFile extends DictionaryFile<KuromojiItem> {
+    private static final String KUROMOJI = "kuromoji";
 
-    private final File file;
+    List<KuromojiItem> kuromojiItemList;
 
-    List<UserDictItem> userDictItemList;
-
-    public UserDictFile(final File file) {
-        this.file = file;
+    public KuromojiFile(String id, String path, Date timestamp) {
+        super(id, path, timestamp);
     }
 
     @Override
     public String getType() {
-        return USERDICT;
+        return KUROMOJI;
     }
 
     @Override
-    public String getName() {
-        return file.getAbsolutePath();
+    public String getPath() {
+        return path;
     }
 
     @Override
-    public UserDictItem get(final long id) {
-        for (final UserDictItem userDictItem : userDictItemList) {
-            if (id == userDictItem.getId()) {
-                return userDictItem;
+    public KuromojiItem get(final long id) {
+        for (final KuromojiItem kuromojiItem : kuromojiItemList) {
+            if (id == kuromojiItem.getId()) {
+                return kuromojiItem;
             }
         }
         return null;
     }
 
     @Override
-    public synchronized PagingList<UserDictItem> selectList(final int offset, final int size) {
-        if (userDictItemList == null) {
+    public synchronized PagingList<KuromojiItem> selectList(final int offset, final int size) {
+        if (kuromojiItemList == null) {
             reload(null);
         }
 
-        if (offset >= userDictItemList.size() || offset < 0) {
-            return new PagingList<UserDictItem>(Collections.<UserDictItem> emptyList(), offset, size, userDictItemList.size());
+        if (offset >= kuromojiItemList.size() || offset < 0) {
+            return new PagingList<KuromojiItem>(Collections.<KuromojiItem> emptyList(), offset, size, kuromojiItemList.size());
         }
 
         int toIndex = offset + size;
-        if (toIndex > userDictItemList.size()) {
-            toIndex = userDictItemList.size();
+        if (toIndex > kuromojiItemList.size()) {
+            toIndex = kuromojiItemList.size();
         }
 
-        return new PagingList<UserDictItem>(userDictItemList.subList(offset, toIndex), offset, size, userDictItemList.size());
+        return new PagingList<KuromojiItem>(kuromojiItemList.subList(offset, toIndex), offset, size, kuromojiItemList.size());
     }
 
     @Override
-    public synchronized void insert(final UserDictItem item) {
-        final UserDictItem userDictItem = item;
-        BufferedWriter bw = null;
-        try {
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), Constants.UTF_8));
-            bw.newLine();
-            bw.write(userDictItem.toLineString());
-            bw.flush();
-
-            long nextId = 1;
-            if (!userDictItemList.isEmpty()) {
-                final UserDictItem lastItem = userDictItemList.get(userDictItemList.size() - 1);
-                nextId = lastItem.getId() + 1;
-            }
-            userDictItemList.add(new UserDictItem(nextId, userDictItem.getNewToken(), userDictItem.getNewSegmentation(), userDictItem
-                    .getNewReading(), userDictItem.getNewPos()));
-        } catch (final IOException e) {
-            throw new DictionaryException("Failed to write: " + item, e);
-        } finally {
-            IOUtils.closeQuietly(bw);
-        }
-    }
-
-    @Override
-    public synchronized void update(final UserDictItem item) {
-        UserDictUpdater updater = null;
-        try {
-            updater = new UserDictUpdater(file, item);
+    public synchronized void insert(final KuromojiItem item) {
+        try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
             reload(updater);
-        } finally {
-            if (updater != null) {
-                updater.close();
-            }
         }
     }
 
     @Override
-    public synchronized void delete(final UserDictItem item) {
-        final UserDictItem userDictItem = item;
-        userDictItem.setNewToken(StringUtil.EMPTY);
-        UserDictUpdater updater = null;
-        try {
-            updater = new UserDictUpdater(file, userDictItem);
+    public synchronized void update(final KuromojiItem item) {
+        try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
             reload(updater);
-        } finally {
-            if (updater != null) {
-                updater.close();
-            }
         }
     }
 
-    protected void reload(final UserDictUpdater updater) {
-        final List<UserDictItem> itemList = new ArrayList<UserDictItem>();
+    @Override
+    public synchronized void delete(final KuromojiItem item) {
+        final KuromojiItem kuromojiItem = item;
+        kuromojiItem.setNewToken(StringUtil.EMPTY);
+        try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
+            reload(updater);
+        }
+    }
+
+    protected void reload(final KuromojiUpdater updater) {
+        final List<KuromojiItem> itemList = new ArrayList<KuromojiItem>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Constants.UTF_8));
+            reader = new BufferedReader(new InputStreamReader(dictionaryManager.getContentInputStream(this), Constants.UTF_8));
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -160,7 +126,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                     continue;
                 }
 
-                final String[] values = UserDictCSVUtil.parse(line);
+                final String[] values = KuromojiCSVUtil.parse(line);
                 String token = null;
                 String segmentation = null;
                 String reading = null;
@@ -179,9 +145,9 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 }
 
                 id++;
-                final UserDictItem item = new UserDictItem(id, token, segmentation, reading, pos);
+                final KuromojiItem item = new KuromojiItem(id, token, segmentation, reading, pos);
                 if (updater != null) {
-                    final UserDictItem newItem = updater.write(item);
+                    final KuromojiItem newItem = updater.write(item);
                     if (newItem != null) {
                         itemList.add(newItem);
                     } else {
@@ -192,31 +158,51 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 }
             }
             if (updater != null) {
-                updater.commit();
+                KuromojiItem item = updater.commit();
+                if (item != null) {
+                    itemList.add(item);
+                }
             }
-            userDictItemList = itemList;
+            kuromojiItemList = itemList;
         } catch (final IOException e) {
-            throw new DictionaryException("Failed to parse " + file.getAbsolutePath(), e);
+            throw new DictionaryException("Failed to parse " + path, e);
         } finally {
             IOUtils.closeQuietly(reader);
         }
     }
 
-    protected static class UserDictUpdater {
+    public String getSimpleName() {
+        return new File(path).getName();
+    }
+
+    // TODO
+    //    public InputStream getInputStream() throws IOException {
+    //        return new BufferedInputStream(new FileInputStream(file));
+    //    }
+    //
+    //    public void update(final InputStream in) throws IOException {
+    //        CopyUtil.copy(in, file);
+    //        reload(null);
+    //    }
+
+    @Override
+    public String toString() {
+        return "KuromojiFile [path=" + path + ", kuromojiItemList=" + kuromojiItemList + ", id=" + id + "]";
+    }
+
+    protected class KuromojiUpdater implements Closeable {
 
         protected boolean isCommit = false;
-
-        protected File oldFile;
 
         protected File newFile;
 
         protected Writer writer;
 
-        protected UserDictItem item;
+        protected KuromojiItem item;
 
-        protected UserDictUpdater(final File file, final UserDictItem newItem) {
+        protected KuromojiUpdater(final KuromojiItem newItem) {
             try {
-                newFile = File.createTempFile(USERDICT, ".txt");
+                newFile = File.createTempFile(KUROMOJI, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {
                 if (newFile != null) {
@@ -224,11 +210,10 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                 }
                 throw new DictionaryException("Failed to write a userDict file.", e);
             }
-            oldFile = file;
             item = newItem;
         }
 
-        public UserDictItem write(final UserDictItem oldItem) {
+        public KuromojiItem write(final KuromojiItem oldItem) {
             try {
                 if (item.getId() == oldItem.getId() && item.isUpdated()) {
                     if (item.equals(oldItem)) {
@@ -237,7 +222,7 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new UserDictItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
+                                return new KuromojiItem(item.getId(), item.getNewToken(), item.getNewSegmentation(), item.getNewReading(),
                                         item.getNewPos());
                             } else {
                                 return null;
@@ -267,10 +252,21 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
             }
         }
 
-        public void commit() {
+        public KuromojiItem commit() {
             isCommit = true;
+            if (item.isUpdated()) {
+                try {
+                    writer.write(item.toLineString());
+                    writer.write(Constants.LINE_SEPARATOR);
+                    return item;
+                } catch (final IOException e) {
+                    throw new DictionaryException("Failed to write: " + item, e);
+                }
+            }
+            return null;
         }
 
+        @Override
         public void close() {
             try {
                 writer.flush();
@@ -281,11 +277,9 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
 
             if (isCommit) {
                 try {
-                    FileUtils.copyFile(newFile, oldFile);
+                    dictionaryManager.store(KuromojiFile.this, newFile);
+                } finally {
                     newFile.delete();
-                } catch (final IOException e) {
-                    throw new DictionaryException("Failed to replace " + oldFile.getAbsolutePath() + " with " + newFile.getAbsolutePath(),
-                            e);
                 }
             } else {
                 newFile.delete();
@@ -293,21 +287,4 @@ public class UserDictFile extends DictionaryFile<UserDictItem> {
         }
     }
 
-    public String getSimpleName() {
-        return file.getName();
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return new BufferedInputStream(new FileInputStream(file));
-    }
-
-    public void update(final InputStream in) throws IOException {
-        CopyUtil.copy(in, file);
-        reload(null);
-    }
-
-    @Override
-    public String toString() {
-        return "UserDictFile [file=" + file + ", userDictItemList=" + userDictItemList + ", id=" + id + "]";
-    }
 }

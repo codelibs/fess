@@ -26,7 +26,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.dict.DictionaryExpiredException;
-import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
@@ -52,11 +51,8 @@ public class SynonymService {
     }
 
     public SynonymFile getSynonymFile(final String dictId) {
-        final DictionaryFile<?> dictionaryFile = dictionaryManager.getDictionaryFile(dictId);
-        if (dictionaryFile instanceof SynonymFile) {
-            return (SynonymFile) dictionaryFile;
-        }
-        throw new DictionaryExpiredException();
+        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof SynonymFile).map(file -> (SynonymFile) file)
+                .orElseThrow(() -> new DictionaryExpiredException());
     }
 
     public SynonymItem getSynonym(final String dictId, final Map<String, String> paramMap) {

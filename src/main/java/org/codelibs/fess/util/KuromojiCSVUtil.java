@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Utility class for parsing CSV text
  */
-public final class UserDictCSVUtil {
+public final class KuromojiCSVUtil {
     private static final char QUOTE = '"';
 
     private static final char COMMA = ',';
@@ -33,7 +33,7 @@ public final class UserDictCSVUtil {
 
     private static final String ESCAPED_QUOTE = "\"\"";
 
-    private UserDictCSVUtil() {
+    private KuromojiCSVUtil() {
     } // no instance!!!
 
     /**

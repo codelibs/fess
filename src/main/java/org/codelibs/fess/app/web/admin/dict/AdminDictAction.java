@@ -19,6 +19,8 @@ package org.codelibs.fess.app.web.admin.dict;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.dict.DictionaryFile;
+import org.codelibs.fess.dict.DictionaryItem;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -51,11 +53,10 @@ public class AdminDictAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final DictForm form) {
+    public HtmlResponse index(final ListForm form) {
         return asHtml(path_AdminDict_IndexJsp).renderWith(data -> {
-            // TODO
-            // DictionaryFile<? extends DictionaryItem>[] dictFiles dictFiles = dictionaryManager.getDictionaryFiles();
-            // data.register("dictFiles", dictFiles);
-            });
+            DictionaryFile<? extends DictionaryItem>[] dictFiles = dictionaryManager.getDictionaryFiles();
+            data.register("dictFiles", dictFiles);
+        });
     }
 }

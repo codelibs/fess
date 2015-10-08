@@ -20,6 +20,7 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.AdRoleHelper;
@@ -52,6 +53,8 @@ import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public final class ComponentUtil {
+    private static final String DICTIONARY_MANAGER = "dictionaryManager";
+
     private static final String DATA_SERVICE = "dataService";
 
     private static final String MESSAGE_MANAGER = "messageManager";
@@ -245,6 +248,11 @@ public final class ComponentUtil {
 
     public static MessageManager getMessageManager() {
         return SingletonLaContainer.getComponent(MESSAGE_MANAGER);
+    }
+
+    public static DictionaryManager getDictionaryManager() {
+        return SingletonLaContainer.getComponent(DICTIONARY_MANAGER);
+
     }
 
     public static DataService<EsAccessResult> getDataService() {

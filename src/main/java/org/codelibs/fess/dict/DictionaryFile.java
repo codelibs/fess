@@ -18,16 +18,44 @@ package org.codelibs.fess.dict;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
 public abstract class DictionaryFile<T extends DictionaryItem> {
+    protected DictionaryManager dictionaryManager;
+
     protected String id;
 
-    public abstract String getType();
+    protected String path;
 
-    public abstract String getName();
+    protected Date timestamp;
+
+    public DictionaryFile(String id, String path, Date timestamp) {
+        this.id = id;
+        this.path = path;
+        this.timestamp = timestamp;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public DictionaryFile<T> manager(DictionaryManager dictionaryManager) {
+        this.dictionaryManager = dictionaryManager;
+        return this;
+    }
+
+    public abstract String getType();
 
     public abstract PagingList<T> selectList(int offset, int size);
 
@@ -38,14 +66,6 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
     public abstract void update(T item);
 
     public abstract void delete(T item);
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
 
     public static class PagingList<E> implements List<E> {
         private final List<E> parent;

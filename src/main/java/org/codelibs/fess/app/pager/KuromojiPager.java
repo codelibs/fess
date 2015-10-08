@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class UserDictPager implements Serializable {
+public class KuromojiPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

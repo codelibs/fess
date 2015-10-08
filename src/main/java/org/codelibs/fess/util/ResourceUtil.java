@@ -18,6 +18,9 @@ package org.codelibs.fess.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,43 +35,55 @@ public class ResourceUtil {
         // nothing
     }
 
-    public static String getDbPath(final String name) {
-        return getBasePath("WEB-INF/db/", name);
+    public static Path getConfPath(final String... names) {
+        return getPath("conf", names);
     }
 
-    public static String getConfPath(final String name) {
-        return getBasePath("WEB-INF/conf/", name);
+    public static Path getClassesPath(final String... names) {
+        return getPath("classes", names);
     }
 
-    public static String getClassesPath(final String name) {
-        return getBasePath("WEB-INF/classes/", name);
+    public static Path getOrigPath(final String... names) {
+        return getPath("orig", names);
     }
 
-    public static String getOrigPath(final String name) {
-        return getBasePath("WEB-INF/orig/", name);
+    public static Path getMailTemplatePath(final String... names) {
+        return getPath("mail", names);
     }
 
-    public static String getMailTemplatePath(final String name) {
-        return getBasePath("WEB-INF/mail/", name);
+    public static Path getViewTemplatePath(final String... names) {
+        return getPath("view", names);
     }
 
-    public static String getViewTemplatePath(final String name) {
-        return getBasePath("WEB-INF/view/", name);
+    public static Path getDictionaryPath(final String... names) {
+        return getPath("dict", names);
     }
 
-    protected static String getBasePath(final String baseName, final String name) {
+    protected static Path getPath(final String base, String... names) {
 
-        String path = null;
         try {
             final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
-            if (servletContext != null) {
-                path = servletContext.getRealPath("/" + baseName + name);
+            String webinfoPath = servletContext.getRealPath("/WEB-INF/" + base);
+            if (webinfoPath != null) {
+                Path path = Paths.get(webinfoPath, names);
+                if (Files.exists(path)) {
+                    return path;
+                }
             }
         } catch (final Throwable e) { // NOSONAR
             // ignore
         }
-        if (path == null) {
-            path = new File(baseName + name).getAbsolutePath();
+        Path path = Paths.get(".", names);
+        if (Files.exists(path)) {
+            return path;
+        }
+        path = Paths.get("src/main/webapps/WEB-INF/" + base, names);
+        if (Files.exists(path)) {
+            return path;
+        }
+        path = Paths.get("target/fess/WEB-INF/" + base, names);
+        if (Files.exists(path)) {
+            return path;
         }
         return path;
     }

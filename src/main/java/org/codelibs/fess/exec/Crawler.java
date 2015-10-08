@@ -304,7 +304,7 @@ public class Crawler implements Serializable {
                 // ignore
             }
 
-            final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getMailTemplatePath(StringUtil.EMPTY)));
+            final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getMailTemplatePath(StringUtil.EMPTY).toFile());
             final Handlebars handlebars = new Handlebars(loader);
 
             try {

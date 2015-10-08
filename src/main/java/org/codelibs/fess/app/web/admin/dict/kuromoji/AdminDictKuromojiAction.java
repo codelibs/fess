@@ -14,15 +14,15 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.dict.userdict;
+package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.pager.UserDictPager;
-import org.codelibs.fess.app.service.UserDictService;
+import org.codelibs.fess.app.pager.KuromojiPager;
+import org.codelibs.fess.app.service.KuromojiService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.suggestelevateword.SuggestElevateWordEditForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -36,15 +36,15 @@ import org.lastaflute.web.validation.VaErrorHook;
 /**
  * @author Keiichi Watanabe
  */
-public class AdminDictUserdictAction extends FessAdminAction {
+public class AdminDictKuromojiAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private UserDictService userDictService;
+    private KuromojiService kuromojiService;
     @Resource
-    private UserDictPager userDictPager;
+    private KuromojiPager kuromojiPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -63,44 +63,44 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
+    public HtmlResponse index(final SearchForm form) {
+        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final UserDictSearchForm form) {
-        userDictPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+        kuromojiPager.setCurrentPageNumber(pageNumber);
+        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse search(final UserDictSearchForm form) {
-        copyBeanToBean(form.searchParams, userDictPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form.searchParams, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final UserDictSearchForm form) {
-        userDictPager.clear();
-        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
+    public HtmlResponse reset(final SearchForm form) {
+        kuromojiPager.clear();
+        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse back(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserdict_IndexJsp).renderWith(data -> {
+    public HtmlResponse back(final SearchForm form) {
+        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final UserDictSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         // TODO
     }
 
@@ -112,78 +112,78 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final UserDictEditForm form) {
+    public HtmlResponse createpage(final EditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminDictUserdict_EditJsp);
+        return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final UserDictEditForm form) {
+    public HtmlResponse editpage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.EDIT);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserdict_EditJsp);
+        return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final UserDictEditForm form) {
-        return asHtml(path_AdminDictUserdict_EditJsp);
+    public HtmlResponse editagain(final EditForm form) {
+        return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final UserDictEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
         form.crudMode = CrudMode.EDIT;
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserdict_EditJsp);
+        return asHtml(path_AdminDictKuromoji_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final UserDictEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.DELETE);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserdict_ConfirmJsp);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final UserDictEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserdict_ConfirmJsp);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     // -----------------------------------------------------
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final UserDictEditForm form) {
+    public HtmlResponse confirmpage(final int crudMode, final String id, final EditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.CONFIRM);
         // TODO loadUserDict(form);
-        return asHtml(path_AdminDictUserdict_ConfirmJsp);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final UserDictEditForm form) {
+    public HtmlResponse confirmfromcreate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminDictUserdict_ConfirmJsp);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final UserDictEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminDictUserdict_ConfirmJsp);
+        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -191,16 +191,16 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse downloadpage(final UserDictSearchForm form) {
-        return asHtml(path_AdminDictUserdict_DownloadJsp);
+    public HtmlResponse downloadpage(final SearchForm form) {
+        return asHtml(path_AdminDictKuromoji_DownloadJsp);
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse download(final UserDictSearchForm form) {
+    public HtmlResponse download(final SearchForm form) {
         // TODO Download
 
-        return asHtml(path_AdminDictUserdict_DownloadJsp);
+        return asHtml(path_AdminDictKuromoji_DownloadJsp);
     }
 
     // -----------------------------------------------------
@@ -208,10 +208,10 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                               -------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse uploadpage(final UserDictUploadForm form) {
+    public HtmlResponse uploadpage(final UploadForm form) {
         // TODO Upload
 
-        return asHtml(path_AdminDictUserdict_UploadJsp);
+        return asHtml(path_AdminDictKuromoji_UploadJsp);
     }
 
     // -----------------------------------------------------
@@ -219,27 +219,27 @@ public class AdminDictUserdictAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final UserDictEditForm form) {
+    public HtmlResponse create(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final UserDictEditForm form) {
+    public HtmlResponse update(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final UserDictEditForm form) {
+    public HtmlResponse delete(final EditForm form) {
         // TODO
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse upload(final UserDictUploadForm form) {
+    public HtmlResponse upload(final UploadForm form) {
         // TODO
         return redirect(getClass());
     }
@@ -254,7 +254,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final UserDictEditForm form, final int expectedMode) {
+    protected void verifyCrudMode(final EditForm form, final int expectedMode) {
         if (form.crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
@@ -264,7 +264,7 @@ public class AdminDictUserdictAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminDictUserdict_EditJsp);
+            return asHtml(path_AdminDictKuromoji_EditJsp);
         };
     }
 }

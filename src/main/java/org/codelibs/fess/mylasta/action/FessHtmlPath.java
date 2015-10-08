@@ -59,6 +59,24 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/index.jsp */
     HtmlNext path_AdminDict_IndexJsp = new HtmlNext("/admin/dict/index.jsp");
 
+    /** The path of the HTML: /admin/dict/kuromoji/confirm.jsp */
+    HtmlNext path_AdminDictKuromoji_ConfirmJsp = new HtmlNext("/admin/dict/kuromoji/confirm.jsp");
+
+    /** The path of the HTML: /admin/dict/kuromoji/download.jsp */
+    HtmlNext path_AdminDictKuromoji_DownloadJsp = new HtmlNext("/admin/dict/kuromoji/download.jsp");
+
+    /** The path of the HTML: /admin/dict/kuromoji/edit.jsp */
+    HtmlNext path_AdminDictKuromoji_EditJsp = new HtmlNext("/admin/dict/kuromoji/edit.jsp");
+
+    /** The path of the HTML: /admin/dict/kuromoji/error.jsp */
+    HtmlNext path_AdminDictKuromoji_ErrorJsp = new HtmlNext("/admin/dict/kuromoji/error.jsp");
+
+    /** The path of the HTML: /admin/dict/kuromoji/index.jsp */
+    HtmlNext path_AdminDictKuromoji_IndexJsp = new HtmlNext("/admin/dict/kuromoji/index.jsp");
+
+    /** The path of the HTML: /admin/dict/kuromoji/upload.jsp */
+    HtmlNext path_AdminDictKuromoji_UploadJsp = new HtmlNext("/admin/dict/kuromoji/upload.jsp");
+
     /** The path of the HTML: /admin/dict/synonym/confirm.jsp */
     HtmlNext path_AdminDictSynonym_ConfirmJsp = new HtmlNext("/admin/dict/synonym/confirm.jsp");
 
@@ -76,24 +94,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/dict/synonym/upload.jsp */
     HtmlNext path_AdminDictSynonym_UploadJsp = new HtmlNext("/admin/dict/synonym/upload.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/confirm.jsp */
-    HtmlNext path_AdminDictUserdict_ConfirmJsp = new HtmlNext("/admin/dict/userdict/confirm.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/download.jsp */
-    HtmlNext path_AdminDictUserdict_DownloadJsp = new HtmlNext("/admin/dict/userdict/download.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/edit.jsp */
-    HtmlNext path_AdminDictUserdict_EditJsp = new HtmlNext("/admin/dict/userdict/edit.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/error.jsp */
-    HtmlNext path_AdminDictUserdict_ErrorJsp = new HtmlNext("/admin/dict/userdict/error.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/index.jsp */
-    HtmlNext path_AdminDictUserdict_IndexJsp = new HtmlNext("/admin/dict/userdict/index.jsp");
-
-    /** The path of the HTML: /admin/dict/userdict/upload.jsp */
-    HtmlNext path_AdminDictUserdict_UploadJsp = new HtmlNext("/admin/dict/userdict/upload.jsp");
 
     /** The path of the HTML: /admin/failureurl/confirm.jsp */
     HtmlNext path_AdminFailureurl_ConfirmJsp = new HtmlNext("/admin/failureurl/confirm.jsp");

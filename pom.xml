@@ -110,7 +110,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.3</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -279,7 +279,7 @@
 							<url
 								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/1.5.0/elasticsearch-analysis-synonym-1.5.0.zip" />
 							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-configsync/1.7.0/elasticsearch-configsync-1.7.0.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/1.7.1-SNAPSHOT/elasticsearch-configsync-1.7.1-20151008.061136-2.zip" />
 							<url
 								url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/1.7.0/elasticsearch-langfield-1.7.0.zip" />
 						</get>
@@ -290,7 +290,7 @@
 						<unzip dest="${basedir}/plugins/analysis-synonym"
 							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-1.5.0.zip" />
 						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-1.7.0.zip" />
+							src="${basedir}/target/plugins/elasticsearch-configsync-1.7.1-20151008.061136-2.zip" />
 						<unzip dest="${basedir}/plugins/langfield"
 							src="${basedir}/target/plugins/elasticsearch-langfield-1.7.0.zip" />
 					</tasks>
@@ -427,7 +427,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.0</version>
+			<version>0.3.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- fileupload -->

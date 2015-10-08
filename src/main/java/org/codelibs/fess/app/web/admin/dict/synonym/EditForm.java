@@ -24,9 +24,42 @@ import java.util.Map;
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class SynonymSearchForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    //@IntegerType
+    public String pageNumber;
+
     public Map<String, String> searchParams = new HashMap<String, String>();
+
+    //@Required
+    public String dictId;
+
+    //@IntegerType
+    public int crudMode;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
+
+    //@Required(target = "confirmfromupdate,update,delete")
+    //@LongType
+    public String id;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@Maxbytelength(maxbytelength = 1000)
+    public String inputs;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@Maxbytelength(maxbytelength = 1000)
+    public String outputs;
+
+    //@Required(target = "upload")
+    //public FormFile synonymFile;
+
+    public void initialize() {
+        id = null;
+
+    }
 }

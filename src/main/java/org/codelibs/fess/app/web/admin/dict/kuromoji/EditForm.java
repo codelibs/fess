@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.dict.synonym;
+package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class SynonymEditForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,14 +49,22 @@ public class SynonymEditForm implements Serializable {
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
-    public String inputs;
+    public String token;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
     //@Maxbytelength(maxbytelength = 1000)
-    public String outputs;
+    public String segmentation;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@Maxbytelength(maxbytelength = 1000)
+    public String reading;
+
+    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    //@Maxbytelength(maxbytelength = 1000)
+    public String pos;
 
     //@Required(target = "upload")
-    //public FormFile synonymFile;
+    //public FormFile userDictFile;
 
     public void initialize() {
         id = null;

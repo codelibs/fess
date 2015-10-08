@@ -388,7 +388,7 @@ public class ViewHelper implements Serializable {
 
     public String createCacheContent(final Map<String, Object> doc, final String[] queries) {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final FileTemplateLoader loader = new FileTemplateLoader(new File(ResourceUtil.getViewTemplatePath(StringUtil.EMPTY)));
+        final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getViewTemplatePath().toFile());
         final Handlebars handlebars = new Handlebars(loader);
 
         Locale locale = LaRequestUtil.getRequest().getLocale();

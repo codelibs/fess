@@ -3,28 +3,19 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
-		<postConstruct name="addLocator">
-			<arg>userDictLocator</arg>
+		<property name="esUrl">"http://localhost:9201"</property>
+		<postConstruct name="addCreator">
+			<arg>userDictCreator</arg>
 		</postConstruct>
-		<postConstruct name="addLocator">
-			<arg>synonymLocator</arg>
-		</postConstruct>
-	</component>
-
-	<component name="synonymLocator" class="org.codelibs.fess.dict.synonym.SynonymLocator">
-		<property name="excludedSynonymList">["data", "txlog",
-			"lib", "bin", "contrib"]</property>
-		<postConstruct name="addSearchPath">
-			<arg>"${solr.solr.home}"</arg>
+		<postConstruct name="addCreator">
+			<arg>synonymCreator</arg>
 		</postConstruct>
 	</component>
 
-	<component name="userDictLocator" class="org.codelibs.fess.dict.userdict.UserDictLocator">
-		<property name="excludedUserDictList">["data", "txlog",
-			"lib", "bin", "contrib"]</property>
-		<postConstruct name="addSearchPath">
-			<arg>"${solr.solr.home}"</arg>
-		</postConstruct>
+	<component name="synonymCreator" class="org.codelibs.fess.dict.synonym.SynonymCreator">
+	</component>
+
+	<component name="userDictCreator" class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
 	</component>
 
 </components>

@@ -14,19 +14,20 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.dict.userdict;
+package org.codelibs.fess.app.web.admin.dict.synonym;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 
 /**
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class UserDictSearchForm implements Serializable {
+public class UploadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    public MultipartFormFile synonymFile;
+
 }
