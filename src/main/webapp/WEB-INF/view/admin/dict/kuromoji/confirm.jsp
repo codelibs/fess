@@ -45,7 +45,9 @@
 		<la:form>
 			<la:hidden property="crudMode" />
             <la:hidden property="dictId" />
+            <c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
             <la:hidden property="id" />
+            </c:if>
 			<div class="row">
 			<div class="col-md-12">
 				<div class="box">

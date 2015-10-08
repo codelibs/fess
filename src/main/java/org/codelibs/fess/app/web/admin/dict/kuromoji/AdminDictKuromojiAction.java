@@ -283,7 +283,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse upload(final UploadForm form) {
         // TODO
-        return redirect(getClass());
+        return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
     // -----------------------------------------------------
@@ -304,7 +304,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
         });
-        return redirect(getClass());
+        return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
     @Token(save = false, validate = true)
@@ -322,7 +322,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
         });
-        return redirect(getClass());
+        return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
     @Execute
@@ -335,7 +335,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
         });
-        return redirect(getClass());
+        return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
     //===================================================================================
