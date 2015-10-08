@@ -1,10 +1,8 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<footer class="footer">
-	<div class="container">
-		<p class="left"></p>
-		<p class="center">
-			<la:message key="labels.footer.copyright" />
-		</p>
-		<p>&nbsp;</p>
-	</div>
+<!-- Main Footer -->
+<footer class="main-footer">
+	<!-- To the right -->
+	<div class="pull-right hidden-xs"></div>
+	<!-- Default to the left -->
+	<la:message key="labels.footer.copyright" />
 </footer>

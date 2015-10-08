@@ -1,35 +1,29 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<div class="topbar">
-	<div class="fill">
-		<div class="container">
-			<la:link styleClass="brand" href="/admin/index" title="Fess Home">
-				<la:message key="labels.header.logo_alt" />
-			</la:link>
-			<ul class="nav ">
-			</ul>
-			<ul class="nav secondary-nav">
-				<li><la:link href="/admin/" title="Fess Home">
-						<la:message key="labels.header.home" />
-					</la:link></li>
-				<c:if test="${helpLink!=null}">
-				<li><la:link href="${helpLink}" target="_olh">
-						<la:message key="labels.header.help" />
-					</la:link></li>
-				</c:if>
-				<li><la:link href="${contextPath}/admin/logout">
-						<la:message key="labels.menu.logout" />
-					</la:link></li>
-			</ul>
-			<la:form styleClass="pull-right" action="/admin/searchList/search"
-				method="get">
-				<la:text styleClass="input-large" property="query" title="Search"
-					maxlength="1000" styleId="query" />
-				<button class="btn medium primary" type="submit" name="search"
-					id="searchButton">
-					<la:message key="labels.search" />
-				</button>
-			</la:form>
-		</div>
-	</div>
-</div>
+      <!-- Main Header -->
+      <header class="main-header">
 
+        <!-- Logo -->
+        <a href="/admin/" class="logo">
+          <span class="logo-mini"><la:message key="labels.header.logo_alt" /></span>
+          <span class="logo-lg">Fess Dashboard</span>
+        </a>
+
+        <!-- Header Navbar -->
+        <nav class="navbar navbar-static-top" role="navigation">
+          <!-- Sidebar toggle button-->
+          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+          <!-- Navbar Right Menu -->
+          <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+              <li>
+                <a href="${helpLink}" target="_olh"><i class="fa fa-question-circle"></i></a>
+              </li>
+              <li>
+                <a href="${contextPath}/logout"><i class="fa fa-sign-out"></i></a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>

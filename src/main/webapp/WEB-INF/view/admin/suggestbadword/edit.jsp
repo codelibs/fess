@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Fess | <la:message key="labels.suggest_bad_word_configuration" /></title>
-<jsp:include page="/WEB-INF/view/common/admin2/head.jsp"></jsp:include>
+<jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
 	<div class="wrapper">
-		<jsp:include page="/WEB-INF/view/common/admin2/header.jsp"></jsp:include>
-		<jsp:include page="/WEB-INF/view/common/admin2/sidebar.jsp">
+		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="suggestBadWord" />
 		</jsp:include>
@@ -119,9 +119,9 @@
 			</section>
 		</div>
 
-		<jsp:include page="/WEB-INF/view/common/admin2/footer.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
-	<jsp:include page="/WEB-INF/view/common/admin2/foot.jsp"></jsp:include>
+	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>
 </html>
 
