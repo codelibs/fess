@@ -16,12 +16,14 @@
 
 package org.codelibs.fess.dict.kuromoji;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -60,7 +62,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     @Override
     public OptionalEntity<KuromojiItem> get(final long id) {
         if (kuromojiItemList == null) {
-            reload(null);
+            reload(null, null);
         }
 
         for (final KuromojiItem kuromojiItem : kuromojiItemList) {
@@ -74,7 +76,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     @Override
     public synchronized PagingList<KuromojiItem> selectList(final int offset, final int size) {
         if (kuromojiItemList == null) {
-            reload(null);
+            reload(null, null);
         }
 
         if (offset >= kuromojiItemList.size() || offset < 0) {
@@ -92,14 +94,14 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     @Override
     public synchronized void insert(final KuromojiItem item) {
         try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
     @Override
     public synchronized void update(final KuromojiItem item) {
         try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
@@ -108,15 +110,14 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         final KuromojiItem kuromojiItem = item;
         kuromojiItem.setNewToken(StringUtil.EMPTY);
         try (KuromojiUpdater updater = new KuromojiUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
-    protected void reload(final KuromojiUpdater updater) {
+    protected void reload(final KuromojiUpdater updater, InputStream in) {
         final List<KuromojiItem> itemList = new ArrayList<KuromojiItem>();
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(dictionaryManager.getContentInputStream(this), Constants.UTF_8));
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -171,8 +172,6 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             kuromojiItemList = itemList;
         } catch (final IOException e) {
             throw new DictionaryException("Failed to parse " + path, e);
-        } finally {
-            IOUtils.closeQuietly(reader);
         }
     }
 
@@ -180,15 +179,15 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         return new File(path).getName();
     }
 
-    // TODO
-    //    public InputStream getInputStream() throws IOException {
-    //        return new BufferedInputStream(new FileInputStream(file));
-    //    }
-    //
-    //    public void update(final InputStream in) throws IOException {
-    //        CopyUtil.copy(in, file);
-    //        reload(null);
-    //    }
+    public InputStream getInputStream() throws IOException {
+        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
+    }
+
+    public void update(final InputStream in) throws IOException {
+        try (KuromojiUpdater updater = new KuromojiUpdater(null)) {
+            reload(updater, in);
+        }
+    }
 
     @Override
     public String toString() {
@@ -220,7 +219,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
 
         public KuromojiItem write(final KuromojiItem oldItem) {
             try {
-                if (item.getId() == oldItem.getId() && item.isUpdated()) {
+                if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
                     if (item.equals(oldItem)) {
                         try {
                             if (!item.isDeleted()) {
@@ -259,7 +258,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
 
         public KuromojiItem commit() {
             isCommit = true;
-            if (item.isUpdated()) {
+            if (item != null && item.isUpdated()) {
                 try {
                     writer.write(item.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);

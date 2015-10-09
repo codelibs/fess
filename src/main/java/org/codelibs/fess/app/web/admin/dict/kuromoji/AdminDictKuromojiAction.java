@@ -16,6 +16,10 @@
 
 package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
@@ -33,11 +37,13 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminDictKuromojiAction extends FessAdminAction {
@@ -256,14 +262,27 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             op.setup(form -> {
                 form.dictId = dictId;
             });
+        }).renderWith(data -> {
+            kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
+                data.register("path", file.getPath());
+            }).orElse(() -> {
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), toIndexHtml());
+            });
         });
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse download(final DownloadForm form) {
-        // TODO Download
-        return asHtml(path_AdminDictKuromoji_DownloadJsp);
+    public ActionResponse download(final DownloadForm form) {
+        validate(form, messages -> {}, () -> downloadpage(form.dictId));
+        return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
+            return asStream(new File(file.getPath()).getName()).contentType("text/plain; charset=UTF-8").stream(out -> {
+                out.write(file.getInputStream());
+            });
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> downloadpage(form.dictId));
+            return null;
+        });
     }
 
     // -----------------------------------------------------
@@ -276,14 +295,34 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             op.setup(form -> {
                 form.dictId = dictId;
             });
+        }).renderWith(data -> {
+            kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
+                data.register("path", file.getPath());
+            }).orElse(() -> {
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), toIndexHtml());
+            });
         });
     }
 
     @Token(save = false, validate = true)
     @Execute
     public HtmlResponse upload(final UploadForm form) {
-        // TODO
-        return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
+        validate(form, messages -> {}, () -> uploadpage(form.dictId));
+        return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
+                file.update(inputStream);
+            } catch (IOException e) {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> {
+                    return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+                });
+            }
+            saveInfo(messages -> messages.addSuccessUploadKuromojiFile(GLOBAL));
+            return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
+        }).orElseGet(() -> {
+            throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> uploadpage(form.dictId));
+            return null;
+        });
+
     }
 
     // -----------------------------------------------------

@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.app.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -23,7 +24,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
-import org.codelibs.fess.dict.DictionaryExpiredException;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.kuromoji.KuromojiFile;
@@ -35,43 +35,41 @@ public class KuromojiService {
     protected DictionaryManager dictionaryManager;
 
     public List<KuromojiItem> getKuromojiList(final String dictId, final KuromojiPager kuromojiPager) {
-        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
+        return getKuromojiFile(dictId).map(file -> {
+            final int pageSize = kuromojiPager.getPageSize();
+            final PagingList<KuromojiItem> userDictList = file.selectList((kuromojiPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-        final int pageSize = kuromojiPager.getPageSize();
-        final PagingList<KuromojiItem> userDictList =
-                kuromojiFile.selectList((kuromojiPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+            // update pager
+                BeanUtil.copyBeanToBean(userDictList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+                userDictList.setPageRangeSize(5);
+                kuromojiPager.setPageNumberList(userDictList.createPageNumberList());
 
-        // update pager
-        BeanUtil.copyBeanToBean(userDictList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        userDictList.setPageRangeSize(5);
-        kuromojiPager.setPageNumberList(userDictList.createPageNumberList());
-
-        return userDictList;
-
+                return (List<KuromojiItem>) userDictList;
+            }).orElseGet(() -> Collections.emptyList());
     }
 
-    public KuromojiFile getKuromojiFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof KuromojiFile).map(file -> (KuromojiFile) file)
-                .orElseThrow(() -> new DictionaryExpiredException());
+    public OptionalEntity<KuromojiFile> getKuromojiFile(final String dictId) {
+        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof KuromojiFile)
+                .map(file -> OptionalEntity.of((KuromojiFile) file)).orElse(OptionalEntity.empty());
     }
 
     public OptionalEntity<KuromojiItem> getKuromoji(final String dictId, final long id) {
-        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
-        return kuromojiFile.get(id);
+        return getKuromojiFile(dictId).map(file -> file.get(id).get());
     }
 
     public void store(final String dictId, final KuromojiItem kuromojiItem) {
-        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
-
-        if (kuromojiItem.getId() == 0) {
-            kuromojiFile.insert(kuromojiItem);
-        } else {
-            kuromojiFile.update(kuromojiItem);
-        }
+        getKuromojiFile(dictId).ifPresent(file -> {
+            if (kuromojiItem.getId() == 0) {
+                file.insert(kuromojiItem);
+            } else {
+                file.update(kuromojiItem);
+            }
+        });
     }
 
     public void delete(final String dictId, final KuromojiItem kuromojiItem) {
-        final KuromojiFile kuromojiFile = getKuromojiFile(dictId);
-        kuromojiFile.delete(kuromojiItem);
+        getKuromojiFile(dictId).ifPresent(file -> {
+            file.delete(kuromojiItem);
+        });
     }
 }

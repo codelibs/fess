@@ -22,16 +22,17 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class UploadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public MultipartFormFile kuromojiFile;
-
     @Required
     public String dictId;
+
+    @Required
+    public MultipartFormFile kuromojiFile;
 
 }
