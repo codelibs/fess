@@ -113,7 +113,7 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.key_match_button_back"/>" />
+										<input type="submit" class="btn" name="createagain" value="<la:message key="labels.key_match_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="create"
 											value="<la:message key="labels.key_match_button_create"/>"
 										/>
