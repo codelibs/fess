@@ -58,8 +58,8 @@ public class KeyMatchService implements Serializable {
         return keyMatchList;
     }
 
-    public OptionalEntity<KeyMatch> getKeyMatch(final String id){
-    	return keyMatchBhv.selectByPK(id);
+    public OptionalEntity<KeyMatch> getKeyMatch(final String id) {
+        return keyMatchBhv.selectByPK(id);
     }
 
     public void store(final KeyMatch keyMatch) {

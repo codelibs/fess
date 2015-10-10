@@ -60,11 +60,11 @@ public class CreateForm implements Serializable {
     public Long createdTime;
 
     public void initialize() {
-    	crudMode = CrudMode.CREATE;
+        crudMode = CrudMode.CREATE;
         maxSize = "10";
         boost = "100.0";
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        
+
     }
 }
