@@ -3,7 +3,7 @@ package org.codelibs.fess.mylasta;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.dbflute.utflute.core.document.DocumentGenerator;
 
-public class FessActionDefTest extends UnitFessTestCase {
+public class FessLastaDocTest extends UnitFessTestCase {
 
     // ===================================================================================
     //                                                                           Component
