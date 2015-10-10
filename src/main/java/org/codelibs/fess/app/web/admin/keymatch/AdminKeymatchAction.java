@@ -16,9 +16,6 @@
 
 package org.codelibs.fess.app.web.admin.keymatch;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -29,7 +26,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -65,14 +62,14 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final KeyMatchSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final KeyMatchSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         keyMatchPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -80,15 +77,15 @@ public class AdminKeymatchAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final KeyMatchSearchForm form) {
-        copyBeanToBean(form.searchParams, keyMatchPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, keyMatchPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final KeyMatchSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         keyMatchPager.clear();
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -96,17 +93,17 @@ public class AdminKeymatchAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final KeyMatchSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final KeyMatchSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(keyMatchPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(keyMatchPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -115,53 +112,112 @@ public class AdminKeymatchAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+//    @Token(save = true, validate = false)
+//    @Execute
+//    public HtmlResponse createpage(final KeyMatchEditForm form) {
+//        form.initialize();
+//        form.crudMode = CrudMode.CREATE;
+//        return asHtml(path_AdminKeymatch_EditJsp);
+//    }
+    
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final KeyMatchEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+    	return asHtml(path_AdminKeymatch_EditJsp).useForm(CreateForm.class, op -> {
+    		op.setup(form -> {
+    			form.initialize();
+//    			form.crudMode = CrudMode.CREATE;
+    		});
+    	});
+    }
+
+//    @Token(save = true, validate = false)
+//    @Execute
+//    public HtmlResponse editpage(final int crudMode, final String id, final KeyMatchEditForm form) {
+//        form.crudMode = crudMode;
+//        form.id = id;
+//        verifyCrudMode(form, CrudMode.EDIT);
+//        loadKeyMatch(form);
+//        return asHtml(path_AdminKeymatch_EditJsp);
+//    }
+    
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editpage(final int crudMode, final String id) {
+    	verifyCrudMode(crudMode, CrudMode.EDIT);
+    	return asHtml(path_AdminKeymatch_EditJsp).useForm(EditForm.class, op -> {
+    		op.setup(form -> {
+    			keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+    				copyBeanToBean(entity, form, copyOp -> {
+    					copyOp.excludeNull();
+    				});
+    			}).orElse(() -> {
+    				throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+    			});
+    			form.crudMode = crudMode;
+    		});
+    	});
+    }
+    
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse createagain(final CreateForm form) {
+    	verifyCrudMode(form.crudMode, CrudMode.CREATE);
+    	validate(form, messages -> {}, toEditHtml());
+    	return asHtml(path_AdminKeymatch_EditJsp);
+    }
+    
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editagain(final EditForm form) {
+    	verifyCrudMode(form.crudMode, CrudMode.EDIT);
+    	validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final KeyMatchEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadKeyMatch(form);
+    public HtmlResponse editfromconfirm(final EditForm form) {
+    	validate(form, messages -> {}, toEditHtml());
+    	form.crudMode = CrudMode.EDIT;
+    	String id = form.id;
+    	keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+    		copyBeanToBean(entity, form, op -> {});
+    	}).orElse(() -> {
+    		throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+    	});
         return asHtml(path_AdminKeymatch_EditJsp);
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final KeyMatchEditForm form) {
-        return asHtml(path_AdminKeymatch_EditJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminKeymatch_ConfirmJsp).useForm(EditForm.class, op -> {
+        	op.setup(form -> {
+        		keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+        			copyBeanToBean(entity, form, copyOp -> {
+        				copyOp.excludeNull();
+        			});
+        		}).orElse(() -> {
+        			throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        		});
+        		form.crudMode = crudMode;
+        	});
+        });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final KeyMatchEditForm form) {
-        form.crudMode = CrudMode.EDIT;
-        loadKeyMatch(form);
-        return asHtml(path_AdminKeymatch_EditJsp);
-    }
-
-    @Token(save = true, validate = false)
-    @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final KeyMatchEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadKeyMatch(form);
-        return asHtml(path_AdminKeymatch_ConfirmJsp);
-    }
-
-    @Token(save = true, validate = false)
-    @Execute
-    public HtmlResponse deletefromconfirm(final KeyMatchEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
-        loadKeyMatch(form);
+        validate(form, messages -> {}, toEditHtml());
+        String id = form.id;
+        keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+        	copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+        	throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
@@ -169,25 +225,35 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final KeyMatchEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadKeyMatch(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminKeymatch_ConfirmJsp).useForm(EditForm.class, op -> {
+        	op.setup(form -> {
+        		keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+        			copyBeanToBean(entity, form, copyOp -> {
+        				copyOp.excludeNull();
+        			});
+        			form.crudMode = crudMode;
+        		}).orElse(() -> {
+        			throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        		});
+        	});
+        });
+    }
+
+    @Token(save = false, validate = true, keep = true)
+    @Execute
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final KeyMatchEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminKeymatch_ConfirmJsp);
-    }
-
-    @Token(save = false, validate = true, keep = true)
-    @Execute
-    public HtmlResponse confirmfromupdate(final KeyMatchEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminKeymatch_ConfirmJsp);
     }
 
@@ -196,78 +262,88 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final KeyMatchEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+    	verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        keyMatchService.store(createKeyMatch(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        ComponentUtil.getKeyMatchHelper().update();
+        createKeyMatch(form).ifPresent(entity -> {
+        	copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+        	keyMatchService.store(entity);
+        	saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+        	throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final KeyMatchEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+    	verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        keyMatchService.store(createKeyMatch(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        ComponentUtil.getKeyMatchHelper().update();
+        createKeyMatch(form).ifPresent(entity -> {
+        	copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+        	keyMatchService.store(entity);
+        	saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+        	throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final KeyMatchEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        keyMatchService.delete(getKeyMatch(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        ComponentUtil.getKeyMatchHelper().update();
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        String id = form.id;
+        keyMatchService.getKeyMatch(id).ifPresent(entity -> {
+        	keyMatchService.delete(entity);
+        	saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+        	throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadKeyMatch(final KeyMatchEditForm form) {
-        copyBeanToBean(getKeyMatch(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected KeyMatch getKeyMatch(final KeyMatchEditForm form) {
-        final KeyMatch keyMatch = keyMatchService.getKeyMatch(createKeyMap(form));
-        if (keyMatch == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return keyMatch;
-    }
-
-    protected KeyMatch createKeyMatch(final KeyMatchEditForm form) {
-        KeyMatch keyMatch;
+    protected OptionalEntity<KeyMatch> createKeyMatch(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            keyMatch = getKeyMatch(form);
-        } else {
-            keyMatch = new KeyMatch();
-            keyMatch.setCreatedBy(username);
-            keyMatch.setCreatedTime(currentTime);
+        
+        switch (form.crudMode) {
+    	case CrudMode.CREATE:
+    		if (form instanceof CreateForm) {
+    			KeyMatch entity = new KeyMatch();
+    			entity.setCreatedBy(username);
+    			entity.setCreatedTime(currentTime);
+    			entity.setUpdatedBy(username);
+    			entity.setUpdatedTime(currentTime);
+    			return OptionalEntity.of(entity);
+    		}
+    		break;
+    	case CrudMode.EDIT:
+    		if (form instanceof EditForm) {
+    			return keyMatchService.getKeyMatch(((EditForm) form).id).map(entity -> {
+    				entity.setUpdatedBy(username);
+    				entity.setUpdatedTime(currentTime);
+    				return entity;
+    			});
+    		}
+    		break;
+    	default:
+    		break;
         }
-        keyMatch.setUpdatedBy(username);
-        keyMatch.setUpdatedTime(currentTime);
-        copyBeanToBean(form, keyMatch, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return keyMatch;
-    }
-
-    protected Map<String, String> createKeyMap(final KeyMatchEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final KeyMatchEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }

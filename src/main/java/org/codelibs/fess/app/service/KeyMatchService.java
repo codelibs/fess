@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.KeyMatchCB;
 import org.codelibs.fess.es.exbhv.KeyMatchBhv;
 import org.codelibs.fess.es.exentity.KeyMatch;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class KeyMatchService implements Serializable {
 
@@ -57,17 +58,8 @@ public class KeyMatchService implements Serializable {
         return keyMatchList;
     }
 
-    public KeyMatch getKeyMatch(final Map<String, String> keys) {
-        final KeyMatch keyMatch = keyMatchBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (keyMatch == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return keyMatch;
+    public OptionalEntity<KeyMatch> getKeyMatch(final String id){
+    	return keyMatchBhv.selectByPK(id);
     }
 
     public void store(final KeyMatch keyMatch) {
