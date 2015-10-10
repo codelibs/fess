@@ -21,7 +21,7 @@ import java.io.Serializable;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class SearchForm implements Serializable {

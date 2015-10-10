@@ -149,7 +149,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.EDIT);
         return asHtml(path_AdminDictKuromoji_EditJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -175,7 +175,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
@@ -189,7 +189,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.DELETE);
         return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -207,7 +207,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
@@ -223,7 +223,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.CONFIRM);
         return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                kuromojiService.getKuromoji(dictId, id).ifPresent(entity -> {
+                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -368,7 +368,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DELETE);
         validate(form, messages -> {}, toEditHtml());
-        kuromojiService.getKuromoji(form.dictId, form.id).ifPresent(entity -> {
+        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             kuromojiService.delete(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -391,7 +391,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return kuromojiService.getKuromoji(form.dictId, ((EditForm) form).id);
+                return kuromojiService.getKuromojiItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:

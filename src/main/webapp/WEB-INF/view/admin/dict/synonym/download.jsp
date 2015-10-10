@@ -21,7 +21,7 @@
 			<la:message key="labels.dict_synonym_title" />
 		</h1>
 		<ol class="breadcrumb">
-			<li class="active"><la:link href="index">
+			<li class="active"><la:link href="list/0?dictId=${dictId}">
 			<la:message key="labels.dict_synonym_link_download" />
 			</la:link></li>
 		</ol>
@@ -39,27 +39,27 @@
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
-					<la:link href="../index">
+					<la:link href="/admin/dict/">
 						<la:message key="labels.dict_list_link" />
 					</la:link>
 					</span>
 					<span class="label label-default">
-					<a href="#">
+					<la:link href="list/0/?dictId=${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_list_link" />
-					</a>
+					</la:link>
 					</span>
 					<span class="label label-default">
-					<la:link href="createpage?dictId=${f:u(dictId)}">
+					<la:link href="createpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_create" />
 					</la:link>
 					</span>
 					<span class="label label-default">
-					<la:link href="downloadpage?dictId=${f:u(dictId)}">
+					<a href="#">
 						<la:message key="labels.dict_synonym_link_download" />
-					</la:link>
+					</a>
 					</span>
 					<span class="label label-default">
-					<la:link href="uploadpage?dictId=${f:u(dictId)}">
+					<la:link href="uploadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_upload" />
 					</la:link>
 					</span>
@@ -78,13 +78,13 @@
 				</div>
 
 				<%-- Edit Form: BEGIN --%>
-				<la:form>
+				<la:form target="_blank">
 					<div>
 					<la:hidden property="dictId" />
 					<table class="table table-bordered table-striped">
 						<tbody>
 						<tr>
-							<th style="">${f:h(filename)}</th>
+							<th style="">${f:h(path)}</th>
 							<td style="form-control">
 							<input type="submit"
 								   class="btn small" name="download"

@@ -21,7 +21,7 @@
 			<la:message key="labels.dict_synonym_title" />
 		</h1>
 		<ol class="breadcrumb">
-			<li class="active"><la:link href="list">
+			<li class="active"><la:link href="">
 			<la:message key="labels.dict_synonym_list_link" />
 			</la:link></li>
 		</ol>
@@ -39,7 +39,7 @@
 				</h3>
 				<div class="box-tools pull-right">
 					<span class="label label-default">
-					<la:link href="../">
+					<la:link href="/admin/dict/">
 						<la:message key="labels.dict_list_link" />
 					</la:link>
 					</span>
@@ -84,10 +84,10 @@
 				</c:if>
 				<c:if test="${synonymPager.allRecordCount > 0}">
 					<table class="table table-bordered table-striped">
-					<thead>
+					    <thead>
 						<tr>
-						<th> <la:message key="labels.dict_synonym_source" /> </th>
-						<th> <la:message key="labels.dict_synonym_target" /> </th>
+							<th> <la:message key="labels.dict_synonym_source" /> </th>
+							<th> <la:message key="labels.dict_synonym_target" /> </th>
 						</tr>
 					</thead>
 					<tbody>

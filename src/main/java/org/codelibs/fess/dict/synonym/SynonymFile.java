@@ -16,12 +16,14 @@
 
 package org.codelibs.fess.dict.synonym;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -52,9 +54,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     @Override
+    public String getPath() {
+        return path;
+    }
+
+    @Override
     public OptionalEntity<SynonymItem> get(final long id) {
         if (synonymItemList == null) {
-            reload(null);
+            reload(null, null);
         }
 
         for (final SynonymItem synonymItem : synonymItemList) {
@@ -68,7 +75,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized PagingList<SynonymItem> selectList(final int offset, final int size) {
         if (synonymItemList == null) {
-            reload(null);
+            reload(null, null);
         }
 
         if (offset >= synonymItemList.size() || offset < 0) {
@@ -86,14 +93,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     @Override
     public synchronized void insert(final SynonymItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
     @Override
     public synchronized void update(final SynonymItem item) {
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
@@ -103,14 +110,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         synonymItem.setNewInputs(StringUtil.EMPTY_STRINGS);
         synonymItem.setNewOutputs(StringUtil.EMPTY_STRINGS);
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
-            reload(updater);
+            reload(updater, null);
         }
     }
 
-    protected void reload(final SynonymUpdater updater) {
+    protected void reload(final SynonymUpdater updater, InputStream in) {
         final List<SynonymItem> itemList = new ArrayList<SynonymItem>();
         try (BufferedReader reader =
-                new BufferedReader(new InputStreamReader(dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
+                new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
@@ -244,15 +251,15 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return new File(path).getName();
     }
 
-    // TODO
-    //    public InputStream getInputStream() throws IOException {
-    //        return new BufferedInputStream(new FileInputStream(file));
-    //    }
-    //
-    //    public void update(final InputStream in) throws IOException {
-    //        CopyUtil.copy(in, file);
-    //        reload(null);
-    //    }
+    public InputStream getInputStream() throws IOException {
+        return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
+    }
+
+    public void update(final InputStream in) throws IOException {
+        try (SynonymUpdater updater = new SynonymUpdater(null)) {
+            reload(updater, in);
+        }
+    }
 
     @Override
     public String toString() {
@@ -277,14 +284,14 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                 if (newFile != null) {
                     newFile.delete();
                 }
-                throw new DictionaryException("Failed to write a synonym file.", e);
+                throw new DictionaryException("Failed to write a userDict file.", e);
             }
             item = newItem;
         }
 
         public SynonymItem write(final SynonymItem oldItem) {
             try {
-                if (item.getId() == oldItem.getId() && item.isUpdated()) {
+                if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
                     if (item.equals(oldItem)) {
                         try {
                             if (!item.isDeleted()) {
@@ -323,7 +330,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
         public SynonymItem commit() {
             isCommit = true;
-            if (item.isUpdated()) {
+            if (item != null && item.isUpdated()) {
                 try {
                     writer.write(item.toLineString());
                     writer.write(Constants.LINE_SEPARATOR);
@@ -355,4 +362,5 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             }
         }
     }
+
 }

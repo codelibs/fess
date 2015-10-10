@@ -19,6 +19,7 @@ package org.codelibs.fess.dict.synonym;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.dict.DictionaryItem;
 
 public class SynonymItem extends DictionaryItem {
@@ -66,8 +67,22 @@ public class SynonymItem extends DictionaryItem {
         return inputs;
     }
 
+    public String getInputsValue() {
+        if (inputs == null) {
+            return StringUtil.EMPTY;
+        }
+        return String.join("\n", inputs);
+    }
+
     public String[] getOutputs() {
         return outputs;
+    }
+
+    public String getOutputsValue() {
+        if (outputs == null) {
+            return StringUtil.EMPTY;
+        }
+        return String.join("\n", outputs);
     }
 
     public boolean isUpdated() {

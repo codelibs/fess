@@ -16,50 +16,20 @@
 
 package org.codelibs.fess.app.web.admin.dict.synonym;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class EditForm implements Serializable {
+public class EditForm extends CreateForm {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
-    public String pageNumber;
+    @Required
+    public Long id;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
-
-    //@Required
-    public String dictId;
-
-    //@IntegerType
-    public int crudMode;
-
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@LongType
-    public String id;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
-    public String inputs;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
-    public String outputs;
-
-    //@Required(target = "upload")
-    //public FormFile synonymFile;
-
-    public void initialize() {
-        id = null;
-
+    public String getDisplayId() {
+        return dictId + ":" + id;
     }
 }

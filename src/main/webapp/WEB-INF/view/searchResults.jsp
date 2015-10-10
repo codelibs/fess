@@ -87,7 +87,7 @@
 				<ul class="nav nav-list">
 					<c:forEach var="fieldData" items="${facetResponse.fieldList}">
 						<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
-					<li class="nav-header"><la:message key="label.facet_label_title" /></li>
+					<li class="nav-header"><la:message key="labels.facet_label_title" /></li>
 							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
 								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 					<li><la:link
@@ -112,7 +112,7 @@
 				<ul class="nav nav-list">
 					<li class="reset">
 						<la:link
-							href="/search/search?query=${f:u(query)}"><la:message key="label.facet_label_reset" /></la:link>
+							href="/search/search?query=${f:u(query)}"><la:message key="labels.facet_label_reset" /></la:link>
 					</li>
 				</ul>
 				</c:if>

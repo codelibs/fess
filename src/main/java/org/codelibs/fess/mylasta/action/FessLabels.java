@@ -491,7 +491,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Synonym File */
     public static final String LABELS_SYNONYM_FILE = "{labels.synonymFile}";
 
-    /** The key of the message: UserDict File */
+    /** The key of the message: Kuromoji File */
     public static final String LABELS_USER_DICT_FILE = "{labels.userDictFile}";
 
     /** The key of the message: Additional Word File */
@@ -503,125 +503,122 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
 
-    /** The key of the message: &#x00bb; Wizard */
-    public static final String LABELS_MENU_WIZARD = "{labels.menu.wizard}";
+    /** The key of the message: Wizard */
+    public static final String LABELS_menu_wizard = "{labels.menu_wizard}";
 
-    /** The key of the message: &#x00bb; General */
-    public static final String LABELS_MENU_crawl_config = "{labels.menu.crawl_config}";
+    /** The key of the message: General */
+    public static final String LABELS_menu_crawl_config = "{labels.menu_crawl_config}";
 
-    /** The key of the message: &#x00bb; Scheduled Jobs */
-    public static final String LABELS_MENU_scheduled_job_config = "{labels.menu.scheduled_job_config}";
+    /** The key of the message: Scheduled Jobs */
+    public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
 
-    /** The key of the message: &#x00bb; System */
-    public static final String LABELS_MENU_system_config = "{labels.menu.system_config}";
+    /** The key of the message: System */
+    public static final String LABELS_menu_system_config = "{labels.menu_system_config}";
 
-    /** The key of the message: &#x00bb; Index */
-    public static final String LABELS_MENU_document_config = "{labels.menu.document_config}";
+    /** The key of the message: Index */
+    public static final String LABELS_menu_document_config = "{labels.menu_document_config}";
 
-    /** The key of the message: &#x00bb; Design */
-    public static final String LABELS_MENU_DESIGN = "{labels.menu.design}";
+    /** The key of the message: Design */
+    public static final String LABELS_menu_design = "{labels.menu_design}";
 
-    /** The key of the message: &#x00bb; Dictionary */
-    public static final String LABELS_MENU_DICT = "{labels.menu.dict}";
+    /** The key of the message: Dictionary */
+    public static final String LABELS_menu_dict = "{labels.menu_dict}";
 
-    /** The key of the message: &#x00bb; Backup/Restore */
-    public static final String LABELS_MENU_DATA = "{labels.menu.data}";
+    /** The key of the message: Backup/Restore */
+    public static final String LABELS_menu_data = "{labels.menu_data}";
 
     /** The key of the message: Crawler */
     public static final String LABELS_menu_crawl = "{labels.menu_crawl}";
 
-    /** The key of the message: &#x00bb; Web */
-    public static final String LABELS_MENU_WEB = "{labels.menu.web}";
+    /** The key of the message: Web */
+    public static final String LABELS_menu_web = "{labels.menu_web}";
 
-    /** The key of the message: &#x00bb; File System */
-    public static final String LABELS_MENU_file_system = "{labels.menu.file_system}";
+    /** The key of the message: File System */
+    public static final String LABELS_menu_file_system = "{labels.menu_file_system}";
 
-    /** The key of the message: &#x00bb; Data Store */
-    public static final String LABELS_MENU_data_store = "{labels.menu.data_store}";
+    /** The key of the message: Data Store */
+    public static final String LABELS_menu_data_store = "{labels.menu_data_store}";
 
-    /** The key of the message: &#x00bb; Label */
-    public static final String LABELS_MENU_label_type = "{labels.menu.label_type}";
+    /** The key of the message: Label */
+    public static final String LABELS_menu_label_type = "{labels.menu_label_type}";
 
-    /** The key of the message: &#x00bb; Key Match */
-    public static final String LABELS_MENU_key_match = "{labels.menu.key_match}";
+    /** The key of the message: Key Match */
+    public static final String LABELS_menu_key_match = "{labels.menu_key_match}";
 
-    /** The key of the message: &#x00bb; Doc Boost */
-    public static final String LABELS_MENU_boost_document_rule = "{labels.menu.boost_document_rule}";
+    /** The key of the message: Doc Boost */
+    public static final String LABELS_menu_boost_document_rule = "{labels.menu_boost_document_rule}";
 
-    /** The key of the message: &#x00bb; Path Mapping */
-    public static final String LABELS_MENU_path_mapping = "{labels.menu.path_mapping}";
+    /** The key of the message: Path Mapping */
+    public static final String LABELS_menu_path_mapping = "{labels.menu_path_mapping}";
 
-    /** The key of the message: &#x00bb; Web Authentication */
-    public static final String LABELS_MENU_web_authentication = "{labels.menu.web_authentication}";
+    /** The key of the message: Web Authentication */
+    public static final String LABELS_menu_web_authentication = "{labels.menu_web_authentication}";
 
-    /** The key of the message: &#x00bb; File Authentication */
-    public static final String LABELS_MENU_file_authentication = "{labels.menu.file_authentication}";
+    /** The key of the message: File Authentication */
+    public static final String LABELS_menu_file_authentication = "{labels.menu_file_authentication}";
 
-    /** The key of the message: &#x00bb; Request Header */
-    public static final String LABELS_MENU_request_header = "{labels.menu.request_header}";
+    /** The key of the message: Request Header */
+    public static final String LABELS_menu_request_header = "{labels.menu_request_header}";
 
-    /** The key of the message: &#x00bb; Overlapping Host */
-    public static final String LABELS_MENU_overlapping_host = "{labels.menu.overlapping_host}";
+    /** The key of the message: Overlapping Host */
+    public static final String LABELS_menu_overlapping_host = "{labels.menu_overlapping_host}";
 
-    /** The key of the message: &#x00bb; Role */
-    public static final String LABELS_MENU_role_type = "{labels.menu.role_type}";
+    /** The key of the message: Role */
+    public static final String LABELS_menu_role_type = "{labels.menu_role_type}";
 
     /** The key of the message: User */
     public static final String LABELS_menu_user = "{labels.menu_user}";
 
-    /** The key of the message: User */
-    public static final String LABELS_MENU_USER = "{labels.menu.user}";
-
     /** The key of the message: Role */
-    public static final String LABELS_MENU_ROLE = "{labels.menu.role}";
+    public static final String LABELS_menu_role = "{labels.menu_role}";
 
     /** The key of the message: Group */
-    public static final String LABELS_MENU_GROUP = "{labels.menu.group}";
+    public static final String LABELS_menu_group = "{labels.menu_group}";
 
     /** The key of the message: Suggest */
     public static final String LABELS_menu_suggest = "{labels.menu_suggest}";
 
-    /** The key of the message: &#x00bb; Additional Word */
-    public static final String LABELS_MENU_suggest_elevate_word = "{labels.menu.suggest_elevate_word}";
+    /** The key of the message: Additional Word */
+    public static final String LABELS_menu_suggest_elevate_word = "{labels.menu_suggest_elevate_word}";
 
-    /** The key of the message: &#x00bb; Bad Word */
-    public static final String LABELS_MENU_suggest_bad_word = "{labels.menu.suggest_bad_word}";
+    /** The key of the message: Bad Word */
+    public static final String LABELS_menu_suggest_bad_word = "{labels.menu_suggest_bad_word}";
 
     /** The key of the message: System Info */
     public static final String LABELS_menu_system_log = "{labels.menu_system_log}";
 
-    /** The key of the message: &#x00bb; Config Info */
-    public static final String LABELS_MENU_system_info = "{labels.menu.system_info}";
+    /** The key of the message: Config Info */
+    public static final String LABELS_menu_system_info = "{labels.menu_system_info}";
 
-    /** The key of the message: &#x00bb; Session Info */
-    public static final String LABELS_MENU_session_info = "{labels.menu.session_info}";
+    /** The key of the message: Session Info */
+    public static final String LABELS_menu_session_info = "{labels.menu_session_info}";
 
-    /** The key of the message: &#x00bb; Log Files */
-    public static final String LABELS_MENU_LOG = "{labels.menu.log}";
+    /** The key of the message: Log Files */
+    public static final String LABELS_menu_log = "{labels.menu_log}";
 
-    /** The key of the message: &#x00bb; Job Log */
-    public static final String LABELS_MENU_JOB_LOG = "{labels.menu.jobLog}";
+    /** The key of the message: Job Log */
+    public static final String LABELS_menu_jobLog = "{labels.menu_jobLog}";
 
-    /** The key of the message: &#x00bb; Failure URL */
-    public static final String LABELS_MENU_failure_url = "{labels.menu.failure_url}";
+    /** The key of the message: Failure URL */
+    public static final String LABELS_menu_failure_url = "{labels.menu_failure_url}";
 
-    /** The key of the message: &#x00bb; Search */
-    public static final String LABELS_MENU_search_list = "{labels.menu.search_list}";
+    /** The key of the message: Search */
+    public static final String LABELS_menu_search_list = "{labels.menu_search_list}";
 
     /** The key of the message: User Info */
     public static final String LABELS_menu_user_log = "{labels.menu_user_log}";
 
-    /** The key of the message: &#x00bb; Search Log */
-    public static final String LABELS_MENU_search_log = "{labels.menu.search_log}";
+    /** The key of the message: Search Log */
+    public static final String LABELS_menu_search_log = "{labels.menu_search_log}";
 
-    /** The key of the message: &#x00bb; Statistics */
-    public static final String LABELS_MENU_STATS = "{labels.menu.stats}";
+    /** The key of the message: Statistics */
+    public static final String LABELS_menu_stats = "{labels.menu_stats}";
 
-    /** The key of the message: &#x00bb; Popular URL */
-    public static final String LABELS_MENU_FAVORITE_LOG = "{labels.menu.favoriteLog}";
+    /** The key of the message: Popular URL */
+    public static final String LABELS_menu_favoriteLog = "{labels.menu_favoriteLog}";
 
     /** The key of the message: Logout */
-    public static final String LABELS_MENU_LOGOUT = "{labels.menu.logout}";
+    public static final String LABELS_menu_logout = "{labels.menu_logout}";
 
     /** The key of the message: Fess */
     public static final String LABELS_HEADER_logo_alt = "{labels.header.logo_alt}";
@@ -727,6 +724,66 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Cache */
     public static final String LABELS_search_result_cache = "{labels.search_result_cache}";
+
+    /** The key of the message: Label */
+    public static final String LABELS_facet_label_title = "{labels.facet_label_title}";
+
+    /** The key of the message: Term */
+    public static final String LABELS_facet_lastModified_title = "{labels.facet_lastModified_title}";
+
+    /** The key of the message: Past 24 Hours */
+    public static final String LABELS_facet_lastModified_1day = "{labels.facet_lastModified_1day}";
+
+    /** The key of the message: Past Week */
+    public static final String LABELS_facet_lastModified_1week = "{labels.facet_lastModified_1week}";
+
+    /** The key of the message: Past Month */
+    public static final String LABELS_facet_lastModified_1month = "{labels.facet_lastModified_1month}";
+
+    /** The key of the message: Past Year */
+    public static final String LABELS_facet_lastModified_1year = "{labels.facet_lastModified_1year}";
+
+    /** The key of the message: Size */
+    public static final String LABELS_facet_contentLength_title = "{labels.facet_contentLength_title}";
+
+    /** The key of the message: &nbsp; - 10kb */
+    public static final String LABELS_facet_contentLength_10k = "{labels.facet_contentLength_10k}";
+
+    /** The key of the message: 10kb - 100kb */
+    public static final String LABELS_facet_contentLength_10kto100k = "{labels.facet_contentLength_10kto100k}";
+
+    /** The key of the message: 100kb - 500kb */
+    public static final String LABELS_facet_contentLength_100kto500k = "{labels.facet_contentLength_100kto500k}";
+
+    /** The key of the message: 500kb - 1mb */
+    public static final String LABELS_facet_contentLength_500kto1m = "{labels.facet_contentLength_500kto1m}";
+
+    /** The key of the message: 1mb - &nbsp; */
+    public static final String LABELS_facet_contentLength_1m = "{labels.facet_contentLength_1m}";
+
+    /** The key of the message: File Type */
+    public static final String LABELS_facet_filetype_title = "{labels.facet_filetype_title}";
+
+    /** The key of the message: HTML */
+    public static final String LABELS_facet_filetype_html = "{labels.facet_filetype_html}";
+
+    /** The key of the message: Word */
+    public static final String LABELS_facet_filetype_word = "{labels.facet_filetype_word}";
+
+    /** The key of the message: Excel */
+    public static final String LABELS_facet_filetype_excel = "{labels.facet_filetype_excel}";
+
+    /** The key of the message: PowerPoint */
+    public static final String LABELS_facet_filetype_powerpoint = "{labels.facet_filetype_powerpoint}";
+
+    /** The key of the message: PDF */
+    public static final String LABELS_facet_filetype_pdf = "{labels.facet_filetype_pdf}";
+
+    /** The key of the message: PDF */
+    public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
+
+    /** The key of the message: Reset */
+    public static final String LABELS_facet_label_reset = "{labels.facet_label_reset}";
 
     /** The key of the message: All */
     public static final String LABELS_searchoptions_all = "{labels.searchoptions_all}";
@@ -871,6 +928,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Options */
     public static final String LABELS_header_form_option_btn = "{labels.header_form_option_btn}";
+
+    /** The key of the message: Accessing {0}<br>At a first time starting, it might take a little more time to open the file. */
+    public static final String LABELS_open_uri = "{labels.open_uri}";
 
     /** The key of the message: File Crawling Configuration */
     public static final String LABELS_file_crawling_configuration = "{labels.file_crawling_configuration}";
@@ -2584,6 +2644,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Samba */
     public static final String LABELS_file_authentication_scheme_samba = "{labels.file_authentication_scheme_samba}";
 
+    /** The key of the message: FTP */
+    public static final String LABELS_file_authentication_scheme_ftp = "{labels.file_authentication_scheme_ftp}";
+
     /** The key of the message: File Authentication */
     public static final String LABELS_file_authentication_title_confirm = "{labels.file_authentication_title_confirm}";
 
@@ -2962,10 +3025,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Synonym File */
     public static final String LABELS_dict_synonym_file = "{labels.dict_synonym_file}";
 
-    /** The key of the message: UserDict List */
+    /** The key of the message: Kuromoji List */
     public static final String LABELS_dict_kuromoji_configuration = "{labels.dict_kuromoji_configuration}";
 
-    /** The key of the message: UserDict List */
+    /** The key of the message: Kuromoji List */
     public static final String LABELS_dict_kuromoji_title = "{labels.dict_kuromoji_title}";
 
     /** The key of the message: List */
@@ -3025,7 +3088,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Upload */
     public static final String LABELS_dict_kuromoji_button_upload = "{labels.dict_kuromoji_button_upload}";
 
-    /** The key of the message: UserDict File */
+    /** The key of the message: Kuromoji File */
     public static final String LABELS_dict_kuromoji_file = "{labels.dict_kuromoji_file}";
 
     /** The key of the message: Doc Boost */

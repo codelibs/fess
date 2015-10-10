@@ -18,16 +18,33 @@ package org.codelibs.fess.app.web.admin.dict.synonym;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Size;
+
+import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.Required;
 
 /**
  * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class SearchForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Required
     public String dictId;
+
+    public Integer crudMode;
+
+    @Required
+    @Size(max = 1000)
+    public String inputs;
+
+    @Required
+    @Size(max = 1000)
+    public String outputs;
+
+    public void initialize() {
+        crudMode = CrudMode.CREATE;
+    }
 }

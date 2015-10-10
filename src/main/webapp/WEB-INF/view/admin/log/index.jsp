@@ -9,7 +9,7 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="crawl" />
+			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="log" />
 		</jsp:include>
 

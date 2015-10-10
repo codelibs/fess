@@ -11,6 +11,18 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
+    /** The key of the message: <font color="red"><ul> */
+    public static final String ERRORS_HEADER = "{errors.header}";
+
+    /** The key of the message: </ul></font> */
+    public static final String ERRORS_FOOTER = "{errors.footer}";
+
+    /** The key of the message: <li> */
+    public static final String ERRORS_PREFIX = "{errors.prefix}";
+
+    /** The key of the message: </li> */
+    public static final String ERRORS_SUFFIX = "{errors.suffix}";
+
     /** The key of the message: must be false */
     public static final String CONSTRAINTS_AssertFalse_MESSAGE = "{constraints.AssertFalse.message}";
 
@@ -112,96 +124,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: already existing data, so retry */
     public static final String ERRORS_APP_DB_ALREADY_EXISTS = "{errors.app.db.already.exists}";
-
-    /** The key of the message: <div class="alert"><button type="button" class="close" data-dismiss="alert">×</button> */
-    public static final String ERRORS_front_header = "{errors.front_header}";
-
-    /** The key of the message: </div> */
-    public static final String ERRORS_front_footer = "{errors.front_footer}";
-
-    /** The key of the message: <div> */
-    public static final String ERRORS_front_prefix = "{errors.front_prefix}";
-
-    /** The key of the message: </div> */
-    public static final String ERRORS_front_suffix = "{errors.front_suffix}";
-
-    /** The key of the message: <div class="alert-message error"> */
-    public static final String ERRORS_HEADER = "{errors.header}";
-
-    /** The key of the message: </div> */
-    public static final String ERRORS_FOOTER = "{errors.footer}";
-
-    /** The key of the message: <p> */
-    public static final String ERRORS_PREFIX = "{errors.prefix}";
-
-    /** The key of the message: </p> */
-    public static final String ERRORS_SUFFIX = "{errors.suffix}";
-
-    /** The key of the message: {0} is invalid. */
-    public static final String ERRORS_INVALID = "{errors.invalid}";
-
-    /** The key of the message: {0} can not be greater than {1} characters. */
-    public static final String ERRORS_MAXLENGTH = "{errors.maxlength}";
-
-    /** The key of the message: {0} can not be less than {1} characters. */
-    public static final String ERRORS_MINLENGTH = "{errors.minlength}";
-
-    /** The key of the message: {0} can not be greater than {1} bytes. */
-    public static final String ERRORS_MAXBYTELENGTH = "{errors.maxbytelength}";
-
-    /** The key of the message: {0} can not be less than {1} bytes. */
-    public static final String ERRORS_MINBYTELENGTH = "{errors.minbytelength}";
-
-    /** The key of the message: {0} is not in the range {1} through {2}. */
-    public static final String ERRORS_RANGE = "{errors.range}";
-
-    /** The key of the message: {0} is required. */
-    public static final String ERRORS_REQUIRED = "{errors.required}";
-
-    /** The key of the message: {0} must be an byte. */
-    public static final String ERRORS_BYTE = "{errors.byte}";
-
-    /** The key of the message: {0} is not a date. */
-    public static final String ERRORS_DATE = "{errors.date}";
-
-    /** The key of the message: {0} must be an double. */
-    public static final String ERRORS_DOUBLE = "{errors.double}";
-
-    /** The key of the message: {0} must be an float. */
-    public static final String ERRORS_FLOAT = "{errors.float}";
-
-    /** The key of the message: {0} must be an integer. */
-    public static final String ERRORS_INTEGER = "{errors.integer}";
-
-    /** The key of the message: {0} must be an long. */
-    public static final String ERRORS_LONG = "{errors.long}";
-
-    /** The key of the message: {0} must be an short. */
-    public static final String ERRORS_SHORT = "{errors.short}";
-
-    /** The key of the message: {0} is not a valid credit card number. */
-    public static final String ERRORS_CREDITCARD = "{errors.creditcard}";
-
-    /** The key of the message: {0} is an invalid e-mail address. */
-    public static final String ERRORS_EMAIL = "{errors.email}";
-
-    /** The key of the message: {0} is an invalid url (web address). */
-    public static final String ERRORS_URL = "{errors.url}";
-
-    /** The key of the message: {0} is a invalid format. */
-    public static final String ERRORS_CRONEXPRESSION = "{errors.cronexpression}";
-
-    /** The key of the message: {0} is a invalid uri. */
-    public static final String ERRORS_URITYPE = "{errors.uritype}";
-
-    /** The key of the message: {0} must be alphabet or digit only. */
-    public static final String ERRORS_ALPHA_DIGIT_ONLY = "{errors.alphaDigitOnly}";
-
-    /** The key of the message: {0} must be alphabet, digit, or space only. */
-    public static final String ERRORS_ALPHA_DIGIT_SPACE_ONLY = "{errors.alphaDigitSpaceOnly}";
-
-    /** The key of the message: Invalid request. */
-    public static final String ERRORS_TOKEN = "{errors.token}";
 
     /** The key of the message: Failed to update parameters. Please contact to a site administrator. */
     public static final String ERRORS_failed_to_update_crawler_params = "{errors.failed_to_update_crawler_params}";
@@ -348,11 +270,17 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Synonym file is not found */
     public static final String ERRORS_kuromoji_file_is_not_found = "{errors.kuromoji_file_is_not_found}";
 
-    /** The key of the message: Failed to download the UserDict file. */
+    /** The key of the message: Failed to download the Kuromoji file. */
     public static final String ERRORS_failed_to_download_kuromoji_file = "{errors.failed_to_download_kuromoji_file}";
 
-    /** The key of the message: Failed to upload the UserDict file. */
+    /** The key of the message: Failed to upload the Kuromoji file. */
     public static final String ERRORS_failed_to_upload_kuromoji_file = "{errors.failed_to_upload_kuromoji_file}";
+
+    /** The key of the message: "{1}" in "{0}" is invalid. */
+    public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
+
+    /** The key of the message: Failed to reload core. Check log files. */
+    public static final String ERRORS_failed_to_reload_core = "{errors.failed_to_reload_core}";
 
     /** The key of the message: Password is required. */
     public static final String ERRORS_blank_password = "{errors.blank_password}";
@@ -383,6 +311,21 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: An invalid range is used. The example of the range format is "field:'{'Aida TO Carmen'}'". */
     public static final String ERRORS_invalid_query_str_range = "{errors.invalid_query_str_range}";
+
+    /** The key of the message: Invalid mode(expected value is {0}, but it's {1}). */
+    public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
+
+    /** The key of the message: Failed to create a new data. */
+    public static final String ERRORS_crud_failed_to_create_crud_table = "{errors.crud_failed_to_create_crud_table}";
+
+    /** The key of the message: Failed to update the data. */
+    public static final String ERRORS_crud_failed_to_update_crud_table = "{errors.crud_failed_to_update_crud_table}";
+
+    /** The key of the message: Failed to delete the data. */
+    public static final String ERRORS_crud_failed_to_delete_crud_table = "{errors.crud_failed_to_delete_crud_table}";
+
+    /** The key of the message: Could not find the data({0}). */
+    public static final String ERRORS_crud_could_not_find_crud_table = "{errors.crud_could_not_find_crud_table}";
 
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
@@ -462,7 +405,7 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Uploaded Synonym file. */
     public static final String SUCCESS_upload_synonym_file = "{success.upload_synonym_file}";
 
-    /** The key of the message: Uploaded UserDict file. */
+    /** The key of the message: Uploaded Kuromoji file. */
     public static final String SUCCESS_upload_kuromoji_file = "{success.upload_kuromoji_file}";
 
     /** The key of the message: Uploaded Additional Word file. */
@@ -470,81 +413,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Uploaded Bad Word file. */
     public static final String SUCCESS_upload_suggest_bad_word = "{success.upload_suggest_bad_word}";
-
-    /** The key of the message: Label */
-    public static final String LABEL_facet_label_title = "{label.facet_label_title}";
-
-    /** The key of the message: Term */
-    public static final String LABEL_facet_lastModified_title = "{label.facet_lastModified_title}";
-
-    /** The key of the message: Past 24 Hours */
-    public static final String LABEL_facet_lastModified_1day = "{label.facet_lastModified_1day}";
-
-    /** The key of the message: Past Week */
-    public static final String LABEL_facet_lastModified_1week = "{label.facet_lastModified_1week}";
-
-    /** The key of the message: Past Month */
-    public static final String LABEL_facet_lastModified_1month = "{label.facet_lastModified_1month}";
-
-    /** The key of the message: Past Year */
-    public static final String LABEL_facet_lastModified_1year = "{label.facet_lastModified_1year}";
-
-    /** The key of the message: Size */
-    public static final String LABEL_facet_contentLength_title = "{label.facet_contentLength_title}";
-
-    /** The key of the message: &nbsp; - 10kb */
-    public static final String LABEL_facet_contentLength_10k = "{label.facet_contentLength_10k}";
-
-    /** The key of the message: 10kb - 100kb */
-    public static final String LABEL_facet_contentLength_10kto100k = "{label.facet_contentLength_10kto100k}";
-
-    /** The key of the message: 100kb - 500kb */
-    public static final String LABEL_facet_contentLength_100kto500k = "{label.facet_contentLength_100kto500k}";
-
-    /** The key of the message: 500kb - 1mb */
-    public static final String LABEL_facet_contentLength_500kto1m = "{label.facet_contentLength_500kto1m}";
-
-    /** The key of the message: 1mb - &nbsp; */
-    public static final String LABEL_facet_contentLength_1m = "{label.facet_contentLength_1m}";
-
-    /** The key of the message: File Type */
-    public static final String LABEL_facet_filetype_title = "{label.facet_filetype_title}";
-
-    /** The key of the message: HTML */
-    public static final String LABEL_facet_filetype_html = "{label.facet_filetype_html}";
-
-    /** The key of the message: Word */
-    public static final String LABEL_facet_filetype_word = "{label.facet_filetype_word}";
-
-    /** The key of the message: Excel */
-    public static final String LABEL_facet_filetype_excel = "{label.facet_filetype_excel}";
-
-    /** The key of the message: PowerPoint */
-    public static final String LABEL_facet_filetype_powerpoint = "{label.facet_filetype_powerpoint}";
-
-    /** The key of the message: PDF */
-    public static final String LABEL_facet_filetype_pdf = "{label.facet_filetype_pdf}";
-
-    /** The key of the message: PDF */
-    public static final String LABEL_facet_filetype_others = "{label.facet_filetype_others}";
-
-    /** The key of the message: Reset */
-    public static final String LABEL_facet_label_reset = "{label.facet_label_reset}";
-
-    /** The key of the message: Invalid mode(expected value is {0}, but it's {1}). */
-    public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
-
-    /** The key of the message: Failed to create a new data. */
-    public static final String ERRORS_crud_failed_to_create_crud_table = "{errors.crud_failed_to_create_crud_table}";
-
-    /** The key of the message: Failed to update the data. */
-    public static final String ERRORS_crud_failed_to_update_crud_table = "{errors.crud_failed_to_update_crud_table}";
-
-    /** The key of the message: Failed to delete the data. */
-    public static final String ERRORS_crud_failed_to_delete_crud_table = "{errors.crud_failed_to_delete_crud_table}";
-
-    /** The key of the message: Could not find the data({0}). */
-    public static final String ERRORS_crud_could_not_find_crud_table = "{errors.crud_could_not_find_crud_table}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -554,6 +422,63 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Deleted data. */
     public static final String SUCCESS_crud_delete_crud_table = "{success.crud_delete_crud_table}";
+
+    /**
+     * Add the created action message for the key 'errors.header' with parameters.
+     * <pre>
+     * message: <font color="red"><ul>
+     * comment: ------------
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsHeader(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_HEADER));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.footer' with parameters.
+     * <pre>
+     * message: </ul></font>
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFooter(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_FOOTER));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.prefix' with parameters.
+     * <pre>
+     * message: <li>
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsPrefix(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_PREFIX));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.suffix' with parameters.
+     * <pre>
+     * message: </li>
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSuffix(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_SUFFIX));
+        return this;
+    }
 
     /**
      * Add the created action message for the key 'constraints.AssertFalse.message' with parameters.
@@ -1052,453 +977,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsAppDbAlreadyExists(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_APP_DB_ALREADY_EXISTS));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_header' with parameters.
-     * <pre>
-     * message: <div class="alert"><button type="button" class="close" data-dismiss="alert">×</button>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontHeader(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_front_header));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_footer' with parameters.
-     * <pre>
-     * message: </div>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontFooter(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_front_footer));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_prefix' with parameters.
-     * <pre>
-     * message: <div>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontPrefix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_front_prefix));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.front_suffix' with parameters.
-     * <pre>
-     * message: </div>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFrontSuffix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_front_suffix));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.header' with parameters.
-     * <pre>
-     * message: <div class="alert-message error">
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsHeader(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_HEADER));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.footer' with parameters.
-     * <pre>
-     * message: </div>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFooter(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_FOOTER));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.prefix' with parameters.
-     * <pre>
-     * message: <p>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsPrefix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_PREFIX));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.suffix' with parameters.
-     * <pre>
-     * message: </p>
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsSuffix(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_SUFFIX));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid' with parameters.
-     * <pre>
-     * message: {0} is invalid.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalid(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_INVALID, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.maxlength' with parameters.
-     * <pre>
-     * message: {0} can not be greater than {1} characters.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsMaxlength(String property, String arg0, String arg1) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_MAXLENGTH, arg0, arg1));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.minlength' with parameters.
-     * <pre>
-     * message: {0} can not be less than {1} characters.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsMinlength(String property, String arg0, String arg1) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_MINLENGTH, arg0, arg1));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.maxbytelength' with parameters.
-     * <pre>
-     * message: {0} can not be greater than {1} bytes.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsMaxbytelength(String property, String arg0, String arg1) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_MAXBYTELENGTH, arg0, arg1));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.minbytelength' with parameters.
-     * <pre>
-     * message: {0} can not be less than {1} bytes.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsMinbytelength(String property, String arg0, String arg1) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_MINBYTELENGTH, arg0, arg1));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.range' with parameters.
-     * <pre>
-     * message: {0} is not in the range {1} through {2}.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @param arg2 The parameter arg2 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsRange(String property, String arg0, String arg1, String arg2) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_RANGE, arg0, arg1, arg2));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.required' with parameters.
-     * <pre>
-     * message: {0} is required.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsRequired(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_REQUIRED, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.byte' with parameters.
-     * <pre>
-     * message: {0} must be an byte.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsByte(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_BYTE, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.date' with parameters.
-     * <pre>
-     * message: {0} is not a date.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDate(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_DATE, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.double' with parameters.
-     * <pre>
-     * message: {0} must be an double.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsDouble(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_DOUBLE, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.float' with parameters.
-     * <pre>
-     * message: {0} must be an float.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFloat(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_FLOAT, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.integer' with parameters.
-     * <pre>
-     * message: {0} must be an integer.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInteger(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_INTEGER, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.long' with parameters.
-     * <pre>
-     * message: {0} must be an long.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsLong(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_LONG, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.short' with parameters.
-     * <pre>
-     * message: {0} must be an short.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsShort(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_SHORT, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.creditcard' with parameters.
-     * <pre>
-     * message: {0} is not a valid credit card number.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCreditcard(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_CREDITCARD, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.email' with parameters.
-     * <pre>
-     * message: {0} is an invalid e-mail address.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsEmail(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_EMAIL, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.url' with parameters.
-     * <pre>
-     * message: {0} is an invalid url (web address).
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUrl(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_URL, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.cronexpression' with parameters.
-     * <pre>
-     * message: {0} is a invalid format.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCronexpression(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_CRONEXPRESSION, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.uritype' with parameters.
-     * <pre>
-     * message: {0} is a invalid uri.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUritype(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_URITYPE, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.alphaDigitOnly' with parameters.
-     * <pre>
-     * message: {0} must be alphabet or digit only.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsAlphaDigitOnly(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_ALPHA_DIGIT_ONLY, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.alphaDigitSpaceOnly' with parameters.
-     * <pre>
-     * message: {0} must be alphabet, digit, or space only.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsAlphaDigitSpaceOnly(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_ALPHA_DIGIT_SPACE_ONLY, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.token' with parameters.
-     * <pre>
-     * message: Invalid request.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsToken(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_TOKEN));
         return this;
     }
 
@@ -2191,7 +1669,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.failed_to_download_kuromoji_file' with parameters.
      * <pre>
-     * message: Failed to download the UserDict file.
+     * message: Failed to download the Kuromoji file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -2205,7 +1683,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.failed_to_upload_kuromoji_file' with parameters.
      * <pre>
-     * message: Failed to upload the UserDict file.
+     * message: Failed to upload the Kuromoji file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -2213,6 +1691,36 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_upload_kuromoji_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_str_is_included' with parameters.
+     * <pre>
+     * message: "{1}" in "{0}" is invalid.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidStrIsIncluded(String property, String arg1, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_str_is_included, arg1, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_reload_core' with parameters.
+     * <pre>
+     * message: Failed to reload core. Check log files.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToReloadCore(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_reload_core));
         return this;
     }
 
@@ -2353,6 +1861,79 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryStrRange(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_invalid_query_str_range));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_invalid_mode' with parameters.
+     * <pre>
+     * message: Invalid mode(expected value is {0}, but it's {1}).
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudInvalidMode(String property, String arg0, String arg1) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_invalid_mode, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_create_crud_table' with parameters.
+     * <pre>
+     * message: Failed to create a new data.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToCreateCrudTable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_create_crud_table));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_update_crud_table' with parameters.
+     * <pre>
+     * message: Failed to update the data.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToUpdateCrudTable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_update_crud_table));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_delete_crud_table' with parameters.
+     * <pre>
+     * message: Failed to delete the data.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToDeleteCrudTable(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_delete_crud_table));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_could_not_find_crud_table' with parameters.
+     * <pre>
+     * message: Could not find the data({0}).
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudCouldNotFindCrudTable(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_could_not_find_crud_table, arg0));
         return this;
     }
 
@@ -2729,7 +2310,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'success.upload_kuromoji_file' with parameters.
      * <pre>
-     * message: Uploaded UserDict file.
+     * message: Uploaded Kuromoji file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -2765,359 +2346,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadSuggestBadWord(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_upload_suggest_bad_word));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_label_title' with parameters.
-     * <pre>
-     * message: Label
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLabelTitle(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_label_title));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_lastModified_title' with parameters.
-     * <pre>
-     * message: Term
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLastModifiedTitle(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_lastModified_title));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_lastModified_1day' with parameters.
-     * <pre>
-     * message: Past 24 Hours
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLastModified1day(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_lastModified_1day));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_lastModified_1week' with parameters.
-     * <pre>
-     * message: Past Week
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLastModified1week(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_lastModified_1week));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_lastModified_1month' with parameters.
-     * <pre>
-     * message: Past Month
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLastModified1month(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_lastModified_1month));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_lastModified_1year' with parameters.
-     * <pre>
-     * message: Past Year
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLastModified1year(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_lastModified_1year));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_title' with parameters.
-     * <pre>
-     * message: Size
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLengthTitle(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_title));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_10k' with parameters.
-     * <pre>
-     * message: &nbsp; - 10kb
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLength10k(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_10k));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_10kto100k' with parameters.
-     * <pre>
-     * message: 10kb - 100kb
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLength10kto100k(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_10kto100k));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_100kto500k' with parameters.
-     * <pre>
-     * message: 100kb - 500kb
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLength100kto500k(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_100kto500k));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_500kto1m' with parameters.
-     * <pre>
-     * message: 500kb - 1mb
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLength500kto1m(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_500kto1m));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_contentLength_1m' with parameters.
-     * <pre>
-     * message: 1mb - &nbsp;
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetContentLength1m(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_contentLength_1m));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_title' with parameters.
-     * <pre>
-     * message: File Type
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypeTitle(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_title));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_html' with parameters.
-     * <pre>
-     * message: HTML
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypeHtml(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_html));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_word' with parameters.
-     * <pre>
-     * message: Word
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypeWord(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_word));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_excel' with parameters.
-     * <pre>
-     * message: Excel
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypeExcel(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_excel));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_powerpoint' with parameters.
-     * <pre>
-     * message: PowerPoint
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypePowerpoint(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_powerpoint));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_pdf' with parameters.
-     * <pre>
-     * message: PDF
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypePdf(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_pdf));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_filetype_others' with parameters.
-     * <pre>
-     * message: PDF
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetFiletypeOthers(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_filetype_others));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'label.facet_label_reset' with parameters.
-     * <pre>
-     * message: Reset
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addLabelFacetLabelReset(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(LABEL_facet_label_reset));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_invalid_mode' with parameters.
-     * <pre>
-     * message: Invalid mode(expected value is {0}, but it's {1}).
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @param arg1 The parameter arg1 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudInvalidMode(String property, String arg0, String arg1) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_invalid_mode, arg0, arg1));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_failed_to_create_crud_table' with parameters.
-     * <pre>
-     * message: Failed to create a new data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudFailedToCreateCrudTable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_create_crud_table));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_failed_to_update_crud_table' with parameters.
-     * <pre>
-     * message: Failed to update the data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudFailedToUpdateCrudTable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_update_crud_table));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_failed_to_delete_crud_table' with parameters.
-     * <pre>
-     * message: Failed to delete the data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudFailedToDeleteCrudTable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_delete_crud_table));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_could_not_find_crud_table' with parameters.
-     * <pre>
-     * message: Could not find the data({0}).
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudCouldNotFindCrudTable(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_could_not_find_crud_table, arg0));
         return this;
     }
 

@@ -37,14 +37,14 @@ public class KuromojiService {
     public List<KuromojiItem> getKuromojiList(final String dictId, final KuromojiPager kuromojiPager) {
         return getKuromojiFile(dictId).map(file -> {
             final int pageSize = kuromojiPager.getPageSize();
-            final PagingList<KuromojiItem> userDictList = file.selectList((kuromojiPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+            final PagingList<KuromojiItem> kuromojiList = file.selectList((kuromojiPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
             // update pager
-                BeanUtil.copyBeanToBean(userDictList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                userDictList.setPageRangeSize(5);
-                kuromojiPager.setPageNumberList(userDictList.createPageNumberList());
+                BeanUtil.copyBeanToBean(kuromojiList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+                kuromojiList.setPageRangeSize(5);
+                kuromojiPager.setPageNumberList(kuromojiList.createPageNumberList());
 
-                return (List<KuromojiItem>) userDictList;
+                return (List<KuromojiItem>) kuromojiList;
             }).orElseGet(() -> Collections.emptyList());
     }
 
@@ -53,7 +53,7 @@ public class KuromojiService {
                 .map(file -> OptionalEntity.of((KuromojiFile) file)).orElse(OptionalEntity.empty());
     }
 
-    public OptionalEntity<KuromojiItem> getKuromoji(final String dictId, final long id) {
+    public OptionalEntity<KuromojiItem> getKuromojiItem(final String dictId, final long id) {
         return getKuromojiFile(dictId).map(file -> file.get(id).get());
     }
 

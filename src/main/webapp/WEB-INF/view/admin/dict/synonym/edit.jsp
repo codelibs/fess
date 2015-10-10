@@ -83,12 +83,12 @@
 					    </span>
 					</c:if>
 					<span class="label label-default">
-					    <la:link href="downloadpage?dictId=${f:u(dictId)}">
+					    <la:link href="downloadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_download" />
 					    </la:link>
 					</span>
 					<span class="label label-default">
-					    <la:link href="uploadpage?dictId=${f:u(dictId)}">
+					    <la:link href="uploadpage/${f:u(dictId)}">
 						<la:message key="labels.dict_synonym_link_upload" />
 					    </la:link>
 					</span>
@@ -108,12 +108,12 @@
 
 				    <%-- Form Fields --%>
 				    <div class="form-group">
-					<label for="term"><la:message key="labels.dict_synonym_source" /></label>
-					<la:textarea property="inputs" rows="5" styleClass="form-control" />
+						<label for="term"><la:message key="labels.dict_synonym_source" /></label>
+						<la:textarea property="inputs" rows="5" styleClass="form-control" />
 				    </div>
 				    <div class="form-group">
-					<label for="outputs"><la:message key="labels.dict_synonym_target" /></label>
-					<la:textarea property="outputs" rows="5" styleClass="form-control" />
+						<label for="outputs"><la:message key="labels.dict_synonym_target" /></label>
+						<la:textarea property="outputs" rows="5" styleClass="form-control" />
 				    </div>
 				</div>
 				<%-- Box Footer --%>

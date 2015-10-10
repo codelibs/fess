@@ -16,16 +16,14 @@
 
 package org.codelibs.fess.app.service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SynonymPager;
-import org.codelibs.fess.dict.DictionaryExpiredException;
 import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
@@ -37,53 +35,41 @@ public class SynonymService {
     protected DictionaryManager dictionaryManager;
 
     public List<SynonymItem> getSynonymList(final String dictId, final SynonymPager synonymPager) {
-        final SynonymFile synonymFile = getSynonymFile(dictId);
+        return getSynonymFile(dictId).map(file -> {
+            final int pageSize = synonymPager.getPageSize();
+            final PagingList<SynonymItem> synonymList = file.selectList((synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-        final int pageSize = synonymPager.getPageSize();
-        final PagingList<SynonymItem> synonymList = synonymFile.selectList((synonymPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+            // update pager
+                BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+                synonymList.setPageRangeSize(5);
+                synonymPager.setPageNumberList(synonymList.createPageNumberList());
 
-        // update pager
-        BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        synonymList.setPageRangeSize(5);
-        synonymPager.setPageNumberList(synonymList.createPageNumberList());
-
-        return synonymList;
-
+                return (List<SynonymItem>) synonymList;
+            }).orElseGet(() -> Collections.emptyList());
     }
 
-    public SynonymFile getSynonymFile(final String dictId) {
-        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof SynonymFile).map(file -> (SynonymFile) file)
-                .orElseThrow(() -> new DictionaryExpiredException());
+    public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {
+        return dictionaryManager.getDictionaryFile(dictId).filter(file -> file instanceof SynonymFile)
+                .map(file -> OptionalEntity.of((SynonymFile) file)).orElse(OptionalEntity.empty());
     }
 
-    public OptionalEntity<SynonymItem> getSynonym(final String dictId, final Map<String, String> paramMap) {
-        final SynonymFile synonymFile = getSynonymFile(dictId);
-
-        final String idStr = paramMap.get("id");
-        if (StringUtil.isNotBlank(idStr)) {
-            try {
-                final long id = Long.parseLong(idStr);
-                return synonymFile.get(id);
-            } catch (final NumberFormatException e) {
-                // ignore
-            }
-        }
-
-        return OptionalEntity.empty();
+    public OptionalEntity<SynonymItem> getSynonymItem(final String dictId, final long id) {
+        return getSynonymFile(dictId).map(file -> file.get(id).get());
     }
 
     public void store(final String dictId, final SynonymItem synonymItem) {
-        final SynonymFile synonymFile = getSynonymFile(dictId);
-
-        if (synonymItem.getId() == 0) {
-            synonymFile.insert(synonymItem);
-        } else {
-            synonymFile.update(synonymItem);
-        }
+        getSynonymFile(dictId).ifPresent(file -> {
+            if (synonymItem.getId() == 0) {
+                file.insert(synonymItem);
+            } else {
+                file.update(synonymItem);
+            }
+        });
     }
 
     public void delete(final String dictId, final SynonymItem synonymItem) {
-        final SynonymFile synonymFile = getSynonymFile(dictId);
-        synonymFile.delete(synonymItem);
+        getSynonymFile(dictId).ifPresent(file -> {
+            file.delete(synonymItem);
+        });
     }
 }

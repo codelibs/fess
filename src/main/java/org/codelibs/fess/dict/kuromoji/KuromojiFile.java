@@ -235,7 +235,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
                             item.setNewToken(null);
                         }
                     } else {
-                        throw new DictionaryException("UserDict file was updated: old=" + oldItem + " : new=" + item);
+                        throw new DictionaryException("Kuromoji file was updated: old=" + oldItem + " : new=" + item);
                     }
                 } else {
                     writer.write(oldItem.toLineString());

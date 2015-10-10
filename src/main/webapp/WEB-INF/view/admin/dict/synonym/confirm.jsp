@@ -21,7 +21,7 @@
 			<la:message key="labels.dict_synonym_title" />
 		</h1>
 		<ol class="breadcrumb">
-			<li><la:link href="index">
+			<li><la:link href="list">
 			<la:message key="labels.dict_synonym_list_link" />
 			</la:link></li>
 			<c:if test="${crudMode == 1}">
@@ -69,7 +69,7 @@
 					</h3>
 					<div class="box-tools pull-right">
 					<span class="label label-default">
-						<la:link href="../index">
+						<la:link href="../list">
 						<la:message key="labels.dict_list_link" />
 						</la:link>
 					</span>
@@ -132,18 +132,18 @@
 
 					<%-- Form Fields --%>
 					<table class="table table-bordered">
-					<tbody>
-						<tr>
-						<th style="col-xs-2">
-							<la:message key="labels.dict_synonym_source" />
-						</th>
-						<td>${f:br(f:h(inputs))}<la:hidden property="inputs" /></td>
-						</tr>
-						<tr>
-						<th><la:message key="labels.dict_synonym_target" /></th>
-						<td>${f:br(f:h(outputs))}<la:hidden property="outputs" /></td>
-						</tr>
-					</tbody>
+					    <tbody>
+							<tr>
+								<th style="col-xs-2">
+									<la:message key="labels.dict_synonym_source" />
+								</th>
+								<td>${f:br(f:h(inputs))}<la:hidden property="inputs" /></td>
+							</tr>
+							<tr>
+								<th><la:message key="labels.dict_synonym_target" /></th>
+								<td>${f:br(f:h(outputs))}<la:hidden property="outputs" /></td>
+							</tr>
+					    </tbody>
 					</table>
 				</div>
 
