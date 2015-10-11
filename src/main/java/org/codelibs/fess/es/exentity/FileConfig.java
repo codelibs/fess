@@ -18,9 +18,9 @@ import org.codelibs.fess.es.exbhv.RoleTypeBhv;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.codelibs.robot.client.S2RobotClientFactory;
-import org.codelibs.robot.client.smb.SmbAuthentication;
-import org.codelibs.robot.client.smb.SmbClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.dbflute.cbean.result.ListResultBean;
 import org.lastaflute.di.core.SingletonLaContainer;
 
@@ -228,7 +228,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
+    public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
         final FileAuthenticationService fileAuthenticationService = SingletonLaContainer.getComponent(FileAuthenticationService.class);
 
         //  Parameters

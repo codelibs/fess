@@ -36,17 +36,17 @@ import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.S2Robot;
-import org.codelibs.robot.entity.AccessResult;
-import org.codelibs.robot.entity.AccessResultData;
-import org.codelibs.robot.entity.EsAccessResult;
-import org.codelibs.robot.entity.EsUrlQueue;
-import org.codelibs.robot.service.DataService;
-import org.codelibs.robot.service.UrlFilterService;
-import org.codelibs.robot.service.UrlQueueService;
-import org.codelibs.robot.service.impl.EsDataService;
-import org.codelibs.robot.transformer.Transformer;
-import org.codelibs.robot.util.EsResultList;
+import org.codelibs.fess.crawler.Crawler;
+import org.codelibs.fess.crawler.entity.AccessResult;
+import org.codelibs.fess.crawler.entity.AccessResultData;
+import org.codelibs.fess.crawler.entity.EsAccessResult;
+import org.codelibs.fess.crawler.entity.EsUrlQueue;
+import org.codelibs.fess.crawler.service.DataService;
+import org.codelibs.fess.crawler.service.UrlFilterService;
+import org.codelibs.fess.crawler.service.UrlQueueService;
+import org.codelibs.fess.crawler.service.impl.EsDataService;
+import org.codelibs.fess.crawler.transformer.Transformer;
+import org.codelibs.fess.crawler.util.EsResultList;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -122,7 +122,7 @@ public class IndexUpdater extends Thread {
 
     private final Map<String, Object> docValueMap = new HashMap<String, Object>();
 
-    private List<S2Robot> s2RobotList;
+    private List<Crawler> crawlerList;
 
     public IndexUpdater() {
         // nothing
@@ -176,7 +176,7 @@ public class IndexUpdater extends Thread {
                                                 .boolFilter()
                                                 .must(FilterBuilders.termsFilter(EsAccessResult.SESSION_ID, sessionIdList))
                                                 .must(FilterBuilders.termFilter(EsAccessResult.STATUS,
-                                                        org.codelibs.robot.Constants.OK_STATUS)));
+                                                        org.codelibs.fess.crawler.Constants.OK_STATUS)));
                         builder.setQuery(queryBuilder);
                         builder.setFrom(0);
                         if (maxDocumentCacheSize <= 0) {
@@ -507,8 +507,8 @@ public class IndexUpdater extends Thread {
 
     private void forceStop() {
         systemHelper.setForceStop(true);
-        for (final S2Robot s2Robot : s2RobotList) {
-            s2Robot.stop();
+        for (final Crawler crawler : crawlerList) {
+            crawler.stop();
         }
     }
 
@@ -557,7 +557,7 @@ public class IndexUpdater extends Thread {
         docValueMap.put(fieldName, value);
     }
 
-    public void setS2RobotList(final List<S2Robot> s2RobotList) {
-        this.s2RobotList = s2RobotList;
+    public void setCrawlerList(final List<Crawler> crawlerList) {
+        this.crawlerList = crawlerList;
     }
 }

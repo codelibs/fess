@@ -24,13 +24,13 @@ import org.codelibs.fess.es.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.exbhv.RoleTypeBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.codelibs.robot.client.S2RobotClientFactory;
-import org.codelibs.robot.client.http.Authentication;
-import org.codelibs.robot.client.http.HcHttpClient;
-import org.codelibs.robot.client.http.impl.AuthenticationImpl;
-import org.codelibs.robot.client.http.ntlm.JcifsEngine;
-import org.codelibs.robot.client.smb.SmbAuthentication;
-import org.codelibs.robot.client.smb.SmbClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.http.Authentication;
+import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
+import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
+import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.dbflute.cbean.result.ListResultBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,15 +44,15 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(DataConfig.class);
 
-    private static final String S2ROBOT_WEB_HEADER_PREFIX = "s2robot.web.header.";
+    private static final String S2ROBOT_WEB_HEADER_PREFIX = "crawler.web.header.";
 
-    private static final String S2ROBOT_WEB_AUTH = "s2robot.web.auth";
+    private static final String S2ROBOT_WEB_AUTH = "crawler.web.auth";
 
-    private static final String S2ROBOT_USERAGENT = "s2robot.useragent";
+    private static final String S2ROBOT_USERAGENT = "crawler.useragent";
 
-    private static final String S2ROBOT_PARAM_PREFIX = "s2robot.param.";
+    private static final String S2ROBOT_PARAM_PREFIX = "crawler.param.";
 
-    private static final Object S2ROBOT_FILE_AUTH = "s2robot.file.auth";
+    private static final Object S2ROBOT_FILE_AUTH = "crawler.file.auth";
 
     private String[] labelTypeIds;
 
@@ -211,11 +211,11 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final S2RobotClientFactory robotClientFactory) {
+    public void initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
         final Map<String, String> paramMap = getHandlerParameterMap();
 
         final Map<String, Object> factoryParamMap = new HashMap<String, Object>();
-        robotClientFactory.setInitParameterMap(factoryParamMap);
+        crawlerClientFactory.setInitParameterMap(factoryParamMap);
 
         // parameters
         for (final Map.Entry<String, String> entry : paramMap.entrySet()) {
@@ -301,18 +301,19 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         }
 
         // request header
-        final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
+        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList =
+                new ArrayList<org.codelibs.fess.crawler.client.http.RequestHeader>();
         int count = 1;
         String headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
         while (StringUtil.isNotBlank(headerName)) {
             final String headerValue = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".value");
-            rhList.add(new org.codelibs.robot.client.http.RequestHeader(headerName, headerValue));
+            rhList.add(new org.codelibs.fess.crawler.client.http.RequestHeader(headerName, headerValue));
             count++;
             headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
         }
         if (!rhList.isEmpty()) {
             factoryParamMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
-                    rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList.size()]));
+                    rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
         }
 
         // file auth

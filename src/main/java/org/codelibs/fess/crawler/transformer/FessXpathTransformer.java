@@ -50,17 +50,17 @@ import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.builder.RequestDataBuilder;
-import org.codelibs.robot.entity.AccessResultData;
-import org.codelibs.robot.entity.RequestData;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.entity.ResultData;
-import org.codelibs.robot.entity.UrlQueue;
-import org.codelibs.robot.exception.ChildUrlsException;
-import org.codelibs.robot.exception.RobotCrawlAccessException;
-import org.codelibs.robot.exception.RobotSystemException;
-import org.codelibs.robot.util.CrawlingParameterUtil;
-import org.codelibs.robot.util.ResponseDataUtil;
+import org.codelibs.fess.crawler.builder.RequestDataBuilder;
+import org.codelibs.fess.crawler.entity.AccessResultData;
+import org.codelibs.fess.crawler.entity.RequestData;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.ResultData;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.CrawlerSystemException;
+import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.util.ResponseDataUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 }
                 parser.parse(is);
             } catch (final Exception e) {
-                throw new RobotCrawlAccessException("Could not parse " + responseData.getUrl(), e);
+                throw new CrawlingAccessException("Could not parse " + responseData.getUrl(), e);
             } finally {
                 IOUtils.closeQuietly(bis);
             }
@@ -172,7 +172,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             try {
                 resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
             } catch (final Exception e) {
-                throw new RobotCrawlAccessException("Could not serialize object: " + responseData.getUrl(), e);
+                throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
             }
             resultData.setEncoding(charsetName);
         } finally {
@@ -500,7 +500,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             try {
                 return SerializeUtil.fromBinaryToObject(data);
             } catch (final Exception e) {
-                throw new RobotSystemException("Could not create an instanced from bytes.", e);
+                throw new CrawlerSystemException("Could not create an instanced from bytes.", e);
             }
         }
         return new HashMap<String, Object>();

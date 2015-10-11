@@ -36,29 +36,29 @@ import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.S2RobotThread;
-import org.codelibs.robot.builder.RequestDataBuilder;
-import org.codelibs.robot.client.S2RobotClient;
-import org.codelibs.robot.client.smb.SmbClient;
-import org.codelibs.robot.entity.RequestData;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.entity.UrlQueue;
-import org.codelibs.robot.log.LogType;
+import org.codelibs.fess.crawler.CrawlerThread;
+import org.codelibs.fess.crawler.builder.RequestDataBuilder;
+import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
+import org.codelibs.fess.crawler.entity.RequestData;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.log.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jcifs.smb.ACE;
 import jcifs.smb.SID;
 
-public class FessS2RobotThread extends S2RobotThread {
-    private static final Logger logger = LoggerFactory.getLogger(FessS2RobotThread.class);
+public class FessCrawlerThread extends CrawlerThread {
+    private static final Logger logger = LoggerFactory.getLogger(FessCrawlerThread.class);
 
     @Override
-    protected boolean isContentUpdated(final S2RobotClient client, final UrlQueue urlQueue) {
+    protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue urlQueue) {
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         if (crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
-            log(logHelper, LogType.CHECK_LAST_MODIFIED, robotContext, urlQueue);
+            log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
             final long startTime = System.currentTimeMillis();
 
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
@@ -72,7 +72,7 @@ public class FessS2RobotThread extends S2RobotThread {
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
             try {
-                final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(robotContext.getSessionId());
+                final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(crawlerContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put(fieldHelper.urlField, url);
                 final List<String> roleTypeList = new ArrayList<String>();
@@ -140,12 +140,12 @@ public class FessS2RobotThread extends S2RobotThread {
                     return true;
                 } else if (responseData.getLastModified().getTime() <= lastModified.getTime() && httpStatusCode == 200) {
 
-                    log(logHelper, LogType.NOT_MODIFIED, robotContext, urlQueue);
+                    log(logHelper, LogType.NOT_MODIFIED, crawlerContext, urlQueue);
 
                     responseData.setExecutionTime(System.currentTimeMillis() - startTime);
                     responseData.setParentUrl(urlQueue.getParentUrl());
-                    responseData.setSessionId(robotContext.getSessionId());
-                    responseData.setHttpStatusCode(org.codelibs.robot.Constants.NOT_MODIFIED_STATUS);
+                    responseData.setSessionId(crawlerContext.getSessionId());
+                    responseData.setHttpStatusCode(org.codelibs.fess.crawler.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fieldHelper.anchorField)));
@@ -163,7 +163,7 @@ public class FessS2RobotThread extends S2RobotThread {
 
     protected void storeChildUrlsToQueue(final UrlQueue urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
-            synchronized (robotContext.getAccessCountLock()) {
+            synchronized (crawlerContext.getAccessCountLock()) {
                 // add an url
                 storeChildUrls(childUrlSet, urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
             }

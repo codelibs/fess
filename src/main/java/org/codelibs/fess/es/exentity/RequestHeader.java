@@ -30,8 +30,8 @@ public class RequestHeader extends BsRequestHeader {
         asDocMeta().version(version);
     }
 
-    public org.codelibs.robot.client.http.RequestHeader getS2RobotRequestHeader() {
-        return new org.codelibs.robot.client.http.RequestHeader(getName(), getValue());
+    public org.codelibs.fess.crawler.client.http.RequestHeader getCrawlerRequestHeader() {
+        return new org.codelibs.fess.crawler.client.http.RequestHeader(getName(), getValue());
     }
 
     public WebConfig getWebConfig() {

@@ -5,7 +5,7 @@
 	<include path="convention.xml" />
 	<include path="fess.xml" />
 
-	<include path="s2robot_es.xml" />
+	<include path="crawler_es.xml" />
 
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>

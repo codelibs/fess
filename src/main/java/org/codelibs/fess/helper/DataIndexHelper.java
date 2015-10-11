@@ -132,8 +132,8 @@ public class DataIndexHelper implements Serializable {
         while (startedCrawlerNum < dataCrawlingThreadList.size()) {
             // Force to stop crawl
             if (systemHelper.isForceStop()) {
-                for (final DataCrawlingThread s2Robot : dataCrawlingThreadList) {
-                    s2Robot.stopCrawling();
+                for (final DataCrawlingThread crawlerThread : dataCrawlingThreadList) {
+                    crawlerThread.stopCrawling();
                 }
                 break;
             }

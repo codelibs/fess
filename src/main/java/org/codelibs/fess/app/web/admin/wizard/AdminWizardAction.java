@@ -39,7 +39,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.TriggeredJob;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.util.CharUtil;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;

@@ -55,8 +55,8 @@
 		<junit.version>4.8.2</junit.version>
 		<utflute.version>0.5.2</utflute.version>
 
-		<!-- S2Robot -->
-		<s2robot.version>1.0.0-SNAPSHOT</s2robot.version>
+		<!-- Crawler -->
+		<crawler.version>1.0.0-SNAPSHOT</crawler.version>
 		<tika.version>1.6</tika.version>
 		<poi.version>3.11-beta2</poi.version>
 		<pdfbox.version>1.8.7</pdfbox.version>
@@ -466,11 +466,11 @@
 			<version>2.2.1</version>
 		</dependency>
 
-		<!-- s2robot -->
+		<!-- Crawler -->
 		<dependency>
-			<groupId>org.codelibs.robot</groupId>
-			<artifactId>s2robot-lasta</artifactId>
-			<version>${s2robot.version}</version>
+			<groupId>org.codelibs.fess</groupId>
+			<artifactId>fess-crawler-lasta</artifactId>
+			<version>${crawler.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -479,9 +479,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.codelibs.robot</groupId>
-			<artifactId>s2robot-es</artifactId>
-			<version>${s2robot.version}</version>
+			<groupId>org.codelibs.fess</groupId>
+			<artifactId>fess-crawler-es</artifactId>
+			<version>${crawler.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>

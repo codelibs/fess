@@ -18,9 +18,9 @@ import org.codelibs.fess.es.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.es.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
-import org.codelibs.robot.client.S2RobotClientFactory;
-import org.codelibs.robot.client.http.Authentication;
-import org.codelibs.robot.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.http.Authentication;
+import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.dbflute.cbean.result.ListResultBean;
 import org.lastaflute.di.core.SingletonLaContainer;
 
@@ -232,7 +232,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final S2RobotClientFactory clientFactory) {
+    public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
         final WebAuthenticationService webAuthenticationService = SingletonLaContainer.getComponent(WebAuthenticationService.class);
         final RequestHeaderService requestHeaderService = SingletonLaContainer.getComponent(RequestHeaderService.class);
 
@@ -259,11 +259,13 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
-        final List<org.codelibs.robot.client.http.RequestHeader> rhList = new ArrayList<org.codelibs.robot.client.http.RequestHeader>();
+        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList =
+                new ArrayList<org.codelibs.fess.crawler.client.http.RequestHeader>();
         for (final RequestHeader requestHeader : requestHeaderList) {
-            rhList.add(requestHeader.getS2RobotRequestHeader());
+            rhList.add(requestHeader.getCrawlerRequestHeader());
         }
-        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, rhList.toArray(new org.codelibs.robot.client.http.RequestHeader[rhList.size()]));
+        paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
+                rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
     }
 

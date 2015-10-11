@@ -2,7 +2,7 @@ package org.codelibs.fess.es.exentity;
 
 import java.util.Map;
 
-import org.codelibs.robot.client.S2RobotClientFactory;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 
 public interface CrawlingConfig {
 
@@ -20,7 +20,7 @@ public interface CrawlingConfig {
 
     String getConfigId();
 
-    void initializeClientFactory(S2RobotClientFactory s2RobotClientFactory);
+    void initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
 

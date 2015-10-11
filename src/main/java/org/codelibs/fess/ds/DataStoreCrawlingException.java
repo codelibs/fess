@@ -16,9 +16,9 @@
 
 package org.codelibs.fess.ds;
 
-import org.codelibs.robot.exception.RobotCrawlAccessException;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 
-public class DataStoreCrawlingException extends RobotCrawlAccessException {
+public class DataStoreCrawlingException extends CrawlingAccessException {
 
     private static final long serialVersionUID = 1L;
 

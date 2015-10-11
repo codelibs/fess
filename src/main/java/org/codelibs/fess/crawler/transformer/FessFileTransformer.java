@@ -18,9 +18,9 @@ package org.codelibs.fess.crawler.transformer;
 
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.extractor.Extractor;
-import org.codelibs.robot.extractor.ExtractorFactory;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

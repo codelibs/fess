@@ -36,8 +36,8 @@ import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.exentity.DataConfig;
-import org.codelibs.robot.exception.RobotCrawlAccessException;
-import org.codelibs.robot.exception.RobotMultipleCrawlAccessException;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,10 +230,10 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
 
                 try {
                     loop = callback.store(dataMap);
-                } catch (final RobotCrawlAccessException e) {
+                } catch (final CrawlingAccessException e) {
                     Throwable target = e;
-                    if (target instanceof RobotMultipleCrawlAccessException) {
-                        final Throwable[] causes = ((RobotMultipleCrawlAccessException) target).getCauses();
+                    if (target instanceof MultipleCrawlingAccessException) {
+                        final Throwable[] causes = ((MultipleCrawlingAccessException) target).getCauses();
                         if (causes.length > 0) {
                             target = causes[causes.length - 1];
                         }

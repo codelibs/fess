@@ -19,29 +19,29 @@ package org.codelibs.fess.helper;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.es.exentity.CrawlingConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.S2RobotContext;
-import org.codelibs.robot.entity.UrlQueue;
-import org.codelibs.robot.exception.RobotMultipleCrawlAccessException;
-import org.codelibs.robot.helper.impl.LogHelperImpl;
-import org.codelibs.robot.log.LogType;
+import org.codelibs.fess.crawler.CrawlerContext;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
+import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
+import org.codelibs.fess.crawler.log.LogType;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RobotLogHelper extends LogHelperImpl {
+public class CrawlerLogHelper extends LogHelperImpl {
     private static final Logger logger = LoggerFactory // NOPMD
-            .getLogger(RobotLogHelper.class);
+            .getLogger(CrawlerLogHelper.class);
 
     @Override
     public void log(final LogType key, final Object... objs) {
         try {
             switch (key) {
             case CRAWLING_ACCESS_EXCEPTION: {
-                final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
                 final UrlQueue urlQueue = (UrlQueue) objs[1];
                 Throwable e = (Throwable) objs[2];
-                if (e instanceof RobotMultipleCrawlAccessException) {
-                    final Throwable[] causes = ((RobotMultipleCrawlAccessException) e).getCauses();
+                if (e instanceof MultipleCrawlingAccessException) {
+                    final Throwable[] causes = ((MultipleCrawlingAccessException) e).getCauses();
                     if (causes.length > 0) {
                         e = causes[causes.length - 1];
                     }
@@ -54,15 +54,15 @@ public class RobotLogHelper extends LogHelperImpl {
                 } else {
                     errorName = e.getClass().getCanonicalName();
                 }
-                storeFailureUrl(robotContext, urlQueue, errorName, e);
+                storeFailureUrl(crawlerContext, urlQueue, errorName, e);
                 break;
             }
             case CRAWLING_EXCETPION: {
-                final S2RobotContext robotContext = (S2RobotContext) objs[0];
+                final CrawlerContext crawlerContext = (CrawlerContext) objs[0];
                 final UrlQueue urlQueue = (UrlQueue) objs[1];
                 final Throwable e = (Throwable) objs[2];
 
-                storeFailureUrl(robotContext, urlQueue, e.getClass().getCanonicalName(), e);
+                storeFailureUrl(crawlerContext, urlQueue, e.getClass().getCanonicalName(), e);
                 break;
             }
             default:
@@ -75,9 +75,9 @@ public class RobotLogHelper extends LogHelperImpl {
         super.log(key, objs);
     }
 
-    private void storeFailureUrl(final S2RobotContext robotContext, final UrlQueue urlQueue, final String errorName, final Throwable e) {
+    private void storeFailureUrl(final CrawlerContext crawlerContext, final UrlQueue urlQueue, final String errorName, final Throwable e) {
 
-        final CrawlingConfig crawlingConfig = getCrawlingConfig(robotContext.getSessionId());
+        final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();
 
         final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);

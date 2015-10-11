@@ -10,8 +10,8 @@
 	<include path="fess_api.xml"/>
 	<include path="fess_dict.xml"/>
 
-	<include path="s2robot/client.xml" />
-	<include path="s2robot/mimetype.xml" />
+	<include path="crawler/client.xml" />
+	<include path="crawler/mimetype.xml" />
 
 	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
         <!-- CHANGE THE FOLLOWING KEY -->

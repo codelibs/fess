@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
-<components namespace="s2robot">
-	<include path="s2robot/container.xml" />
-	<include path="s2robot/transformer.xml" />
+<components namespace="fessCrawler">
+	<include path="crawler/container.xml" />
+	<include path="crawler/transformer.xml" />
 
-	<component name="ruleManager" class="org.codelibs.robot.rule.impl.RuleManagerImpl" instance="prototype">
+	<component name="ruleManager" class="org.codelibs.fess.crawler.rule.impl.RuleManagerImpl" instance="prototype">
 		<postConstruct name="addRule">
 			<arg>sitemapsRule</arg>
 		</postConstruct>
@@ -23,10 +23,10 @@
 		</postConstruct>
 	</component>
 
-	<component name="sitemapsRule" class="org.codelibs.robot.rule.impl.RegexRule" >
+	<component name="sitemapsRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"sitemapsRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.robot.processor.impl.SitemapsResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.impl.SitemapsResponseProcessor">
 			</component>
 		</property>
 		<postConstruct name="addRule">
@@ -35,10 +35,10 @@
 		</postConstruct>
 	</component>
 	
-	<component name="webHtmlRule" class="org.codelibs.robot.rule.impl.RegexRule" >
+	<component name="webHtmlRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"webHtmlRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessXpathTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -56,10 +56,10 @@
 		</postConstruct>
 	</component>
 
-	<component name="webFileRule" class="org.codelibs.robot.rule.impl.RegexRule" >
+	<component name="webFileRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"webFileRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -85,10 +85,10 @@
 		</postConstruct>
 	</component>
 
-	<component name="fsFileRule" class="org.codelibs.robot.rule.impl.RegexRule" >
+	<component name="fsFileRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"fsFileRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessFileTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>
@@ -116,10 +116,10 @@
 	</component>
 
 
-	<component name="defaultRule" class="org.codelibs.robot.rule.impl.RegexRule" >
+	<component name="defaultRule" class="org.codelibs.fess.crawler.rule.impl.RegexRule" >
 		<property name="ruleId">"defaultRule"</property>
 		<property name="responseProcessor">
-			<component class="org.codelibs.robot.processor.impl.DefaultResponseProcessor">
+			<component class="org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor">
 				<property name="transformer">fessTikaTransformer</property>
 				<property name="successfulHttpCodes">(int[])[200]</property>
 				<property name="notModifiedHttpCodes">(int[])[304]</property>

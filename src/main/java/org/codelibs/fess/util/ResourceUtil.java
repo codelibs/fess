@@ -73,19 +73,19 @@ public class ResourceUtil {
         } catch (final Throwable e) { // NOSONAR
             // ignore
         }
-        Path path = Paths.get(".", names);
-        if (Files.exists(path)) {
-            return path;
+        final Path defaultPath = Paths.get("WEB-INF/" + base, names);
+        if (Files.exists(defaultPath)) {
+            return defaultPath;
         }
-        path = Paths.get("src/main/webapps/WEB-INF/" + base, names);
-        if (Files.exists(path)) {
-            return path;
+        final Path srcBasePath = Paths.get("src/main/webapps/WEB-INF/" + base, names);
+        if (Files.exists(srcBasePath)) {
+            return srcBasePath;
         }
-        path = Paths.get("target/fess/WEB-INF/" + base, names);
-        if (Files.exists(path)) {
-            return path;
+        final Path targetBasePath = Paths.get("target/fess/WEB-INF/" + base, names);
+        if (Files.exists(targetBasePath)) {
+            return targetBasePath;
         }
-        return path;
+        return defaultPath;
     }
 
     public static File[] getJarFiles(final String namePrefix) {

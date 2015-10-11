@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN" 
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="fessCrawler">
+    <include path="crawler/container.xml"/>
+    <include path="crawler/client.xml"/>
+    <include path="crawler/rule.xml"/>
+    <include path="crawler/filter.xml"/>
+    <include path="crawler/interval.xml"/>
+    <include path="crawler/extractor.xml"/>
+    <include path="crawler/mimetype.xml"/>
+    <include path="crawler/encoding.xml"/>
+    <include path="crawler/urlconverter.xml"/>
+    <include path="crawler/log.xml"/>
+    <include path="crawler/sitemaps.xml"/>
+
+    <include path="crawler/es.xml"/>
+
+	<!-- Crawler -->
+	<component name="crawler" class="org.codelibs.fess.crawler.Crawler" instance="prototype" >
+	</component>
+
+	<!-- Crawler Thread -->
+	<component name="crawlerThread" class="org.codelibs.fess.crawler.FessCrawlerThread" instance="prototype" >
+	</component>
+
+	<!-- Entity -->
+	<component name="accessResult"
+		class="org.codelibs.fess.crawler.entity.EsAccessResult" instance="prototype">
+	</component>
+	<component name="urlQueue"
+		class="org.codelibs.fess.crawler.entity.EsUrlQueue" instance="prototype">
+	</component>
+
+	<!-- Service -->
+	<component name="urlQueueService"
+		class="org.codelibs.fess.crawler.service.impl.EsUrlQueueService">
+		<property name="index">".crawler"</property>
+		<property name="type">"queue"</property>
+	</component>
+	<component name="dataService"
+		class="org.codelibs.fess.crawler.service.impl.EsDataService">
+		<property name="index">".crawler"</property>
+		<property name="type">"data"</property>
+	</component>
+	<component name="urlFilterService"
+		class="org.codelibs.fess.crawler.service.impl.EsUrlFilterService">
+		<property name="index">".crawler"</property>
+		<property name="type">"filter"</property>
+	</component>
+
+</components>

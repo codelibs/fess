@@ -53,7 +53,11 @@ public class BoostDocumentRule {
                 return ((Boolean) value).booleanValue();
             }
         } catch (final Exception e) {
-            logger.warn("Failed to parse a doc for boost: " + map, e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to evaluate \"" + matchExpression + "\" for " + map, e);
+            } else {
+                logger.warn("Failed to evaluate \"" + matchExpression + "\".");
+            }
         }
 
         return false;

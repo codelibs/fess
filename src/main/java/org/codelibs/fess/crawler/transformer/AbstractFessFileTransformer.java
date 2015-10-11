@@ -48,17 +48,17 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.client.smb.SmbClient;
-import org.codelibs.robot.entity.AccessResult;
-import org.codelibs.robot.entity.AccessResultData;
-import org.codelibs.robot.entity.ExtractData;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.entity.ResultData;
-import org.codelibs.robot.entity.UrlQueue;
-import org.codelibs.robot.exception.RobotCrawlAccessException;
-import org.codelibs.robot.exception.RobotSystemException;
-import org.codelibs.robot.extractor.Extractor;
-import org.codelibs.robot.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.client.smb.SmbClient;
+import org.codelibs.fess.crawler.entity.AccessResult;
+import org.codelibs.fess.crawler.entity.AccessResultData;
+import org.codelibs.fess.crawler.entity.ExtractData;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.ResultData;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.exception.CrawlerSystemException;
+import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || responseData.getResponseBody() == null) {
-            throw new RobotCrawlAccessException("No response body.");
+            throw new CrawlingAccessException("No response body.");
         }
 
         final Extractor extractor = getExtractor(responseData);
@@ -144,8 +144,8 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
                 }
             }
         } catch (final Exception e) {
-            final RobotCrawlAccessException rcae = new RobotCrawlAccessException("Could not get a text from " + responseData.getUrl(), e);
-            rcae.setLogLevel(RobotCrawlAccessException.WARN);
+            final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
+            rcae.setLogLevel(CrawlingAccessException.WARN);
             throw rcae;
         } finally {
             IOUtils.closeQuietly(in);
@@ -323,7 +323,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         try {
             resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
         } catch (final Exception e) {
-            throw new RobotCrawlAccessException("Could not serialize object: " + url, e);
+            throw new CrawlingAccessException("Could not serialize object: " + url, e);
         }
         resultData.setEncoding(charsetName);
 
@@ -466,7 +466,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
             try {
                 return SerializeUtil.fromBinaryToObject(data);
             } catch (final Exception e) {
-                throw new RobotSystemException("Could not create an instanced from bytes.", e);
+                throw new CrawlerSystemException("Could not create an instanced from bytes.", e);
             }
         }
         return new HashMap<String, Object>();

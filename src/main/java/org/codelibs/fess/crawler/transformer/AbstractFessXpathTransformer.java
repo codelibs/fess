@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.transformer.impl.XpathTransformer;
+import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

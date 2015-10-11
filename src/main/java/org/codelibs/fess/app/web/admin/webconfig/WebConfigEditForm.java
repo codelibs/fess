@@ -139,7 +139,7 @@ public class WebConfigEditForm implements Serializable {
         sortOrder = "0";
         userAgent = ComponentUtil.getUserAgentName();
         if (StringUtil.isBlank(userAgent)) {
-            userAgent = "Fess Robot/" + Constants.FESS_VERSION;
+            userAgent = "FessCrawler/" + Constants.FESS_VERSION;
         }
         numOfThread = Integer.toString(Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB);
         intervalTime = Integer.toString(Constants.DEFAULT_INTERVAL_TIME_FOR_WEB);

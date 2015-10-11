@@ -34,7 +34,7 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
-import org.codelibs.robot.util.CharUtil;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;

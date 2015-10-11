@@ -56,11 +56,11 @@ import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.codelibs.robot.builder.RequestDataBuilder;
-import org.codelibs.robot.client.S2RobotClient;
-import org.codelibs.robot.client.S2RobotClientFactory;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.util.CharUtil;
+import org.codelibs.fess.crawler.builder.RequestDataBuilder;
+import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.StreamResponse;
@@ -508,11 +508,11 @@ public class ViewHelper implements Serializable {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
         final String url = (String) doc.get(fieldHelper.urlField);
-        final S2RobotClientFactory robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
-        config.initializeClientFactory(robotClientFactory);
-        final S2RobotClient client = robotClientFactory.getClient(url);
+        final CrawlerClientFactory crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
+        config.initializeClientFactory(crawlerClientFactory);
+        final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new FessSystemException("No S2RobotClient: " + configIdObj + ", url: " + url);
+            throw new FessSystemException("No CrawlerClient: " + configIdObj + ", url: " + url);
         }
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);

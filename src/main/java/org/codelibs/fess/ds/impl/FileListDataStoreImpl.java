@@ -34,17 +34,17 @@ import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.builder.RequestDataBuilder;
-import org.codelibs.robot.client.S2RobotClient;
-import org.codelibs.robot.client.S2RobotClientFactory;
-import org.codelibs.robot.entity.ResponseData;
-import org.codelibs.robot.entity.ResultData;
-import org.codelibs.robot.exception.RobotSystemException;
-import org.codelibs.robot.processor.ResponseProcessor;
-import org.codelibs.robot.processor.impl.DefaultResponseProcessor;
-import org.codelibs.robot.rule.Rule;
-import org.codelibs.robot.rule.RuleManager;
-import org.codelibs.robot.transformer.Transformer;
+import org.codelibs.fess.crawler.builder.RequestDataBuilder;
+import org.codelibs.fess.crawler.client.CrawlerClient;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.ResultData;
+import org.codelibs.fess.crawler.exception.CrawlerSystemException;
+import org.codelibs.fess.crawler.processor.ResponseProcessor;
+import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
+import org.codelibs.fess.crawler.rule.Rule;
+import org.codelibs.fess.crawler.rule.RuleManager;
+import org.codelibs.fess.crawler.transformer.Transformer;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
     public int maxDeleteDocumentCacheSize = 100;
 
-    protected S2RobotClientFactory robotClientFactory;
+    protected CrawlerClientFactory crawlerClientFactory;
 
     protected CrawlingSessionHelper crawlingSessionHelper;
 
@@ -92,9 +92,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
     @Override
     public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
 
-        robotClientFactory = SingletonLaContainer.getComponent(S2RobotClientFactory.class);
+        crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
 
-        config.initializeClientFactory(robotClientFactory);
+        config.initializeClientFactory(crawlerClientFactory);
 
         super.store(config, callback, initParamMap);
     }
@@ -170,9 +170,9 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
                 final String url = dataMap.get(fieldHelper.urlField).toString();
                 try {
-                    final S2RobotClient client = robotClientFactory.getClient(url);
+                    final CrawlerClient client = crawlerClientFactory.getClient(url);
                     if (client == null) {
-                        logger.warn("S2RobotClient is null. Data: " + dataMap);
+                        logger.warn("CrawlerClient is null. Data: " + dataMap);
                         return false;
                     }
 
@@ -200,7 +200,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                                             (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
                                     dataMap.putAll(responseDataMap);
                                 } catch (final Exception e) {
-                                    throw new RobotSystemException("Could not create an instance from bytes.", e);
+                                    throw new CrawlerSystemException("Could not create an instance from bytes.", e);
                                 }
                             }
 

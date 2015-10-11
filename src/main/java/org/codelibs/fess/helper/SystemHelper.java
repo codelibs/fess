@@ -42,7 +42,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.robot.util.CharUtil;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaRequestUtil;
 
