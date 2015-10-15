@@ -51,6 +51,7 @@ import org.codelibs.fess.job.JobExecutor;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.web.servlet.session.SessionManager;
 
 public final class ComponentUtil {
     private static final String DICTIONARY_MANAGER = "dictionaryManager";
@@ -261,6 +262,10 @@ public final class ComponentUtil {
 
     public static FessLoginAssist getLoginAssist() {
         return getComponent(FessLoginAssist.class);
+    }
+
+    public static SessionManager getSessionManager() {
+        return getComponent(SessionManager.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

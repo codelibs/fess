@@ -33,7 +33,6 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
 import org.codelibs.fess.entity.PingResponse;
@@ -48,11 +47,13 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonApiManager extends BaseApiManager implements WebApiManager {
+public class JsonApiManager extends BaseApiManager {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
 
-    protected String jsonPathPrefix = "/json";
+    public JsonApiManager() {
+        setPathPrefix("/json");
+    }
 
     @Override
     public boolean matches(final HttpServletRequest request) {
@@ -61,7 +62,7 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
         }
 
         final String servletPath = request.getServletPath();
-        return servletPath.startsWith(jsonPathPrefix);
+        return servletPath.startsWith(pathPrefix);
     }
 
     @Override
@@ -668,14 +669,6 @@ public class JsonApiManager extends BaseApiManager implements WebApiManager {
 
     private String hex(final char ch) {
         return Integer.toHexString(ch).toUpperCase();
-    }
-
-    public String getJsonPathPrefix() {
-        return jsonPathPrefix;
-    }
-
-    public void setJsonPathPrefix(final String jsonPathPrefix) {
-        this.jsonPathPrefix = jsonPathPrefix;
     }
 
 }

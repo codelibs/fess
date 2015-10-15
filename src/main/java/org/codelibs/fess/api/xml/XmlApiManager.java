@@ -32,7 +32,6 @@ import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.api.WebApiManager;
 import org.codelibs.fess.api.WebApiRequest;
 import org.codelibs.fess.api.WebApiResponse;
 import org.codelibs.fess.entity.PingResponse;
@@ -45,10 +44,12 @@ import org.codelibs.fess.util.WebApiUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class XmlApiManager extends BaseApiManager implements WebApiManager {
+public class XmlApiManager extends BaseApiManager {
     private static final Logger logger = LoggerFactory.getLogger(XmlApiManager.class);
 
-    protected String xmlPathPrefix = "/xml";
+    public XmlApiManager() {
+        setPathPrefix("/xml");
+    }
 
     @Override
     public boolean matches(final HttpServletRequest request) {
@@ -57,7 +58,7 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         }
 
         final String servletPath = request.getServletPath();
-        return servletPath.startsWith(xmlPathPrefix);
+        return servletPath.startsWith(pathPrefix);
     }
 
     @Override
@@ -403,11 +404,4 @@ public class XmlApiManager extends BaseApiManager implements WebApiManager {
         return buf.toString();
     }
 
-    public String getXmlPathPrefix() {
-        return xmlPathPrefix;
-    }
-
-    public void setXmlPathPrefix(final String xmlPathPrefix) {
-        this.xmlPathPrefix = xmlPathPrefix;
-    }
 }

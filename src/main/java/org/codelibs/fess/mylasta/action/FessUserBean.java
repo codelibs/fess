@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import java.util.stream.Stream;
+
 import org.codelibs.fess.es.exentity.User;
 import org.lastaflute.web.login.TypicalUserBean;
 
@@ -37,10 +39,6 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FessUserBean() {
-        // TODO needed?
-    }
-
     public FessUserBean(final User user) {
         this.user = user;
     }
@@ -56,4 +54,19 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String[] getRoles() {
+        return user.getRoles();
+    }
+
+    public String[] getGroups() {
+        return user.getGroups();
+    }
+
+    public boolean hasRole(String role) {
+        return Stream.of(user.getRoles()).anyMatch(s -> s.equals(role));
+    }
+
+    public boolean hasRoles(String[] acceptedRoles) {
+        return Stream.of(user.getRoles()).anyMatch(s1 -> Stream.of(acceptedRoles).anyMatch(s2 -> s2.equals(s1)));
+    }
 }

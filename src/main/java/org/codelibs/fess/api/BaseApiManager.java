@@ -26,7 +26,7 @@ import org.codelibs.core.exception.IORuntimeException;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
-public class BaseApiManager {
+public abstract class BaseApiManager implements WebApiManager {
     protected static final String FAVORITES_API = "/favoritesApi";
 
     protected static final String FAVORITE_API = "/favoriteApi";
@@ -37,12 +37,18 @@ public class BaseApiManager {
 
     protected static final String SEARCH_API = "/searchApi";
 
+    protected String pathPrefix;
+
     protected static enum FormatType {
         SEARCH, LABEL, SUGGEST, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
-    public BaseApiManager() {
-        super();
+    public String getPathPrefix() {
+        return pathPrefix;
+    }
+
+    public void setPathPrefix(final String pathPrefix) {
+        this.pathPrefix = pathPrefix;
     }
 
     protected FormatType getFormatType(final String formatType) {
