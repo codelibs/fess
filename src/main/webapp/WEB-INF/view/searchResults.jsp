@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%-- query matched some document --%>
 <div id="subheader" class="row">
-	<div class="span12">
+	<div class="col-md-12">
 		<p>
 			<la:message key="labels.search_result_status"
 				arg0="${f:h(displayQuery)}" arg1="${f:h(allRecordCount)}"
@@ -24,7 +24,7 @@
 <div id="result" class="row content">
 	<input type="hidden" id="queryId" value="${f:u(queryId)}" />
 	<input type="hidden" id="rt" value="${f:u(rt)}" />
-	<div class="span8">
+	<div class="col-md-8">
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
@@ -77,61 +77,69 @@
 			</c:forEach>
 		</ol>
 	</div>
-	<div class="span4 visible-desktop visible-tablet">
+	<div class="col-md-4 visible-desktop visible-tablet">
 		<%-- Side Content --%>
 		<c:if test="${screenShotSupport}">
 			<div id="screenshot"></div>
 		</c:if>
 		<c:if test="${facetResponse != null}">
-			<div class="well span3">
-				<ul class="nav nav-list">
-					<c:forEach var="fieldData" items="${facetResponse.fieldList}">
-						<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
-					<li class="nav-header"><la:message key="labels.facet_label_title" /></li>
-							<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
-								<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
-					<li><la:link
-							href="/search/search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-							${f:h(fe:label(countEntry.key))} (${f:h(countEntry.value)})</la:link></li>
-								</c:if>
-							</c:forEach>
+			<c:forEach var="fieldData" items="${facetResponse.fieldList}">
+				<c:if test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
+					<ul class="list-group m-b">
+						<li class="list-group-item text-uppercase"><la:message key="labels.facet_label_title" /></li>
+						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
+							<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
+								<li class="list-group-item"><la:link
+										href="/search/search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
+									>
+											${f:h(fe:label(countEntry.key))} 
+											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
+									</la:link></li>
+							</c:if>
+						</c:forEach>
+					</ul>
+				</c:if>
+			</c:forEach>
+			<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
+				<ul class="list-group m-b">
+					<li class="list-group-item text-uppercase"><la:message key="${facetQueryView.title}" /></li>
+					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
+						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
+							<li class="list-group-item p-l-md"><la:link
+									href="/search/search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
+								>
+									<la:message key="${queryEntry.key}" />
+									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
+								</la:link></li>
 						</c:if>
 					</c:forEach>
-					<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
-					<li class="nav-header"><la:message key="${facetQueryView.title}" /></li>
-						<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
-								<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
-					<li><la:link
-							href="/search/search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-							<la:message key="${queryEntry.key}" /> (${f:h(facetResponse.queryCountMap[queryEntry.value])})</la:link></li>
-								</c:if>
-						</c:forEach>
-					</c:forEach>
 				</ul>
-				<c:if test="${!empty additional}">
-				<ul class="nav nav-list">
-					<li class="reset">
-						<la:link
-							href="/search/search?query=${f:u(query)}"><la:message key="labels.facet_label_reset" /></la:link>
-					</li>
-				</ul>
-				</c:if>
-			</div>
+			</c:forEach>
+			<c:if test="${!empty additional}">
+				<div class="pull-right">
+					<la:link href="/search/search?query=${f:u(query)}" styleClass="btn btn-secondary btn-sm">
+						<la:message key="labels.facet_label_reset" />
+					</la:link>
+				</div>
+			</c:if>
 		</c:if>
 	</div>
 </div>
 <div class="row center">
-	<div id="subfooter" class="pagination">
-		<ul>
+	<nav id="subfooter">
+		<ul class="pagination">
 			<c:if test="${existPrevPage}">
-				<li class="prev"><la:link
+				<li class="prev"><la:link aria-label="Previous"
 						href="/search/prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-						<la:message key="labels.prev_page" />
-					</la:link></li>
+					<span aria-hidden="true">&laquo;</span>
+					<span class="sr-only"><la:message key="labels.prev_page" /></span>
+				</la:link></li>
 			</c:if>
 			<c:if test="${!existPrevPage}">
-				<li class="prev disabled"><a href="#"><la:message
-							key="labels.prev_page" /></a></li>
+				<li class="prev disabled" aria-label="Previous"><a href="#">
+					<span aria-hidden="true">&laquo;</span>
+					<span class="sr-only"><la:message key="labels.prev_page" /></span>
+				</a></li>
 			</c:if>
 			<c:forEach var="pageNumber" varStatus="s" items="${pageNumberList}">
 				<li
@@ -143,15 +151,18 @@
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
-				<li class="next"><la:link
+				<li class="next"><la:link aria-label="Next"
 						href="/search/next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
-						<la:message key="labels.next_page" />
-					</la:link></li>
+					<span class="sr-only"><la:message key="labels.next_page" /></span>
+					<span aria-hidden="true">&raquo;</span>
+				</la:link></li>
 			</c:if>
 			<c:if test="${!existNextPage}">
-				<li class="next disabled"><a href="#"><la:message
-							key="labels.next_page" /></a></li>
+				<li class="next disabled" aria-label="Next"><a href="#">
+					<span class="sr-only"><la:message key="labels.next_page"/></span>
+					<span aria-hidden="true">&raquo;</span>
+				</a></li>
 			</c:if>
 		</ul>
-	</div>
+	</nav>
 </div>

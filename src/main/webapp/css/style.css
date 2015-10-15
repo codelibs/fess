@@ -1,5 +1,9 @@
 /* Override some defaults */
 
+body {
+	padding-top: 70px;
+}
+
 .content {
 	min-height: 500px;
 }
@@ -117,7 +121,11 @@ h3 {
 }
 
 /* Large desktop */
-@media (min-width: 1200px) {
+@media (min-width: 74.9em) {
+	.visible-phone {
+		display: none!important;
+	}
+
     #query {
 	    width: 500px;
     }
@@ -127,8 +135,12 @@ h3 {
     }
 }
  
-/* Portrait tablet to landscape and desktop */
-@media (min-width: 768px) and (max-width: 979px) {
+/* Large devices (desktops, less than 75em) */
+@media (max-width: 74.9em) {
+	.visible-phone {
+		display: none!important;
+	}
+
     .br-tablet {
 	    display: block;
     }
@@ -142,8 +154,8 @@ h3 {
     }
 }
  
-/* Landscape phone to portrait tablet */
-@media (max-width: 767px) {
+/* Medium devices (tablets, less than 62em) */
+@media (max-width: 61.9em) {
     #query {
 	    width: 300px;
     }
@@ -153,23 +165,8 @@ h3 {
     }
 }
  
-/* Portrait Garaxly */
-@media (max-width: 640px) {
-    #query {
-	    width: 300px;
-    }
-
-    #contentQuery {
-	    width: 400px;
-    }
-
-    .searchFormBox {
-	    margin-top: 20px;
-    }
-}
-
-/* Landscape phones and down */
-@media (max-width: 480px) {
+/* Small devices (landscape phones, less than 48em) */
+@media (max-width: 47.9em) {
     .br-phone {
 	    display: block;
     }
@@ -203,6 +200,7 @@ h3 {
     }
 }
 
+/* Extra small devices (portrait phones, less than 34em) */
 @media (max-width: 360px) {
     .br-phone {
 	    display: block;
@@ -238,9 +236,6 @@ h3 {
 }
 
 @media (max-width: 767px) and (min-width: 481px){
-	.visible-phone {
-		display: none!important;
-	}
 }
 
 @media (max-height: 480px){

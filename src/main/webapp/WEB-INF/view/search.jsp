@@ -3,9 +3,8 @@
 <html>
 <head profile="http://a9.com/-/spec/opensearch/1.1/">
 <meta charset="utf-8">
-<meta http-equiv="content-style-type" content="text/css" />
-<meta http-equiv="content-script-type" content="text/javascript" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
 <title>${f:h(displayQuery)} - <la:message
 		key="labels.search_title" /></title>
 <c:if test="${osddLink}">
@@ -21,7 +20,7 @@
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">
-			<div class="span9">
+			<div class="col-md-9">
 				<p id="searchOptionMenu">
 					<span>
 						<la:message key="labels.searchoptions_menu_sort" />
@@ -75,21 +74,21 @@
 					</c:if>
 				</p>
 			</div>
-			<div class="span3">
+			<div class="col-md-3">
 				<c:if test="${!empty username}">
 				<p class="username">
 					<la:message key="labels.searchheader_username" arg0="${f:h(username)}" />
 					|
-					<todo:link href="/login/logout" styleClass="logout-link">
+					<la:link href="/login/logout" styleClass="logout-link">
 						<la:message key="labels.logout" />
-					</todo:link>
+					</la:link>
 				</p>
 				</c:if>
 			</div>
 		</div>
 		<c:if test="${fe:hswsize(null) != 0}">
 			<div class="row">
-				<div class="span12">
+				<div class="col-md-12">
 					<p class="hotSearchWordBody ellipsis">
 						<la:message key="labels.search_hot_search_word" />
 						<c:forEach var="item" items="${fe:hsw(null, 5)}">
@@ -114,7 +113,7 @@
 	</div>
 	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
-		src="${f:url('/js/jquery-1.11.0.min.js')}"></script>
+		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/search.js')}"></script>
