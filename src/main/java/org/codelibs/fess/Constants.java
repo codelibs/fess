@@ -168,7 +168,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_IGNORE_FAILURE_TYPE = StringUtil.EMPTY;
 
-    public static final String DEFAULT_FAILURE_COUNT = "-1";
+    public static final Integer DEFAULT_FAILURE_COUNT = -1;
 
     public static final String DEFAULT_PURGE_DAY = "30";
 
@@ -327,4 +327,8 @@ public class Constants extends CoreLibConstants {
             "updatedBy", "updatedTime" };
 
     public static final String USER_INFO = "LoginInfo";
+
+    public static final String ELASTICSEARCH_WEB_URL_PROPERTY = "es.http.url";
+
+    public static final String ELASTICSEARCH_WEB_URL = "http://localhost:9201";
 }

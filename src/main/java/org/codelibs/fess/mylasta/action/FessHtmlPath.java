@@ -20,9 +20,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/boostdocumentrule/index.jsp */
     HtmlNext path_AdminBoostdocumentrule_IndexJsp = new HtmlNext("/admin/boostdocumentrule/index.jsp");
 
-    /** The path of the HTML: /admin/crawl/index.jsp */
-    HtmlNext path_AdminCrawl_IndexJsp = new HtmlNext("/admin/crawl/index.jsp");
-
     /** The path of the HTML: /admin/crawlingsession/confirm.jsp */
     HtmlNext path_AdminCrawlingsession_ConfirmJsp = new HtmlNext("/admin/crawlingsession/confirm.jsp");
 
@@ -127,6 +124,9 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/fileconfig/index.jsp */
     HtmlNext path_AdminFileconfig_IndexJsp = new HtmlNext("/admin/fileconfig/index.jsp");
+
+    /** The path of the HTML: /admin/general/index.jsp */
+    HtmlNext path_AdminGeneral_IndexJsp = new HtmlNext("/admin/general/index.jsp");
 
     /** The path of the HTML: /admin/group/confirm.jsp */
     HtmlNext path_AdminGroup_ConfirmJsp = new HtmlNext("/admin/group/confirm.jsp");

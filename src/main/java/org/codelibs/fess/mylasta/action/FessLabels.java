@@ -3613,6 +3613,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Toggle navigation */
     public static final String LABELS_admin_toggle_navi = "{labels.admin_toggle_navi}";
 
+    /** The key of the message: Search Server URL */
+    public static final String LABELS_es_http_url = "{labels.es_http_url}";
+
     /** The key of the message:  */
     public static final String LABELS_LABEL_TYPE_IDS = "{labels.labelTypeIds}";
 

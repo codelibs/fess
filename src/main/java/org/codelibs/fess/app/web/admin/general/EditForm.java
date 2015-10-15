@@ -14,90 +14,107 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.crawl;
+package org.codelibs.fess.app.web.admin.general;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Shunji Makino
  */
-public class CrawlEditForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String diffCrawling;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String useAclAsRole;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String serverRotation;
 
-    //@Required
-    //@IntRange(min = -1, max = 1000)
-    public String dayForCleanup;
+    @Required
+    @Max(1000)
+    @Min(-1)
+    public Integer dayForCleanup;
 
-    //@Required
-    //@LongRange(min = 0, max = 100)
+    @Required
+    @Max(100)
+    @Min(0)
     public String crawlingThreadCount;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String searchLog;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String userInfo;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String userFavorite;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String webApiXml;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String webApiJson;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String defaultLabelValue;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String appendQueryParameter;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String supportedSearch;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String ignoreFailureType;
 
-    //@IntRange(min = -1, max = 10000)
-    public String failureCountThreshold;
+    @Required
+    @Max(10000)
+    @Min(-1)
+    public Integer failureCountThreshold;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String hotSearchWord;
 
-    //@Required
-    //@Maxbytelength(maxbytelength = 20)
+    @Required
+    @Size(max = 20)
     public String csvFileEncoding;
 
-    //@IntRange(min = 0, max = 100000)
+    @Max(100000)
+    @Min(0)
     public String purgeSearchLogDay;
 
-    //@IntRange(min = 0, max = 100000)
+    @Max(100000)
+    @Min(0)
     public String purgeJobLogDay;
 
-    //@IntRange(min = 0, max = 100000)
+    @Max(100000)
+    @Min(0)
     public String purgeUserInfoDay;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String purgeByBots;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String notificationTo;
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String suggestSearchLog;
 
-    //@IntRange(min = 0, max = 100000)
+    @Max(100000)
+    @Min(0)
     public String purgeSuggestSearchLogDay;
+
+    @Size(max = 1000)
+    public String esHttpUrl;
 }

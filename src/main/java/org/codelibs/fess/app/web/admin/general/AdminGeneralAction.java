@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.crawl;
+package org.codelibs.fess.app.web.admin.general;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +27,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.Token;
-import org.codelibs.fess.app.web.admin.keymatch.AdminKeymatchAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -35,16 +34,13 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  * @author Shunji Makino
  */
-public class AdminCrawlAction extends FessAdminAction {
+public class AdminGeneralAction extends FessAdminAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdminKeymatchAction.class);
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -53,67 +49,41 @@ public class AdminCrawlAction extends FessAdminAction {
     @Resource
     protected SystemHelper systemHelper;
 
-    public String getHelpLink() {
-        return systemHelper.getHelpLink("crawl");
-    }
-
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("crawl"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("general"));
         runtime.registerData("supportedSearchItems", getSupportedSearchItems());
+        runtime.registerData("dayItems", getDayItems());
     }
 
     // ===================================================================================
-
-    protected void updateForm(final CrawlEditForm form) {
-        form.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
-        form.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-        form.dayForCleanup = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
-        form.crawlingThreadCount = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
-        form.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.userInfo = crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
-        form.userFavorite = crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-        form.webApiXml = crawlerProperties.getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
-        form.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-        form.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
-        form.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
-        form.supportedSearch = crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
-        form.ignoreFailureType =
-                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-        form.failureCountThreshold =
-                crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
-        form.hotSearchWord = crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
-        form.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-        form.purgeSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-        form.purgeJobLogDay = crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-        form.purgeUserInfoDay = crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-        form.purgeByBots = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
-        form.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
-        form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.purgeSuggestSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
-    }
-
     //
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse index(final CrawlEditForm form) {
-        return asHtml(path_AdminCrawl_IndexJsp).renderWith(data -> {
-            updateForm(form);
+    public HtmlResponse index() {
+        return asHtml(path_AdminGeneral_IndexJsp).useForm(EditForm.class, setup -> {
+            setup.setup(form -> {
+                updateForm(form);
+            });
         });
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final CrawlEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminGeneral_IndexJsp);
+        });
+
         crawlerProperties.setProperty(Constants.DIFF_CRAWLING_PROPERTY,
                 form.diffCrawling != null && Constants.ON.equalsIgnoreCase(form.diffCrawling) ? Constants.TRUE : Constants.FALSE);
         crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE,
                 form.useAclAsRole != null && Constants.ON.equalsIgnoreCase(form.useAclAsRole) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup);
+        crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
         crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount);
         crawlerProperties.setProperty(Constants.SEARCH_LOG_PROPERTY,
                 form.searchLog != null && Constants.ON.equalsIgnoreCase(form.searchLog) ? Constants.TRUE : Constants.FALSE);
@@ -131,7 +101,7 @@ public class AdminCrawlAction extends FessAdminAction {
                         : Constants.FALSE);
         crawlerProperties.setProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, form.supportedSearch);
         crawlerProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
-        crawlerProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold);
+        crawlerProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
         crawlerProperties.setProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
                 form.hotSearchWord != null && Constants.ON.equalsIgnoreCase(form.hotSearchWord) ? Constants.TRUE : Constants.FALSE);
         crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
@@ -143,13 +113,54 @@ public class AdminCrawlAction extends FessAdminAction {
         crawlerProperties.setProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
                 form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
         crawlerProperties.setProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay);
+        crawlerProperties.setProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, form.esHttpUrl);
 
         crawlerProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
         return redirect(getClass());
     }
 
-    public List<String> getDayItems() {
+    protected void updateForm(final EditForm form) {
+        form.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
+        form.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
+        form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, 1);
+        form.crawlingThreadCount = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        form.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
+        form.userInfo = crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
+        form.userFavorite = crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
+        form.webApiXml = crawlerProperties.getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
+        form.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
+        form.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+        form.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
+        form.supportedSearch = crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
+        form.ignoreFailureType =
+                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+        form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
+        form.hotSearchWord = crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
+        form.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+        form.purgeSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        form.purgeJobLogDay = crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        form.purgeUserInfoDay = crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
+        form.purgeByBots = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
+        form.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
+        form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
+        form.purgeSuggestSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
+        form.esHttpUrl = crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
+    }
+
+    private Integer getPropertyAsInteger(String key, int defaultValue) {
+        String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
+        if (value != null) {
+            try {
+                return Integer.valueOf(value);
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        return defaultValue;
+    }
+
+    private List<String> getDayItems() {
         final List<String> items = new ArrayList<String>();
         for (int i = 0; i < 32; i++) {
             items.add(Integer.valueOf(i).toString());

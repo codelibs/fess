@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
@@ -38,7 +40,8 @@ import org.slf4j.LoggerFactory;
 public class DictionaryManager {
     private static final Logger logger = LoggerFactory.getLogger(DictionaryManager.class);
 
-    protected String esUrl = "http://localhost:9201";
+    @Resource
+    protected DynamicProperties crawlerProperties;
 
     protected List<DictionaryCreator> creatorList = new ArrayList<>();
 
@@ -50,7 +53,7 @@ public class DictionaryManager {
     }
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
-        try (CurlResponse response = Curl.get(esUrl + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
+        try (CurlResponse response = Curl.get(getUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
             Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -88,45 +91,42 @@ public class DictionaryManager {
     }
 
     public void store(DictionaryFile<? extends DictionaryItem> dictFile, File file) {
-        getDictionaryFile(dictFile.getId()).ifPresent(currentFile -> {
-            if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
-                throw new DictionaryException(dictFile.getPath() + " was updated.");
-            }
-
-            // TODO use stream
-                try (CurlResponse response =
-                        Curl.post(esUrl + "/_configsync/file").param("path", dictFile.getPath()).body(FileUtil.readUTF8(file)).execute()) {
-                    Map<String, Object> contentMap = response.getContentAsMap();
-                    if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
-                        throw new DictionaryException("Failed to update " + dictFile.getPath());
+        getDictionaryFile(dictFile.getId())
+                .ifPresent(currentFile -> {
+                    if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
+                        throw new DictionaryException(dictFile.getPath() + " was updated.");
                     }
-                } catch (IOException e) {
-                    throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
-                }
 
-            }).orElse(() -> {
-            throw new DictionaryException(dictFile.getPath() + " does not exist.");
-        });
+                    // TODO use stream
+                        try (CurlResponse response =
+                                Curl.post(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).body(FileUtil.readUTF8(file))
+                                        .execute()) {
+                            Map<String, Object> contentMap = response.getContentAsMap();
+                            if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
+                                throw new DictionaryException("Failed to update " + dictFile.getPath());
+                            }
+                        } catch (IOException e) {
+                            throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
+                        }
+
+                    }).orElse(() -> {
+                    throw new DictionaryException(dictFile.getPath() + " does not exist.");
+                });
     }
 
     public InputStream getContentInputStream(DictionaryFile<? extends DictionaryItem> dictFile) {
         try {
-            return Curl.get(esUrl + "/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
+            return Curl.get(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
         } catch (IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
         }
-    }
-
-    public String getEsUrl() {
-        return esUrl;
-    }
-
-    public void setEsUrl(String esUrl) {
-        this.esUrl = esUrl;
     }
 
     public void addCreator(DictionaryCreator creator) {
         creatorList.add(creator);
     }
 
+    protected String getUrl() {
+        return crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
+    }
 }

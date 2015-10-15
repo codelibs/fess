@@ -8,7 +8,6 @@
 	<include path="fess.xml"/>
 	<include path="fess_job.xml"/>
 	<include path="fess_api.xml"/>
-	<include path="fess_dict.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
@@ -280,8 +279,6 @@
 	</component>
 
 	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
-		<postConstruct name="init">
-		</postConstruct>
 	</component>
 
 	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
@@ -326,4 +323,17 @@
 	</component>
 -->
 
+	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
+		<postConstruct name="addCreator">
+			<arg>userDictCreator</arg>
+		</postConstruct>
+		<postConstruct name="addCreator">
+			<arg>synonymCreator</arg>
+		</postConstruct>
+	</component>
+
+	<component name="synonymCreator" class="org.codelibs.fess.dict.synonym.SynonymCreator">
+	</component>
+	<component name="userDictCreator" class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
+	</component>
 </components>

@@ -159,15 +159,16 @@ public class FailureUrlService implements Serializable {
     }
 
     public List<String> getExcludedUrlList(final String configId) {
-        final String failureCountStr =
-                crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
+        final String failureCountStr = crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY);
         final String ignoreFailureType =
                 crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-        int failureCount;
-        try {
-            failureCount = Integer.parseInt(failureCountStr);
-        } catch (final NumberFormatException ignore) {
-            failureCount = 10;
+        int failureCount = Constants.DEFAULT_FAILURE_COUNT;
+        if (failureCountStr != null) {
+            try {
+                failureCount = Integer.parseInt(failureCountStr);
+            } catch (final NumberFormatException ignore) {
+                // ignore
+            }
         }
 
         if (failureCount < 0) {

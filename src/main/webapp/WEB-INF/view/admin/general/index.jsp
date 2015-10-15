@@ -10,7 +10,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="system" />
-			<jsp:param name="menuType" value="crawl" />
+			<jsp:param name="menuType" value="general" />
 		</jsp:include>
 
 		<div class="content-wrapper">
@@ -43,6 +43,10 @@
 									</div>
 
 									<%-- Form Fields --%>
+									<div class="form-group">
+											<label for="esHttpUrl"><la:message key="labels.es_http_url" /></label>
+											<la:text property="esHttpUrl" styleClass="form-control" />
+									</div>
 									<div class="form-group">
 											<label for="searchLog"><la:message key="labels.search_log_enabled" /></label>
 											<div styleClass="form-inline" >

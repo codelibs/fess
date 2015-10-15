@@ -32,7 +32,7 @@
 							<span><la:message key="labels.menu_wizard" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='crawl'}">class="active"</c:if>><la:link href="/admin/crawl/">
+					<li <c:if test="${param.menuType=='general'}">class="active"</c:if>><la:link href="/admin/general/">
 							<i class='fa fa-angle-right'></i>
 							<span><la:message key="labels.menu_crawl_config" /></span>
 						</la:link></li>
