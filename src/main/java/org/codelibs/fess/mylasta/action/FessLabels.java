@@ -509,7 +509,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: General */
     public static final String LABELS_menu_crawl_config = "{labels.menu_crawl_config}";
 
-    /** The key of the message: Scheduled Jobs */
+    /** The key of the message: Scheduled Job */
     public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
 
     /** The key of the message: System */
@@ -932,7 +932,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Accessing {0}<br>At a first time starting, it might take a little more time to open the file. */
     public static final String LABELS_open_uri = "{labels.open_uri}";
 
-    /** The key of the message: File Crawling Configuration */
+    /** The key of the message: File Crawling */
     public static final String LABELS_file_crawling_configuration = "{labels.file_crawling_configuration}";
 
     /** The key of the message: File Crawling Configuration */
@@ -1016,7 +1016,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_file_crawling_link_next_page = "{labels.file_crawling_link_next_page}";
 
-    /** The key of the message: Web Crawling Configuration */
+    /** The key of the message: Web Crawling */
     public static final String LABELS_web_crawling_configuration = "{labels.web_crawling_configuration}";
 
     /** The key of the message: Web Crawling Configuration */
@@ -1199,7 +1199,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Notification Email */
     public static final String LABELS_notification_to = "{labels.notification_to}";
 
-    /** The key of the message: Path Mapping Configuration */
+    /** The key of the message: Path Mapping */
     public static final String LABELS_path_mapping_configuration = "{labels.path_mapping_configuration}";
 
     /** The key of the message: Path Mapping */
@@ -1274,7 +1274,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_path_mapping_link_next_page = "{labels.path_mapping_link_next_page}";
 
-    /** The key of the message: Overlapping Host Configuration */
+    /** The key of the message: Overlapping Host */
     public static final String LABELS_overlapping_host_configuration = "{labels.overlapping_host_configuration}";
 
     /** The key of the message: Overlapping Host */
@@ -2141,7 +2141,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Back */
     public static final String LABELS_design_button_back = "{labels.design_button_back}";
 
-    /** The key of the message: Data Crawling Configuration */
+    /** The key of the message: Data Crawling */
     public static final String LABELS_data_crawling_configuration = "{labels.data_crawling_configuration}";
 
     /** The key of the message: Data Crawling Configuration */
@@ -2216,13 +2216,13 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Configuration Wizard */
     public static final String LABELS_wizard_title_configuration = "{labels.wizard_title_configuration}";
 
-    /** The key of the message: Configuration Wizard */
+    /** The key of the message: Quick Setup */
     public static final String LABELS_wizard_start_title = "{labels.wizard_start_title}";
 
     /** The key of the message: Using Configuration Wizard, you can create crawling settings easily. */
     public static final String LABELS_wizard_start_desc = "{labels.wizard_start_desc}";
 
-    /** The key of the message: Start */
+    /** The key of the message: Start Configuration */
     public static final String LABELS_wizard_start_button = "{labels.wizard_start_button}";
 
     /** The key of the message: Crawling Schedule */
@@ -2273,6 +2273,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Crawling Configuration */
     public static final String LABELS_wizard_crawling_config_title = "{labels.wizard_crawling_config_title}";
 
+    /** The key of the message: Crawling Setting */
+    public static final String LABELS_wizard_crawling_setting_title = "{labels.wizard_crawling_setting_title}";
+
     /** The key of the message: Name */
     public static final String LABELS_wizard_crawling_config_name = "{labels.wizard_crawling_config_name}";
 
@@ -2282,7 +2285,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Create again */
     public static final String LABELS_wizard_button_register_again = "{labels.wizard_button_register_again}";
 
-    /** The key of the message: Create/Next */
+    /** The key of the message: Create and Next */
     public static final String LABELS_wizard_button_register_next = "{labels.wizard_button_register_next}";
 
     /** The key of the message: Sun */
@@ -2318,13 +2321,16 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Start Crawling */
     public static final String LABELS_wizard_start_crawling_title = "{labels.wizard_start_crawling_title}";
 
+    /** The key of the message: Crawler */
+    public static final String LABELS_wizard_start_crawler_title = "{labels.wizard_start_crawler_title}";
+
     /** The key of the message: To click "Start Crawling" button, you can start a crawling now. */
     public static final String LABELS_wizard_start_crawling_desc = "{labels.wizard_start_crawling_desc}";
 
     /** The key of the message: Start Crawling */
     public static final String LABELS_wizard_button_start_crawling = "{labels.wizard_button_start_crawling}";
 
-    /** The key of the message: Finish */
+    /** The key of the message: Skip */
     public static final String LABELS_wizard_button_finish = "{labels.wizard_button_finish}";
 
     /** The key of the message: Search Result */
@@ -2749,7 +2755,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: ID */
     public static final String LABELS_favorite_log_id = "{labels.favorite_log_id}";
 
-    /** The key of the message: Managed Jobs */
+    /** The key of the message: Job Scheduler */
     public static final String LABELS_scheduledjob_configuration = "{labels.scheduledjob_configuration}";
 
     /** The key of the message: Jobs */
@@ -3597,6 +3603,15 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Confirmation */
     public static final String LABELS_crud_title_confirm = "{labels.crud_title_confirm}";
+
+    /** The key of the message: Fess */
+    public static final String LABELS_admin_brand_title = "{labels.admin_brand_title}";
+
+    /** The key of the message: Fess Dashboard */
+    public static final String LABELS_admin_dashboard_title = "{labels.admin_dashboard_title}";
+
+    /** The key of the message: Toggle navigation */
+    public static final String LABELS_admin_toggle_navi = "{labels.admin_toggle_navi}";
 
     /** The key of the message:  */
     public static final String LABELS_LABEL_TYPE_IDS = "{labels.labelTypeIds}";

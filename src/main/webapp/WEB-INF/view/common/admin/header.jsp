@@ -3,16 +3,16 @@
       <header class="main-header">
 
         <!-- Logo -->
-        <a href="/admin/" class="logo">
+        <la:link href="/admin/" styleClass="logo">
           <span class="logo-mini"><la:message key="labels.header.logo_alt" /></span>
-          <span class="logo-lg">Fess Dashboard</span>
-        </a>
+          <span class="logo-lg"><la:message key="labels.admin_dashboard_title" /></span>
+        </la:link>
 
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
           <!-- Sidebar toggle button-->
           <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
+            <span class="sr-only"><la:message key="labels.admin_toggle_navi" /></span>
           </a>
           <!-- Navbar Right Menu -->
           <div class="navbar-custom-menu">

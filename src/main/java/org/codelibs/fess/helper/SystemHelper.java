@@ -40,9 +40,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RoleTypeService;
+import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.exentity.RoleType;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.crawler.util.CharUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaRequestUtil;
 

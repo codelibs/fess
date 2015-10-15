@@ -16,9 +16,9 @@
 
 package org.codelibs.fess.crawler.interval;
 
+import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.crawler.interval.impl.DefaultIntervalController;
 
 public class FessIntervalController extends DefaultIntervalController {
 

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.wizard_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -35,7 +35,7 @@
 						<div class="col-md-12">
 							<div class="box">
 								<div class="box-header with-border">
-									<h3 class="box-title">Start Crawling</h3>
+									<h3 class="box-title"><la:message key="labels.wizard_start_crawler_title" /></h3>
 								</div>
 								<div class="box-body">
 									<%-- Message: BEGIN --%>
@@ -54,9 +54,10 @@
 									</p>
 								</div>
 								<div class="box-footer">
-									<input type="submit" class="btn btn-primary" name="startCrawling"
+									<input type="submit" class="btn" name="index" value="<la:message key="labels.wizard_button_finish"/>" /> <input
+										type="submit" class="btn btn-primary" name="startCrawling"
 										value="<la:message key="labels.wizard_button_start_crawling"/>"
-									/> <input type="submit" class="btn" name="index" value="<la:message key="labels.wizard_button_finish"/>" />
+									/>
 								</div>
 							</div>
 						</div>

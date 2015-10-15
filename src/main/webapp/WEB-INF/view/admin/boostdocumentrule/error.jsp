@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.boost_document_rule_configuration" /></title>
+<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.boost_document_rule_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">

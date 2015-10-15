@@ -13,13 +13,13 @@ import org.apache.http.impl.auth.NTLMScheme;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.WebConfigService;
-import org.codelibs.fess.es.bsentity.BsWebAuthentication;
-import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ParameterUtil;
 import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
 import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
+import org.codelibs.fess.es.bsentity.BsWebAuthentication;
+import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ParameterUtil;
 
 /**
  * @author FreeGen

@@ -17,13 +17,13 @@
 package org.codelibs.fess.helper;
 
 import org.codelibs.fess.app.service.FailureUrlService;
-import org.codelibs.fess.es.exentity.CrawlingConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
+import org.codelibs.fess.es.exentity.CrawlingConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,9 +16,9 @@
 
 package org.codelibs.fess.crawler.transformer;
 
-import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.exception.FessSystemException;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FessTikaTransformer extends AbstractFessFileTransformer {

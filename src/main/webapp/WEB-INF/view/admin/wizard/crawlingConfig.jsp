@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fess | <la:message key="labels.wizard_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.wizard_start_title" />
+					<la:message key="labels.wizard_crawling_config_title" />
 				</h1>
 				<ol class="breadcrumb">
 					<li><la:link href="/admin/wizard/">
@@ -34,7 +34,7 @@
 							<div class="box">
 								<div class="box-header with-border">
 									<h3 class="box-title">
-										<la:message key="labels.wizard_crawling_config_title" />
+										<la:message key="labels.wizard_crawling_setting_title" />
 									</h3>
 								</div>
 								<div class="box-body">
