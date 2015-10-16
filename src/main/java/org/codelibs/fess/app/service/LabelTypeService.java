@@ -35,6 +35,7 @@ import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class LabelTypeService implements Serializable {
 
@@ -189,24 +190,8 @@ public class LabelTypeService implements Serializable {
         }
     }
 
-    public LabelType getLabelType(final Map<String, String> keys) {
-        final LabelType labelType = labelTypeBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (labelType != null) {
-            final List<LabelToRole> wctrtmList = labelToRoleBhv.selectList(wctrtmCb -> {
-                wctrtmCb.query().setLabelTypeId_Equal(labelType.getId());
-            });
-            if (!wctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
-                for (final LabelToRole mapping : wctrtmList) {
-                    roleTypeIds.add(mapping.getRoleTypeId());
-                }
-                labelType.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
-            }
-        }
-        return labelType;
+    public OptionalEntity<LabelType> getLabelType(final String id) {
+        return labelTypeBhv.selectByPK(id);
     }
 
 }
