@@ -16,8 +16,6 @@
 
 package org.codelibs.fess.app.web.admin.labeltype;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -27,9 +25,13 @@ import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.labeltype.CreateForm;
+import org.codelibs.fess.app.web.admin.labeltype.EditForm;
+import org.codelibs.fess.app.web.admin.labeltype.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -39,6 +41,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 /**
  * @author shinsuke
  * @author Shunji Makino
+ * @author Keiichi Watanabe
  */
 public class AdminLabeltypeAction extends FessAdminAction {
 
@@ -50,9 +53,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Resource
     private LabelTypePager labelTypePager;
     @Resource
-    private SystemHelper systemHelper;
+    private RoleTypeService roleTypeService;
     @Resource
-    protected RoleTypeService roleTypeService;
+    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -67,14 +70,14 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final LabelTypeSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final LabelTypeSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         labelTypePager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -82,15 +85,15 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final LabelTypeSearchForm form) {
-        copyBeanToBean(form.searchParams, labelTypePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, labelTypePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final LabelTypeSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         labelTypePager.clear();
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -98,17 +101,17 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final LabelTypeSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final LabelTypeSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
         // restore from pager
-        copyBeanToBean(labelTypePager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(labelTypePager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -119,63 +122,106 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final LabelTypeEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminLabeltype_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        }).renderWith(data -> {
+            registerItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final LabelTypeEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadLabelType(form);
-        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminLabeltype_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                labelTypeService.getLabelType(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            registerItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final LabelTypeEditForm form) {
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+            registerItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editfromconfirm(final LabelTypeEditForm form) {
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
+        return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            registerItems(data);
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadLabelType(form);
+        final String id = form.id;
+        labelTypeService.getLabelType(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+            registerItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final LabelTypeEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadLabelType(form);
-        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                labelTypeService.getLabelType(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            registerItems(data);
         });
     }
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final LabelTypeEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadLabelType(form);
+        final String id = form.id;
+        labelTypeService.getLabelType(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+            registerItems(data);
         });
     }
 
@@ -183,31 +229,41 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final LabelTypeEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadLabelType(form);
-        return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminLabeltype_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                labelTypeService.getLabelType(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        }).renderWith(data -> {
+            registerItems(data);
         });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final LabelTypeEditForm form) {
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+            registerItems(data);
         });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final LabelTypeEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+            registerItems(data);
         });
     }
 
@@ -216,75 +272,91 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final LabelTypeEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        labelTypeService.store(createLabelType(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createLabelType(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            labelTypeService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final LabelTypeEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        labelTypeService.store(createLabelType(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createLabelType(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            labelTypeService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final LabelTypeEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        labelTypeService.delete(getLabelType(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        labelTypeService.getLabelType(id).ifPresent(entity -> {
+            labelTypeService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadLabelType(final LabelTypeEditForm form) {
-        copyBeanToBean(getLabelType(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected LabelType getLabelType(final LabelTypeEditForm form) {
-        final LabelType labelType = labelTypeService.getLabelType(createKeyMap(form));
-        if (labelType == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return labelType;
-    }
-
-    protected LabelType createLabelType(final LabelTypeEditForm form) {
-        LabelType labelType;
+    protected OptionalEntity<LabelType> createLabelType(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            labelType = getLabelType(form);
-        } else {
-            labelType = new LabelType();
-            labelType.setCreatedBy(username);
-            labelType.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final LabelType entity = new LabelType();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return labelTypeService.getLabelType(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        labelType.setUpdatedBy(username);
-        labelType.setUpdatedTime(currentTime);
-        copyBeanToBean(form, labelType, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return labelType;
+        return OptionalEntity.empty();
     }
 
-    protected Map<String, String> createKeyMap(final LabelTypeEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+    protected void registerItems(final RenderData data) {
+        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final LabelTypeEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }

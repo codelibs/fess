@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.OverlappingHostCB;
 import org.codelibs.fess.es.exbhv.OverlappingHostBhv;
 import org.codelibs.fess.es.exentity.OverlappingHost;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class OverlappingHostService implements Serializable {
 
@@ -57,17 +58,8 @@ public class OverlappingHostService implements Serializable {
         return overlappingHostList;
     }
 
-    public OverlappingHost getOverlappingHost(final Map<String, String> keys) {
-        final OverlappingHost overlappingHost = overlappingHostBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (overlappingHost == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return overlappingHost;
+    public OptionalEntity<OverlappingHost> getOverlappingHost(final String id) {
+        return overlappingHostBhv.selectByPK(id);
     }
 
     public void store(final OverlappingHost overlappingHost) {
