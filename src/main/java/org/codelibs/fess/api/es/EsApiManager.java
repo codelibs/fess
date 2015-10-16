@@ -1,17 +1,37 @@
 package org.codelibs.fess.api.es;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Locale;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codelibs.core.exception.IORuntimeException;
+import org.codelibs.core.io.CopyUtil;
+import org.codelibs.core.io.InputStreamUtil;
+import org.codelibs.core.misc.DynamicProperties;
+import org.codelibs.elasticsearch.runner.net.Curl.Method;
+import org.codelibs.elasticsearch.runner.net.CurlRequest;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EsApiManager extends BaseApiManager {
+    private static final Logger logger = LoggerFactory.getLogger(EsApiManager.class);
+
+    @Resource
+    protected DynamicProperties crawlerProperties;
+
     protected String[] acceptedRoles = new String[] { "admin" };
 
     public EsApiManager() {
@@ -30,12 +50,47 @@ public class EsApiManager extends BaseApiManager {
 
     @Override
     public void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // TODO Auto-generated method stub
-
+        String path = request.getServletPath().substring(pathPrefix.length());
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
+        CurlRequest curlRequest = new CurlRequest(httpMethod, getUrl() + path);
+        request.getParameterMap().entrySet().stream().forEach(entry -> {
+            if (entry.getValue().length > 1) {
+                curlRequest.param(entry.getKey(), String.join(",", entry.getValue()));
+            } else if (entry.getValue().length == 1) {
+                curlRequest.param(entry.getKey(), entry.getValue()[0]);
+            }
+        });
+        curlRequest.onConnect((req, con) -> {
+            con.setDoOutput(true);
+            if (httpMethod != Method.GET) {
+                try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
+                    CopyUtil.copy(in, out);
+                } catch (IOException e) {
+                    throw new IORuntimeException(e);
+                }
+            }
+        }).execute(con -> {
+            try (InputStream in = con.getInputStream(); ServletOutputStream out = response.getOutputStream()) {
+                response.setStatus(con.getResponseCode());
+                CopyUtil.copy(in, out);
+            } catch (IOException e) {
+                try (InputStream err = con.getErrorStream()) {
+                    logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
+                } catch (IOException e1) {}
+                throw new IORuntimeException(e);
+            }
+        });
+        // TODO exception
     }
 
     public void setAcceptedRoles(String[] acceptedRoles) {
         this.acceptedRoles = acceptedRoles;
     }
 
+    protected String getUrl() {
+        return crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
+    }
 }

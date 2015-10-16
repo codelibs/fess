@@ -16,16 +16,27 @@
 
 package org.codelibs.fess.app.web.search;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.fess.app.web.RootForm;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 
-public class SearchForm extends RootForm {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public Map<String, String[]> fields = new HashMap<>();
+
+    //@Maxbytelength(maxbytelength = 1000)
+    public String query;
+
+    public String sort;
+
+    public String num;
+
+    public String[] lang;
 
     public String additional[];
 

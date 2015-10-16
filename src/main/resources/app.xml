@@ -6,8 +6,11 @@
 	<include path="lastaflute.xml"/>
 
 	<include path="fess.xml"/>
-	<include path="fess_job.xml"/>
+	<include path="fess_ad.xml"/>
 	<include path="fess_api.xml"/>
+	<include path="fess_dict.xml"/>
+	<include path="fess_job.xml"/>
+	<include path="fess_screenshot.xml"/>
 
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
@@ -237,103 +240,7 @@
 		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
 	</component>
 
-	<component name="adProperties" class="java.util.Properties">
-		<postConstruct name="put">
-			<arg>"java.naming.factory.initial"</arg>
-			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"java.naming.provider.url"</arg>
-			<arg>"ldap://[host]:[port]"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"java.naming.security.principal"</arg>
-			<arg>"[loginId]@[domain]"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"java.naming.security.credentials"</arg>
-			<arg>"password"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"com.sun.jndi.ldap.connect.timeout"</arg>
-			<arg>"10000"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"com.sun.jndi.ldap.connect.pool"</arg>
-			<arg>"true"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"com.sun.jndi.connect.pool.timeout"</arg>
-			<arg>"30000"</arg>
-		</postConstruct>
-		<postConstruct name="put">
-			<arg>"com.sun.jndi.connect.pool.debug"</arg>
-			<arg>"all"</arg>
-		</postConstruct>
-	</component>
-
-	<component name="adRoleHelper" class="org.codelibs.fess.helper.AdRoleHelper">
-		<postConstruct name="setAdProperties">
-			<arg>adProperties</arg>
-		</postConstruct>
-	</component>
-
 	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
 	</component>
 
-	<component name="screenShotManager" class="org.codelibs.fess.screenshot.ScreenShotManager">
-		<!-- 
-		<postConstruct name="add">
-			<arg>htmlScreenShotGenerator</arg>
-		</postConstruct>
-		 -->
-	</component>
-<!--
-	<component name="webDriver" class="org.openqa.selenium.phantomjs.PhantomJSDriver">
-		<arg>
-			<component class="org.openqa.selenium.remote.DesiredCapabilities">
-				<postConstruct name="setCapability">
-					<arg>"phantomjs.binary.path"</arg>
-					<arg>"/usr/bin/phantomjs"</arg>
-				</postConstruct>
-			</component>
-		</arg>
-		<preDestroy name="quit"></preDestroy>
-	</component>
-	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.WebDriverGenerator">
-		<property name="webDriver">webDriver</property>
-		<postConstruct name="addCondition">
-			<arg>"mimetype"</arg>
-			<arg>"text/html"</arg>
-		</postConstruct>
-	</component>
--->
-<!--
-	<component name="htmlScreenShotGenerator" class="org.codelibs.fess.screenshot.impl.CommandGenerator">
-		<property name="commandList">
-			{"bash", 
-			"/opt/fess/bin/html-screenshot.sh",
-			"${url}",
-			"${outputFile}"}
-		</property>
-		<postConstruct name="addCondition">
-			<arg>"mimetype"</arg>
-			<arg>"text/html"</arg>
-		</postConstruct>
-	</component>
--->
-
-	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
-		<postConstruct name="addCreator">
-			<arg>userDictCreator</arg>
-		</postConstruct>
-		<postConstruct name="addCreator">
-			<arg>synonymCreator</arg>
-		</postConstruct>
-	</component>
-
-	<component name="synonymCreator" class="org.codelibs.fess.dict.synonym.SynonymCreator">
-	</component>
-	<component name="userDictCreator" class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
-	</component>
 </components>

@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.RootAction;
-import org.codelibs.fess.app.web.RootForm;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.exentity.SearchLog;
@@ -449,7 +448,7 @@ public class SearchAction extends FessSearchAction {
         }
     }
 
-    protected String getDisplayQuery(final RootForm form, final List<Map<String, String>> labelTypeItems) {
+    protected String getDisplayQuery(final SearchForm form, final List<Map<String, String>> labelTypeItems) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(form.query);
         if (!form.fields.isEmpty() && form.fields.containsKey(LABEL_FIELD)) {
@@ -473,7 +472,7 @@ public class SearchAction extends FessSearchAction {
         return buf.toString();
     }
 
-    protected void normalizePageNum(final RootForm form) {
+    protected void normalizePageNum(final SearchForm form) {
         try {
             final int num = Integer.parseInt(form.num);
             if (num > getMaxPageSize()) {

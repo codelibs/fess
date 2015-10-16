@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="adProperties" class="java.util.Properties">
+		<postConstruct name="put">
+			<arg>"java.naming.factory.initial"</arg>
+			<arg>"com.sun.jndi.ldap.LdapCtxFactory"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.provider.url"</arg>
+			<arg>"ldap://[host]:[port]"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.security.principal"</arg>
+			<arg>"[loginId]@[domain]"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"java.naming.security.credentials"</arg>
+			<arg>"password"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.ldap.connect.timeout"</arg>
+			<arg>"10000"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.ldap.connect.pool"</arg>
+			<arg>"true"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.connect.pool.timeout"</arg>
+			<arg>"30000"</arg>
+		</postConstruct>
+		<postConstruct name="put">
+			<arg>"com.sun.jndi.connect.pool.debug"</arg>
+			<arg>"all"</arg>
+		</postConstruct>
+	</component>
+
+	<component name="adRoleHelper" class="org.codelibs.fess.helper.AdRoleHelper">
+		<postConstruct name="setAdProperties">
+			<arg>adProperties</arg>
+		</postConstruct>
+	</component>
+
+</components>

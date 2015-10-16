@@ -16,9 +16,10 @@
 
 package org.codelibs.fess.app.web.error;
 
-import java.io.Serializable;
+import org.codelibs.fess.app.web.search.SearchForm;
 
-public class ErrorForm implements Serializable {
+// TODO workaround
+public class ErrorForm extends SearchForm {
 
     private static final long serialVersionUID = 1L;
 

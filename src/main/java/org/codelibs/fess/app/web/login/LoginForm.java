@@ -1,9 +1,10 @@
 package org.codelibs.fess.app.web.login;
 
-import org.codelibs.fess.app.web.RootForm;
+import java.io.Serializable;
+
 import org.hibernate.validator.constraints.NotBlank;
 
-public class LoginForm extends RootForm {
+public class LoginForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotBlank

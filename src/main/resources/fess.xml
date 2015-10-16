@@ -2,14 +2,9 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
+	<include path="fess_config.xml"/>
 	<include path="fess_ds.xml"/>
 	<include path="fess_es.xml"/>
-
-	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
-		<arg>
-			org.codelibs.fess.util.ResourceUtil.getConfPath("crawler.properties")
-		</arg>
-	</component>
 
 	<component name="searchLogHelper" class="org.codelibs.fess.helper.impl.SearchLogHelperImpl">
 		<!-- 

@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <% try{ %>
 <html>
-<head>
+<head profile="http://a9.com/-/spec/opensearch/1.1/">
 <meta charset="utf-8">
-<meta http-equiv="content-style-type" content="text/css" />
-<meta http-equiv="content-script-type" content="text/javascript" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
 <title><la:message key="labels.system_error_title" /></title>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
@@ -17,7 +17,7 @@
 	<div class="container">
 		<div class="content">
 			<div class="center row">
-				<div class="span10">
+				<div class="col-md-12">
 					<h2>
 						<la:message key="labels.request_error_title" />
 					</h2>
@@ -27,6 +27,7 @@
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>
+	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>

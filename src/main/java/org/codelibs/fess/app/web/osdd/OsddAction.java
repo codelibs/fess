@@ -40,7 +40,7 @@ public class OsddAction extends FessSearchAction {
     //                                                                      ==============
 
     @Execute
-    public HtmlResponse index(final OsddForm form) {
+    public HtmlResponse index() {
         searchAvailable();
         openSearchHelper.write(LaResponseUtil.getResponse());
         return null;

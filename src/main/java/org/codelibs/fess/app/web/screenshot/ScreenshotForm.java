@@ -1,8 +1,8 @@
 package org.codelibs.fess.app.web.screenshot;
 
-import org.codelibs.fess.app.web.RootForm;
+import java.io.Serializable;
 
-public class ScreenshotForm extends RootForm {
+public class ScreenshotForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public String docId;

@@ -1,8 +1,6 @@
 package org.codelibs.fess.app.web.go;
 
-import org.codelibs.fess.app.web.RootForm;
-
-public class GoForm extends RootForm {
+public class GoForm {
     private static final long serialVersionUID = 1L;
 
     //@Required(target = "go,cache")

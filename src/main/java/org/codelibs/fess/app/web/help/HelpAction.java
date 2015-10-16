@@ -17,6 +17,7 @@
 package org.codelibs.fess.app.web.help;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.search.SearchForm;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -39,9 +40,12 @@ public class HelpAction extends FessSearchAction {
     //                                                                      ==============
 
     @Execute
-    public HtmlResponse index(final HelpForm form) {
-        return asHtml(path_HelpJsp).renderWith(data -> {
-            buildLabelParams(form.fields);
+    public HtmlResponse index() {
+        return asHtml(path_HelpJsp).useForm(SearchForm.class, op -> {
+            op.setup(form -> {
+                buildLabelParams(form.fields);
+            });
+        }).renderWith(data -> {
             buildInitParams();
         });
     }

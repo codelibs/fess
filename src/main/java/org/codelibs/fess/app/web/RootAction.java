@@ -17,6 +17,7 @@
 package org.codelibs.fess.app.web;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.search.SearchForm;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -34,11 +35,14 @@ public class RootAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final RootForm form) {
+    public HtmlResponse index() {
         searchAvailable();
 
-        return asHtml(path_IndexJsp).renderWith(data -> {
-            buildLabelParams(form.fields);
+        return asHtml(path_IndexJsp).useForm(SearchForm.class, op -> {
+            op.setup(form -> {
+                buildLabelParams(form.fields);
+            });
+        }).renderWith(data -> {
             buildInitParams();
         });
     }
