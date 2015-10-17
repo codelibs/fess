@@ -13,12 +13,13 @@
 			<jsp:param name="menuType" value="system" />
 		</jsp:include>
 
-		<div class="content-wrapper">
-			<iframe src="<%=request.getContextPath()%>/admin/server/_plugin/kopf/" width="100%" height="800" seamless></iframe>
+		<div id="content" class="content-wrapper">
+			<iframe id="contentFrame" src="<%=request.getContextPath()%>/admin/server/_plugin/kopf/" width="100%" height="400" seamless></iframe>
 		</div>
 
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
+	<script src="${f:url('/js/admin/system.js')}" type="text/javascript"></script>
 </body>
 </html>

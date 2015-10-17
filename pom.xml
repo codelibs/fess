@@ -283,7 +283,7 @@
 							<url
 								url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/1.7.0/elasticsearch-langfield-1.7.0.zip" />
 							<url
-								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-1.5.7.zip" />
+								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-1.5.7.1.zip" />
 						</get>
 						<delete dir="${basedir}/plugins" />
 						<mkdir dir="${basedir}/plugins" />
@@ -296,7 +296,7 @@
 						<unzip dest="${basedir}/plugins/langfield"
 							src="${basedir}/target/plugins/elasticsearch-langfield-1.7.0.zip" />
 						<unzip dest="${basedir}/plugins/kopf"
-							src="${basedir}/target/plugins/elasticsearch-kopf-1.5.7.zip" />
+							src="${basedir}/target/plugins/elasticsearch-kopf-1.5.7.1.zip" />
 					</tasks>
 				</configuration>
 				<goals>
