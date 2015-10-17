@@ -16,7 +16,6 @@
 
 package org.codelibs.fess.app.web.admin.labeltype;
 
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;

@@ -191,7 +191,19 @@ public class LabelTypeService implements Serializable {
     }
 
     public OptionalEntity<LabelType> getLabelType(final String id) {
-        return labelTypeBhv.selectByPK(id);
+        return labelTypeBhv.selectByPK(id).map(entity -> {
+            final List<LabelToRole> wctrtmList = labelToRoleBhv.selectList(wctrtmCb -> {
+                wctrtmCb.query().setLabelTypeId_Equal(entity.getId());
+            });
+            if (!wctrtmList.isEmpty()) {
+                final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
+                for (final LabelToRole mapping : wctrtmList) {
+                    roleTypeIds.add(mapping.getRoleTypeId());
+                }
+                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
+            }
+            return entity;
+        });
     }
 
 }
