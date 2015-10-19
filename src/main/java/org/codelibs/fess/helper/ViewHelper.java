@@ -496,7 +496,7 @@ public class ViewHelper implements Serializable {
         }
         if (ConfigType.WEB == configType) {
             final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
-            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId));
+            config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.FILE == configType) {
             final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
             config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId));

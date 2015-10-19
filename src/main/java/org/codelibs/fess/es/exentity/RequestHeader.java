@@ -37,7 +37,7 @@ public class RequestHeader extends BsRequestHeader {
     public WebConfig getWebConfig() {
         if (webConfig == null) {
             final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            webConfig = webConfigService.getWebConfig(getWebConfigId());
+            webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
         }
         return webConfig;
     }
