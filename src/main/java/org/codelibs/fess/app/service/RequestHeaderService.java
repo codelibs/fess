@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.RequestHeaderCB;
 import org.codelibs.fess.es.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.exentity.RequestHeader;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class RequestHeaderService implements Serializable {
 
@@ -57,17 +58,8 @@ public class RequestHeaderService implements Serializable {
         return requestHeaderList;
     }
 
-    public RequestHeader getRequestHeader(final Map<String, String> keys) {
-        final RequestHeader requestHeader = requestHeaderBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (requestHeader == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return requestHeader;
+    public OptionalEntity<RequestHeader> getRequestHeader(final String id) {
+        return requestHeaderBhv.selectByPK(id);
     }
 
     public void store(final RequestHeader requestHeader) {
