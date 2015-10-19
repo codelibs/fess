@@ -34,6 +34,7 @@ import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.es.exentity.WebConfigToLabel;
 import org.codelibs.fess.es.exentity.WebConfigToRole;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class WebConfigService implements Serializable {
 
@@ -103,37 +104,32 @@ public class WebConfigService implements Serializable {
         return list;
     }
 
-    public WebConfig getWebConfig(final Map<String, String> keys) {
-        final WebConfig webConfig = webConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-
-        if (webConfig != null) {
-            final List<WebConfigToLabel> wctltmList = webConfigToLabelBhv.selectList(wctltmCb -> {
-                wctltmCb.query().setWebConfigId_Equal(webConfig.getId());
-            });
-            if (!wctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
-                for (final WebConfigToLabel mapping : wctltmList) {
-                    labelTypeIds.add(mapping.getLabelTypeId());
-                }
-                webConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
-            }
+    public OptionalEntity<WebConfig> getWebConfig(final String id) {
+        return webConfigBhv.selectByPK(id).map(entity -> {
 
             final List<WebConfigToRole> wctrtmList = webConfigToRoleBhv.selectList(wctrtmCb -> {
-                wctrtmCb.query().setWebConfigId_Equal(webConfig.getId());
+                wctrtmCb.query().setWebConfigId_Equal(entity.getId());
             });
             if (!wctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
                 for (final WebConfigToRole mapping : wctrtmList) {
                     roleTypeIds.add(mapping.getRoleTypeId());
                 }
-                webConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
+                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
-        }
 
-        return webConfig;
+            final List<WebConfigToLabel> wctltmList = webConfigToLabelBhv.selectList(wctltmCb -> {
+                wctltmCb.query().setWebConfigId_Equal(entity.getId());
+            });
+            if (!wctltmList.isEmpty()) {
+                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
+                for (final WebConfigToLabel mapping : wctltmList) {
+                    labelTypeIds.add(mapping.getLabelTypeId());
+                }
+                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
+            }
+            return entity;
+        });
     }
 
     public void store(final WebConfig webConfig) {
@@ -269,11 +265,5 @@ public class WebConfigService implements Serializable {
 
         // setup condition
 
-    }
-
-    public WebConfig getWebConfig(final String id) {
-        return webConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(id);
-        }).orElse(null);//TODO
     }
 }

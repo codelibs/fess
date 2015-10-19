@@ -14,19 +14,18 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.fileconfig;
+package org.codelibs.fess.app.web.admin.webconfig;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author codelibs
+ * @author Shunji Makino
  * @author Keiichi Watanabe
  */
-public class FileConfigSearchForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    public String id;
 }

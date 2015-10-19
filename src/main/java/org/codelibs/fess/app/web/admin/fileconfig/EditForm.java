@@ -14,19 +14,29 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.requestheader;
+package org.codelibs.fess.app.web.admin.fileconfig;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
- * @author Shunji Makino
+ * @author Keiichi Watanabe
  */
-public class RequestHeaderSearchForm implements Serializable {
+public class EditForm extends CreateForm {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    @Required
+    @Size(max = 1000)
+    public String id;
+
+    @Size(max = 1000)
+    public String updatedBy;
+
+    public Long updatedTime;
+
+    @Required
+    public Integer versionNo;
+
 }

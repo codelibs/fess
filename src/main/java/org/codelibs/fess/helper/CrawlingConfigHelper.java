@@ -73,13 +73,13 @@ public class CrawlingConfigHelper implements Serializable {
         switch (configType) {
         case WEB:
             final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
-            return webConfigService.getWebConfig(id);
+            return webConfigService.getWebConfig(id).get();
         case FILE:
             final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
-            return fileConfigService.getFileConfig(id);
+            return fileConfigService.getFileConfig(id).get();
         case DATA:
             final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
-            return dataConfigService.getDataConfig(id);
+            return dataConfigService.getDataConfig(id).get();
         default:
             return null;
         }

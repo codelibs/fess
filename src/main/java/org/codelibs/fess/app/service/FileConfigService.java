@@ -34,6 +34,7 @@ import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.es.exentity.FileConfigToLabel;
 import org.codelibs.fess.es.exentity.FileConfigToRole;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class FileConfigService implements Serializable {
 
@@ -102,39 +103,32 @@ public class FileConfigService implements Serializable {
         return list;
     }
 
-    public FileConfig getFileConfig(final Map<String, String> keys) {
-        final FileConfig fileConfig = fileConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-
-        if (fileConfig != null) {
+    public OptionalEntity<FileConfig> getFileConfig(final String id) {
+        return fileConfigBhv.selectByPK(id).map(entity -> {
 
             final List<FileConfigToRole> fctrtmList = fileConfigToRoleBhv.selectList(fctrtmCb -> {
-                fctrtmCb.query().setFileConfigId_Equal(fileConfig.getId());
+                fctrtmCb.query().setFileConfigId_Equal(entity.getId());
             });
             if (!fctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
                 for (final FileConfigToRole mapping : fctrtmList) {
                     roleTypeIds.add(mapping.getRoleTypeId());
                 }
-                fileConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
+                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
 
             final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
-                fctltmCb.query().setFileConfigId_Equal(fileConfig.getId());
+                fctltmCb.query().setFileConfigId_Equal(entity.getId());
             });
             if (!fctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
                 for (final FileConfigToLabel mapping : fctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
-                fileConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
+                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
             }
-
-        }
-
-        return fileConfig;
+            return entity;
+        });
     }
 
     public void store(final FileConfig fileConfig) {
@@ -269,12 +263,6 @@ public class FileConfigService implements Serializable {
 
         // setup condition
 
-    }
-
-    public FileConfig getFileConfig(final String id) {
-        return fileConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(id);
-        }).orElse(null);//TODO
     }
 
 }

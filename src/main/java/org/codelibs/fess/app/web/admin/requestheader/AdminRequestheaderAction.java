@@ -30,11 +30,15 @@ import org.codelibs.fess.app.pager.RequestHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.requestheader.CreateForm;
+import org.codelibs.fess.app.web.admin.requestheader.EditForm;
+import org.codelibs.fess.app.web.admin.requestheader.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.exentity.RequestHeader;
 import org.codelibs.fess.es.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -45,6 +49,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 /**
  * @author shinsuke
  * @author Shunji Makino
+ * @author Keiichi Watanabe
  */
 public class AdminRequestheaderAction extends FessAdminAction {
 
@@ -56,9 +61,9 @@ public class AdminRequestheaderAction extends FessAdminAction {
     @Resource
     private RequestHeaderPager requestHeaderPager;
     @Resource
-    private SystemHelper systemHelper;
-    @Resource
     protected WebConfigService webConfigService;
+    @Resource
+    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -73,14 +78,14 @@ public class AdminRequestheaderAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final RequestHeaderSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final RequestHeaderSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         requestHeaderPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -88,15 +93,15 @@ public class AdminRequestheaderAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final RequestHeaderSearchForm form) {
-        copyBeanToBean(form.searchParams, requestHeaderPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, requestHeaderPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final RequestHeaderSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         requestHeaderPager.clear();
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -104,18 +109,18 @@ public class AdminRequestheaderAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final RequestHeaderSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminRequestheader_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final RequestHeaderSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(requestHeaderPager)); // page navi
         data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
-        copyBeanToBean(requestHeaderPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(requestHeaderPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -126,9 +131,44 @@ public class AdminRequestheaderAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final RequestHeaderEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminRequestheader_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminRequestheader_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -137,11 +177,9 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final RequestHeaderEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadRequestHeader(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -150,18 +188,15 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final RequestHeaderEditForm form) {
-        return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
-            registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
-        });
-    }
-
-    @Token(save = true, validate = false)
-    @Execute
-    public HtmlResponse editfromconfirm(final RequestHeaderEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadRequestHeader(form);
+        final String id = form.id;
+        requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -170,12 +205,20 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final RequestHeaderEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminRequestheader_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
         });
@@ -183,9 +226,15 @@ public class AdminRequestheaderAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final RequestHeaderEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadRequestHeader(form);
+        final String id = form.id;
+        requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
@@ -196,26 +245,45 @@ public class AdminRequestheaderAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final RequestHeaderEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadRequestHeader(form);
-        return asHtml(path_AdminRequestheader_ConfirmJsp);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminRequestheader_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final RequestHeaderEditForm form) {
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminRequestheader_ConfirmJsp);
+        form.crudMode = CrudMode.CREATE;
+        return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final RequestHeaderEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminRequestheader_ConfirmJsp);
+        form.crudMode = CrudMode.EDIT;
+        return asHtml(path_AdminRequestheader_ConfirmJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     // -----------------------------------------------------
@@ -223,66 +291,78 @@ public class AdminRequestheaderAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final RequestHeaderEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        requestHeaderService.store(createRequestHeader(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createRequestHeader(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            requestHeaderService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final RequestHeaderEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        requestHeaderService.store(createRequestHeader(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createRequestHeader(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            requestHeaderService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final RequestHeaderEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        requestHeaderService.delete(getRequestHeader(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        requestHeaderService.getRequestHeader(id).ifPresent(entity -> {
+            requestHeaderService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadRequestHeader(final RequestHeaderEditForm form) {
-        copyBeanToBean(getRequestHeader(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected RequestHeader getRequestHeader(final RequestHeaderEditForm form) {
-        final RequestHeader requestHeader = requestHeaderService.getRequestHeader(createKeyMap(form));
-        if (requestHeader == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return requestHeader;
-    }
-
-    protected RequestHeader createRequestHeader(final RequestHeaderEditForm form) {
-        RequestHeader requestHeader;
+    protected OptionalEntity<RequestHeader> createRequestHeader(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            requestHeader = getRequestHeader(form);
-        } else {
-            requestHeader = new RequestHeader();
-            requestHeader.setCreatedBy(username);
-            requestHeader.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final RequestHeader entity = new RequestHeader();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return requestHeaderService.getRequestHeader(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        requestHeader.setUpdatedBy(username);
-        requestHeader.setUpdatedTime(currentTime);
-        copyBeanToBean(form, requestHeader, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return requestHeader;
-    }
-
-    protected Map<String, String> createKeyMap(final RequestHeaderEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     protected void registerProtocolSchemeItems(final RenderData data) {
@@ -316,10 +396,10 @@ public class AdminRequestheaderAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final RequestHeaderEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }
@@ -327,6 +407,7 @@ public class AdminRequestheaderAction extends FessAdminAction {
     protected VaErrorHook toEditHtml() {
         return () -> {
             return asHtml(path_AdminRequestheader_EditJsp).renderWith(data -> {
+                registerProtocolSchemeItems(data);
                 registerWebConfigItems(data);
             });
         };

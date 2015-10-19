@@ -128,7 +128,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
                 form.crudMode = CrudMode.CREATE;
             });
         }).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -148,7 +148,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
                 form.crudMode = crudMode;
             });
         }).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -158,7 +158,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -168,7 +168,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -184,7 +184,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
         });
         return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -204,7 +204,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
                 form.crudMode = crudMode;
             });
         }).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -220,7 +220,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
         });
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -242,7 +242,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
                 });
             });
         }).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -252,7 +252,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -262,7 +262,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminLabeltype_ConfirmJsp).renderWith(data -> {
-            registerItems(data);
+            registerRoleTypeItems(data);
         });
     }
 
@@ -345,7 +345,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected void registerItems(final RenderData data) {
+    protected void registerRoleTypeItems(final RenderData data) {
         data.register("roleTypeItems", roleTypeService.getRoleTypeList());
     }
 
@@ -362,7 +362,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminLabeltype_EditJsp);
+            return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+                registerRoleTypeItems(data);
+            });
         };
     }
 }
