@@ -502,7 +502,7 @@ public class ViewHelper implements Serializable {
             config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.DATA == configType) {
             final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
-            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId));
+            config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);

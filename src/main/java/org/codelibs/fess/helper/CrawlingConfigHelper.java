@@ -79,7 +79,7 @@ public class CrawlingConfigHelper implements Serializable {
             return fileConfigService.getFileConfig(id).get();
         case DATA:
             final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
-            return dataConfigService.getDataConfig(id);
+            return dataConfigService.getDataConfig(id).get();
         default:
             return null;
         }

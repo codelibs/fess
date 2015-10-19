@@ -34,6 +34,7 @@ import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.es.exentity.DataConfigToLabel;
 import org.codelibs.fess.es.exentity.DataConfigToRole;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class DataConfigService implements Serializable {
 
@@ -103,40 +104,33 @@ public class DataConfigService implements Serializable {
         return list;
     }
 
-    public DataConfig getDataConfig(final Map<String, String> keys) {
-
-        final DataConfig dataConfig = dataConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-
-        if (dataConfig != null) {
+    public OptionalEntity<DataConfig> getDataConfig(final String id) {
+        return dataConfigBhv.selectByPK(id).map(entity -> {
 
             final List<DataConfigToRole> fctrtmList = dataConfigToRoleBhv.selectList(fctrtmCb -> {
-                fctrtmCb.query().setDataConfigId_Equal(dataConfig.getId());
+                fctrtmCb.query().setDataConfigId_Equal(entity.getId());
             });
             if (!fctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
                 for (final DataConfigToRole mapping : fctrtmList) {
                     roleTypeIds.add(mapping.getRoleTypeId());
                 }
-                dataConfig.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
+                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
             }
 
             final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
-                fctltmCb.query().setDataConfigId_Equal(dataConfig.getId());
+                fctltmCb.query().setDataConfigId_Equal(entity.getId());
             });
             if (!fctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
                 for (final DataConfigToLabel mapping : fctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
-                dataConfig.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
+                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
             }
 
-        }
-
-        return dataConfig;
+            return entity;
+        });
     }
 
     public void store(final DataConfig dataConfig) {
@@ -271,12 +265,6 @@ public class DataConfigService implements Serializable {
 
         // setup condition
 
-    }
-
-    public DataConfig getDataConfig(final String id) {
-        return dataConfigBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(id);
-        }).orElse(null);//TODO
     }
 
 }

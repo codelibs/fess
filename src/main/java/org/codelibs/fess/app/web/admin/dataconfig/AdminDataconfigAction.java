@@ -30,10 +30,14 @@ import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.dataconfig.CreateForm;
+import org.codelibs.fess.app.web.admin.dataconfig.EditForm;
+import org.codelibs.fess.app.web.admin.dataconfig.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -54,13 +58,13 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Resource
     private DataConfigPager dataConfigPager;
     @Resource
-    private SystemHelper systemHelper;
+    private RoleTypeService roleTypeService;
     @Resource
-    protected RoleTypeService roleTypeService;
-    @Resource
-    protected LabelTypeService labelTypeService;
+    private LabelTypeService labelTypeService;
     @Resource
     protected DataStoreFactory dataStoreFactory;
+    @Resource
+    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -75,14 +79,14 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final DataConfigSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final DataConfigSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         dataConfigPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -90,15 +94,15 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final DataConfigSearchForm form) {
-        copyBeanToBean(form.searchParams, dataConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, dataConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final DataConfigSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         dataConfigPager.clear();
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -106,17 +110,17 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final DataConfigSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final DataConfigSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(dataConfigPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(dataConfigPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -127,9 +131,44 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                            ----------
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse createpage(final DataConfigEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminDataconfig_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        }).renderWith(data -> {
+            registerRolesAndLabels(data);
+            registerHandlerNames(data);
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminDataconfig_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            registerRolesAndLabels(data);
+            registerHandlerNames(data);
+        });
+    }
+
+    @Token(save = true, validate = false)
+    @Execute
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -138,11 +177,9 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editpage(final int crudMode, final String id, final DataConfigEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadDataConfig(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -151,18 +188,15 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse editagain(final DataConfigEditForm form) {
-        return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
-            registerRolesAndLabels(data);
-            registerHandlerNames(data);
-        });
-    }
-
-    @Token(save = true, validate = false)
-    @Execute
-    public HtmlResponse editfromconfirm(final DataConfigEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadDataConfig(form);
+        final String id = form.id;
+        dataConfigService.getDataConfig(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -171,12 +205,20 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id, final DataConfigEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadDataConfig(form);
-        return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminDataconfig_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
         });
@@ -184,9 +226,15 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Token(save = true, validate = false)
     @Execute
-    public HtmlResponse deletefromconfirm(final DataConfigEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadDataConfig(form);
+        final String id = form.id;
+        dataConfigService.getDataConfig(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -197,26 +245,30 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final DataConfigEditForm form) {
-        try {
-            form.crudMode = crudMode;
-            form.id = id;
-            verifyCrudMode(form, CrudMode.CONFIRM);
-            loadDataConfig(form);
-            return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
-                registerRolesAndLabels(data);
-                registerHandlerNames(data);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminDataconfig_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                dataConfigService.getDataConfig(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
             });
-        } catch (final Exception e) {
-            e.printStackTrace();
-            return asHtml(path_AdminDataconfig_ConfirmJsp);
-        }
+        }).renderWith(data -> {
+            registerRolesAndLabels(data);
+            registerHandlerNames(data);
+        });
     }
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromcreate(final DataConfigEditForm form) {
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -225,8 +277,9 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Token(save = false, validate = true, keep = true)
     @Execute
-    public HtmlResponse confirmfromupdate(final DataConfigEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminDataconfig_ConfirmJsp).renderWith(data -> {
             registerRolesAndLabels(data);
             registerHandlerNames(data);
@@ -238,66 +291,78 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                         -------------
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse create(final DataConfigEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        dataConfigService.store(createDataConfig(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createDataConfig(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            dataConfigService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Token(save = false, validate = true)
     @Execute
-    public HtmlResponse update(final DataConfigEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        dataConfigService.store(createDataConfig(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createDataConfig(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            dataConfigService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final DataConfigEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        dataConfigService.delete(getDataConfig(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        dataConfigService.getDataConfig(id).ifPresent(entity -> {
+            dataConfigService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadDataConfig(final DataConfigEditForm form) {
-        copyBeanToBean(getDataConfig(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected DataConfig getDataConfig(final DataConfigEditForm form) {
-        final DataConfig dataConfig = dataConfigService.getDataConfig(createKeyMap(form));
-        if (dataConfig == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return dataConfig;
-    }
-
-    protected DataConfig createDataConfig(final DataConfigEditForm form) {
-        DataConfig dataConfig;
+    protected OptionalEntity<DataConfig> createDataConfig(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            dataConfig = getDataConfig(form);
-        } else {
-            dataConfig = new DataConfig();
-            dataConfig.setCreatedBy(username);
-            dataConfig.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final DataConfig entity = new DataConfig();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return dataConfigService.getDataConfig(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        dataConfig.setUpdatedBy(username);
-        dataConfig.setUpdatedTime(currentTime);
-        copyBeanToBean(form, dataConfig, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return dataConfig;
-    }
-
-    protected Map<String, String> createKeyMap(final DataConfigEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     protected void registerRolesAndLabels(final RenderData data) {
@@ -305,7 +370,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         data.register("labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
-    public void registerHandlerNames(final RenderData data) {
+    protected void registerHandlerNames(final RenderData data) {
         final List<String> dataStoreNameList = dataStoreFactory.getDataStoreNameList();
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         for (final String name : dataStoreNameList) {
@@ -320,10 +385,10 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final DataConfigEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }
