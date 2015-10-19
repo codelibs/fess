@@ -362,7 +362,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminLabeltype_EditJsp);
+            return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+                registerItems(data);
+            });
         };
     }
 }
