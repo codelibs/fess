@@ -33,7 +33,7 @@ public class FileAuthentication extends BsFileAuthentication {
     public FileConfig getFileConfig() {
         if (fileConfig == null) {
             final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            fileConfig = fileConfigService.getFileConfig(getFileConfigId());
+            fileConfig = fileConfigService.getFileConfig(getFileConfigId()).get();
         }
         return fileConfig;
     }
