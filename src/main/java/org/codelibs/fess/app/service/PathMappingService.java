@@ -30,6 +30,7 @@ import org.codelibs.fess.es.cbean.PathMappingCB;
 import org.codelibs.fess.es.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.exentity.PathMapping;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class PathMappingService implements Serializable {
 
@@ -54,18 +55,8 @@ public class PathMappingService implements Serializable {
         return pathMappingList;
     }
 
-    public PathMapping getPathMapping(final Map<String, String> keys) {
-        final PathMapping pathMapping = pathMappingBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            cb.request().setVersion(true);
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (pathMapping == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return pathMapping;
+    public OptionalEntity<PathMapping> getPathMapping(final String id) {
+        return pathMappingBhv.selectByPK(id);
     }
 
     public void store(final PathMapping pathMapping) {

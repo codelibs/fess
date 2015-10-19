@@ -12,7 +12,7 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="pathMapping" />
 		</jsp:include>
-			
+
 		<div class="content-wrapper">
 			<%-- Content Header --%>
 			<section class="content-header">
@@ -20,7 +20,7 @@
 					<la:message key="labels.path_mapping_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-			
+
 					<li><la:link href="index">
 							<la:message key="labels.path_mapping_link_list" />
 						</la:link></li>
@@ -102,13 +102,13 @@
 												<td>
 													<c:if test="${processType=='C'}">
 														<la:message key="labels.path_mapping_pt_crawling" />
-													</c:if> 
+													</c:if>
 													<c:if test="${processType=='D'}">
 														<la:message key="labels.path_mapping_pt_displaying" />
 													</c:if>
 													<c:if test="${processType=='B'}">
 														<la:message key="labels.path_mapping_pt_both" />
-													</c:if> 
+													</c:if>
 													<la:hidden property="processType" />
 												</td>
 											</tr>
@@ -122,7 +122,7 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.path_mapping_button_back"/>" />
+										<input type="submit" class="btn" name="createagain" value="<la:message key="labels.path_mapping_button_back"/>" />
 										<input type="submit" class="btn btn-primary" name="create"
 											value="<la:message key="labels.path_mapping_button_create"/>"
 										/>
