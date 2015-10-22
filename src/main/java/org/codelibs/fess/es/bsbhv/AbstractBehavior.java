@@ -339,19 +339,24 @@ public abstract class AbstractBehavior<ENTITY extends Entity, CB extends Conditi
                 bulkBuilder.add((DeleteRequestBuilder) builder);
             }
         }
-        RequestOptionCall<BulkRequestBuilder> builderCall = bulkList.getCall();
+        final RequestOptionCall<BulkRequestBuilder> builderCall = bulkList.getCall();
         if (builderCall != null) {
             builderCall.callback(bulkBuilder);
         }
-        BulkResponse response = bulkBuilder.execute().actionGet();
 
-        List<Integer> resultList = new ArrayList<>();
-        for (BulkItemResponse itemResponse : response.getItems()) {
-            resultList.add(itemResponse.isFailed() ? 0 : 1);
+        final BulkResponse response = bulkBuilder.execute().actionGet();
+        final BulkItemResponse[] itemResponses = response.getItems();
+        if (itemResponses.length != entityList.size()) {
+            throw new IllegalStateException("Invalid response size: " + itemResponses.length + " != " + entityList.size());
         }
-        int[] results = new int[resultList.size()];
-        for (int i = 0; i < resultList.size(); i++) {
-            results[i] = resultList.get(i);
+        final int[] results = new int[itemResponses.length];
+        for (int i = 0; i < itemResponses.length; i++) {
+            final BulkItemResponse itemResponse = itemResponses[i];
+            final Entity entity = entityList.get(i);
+            if (entity instanceof AbstractEntity) {
+                ((AbstractEntity) entity).asDocMeta().id(itemResponse.getId());
+            }
+            results[i] = itemResponse.isFailed() ? 0 : 1;
         }
         return results;
     }

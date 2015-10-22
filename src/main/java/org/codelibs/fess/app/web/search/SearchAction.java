@@ -134,6 +134,7 @@ public class SearchAction extends FessSearchAction {
             try {
                 final WebRenderData renderData = new WebRenderData(data);
                 searchService.search(request, form, renderData);
+                form.rt = Long.toString(renderData.getRequestedTime());
                 // favorite or screenshot
                 if (favoriteSupport || screenShotManager != null) {
                     final String searchQuery = renderData.getSearchQuery();
@@ -157,7 +158,6 @@ public class SearchAction extends FessSearchAction {
                     messages.addErrorsResultSizeExceeded(GLOBAL);
                 }, () -> asHtml(path_ErrorJsp));
             }
-            form.rt = Long.toString(systemHelper.getCurrentTimeAsLong());
             data.register("displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
             data.register("pagingQuery", getPagingQuery(form));
         });

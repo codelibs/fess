@@ -39,6 +39,8 @@ public class SearchRenderData {
 
     private long queryTime;
 
+    private long requestedTime;
+
     public void setDocumentItems(final List<Map<String, Object>> documentItems) {
         this.documentItems = documentItems;
     }
@@ -103,6 +105,10 @@ public class SearchRenderData {
         this.searchQuery = searchQuery;
     }
 
+    public void setRequestedTime(final long requestedTime) {
+        this.requestedTime = requestedTime;
+    }
+
     public List<Map<String, Object>> getDocumentItems() {
         return documentItems;
     }
@@ -165,6 +171,10 @@ public class SearchRenderData {
 
     public long getQueryTime() {
         return queryTime;
+    }
+
+    public long getRequestedTime() {
+        return requestedTime;
     }
 
 }

@@ -1,7 +1,7 @@
 {
   "settings": {
     "index": {
-      "refresh_interval": "60s",
+      "refresh_interval": "1s",
       "number_of_shards": 10,
       "number_of_replicas": 0
     }

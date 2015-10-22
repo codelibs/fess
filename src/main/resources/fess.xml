@@ -6,7 +6,7 @@
 	<include path="fess_ds.xml"/>
 	<include path="fess_es.xml"/>
 
-	<component name="searchLogHelper" class="org.codelibs.fess.helper.impl.SearchLogHelperImpl">
+	<component name="searchLogHelper" class="org.codelibs.fess.helper.SearchLogHelper">
 		<!-- 
 		<property name="userCheckInterval">5 * 60 * 1000</property>
 		<property name="userInfoCacheSize">1000</property>

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +23,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
+import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.es.exentity.SearchLog;
 import org.codelibs.fess.es.exentity.UserInfo;
 import org.codelibs.fess.helper.FieldHelper;
@@ -32,16 +34,15 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SearchService {
 
     // ===================================================================================
     //                                                                            Constant
     //
-    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
     protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern.compile("^([a-zA-Z0-9_]+):.*");
 
@@ -71,6 +72,8 @@ public class SearchService {
     //                                                                      ==============
 
     public void search(final HttpServletRequest request, final SearchRequestParams params, final SearchRenderData data) {
+        final long requestedTime = systemHelper.getCurrentTimeAsLong();
+
         final long startTime = System.currentTimeMillis();
         final boolean searchLogSupport =
                 Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
@@ -136,7 +139,7 @@ public class SearchService {
 
         // search log
         if (searchLogSupport) {
-            storeSearchLog(request, query, pageStart, pageSize, queryResponseList);
+            storeSearchLog(request, requestedTime, query, pageStart, pageSize, queryResponseList);
         }
 
         queryResponseList.setExecTime(System.currentTimeMillis() - startTime);
@@ -163,11 +166,11 @@ public class SearchService {
         data.setPartialResults(queryResponseList.isPartialResults());
         data.setQueryTime(queryResponseList.getQueryTime());
         data.setSearchQuery(query);
+        data.setRequestedTime(requestedTime);
     }
 
-    protected void storeSearchLog(final HttpServletRequest request, final String query, final int pageStart, final int pageSize,
-            final QueryResponseList queryResponseList) {
-        final long now = systemHelper.getCurrentTimeAsLong();
+    protected void storeSearchLog(final HttpServletRequest request, final long requestedTime, final String query, final int pageStart,
+            final int pageSize, final QueryResponseList queryResponseList) {
 
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final SearchLog searchLog = new SearchLog();
@@ -178,8 +181,8 @@ public class SearchService {
             if (StringUtil.isNotBlank(userCode)) {
                 final UserInfo userInfo = new UserInfo();
                 userInfo.setCode(userCode);
-                userInfo.setCreatedTime(now);
-                userInfo.setUpdatedTime(now);
+                userInfo.setCreatedTime(requestedTime);
+                userInfo.setUpdatedTime(requestedTime);
                 searchLog.setUserInfo(OptionalEntity.of(userInfo));
             }
         }
@@ -188,7 +191,7 @@ public class SearchService {
         searchLog.setResponseTime(Integer.valueOf((int) queryResponseList.getExecTime()));
         searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
         searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
-        searchLog.setRequestedTime(now);
+        searchLog.setRequestedTime(requestedTime);
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
 
@@ -320,5 +323,20 @@ public class SearchService {
 
     public boolean update(final String id, final String field, final Object value) {
         return fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, id, field, value);
+    }
+
+    public boolean bulkUpdate(Consumer<BulkRequestBuilder> consumer) {
+        BulkRequestBuilder builder = fessEsClient.prepareBulk();
+        consumer.accept(builder);
+        try {
+            BulkResponse response = builder.execute().get();
+            if (response.hasFailures()) {
+                throw new FessEsClientException(response.buildFailureMessage());
+            } else {
+                return true;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new FessEsClientException("Failed to update bulk data.", e);
+        }
     }
 }
