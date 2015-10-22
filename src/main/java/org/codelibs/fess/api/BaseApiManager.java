@@ -33,14 +33,12 @@ public abstract class BaseApiManager implements WebApiManager {
 
     protected static final String HOT_SEARCH_WORD_API = "/hotSearchWordApi";
 
-    protected static final String SUGGEST_API = "/suggestApi";
-
     protected static final String SEARCH_API = "/searchApi";
 
     protected String pathPrefix;
 
     protected static enum FormatType {
-        SEARCH, LABEL, SUGGEST, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
+        SEARCH, LABEL, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
     public String getPathPrefix() {
@@ -60,8 +58,6 @@ public abstract class BaseApiManager implements WebApiManager {
             return FormatType.SEARCH;
         } else if (FormatType.LABEL.name().equals(type)) {
             return FormatType.LABEL;
-        } else if (FormatType.SUGGEST.name().equals(type)) {
-            return FormatType.SUGGEST;
         } else if (FormatType.HOTSEARCHWORD.name().equals(type)) {
             return FormatType.HOTSEARCHWORD;
         } else if (FormatType.FAVORITE.name().equals(type)) {

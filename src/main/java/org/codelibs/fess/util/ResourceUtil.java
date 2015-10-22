@@ -59,13 +59,13 @@ public class ResourceUtil {
         return getPath("dict", names);
     }
 
-    protected static Path getPath(final String base, String... names) {
+    protected static Path getPath(final String base, final String... names) {
 
         try {
             final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
-            String webinfoPath = servletContext.getRealPath("/WEB-INF/" + base);
+            final String webinfoPath = servletContext.getRealPath("/WEB-INF/" + base);
             if (webinfoPath != null) {
-                Path path = Paths.get(webinfoPath, names);
+                final Path path = Paths.get(webinfoPath, names);
                 if (Files.exists(path)) {
                     return path;
                 }

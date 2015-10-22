@@ -39,23 +39,24 @@ public class EsApiManager extends BaseApiManager {
     }
 
     @Override
-    public boolean matches(HttpServletRequest request) {
+    public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
         if (servletPath.startsWith(pathPrefix)) {
-            FessLoginAssist loginAssist = ComponentUtil.getLoginAssist();
+            final FessLoginAssist loginAssist = ComponentUtil.getLoginAssist();
             return loginAssist.getSessionUserBean().map(user -> user.hasRoles(acceptedRoles)).orElseGet(() -> Boolean.FALSE).booleanValue();
         }
         return false;
     }
 
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         String path = request.getServletPath().substring(pathPrefix.length());
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        CurlRequest curlRequest = new CurlRequest(httpMethod, getUrl() + path);
+        final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
+        final CurlRequest curlRequest = new CurlRequest(httpMethod, getUrl() + path);
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
                 curlRequest.param(entry.getKey(), String.join(",", entry.getValue()));
@@ -68,7 +69,7 @@ public class EsApiManager extends BaseApiManager {
             if (httpMethod != Method.GET) {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
                     CopyUtil.copy(in, out);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new IORuntimeException(e);
                 }
             }
@@ -76,17 +77,17 @@ public class EsApiManager extends BaseApiManager {
             try (InputStream in = con.getInputStream(); ServletOutputStream out = response.getOutputStream()) {
                 response.setStatus(con.getResponseCode());
                 CopyUtil.copy(in, out);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 try (InputStream err = con.getErrorStream()) {
                     logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
-                } catch (IOException e1) {}
+                } catch (final IOException e1) {}
                 throw new IORuntimeException(e);
             }
         });
         // TODO exception
     }
 
-    public void setAcceptedRoles(String[] acceptedRoles) {
+    public void setAcceptedRoles(final String[] acceptedRoles) {
         this.acceptedRoles = acceptedRoles;
     }
 

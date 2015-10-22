@@ -54,35 +54,35 @@ public class DictionaryManager {
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response = Curl.get(getUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
-            Map<String, Object> contentMap = response.getContentAsMap();
+            final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
+            final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
             return fileList
                     .stream()
                     .map(fileMap -> {
                         try {
-                            String path = fileMap.get("path").toString();
-                            Date timestamp =
+                            final String path = fileMap.get("path").toString();
+                            final Date timestamp =
                                     new SimpleDateFormat(Constants.DATE_FORMAT_ISO_8601_EXTEND_UTC).parse(fileMap.get("@timestamp")
                                             .toString());
                             for (final DictionaryCreator creator : creatorList) {
-                                DictionaryFile<? extends DictionaryItem> file = creator.create(path, timestamp);
+                                final DictionaryFile<? extends DictionaryItem> file = creator.create(path, timestamp);
                                 if (file != null) {
                                     return file;
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             logger.warn("Failed to load " + fileMap, e);
                         }
                         return null;
                     }).filter(file -> file != null).toArray(n -> new DictionaryFile<?>[n]);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new DictionaryException("Failed to access dictionaries", e);
         }
     }
 
     public OptionalEntity<DictionaryFile<? extends DictionaryItem>> getDictionaryFile(final String id) {
-        for (DictionaryFile<? extends DictionaryItem> dictFile : getDictionaryFiles()) {
+        for (final DictionaryFile<? extends DictionaryItem> dictFile : getDictionaryFiles()) {
             if (dictFile.getId().equals(id)) {
                 return OptionalEntity.of(dictFile);
             }
@@ -90,7 +90,7 @@ public class DictionaryManager {
         return OptionalEntity.empty();
     }
 
-    public void store(DictionaryFile<? extends DictionaryItem> dictFile, File file) {
+    public void store(final DictionaryFile<? extends DictionaryItem> dictFile, final File file) {
         getDictionaryFile(dictFile.getId())
                 .ifPresent(currentFile -> {
                     if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
@@ -101,11 +101,11 @@ public class DictionaryManager {
                         try (CurlResponse response =
                                 Curl.post(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).body(FileUtil.readUTF8(file))
                                         .execute()) {
-                            Map<String, Object> contentMap = response.getContentAsMap();
+                            final Map<String, Object> contentMap = response.getContentAsMap();
                             if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
                                 throw new DictionaryException("Failed to update " + dictFile.getPath());
                             }
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
                         }
 
@@ -114,15 +114,15 @@ public class DictionaryManager {
                 });
     }
 
-    public InputStream getContentInputStream(DictionaryFile<? extends DictionaryItem> dictFile) {
+    public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
         try {
             return Curl.get(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
         }
     }
 
-    public void addCreator(DictionaryCreator creator) {
+    public void addCreator(final DictionaryCreator creator) {
         creatorList.add(creator);
     }
 

@@ -45,6 +45,7 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
+import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
@@ -54,6 +55,8 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.servlet.session.SessionManager;
 
 public final class ComponentUtil {
+    private static final String FESS_ES_CLIENT = "fessEsClient";
+
     private static final String DICTIONARY_MANAGER = "dictionaryManager";
 
     private static final String DATA_SERVICE = "dataService";
@@ -75,6 +78,8 @@ public final class ComponentUtil {
     private static final String DATA_STORE_FACTORY = "dataStoreFactory";
 
     private static final String USER_AGENT_HELPER = "userAgentHelper";
+
+    private static final String USER_INFO_HELPER = "userInfoHelper";
 
     private static final String WEB_API_MANAGER_FACTORY = "webApiManagerFactory";
 
@@ -118,7 +123,7 @@ public final class ComponentUtil {
 
     private static final String FIELD_HELPER = "fieldHelper";
 
-    private static final String ELASTICSEARCH_CLIENT = "fessEsClient";
+    private static final String ELASTICSEARCH_CLIENT = FESS_ES_CLIENT;
 
     private ComponentUtil() {
     }
@@ -243,6 +248,10 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(FIELD_HELPER);
     }
 
+    public static UserInfoHelper getUserInfoHelper() {
+        return SingletonLaContainer.getComponent(USER_INFO_HELPER);
+    }
+
     public static FessEsClient getElasticsearchClient() {
         return SingletonLaContainer.getComponent(ELASTICSEARCH_CLIENT);
     }
@@ -253,11 +262,14 @@ public final class ComponentUtil {
 
     public static DictionaryManager getDictionaryManager() {
         return SingletonLaContainer.getComponent(DICTIONARY_MANAGER);
-
     }
 
     public static DataService<EsAccessResult> getDataService() {
         return SingletonLaContainer.getComponent(DATA_SERVICE);
+    }
+
+    public static FessEsClient getFessEsClient() {
+        return SingletonLaContainer.getComponent(FESS_ES_CLIENT);
     }
 
     public static FessLoginAssist getLoginAssist() {

@@ -323,7 +323,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return synonymService.getSynonymFile(form.dictId).map(file -> {
             try (InputStream inputStream = form.synonymFile.getInputStream()) {
                 file.update(inputStream);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throwValidationError(messages -> messages.addErrorsFailedToUploadSynonymFile(GLOBAL), () -> {
                     return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
                 });
@@ -397,7 +397,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    protected OptionalEntity<SynonymItem> createSynonymItem(CreateForm form) {
+    protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
@@ -439,11 +439,11 @@ public class AdminDictSynonymAction extends FessAdminAction {
         };
     }
 
-    private void validateSynonymString(String[] values, VaErrorHook hook) {
+    private void validateSynonymString(final String[] values, final VaErrorHook hook) {
         if (values.length == 0) {
             return;
         }
-        for (String value : values) {
+        for (final String value : values) {
             if (value.indexOf(',') >= 0) {
                 throwValidationError(messages -> {
                     messages.addErrorsInvalidStrIsIncluded(GLOBAL, value, ",");

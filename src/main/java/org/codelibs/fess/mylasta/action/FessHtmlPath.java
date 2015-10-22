@@ -347,9 +347,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /error/badRequest.jsp */
     HtmlNext path_Error_BadRequestJsp = new HtmlNext("/error/badRequest.jsp");
 
-    /** The path of the HTML: /error/error_message.jsp */
-    HtmlNext path_Error_ErrorMessageJsp = new HtmlNext("/error/error_message.jsp");
-
     /** The path of the HTML: /error/footer.jsp */
     HtmlNext path_Error_FooterJsp = new HtmlNext("/error/footer.jsp");
 

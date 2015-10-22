@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -45,27 +46,36 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
 
-    private static final String SCORE_FIELD = "score";
+    protected static final long serialVersionUID = 1L;
 
-    private static final String INURL_FIELD = "inurl";
+    protected static final String SCORE_FIELD = "score";
 
-    private static final String NOT_ = "NOT ";
+    protected static final String INURL_FIELD = "inurl";
 
-    private static final String AND = "AND";
+    protected static final String NOT_ = "NOT ";
 
-    private static final String OR = "OR";
+    protected static final String AND = "AND";
 
-    private static final String NOT = "NOT";
+    protected static final String OR = "OR";
 
-    private static final String _TO_ = " TO ";
+    protected static final String NOT = "NOT";
 
-    private static final String _OR_ = " OR ";
+    protected static final String _TO_ = " TO ";
 
-    private static final String _AND_ = " AND ";
+    protected static final String _OR_ = " OR ";
 
-    private static final String DEFAULT_OPERATOR = _AND_;
+    protected static final String _AND_ = " AND ";
 
-    private static final long serialVersionUID = 1L;
+    protected static final String DEFAULT_OPERATOR = _AND_;
+
+    protected static final int DEFAULT_START_POSITION = 0;
+
+    protected static final int DEFAULT_PAGE_SIZE = 20;
+
+    protected static final int MAX_PAGE_SIZE = 100;
+
+    @Resource
+    protected DynamicProperties crawlerProperties;
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;
@@ -113,9 +123,9 @@ public class QueryHelper implements Serializable {
 
     protected long timeAllowed = -1;
 
-    protected Map<String, String[]> requestParameterMap = new HashMap<String, String[]>();
+    protected Map<String, String[]> requestParameterMap = new HashMap<>();
 
-    protected Map<String, String> fieldLanguageMap = new HashMap<String, String>();
+    protected Map<String, String> fieldLanguageMap = new HashMap<>();
 
     protected int maxSearchResultOffset = 100000;
 
@@ -133,9 +143,13 @@ public class QueryHelper implements Serializable {
 
     protected String defaultQueryLanguage;
 
-    protected Map<String, String[]> additionalQueryParamMap = new HashMap<String, String[]>();
+    protected Map<String, String[]> additionalQueryParamMap = new HashMap<>();
 
-    protected Map<String, String> fieldBoostMap = new HashMap<String, String>();
+    protected Map<String, String> fieldBoostMap = new HashMap<>();
+
+    protected int defaultPageSize = DEFAULT_PAGE_SIZE;
+
+    protected int defaultStartPosition = DEFAULT_START_POSITION;
 
     @PostConstruct
     public void init() {
@@ -1376,6 +1390,34 @@ public class QueryHelper implements Serializable {
 
     public void setDefaultQueryLanguage(final String defaultQueryLanguage) {
         this.defaultQueryLanguage = defaultQueryLanguage;
+    }
+
+    public int getMaxPageSize() {
+        final Object maxPageSize = crawlerProperties.get(Constants.SEARCH_RESULT_MAX_PAGE_SIZE);
+        if (maxPageSize == null) {
+            return MAX_PAGE_SIZE;
+        }
+        try {
+            return Integer.parseInt(maxPageSize.toString());
+        } catch (final NumberFormatException e) {
+            return MAX_PAGE_SIZE;
+        }
+    }
+
+    public int getDefaultPageSize() {
+        return defaultPageSize;
+    }
+
+    public void setDefaultPageSize(final int defaultPageSize) {
+        this.defaultPageSize = defaultPageSize;
+    }
+
+    public int getDefaultStart() {
+        return defaultStartPosition;
+    }
+
+    public void setDefaultStart(final int defaultStartPosition) {
+        this.defaultStartPosition = defaultStartPosition;
     }
 
     public Map<String, String[]> getQueryParamMap() {

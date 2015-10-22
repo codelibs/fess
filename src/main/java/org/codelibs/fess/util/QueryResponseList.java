@@ -23,11 +23,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.search.SearchHit;
@@ -82,7 +82,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         this.parent = parent;
     }
 
-    public void init(final Optional<SearchResponse> searchResponseOpt, final int start, final int pageSize) {
+    public void init(final OptionalEntity<SearchResponse> searchResponseOpt, final int start, final int pageSize) {
         searchResponseOpt.ifPresent(searchResponse -> {
             final SearchHits searchHits = searchResponse.getHits();
             allRecordCount = searchHits.getTotalHits();
@@ -360,6 +360,10 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
     public boolean isPartialResults() {
         return partialResults;
+    }
+
+    public long getQueryTime() {
+        return queryTime;
     }
 
 }

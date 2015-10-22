@@ -20,10 +20,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.util.ComponentUtil;
 
-public class SearchForm implements Serializable {
+public class SearchForm implements SearchRequestParams, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -94,4 +98,90 @@ public class SearchForm implements Serializable {
 
     public Map<String, String[]> options = new HashMap<>();
 
+    private int startPosition = -1;
+
+    private int pageSize = -1;
+
+    @Override
+    public int getStartPosition() {
+        if (startPosition != -1) {
+            return startPosition;
+        }
+
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        if (StringUtil.isBlank(start)) {
+            startPosition = queryHelper.getDefaultStart();
+        } else {
+            try {
+                startPosition = Integer.parseInt(start);
+            } catch (final NumberFormatException e) {
+                startPosition = queryHelper.getDefaultStart();
+            }
+        }
+        start = String.valueOf(startPosition);
+        return startPosition;
+    }
+
+    @Override
+    public int getPageSize() {
+        if (pageSize != -1) {
+            return pageSize;
+        }
+
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        if (StringUtil.isBlank(num)) {
+            pageSize = queryHelper.getDefaultPageSize();
+        } else {
+            try {
+                pageSize = Integer.parseInt(num);
+                if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
+                    pageSize = queryHelper.getMaxPageSize();
+                }
+            } catch (final NumberFormatException e) {
+                pageSize = queryHelper.getDefaultPageSize();
+            }
+        }
+        num = String.valueOf(pageSize);
+        return pageSize;
+    }
+
+    @Override
+    public String getQuery() {
+        return query;
+    }
+
+    @Override
+    public String getOperator() {
+        return op;
+    }
+
+    @Override
+    public String[] getAdditional() {
+        return additional;
+    }
+
+    @Override
+    public Map<String, String[]> getFields() {
+        return fields;
+    }
+
+    @Override
+    public String[] getLanguages() {
+        return lang;
+    }
+
+    @Override
+    public GeoInfo getGeoInfo() {
+        return geo;
+    }
+
+    @Override
+    public FacetInfo getFacetInfo() {
+        return facet;
+    }
+
+    @Override
+    public String getSort() {
+        return sort;
+    }
 }

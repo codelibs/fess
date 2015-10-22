@@ -34,7 +34,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
 
     protected Date timestamp;
 
-    public DictionaryFile(String id, String path, Date timestamp) {
+    public DictionaryFile(final String id, final String path, final Date timestamp) {
         this.id = id;
         this.path = path;
         this.timestamp = timestamp;
@@ -52,7 +52,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
         return timestamp;
     }
 
-    public DictionaryFile<T> manager(DictionaryManager dictionaryManager) {
+    public DictionaryFile<T> manager(final DictionaryManager dictionaryManager) {
         this.dictionaryManager = dictionaryManager;
         return this;
     }

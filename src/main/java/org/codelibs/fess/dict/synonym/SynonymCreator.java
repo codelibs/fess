@@ -12,12 +12,12 @@ public class SynonymCreator extends DictionaryCreator {
         super("synonym.*\\.txt");
     }
 
-    public SynonymCreator(String pattern) {
+    public SynonymCreator(final String pattern) {
         super(pattern);
     }
 
     @Override
-    protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(String id, String path, Date timestamp) {
+    protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(final String id, final String path, final Date timestamp) {
         return new SynonymFile(id, path, timestamp).manager(dictionaryManager);
     }
 

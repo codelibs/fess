@@ -38,7 +38,7 @@ public final class DocumentUtil {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T convertObj(Object value, final Class<T> clazz) {
+    private static <T> T convertObj(final Object value, final Class<T> clazz) {
         if (value == null) {
             return null;
         }

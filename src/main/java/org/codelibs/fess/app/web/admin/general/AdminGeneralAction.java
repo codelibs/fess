@@ -148,12 +148,12 @@ public class AdminGeneralAction extends FessAdminAction {
         form.esHttpUrl = crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
     }
 
-    private Integer getPropertyAsInteger(String key, int defaultValue) {
-        String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
+    private Integer getPropertyAsInteger(final String key, final int defaultValue) {
+        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
         if (value != null) {
             try {
                 return Integer.valueOf(value);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 // ignore
             }
         }

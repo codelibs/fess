@@ -6,9 +6,6 @@
 
 	<component name="webApiManagerFactory" class="org.codelibs.fess.api.WebApiManagerFactory">
 		<postConstruct name="add">
-			<arg>xmlApiManager</arg>
-		</postConstruct>
-		<postConstruct name="add">
 			<arg>jsonApiManager</arg>
 		</postConstruct>
 		<postConstruct name="add">
@@ -19,8 +16,6 @@
 		</postConstruct>
 	</component>
 
-	<component name="xmlApiManager" class="org.codelibs.fess.api.xml.XmlApiManager">
-	</component>
 	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
 	</component>
 	<component name="esApiManager" class="org.codelibs.fess.api.es.EsApiManager">

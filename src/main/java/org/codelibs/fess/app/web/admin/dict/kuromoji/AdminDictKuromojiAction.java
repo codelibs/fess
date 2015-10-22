@@ -311,7 +311,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
             try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
                 file.update(inputStream);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throwValidationError(messages -> messages.addErrorsFailedToUploadKuromojiFile(GLOBAL), () -> {
                     return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
                 });
@@ -381,7 +381,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    protected OptionalEntity<KuromojiItem> createKuromojiItem(CreateForm form) {
+    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {

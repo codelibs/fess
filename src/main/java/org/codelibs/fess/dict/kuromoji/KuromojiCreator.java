@@ -12,12 +12,12 @@ public class KuromojiCreator extends DictionaryCreator {
         super("kuromoji.*\\.txt");
     }
 
-    public KuromojiCreator(String pattern) {
+    public KuromojiCreator(final String pattern) {
         super(pattern);
     }
 
     @Override
-    protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(String id, String path, Date timestamp) {
+    protected DictionaryFile<? extends DictionaryItem> newDictionaryFile(final String id, final String path, final Date timestamp) {
         return new KuromojiFile(id, path, timestamp).manager(dictionaryManager);
     }
 

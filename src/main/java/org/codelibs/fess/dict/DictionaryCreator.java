@@ -11,11 +11,11 @@ public abstract class DictionaryCreator {
 
     protected DictionaryManager dictionaryManager;
 
-    public DictionaryCreator(String pattern) {
+    public DictionaryCreator(final String pattern) {
         this.pattern = Pattern.compile(pattern);
     }
 
-    public DictionaryFile<? extends DictionaryItem> create(String path, Date timestamp) {
+    public DictionaryFile<? extends DictionaryItem> create(final String path, final Date timestamp) {
         if (!isTarget(path)) {
             return null;
         }
@@ -23,17 +23,17 @@ public abstract class DictionaryCreator {
         return newDictionaryFile(encodePath(path), path, timestamp);
     }
 
-    protected String encodePath(String path) {
+    protected String encodePath(final String path) {
         return Base64.getEncoder().encodeToString(path.getBytes(Constants.CHARSET_UTF_8));
     }
 
-    protected boolean isTarget(String path) {
+    protected boolean isTarget(final String path) {
         return pattern.matcher(path).find();
     }
 
     protected abstract DictionaryFile<? extends DictionaryItem> newDictionaryFile(String id, String path, Date timestamp);
 
-    public void setDictionaryManager(DictionaryManager dictionaryManager) {
+    public void setDictionaryManager(final DictionaryManager dictionaryManager) {
         this.dictionaryManager = dictionaryManager;
     }
 }

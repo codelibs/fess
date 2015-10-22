@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +35,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.indexer.FessSearchQueryException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionFuture;
@@ -471,7 +471,7 @@ public class FessEsClient implements Client {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        return searchResult.build(requestBuilder, execTime, Optional.ofNullable(response));
+        return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {/* TODO */}));
     }
 
     public <T> T search(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
@@ -504,10 +504,10 @@ public class FessEsClient implements Client {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        return searchResult.build(searchRequestBuilder, execTime, Optional.ofNullable(searchResponse));
+        return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {/* TODO */}));
     }
 
-    public Optional<Map<String, Object>> getDocument(final String index, final String type,
+    public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
         return getDocument(index, type, condition, (response, hit) -> {
             final Map<String, Object> source = hit.getSource();
@@ -522,7 +522,7 @@ public class FessEsClient implements Client {
         });
     }
 
-    public <T> Optional<T> getDocument(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+    public <T> OptionalEntity<T> getDocument(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator) {
         return search(index, type, condition, (queryBuilder, execTime, searchResponse) -> {
             return searchResponse.map(response -> {
@@ -535,7 +535,7 @@ public class FessEsClient implements Client {
         });
     }
 
-    public Optional<Map<String, Object>> getDocument(final String index, final String type, final String id,
+    public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type, final String id,
             final SearchCondition<GetRequestBuilder> condition) {
         return getDocument(index, type, id, condition, (response, result) -> {
             final Map<String, Object> source = response.getSource();
@@ -550,7 +550,7 @@ public class FessEsClient implements Client {
         });
     }
 
-    public <T> Optional<T> getDocument(final String index, final String type, final String id,
+    public <T> OptionalEntity<T> getDocument(final String index, final String type, final String id,
             final SearchCondition<GetRequestBuilder> condition, final EntityCreator<T, GetResponse, GetResponse> creator) {
         return get(index, type, id, condition, (queryBuilder, execTime, getResponse) -> {
             return getResponse.map(response -> {
@@ -562,7 +562,15 @@ public class FessEsClient implements Client {
     public List<Map<String, Object>> getDocumentList(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
         return getDocumentList(index, type, condition, (response, hit) -> {
-            return hit.getSource();
+            final Map<String, Object> source = hit.getSource();
+            if (source != null) {
+                return source;
+            }
+            final Map<String, SearchHitField> fields = hit.getFields();
+            if (fields != null) {
+                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+            }
+            return null;
         });
     }
 
@@ -875,7 +883,7 @@ public class FessEsClient implements Client {
     }
 
     public interface SearchResult<T, B, R> {
-        T build(B requestBuilder, long execTime, Optional<R> response);
+        T build(B requestBuilder, long execTime, OptionalEntity<R> response);
     }
 
     public interface EntityCreator<T, R, H> {

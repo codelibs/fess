@@ -18,11 +18,15 @@ package org.codelibs.fess.api.json;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,18 +35,28 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.api.WebApiRequest;
-import org.codelibs.fess.api.WebApiResponse;
+import org.codelibs.fess.app.service.FavoriteLogService;
+import org.codelibs.fess.app.service.SearchService;
+import org.codelibs.fess.entity.FacetInfo;
+import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
+import org.codelibs.fess.entity.SearchRenderData;
+import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
+import org.codelibs.fess.helper.FieldHelper;
+import org.codelibs.fess.helper.HotSearchWordHelper;
+import org.codelibs.fess.helper.HotSearchWordHelper.Range;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
-import org.codelibs.fess.util.MoreLikeThisResponse;
-import org.codelibs.fess.util.WebApiUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +64,9 @@ import org.slf4j.LoggerFactory;
 public class JsonApiManager extends BaseApiManager {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
+
+    @Resource
+    protected DynamicProperties crawlerProperties;
 
     public JsonApiManager() {
         setPathPrefix("/json");
@@ -75,9 +92,6 @@ public class JsonApiManager extends BaseApiManager {
             break;
         case LABEL:
             processLabelRequest(request, response, chain);
-            break;
-        case SUGGEST:
-            processSuggestRequest(request, response, chain);
             break;
         case HOTSEARCHWORD:
             processHotSearchWordRequest(request, response, chain);
@@ -119,26 +133,26 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         String query = null;
         final StringBuilder buf = new StringBuilder(1000);
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-        final String queryId = request.getParameter("queryId");
         try {
-            chain.doFilter(new WebApiRequest(request, SEARCH_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            query = WebApiUtil.getObject("searchQuery");
-            final String execTime = WebApiUtil.getObject("execTime");
-            final String queryTime = WebApiUtil.getObject("queryTime");
-            final String searchTime = WebApiUtil.getObject("searchTime");
-            final String pageSize = WebApiUtil.getObject("pageSize");
-            final String currentPageNumber = WebApiUtil.getObject("currentPageNumber");
-            final String allRecordCount = WebApiUtil.getObject("allRecordCount");
-            final String allPageCount = WebApiUtil.getObject("allPageCount");
-            final List<Map<String, Object>> documentItems = WebApiUtil.getObject("documentItems");
-            final FacetResponse facetResponse = WebApiUtil.getObject("facetResponse");
-            final MoreLikeThisResponse moreLikeThisResponse = WebApiUtil.getObject("moreLikeThisResponse");
+            final SearchRenderData data = new SearchRenderData();
+            final SearchApiRequestParams params = new SearchApiRequestParams(request);
+            searchService.search(request, params, data);
+            query = params.getQuery();
+            final String execTime = data.getExecTime();
+            final String queryTime = Long.toString(data.getQueryTime());
+            final String pageSize = Integer.toString(data.getPageSize());
+            final String currentPageNumber = Integer.toString(data.getCurrentPageNumber());
+            final String allRecordCount = Long.toString(data.getAllRecordCount());
+            final String allPageCount = Integer.toString(data.getAllPageCount());
+            final List<Map<String, Object>> documentItems = data.getDocumentItems();
+            final FacetResponse facetResponse = data.getFacetResponse();
 
             buf.append("\"query\":");
             buf.append(escapeJson(query));
@@ -146,14 +160,7 @@ public class JsonApiManager extends BaseApiManager {
             buf.append(execTime);
             buf.append(",\"queryTime\":");
             buf.append(queryTime);
-            buf.append(",\"searchTime\":");
-            buf.append(searchTime);
             buf.append(',');
-            if (StringUtil.isNotBlank(queryId)) {
-                buf.append("\"queryId\":");
-                buf.append(escapeJson(queryId));
-                buf.append(',');
-            }
             buf.append("\"pageSize\":");
             buf.append(pageSize);
             buf.append(',');
@@ -248,46 +255,6 @@ public class JsonApiManager extends BaseApiManager {
                     buf.append(']');
                 }
             }
-            if (moreLikeThisResponse != null && !moreLikeThisResponse.isEmpty()) {
-                buf.append(',');
-                buf.append("\"moreLikeThis\":[");
-                boolean first = true;
-                for (final Map.Entry<String, List<Map<String, Object>>> mltEntry : moreLikeThisResponse.entrySet()) {
-                    if (!first) {
-                        buf.append(',');
-                    } else {
-                        first = false;
-                    }
-                    buf.append("{\"id\":");
-                    buf.append(escapeJson(mltEntry.getKey()));
-                    buf.append(",\"result\":[");
-                    boolean first1 = true;
-                    for (final Map<String, Object> document : mltEntry.getValue()) {
-                        if (!first1) {
-                            buf.append(',');
-                        } else {
-                            first1 = false;
-                        }
-                        buf.append('{');
-                        boolean first2 = true;
-                        for (final Map.Entry<String, Object> entry : document.entrySet()) {
-                            if (StringUtil.isNotBlank(entry.getKey()) && entry.getValue() != null) {
-                                if (!first2) {
-                                    buf.append(',');
-                                } else {
-                                    first2 = false;
-                                }
-                                buf.append(escapeJson(entry.getKey()));
-                                buf.append(':');
-                                buf.append(escapeJson(entry.getValue()));
-                            }
-                        }
-                        buf.append('}');
-                    }
-                    buf.append("]}");
-                }
-                buf.append(']');
-            }
         } catch (final Exception e) {
             status = 1;
             errMsg = e.getMessage();
@@ -304,11 +271,13 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
+
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<Map<String, String>> labelTypeItems = ComponentUtil.getLabelTypeHelper().getLabelTypeItemList();
+            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
             buf.append("\"recordCount\":");
             buf.append(labelTypeItems.size());
             if (!labelTypeItems.isEmpty()) {
@@ -341,91 +310,20 @@ public class JsonApiManager extends BaseApiManager {
 
     }
 
-    protected void processSuggestRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        // TODO
-        //        int status = 0;
-        //        String errMsg = StringUtil.EMPTY;
-        //        final StringBuilder buf = new StringBuilder(255);
-        //        try {
-        //            chain.doFilter(new WebApiRequest(request, SUGGEST_API), new WebApiResponse(response));
-        //            WebApiUtil.validate();
-        //            final Integer suggestRecordCount = WebApiUtil.getObject("suggestRecordCount");
-        //            final List<SuggestResponse> suggestResultList = WebApiUtil.getObject("suggestResultList");
-        //            final List<String> suggestFieldName = WebApiUtil.getObject("suggestFieldName");
-        //
-        //            buf.append("\"recordCount\":");
-        //            buf.append(suggestRecordCount);
-        //
-        //            if (suggestResultList.size() > 0) {
-        //                buf.append(',');
-        //                buf.append("\"result\":[");
-        //                boolean first1 = true;
-        //                for (int i = 0; i < suggestResultList.size(); i++) {
-        //
-        //                    final SuggestResponse suggestResponse = suggestResultList.get(i);
-        //
-        //                    for (final Map.Entry<String, List<String>> entry : suggestResponse.entrySet()) {
-        //                        final String fn = suggestFieldName.get(i);
-        //                        if (!first1) {
-        //                            buf.append(',');
-        //                        } else {
-        //                            first1 = false;
-        //                        }
-        //
-        //                        final SuggestResponseList srList = (SuggestResponseList) entry.getValue();
-        //
-        //                        buf.append("{\"token\":");
-        //                        buf.append(escapeJson(entry.getKey()));
-        //                        buf.append(", \"fn\":");
-        //                        buf.append(escapeJson(fn));
-        //                        buf.append(", \"startOffset\":");
-        //                        buf.append(Integer.toString(srList.getStartOffset()));
-        //                        buf.append(", \"endOffset\":");
-        //                        buf.append(Integer.toString(srList.getEndOffset()));
-        //                        buf.append(", \"numFound\":");
-        //                        buf.append(Integer.toString(srList.getNumFound()));
-        //                        buf.append(", ");
-        //                        buf.append("\"result\":[");
-        //                        boolean first2 = true;
-        //                        for (final String value : srList) {
-        //                            if (!first2) {
-        //                                buf.append(',');
-        //                            } else {
-        //                                first2 = false;
-        //                            }
-        //                            buf.append(escapeJson(value));
-        //                        }
-        //                        buf.append("]}");
-        //                    }
-        //
-        //                }
-        //                buf.append(']');
-        //            }
-        //        } catch (final Exception e) {
-        //            if (e instanceof WebApiException) {
-        //                status = ((WebApiException) e).getStatusCode();
-        //            } else {
-        //                status = 1;
-        //            }
-        //            errMsg = e.getMessage();
-        //            if (logger.isDebugEnabled()) {
-        //                logger.debug("Failed to process a suggest request.", e);
-        //            }
-        //        }
-        //
-        //        writeJsonResponse(status, buf.toString(), errMsg);
-
-    }
-
     protected void processHotSearchWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
+            writeJsonResponse(9, null, "Unsupported operation.");
+            return;
+        }
+
+        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            chain.doFilter(new WebApiRequest(request, HOT_SEARCH_WORD_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final List<String> hotSearchWordList = WebApiUtil.getObject("hotSearchWordList");
+            final List<String> hotSearchWordList =
+                    hotSearchWordHelper.getHotSearchWordList(Range.parseRange(request.getParameter("range")));
 
             buf.append("\"result\":[");
             boolean first1 = true;
@@ -455,39 +353,128 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        int status = 0;
-        String body = null;
-        String errMsg = null;
-        try {
-            chain.doFilter(new WebApiRequest(request, FAVORITE_API), new WebApiResponse(response));
-            WebApiUtil.validate();
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+            writeJsonResponse(9, null, "Unsupported operation.");
+            return;
+        }
 
-            body = "\"result\":\"ok\"";
+        final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
+
+        try {
+            final String docId = request.getParameter("docId");
+            final String queryId = request.getParameter("queryId");
+
+            final String[] docIds = userInfoHelper.getResultDocIds(URLDecoder.decode(queryId, Constants.UTF_8));
+            if (docIds == null) {
+                throw new WebApiException(6, "No searched urls.");
+            }
+
+            searchService
+                    .getDocumentByDocId(docId, new String[] { fieldHelper.idField, fieldHelper.urlField, fieldHelper.favoriteCountField })
+                    .ifPresent(doc -> {
+                        final String favoriteUrl = doc == null ? null : DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                        final String userCode = userInfoHelper.getUserCode();
+
+                        if (StringUtil.isBlank(userCode)) {
+                            throw new WebApiException(2, "No user session.");
+                        } else if (StringUtil.isBlank(favoriteUrl)) {
+                            throw new WebApiException(2, "URL is null.");
+                        }
+
+                        boolean found = false;
+                        for (final String id : docIds) {
+                            if (docId.equals(id)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            throw new WebApiException(5, "Not found: " + favoriteUrl);
+                        }
+
+                        if (!favoriteLogService.addUrl(userCode, favoriteUrl)) {
+                            throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
+                        }
+
+                        final String id = DocumentUtil.getValue(doc, fieldHelper.idField, String.class);
+                        final Long count = DocumentUtil.getValue(doc, fieldHelper.favoriteCountField, Long.class);
+                        if (count != null) {
+                            searchService.update(id, fieldHelper.favoriteCountField, count.longValue() + 1);
+                        } else {
+                            throw new WebApiException(7, "Failed to update count: " + favoriteUrl);
+                        }
+
+                        writeJsonResponse(0, "\"result\":\"ok\"", null);
+
+                    }).orElse(() -> {
+                        throw new WebApiException(6, "Not found: " + docId);
+                    });
 
         } catch (final Exception e) {
+            int status;
             if (e instanceof WebApiException) {
                 status = ((WebApiException) e).getStatusCode();
             } else {
                 status = 1;
             }
-            errMsg = e.getMessage();
+            writeJsonResponse(status, null, e.getMessage());
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a favorite request.", e);
             }
         }
 
-        writeJsonResponse(status, body, errMsg);
     }
 
     protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+            writeJsonResponse(9, null, "Unsupported operation.");
+            return;
+        }
+
+        final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
+        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
+
         int status = 0;
         String body = null;
         String errMsg = null;
 
         try {
-            chain.doFilter(new WebApiRequest(request, FAVORITES_API), new WebApiResponse(response));
-            WebApiUtil.validate();
-            final List<String> docIdList = WebApiUtil.getObject("docIdList");
+            final String queryId = request.getParameter("queryId");
+            final String userCode = userInfoHelper.getUserCode();
+
+            if (StringUtil.isBlank(userCode)) {
+                throw new WebApiException(2, "No user session.");
+            } else if (StringUtil.isBlank(queryId)) {
+                throw new WebApiException(3, "Query ID is null.");
+            }
+
+            final String[] docIds = userInfoHelper.getResultDocIds(queryId);
+            final List<Map<String, Object>> docList =
+                    searchService.getDocumentListByDocIds(docIds, new String[] { fieldHelper.urlField, fieldHelper.docIdField,
+                            fieldHelper.favoriteCountField });
+            List<String> urlList = new ArrayList<>(docList.size());
+            for (final Map<String, Object> doc : docList) {
+                final String urlObj = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                if (urlObj != null) {
+                    urlList.add(urlObj.toString());
+                }
+            }
+            urlList = favoriteLogService.getUrlList(userCode, urlList);
+            final List<String> docIdList = new ArrayList<>(urlList.size());
+            for (final Map<String, Object> doc : docList) {
+                final String urlObj = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                if (urlObj != null && urlList.contains(urlObj)) {
+                    final String docIdObj = DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class);
+                    if (docIdObj != null) {
+                        docIdList.add(docIdObj);
+                    }
+                }
+            }
 
             final StringBuilder buf = new StringBuilder();
             buf.append("\"num\":").append(docIdList.size());
@@ -671,4 +658,103 @@ public class JsonApiManager extends BaseApiManager {
         return Integer.toHexString(ch).toUpperCase();
     }
 
+    protected static class SearchApiRequestParams implements SearchRequestParams {
+
+        private final HttpServletRequest request;
+
+        private int startPosition = -1;
+
+        private int pageSize = -1;
+
+        protected SearchApiRequestParams(final HttpServletRequest request) {
+            this.request = request;
+        }
+
+        @Override
+        public String getQuery() {
+            return request.getParameter("query");
+        }
+
+        @Override
+        public String getOperator() {
+            return request.getParameter("op");
+        }
+
+        @Override
+        public String[] getAdditional() {
+            return request.getParameterValues("additional");
+        }
+
+        @Override
+        public Map<String, String[]> getFields() {
+            // TODO Auto-generated method stub
+            return new HashMap<>();
+        }
+
+        @Override
+        public String[] getLanguages() {
+            return request.getParameterValues("lang");
+        }
+
+        @Override
+        public GeoInfo getGeoInfo() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public FacetInfo getFacetInfo() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getSort() {
+            return request.getParameter("sort");
+        }
+
+        @Override
+        public int getStartPosition() {
+            if (startPosition != -1) {
+                return startPosition;
+            }
+
+            final String start = request.getParameter("start");
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            if (StringUtil.isBlank(start)) {
+                startPosition = queryHelper.getDefaultStart();
+            } else {
+                try {
+                    startPosition = Integer.parseInt(start);
+                } catch (final NumberFormatException e) {
+                    startPosition = queryHelper.getDefaultStart();
+                }
+            }
+            return startPosition;
+        }
+
+        @Override
+        public int getPageSize() {
+            if (pageSize != -1) {
+                return pageSize;
+            }
+
+            final String num = request.getParameter("num");
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            if (StringUtil.isBlank(num)) {
+                pageSize = queryHelper.getDefaultPageSize();
+            } else {
+                try {
+                    pageSize = Integer.parseInt(num);
+                    if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
+                        pageSize = queryHelper.getMaxPageSize();
+                    }
+                } catch (final NumberFormatException e) {
+                    pageSize = queryHelper.getDefaultPageSize();
+                }
+            }
+            return pageSize;
+        }
+
+    }
 }

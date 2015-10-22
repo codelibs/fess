@@ -77,5 +77,23 @@ public class HotSearchWordHelper {
         public long getTime() {
             return time;
         }
+
+        public static Range parseRange(final String value) {
+            Range range;
+            if (value == null) {
+                range = Range.ENTIRE;
+            } else if ("day".equals(value) || "1".equals(value)) {
+                range = Range.ONE_DAY;
+            } else if ("week".equals(value) || "7".equals(value)) {
+                range = Range.ONE_DAY;
+            } else if ("month".equals(value) || "30".equals(value)) {
+                range = Range.ONE_DAY;
+            } else if ("year".equals(value) || "365".equals(value)) {
+                range = Range.ONE_DAY;
+            } else {
+                range = Range.ENTIRE;
+            }
+            return range;
+        }
     }
 }

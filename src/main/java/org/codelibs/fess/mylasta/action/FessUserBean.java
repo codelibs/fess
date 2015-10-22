@@ -30,7 +30,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                          ==========
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
-    private User user;
+    private final User user;
 
     // ===================================================================================
     //                                                                           Attribute
@@ -62,19 +62,19 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
         return user.getGroups();
     }
 
-    public boolean hasRole(String role) {
+    public boolean hasRole(final String role) {
         return Stream.of(user.getRoleNames()).anyMatch(s -> s.equals(role));
     }
 
-    public boolean hasRoles(String[] acceptedRoles) {
+    public boolean hasRoles(final String[] acceptedRoles) {
         return Stream.of(user.getRoleNames()).anyMatch(s1 -> Stream.of(acceptedRoles).anyMatch(s2 -> s2.equals(s1)));
     }
 
-    public boolean hasGroup(String group) {
+    public boolean hasGroup(final String group) {
         return Stream.of(user.getGroupNames()).anyMatch(s -> s.equals(group));
     }
 
-    public boolean hasGroups(String[] acceptedGroups) {
+    public boolean hasGroups(final String[] acceptedGroups) {
         return Stream.of(user.getGroupNames()).anyMatch(s1 -> Stream.of(acceptedGroups).anyMatch(s2 -> s2.equals(s1)));
     }
 }

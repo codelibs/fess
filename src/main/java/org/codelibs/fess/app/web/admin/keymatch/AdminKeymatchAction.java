@@ -163,7 +163,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        String id = form.id;
+        final String id = form.id;
         keyMatchService.getKeyMatch(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
@@ -195,7 +195,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         validate(form, messages -> {}, toEditHtml());
-        String id = form.id;
+        final String id = form.id;
         keyMatchService.getKeyMatch(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
@@ -279,7 +279,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DELETE);
         validate(form, messages -> {}, toEditHtml());
-        String id = form.id;
+        final String id = form.id;
         keyMatchService.getKeyMatch(id).ifPresent(entity -> {
             keyMatchService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
@@ -300,7 +300,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                KeyMatch entity = new KeyMatch();
+                final KeyMatch entity = new KeyMatch();
                 entity.setCreatedBy(username);
                 entity.setCreatedTime(currentTime);
                 entity.setUpdatedBy(username);

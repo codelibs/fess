@@ -44,7 +44,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
 
     List<SynonymItem> synonymItemList;
 
-    public SynonymFile(String id, String path, Date timestamp) {
+    public SynonymFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
 
@@ -114,7 +114,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
     }
 
-    protected void reload(final SynonymUpdater updater, InputStream in) {
+    protected void reload(final SynonymUpdater updater, final InputStream in) {
         final List<SynonymItem> itemList = new ArrayList<SynonymItem>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
@@ -186,7 +186,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                 }
             }
             if (updater != null) {
-                SynonymItem item = updater.commit();
+                final SynonymItem item = updater.commit();
                 if (item != null) {
                     itemList.add(item);
                 }

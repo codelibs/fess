@@ -45,7 +45,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
 
     List<KuromojiItem> kuromojiItemList;
 
-    public KuromojiFile(String id, String path, Date timestamp) {
+    public KuromojiFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
 
@@ -114,7 +114,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         }
     }
 
-    protected void reload(final KuromojiUpdater updater, InputStream in) {
+    protected void reload(final KuromojiUpdater updater, final InputStream in) {
         final List<KuromojiItem> itemList = new ArrayList<KuromojiItem>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
@@ -164,7 +164,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
                 }
             }
             if (updater != null) {
-                KuromojiItem item = updater.commit();
+                final KuromojiItem item = updater.commit();
                 if (item != null) {
                     itemList.add(item);
                 }

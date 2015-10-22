@@ -69,7 +69,7 @@
 								<a href="#${doc.doc_id}" class="favorite"><la:message
 										key="labels.search_result_favorite" /> (${f:h(doc.favorite_count)})</a>
 								<span class="favorited"><la:message
-										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favoriteCount_l_x_dv)})</span></span>
+										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favorite_count)})</span></span>
 							</c:if>
 						</div>
 					</div>
