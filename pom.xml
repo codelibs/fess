@@ -66,7 +66,7 @@
 		<cluster.runner.version>1.7.0.1-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.3.7</tomcat.boot.version>
+		<tomcat.boot.version>0.3.8-RC6</tomcat.boot.version>
 
 		<!-- Maven Repository -->
 		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
