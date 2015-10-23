@@ -638,7 +638,6 @@
 			<groupId>org.dbflute.tomcat</groupId>
 			<artifactId>tomcat-boot</artifactId>
 			<version>${tomcat.boot.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- test -->
