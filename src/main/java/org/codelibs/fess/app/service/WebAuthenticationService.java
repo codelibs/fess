@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.exentity.WebAuthentication;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class WebAuthenticationService implements Serializable {
 
@@ -57,17 +58,8 @@ public class WebAuthenticationService implements Serializable {
         return webAuthenticationList;
     }
 
-    public WebAuthentication getWebAuthentication(final Map<String, String> keys) {
-        final WebAuthentication webAuthentication = webAuthenticationBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (webAuthentication == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return webAuthentication;
+    public OptionalEntity<WebAuthentication> getWebAuthentication(final String id) {
+        return webAuthenticationBhv.selectByPK(id);
     }
 
     public void store(final WebAuthentication webAuthentication) {
