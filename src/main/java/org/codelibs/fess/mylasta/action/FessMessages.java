@@ -11,10 +11,10 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
-    /** The key of the message: <font color="red"><ul> */
+    /** The key of the message: <ul> */
     public static final String ERRORS_HEADER = "{errors.header}";
 
-    /** The key of the message: </ul></font> */
+    /** The key of the message: </ul> */
     public static final String ERRORS_FOOTER = "{errors.footer}";
 
     /** The key of the message: <li> */
@@ -429,7 +429,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.header' with parameters.
      * <pre>
-     * message: <font color="red"><ul>
+     * message: <ul>
      * comment: ------------
      * </pre>
      * @param property The property name for the message. (NotNull)
@@ -444,7 +444,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.footer' with parameters.
      * <pre>
-     * message: </ul></font>
+     * message: </ul>
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)

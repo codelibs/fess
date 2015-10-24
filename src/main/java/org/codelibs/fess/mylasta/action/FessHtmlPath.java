@@ -14,17 +14,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/boostdocumentrule/edit.jsp */
     HtmlNext path_AdminBoostdocumentrule_EditJsp = new HtmlNext("/admin/boostdocumentrule/edit.jsp");
 
-    /** The path of the HTML: /admin/boostdocumentrule/error.jsp */
-    HtmlNext path_AdminBoostdocumentrule_ErrorJsp = new HtmlNext("/admin/boostdocumentrule/error.jsp");
-
     /** The path of the HTML: /admin/boostdocumentrule/index.jsp */
     HtmlNext path_AdminBoostdocumentrule_IndexJsp = new HtmlNext("/admin/boostdocumentrule/index.jsp");
 
     /** The path of the HTML: /admin/crawlingsession/confirm.jsp */
     HtmlNext path_AdminCrawlingsession_ConfirmJsp = new HtmlNext("/admin/crawlingsession/confirm.jsp");
-
-    /** The path of the HTML: /admin/crawlingsession/error.jsp */
-    HtmlNext path_AdminCrawlingsession_ErrorJsp = new HtmlNext("/admin/crawlingsession/error.jsp");
 
     /** The path of the HTML: /admin/crawlingsession/index.jsp */
     HtmlNext path_AdminCrawlingsession_IndexJsp = new HtmlNext("/admin/crawlingsession/index.jsp");
@@ -38,9 +32,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dataconfig/edit.jsp */
     HtmlNext path_AdminDataconfig_EditJsp = new HtmlNext("/admin/dataconfig/edit.jsp");
 
-    /** The path of the HTML: /admin/dataconfig/error.jsp */
-    HtmlNext path_AdminDataconfig_ErrorJsp = new HtmlNext("/admin/dataconfig/error.jsp");
-
     /** The path of the HTML: /admin/dataconfig/index.jsp */
     HtmlNext path_AdminDataconfig_IndexJsp = new HtmlNext("/admin/dataconfig/index.jsp");
 
@@ -49,9 +40,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/design/admin_design_edit.jsp */
     HtmlNext path_AdminDesign_AdminDesignEditJsp = new HtmlNext("/admin/design/admin_design_edit.jsp");
-
-    /** The path of the HTML: /admin/dict/error.jsp */
-    HtmlNext path_AdminDict_ErrorJsp = new HtmlNext("/admin/dict/error.jsp");
 
     /** The path of the HTML: /admin/dict/index.jsp */
     HtmlNext path_AdminDict_IndexJsp = new HtmlNext("/admin/dict/index.jsp");
@@ -92,11 +80,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/synonym/upload.jsp */
     HtmlNext path_AdminDictSynonym_UploadJsp = new HtmlNext("/admin/dict/synonym/upload.jsp");
 
+    /** The path of the HTML: /admin/error/error.jsp */
+    HtmlNext path_AdminError_ErrorJsp = new HtmlNext("/admin/error/error.jsp");
+
     /** The path of the HTML: /admin/failureurl/confirm.jsp */
     HtmlNext path_AdminFailureurl_ConfirmJsp = new HtmlNext("/admin/failureurl/confirm.jsp");
-
-    /** The path of the HTML: /admin/failureurl/error.jsp */
-    HtmlNext path_AdminFailureurl_ErrorJsp = new HtmlNext("/admin/failureurl/error.jsp");
 
     /** The path of the HTML: /admin/failureurl/index.jsp */
     HtmlNext path_AdminFailureurl_IndexJsp = new HtmlNext("/admin/failureurl/index.jsp");
@@ -107,9 +95,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/fileauthentication/edit.jsp */
     HtmlNext path_AdminFileauthentication_EditJsp = new HtmlNext("/admin/fileauthentication/edit.jsp");
 
-    /** The path of the HTML: /admin/fileauthentication/error.jsp */
-    HtmlNext path_AdminFileauthentication_ErrorJsp = new HtmlNext("/admin/fileauthentication/error.jsp");
-
     /** The path of the HTML: /admin/fileauthentication/index.jsp */
     HtmlNext path_AdminFileauthentication_IndexJsp = new HtmlNext("/admin/fileauthentication/index.jsp");
 
@@ -118,9 +103,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/fileconfig/edit.jsp */
     HtmlNext path_AdminFileconfig_EditJsp = new HtmlNext("/admin/fileconfig/edit.jsp");
-
-    /** The path of the HTML: /admin/fileconfig/error.jsp */
-    HtmlNext path_AdminFileconfig_ErrorJsp = new HtmlNext("/admin/fileconfig/error.jsp");
 
     /** The path of the HTML: /admin/fileconfig/index.jsp */
     HtmlNext path_AdminFileconfig_IndexJsp = new HtmlNext("/admin/fileconfig/index.jsp");
@@ -134,17 +116,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/group/edit.jsp */
     HtmlNext path_AdminGroup_EditJsp = new HtmlNext("/admin/group/edit.jsp");
 
-    /** The path of the HTML: /admin/group/error.jsp */
-    HtmlNext path_AdminGroup_ErrorJsp = new HtmlNext("/admin/group/error.jsp");
-
     /** The path of the HTML: /admin/group/index.jsp */
     HtmlNext path_AdminGroup_IndexJsp = new HtmlNext("/admin/group/index.jsp");
 
     /** The path of the HTML: /admin/joblog/confirm.jsp */
     HtmlNext path_AdminJoblog_ConfirmJsp = new HtmlNext("/admin/joblog/confirm.jsp");
-
-    /** The path of the HTML: /admin/joblog/error.jsp */
-    HtmlNext path_AdminJoblog_ErrorJsp = new HtmlNext("/admin/joblog/error.jsp");
 
     /** The path of the HTML: /admin/joblog/index.jsp */
     HtmlNext path_AdminJoblog_IndexJsp = new HtmlNext("/admin/joblog/index.jsp");
@@ -155,9 +131,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/keymatch/edit.jsp */
     HtmlNext path_AdminKeymatch_EditJsp = new HtmlNext("/admin/keymatch/edit.jsp");
 
-    /** The path of the HTML: /admin/keymatch/error.jsp */
-    HtmlNext path_AdminKeymatch_ErrorJsp = new HtmlNext("/admin/keymatch/error.jsp");
-
     /** The path of the HTML: /admin/keymatch/index.jsp */
     HtmlNext path_AdminKeymatch_IndexJsp = new HtmlNext("/admin/keymatch/index.jsp");
 
@@ -166,9 +139,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/labeltype/edit.jsp */
     HtmlNext path_AdminLabeltype_EditJsp = new HtmlNext("/admin/labeltype/edit.jsp");
-
-    /** The path of the HTML: /admin/labeltype/error.jsp */
-    HtmlNext path_AdminLabeltype_ErrorJsp = new HtmlNext("/admin/labeltype/error.jsp");
 
     /** The path of the HTML: /admin/labeltype/index.jsp */
     HtmlNext path_AdminLabeltype_IndexJsp = new HtmlNext("/admin/labeltype/index.jsp");
@@ -182,9 +152,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/overlappinghost/edit.jsp */
     HtmlNext path_AdminOverlappinghost_EditJsp = new HtmlNext("/admin/overlappinghost/edit.jsp");
 
-    /** The path of the HTML: /admin/overlappinghost/error.jsp */
-    HtmlNext path_AdminOverlappinghost_ErrorJsp = new HtmlNext("/admin/overlappinghost/error.jsp");
-
     /** The path of the HTML: /admin/overlappinghost/index.jsp */
     HtmlNext path_AdminOverlappinghost_IndexJsp = new HtmlNext("/admin/overlappinghost/index.jsp");
 
@@ -193,9 +160,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/pathmapping/edit.jsp */
     HtmlNext path_AdminPathmapping_EditJsp = new HtmlNext("/admin/pathmapping/edit.jsp");
-
-    /** The path of the HTML: /admin/pathmapping/error.jsp */
-    HtmlNext path_AdminPathmapping_ErrorJsp = new HtmlNext("/admin/pathmapping/error.jsp");
 
     /** The path of the HTML: /admin/pathmapping/index.jsp */
     HtmlNext path_AdminPathmapping_IndexJsp = new HtmlNext("/admin/pathmapping/index.jsp");
@@ -206,9 +170,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/requestheader/edit.jsp */
     HtmlNext path_AdminRequestheader_EditJsp = new HtmlNext("/admin/requestheader/edit.jsp");
 
-    /** The path of the HTML: /admin/requestheader/error.jsp */
-    HtmlNext path_AdminRequestheader_ErrorJsp = new HtmlNext("/admin/requestheader/error.jsp");
-
     /** The path of the HTML: /admin/requestheader/index.jsp */
     HtmlNext path_AdminRequestheader_IndexJsp = new HtmlNext("/admin/requestheader/index.jsp");
 
@@ -217,9 +178,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/role/edit.jsp */
     HtmlNext path_AdminRole_EditJsp = new HtmlNext("/admin/role/edit.jsp");
-
-    /** The path of the HTML: /admin/role/error.jsp */
-    HtmlNext path_AdminRole_ErrorJsp = new HtmlNext("/admin/role/error.jsp");
 
     /** The path of the HTML: /admin/role/index.jsp */
     HtmlNext path_AdminRole_IndexJsp = new HtmlNext("/admin/role/index.jsp");
@@ -230,9 +188,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/roletype/edit.jsp */
     HtmlNext path_AdminRoletype_EditJsp = new HtmlNext("/admin/roletype/edit.jsp");
 
-    /** The path of the HTML: /admin/roletype/error.jsp */
-    HtmlNext path_AdminRoletype_ErrorJsp = new HtmlNext("/admin/roletype/error.jsp");
-
     /** The path of the HTML: /admin/roletype/index.jsp */
     HtmlNext path_AdminRoletype_IndexJsp = new HtmlNext("/admin/roletype/index.jsp");
 
@@ -241,9 +196,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/scheduledjob/edit.jsp */
     HtmlNext path_AdminScheduledjob_EditJsp = new HtmlNext("/admin/scheduledjob/edit.jsp");
-
-    /** The path of the HTML: /admin/scheduledjob/error.jsp */
-    HtmlNext path_AdminScheduledjob_ErrorJsp = new HtmlNext("/admin/scheduledjob/error.jsp");
 
     /** The path of the HTML: /admin/scheduledjob/index.jsp */
     HtmlNext path_AdminScheduledjob_IndexJsp = new HtmlNext("/admin/scheduledjob/index.jsp");
@@ -263,9 +215,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/suggestbadword/edit.jsp */
     HtmlNext path_AdminSuggestbadword_EditJsp = new HtmlNext("/admin/suggestbadword/edit.jsp");
 
-    /** The path of the HTML: /admin/suggestbadword/error.jsp */
-    HtmlNext path_AdminSuggestbadword_ErrorJsp = new HtmlNext("/admin/suggestbadword/error.jsp");
-
     /** The path of the HTML: /admin/suggestbadword/index.jsp */
     HtmlNext path_AdminSuggestbadword_IndexJsp = new HtmlNext("/admin/suggestbadword/index.jsp");
 
@@ -280,9 +229,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/suggestelevateword/edit.jsp */
     HtmlNext path_AdminSuggestelevateword_EditJsp = new HtmlNext("/admin/suggestelevateword/edit.jsp");
-
-    /** The path of the HTML: /admin/suggestelevateword/error.jsp */
-    HtmlNext path_AdminSuggestelevateword_ErrorJsp = new HtmlNext("/admin/suggestelevateword/error.jsp");
 
     /** The path of the HTML: /admin/suggestelevateword/index.jsp */
     HtmlNext path_AdminSuggestelevateword_IndexJsp = new HtmlNext("/admin/suggestelevateword/index.jsp");
@@ -302,9 +248,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/user/edit.jsp */
     HtmlNext path_AdminUser_EditJsp = new HtmlNext("/admin/user/edit.jsp");
 
-    /** The path of the HTML: /admin/user/error.jsp */
-    HtmlNext path_AdminUser_ErrorJsp = new HtmlNext("/admin/user/error.jsp");
-
     /** The path of the HTML: /admin/user/index.jsp */
     HtmlNext path_AdminUser_IndexJsp = new HtmlNext("/admin/user/index.jsp");
 
@@ -313,9 +256,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/webauthentication/edit.jsp */
     HtmlNext path_AdminWebauthentication_EditJsp = new HtmlNext("/admin/webauthentication/edit.jsp");
-
-    /** The path of the HTML: /admin/webauthentication/error.jsp */
-    HtmlNext path_AdminWebauthentication_ErrorJsp = new HtmlNext("/admin/webauthentication/error.jsp");
 
     /** The path of the HTML: /admin/webauthentication/index.jsp */
     HtmlNext path_AdminWebauthentication_IndexJsp = new HtmlNext("/admin/webauthentication/index.jsp");
@@ -326,17 +266,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/webconfig/edit.jsp */
     HtmlNext path_AdminWebconfig_EditJsp = new HtmlNext("/admin/webconfig/edit.jsp");
 
-    /** The path of the HTML: /admin/webconfig/error.jsp */
-    HtmlNext path_AdminWebconfig_ErrorJsp = new HtmlNext("/admin/webconfig/error.jsp");
-
     /** The path of the HTML: /admin/webconfig/index.jsp */
     HtmlNext path_AdminWebconfig_IndexJsp = new HtmlNext("/admin/webconfig/index.jsp");
 
     /** The path of the HTML: /admin/wizard/crawlingConfig.jsp */
     HtmlNext path_AdminWizard_CrawlingConfigJsp = new HtmlNext("/admin/wizard/crawlingConfig.jsp");
-
-    /** The path of the HTML: /admin/wizard/error.jsp */
-    HtmlNext path_AdminWizard_ErrorJsp = new HtmlNext("/admin/wizard/error.jsp");
 
     /** The path of the HTML: /admin/wizard/index.jsp */
     HtmlNext path_AdminWizard_IndexJsp = new HtmlNext("/admin/wizard/index.jsp");

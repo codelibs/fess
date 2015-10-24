@@ -44,6 +44,8 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.callback.TypicalEmbeddedKeySupplier;
+import org.lastaflute.web.callback.TypicalKey.TypicalSimpleEmbeddedKeySupplier;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -92,6 +94,18 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     protected boolean favoriteSupport;
 
+    // ===================================================================================
+    //                                                                            Override
+    //                                                                           =========
+    @Override
+    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
+        return new TypicalSimpleEmbeddedKeySupplier() {
+            public String getErrorMessageForwardPath() {
+                return "/error/system.jsp";
+            }
+        };
+    }
+
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
         searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
@@ -132,6 +146,9 @@ public abstract class FessSearchAction extends FessBaseAction {
         }
     }
 
+    // ===================================================================================
+    //                                                                             Helpers
+    //                                                                           =========
     protected void searchAvailable() {
         final String supportedSearch =
                 crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);

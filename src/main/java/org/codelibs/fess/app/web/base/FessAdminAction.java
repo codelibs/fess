@@ -24,6 +24,8 @@ import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.callback.TypicalEmbeddedKeySupplier;
+import org.lastaflute.web.callback.TypicalKey.TypicalSimpleEmbeddedKeySupplier;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaMessenger;
@@ -90,5 +92,17 @@ public abstract class FessAdminAction extends FessBaseAction {
     @Override
     protected OptionalThing<LoginManager> myLoginManager() {
         return OptionalThing.of(fessLoginAssist);
+    }
+
+    // ===================================================================================
+    //                                                                            Override
+    //                                                                           =========
+    @Override
+    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
+        return new TypicalSimpleEmbeddedKeySupplier() {
+            public String getErrorMessageForwardPath() {
+                return "/admin/error/error.jsp";
+            }
+        };
     }
 }
