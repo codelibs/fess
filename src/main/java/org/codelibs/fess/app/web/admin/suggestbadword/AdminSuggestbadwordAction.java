@@ -36,7 +36,6 @@ import org.apache.commons.io.IOUtils;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.SuggestBadWordPager;
 import org.codelibs.fess.app.service.SuggestBadWordService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -48,6 +47,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
@@ -130,16 +130,14 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage(final SuggestBadWordEditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -148,22 +146,19 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final SuggestBadWordEditForm form) {
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final SuggestBadWordEditForm form) {
         form.crudMode = CrudMode.EDIT;
         loadSuggestBadWord(form);
         return asHtml(path_AdminSuggestbadword_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final SuggestBadWordEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -172,8 +167,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final SuggestBadWordEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadSuggestBadWord(form);
@@ -192,15 +186,13 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminSuggestbadword_ConfirmJsp);
@@ -209,14 +201,12 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse downloadpage(final SuggestBadWordSearchForm form) {
         return asHtml(path_AdminSuggestbadword_DownloadJsp);
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse download(final SuggestBadWordSearchForm form) {
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
@@ -234,8 +224,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse uploadpage(final SuggestBadWordUploadForm form) {
         return asHtml(path_AdminSuggestbadword_UploadJsp);
     }
@@ -243,8 +232,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         suggestBadWordService.store(createSuggestBadWord(form));
@@ -252,8 +240,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final SuggestBadWordEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         suggestBadWordService.store(createSuggestBadWord(form));
@@ -269,8 +256,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse upload(final SuggestBadWordUploadForm form) {
         BufferedInputStream is = null;
         File tempFile = null;

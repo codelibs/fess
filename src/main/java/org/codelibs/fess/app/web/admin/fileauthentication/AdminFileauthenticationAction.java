@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.FileAuthenticationPager;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.app.service.FileConfigService;
@@ -39,6 +38,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
@@ -123,8 +123,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage(final FileAuthenticationEditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
@@ -134,8 +133,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -147,8 +145,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final FileAuthenticationEditForm form) {
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
@@ -156,8 +153,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final FileAuthenticationEditForm form) {
         form.crudMode = CrudMode.EDIT;
         loadFileAuthentication(form);
@@ -167,8 +163,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -180,8 +175,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final FileAuthenticationEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadFileAuthentication(form);
@@ -206,8 +200,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
@@ -216,8 +209,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
@@ -229,8 +221,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         fileAuthenticationService.store(createFileAuthentication(form));
@@ -238,8 +229,7 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final FileAuthenticationEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         fileAuthenticationService.store(createFileAuthentication(form));

@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.UserPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
@@ -37,6 +36,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -132,8 +132,7 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage(final UserEditForm form) {
         clearStoredPassword();
         form.initialize();
@@ -143,8 +142,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id, final UserEditForm form) {
         clearStoredPassword();
         form.crudMode = crudMode;
@@ -156,8 +154,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final UserEditForm form) {
         clearStoredPassword();
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
@@ -165,8 +162,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final UserEditForm form) {
         clearStoredPassword();
         form.crudMode = CrudMode.EDIT;
@@ -176,8 +172,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final UserEditForm form) {
         clearStoredPassword();
         form.crudMode = crudMode;
@@ -189,8 +184,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final UserEditForm form) {
         clearStoredPassword();
         form.crudMode = CrudMode.DELETE;
@@ -215,8 +209,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final UserEditForm form) {
         verifyPassword(form);
         storePassword(form);
@@ -226,8 +219,7 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final UserEditForm form) {
         verifyPassword(form);
         storePassword(form);
@@ -240,8 +232,7 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final UserEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         verifyPassword(form);
@@ -250,8 +241,7 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final UserEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         verifyPassword(form);

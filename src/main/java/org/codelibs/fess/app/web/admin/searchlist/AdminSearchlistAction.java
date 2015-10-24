@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
@@ -41,6 +40,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
@@ -226,7 +226,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asHtml(path_AdminSearchlist_ConfirmDeleteJsp);
     }
 
-    @Token(save = false, validate = true)
+    @Execute(token = TxToken.VALIDATE)
     //@Execute(validator = true, input = "index")
     public HtmlResponse delete(final SearchListForm form) {
         return deleteByQuery(form);

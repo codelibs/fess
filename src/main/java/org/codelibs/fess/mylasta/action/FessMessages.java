@@ -125,6 +125,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: already existing data, so retry */
     public static final String ERRORS_APP_DB_ALREADY_EXISTS = "{errors.app.db.already.exists}";
 
+    /** The key of the message: double submit might be requested */
+    public static final String ERRORS_APP_DOUBLE_SUBMIT_REQUEST = "{errors.app.double.submit.request}";
+
     /** The key of the message: Failed to update parameters. Please contact to a site administrator. */
     public static final String ERRORS_failed_to_update_crawler_params = "{errors.failed_to_update_crawler_params}";
 
@@ -135,7 +138,7 @@ public class FessMessages extends FessLabels {
     public static final String ERRORS_failed_to_update_solr_params = "{errors.failed_to_update_solr_params}";
 
     /** The key of the message: Username or Password is not correct. */
-    public static final String ERROR_login_error = "{error.login_error}";
+    public static final String ERRORS_login_error = "{errors.login_error}";
 
     /** The key of the message: Failed to commit index. */
     public static final String ERRORS_failed_to_commit_solr_index = "{errors.failed_to_commit_solr_index}";
@@ -981,6 +984,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.app.double.submit.request' with parameters.
+     * <pre>
+     * message: double submit might be requested
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsAppDoubleSubmitRequest(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_APP_DOUBLE_SUBMIT_REQUEST));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.failed_to_update_crawler_params' with parameters.
      * <pre>
      * message: Failed to update parameters. Please contact to a site administrator.
@@ -1023,16 +1040,16 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'error.login_error' with parameters.
+     * Add the created action message for the key 'errors.login_error' with parameters.
      * <pre>
      * message: Username or Password is not correct.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorLoginError(String property) {
+    public FessMessages addErrorsLoginError(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERROR_login_error));
+        add(property, new ActionMessage(ERRORS_login_error));
         return this;
     }
 

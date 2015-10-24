@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -33,6 +32,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -114,8 +114,7 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final JobLogEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -124,8 +123,7 @@ public class AdminJoblogAction extends FessAdminAction {
         return asHtml(path_AdminJoblog_ConfirmJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final JobLogEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadJobLog(form);

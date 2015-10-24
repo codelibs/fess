@@ -35,6 +35,12 @@ public interface FessEnv {
     /** The key of the configuration. e.g. root@localhost */
     String MAIL_RETURN_PATH = "mail.return.path";
 
+    /** The key of the configuration. e.g. UTF-8 */
+    String TOMCAT_URIEncoding = "tomcat.URIEncoding";
+
+    /** The key of the configuration. e.g. true */
+    String TOMCAT_USE_BODY_ENCODING_FORURI = "tomcat.useBodyEncodingForURI";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -157,6 +163,28 @@ public interface FessEnv {
     String getMailReturnPath();
 
     /**
+     * Get the value for the key 'tomcat.URIEncoding'. <br>
+     * The value is, e.g. UTF-8 <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getTomcatURIEncoding();
+
+    /**
+     * Get the value for the key 'tomcat.useBodyEncodingForURI'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getTomcatUseBodyEncodingForuri();
+
+    /**
+     * Is the property for the key 'tomcat.useBodyEncodingForURI' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isTomcatUseBodyEncodingForuri();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -215,6 +243,18 @@ public interface FessEnv {
 
         public String getMailReturnPath() {
             return get(FessEnv.MAIL_RETURN_PATH);
+        }
+
+        public String getTomcatURIEncoding() {
+            return get(FessEnv.TOMCAT_URIEncoding);
+        }
+
+        public String getTomcatUseBodyEncodingForuri() {
+            return get(FessEnv.TOMCAT_USE_BODY_ENCODING_FORURI);
+        }
+
+        public boolean isTomcatUseBodyEncodingForuri() {
+            return is(FessEnv.TOMCAT_USE_BODY_ENCODING_FORURI);
         }
     }
 }

@@ -19,7 +19,6 @@ package org.codelibs.fess.app.web.admin.fileconfig;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
@@ -33,6 +32,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -118,8 +118,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage() {
         return asHtml(path_AdminFileconfig_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -131,8 +130,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.EDIT);
         return asHtml(path_AdminFileconfig_EditJsp).useForm(EditForm.class, op -> {
@@ -151,8 +149,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createagain(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
@@ -161,8 +158,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
@@ -171,8 +167,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
@@ -187,8 +182,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DELETE);
         return asHtml(path_AdminFileconfig_ConfirmJsp).useForm(EditForm.class, op -> {
@@ -207,8 +201,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
@@ -245,8 +238,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.CREATE;
@@ -255,8 +247,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
@@ -268,8 +259,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
@@ -283,8 +273,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());

@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.ScheduledJobPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -35,6 +34,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -122,16 +122,14 @@ public class AdminScheduledjobAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage(final ScheduledjobEditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -140,22 +138,19 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final ScheduledjobEditForm form) {
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final ScheduledjobEditForm form) {
         form.crudMode = CrudMode.EDIT;
         loadScheduledJob(form);
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final ScheduledjobEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -164,8 +159,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final ScheduledjobEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadScheduledJob(form);
@@ -186,8 +180,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
@@ -195,8 +188,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         });
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
@@ -207,8 +199,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         scheduledJobService.store(createScheduledJob(form));
@@ -216,8 +207,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final ScheduledjobEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         scheduledJobService.store(createScheduledJob(form));

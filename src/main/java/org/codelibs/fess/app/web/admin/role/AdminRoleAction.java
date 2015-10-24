@@ -23,7 +23,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.Token;
 import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -34,6 +33,7 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -114,16 +114,14 @@ public class AdminRoleAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse createpage(final RoleEditForm form) {
         form.initialize();
         form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminRole_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id, final RoleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -132,22 +130,19 @@ public class AdminRoleAction extends FessAdminAction {
         return asHtml(path_AdminRole_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editagain(final RoleEditForm form) {
         return asHtml(path_AdminRole_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse editfromconfirm(final RoleEditForm form) {
         form.crudMode = CrudMode.EDIT;
         loadRole(form);
         return asHtml(path_AdminRole_EditJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id, final RoleEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
@@ -156,8 +151,7 @@ public class AdminRoleAction extends FessAdminAction {
         return asHtml(path_AdminRole_ConfirmJsp);
     }
 
-    @Token(save = true, validate = false)
-    @Execute
+    @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final RoleEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadRole(form);
@@ -176,15 +170,13 @@ public class AdminRoleAction extends FessAdminAction {
         return asHtml(path_AdminRole_ConfirmJsp);
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final RoleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRole_ConfirmJsp);
     }
 
-    @Token(save = false, validate = true, keep = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final RoleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminRole_ConfirmJsp);
@@ -193,8 +185,7 @@ public class AdminRoleAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse create(final RoleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         roleService.store(createRole(form));
@@ -202,8 +193,7 @@ public class AdminRoleAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Token(save = false, validate = true)
-    @Execute
+    @Execute(token = TxToken.VALIDATE)
     public HtmlResponse update(final RoleEditForm form) {
         validate(form, messages -> {}, toEditHtml());
         roleService.store(createRole(form));

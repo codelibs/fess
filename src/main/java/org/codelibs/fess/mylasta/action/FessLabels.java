@@ -710,13 +710,13 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Last Modified:  */
     public static final String LABELS_search_result_last_modified = "{labels.search_result_last_modified}";
 
-    /** The key of the message: Vote it */
+    /** The key of the message: Like */
     public static final String LABELS_search_result_favorite = "{labels.search_result_favorite}";
 
-    /** The key of the message: Voted */
+    /** The key of the message: Liked */
     public static final String LABELS_search_result_favorited = "{labels.search_result_favorited}";
 
-    /** The key of the message: Click: {0} */
+    /** The key of the message: Clicked ({0}) */
     public static final String LABELS_search_click_count = "{labels.search_click_count}";
 
     /** The key of the message: more.. */
@@ -794,13 +794,13 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Sort:  */
     public static final String LABELS_searchoptions_menu_sort = "{labels.searchoptions_menu_sort}";
 
-    /** The key of the message: Result Per Page:  */
+    /** The key of the message: Result:  */
     public static final String LABELS_searchoptions_menu_num = "{labels.searchoptions_menu_num}";
 
     /** The key of the message: {0} results */
     public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
 
-    /** The key of the message: Language:  */
+    /** The key of the message: Languages:  */
     public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
 
     /** The key of the message: Labels:  */
