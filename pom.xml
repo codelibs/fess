@@ -62,7 +62,7 @@
 		<pdfbox.version>1.8.7</pdfbox.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>1.7.2</elasticsearch.version>
+		<elasticsearch.version>1.7.3</elasticsearch.version>
 		<cluster.runner.version>1.7.0.1-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
