@@ -49,15 +49,6 @@ public class FessBoot extends TomcatBoot {
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
     }
 
-    @Override
-    protected void loadServerLoggingIfNeeds() {
-        try {
-            super.loadServerLoggingIfNeeds();
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
     // ===================================================================================
     //                                                                        main
     //                                                                        ============
@@ -73,6 +64,7 @@ public class FessBoot extends TomcatBoot {
                 .useTldDetect() // for JSP
                 .configure(FESS_ENV_PROPERTIES) // e.g. URIEncoding
                 .logging(LOGGING_PROPERTIES, op -> {
+                    op.ignoreNoFile();
                     final String fessHomeDir = System.getProperty("fess.home");
                     if (fessHomeDir != null) {
                         op.replace("fess.home", fessHomeDir);

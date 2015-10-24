@@ -39,7 +39,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp8</dbflute.version>
-		<lastaflute.version>0.6.4</lastaflute.version>
+		<lastaflute.version>0.6.5-A-SNAPSHOT</lastaflute.version>
 		<lasta.taglib.version>0.6.0</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
@@ -66,7 +66,7 @@
 		<cluster.runner.version>1.7.0.1-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.3.8-RC6</tomcat.boot.version>
+		<tomcat.boot.version>0.3.8-C-SNAPSHOT</tomcat.boot.version>
 
 		<!-- Maven Repository -->
 		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
