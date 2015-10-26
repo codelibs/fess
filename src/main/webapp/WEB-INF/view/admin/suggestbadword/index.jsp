@@ -21,7 +21,7 @@
 					<la:message key="labels.suggest_bad_word_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/suggestbadword">
 							<la:message key="labels.suggest_bad_word_link_list" />
 						</la:link></li>
 				</ol>
@@ -38,7 +38,7 @@
 									<la:message key="labels.suggest_bad_word_link_list" />
 								</h3>
 								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="index">
+									<span class="label label-default"><la:link href="/admin/suggestbadword">
 										<la:message key="labels.suggest_bad_word_link_list" />
 										</la:link></span>
 									<span class="label label-default"><la:link href="createpage">

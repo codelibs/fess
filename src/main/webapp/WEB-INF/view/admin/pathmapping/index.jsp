@@ -20,7 +20,7 @@
 					<la:message key="labels.path_mapping_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/pathmapping">
 							<la:message key="labels.path_mapping_link_list" />
 						</la:link></li>
 				</ol>

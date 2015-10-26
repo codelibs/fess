@@ -33,7 +33,7 @@
 						<la:errors />
 					</p>
 					<p>
-						<la:link href="index">
+						<la:link href="/admin/dict">
 							<la:message key="labels.dict_synonym_button_back" />
 						</la:link>
 					</p>
@@ -61,7 +61,7 @@
 
 <la:errors/>
 <br/>
-<la:link href="../index"><la:message key="labels.dict_button_back"/></la:link>
+<la:link href="/admin/dict"><la:message key="labels.dict_button_back"/></la:link>
 
       </div>
 

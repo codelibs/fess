@@ -21,7 +21,7 @@
 					<la:message key="labels.request_header_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/requestheader">
 							<la:message key="labels.request_header_link_list" />
 						</la:link></li>
 				</ol>

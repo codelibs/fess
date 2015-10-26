@@ -21,7 +21,7 @@
 					<la:message key="labels.log_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/log">
 							<la:message key="labels.log_configuration" />
 						</la:link></li>
 				</ol>

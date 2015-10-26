@@ -21,7 +21,7 @@
 					<la:message key="labels.joblog_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/joblog">
 							<la:message key="labels.joblog_link_list" />
 						</la:link></li>
 				</ol>

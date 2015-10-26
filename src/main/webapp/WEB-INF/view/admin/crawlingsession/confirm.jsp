@@ -21,7 +21,7 @@
 					<la:message key="labels.crawling_session_title_confirm" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="index">
+					<li><la:link href="/admin/crawlingsession">
 							<la:message key="labels.crawling_session_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
@@ -67,7 +67,7 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="index">
+										<span class="label label-default"><la:link href="/admin/crawlingsession">
 												<la:message key="labels.crawling_session_link_list" />
 											</la:link></span>
 									</div>

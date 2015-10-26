@@ -21,7 +21,7 @@
 					<la:message key="labels.failure_url_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/failureurl">
 							<la:message key="labels.failure_url_configuration" />
 						</la:link></li>
 				</ol>

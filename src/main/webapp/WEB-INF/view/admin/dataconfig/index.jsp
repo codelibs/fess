@@ -21,7 +21,7 @@
 					<la:message key="labels.data_crawling_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/dataconfig">
 							<la:message key="labels.data_crawling_link_list" />
 						</la:link></li>
 				</ol>

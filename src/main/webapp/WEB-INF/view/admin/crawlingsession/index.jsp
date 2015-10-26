@@ -21,7 +21,7 @@
 					<la:message key="labels.crawling_session_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/crawlingsession">
 							<la:message key="labels.crawling_session_title" />
 						</la:link></li>
 				</ol>

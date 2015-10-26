@@ -21,7 +21,7 @@
 					<la:message key="labels.key_match_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/keymatch">
 							<la:message key="labels.key_match_link_list" />
 						</la:link></li>
 				</ol>

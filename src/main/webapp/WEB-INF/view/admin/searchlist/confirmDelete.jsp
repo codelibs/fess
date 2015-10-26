@@ -21,7 +21,7 @@
 					<la:message key="labels.search_list_title_confirm_delete" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="index">
+					<li><la:link href="/admin/searchlist">
 							<la:message key="labels.search_list_title_confirm_delete" />
 						</la:link></li>
 				</ol>

@@ -21,7 +21,7 @@
 					<la:message key="labels.file_authentication_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="index">
+					<li class="active"><la:link href="/admin/fileauthentication">
 							<la:message key="labels.file_authentication_link_list" />
 						</la:link></li>
 				</ol>

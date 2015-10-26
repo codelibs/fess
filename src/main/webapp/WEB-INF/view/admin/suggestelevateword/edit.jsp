@@ -21,7 +21,7 @@
 					<la:message key="labels.suggest_elevate_word_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="index">
+					<li><la:link href="/admin/suggestelevateword">
 							<la:message key="labels.suggest_elevate_word_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
@@ -64,7 +64,7 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="index">
+										<span class="label label-default"><la:link href="/admin/suggestelevateword">
 												<la:message key="labels.suggest_elevate_word_link_list" />
 											</la:link></span>
 										<span class="label label-default"><la:link href="createpage">

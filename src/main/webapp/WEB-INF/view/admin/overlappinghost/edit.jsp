@@ -21,7 +21,7 @@
 					<la:message key="labels.overlapping_host_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="index">
+					<li><la:link href="/admin/overlappinghost">
 							<la:message key="labels.overlapping_host_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
@@ -65,7 +65,7 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="index">
+										<span class="label label-default"><la:link href="/admin/overlappinghost">
 												<la:message key="labels.overlapping_host_link_list" />
 											</la:link></span>
 									</div>
