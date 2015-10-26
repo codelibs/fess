@@ -16,17 +16,27 @@
 
 package org.codelibs.fess.app.web.admin.fileauthentication;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
  * @author Keiichi Watanabe
  */
-public class FileAuthenticationSearchForm implements Serializable {
+public class EditForm extends CreateForm {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    @Required
+    @Size(max = 1000)
+    public String id;
+
+    @Size(max = 255)
+    public String updatedBy;
+
+    public Long updatedTime;
+
+    @Required
+    public Integer versionNo;
+
 }

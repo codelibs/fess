@@ -34,6 +34,7 @@ import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.codelibs.fess.es.exentity.FileConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -73,14 +74,14 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final FileAuthenticationSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final FileAuthenticationSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         fileAuthenticationPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -88,15 +89,15 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final FileAuthenticationSearchForm form) {
-        copyBeanToBean(form.searchParams, fileAuthenticationPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, fileAuthenticationPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final FileAuthenticationSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         fileAuthenticationPager.clear();
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -104,17 +105,17 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final FileAuthenticationSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminFileauthentication_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final FileAuthenticationSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("fileAuthenticationItems", fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
         data.register("displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
-        copyBeanToBean(fileAuthenticationPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -124,9 +125,42 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final FileAuthenticationEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminFileauthentication_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerFileConfigItems(data);
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminFileauthentication_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerFileConfigItems(data);
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -134,11 +168,9 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadFileAuthentication(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -146,17 +178,15 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final FileAuthenticationEditForm form) {
-        return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
-            registerProtocolSchemeItems(data);
-            registerFileConfigItems(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final FileAuthenticationEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadFileAuthentication(form);
+        final String id = form.id;
+        fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -164,21 +194,35 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadFileAuthentication(form);
-        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        }).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
         });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final FileAuthenticationEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadFileAuthentication(form);
+        final String id = form.id;
+        fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -189,11 +233,29 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final FileAuthenticationEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadFileAuthentication(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminFileauthentication_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerFileConfigItems(data);
+        });
+    }
+
+    @Execute(token = TxToken.VALIDATE_KEEP)
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -201,17 +263,9 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final FileAuthenticationEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
-            registerProtocolSchemeItems(data);
-            registerFileConfigItems(data);
-        });
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final FileAuthenticationEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminFileauthentication_ConfirmJsp).renderWith(data -> {
             registerProtocolSchemeItems(data);
             registerFileConfigItems(data);
@@ -222,65 +276,77 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse create(final FileAuthenticationEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        fileAuthenticationService.store(createFileAuthentication(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createFileAuthentication(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            fileAuthenticationService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse update(final FileAuthenticationEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        fileAuthenticationService.store(createFileAuthentication(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createFileAuthentication(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            fileAuthenticationService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final FileAuthenticationEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        fileAuthenticationService.delete(getFileAuthentication(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        fileAuthenticationService.getFileAuthentication(id).ifPresent(entity -> {
+            fileAuthenticationService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadFileAuthentication(final FileAuthenticationEditForm form) {
-        copyBeanToBean(getFileAuthentication(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected FileAuthentication getFileAuthentication(final FileAuthenticationEditForm form) {
-        final FileAuthentication fileAuthentication = fileAuthenticationService.getFileAuthentication(createKeyMap(form));
-        if (fileAuthentication == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return fileAuthentication;
-    }
-
-    protected FileAuthentication createFileAuthentication(final FileAuthenticationEditForm form) {
-        FileAuthentication fileAuthentication;
+    protected OptionalEntity<FileAuthentication> createFileAuthentication(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            fileAuthentication = getFileAuthentication(form);
-        } else {
-            fileAuthentication = new FileAuthentication();
-            fileAuthentication.setCreatedBy(username);
-            fileAuthentication.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final FileAuthentication entity = new FileAuthentication();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return fileAuthenticationService.getFileAuthentication(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        fileAuthentication.setUpdatedBy(username);
-        fileAuthentication.setUpdatedTime(currentTime);
-        copyBeanToBean(form, fileAuthentication, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return fileAuthentication;
-    }
-
-    protected Map<String, String> createKeyMap(final FileAuthenticationEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     protected void registerProtocolSchemeItems(final RenderData data) {
@@ -310,17 +376,20 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final FileAuthenticationEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminFileauthentication_EditJsp);
+            return asHtml(path_AdminFileauthentication_EditJsp).renderWith(data -> {
+                registerProtocolSchemeItems(data);
+                registerFileConfigItems(data);
+            });
         };
     }
 }
