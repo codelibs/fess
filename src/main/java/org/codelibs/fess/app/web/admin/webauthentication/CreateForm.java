@@ -34,14 +34,14 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public int crudMode;
+    public Integer crudMode;
 
     @Size(max = 100)
     public String hostname;
 
     @Min(value = 0)
     @Max(value = 2147483647)
-    public String port;
+    public Integer port;
 
     @Size(max = 100)
     public String authRealm;
@@ -64,7 +64,7 @@ public class CreateForm implements Serializable {
     public String webConfigId;
 
     @Required
-    @Size(max = 255)
+    @Size(max = 1000)
     public String createdBy;
 
     @Required
@@ -72,7 +72,7 @@ public class CreateForm implements Serializable {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
-        createdBy = "system";
+        createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }
 }

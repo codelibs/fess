@@ -140,6 +140,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
 
     @Execute(token = TxToken.SAVE)
     public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
         return asHtml(path_AdminWebauthentication_EditJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
@@ -181,7 +182,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse editfromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        String id = form.id;
+        final String id = form.id;
         webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
@@ -217,7 +218,7 @@ public class AdminWebauthenticationAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        String id = form.id;
+        final String id = form.id;
         webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
