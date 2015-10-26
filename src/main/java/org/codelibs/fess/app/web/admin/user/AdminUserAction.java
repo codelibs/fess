@@ -25,13 +25,14 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
+import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
-import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -41,10 +42,12 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
+ * @author Keiichi Watanabe
  */
 public class AdminUserAction extends FessAdminAction {
 
     private static final String TEMPORARY_PASSWORD = "fess.temporary_password";
+
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -72,7 +75,7 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final UserSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         clearStoredPassword();
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -80,7 +83,7 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final UserSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         clearStoredPassword();
         userPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
@@ -89,16 +92,16 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final UserSearchForm form) {
+    public HtmlResponse search(final SearchForm form) {
         clearStoredPassword();
-        copyBeanToBean(form.searchParams, userPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, userPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final UserSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         clearStoredPassword();
         userPager.clear();
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
@@ -107,18 +110,17 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final UserSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         clearStoredPassword();
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final UserSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("userItems", userService.getUserList(userPager)); // page navi
-
         // restore from pager
-        copyBeanToBean(userPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(userPager, form, op -> op.include("id"));
     }
 
     private void registerForms(final RenderData data) {
@@ -133,62 +135,109 @@ public class AdminUserAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final UserEditForm form) {
+    public HtmlResponse createpage() {
         clearStoredPassword();
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+        return asHtml(path_AdminUser_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        }).renderWith(data -> {
+            registerForms(data);
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        clearStoredPassword();
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminUser_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                userService.getUser(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+                resetPassword(form);
+            });
+        }).renderWith(data -> {
+            registerForms(data);
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse createagain(final CreateForm form) {
+        clearStoredPassword();
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
         });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id, final UserEditForm form) {
+    public HtmlResponse editagain(final EditForm form) {
         clearStoredPassword();
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadUser(form, false);
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
         });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final UserEditForm form) {
-        clearStoredPassword();
-        return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final UserEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
         clearStoredPassword();
         form.crudMode = CrudMode.EDIT;
-        loadUser(form, false);
+        final String id = form.id;
+        userService.getUser(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
+        resetPassword(form);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
             registerForms(data);
         });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final UserEditForm form) {
+    public HtmlResponse deletepage(final int crudMode, final String id) {
         clearStoredPassword();
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadUser(form, false);
-        return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminUser_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                userService.getUser(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+                resetPassword(form);
+            });
+        }).renderWith(data -> {
             registerForms(data);
         });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final UserEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         clearStoredPassword();
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadUser(form, false);
+        final String id = form.id;
+        userService.getUser(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
+        resetPassword(form);
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
             registerForms(data);
         });
@@ -198,32 +247,42 @@ public class AdminUserAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final UserEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminUser_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                userService.getUser(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                resetPassword(form);
+            });
+        }).renderWith(data -> {
+            registerForms(data);
+        });
+    }
+
+    @Execute(token = TxToken.VALIDATE_KEEP)
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
         verifyPassword(form);
-        loadUser(form, false);
+        storePassword(form);
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
             registerForms(data);
         });
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final UserEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         verifyPassword(form);
         storePassword(form);
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final UserEditForm form) {
-        verifyPassword(form);
-        storePassword(form);
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
             registerForms(data);
         });
@@ -233,83 +292,99 @@ public class AdminUserAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse create(final UserEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        verifyPassword(form);
-        userService.store(createUser(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createUser(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude("crudMode", "password", "confirmPassword"));
+            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
+            userService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse update(final UserEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        verifyPassword(form);
-        userService.store(createUser(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        //verifyPassword(form);
+        createUser(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude("crudMode", "password", "confirmPassword"));
+            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
+            userService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final UserEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        userService.delete(getUser(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        userService.getUser(id).ifPresent(entity -> {
+            userService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
-    // ===================================================================================
+    //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadUser(final UserEditForm form, final boolean hasPassword) {
-        copyBeanToBean(getUser(form), form, op -> op.exclude("crudMode"));
-        if (!hasPassword) {
-            form.password = null;
-            form.confirmPassword = null;
+    protected OptionalEntity<User> createUser(final CreateForm form) {
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final User entity = new User();
+                sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
+                    entity.setPassword(password);
+                });
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return userService.getUser(((EditForm) form).id).map(entity -> {
+                    sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
+                        entity.setPassword(password);
+                    });
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
+        return OptionalEntity.empty();
     }
 
-    protected User getUser(final UserEditForm form) {
-        final User user = userService.getUser(createKeyMap(form));
-        if (user == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return user;
-    }
-
-    protected User createUser(final UserEditForm form) {
-        User user;
-        if (form.crudMode == CrudMode.EDIT) {
-            user = getUser(form);
-        } else {
-            user = new User();
-        }
-        copyBeanToBean(form, user, op -> op.exclude("password", "confirmPassword"));
-        sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
-            user.setPassword(password);
-        });
-        user.setId(Base64.getEncoder().encodeToString(user.getName().getBytes(Constants.CHARSET_UTF_8)));
-        return user;
-    }
-
-    protected Map<String, String> createKeyMap(final UserEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+    protected Map<String, String> createItem(final String label, final String value) {
+        final Map<String, String> map = new HashMap<String, String>(2);
+        map.put(Constants.ITEM_LABEL, label);
+        map.put(Constants.ITEM_VALUE, value);
+        return map;
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final UserEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }
-
-    protected void verifyPassword(final UserEditForm form) {
+         protected void verifyPassword(final CreateForm form) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);
@@ -322,7 +397,7 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
-    protected void verifyStoredPassword(final UserEditForm form) {
+    protected void verifyStoredPassword(final CreateForm form) {
         if (!sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).isPresent()) {
             throwValidationError(messages -> {
                 messages.addErrorsInvalidConfirmPassword(GLOBAL);
@@ -334,9 +409,14 @@ public class AdminUserAction extends FessAdminAction {
         sessionManager.removeAttribute(TEMPORARY_PASSWORD);
     }
 
-    private void storePassword(final UserEditForm form) {
+    private void storePassword(final CreateForm form) {
         final String encodedPassword = fessLoginAssist.encryptPassword(form.password);
         sessionManager.setAttribute(TEMPORARY_PASSWORD, encodedPassword);
+        form.password = null;
+        form.confirmPassword = null;
+    }
+
+    private void resetPassword(final CreateForm form) {
         form.password = null;
         form.confirmPassword = null;
     }

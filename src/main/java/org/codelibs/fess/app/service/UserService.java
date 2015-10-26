@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.UserCB;
 import org.codelibs.fess.es.exbhv.UserBhv;
 import org.codelibs.fess.es.exentity.User;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class UserService implements Serializable {
 
@@ -56,18 +57,9 @@ public class UserService implements Serializable {
 
         return userList;
     }
-
-    public User getUser(final Map<String, String> keys) {
-        final User user = userBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (user == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return user;
+    
+    public OptionalEntity<User> getUser(final String id) {
+        return userBhv.selectByPK(id);
     }
 
     public void store(final User user) {
