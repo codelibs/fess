@@ -18,43 +18,34 @@ package org.codelibs.fess.app.web.admin.user;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
  * @author shinsuke
+ * @author Keiichi Watanabe
  */
-public class UserEditForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
-    public int crudMode;
+    public Integer crudMode;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
-    public String id;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 100)
+    @Required
+    @Size(max = 100)
     public String name;
 
-    //@Maxbytelength(maxbytelength = 100)
+    @Size(max = 100)
     public String password;
 
-    //@Maxbytelength(maxbytelength = 100)
+    @Size(max = 100)
     public String confirmPassword;
 
     public String[] roles;
 
     public String[] groups;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@IntegerType
-    public String versionNo;
-
     public void initialize() {
-        id = null;
-        name = null;
-        roles = null;
-        groups = null;
-        versionNo = null;
     }
 }

@@ -29,6 +29,7 @@ import org.codelibs.fess.es.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.exentity.FileAuthentication;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class FileAuthenticationService implements Serializable {
 
@@ -57,17 +58,8 @@ public class FileAuthenticationService implements Serializable {
         return fileAuthenticationList;
     }
 
-    public FileAuthentication getFileAuthentication(final Map<String, String> keys) {
-        final FileAuthentication fileAuthentication = fileAuthenticationBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (fileAuthentication == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return fileAuthentication;
+    public OptionalEntity<FileAuthentication> getFileAuthentication(final String id) {
+        return fileAuthenticationBhv.selectByPK(id);
     }
 
     public void store(final FileAuthentication fileAuthentication) {

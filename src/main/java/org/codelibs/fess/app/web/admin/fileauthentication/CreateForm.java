@@ -14,7 +14,7 @@
  * governing permissions and limitations under the License.
  */
 
-package org.codelibs.fess.app.web.admin.webauthentication;
+package org.codelibs.fess.app.web.admin.fileauthentication;
 
 import java.io.Serializable;
 
@@ -28,7 +28,7 @@ import org.lastaflute.web.validation.Required;
 
 /**
  * @author codelibs
- * @author Shunji Makino
+ * @author Keiichi Watanabe
  */
 public class CreateForm implements Serializable {
 
@@ -42,9 +42,6 @@ public class CreateForm implements Serializable {
     @Min(value = 0)
     @Max(value = 2147483647)
     public Integer port;
-
-    @Size(max = 100)
-    public String authRealm;
 
     @Size(max = 10)
     public String protocolScheme;
@@ -61,7 +58,7 @@ public class CreateForm implements Serializable {
 
     @Required
     @Size(max = 1000)
-    public String webConfigId;
+    public String fileConfigId;
 
     @Required
     @Size(max = 1000)
@@ -75,4 +72,5 @@ public class CreateForm implements Serializable {
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
     }
+
 }
