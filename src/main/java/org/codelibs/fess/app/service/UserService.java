@@ -57,7 +57,7 @@ public class UserService implements Serializable {
 
         return userList;
     }
-    
+
     public OptionalEntity<User> getUser(final String id) {
         return userBhv.selectByPK(id);
     }

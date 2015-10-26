@@ -384,7 +384,8 @@ public class AdminUserAction extends FessAdminAction {
             }, toEditHtml());
         }
     }
-         protected void verifyPassword(final CreateForm form) {
+
+    protected void verifyPassword(final CreateForm form) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);

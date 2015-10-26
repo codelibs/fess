@@ -13,6 +13,14 @@ public class User extends BsUser {
 
     private static final long serialVersionUID = 1L;
 
+    public Long getVersionNo() {
+        return asDocMeta().version();
+    }
+
+    public void setVersionNo(final Long version) {
+        asDocMeta().version(version);
+    }
+
     public String[] getRoleNames() {
         return Stream.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
