@@ -32,12 +32,12 @@ public class FailureUrlEditForm implements Serializable {
 
     public String fileConfigName;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String pageNumber;
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     // TODO necessary?
     public int crudMode;
 
@@ -60,7 +60,7 @@ public class FailureUrlEditForm implements Serializable {
     public String errorLog;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String errorCount;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")

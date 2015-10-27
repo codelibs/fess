@@ -29,13 +29,13 @@ public class SearchListForm implements Serializable {
     //@Maxbytelength(maxbytelength = 1000)
     public String query;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String start;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String pn;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String num;
 
     //@Required(target = "confirmDelete,delete")

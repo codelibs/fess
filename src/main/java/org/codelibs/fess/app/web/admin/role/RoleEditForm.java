@@ -25,7 +25,7 @@ public class RoleEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public int crudMode;
 
     //@Required(target = "confirmfromupdate,update,delete")
@@ -37,7 +37,7 @@ public class RoleEditForm implements Serializable {
     public String name;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String versionNo;
 
     public void initialize() {

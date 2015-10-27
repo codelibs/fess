@@ -26,11 +26,11 @@ public class JobLogEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public int crudMode;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@LongType
+    //@Digits(integer=19, fraction=0)
     public String id;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")

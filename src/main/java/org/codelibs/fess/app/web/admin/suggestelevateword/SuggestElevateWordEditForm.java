@@ -30,12 +30,12 @@ public class SuggestElevateWordEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String pageNumber;
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public int crudMode;
 
     public String getCurrentPageNumber() {
@@ -64,17 +64,17 @@ public class SuggestElevateWordEditForm implements Serializable {
     public String createdBy;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@LongType
+    //@Digits(integer=19, fraction=0)
     public String createdTime;
 
     //@Maxbytelength(maxbytelength = 255)
     public String updatedBy;
 
-    //@LongType
+    //@Digits(integer=19, fraction=0)
     public String updatedTime;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String versionNo;
 
     public void initialize() {

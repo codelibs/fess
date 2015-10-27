@@ -47,10 +47,10 @@ public class SearchForm implements SearchRequestParams, Serializable {
     //@Maxbytelength(maxbytelength = 10)
     public String op;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String start;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String pn;
 
     //@Maxbytelength(maxbytelength = 1000)

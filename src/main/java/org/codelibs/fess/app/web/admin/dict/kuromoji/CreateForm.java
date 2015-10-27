@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.dict.kuromoji;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
@@ -34,6 +35,7 @@ public class CreateForm implements Serializable {
     @Required
     public String dictId;
 
+    @Digits(integer = 10, fraction = 0)
     public Integer crudMode;
 
     @Required

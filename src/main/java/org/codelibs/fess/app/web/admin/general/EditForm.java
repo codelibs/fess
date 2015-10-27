@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.general;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -44,6 +45,7 @@ public class EditForm implements Serializable {
     @Required
     @Max(1000)
     @Min(-1)
+    @Digits(integer = 10, fraction = 0)
     public Integer dayForCleanup;
 
     @Required
@@ -81,6 +83,7 @@ public class EditForm implements Serializable {
     @Required
     @Max(10000)
     @Min(-1)
+    @Digits(integer = 10, fraction = 0)
     public Integer failureCountThreshold;
 
     @Size(max = 10)

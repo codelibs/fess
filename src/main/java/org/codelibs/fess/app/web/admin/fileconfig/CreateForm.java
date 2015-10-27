@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.fileconfig;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -40,6 +41,7 @@ public class CreateForm implements Serializable {
 
     public String[] labelTypeIds;
 
+    @Digits(integer = 10, fraction = 0)
     public Integer crudMode;
 
     @Required
@@ -68,25 +70,30 @@ public class CreateForm implements Serializable {
 
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer depth;
 
     @Min(value = 0)
     @Max(value = 9223372036854775807l)
+    @Digits(integer = 19, fraction = 0)
     public Long maxAccessCount;
 
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer numOfThread;
 
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer intervalTime;
 
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer boost;
 
     @Required
@@ -96,6 +103,7 @@ public class CreateForm implements Serializable {
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer sortOrder;
 
     @Required
@@ -103,6 +111,7 @@ public class CreateForm implements Serializable {
     public String createdBy;
 
     @Required
+    @Digits(integer = 19, fraction = 0)
     public Long createdTime;
 
     public void initialize() {

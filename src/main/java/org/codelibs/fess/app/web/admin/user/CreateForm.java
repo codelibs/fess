@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.user;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -30,6 +31,7 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @Digits(integer = 10, fraction = 0)
     public Integer crudMode;
 
     @Required

@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.admin.labeltype;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
@@ -38,6 +39,7 @@ public class CreateForm implements Serializable {
 
     public String[] roleTypeIds;
 
+    @Digits(integer = 10, fraction = 0)
     public Integer crudMode;
 
     @Required
@@ -60,6 +62,7 @@ public class CreateForm implements Serializable {
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
+    @Digits(integer = 10, fraction = 0)
     public Integer sortOrder;
 
     @Required
@@ -67,6 +70,7 @@ public class CreateForm implements Serializable {
     public String createdBy;
 
     @Required
+    @Digits(integer = 19, fraction = 0)
     public Long createdTime;
 
     public void initialize() {

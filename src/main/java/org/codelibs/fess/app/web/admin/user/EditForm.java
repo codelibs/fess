@@ -16,6 +16,7 @@
 
 package org.codelibs.fess.app.web.admin.user;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -32,6 +33,7 @@ public class EditForm extends CreateForm {
     public String id;
 
     @Required
+    @Digits(integer = 10, fraction = 0)
     public Integer versionNo;
 
 }

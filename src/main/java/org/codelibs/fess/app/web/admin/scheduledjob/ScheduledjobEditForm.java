@@ -29,7 +29,7 @@ public class ScheduledjobEditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public int crudMode;
 
     //@Required(target = "confirmfromupdate,update,delete")
@@ -66,7 +66,7 @@ public class ScheduledjobEditForm implements Serializable {
     public String available;
 
     //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     //@IntRange(min = 0, max = 2147483647)
     public String sortOrder;
 
@@ -74,16 +74,16 @@ public class ScheduledjobEditForm implements Serializable {
     public String createdBy;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@LongType
+    //@Digits(integer=19, fraction=0)
     public String createdTime;
 
     public String updatedBy;
 
-    //@LongType
+    //@Digits(integer=19, fraction=0)
     public String updatedTime;
 
     //@Required(target = "confirmfromupdate,update,delete")
-    //@IntegerType
+    //@Digits(integer=10, fraction=0)
     public String versionNo;
 
     public void initialize() {
