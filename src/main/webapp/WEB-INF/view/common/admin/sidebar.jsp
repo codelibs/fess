@@ -23,7 +23,7 @@
 			<li class="header">MENU</li>
 
 			<li class="treeview <c:if test="${param.menuCategoryType=='system'}">active</c:if>"><a href="#"><i
-					class='fa fa-server'
+					class='fa fa-laptop'
 				></i> <span><la:message key="labels.menu_system" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
@@ -141,7 +141,7 @@
 				</ul>
 			</li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='user'}">active</c:if>"><a href="#"><i
-					class='fa fa-list'
+					class='fa fa-user'
 				></i> <span><la:message key="labels.menu_user" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
@@ -190,7 +190,7 @@
 				</ul>
 			</li>
 			<li class="treeview <c:if test="${param.menuCategoryType=='log'}">active</c:if>"><a href="#"><i
-					class='fa fa-files-o'
+					class='fa fa-rss'
 				></i> <span><la:message key="labels.menu_system_log" /></span> <i class="fa fa-angle-left pull-right"></i></a>
 				<ul class="treeview-menu">
 
