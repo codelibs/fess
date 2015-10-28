@@ -57,7 +57,8 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box box-primary">
+							<div
+								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
