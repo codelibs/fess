@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.scheduledjob_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.scheduledjob_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.scheduledjob_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.scheduledjob_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.scheduledjob_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.scheduledjob_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.scheduledjob_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.scheduledjob_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -52,7 +57,7 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -64,7 +69,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/scheduledjob">
+										<span class="label label-default"><la:link
+												href="/admin/scheduledjob">
 												<la:message key="labels.scheduledjob_link_list" />
 											</la:link></span>
 									</div>
@@ -74,75 +80,92 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message key="labels.scheduledjob_name" /></label>
+										<label for="name"><la:message
+												key="labels.scheduledjob_name" /></label>
 										<la:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="target"><la:message key="labels.scheduledjob_target" /></label>
-											<la:text property="target" styleClass="form-control" />
+										<label for="target"><la:message
+												key="labels.scheduledjob_target" /></label>
+										<la:text property="target" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="cronExpression"><la:message key="labels.scheduledjob_cronExpression" /></label>
-											<la:text property="cronExpression" styleClass="form-control" />
+										<label for="cronExpression"><la:message
+												key="labels.scheduledjob_cronExpression" /></label>
+										<la:text property="cronExpression" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="scriptType"><la:message key="labels.scheduledjob_scriptType" /></label>
-											<la:text property="scriptType" styleClass="form-control" />
+										<label for="scriptType"><la:message
+												key="labels.scheduledjob_scriptType" /></label>
+										<la:text property="scriptType" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-											<label for="scriptData"><la:message key="labels.scheduledjob_scriptData" /></label>
-											<la:textarea property="scriptData" styleClass="form-control" rows="5" />
+										<label for="scriptData"><la:message
+												key="labels.scheduledjob_scriptData" /></label>
+										<la:textarea property="scriptData" styleClass="form-control"
+											rows="5" />
 									</div>
 									<div class="form-group">
-											<label for="jobLogging"><la:message key="labels.scheduledjob_jobLogging"/></label>
-											<div styleClass="form-inline" >
-													<la:checkbox property="jobLogging" />
-													<la:message key="labels.enabled"/>
-											</div>
+										<label for="jobLogging"><la:message
+												key="labels.scheduledjob_jobLogging" /></label>
+										<div class="form-inline">
+											<la:checkbox property="jobLogging" />
+											<la:message key="labels.enabled" />
+										</div>
 									</div>
 									<div class="form-group">
-											<label for="crawler"><la:message key="labels.scheduledjob_crawler" /></label>
-											<div styleClass="form-inline" >
-													<la:checkbox property="crawler" />
-													<la:message key="labels.enabled"/>
-											</div>
+										<label for="crawler"><la:message
+												key="labels.scheduledjob_crawler" /></label>
+										<div class="form-inline">
+											<la:checkbox property="crawler" />
+											<la:message key="labels.enabled" />
+										</div>
 									</div>
 									<div class="form-group">
-											<label for="available"><la:message key="labels.scheduledjob_status" /></label>
-											<div styleClass="form-inline" >
-													<la:checkbox property="available" />
-													<la:message key="labels.enabled"/>
-											</div>
+										<label for="available"><la:message
+												key="labels.scheduledjob_status" /></label>
+										<div class="form-inline">
+											<la:checkbox property="available" />
+											<la:message key="labels.enabled" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>
+										<label for="sortOrder"><la:message
+												key="labels.sortOrder" /></label>
 										<la:text property="sortOrder" styleClass="form-control" />
 									</div>
-									</div>
-
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.scheduledjob_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<la:message key="labels.scheduledjob_button_create"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.scheduledjob_button_back" />">
+											<la:message key="labels.scheduledjob_button_back" />
+										</button>
+										<button type="submit" class="btn btn-success"
+											name="confirmfromcreate"
+											value="<la:message key="labels.scheduledjob_button_create" />">
+											<la:message key="labels.scheduledjob_button_create" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.scheduledjob_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<la:message key="labels.scheduledjob_button_confirm"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.scheduledjob_button_back" />">
+											<la:message key="labels.scheduledjob_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning"
+											name="confirmfromupdate"
+											value="<la:message key="labels.scheduledjob_button_confirm" />">
+											<la:message key="labels.scheduledjob_button_confirm" />
+										</button>
 									</c:if>
 								</div>
 							</div>

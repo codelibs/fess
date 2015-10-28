@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.web_crawling_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.web_crawling_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.web_crawling_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.web_crawling_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.web_crawling_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.web_crawling_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.web_crawling_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.web_crawling_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.web_crawling_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.web_crawling_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.web_crawling_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -50,10 +55,10 @@
 					</c:if>
 					<la:hidden property="createdBy" />
 					<la:hidden property="createdTime" />
-					<la:hidden property="sortOrder"/>
+					<la:hidden property="sortOrder" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -71,7 +76,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/webconfig">
+										<span class="label label-default"><la:link
+												href="/admin/webconfig">
 												<la:message key="labels.web_crawling_link_list" />
 											</la:link></span>
 									</div>
@@ -81,9 +87,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -91,10 +95,12 @@
 									<%-- Form Fields --%>
 									<table class="table table-bordered">
 										<tbody>
-											<c:if test="${id != null}"><tr>
-												<th class="col-xs-3"><la:message key="labels.id" /></th>
-												<td>${f:h(id)}</td>
-											</tr></c:if>
+											<c:if test="${id != null}">
+												<tr>
+													<th class="col-xs-3"><la:message key="labels.id" /></th>
+													<td>${f:h(id)}</td>
+												</tr>
+											</c:if>
 											<tr>
 												<th class="col-xs-3"><la:message key="labels.name" /></th>
 												<td>${f:h(name)}<la:hidden property="name" /></td>
@@ -105,23 +111,28 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.included_urls" /></th>
-												<td>${f:br(f:h(includedUrls))}<la:hidden property="includedUrls" /></td>
+												<td>${f:br(f:h(includedUrls))}<la:hidden
+														property="includedUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.excluded_urls" /></th>
-												<td>${f:br(f:h(excludedUrls))}<la:hidden property="excludedUrls" /></td>
+												<td>${f:br(f:h(excludedUrls))}<la:hidden
+														property="excludedUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.included_doc_urls" /></th>
-												<td>${f:br(f:h(includedDocUrls))}<la:hidden property="includedDocUrls" /></td>
+												<td>${f:br(f:h(includedDocUrls))}<la:hidden
+														property="includedDocUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.excluded_doc_urls" /></th>
-												<td>${f:br(f:h(excludedDocUrls))}<la:hidden property="excludedDocUrls" /></td>
+												<td>${f:br(f:h(excludedDocUrls))}<la:hidden
+														property="excludedDocUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.config_parameter" /></th>
-												<td>${f:br(f:h(configParameter))}<la:hidden property="configParameter" /></td>
+												<td>${f:br(f:h(configParameter))}<la:hidden
+														property="configParameter" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.depth" /></th>
@@ -129,7 +140,8 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.max_access_count" /></th>
-												<td>${f:h(maxAccessCount)}<la:hidden property="maxAccessCount" /></td>
+												<td>${f:h(maxAccessCount)}<la:hidden
+														property="maxAccessCount" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.user_agent" /></th>
@@ -137,56 +149,60 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.number_of_thread" /></th>
-												<td>${f:h(numOfThread)}<la:hidden property="numOfThread" /></td>
+												<td>${f:h(numOfThread)}<la:hidden
+														property="numOfThread" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.interval_time" /></th>
-												<td>${f:h(intervalTime)}<la:hidden property="intervalTime" /><la:message key="labels.millisec"/></td>
+												<td>${f:h(intervalTime)}<la:hidden
+														property="intervalTime" />
+													<la:message key="labels.millisec" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost" /></th>
 												<td>${f:h(boost)}<la:hidden property="boost" /></td>
 											</tr>
 											<tr>
-													<th><la:message key="labels.role_type" /></th>
-													<td>
-															<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-																	<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
-																			<c:if test="${rtid==rt.id}">
-																					${f:h(rt.name)}<br/>
-																			</c:if>
-																	</c:forEach>
-															</c:forEach>
-															<la:select property="roleTypeIds" multiple="true" style="display:none;">
-																	<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-																			<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-																	</c:forEach>
-															</la:select>
-													</td>
+												<th><la:message key="labels.role_type" /></th>
+												<td><c:forEach var="rt" varStatus="s"
+														items="${roleTypeItems}">
+														<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
+															<c:if test="${rtid==rt.id}">
+																					${f:h(rt.name)}<br />
+															</c:if>
+														</c:forEach>
+													</c:forEach> <la:select property="roleTypeIds" multiple="true"
+														style="display:none;">
+														<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
+															<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
+														</c:forEach>
+													</la:select></td>
 											</tr>
 											<tr>
-													<th><la:message key="labels.label_type" /></th>
-													<td>
-															<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-																	<c:forEach var="ltid" varStatus="s" items="${labelTypeIds}">
-																			<c:if test="${ltid==l.id}">
-																					${f:h(l.name)}<br/>
-																			</c:if>
-																	</c:forEach>
-															</c:forEach>
-															<la:select property="labelTypeIds" multiple="true" style="display:none;">
-																	<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-																			<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-																	</c:forEach>
-															</la:select>
-													</td>
+												<th><la:message key="labels.label_type" /></th>
+												<td><c:forEach var="l" varStatus="s"
+														items="${labelTypeItems}">
+														<c:forEach var="ltid" varStatus="s"
+															items="${labelTypeIds}">
+															<c:if test="${ltid==l.id}">
+																					${f:h(l.name)}<br />
+															</c:if>
+														</c:forEach>
+													</c:forEach> <la:select property="labelTypeIds" multiple="true"
+														style="display:none;">
+														<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
+															<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
+														</c:forEach>
+													</la:select></td>
 											</tr>
 											<tr>
-													<th><la:message key="labels.available"/></th>
-													<td><la:hidden property="available"/>
-															<c:if test="${available=='true'}"><la:message key="labels.enabled"/></c:if>
-															<c:if test="${available=='false'}"><la:message key="labels.disabled"/></c:if>
-													</td>
+												<th><la:message key="labels.available" /></th>
+												<td><la:hidden property="available" /> <c:if
+														test="${available=='true'}">
+														<la:message key="labels.enabled" />
+													</c:if> <c:if test="${available=='false'}">
+														<la:message key="labels.disabled" />
+													</c:if></td>
 											</tr>
 										</tbody>
 									</table>
@@ -195,31 +211,50 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="createagain" value="<la:message key="labels.web_crawling_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="create"
-											value="<la:message key="labels.web_crawling_button_create"/>"
-										/>
+										<button type="submit" class="btn" name="createagain"
+											value="<la:message key="labels.web_crawling_button_back" />">
+											<la:message key="labels.web_crawling_button_back" />
+										</button>
+										<button type="submit" class="btn btn-primary" name="create"
+											value="<la:message key="labels.web_crawling_button_create" />">
+											<la:message key="labels.web_crawling_button_create" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.web_crawling_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="update"
-											value="<la:message key="labels.web_crawling_button_update"/>"
-										/>
+										<button type="submit" class="btn" name="editagain"
+											value="<la:message key="labels.web_crawling_button_back" />">
+											<la:message key="labels.web_crawling_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning" name="update"
+											value="<la:message key="labels.web_crawling_button_update" />">
+											<la:message key="labels.web_crawling_button_update" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.web_crawling_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="delete"
-											value="<la:message key="labels.web_crawling_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.web_crawling_button_back" />">
+											<la:message key="labels.web_crawling_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.web_crawling_button_delete" />">
+											<la:message key="labels.web_crawling_button_delete" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.web_crawling_button_back"/>" />
-										<input type="submit" class="btn" name="editfromconfirm"
-											value="<la:message key="labels.web_crawling_button_edit"/>"
-										/>
-										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<la:message key="labels.web_crawling_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.web_crawling_button_back" />">
+											<la:message key="labels.web_crawling_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning"
+											name="editfromconfirm"
+											value="<la:message key="labels.web_crawling_button_edit" />">
+											<la:message key="labels.web_crawling_button_edit" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+											name="deletefromconfirm"
+											value="<la:message key="labels.web_crawling_button_delete" />">
+											<la:message key="labels.web_crawling_button_delete" />
+										</button>
 									</c:if>
 								</div>
 							</div>

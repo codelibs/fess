@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.joblog_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.joblog_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.joblog_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.joblog_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.joblog_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.joblog_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.joblog_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.joblog_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.joblog_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.joblog_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.joblog_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -49,7 +54,7 @@
 					</c:if>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -67,7 +72,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/joblog">
+										<span class="label label-default"><la:link
+												href="/admin/joblog">
 												<la:message key="labels.joblog_link_list" />
 											</la:link></span>
 									</div>
@@ -77,9 +83,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -88,7 +92,8 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message key="labels.joblog_jobName" /></th>
+												<th class="col-xs-2"><la:message
+														key="labels.joblog_jobName" /></th>
 												<td>${f:h(jobName)}<la:hidden property="jobName" /></td>
 											</tr>
 											<tr>
@@ -113,11 +118,13 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_scriptData" /></th>
-												<td>${f:br(f:h(scriptData))}<la:hidden property="scriptData" /></td>
+												<td>${f:br(f:h(scriptData))}<la:hidden
+														property="scriptData" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.joblog_scriptResult" /></th>
-												<td>${f:br(f:h(scriptResult))}<la:hidden property="scriptResult" /></td>
+												<td>${f:br(f:h(scriptResult))}<la:hidden
+														property="scriptResult" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -126,12 +133,25 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="delete" value="<la:message key="labels.joblog_button_delete"/>" />
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.joblog_button_back"/>" />
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.joblog_button_delete" />">
+											<la:message key="labels.joblog_button_delete" />
+										</button>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.joblog_button_back" />">
+											<la:message key="labels.joblog_button_back" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.joblog_button_back"/>" />
-										<input type="submit" class="btn" name="deletefromconfirm" value="<la:message key="labels.joblog_button_delete"/>" />
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.joblog_button_back" />">
+											<la:message key="labels.joblog_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+											name="deletefromconfirm"
+											value="<la:message key="labels.joblog_button_delete" />">
+											<la:message key="labels.joblog_button_delete" />
+										</button>
 									</c:if>
 								</div>
 							</div>

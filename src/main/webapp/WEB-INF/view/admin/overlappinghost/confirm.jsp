@@ -53,7 +53,7 @@
 					<la:hidden property="sortOrder" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -81,7 +81,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
+											<div class="alert alert-info">
 												${msg}
 											</div>
 										</la:info>
@@ -106,31 +106,50 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="createagain" value="<la:message key="labels.overlapping_host_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="create"
-											value="<la:message key="labels.overlapping_host_button_create"/>"
-										/>
+										<button type="submit" class="btn" name="createagain"
+											value="<la:message key="labels.overlapping_host_button_back" />">
+											<la:message key="labels.overlapping_host_button_back" />
+										</button>
+										<button type="submit" class="btn btn-primary" name="create"
+											value="<la:message key="labels.overlapping_host_button_create" />">
+											<la:message key="labels.overlapping_host_button_create" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.overlapping_host_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="update"
-											value="<la:message key="labels.overlapping_host_button_update"/>"
-										/>
+										<button type="submit" class="btn" name="editagain"
+											value="<la:message key="labels.overlapping_host_button_back" />">
+											<la:message key="labels.overlapping_host_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning" name="update"
+											value="<la:message key="labels.overlapping_host_button_update" />">
+											<la:message key="labels.overlapping_host_button_update" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.overlapping_host_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="delete"
-											value="<la:message key="labels.overlapping_host_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.overlapping_host_button_back" />">
+											<la:message key="labels.overlapping_host_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.overlapping_host_button_delete" />">
+											<la:message key="labels.overlapping_host_button_delete" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.overlapping_host_button_back"/>" />
-										<input type="submit" class="btn" name="editfromconfirm"
-											value="<la:message key="labels.overlapping_host_button_edit"/>"
-										/>
-										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<la:message key="labels.overlapping_host_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.overlapping_host_button_back" />">
+											<la:message key="labels.overlapping_host_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning"
+											name="editfromconfirm"
+											value="<la:message key="labels.overlapping_host_button_edit" />">
+											<la:message key="labels.overlapping_host_button_edit" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+											name="deletefromconfirm"
+											value="<la:message key="labels.overlapping_host_button_delete" />">
+											<la:message key="labels.overlapping_host_button_delete" />
+										</button>
 									</c:if>
 								</div>
 							</div>

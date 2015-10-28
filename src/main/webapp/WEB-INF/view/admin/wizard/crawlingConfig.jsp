@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.wizard_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -22,7 +23,8 @@
 					<li><la:link href="/admin/wizard/">
 							<la:message key="labels.wizard_start_title" />
 						</la:link></li>
-					<li class="active"><la:message key="labels.wizard_crawling_config_title" /></li>
+					<li class="active"><la:message
+							key="labels.wizard_crawling_config_title" /></li>
 				</ol>
 			</section>
 
@@ -31,7 +33,7 @@
 				<la:form>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<la:message key="labels.wizard_crawling_setting_title" />
@@ -42,24 +44,27 @@
 									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert-message info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
 									<%-- Message: END --%>
 
 									<div class="form-group">
-										<label for="crawlingConfigName"><la:message key="labels.wizard_crawling_config_name" /></label>
-										<la:text property="crawlingConfigName" styleClass="form-control" />
+										<label for="crawlingConfigName"><la:message
+												key="labels.wizard_crawling_config_name" /></label>
+										<la:text property="crawlingConfigName"
+											styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="crawlingConfigPath"><la:message key="labels.wizard_crawling_config_path" /></label>
-										<la:text property="crawlingConfigPath" styleClass="form-control" />
+										<label for="crawlingConfigPath"><la:message
+												key="labels.wizard_crawling_config_path" /></label>
+										<la:text property="crawlingConfigPath"
+											styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="maxAccessCount"><la:message key="labels.maxAccessCount" /></label>
+										<label for="maxAccessCount"><la:message
+												key="labels.maxAccessCount" /></label>
 										<la:text property="maxAccessCount" styleClass="form-control" />
 									</div>
 									<div class="form-group">
@@ -68,13 +73,20 @@
 									</div>
 								</div>
 								<div class="box-footer">
-									<input type="submit" class="btn" name="index" value="<la:message key="labels.wizard_button_cancel"/>" /> <input
-										type="submit" class="btn" name="startCrawlingForm" value="<la:message key="labels.wizard_button_skip"/>"
-									/> <input type="submit" class="btn btn-primary" name="crawlingConfig"
-										value="<la:message key="labels.wizard_button_register_again"/>"
-									/> <input type="submit" class="btn btn-primary" name="crawlingConfigNext"
-										value="<la:message key="labels.wizard_button_register_next"/>"
-									/>
+									<button type="submit" class="btn" name="index"
+										value="<la:message key="labels.wizard_button_cancel"/>">
+										<la:message key="labels.wizard_button_cancel" />
+									</button>
+									<button type="submit" class="btn btn-primary"
+										name="crawlingConfig"
+										value="<la:message key="labels.wizard_button_register_again"/>">
+										<la:message key="labels.wizard_button_register_again" />
+									</button>
+									<button type="submit" class="btn btn-success"
+										name="crawlingConfigNext"
+										value="<la:message key="labels.wizard_button_register_next"/>">
+										<la:message key="labels.wizard_button_register_next" />
+									</button>
 								</div>
 							</div>
 						</div>

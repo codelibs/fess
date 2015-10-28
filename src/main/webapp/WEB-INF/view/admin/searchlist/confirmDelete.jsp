@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.search_list_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.search_list_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -33,11 +34,9 @@
 				<la:form>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
-								<div class="box-header with-border">
-									
-								</div>
+								<div class="box-header with-border"></div>
 								<%-- Box Body --%>
 								<div class="box-body">
 									<la:form>
@@ -54,10 +53,16 @@
 												</tbody>
 												<tfoot>
 													<tr>
-														<td colspan="2"><input type="submit" class="btn small" name="delete"
-															value="<la:message key="labels.crud_button_delete"/>" /> <input
-															type="submit" class="btn small" name="search"
-															value="<la:message key="labels.crud_button_back"/>" /></td>
+														<td colspan="2">
+															<button type="reset" class="btn btn-danger" name="delete"
+																value="<la:message key="labels.crud_button_delete" />">
+																<la:message key="labels.crud_button_delete" />
+															</button>
+															<button type="submit" class="btn" name="search"
+																value="<la:message key="labels.crud_button_search" />">
+																<la:message key="labels.crud_button_back" />
+															</button>
+														</td>
 													</tr>
 												</tfoot>
 											</table>
@@ -65,9 +70,7 @@
 									</la:form>
 								</div>
 								<%-- Box Footer --%>
-								<div class="box-footer">
-									
-								</div>
+								<div class="box-footer"></div>
 							</div>
 						</div>
 					</div>

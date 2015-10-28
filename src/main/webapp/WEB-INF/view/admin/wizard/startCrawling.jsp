@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.wizard_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -23,7 +24,8 @@
 							<la:message key="labels.wizard_start_title" />
 						</la:link></li>
 					<li><la:message key="labels.wizard_crawling_config_title" /></li>
-					<li class="active"><la:message key="labels.wizard_start_crawling_title" /></li>
+					<li class="active"><la:message
+							key="labels.wizard_start_crawling_title" /></li>
 				</ol>
 			</section>
 
@@ -33,17 +35,17 @@
 				<la:form>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<div class="box-header with-border">
-									<h3 class="box-title"><la:message key="labels.wizard_start_crawler_title" /></h3>
+									<h3 class="box-title">
+										<la:message key="labels.wizard_start_crawler_title" />
+									</h3>
 								</div>
 								<div class="box-body">
 									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -54,10 +56,15 @@
 									</p>
 								</div>
 								<div class="box-footer">
-									<input type="submit" class="btn" name="index" value="<la:message key="labels.wizard_button_finish"/>" /> <input
-										type="submit" class="btn btn-primary" name="startCrawling"
-										value="<la:message key="labels.wizard_button_start_crawling"/>"
-									/>
+									<button type="submit" class="btn" name="index"
+										value="<la:message key="labels.wizard_button_finish"/>">
+										<la:message key="labels.wizard_button_finish" />
+									</button>
+									<button type="submit" class="btn btn-success"
+										name="startCrawling"
+										value="<la:message key="labels.wizard_button_start_crawling"/>">
+										<la:message key="labels.wizard_button_start_crawling" />
+									</button>
 								</div>
 							</div>
 						</div>

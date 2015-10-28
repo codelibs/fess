@@ -25,8 +25,8 @@
 			<section class="content">
 
 				<div class="row">
-					<div class="col-md-12">
-						<div class="box">
+					<div class="col-md-6">
+						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
@@ -35,13 +35,15 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-							    <textarea id="envData" style="height: 300px;" class="form-control">
+								<textarea id="envData" style="height: 300px;" class="form-control" readonly>
 <c:forEach var="item" items="${envItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
-							    </textarea>
+								</textarea>
 							</div>
 						</div>
-						<div class="box">
+					</div>
+					<div class="col-md-6">
+						<div class="box box-success">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
@@ -50,13 +52,17 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<textarea id="propData" style="height: 300px;" class="form-control">
+								<textarea id="propData" style="height: 300px;" class="form-control" readonly>
 <c:forEach var="item" items="${propItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 								</textarea>
 							</div>
 						</div>
-						<div class="box">
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="box box-warning">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
@@ -66,17 +72,19 @@
 							<%-- Box Body --%>
 							<div class="box-body">
 								<c:if test="${empty fessPropItems}">
-									<textarea id="fessPropData" style="height: 300px;" class="form-control"><la:message key="labels.system_info_crawler_properties_does_not_exist" /></textarea>
+									<textarea id="fessPropData" style="height: 300px;" class="form-control" readonly><la:message key="labels.system_info_crawler_properties_does_not_exist" /></textarea>
 								</c:if>
 								<c:if test="${!empty fessPropItems}">
-									<textarea id="fessPropData" style="height: 300px;" class="form-control">
+									<textarea id="fessPropData" style="height: 300px;" class="form-control" readonly>
 <c:forEach var="item" items="${fessPropItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 									</textarea>
 								</c:if>
 							</div>
 						</div>
-						<div class="box">
+					</div>
+					<div class="col-md-6">
+						<div class="box box-danger">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
@@ -85,7 +93,7 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<textarea id="bugReportData" style="height: 300px;" class="form-control">
+								<textarea id="bugReportData" style="height: 300px;" class="form-control" readonly>
 <c:forEach var="item" items="${bugReportItems}">${f:h(item.label)}=${f:h(item.value)}
 </c:forEach>
 								</textarea>

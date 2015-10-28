@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.design_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.design_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -14,16 +15,16 @@
 		</jsp:include>
 
 		<div class="content-wrapper">
-		
+
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.design_configuration" />
 				</h1>
 			</section>
-			
+
 			<section class="content">
-				
+
 				<div class="row">
 					<div class="col-md-12">
 						<div>
@@ -32,7 +33,7 @@
 							</la:info>
 							<la:errors />
 						</div>
-						<div class="box">
+						<div class="box box-primary">
 							<c:if test="${editable}">
 								<la:form>
 									<%-- Box Header --%>
@@ -45,13 +46,20 @@
 									<div class="box-body">
 										<h4>${f:h(fileName)}</h4>
 										<div>
-											<la:textarea property="content" style="width:98%" rows="20"></la:textarea>
+											<la:textarea property="content" rows="20"
+												styleClass="form-control"></la:textarea>
 										</div>
 									</div>
 									<%-- Box Footer --%>
 									<div class="box-footer">
-										<input type="submit" class="btn small" name="update" value="<la:message key="labels.design_button_update"/>" />
-										<input type="submit" class="btn small" name="back" value="<la:message key="labels.design_button_back"/>" />
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.design_button_back" />">
+											<la:message key="labels.design_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning" name="update"
+											value="<la:message key="labels.design_button_update" />">
+											<la:message key="labels.design_button_update" />
+										</button>
 									</div>
 									<la:hidden property="fileName" />
 								</la:form>
@@ -59,7 +67,7 @@
 						</div>
 					</div>
 				</div>
-				
+
 			</section>
 		</div>
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

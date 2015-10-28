@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.wizard_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.wizard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -30,7 +31,7 @@
 				<la:form>
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<la:message key="labels.wizard_start_title" />
@@ -40,9 +41,7 @@
 									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -52,9 +51,11 @@
 									</p>
 								</div>
 								<div class="box-footer">
-									<input type="submit" name="crawlingConfigForm" class="btn btn-primary"
-										value="<la:message key="labels.wizard_start_button"/>"
-									/>
+									<button type="submit" class="btn btn-primary"
+										name="crawlingConfigForm"
+										value="<la:message key="labels.wizard_start_button"/>">
+										<la:message key="labels.wizard_start_button" />
+									</button>
 								</div>
 							</div>
 						</div>

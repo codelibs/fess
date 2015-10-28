@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.key_match_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.key_match_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.key_match_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.key_match_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.key_match_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.key_match_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.key_match_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.key_match_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.key_match_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.key_match_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.key_match_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -52,7 +57,7 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -64,7 +69,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/keymatch">
+										<span class="label label-default"><la:link
+												href="/admin/keymatch">
 												<la:message key="labels.key_match_link_list" />
 											</la:link></span>
 									</div>
@@ -74,28 +80,30 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="term"><la:message key="labels.key_match_term" /></label>
+										<label for="term"><la:message
+												key="labels.key_match_term" /></label>
 										<la:text property="term" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="query"><la:message key="labels.key_match_query" /></label>
+										<label for="query"><la:message
+												key="labels.key_match_query" /></label>
 										<la:text property="query" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="maxSize"><la:message key="labels.key_match_size" /></label>
+										<label for="maxSize"><la:message
+												key="labels.key_match_size" /></label>
 										<la:text property="maxSize" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="boost"><la:message key="labels.key_match_boost" /></label>
+										<label for="boost"><la:message
+												key="labels.key_match_boost" /></label>
 										<la:text property="boost" styleClass="form-control" />
 									</div>
 
@@ -103,16 +111,26 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromcreate"
-											value="<la:message key="labels.key_match_button_create"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.key_match_button_back" />">
+											<la:message key="labels.key_match_button_back" />
+										</button>
+										<button type="submit" class="btn btn-success"
+											name="confirmfromcreate"
+											value="<la:message key="labels.key_match_button_create" />">
+											<la:message key="labels.key_match_button_create" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.key_match_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="confirmfromupdate"
-											value="<la:message key="labels.key_match_button_confirm"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.key_match_button_back" />">
+											<la:message key="labels.key_match_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning"
+											name="confirmfromupdate"
+											value="<la:message key="labels.key_match_button_confirm" />">
+											<la:message key="labels.key_match_button_confirm" />
+										</button>
 									</c:if>
 								</div>
 							</div>

@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.search_list_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.search_list_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -31,16 +32,24 @@
 
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box">
+						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.search_list_configuration" />
 								</h3>
-								<la:form>
-									<div class="input">
-										<la:text styleClass="query" property="query" title="Search" size="50" maxlength="1000" />
-										<input class="btn" type="submit" value="<la:message key="labels.search"/>" name="search" />
+								<la:form styleClass="form-inline">
+									<div class="form-group">
+										<label class="sr-only" for="sessionIdSearchBtn"></label>
+										<la:text styleClass="query form-control" property="query" title="Search"
+											size="50" maxlength="1000"
+											placeholder="Type a search query" />
+									</div>
+									<div class="form-group">
+										<button type="submit" class="btn btn-primary" name="search"
+											value="<la:message key="labels.search"/>">
+											<la:message key="labels.search" />
+										</button>
 									</div>
 								</la:form>
 							</div>
@@ -49,9 +58,7 @@
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert-message info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
@@ -61,9 +68,11 @@
 									<c:when test="${allRecordCount == null}">
 										<div id="subheader"></div>
 										<div id="result">
+											<%--
 											<p>
 												<la:message key="labels.search_list_index_page" />
 											</p>
+											--%>
 										</div>
 									</c:when>
 									<c:when test="${f:h(allRecordCount) != 0}">
@@ -113,8 +122,8 @@
 												<ul>
 													<c:if test="${existPrePage}">
 														<li class="prev"><la:link
-																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}"><la:message
-																	key="labels.prev_page" />
+																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
+																<la:message key="labels.prev_page" />
 															</la:link></li>
 													</c:if>
 													<c:if test="${!existPrePage}">
@@ -130,11 +139,12 @@
 														</li>
 													</c:forEach>
 													<c:if test="${existNextPage}">
-														<li class="next<c:if test="${!existNextPage}"> disabled</c:if>">
+														<li
+															class="next<c:if test="${!existNextPage}"> disabled</c:if>">
 															<la:link
 																href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
 																<la:message key="labels.next_page" />
-														</la:link>
+															</la:link>
 														</li>
 													</c:if>
 													<c:if test="${!existNextPage}">
@@ -153,20 +163,17 @@
 										<div id="subheader"></div>
 										<div id="result">
 											<p>
-												<la:message key="labels.did_not_match"
-													arg0="${f:h(query)}" />
+												<la:message key="labels.did_not_match" arg0="${f:h(query)}" />
 											</p>
 										</div>
 									</c:otherwise>
 								</c:choose>
-							<%-- Box Footer --%>
-							<div class="box-footer">
-
+								<%-- Box Footer --%>
+								<div class="box-footer"></div>
 							</div>
 						</div>
 					</div>
 				</div>
-</div>
 			</section>
 		</div>
 

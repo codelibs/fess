@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.failure_url_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.failure_url_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.failure_url_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.failure_url_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.failure_url_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.failure_url_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.failure_url_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.failure_url_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.failure_url_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.failure_url_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.failure_url_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -52,7 +57,7 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -70,7 +75,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/failureurl">
+										<span class="label label-default"><la:link
+												href="/admin/failureurl">
 												<la:message key="labels.failure_url_link_list" />
 											</la:link></span>
 									</div>
@@ -80,9 +86,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -125,16 +129,19 @@
 												<td>${f:h(errorCount)}<la:hidden property="errorCount" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.failure_url_last_access_time" /></th>
+												<th><la:message
+														key="labels.failure_url_last_access_time" /></th>
 												<td>${f:h(lastAccessTime)}<la:hidden
 														property="lastAccessTime" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.failure_url_web_config_name" /></th>
+												<th><la:message
+														key="labels.failure_url_web_config_name" /></th>
 												<td>${f:h(webConfigName)}</td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.failure_url_file_config_name" /></th>
+												<th><la:message
+														key="labels.failure_url_file_config_name" /></th>
 												<td>${f:h(fileConfigName)}</td>
 											</tr>
 										</tbody>
@@ -144,12 +151,25 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn small" name="delete" value="<la:message key="labels.crud_button_delete"/>" />
-										<input type="submit" class="btn small" name="back" value="<la:message key="labels.crud_button_back"/>" />
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.crud_button_back" />">
+											<la:message key="labels.crud_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.crud_button_delete" />">
+											<la:message key="labels.crud_button_delete" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn small" name="back" value="<la:message key="labels.crud_button_back"/>" />
-										<input type="submit" class="btn small" name="deletefromconfirm" value="<la:message key="labels.crud_button_delete"/>" />
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.crud_button_back" />">
+											<la:message key="labels.crud_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+											name="deletefromconfirm"
+											value="<la:message key="labels.crud_button_delete" />">
+											<la:message key="labels.crud_button_delete" />
+										</button>
 									</c:if>
 								</div>
 							</div>

@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.suggest_elevate_word_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.suggest_elevate_word_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -24,7 +25,8 @@
 					<li class="active"><la:link href="/admin/suggestelevateword">
 							<la:message key="labels.suggest_elevate_word_link_list" />
 						</la:link></li>
-					<li class="active"><a href="#"><la:message key="labels.suggest_elevate_word_link_upload" /></a></li>
+					<li class="active"><a href="#"><la:message
+								key="labels.suggest_elevate_word_link_upload" /></a></li>
 				</ol>
 			</section>
 
@@ -32,24 +34,25 @@
 
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box">
+						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.suggest_elevate_word_link_upload" />
 								</h3>
 								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="/admin/suggestelevateword">
-										<la:message key="labels.suggest_elevate_word_link_list" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="createpage">
-										<la:message key="labels.suggest_elevate_word_link_create_new" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="downloadpage">
-										<la:message key="labels.suggest_elevate_word_link_download" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="uploadpage">
-										<la:message key="labels.suggest_elevate_word_link_upload" />
+									<span class="label label-default"><la:link
+											href="/admin/suggestelevateword">
+											<la:message key="labels.suggest_elevate_word_link_list" />
+										</la:link></span> <span class="label label-default"><la:link
+											href="createpage">
+											<la:message key="labels.suggest_elevate_word_link_create_new" />
+										</la:link></span> <span class="label label-default"><la:link
+											href="downloadpage">
+											<la:message key="labels.suggest_elevate_word_link_download" />
+										</la:link></span> <span class="label label-default"><la:link
+											href="uploadpage">
+											<la:message key="labels.suggest_elevate_word_link_upload" />
 										</la:link></span>
 								</div>
 							</div>
@@ -59,14 +62,19 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message key="labels.suggest_elevate_word_file" /></th>
+												<th class="col-xs-2"><la:message
+														key="labels.suggest_elevate_word_file" /></th>
 												<td><input type="file" name="suggestElevateWordFile" /></td>
 											</tr>
 										</tbody>
 										<tfoot>
 											<tr>
 												<td colspan="2">
-													<input type="submit" name="upload" value="<la:message key="labels.suggest_elevate_word_button_upload"/>" />
+													<button type="submit" class="btn btn-primary" name="upload"
+														value="<la:message key="labels.suggest_elevate_word_button_upload" />">
+														<la:message
+															key="labels.suggest_elevate_word_button_upload" />
+													</button>
 												</td>
 											</tr>
 										</tfoot>
@@ -75,9 +83,7 @@
 
 							</div>
 							<%-- Box Footer --%>
-							<div class="box-footer">
-
-							</div>
+							<div class="box-footer"></div>
 						</div>
 					</div>
 				</div>

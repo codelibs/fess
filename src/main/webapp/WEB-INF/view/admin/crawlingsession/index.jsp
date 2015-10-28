@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.crawling_session_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.crawling_session_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -31,38 +32,44 @@
 
 				<div class="row">
 					<div class="col-md-12">
-						<div class="box">
+						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.crawling_session_title" />
 								</h3>
-								<la:form>
-										<label for="sessionIdSearchBtn"><la:message
-												key="labels.crawling_session_session_id_search" /></label>
-										<la:text styleId="sessionIdSearchBtn"
-											property="searchParams.sessionId"></la:text>
-										<input type="submit" class="btn small primary" name="search"
-											value="<la:message key="labels.crawling_session_search"/>" /> <input
-											type="submit" class="btn small" name="reset"
-											value="<la:message key="labels.crawling_session_reset"/>" />
-								</la:form>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
+								<la:form styleClass="form-inline">
+									<div class="form-group">
+										<label for="sessionIdSearchBtn"><la:message
+												key="labels.crawling_session_session_id_search" /></label>
+										<la:text styleId="sessionIdSearchBtn"
+											property="searchParams.sessionId" styleClass="form-control"></la:text>
+									</div>
+									<div class="form-group">
+										<button type="submit" class="btn btn-primary" name="search"
+											value="<la:message key="labels.crawling_session_search" />">
+											<la:message key="labels.crawling_session_search" />
+										</button>
+										<button type="reset" class="btn btn-secondary" name="reset"
+											value="<la:message key="labels.crawling_session_reset" />">
+											<la:message key="labels.crawling_session_reset" />
+										</button>
+									</div>
+								</la:form>
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert-message info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
 
 								<%-- List --%>
 								<c:if test="${crawlingSessionPager.allRecordCount == 0}">
-									<p class="alert-message warning">
+									<p class="callout callout-info">
 										<la:message key="labels.list_could_not_find_crud_table" />
 									</p>
 								</c:if>
@@ -70,28 +77,31 @@
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><la:message key="labels.crawling_session_session_id" /></th>
-												<th><la:message key="labels.crawling_session_created_time" /></th>
-												<th><la:message key="labels.crawling_session_expired_time" /></th>
+												<th><la:message
+														key="labels.crawling_session_session_id" /></th>
+												<th><la:message
+														key="labels.crawling_session_created_time" /></th>
+												<th><la:message
+														key="labels.crawling_session_expired_time" /></th>
 											</tr>
 										</thead>
 										<tbody>
-											<c:forEach var="data" varStatus="s" items="${crawlingSessionItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
+											<c:forEach var="data" varStatus="s"
+												items="${crawlingSessionItems}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+													data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.sessionId)}</td>
 													<td>${f:h(data.createdTime)}</td>
-													<td>
-														<c:if test="${data.expiredTime==null}"><la:message key="labels.none" /></c:if>
-														<c:if test="${data.expiredTime!=null}">${f:h(data.expiredTime)}</c:if>
+													<td><c:if test="${data.expiredTime==null}">
+															<la:message key="labels.none" />
+														</c:if> <c:if test="${data.expiredTime!=null}">${f:h(data.expiredTime)}</c:if>
 													</td>
-													<td style="overflow-x: auto;">
-														<la:link href="confirmpage/4/${f:u(data.id)}">
+													<td style="overflow-x: auto;"><la:link
+															href="confirmpage/4/${f:u(data.id)}">
 															<la:message key="labels.crawling_session_link_details" />
-														</la:link>
-														<la:link href="deletepage/3/${f:u(data.id)}">
+														</la:link> <la:link href="deletepage/3/${f:u(data.id)}">
 															<la:message key="labels.crawling_session_link_delete" />
-														</la:link>
-													</td>
+														</la:link></td>
 												</tr>
 											</c:forEach>
 										</tbody>
@@ -103,47 +113,55 @@
 							<div class="box-footer">
 								<div class="span12 center">
 									<script>
-							<!--
-								function confirmToDeleteAll() {
-									if (confirm('<la:message key="labels.crawling_session_delete_all_confirmation"/>')) {
-										return true;
-									} else {
-										return false;
-									}
-								}
-							// -->
-							</script>
-									<la:link href="deleteall" onclick="return confirmToDeleteAll();"
-										styleClass="btn">
+									<!--
+										function confirmToDeleteAll() {
+											if (confirm('<la:message key="labels.crawling_session_delete_all_confirmation"/>')) {
+												return true;
+											} else {
+												return false;
+											}
+										}
+									// -->
+									</script>
+									<la:link href="deleteall"
+										onclick="return confirmToDeleteAll();"
+										styleClass="btn btn-danger">
 										<la:message key="labels.crawling_session_delete_all_link" />
 									</la:link>
 								</div>
 								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(crawlingSessionPager.currentPageNumber)}"
-										arg1="${f:h(crawlingSessionPager.allPageCount)}" arg2="${f:h(crawlingSessionPager.allRecordCount)}"
-									/></span>
+								<span><la:message key="labels.pagination_page_guide_msg"
+										arg0="${f:h(crawlingSessionPager.currentPageNumber)}"
+										arg1="${f:h(crawlingSessionPager.allPageCount)}"
+										arg2="${f:h(crawlingSessionPager.allRecordCount)}" /></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${crawlingSessionPager.existPrePage}">
-										<li class="prev"><la:link href="list/${crawlingSessionPager.currentPageNumber - 1}">
+										<li class="prev"><la:link
+												href="list/${crawlingSessionPager.currentPageNumber - 1}">
 												<la:message key="labels.crud_link_prev_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!crawlingSessionPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message key="labels.crud_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message
+													key="labels.crud_link_prev_page" /></a></li>
 									</c:if>
-									<c:forEach var="p" varStatus="s" items="${crawlingSessionPager.pageNumberList}">
-										<li <c:if test="${p == crawlingSessionPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
-										</li>
+									<c:forEach var="p" varStatus="s"
+										items="${crawlingSessionPager.pageNumberList}">
+										<li
+											<c:if test="${p == crawlingSessionPager.currentPageNumber}">class="active"</c:if>><la:link
+												href="list/${p}">${p}</la:link></li>
 									</c:forEach>
 									<c:if test="${crawlingSessionPager.existNextPage}">
-										<li class="next"><la:link href="list/${crawlingSessionPager.currentPageNumber + 1}">
+										<li class="next"><la:link
+												href="list/${crawlingSessionPager.currentPageNumber + 1}">
 												<la:message key="labels.crud_link_next_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!crawlingSessionPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message key="labels.crud_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message
+													key="labels.crud_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

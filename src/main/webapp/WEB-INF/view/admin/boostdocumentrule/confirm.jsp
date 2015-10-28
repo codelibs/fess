@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.boost_document_rule_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.boost_document_rule_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -12,7 +13,7 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="boostDocumentRule" />
 		</jsp:include>
-		
+
 		<div class="content-wrapper">
 
 			<%-- Content Header --%>
@@ -25,16 +26,20 @@
 							<la:message key="labels.boost_document_rule_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -52,7 +57,7 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box">
+							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -70,7 +75,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/boostdocumentrule">
+										<span class="label label-default"><la:link
+												href="/admin/boostdocumentrule">
 												<la:message key="labels.boost_document_rule_link_list" />
 											</la:link></span>
 									</div>
@@ -80,9 +86,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert-message info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -91,15 +95,18 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message key="labels.boost_document_rule_url_expr" /></th>
+												<th class="col-xs-2"><la:message
+														key="labels.boost_document_rule_url_expr" /></th>
 												<td>${f:h(urlExpr)}<la:hidden property="urlExpr" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.boost_document_rule_boost_expr" /></th>
+												<th><la:message
+														key="labels.boost_document_rule_boost_expr" /></th>
 												<td>${f:h(boostExpr)}<la:hidden property="boostExpr" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.boost_document_rule_sort_order" /></th>
+												<th><la:message
+														key="labels.boost_document_rule_sort_order" /></th>
 												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
 										</tbody>
@@ -109,31 +116,50 @@
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<input type="submit" class="btn" name="createagain" value="<la:message key="labels.boost_document_rule_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="create"
-											value="<la:message key="labels.boost_document_rule_button_create"/>"
-										/>
+										<button type="submit" class="btn" name="createagain"
+											value="<la:message key="labels.boost_document_rule_button_back" />">
+											<la:message key="labels.boost_document_rule_button_back" />
+										</button>
+										<button type="submit" class="btn btn-primary" name="create"
+											value="<la:message key="labels.boost_document_rule_button_create" />">
+											<la:message key="labels.boost_document_rule_button_create" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<input type="submit" class="btn" name="editagain" value="<la:message key="labels.boost_document_rule_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="update"
-											value="<la:message key="labels.boost_document_rule_button_update"/>"
-										/>
+										<button type="submit" class="btn" name="editagain"
+											value="<la:message key="labels.boost_document_rule_button_back" />">
+											<la:message key="labels.boost_document_rule_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning" name="update"
+											value="<la:message key="labels.boost_document_rule_button_update" />">
+											<la:message key="labels.boost_document_rule_button_update" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.boost_document_rule_button_back"/>" />
-										<input type="submit" class="btn btn-primary" name="delete"
-											value="<la:message key="labels.boost_document_rule_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.boost_document_rule_button_back" />">
+											<la:message key="labels.boost_document_rule_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.boost_document_rule_button_delete" />">
+											<la:message key="labels.boost_document_rule_button_delete" />
+										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<input type="submit" class="btn" name="back" value="<la:message key="labels.boost_document_rule_button_back"/>" />
-										<input type="submit" class="btn" name="editfromconfirm"
-											value="<la:message key="labels.boost_document_rule_button_edit"/>"
-										/>
-										<input type="submit" class="btn" name="deletefromconfirm"
-											value="<la:message key="labels.boost_document_rule_button_delete"/>"
-										/>
+										<button type="submit" class="btn" name="back"
+											value="<la:message key="labels.boost_document_rule_button_back" />">
+											<la:message key="labels.boost_document_rule_button_back" />
+										</button>
+										<button type="submit" class="btn btn-warning"
+											name="editfromconfirm"
+											value="<la:message key="labels.boost_document_rule_button_edit" />">
+											<la:message key="labels.boost_document_rule_button_edit" />
+										</button>
+										<button type="submit" class="btn btn-danger"
+											name="deletefromconfirm"
+											value="<la:message key="labels.boost_document_rule_button_delete" />">
+											<la:message key="labels.boost_document_rule_button_delete" />
+										</button>
 									</c:if>
 								</div>
 							</div>
