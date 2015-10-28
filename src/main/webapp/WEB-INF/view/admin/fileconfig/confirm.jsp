@@ -211,7 +211,7 @@
 											value="<la:message key="labels.file_crawling_button_back" />">
 											<la:message key="labels.file_crawling_button_back" />
 										</button>
-										<button type="submit" class="btn btn-primary" name="create"
+										<button type="submit" class="btn btn-success" name="create"
 											value="<la:message key="labels.file_crawling_button_create" />">
 											<la:message key="labels.file_crawling_button_create" />
 										</button>

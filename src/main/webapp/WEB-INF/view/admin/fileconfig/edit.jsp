@@ -174,8 +174,8 @@
 										</button>
 										<button type="submit" class="btn btn-success"
 											name="confirmfromcreate"
-											value="<la:message key="labels.file_crawling_button_create" />">
-											<la:message key="labels.file_crawling_button_create" />
+											value="<la:message key="labels.file_crawling_button_confirm" />">
+											<la:message key="labels.file_crawling_button_confirm" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">

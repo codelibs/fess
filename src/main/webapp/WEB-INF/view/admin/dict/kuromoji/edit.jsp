@@ -130,8 +130,8 @@
 										</button>
 										<button type="submit" class="btn btn-success"
 											name="confirmfromcreate"
-											value="<la:message key="labels.dict_kuromoji_button_create" />">
-											<la:message key="labels.dict_kuromoji_button_create" />
+											value="<la:message key="labels.dict_kuromoji_button_confirm" />">
+											<la:message key="labels.dict_kuromoji_button_confirm" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
