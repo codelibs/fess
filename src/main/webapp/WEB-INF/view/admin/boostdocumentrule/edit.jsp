@@ -53,7 +53,8 @@
 					<la:hidden property="createdTime" />
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box box-warning">
+							<div
+								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -65,7 +66,8 @@
 										</c:if>
 									</h3>
 									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/boostdocumentrule">
+										<span class="label label-default"><la:link
+												href="/admin/boostdocumentrule">
 												<la:message key="labels.boost_document_rule_link_list" />
 											</la:link></span>
 									</div>
@@ -75,24 +77,25 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert alert-info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="urlExpr"><la:message key="labels.boost_document_rule_url_expr" /></label>
+										<label for="urlExpr"><la:message
+												key="labels.boost_document_rule_url_expr" /></label>
 										<la:text property="urlExpr" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="boostExpr"><la:message key="labels.boost_document_rule_boost_expr" /></label>
+										<label for="boostExpr"><la:message
+												key="labels.boost_document_rule_boost_expr" /></label>
 										<la:text property="boostExpr" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message key="labels.boost_document_rule_sort_order" /></label>
+										<label for="sortOrder"><la:message
+												key="labels.boost_document_rule_sort_order" /></label>
 										<la:text property="sortOrder" styleClass="form-control" />
 									</div>
 								</div>
