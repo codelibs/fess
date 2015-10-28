@@ -50,6 +50,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -87,17 +88,8 @@ public class CrawlingSessionService implements Serializable {
         return crawlingSessionList;
     }
 
-    public CrawlingSession getCrawlingSession(final Map<String, String> keys) {
-        final CrawlingSession crawlingSession = crawlingSessionBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (crawlingSession == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return crawlingSession;
+    public OptionalEntity<CrawlingSession> getCrawlingSession(final String id) {
+        return crawlingSessionBhv.selectByPK(id);
     }
 
     public void store(final CrawlingSession crawlingSession) {

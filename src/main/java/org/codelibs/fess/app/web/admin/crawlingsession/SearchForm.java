@@ -17,16 +17,16 @@
 package org.codelibs.fess.app.web.admin.crawlingsession;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import javax.validation.constraints.Size;
 
 /**
  * @author codelibs
  * @author Shunji Makino
  */
-public class CrawlingSessionSearchForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    public String id;
 }

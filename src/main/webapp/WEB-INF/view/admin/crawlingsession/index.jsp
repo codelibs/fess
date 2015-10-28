@@ -41,7 +41,7 @@
 										<label for="sessionIdSearchBtn"><la:message
 												key="labels.crawling_session_session_id_search" /></label>
 										<la:text styleId="sessionIdSearchBtn"
-											property="searchParams.sessionId"></la:text>
+											property="id"></la:text>
 										<input type="submit" class="btn small primary" name="search"
 											value="<la:message key="labels.crawling_session_search"/>" /> <input
 											type="submit" class="btn small" name="reset"
