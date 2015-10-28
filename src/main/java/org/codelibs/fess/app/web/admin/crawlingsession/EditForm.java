@@ -18,34 +18,39 @@ package org.codelibs.fess.app.web.admin.crawlingsession;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
  * @author codelibs
  * @author Shunji Makino
  */
-public class CrawlingSessionEditForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
+    @Digits(integer = 10, fraction = 0)
     public int crudMode;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
+    @Required
+    @Size(max = 1000)
     public String id;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 20)
+    @Required
+    @Size(max = 20)
     public String sessionId;
 
-    //@Maxbytelength(maxbytelength = 20)
+    @Size(max = 20)
     public String name;
 
-    //@DateType
     public String expiredTime;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@DateType
-    public String createdTime;
+    @Required
+    public Long createdTime;
 
     public void initialize() {
 
