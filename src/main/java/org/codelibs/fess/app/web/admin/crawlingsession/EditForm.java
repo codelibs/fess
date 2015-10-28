@@ -17,16 +17,45 @@
 package org.codelibs.fess.app.web.admin.crawlingsession;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Shunji Makino
  */
-public class CrawlingSessionSearchForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    @Digits(integer = 10, fraction = 0)
+    public int crudMode;
+
+    @Required
+    @Size(max = 1000)
+    public String id;
+
+    @Required
+    @Size(max = 20)
+    public String sessionId;
+
+    @Size(max = 20)
+    public String name;
+
+    public String expiredTime;
+
+    public Long createdTime;
+
+    public void initialize() {
+
+        id = null;
+        sessionId = null;
+        name = null;
+        expiredTime = null;
+        createdTime = null;
+
+    }
 }

@@ -19,41 +19,12 @@ package org.codelibs.fess.app.web.admin.crawlingsession;
 import java.io.Serializable;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Shunji Makino
  */
-public class CrawlingSessionEditForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
-    public int crudMode;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
-    public String id;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 20)
     public String sessionId;
-
-    //@Maxbytelength(maxbytelength = 20)
-    public String name;
-
-    //@DateType
-    public String expiredTime;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@DateType
-    public String createdTime;
-
-    public void initialize() {
-
-        id = null;
-        sessionId = null;
-        name = null;
-        expiredTime = null;
-        createdTime = null;
-
-    }
 }

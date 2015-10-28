@@ -46,14 +46,14 @@
 										<label for="sessionIdSearchBtn"><la:message
 												key="labels.crawling_session_session_id_search" /></label>
 										<la:text styleId="sessionIdSearchBtn"
-											property="searchParams.sessionId" styleClass="form-control"></la:text>
+											property="sessionId" styleClass="form-control"></la:text>
 									</div>
 									<div class="form-group">
 										<button type="submit" class="btn btn-primary" name="search"
 											value="<la:message key="labels.crawling_session_search" />">
 											<la:message key="labels.crawling_session_search" />
 										</button>
-										<button type="reset" class="btn btn-secondary" name="reset"
+										<button type="submit" class="btn btn-secondary" name="reset"
 											value="<la:message key="labels.crawling_session_reset" />">
 											<la:message key="labels.crawling_session_reset" />
 										</button>
@@ -81,8 +81,6 @@
 														key="labels.crawling_session_session_id" /></th>
 												<th><la:message
 														key="labels.crawling_session_created_time" /></th>
-												<th><la:message
-														key="labels.crawling_session_expired_time" /></th>
 											</tr>
 										</thead>
 										<tbody>
@@ -91,17 +89,7 @@
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
 													data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.sessionId)}</td>
-													<td>${f:h(data.createdTime)}</td>
-													<td><c:if test="${data.expiredTime==null}">
-															<la:message key="labels.none" />
-														</c:if> <c:if test="${data.expiredTime!=null}">${f:h(data.expiredTime)}</c:if>
-													</td>
-													<td style="overflow-x: auto;"><la:link
-															href="confirmpage/4/${f:u(data.id)}">
-															<la:message key="labels.crawling_session_link_details" />
-														</la:link> <la:link href="deletepage/3/${f:u(data.id)}">
-															<la:message key="labels.crawling_session_link_delete" />
-														</la:link></td>
+													<td><fmt:formatDate value="${fe:date(data.createdTime)}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
 												</tr>
 											</c:forEach>
 										</tbody>

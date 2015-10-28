@@ -16,9 +16,6 @@
 
 package org.codelibs.fess.app.web.admin.crawlingsession;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -26,7 +23,6 @@ import org.codelibs.fess.app.pager.CrawlingSessionPager;
 import org.codelibs.fess.app.service.CrawlingSessionService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.exentity.CrawlingSession;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -67,21 +63,22 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse deleteall(final CrawlingSessionEditForm form) {
+    public HtmlResponse deleteall(final EditForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
         saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse index(final CrawlingSessionSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final CrawlingSessionSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         crawlingSessionPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -89,15 +86,15 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final CrawlingSessionSearchForm form) {
-        copyBeanToBean(form.searchParams, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final CrawlingSessionSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         crawlingSessionPager.clear();
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -105,17 +102,17 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final CrawlingSessionSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final CrawlingSessionSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(crawlingSessionPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(crawlingSessionPager, form, op -> op.include("sessionId"));
     }
 
     // ===================================================================================
@@ -125,18 +122,32 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final CrawlingSessionEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadCrawlingSession(form);
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminCrawlingsession_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final CrawlingSessionEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
-        loadCrawlingSession(form);
+        validate(form, messages -> {}, toIndexHtml());
+        String id = form.id;
+        crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+        });
         return asHtml(path_AdminCrawlingsession_ConfirmJsp);
     }
 
@@ -144,50 +155,48 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final CrawlingSessionEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadCrawlingSession(form);
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminCrawlingsession_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                });
+            });
+        });
     }
 
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
     @Execute
-    public HtmlResponse delete(final CrawlingSessionEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        crawlingSessionService.delete(getCrawlingSession(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toIndexHtml());
+        String id = form.id;
+        crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {
+            crawlingSessionService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadCrawlingSession(final CrawlingSessionEditForm form) {
-        copyBeanToBean(getCrawlingSession(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected CrawlingSession getCrawlingSession(final CrawlingSessionEditForm form) {
-        final CrawlingSession crawlingSession = crawlingSessionService.getCrawlingSession(createKeyMap(form));
-        return crawlingSession;
-    }
-
-    protected Map<String, String> createKeyMap(final CrawlingSessionEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
-    }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final CrawlingSessionEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toIndexHtml());
         }
     }

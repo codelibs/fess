@@ -94,8 +94,7 @@
 											<tr>
 												<th><la:message
 														key="labels.crawling_session_session_id" /></th>
-												<td><la:link
-														href="${f:url('/admin/searchList/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</la:link>
+												<td><a href="${f:url('/admin/searchlist/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
 													<la:hidden property="sessionId" /></td>
 											</tr>
 											<tr>
@@ -127,13 +126,13 @@
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="delete"
-											value="<la:message key="labels.crawling_session_button_delete" />">
-											<la:message key="labels.crawling_session_button_delete" />
-										</button>
 										<button type="submit" class="btn" name="back"
 											value="<la:message key="labels.crawling_session_button_back" />">
 											<la:message key="labels.crawling_session_button_back" />
+										</button>
+										<button type="submit" class="btn btn-danger" name="delete"
+											value="<la:message key="labels.crawling_session_button_delete" />">
+											<la:message key="labels.crawling_session_button_delete" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
@@ -141,7 +140,7 @@
 											value="<la:message key="labels.crawling_session_button_back" />">
 											<la:message key="labels.crawling_session_button_back" />
 										</button>
-										<button type="submit" class="btn" name="deletefromconfirm"
+										<button type="submit" class="btn btn-danger" name="deletefromconfirm"
 											value="<la:message key="labels.crawling_session_button_delete" />">
 											<la:message key="labels.crawling_session_button_delete" />
 										</button>
