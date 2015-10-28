@@ -4,8 +4,8 @@
 
         <!-- Logo -->
         <la:link href="/admin/" styleClass="logo">
-          <span class="logo-mini"><la:message key="labels.header.logo_alt" /></span>
-          <span class="logo-lg"><la:message key="labels.admin_dashboard_title" /></span>
+          <span class="logo-mini"><b><la:message key="labels.admin_brand_title" /></b></span>
+          <span class="logo-lg"><b><la:message key="labels.admin_brand_title" /></b> <la:message key="labels.admin_dashboard_title" /></span>
         </la:link>
 
         <!-- Header Navbar -->
