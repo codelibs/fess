@@ -228,10 +228,10 @@ public class CrawlJob {
         // -cp
         crawlerCmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
-        // WEB-INF/cmd/resources
+        // WEB-INF/crawler/resources
         buf.append("WEB-INF");
         buf.append(File.separator);
-        buf.append("cmd");
+        buf.append("crawler");
         buf.append(File.separator);
         buf.append("resources");
         buf.append(cpSeparator);
@@ -249,8 +249,8 @@ public class CrawlJob {
         }
         // WEB-INF/lib
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
-        // WEB-INF/cmd/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/cmd/lib")), "WEB-INF/cmd" + File.separator + "lib"
+        // WEB-INF/crawler/lib
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/crawler/lib")), "WEB-INF/crawler" + File.separator + "lib"
                 + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
