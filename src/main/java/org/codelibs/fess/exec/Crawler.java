@@ -27,10 +27,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -41,26 +43,22 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.FieldHelper;
-import org.codelibs.fess.helper.MailHelper;
 import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.ResourceUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
 
 public class Crawler implements Serializable {
 
@@ -71,8 +69,6 @@ public class Crawler implements Serializable {
     private static final String WEB_FS_CRAWLING_PROCESS = "WebFsCrawler";
 
     private static final String DATA_CRAWLING_PROCESS = "DataStoreCrawler";
-
-    private static final String MAIL_TEMPLATE_NAME = "crawler";
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -91,11 +87,6 @@ public class Crawler implements Serializable {
 
     @Resource
     protected DynamicProperties crawlerProperties;
-
-    @Resource
-    protected MailHelper mailHelper;
-
-    public String notificationSubject = "[FESS] Crawler completed";
 
     protected static class Options {
 
@@ -304,15 +295,17 @@ public class Crawler implements Serializable {
                 // ignore
             }
 
-            final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getMailTemplatePath(StringUtil.EMPTY).toFile());
-            final Handlebars handlebars = new Handlebars(loader);
-
             try {
-                final Template template = handlebars.compile(MAIL_TEMPLATE_NAME);
-                final Context hbsContext = Context.newContext(dataMap);
-                final String body = template.apply(hbsContext);
-
-                mailHelper.send(toAddresses, notificationSubject, body);
+                FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
+                Postbox postbox = ComponentUtil.getComponent(Postbox.class);
+                CrawlerPostcard.droppedInto(postbox, postcard -> {
+                    postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
+                    postcard.addReplyTo(fessConfig.getMailReturnPath());
+                    Stream.of(toAddresses).forEach(address -> {
+                        postcard.addTo(address);
+                    });
+                    BeanUtil.copyMapToBean(dataMap, postcard);
+                });
             } catch (final Exception e) {
                 logger.warn("Failed to send the notification.", e);
             }

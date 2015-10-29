@@ -37,7 +37,6 @@ import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
-import org.codelibs.fess.helper.MailHelper;
 import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.QueryHelper;
@@ -66,8 +65,6 @@ public final class ComponentUtil {
     private static final String USER_AGENT_NAME = "userAgentName";
 
     private static final String INDEX_UPDATER = "indexUpdater";
-
-    private static final String MAIL_HELPER = "mailHelper";
 
     private static final String FILE_TYPE_HELPER = "fileTypeHelper";
 
@@ -214,10 +211,6 @@ public final class ComponentUtil {
 
     public static JobExecutor getJobExecutor(final String name) {
         return SingletonLaContainer.getComponent(name + JOB_EXECUTOR_SUFFIX);
-    }
-
-    public static MailHelper getMailHelper() {
-        return SingletonLaContainer.getComponent(MAIL_HELPER);
     }
 
     public static FileTypeHelper getFileTypeHelper() {

@@ -509,7 +509,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: General */
     public static final String LABELS_menu_crawl_config = "{labels.menu_crawl_config}";
 
-    /** The key of the message: Scheduled Job */
+    /** The key of the message: Scheduler */
     public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
 
     /** The key of the message: System */
@@ -518,7 +518,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Index */
     public static final String LABELS_menu_document_config = "{labels.menu_document_config}";
 
-    /** The key of the message: Design */
+    /** The key of the message: Page Design */
     public static final String LABELS_menu_design = "{labels.menu_design}";
 
     /** The key of the message: Dictionary */
@@ -628,6 +628,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Help */
     public static final String LABELS_HEADER_HELP = "{labels.header.help}";
+
+    /** The key of the message: Search... */
+    public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
     /** The key of the message: Copyright(C) 2009-2015 CodeLibs Project. <span class="br-phone"></span>All Rights Reserved. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
@@ -1517,7 +1520,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_crawling_session_next_page = "{labels.crawling_session_next_page}";
 
-    /** The key of the message: Session ID:  */
+    /** The key of the message: Session ID */
     public static final String LABELS_crawling_session_session_id_search = "{labels.crawling_session_session_id_search}";
 
     /** The key of the message: Session ID */
@@ -2051,7 +2054,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Edit */
     public static final String LABELS_key_match_button_edit = "{labels.key_match_button_edit}";
 
-    /** The key of the message: Design */
+    /** The key of the message: Page Design */
     public static final String LABELS_design_configuration = "{labels.design_configuration}";
 
     /** The key of the message: File Upload */
@@ -2273,7 +2276,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Crawling Configuration */
     public static final String LABELS_wizard_crawling_config_title = "{labels.wizard_crawling_config_title}";
 
-    /** The key of the message: Crawling Setting */
+    /** The key of the message: Crawling Settings */
     public static final String LABELS_wizard_crawling_setting_title = "{labels.wizard_crawling_setting_title}";
 
     /** The key of the message: Name */
@@ -2333,7 +2336,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Skip */
     public static final String LABELS_wizard_button_finish = "{labels.wizard_button_finish}";
 
-    /** The key of the message: Search Result */
+    /** The key of the message: Search */
     public static final String LABELS_search_list_configuration = "{labels.search_list_configuration}";
 
     /** The key of the message: Type a search query. */
@@ -2470,6 +2473,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Confirm */
     public static final String LABELS_failure_url_link_confirm = "{labels.failure_url_link_confirm}";
+
+    /** The key of the message: Delete All */
+    public static final String LABELS_failure_url_delete_all_link = "{labels.failure_url_delete_all_link}";
 
     /** The key of the message: Do you want to delete all? */
     public static final String LABELS_failure_url_delete_all_confirmation = "{labels.failure_url_delete_all_confirmation}";
@@ -3607,7 +3613,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Fess */
     public static final String LABELS_admin_brand_title = "{labels.admin_brand_title}";
 
-    /** The key of the message: Fess Dashboard */
+    /** The key of the message: Dashboard */
     public static final String LABELS_admin_dashboard_title = "{labels.admin_dashboard_title}";
 
     /** The key of the message: Toggle navigation */

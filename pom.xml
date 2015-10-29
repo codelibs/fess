@@ -43,6 +43,7 @@
 		<lasta.taglib.version>0.6.0</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
+		<mailflute.version>0.4.2</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.12</slf4j.version>
@@ -435,6 +436,11 @@
 			<version>0.3.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>56.1</version>
@@ -457,16 +463,9 @@
 
 		<!-- mail -->
 		<dependency>
-			<!-- TODO remove -->
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>1.5.2</version>
-		</dependency>
-		<dependency>
-			<!-- TODO remove -->
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
+			<groupId>org.dbflute.mail</groupId>
+			<artifactId>mailflute</artifactId>
+			<version>${mailflute.version}</version>
 		</dependency>
 
 		<!-- csv -->
@@ -503,10 +502,9 @@
 
 		<!-- template -->
 		<dependency>
-			<!-- TODO remove with lasta -->
 			<groupId>com.github.jknack</groupId>
 			<artifactId>handlebars</artifactId>
-			<version>2.2.2</version>
+			<version>2.3.2</version>
 		</dependency>
 
 		<!-- groovy -->

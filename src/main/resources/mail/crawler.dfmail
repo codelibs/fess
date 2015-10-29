@@ -1,0 +1,43 @@
+/*
+ [Crawler Notification]
+ Crawler notification mail.
+*/
+subject: [FESS] Crawler completed: /*pmb.hostname*/
+>>>
+--- Server Info ---
+Host Name: /*IF pmb.hostname != null*//*pmb.hostname*//*END*//*IF pmb.hostname == null*/Unknown/*END*/
+/*IF pmb.webFsIndexSize != null*/
+--- Web/FileSystem Crawler ---
+Start Time: /*pmb.webFsCrawlStartTime*/
+End Time:   /*pmb.webFsCrawlEndTime*/
+Exec Time:  /*pmb.webFsCrawlExecTime*/ms
+
+--- Web/FileSystem Indexer ---
+Exec Time:  /*pmb.webFsIndexExecTime*/
+Num of Doc: /*pmb.webFsIndexSize*/ docs
+/*END*//*IF pmb.dataFsIndexSize != null*/
+--- Data Store Crawler ---
+Start Time: /*pmb.dataCrawlStartTime*/
+End Time:   /*pmb.dataCrawlEndTime*/
+Exec Time:  /*pmb.dataCrawlExecTime*/ms
+
+--- Data Store Indexer ---
+Exec Time:  /*pmb.dataIndexExecTime*/
+Num of Doc: /*pmb.dataFsIndexSize*/ docs
+/*END*//*IF pmb.commitExecTime != null*/
+--- Indexer(Commit) ---
+Start Time: /*pmb.commitStartTime*/
+End Time:   /*pmb.commitEndTime*/
+Exec Time:  /*pmb.commitExecTime*/ms
+/*END*//*IF pmb.optimizeEndTime*/
+--- Indexer(Optimize) ---
+Start Time: /*pmb.optimizeStartTime*/
+End Time:   /*pmb.optimizeEndTime*/
+Exec Time:  /*pmb.optimizeExecTime*/ms
+/*END*/
+--- Total ---
+Start Time: /*pmb.crawlerStartTime*/
+End Time:   /*pmb.crawlerEndTime*/
+Exec Time:  /*pmb.crawlerExecTime*/ms
+Status:     /*IF pmb.success != null*/Success/*END*//*IF pmb.success == null*/Fail/*END*/
+

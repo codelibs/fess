@@ -1,0 +1,13 @@
+/*
+ [Crawler Notification]
+*/
+subject: [FESS] Status Change: /*pmb.hostname*/
+>>>
+--- Server Info ---
+Host Name: /*IF pmb.hostname != null*//*pmb.hostname*//*END*//*IF pmb.hostname == null*/Unknown/*END*/
+Elasticsearch: /*pmb.server*/
+
+--- Status ---
+/*IF pmb.statusBefore != null*/Status: /*pmb.statusBefore*/ -> /*pmb.statusAfter*//*END*/
+/*IF pmb.indexBefore != null*/Index: /*pmb.indexBefore*/ -> /*pmb.indexAfter*//*END*/
+

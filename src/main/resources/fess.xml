@@ -121,15 +121,6 @@
 	</component>
 	<component name="crawlingSessionHelper" class="org.codelibs.fess.helper.CrawlingSessionHelper">
 	</component>
-	<component name="mailHelper" class="org.codelibs.fess.helper.MailHelper">
-		<postConstruct name="addProperty">
-			<arg>"mail.smtp.host"</arg>
-			<arg>"localhost"</arg>
-		</postConstruct>
-		<!--
-		<property name="from">"Administrator &lt;root@localhost&gt;"</property>
-		-->
-	</component>
 	<component name="roleQueryHelper" class="org.codelibs.fess.helper.impl.RoleQueryHelperImpl">
 		<!-- ex. parameter: fessRoles=123%0aadmin -->
 		<!-- 
