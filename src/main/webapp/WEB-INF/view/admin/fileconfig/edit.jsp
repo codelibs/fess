@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.file_crawling_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.file_crawling_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.file_crawling_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.file_crawling_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.file_crawling_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.file_crawling_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.file_crawling_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.file_crawling_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -50,7 +55,7 @@
 					</c:if>
 					<la:hidden property="createdBy" />
 					<la:hidden property="createdTime" />
-					<la:hidden property="sortOrder"/>
+					<la:hidden property="sortOrder" />
 					<div class="row">
 						<div class="col-md-12">
 							<div
@@ -65,10 +70,11 @@
 											<la:message key="labels.file_crawling_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/fileconfig">
-												<la:message key="labels.file_crawling_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/fileconfig"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.file_crawling_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -76,9 +82,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert alert-info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -92,26 +96,36 @@
 									</div>
 									<div class="form-group">
 										<label for="paths"><la:message key="labels.paths" /></label>
-										<la:textarea property="paths" styleClass="form-control" rows="5" />
+										<la:textarea property="paths" styleClass="form-control"
+											rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="includedPaths"><la:message key="labels.included_paths" /></label>
-										<la:textarea property="includedPaths" styleClass="form-control" rows="5" />
+										<label for="includedPaths"><la:message
+												key="labels.included_paths" /></label>
+										<la:textarea property="includedPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="excludedPaths"><la:message key="labels.excluded_paths" /></label>
-										<la:textarea property="excludedPaths" styleClass="form-control" rows="5" />
+										<label for="excludedPaths"><la:message
+												key="labels.excluded_paths" /></label>
+										<la:textarea property="excludedPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="includedDocPaths"><la:message key="labels.included_doc_paths" /></label>
-										<la:textarea property="includedDocPaths" styleClass="form-control" rows="5" />
+										<label for="includedDocPaths"><la:message
+												key="labels.included_doc_paths" /></label>
+										<la:textarea property="includedDocPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="excludedDocPaths"><la:message key="labels.excluded_doc_paths" /></label>
-										<la:textarea property="excludedDocPaths" styleClass="form-control" rows="5" />
+										<label for="excludedDocPaths"><la:message
+												key="labels.excluded_doc_paths" /></label>
+										<la:textarea property="excludedDocPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="configParameter"><la:message key="labels.config_parameter" /></label>
+										<label for="configParameter"><la:message
+												key="labels.config_parameter" /></label>
 										<la:text property="configParameter" styleClass="form-control" />
 									</div>
 									<div class="form-group">
@@ -119,15 +133,18 @@
 										<la:text property="depth" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="maxAccessCount"><la:message key="labels.max_access_count" /></label>
+										<label for="maxAccessCount"><la:message
+												key="labels.max_access_count" /></label>
 										<la:text property="maxAccessCount" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="numOfThread"><la:message key="labels.number_of_thread" /></label>
+										<label for="numOfThread"><la:message
+												key="labels.number_of_thread" /></label>
 										<la:text property="numOfThread" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="intervalTime"><la:message key="labels.interval_time" /></label>
+										<label for="intervalTime"><la:message
+												key="labels.interval_time" /></label>
 										<div class="form-inline">
 											<la:text property="intervalTime" styleClass="form-control" />
 											<la:message key="labels.millisec" />
@@ -138,23 +155,28 @@
 										<la:text property="boost" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
-										<la:select property="roleTypeIds" multiple="true" styleClass="form-control">
+										<label for="roleTypeIds"><la:message
+												key="labels.role_type" /></label>
+										<la:select property="roleTypeIds" multiple="true"
+											styleClass="form-control">
 											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
 												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
 											</c:forEach>
 										</la:select>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message key="labels.label_type" /></label>
-										<la:select property="labelTypeIds" multiple="true" styleClass="form-control">
+										<label for="roleTypeIds"><la:message
+												key="labels.label_type" /></label>
+										<la:select property="labelTypeIds" multiple="true"
+											styleClass="form-control">
 											<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
 												<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
 											</c:forEach>
 										</la:select>
 									</div>
 									<div class="form-group">
-										<label for="available"><la:message key="labels.available" /></label>
+										<label for="available"><la:message
+												key="labels.available" /></label>
 										<la:select property="available" styleClass="form-control">
 											<la:option value="true">
 												<la:message key="labels.enabled" />

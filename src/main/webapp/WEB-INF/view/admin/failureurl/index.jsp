@@ -44,7 +44,7 @@
 								<la:form styleClass="form-horizontal">
 									<div class="form-group">
 										<label for="searchParams.url"
-											class="col-sm-2 form-control-label"><la:message
+											class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
 											<la:text property="searchParams.url"
@@ -53,7 +53,7 @@
 									</div>
 									<div class="form-group row">
 										<label for="searchParams.errorCountMin"
-											class="col-sm-2 form-control-label"><la:message
+											class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_count" /></label>
 										<div class="col-xs-2">
 											<la:text property="searchParams.errorCountMin" size="2"
@@ -67,7 +67,7 @@
 									</div>
 									<div class="form-group">
 										<label for="searchParams.errorName"
-											class="col-sm-2 form-control-label"><la:message
+											class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
 											<la:text property="searchParams.errorName"
@@ -131,24 +131,28 @@
 							</div>
 							<%-- Box Footer --%>
 							<div class="box-footer">
-								<div class="span12 center">
-									<script>
-									<!--
-										function confirmToDeleteAll() {
-											if (confirm('<la:message key="labels.failure_url_delete_all_confirmation"/>')) {
-												return true;
-											} else {
-												return false;
-											}
-										}
-									// -->
-									</script>
-									<la:link href="deleteall"
-										onclick="return confirmToDeleteAll();"
-										styleClass="btn btn-danger">
-										<la:message key="labels.failure_url_delete_all_link" />
-									</la:link>
-								</div>
+								<c:if test="${failureUrlPager.allRecordCount != 0}">
+									<div class="row">
+										<div class="col-md-12">
+											<script>
+											<!--
+												function confirmToDeleteAll() {
+													if (confirm('<la:message key="labels.failure_url_delete_all_confirmation"/>')) {
+														return true;
+													} else {
+														return false;
+													}
+												}
+											// -->
+											</script>
+											<la:link href="deleteall"
+												onclick="return confirmToDeleteAll();"
+												styleClass="btn btn-danger">
+												<la:message key="labels.failure_url_delete_all_link" />
+											</la:link>
+										</div>
+									</div>
+								</c:if>
 								<%-- Paging Info --%>
 								<span><la:message key="labels.pagination_page_guide_msg"
 										arg0="${f:h(failureUrlPager.currentPageNumber)}"

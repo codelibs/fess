@@ -15,7 +15,6 @@
 		</jsp:include>
 
 		<div class="content-wrapper">
-
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
@@ -27,9 +26,7 @@
 						</la:link></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
@@ -41,24 +38,6 @@
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
-								<la:form styleClass="form-inline">
-									<div class="form-group">
-										<label for="sessionIdSearchBtn"><la:message
-												key="labels.crawling_session_session_id_search" /></label>
-										<la:text styleId="sessionIdSearchBtn"
-											property="sessionId" styleClass="form-control"></la:text>
-									</div>
-									<div class="form-group">
-										<button type="submit" class="btn btn-primary" name="search"
-											value="<la:message key="labels.crawling_session_search" />">
-											<la:message key="labels.crawling_session_search" />
-										</button>
-										<button type="submit" class="btn btn-secondary" name="reset"
-											value="<la:message key="labels.crawling_session_reset" />">
-											<la:message key="labels.crawling_session_reset" />
-										</button>
-									</div>
-								</la:form>
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
@@ -66,36 +45,62 @@
 									</la:info>
 									<la:errors />
 								</div>
-
-								<%-- List --%>
-								<c:if test="${crawlingSessionPager.allRecordCount == 0}">
-									<p class="callout callout-info">
-										<la:message key="labels.list_could_not_find_crud_table" />
-									</p>
-								</c:if>
-								<c:if test="${crawlingSessionPager.allRecordCount > 0}">
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th><la:message
-														key="labels.crawling_session_session_id" /></th>
-												<th><la:message
-														key="labels.crawling_session_created_time" /></th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach var="data" varStatus="s"
-												items="${crawlingSessionItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-													data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
-													<td>${f:h(data.sessionId)}</td>
-													<td><fmt:formatDate value="${fe:date(data.createdTime)}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
-								</c:if>
-
+								<div class="row">
+									<div class="col-sm-12">
+										<la:form styleClass="form-inline">
+											<div class="form-group">
+												<label for="sessionIdSearchBtn"><la:message
+														key="labels.crawling_session_session_id_search" /></label>
+												<la:text styleId="sessionIdSearchBtn" property="sessionId"
+													styleClass="form-control"></la:text>
+											</div>
+											<div class="form-group">
+												<button type="submit" class="btn btn-primary" name="search"
+													value="<la:message key="labels.crawling_session_search" />">
+													<la:message key="labels.crawling_session_search" />
+												</button>
+												<button type="submit" class="btn btn-secondary" name="reset"
+													value="<la:message key="labels.crawling_session_reset" />">
+													<la:message key="labels.crawling_session_reset" />
+												</button>
+											</div>
+										</la:form>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-12">
+										<%-- List --%>
+										<c:if test="${crawlingSessionPager.allRecordCount == 0}">
+											<p class="callout callout-info">
+												<la:message key="labels.list_could_not_find_crud_table" />
+											</p>
+										</c:if>
+										<c:if test="${crawlingSessionPager.allRecordCount > 0}">
+											<table class="table table-bordered table-striped">
+												<thead>
+													<tr>
+														<th><la:message
+																key="labels.crawling_session_session_id" /></th>
+														<th><la:message
+																key="labels.crawling_session_created_time" /></th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="data" varStatus="s"
+														items="${crawlingSessionItems}">
+														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+															data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
+															<td>${f:h(data.sessionId)}</td>
+															<td><fmt:formatDate
+																	value="${fe:date(data.createdTime)}"
+																	pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+										</c:if>
+									</div>
+								</div>
 							</div>
 							<%-- Box Footer --%>
 							<div class="box-footer">

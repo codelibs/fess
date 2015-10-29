@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.scheduledjob_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.scheduledjob_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -37,10 +38,10 @@
 								<h3 class="box-title">
 									<la:message key="labels.scheduledjob_link_list" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="createpage">
-											<la:message key="labels.scheduledjob_link_create_new" />
-										</la:link></span>
+								<div class="btn-group pull-right">
+									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+										<la:message key="labels.scheduledjob_link_create_new" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -48,9 +49,7 @@
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert alert-info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
@@ -68,26 +67,29 @@
 												<th><la:message key="labels.scheduledjob_name" /></th>
 												<th><la:message key="labels.scheduledjob_status" /></th>
 												<th><la:message key="labels.scheduledjob_target" /></th>
-												<th><la:message key="labels.scheduledjob_cronExpression" /></th>
+												<th><la:message
+														key="labels.scheduledjob_cronExpression" /></th>
 											</tr>
 										</thead>
 										<tbody>
-											<c:forEach var="data" varStatus="s" items="${scheduledJobItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/scheduledjob/confirmpage/4/${f:u(data.id)}">
-														<td>${f:h(data.name)}</td>
-														<td>
-																<c:if test="${data.running}">
-																		<la:message key="labels.scheduledjob_running" />
-																</c:if><c:if test="${!data.running}">
-																		<c:if test="${data.available=='T'}">
-																				<la:message key="labels.scheduledjob_active" />
-																		</c:if><c:if test="${data.available!='T'}">
-																				<la:message key="labels.scheduledjob_nojob" />
-																		</c:if>
-																</c:if>
-														</td>
-														<td>${f:h(data.target)}</td>
-														<td>${f:h(data.cronExpression)}</td>
+											<c:forEach var="data" varStatus="s"
+												items="${scheduledJobItems}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+													data-href="${contextPath}/admin/scheduledjob/confirmpage/4/${f:u(data.id)}">
+													<td>${f:h(data.name)}</td>
+													<td><c:if test="${data.running}">
+															<la:message key="labels.scheduledjob_running" />
+														</c:if>
+														<c:if test="${!data.running}">
+															<c:if test="${data.available=='T'}">
+																<la:message key="labels.scheduledjob_active" />
+															</c:if>
+															<c:if test="${data.available!='T'}">
+																<la:message key="labels.scheduledjob_nojob" />
+															</c:if>
+														</c:if></td>
+													<td>${f:h(data.target)}</td>
+													<td>${f:h(data.cronExpression)}</td>
 												</tr>
 											</c:forEach>
 										</tbody>
@@ -98,31 +100,38 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(scheduledJobPager.currentPageNumber)}"
-										arg1="${f:h(scheduledJobPager.allPageCount)}" arg2="${f:h(scheduledJobPager.allRecordCount)}"
-									/></span>
+								<span><la:message key="labels.pagination_page_guide_msg"
+										arg0="${f:h(scheduledJobPager.currentPageNumber)}"
+										arg1="${f:h(scheduledJobPager.allPageCount)}"
+										arg2="${f:h(scheduledJobPager.allRecordCount)}" /></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${scheduledJobPager.existPrePage}">
-										<li class="prev"><la:link href="list/${scheduledJobPager.currentPageNumber - 1}">
+										<li class="prev"><la:link
+												href="list/${scheduledJobPager.currentPageNumber - 1}">
 												<la:message key="labels.scheduledjob_link_prev_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!scheduledJobPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message key="labels.scheduledjob_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message
+													key="labels.scheduledjob_link_prev_page" /></a></li>
 									</c:if>
-									<c:forEach var="p" varStatus="s" items="${scheduledJobPager.pageNumberList}">
-										<li <c:if test="${p == scheduledJobPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
-										</li>
+									<c:forEach var="p" varStatus="s"
+										items="${scheduledJobPager.pageNumberList}">
+										<li
+											<c:if test="${p == scheduledJobPager.currentPageNumber}">class="active"</c:if>><la:link
+												href="list/${p}">${p}</la:link></li>
 									</c:forEach>
 									<c:if test="${scheduledJobPager.existNextPage}">
-										<li class="next"><la:link href="list/${scheduledJobPager.currentPageNumber + 1}">
+										<li class="next"><la:link
+												href="list/${scheduledJobPager.currentPageNumber + 1}">
 												<la:message key="labels.scheduledjob_link_next_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!scheduledJobPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message key="labels.scheduledjob_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message
+													key="labels.scheduledjob_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

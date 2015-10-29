@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.labeltype_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.labeltype_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -25,16 +26,20 @@
 							<la:message key="labels.labeltype_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.labeltype_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.labeltype_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.labeltype_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.labeltype_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.labeltype_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.labeltype_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.labeltype_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.labeltype_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -64,10 +69,11 @@
 											<la:message key="labels.labeltype_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/labeltype">
-												<la:message key="labels.labeltype_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/labeltype"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.labeltype_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -75,40 +81,47 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert alert-info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message key="labels.labeltype_name" /></label>
+										<label for="name"><la:message
+												key="labels.labeltype_name" /></label>
 										<la:text property="name" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="paths"><la:message key="labels.labeltype_value" /></label>
+										<label for="paths"><la:message
+												key="labels.labeltype_value" /></label>
 										<la:text property="value" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="includedPaths"><la:message key="labels.labeltype_included_paths" /></label>
-										<la:textarea property="includedPaths" styleClass="form-control" rows="5" />
+										<label for="includedPaths"><la:message
+												key="labels.labeltype_included_paths" /></label>
+										<la:textarea property="includedPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="excludedPaths"><la:message key="labels.labeltype_excluded_paths" /></label>
-										<la:textarea property="excludedPaths" styleClass="form-control" rows="5" />
+										<label for="excludedPaths"><la:message
+												key="labels.labeltype_excluded_paths" /></label>
+										<la:textarea property="excludedPaths"
+											styleClass="form-control" rows="5" />
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message key="labels.role_type" /></label>
-										<la:select property="roleTypeIds" multiple="true" styleClass="form-control">
+										<label for="roleTypeIds"><la:message
+												key="labels.role_type" /></label>
+										<la:select property="roleTypeIds" multiple="true"
+											styleClass="form-control">
 											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
 												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
 											</c:forEach>
 										</la:select>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>
+										<label for="sortOrder"><la:message
+												key="labels.sortOrder" /></label>
 										<la:text property="sortOrder" styleClass="form-control" />
 									</div>
 								</div>

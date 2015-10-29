@@ -69,11 +69,11 @@
 											<la:message key="labels.key_match_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/keymatch">
-												<la:message key="labels.key_match_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/keymatch"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.key_match_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

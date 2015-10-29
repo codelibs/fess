@@ -67,11 +67,11 @@
 											<la:message key="labels.role_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/role">
-												<la:message key="labels.role_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/role"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.role_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

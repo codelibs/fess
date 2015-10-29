@@ -70,11 +70,11 @@
 											<la:message key="labels.overlapping_host_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/overlappinghost">
-												<la:message key="labels.overlapping_host_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/overlappinghost"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.overlapping_host_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

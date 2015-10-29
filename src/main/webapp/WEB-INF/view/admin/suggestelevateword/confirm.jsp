@@ -75,11 +75,11 @@
 											<la:message key="labels.suggest_elevate_word_link_confirm" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/suggestelevateword">
-												<la:message key="labels.suggest_elevate_word_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/suggestelevateword"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.suggest_elevate_word_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

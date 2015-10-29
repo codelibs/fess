@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.boost_document_rule_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.boost_document_rule_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -12,7 +13,7 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="boostDocumentRule" />
 		</jsp:include>
-		
+
 		<div class="content-wrapper">
 			<%-- Content Header --%>
 			<section class="content-header">
@@ -36,10 +37,10 @@
 								<h3 class="box-title">
 									<la:message key="labels.boost_document_rule_link_list" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="createpage">
-											<la:message key="labels.boost_document_rule_link_create_new" />
-										</la:link></span>
+								<div class="btn-group pull-right">
+									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+										<la:message key="labels.boost_document_rule_link_create_new" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -47,9 +48,7 @@
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert alert-info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
@@ -63,12 +62,15 @@
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><la:message key="labels.boost_document_rule_list_url_expr" /></th>
+												<th><la:message
+														key="labels.boost_document_rule_list_url_expr" /></th>
 											</tr>
 										</thead>
 										<tbody>
-											<c:forEach var="data" varStatus="s" items="${boostDocumentRuleItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/boostdocumentrule/confirmpage/4/${f:u(data.id)}">
+											<c:forEach var="data" varStatus="s"
+												items="${boostDocumentRuleItems}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+													data-href="${contextPath}/admin/boostdocumentrule/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.urlExpr)}</td>
 												</tr>
 											</c:forEach>
@@ -80,31 +82,38 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(boostDocumentRulePager.currentPageNumber)}"
-										arg1="${f:h(boostDocumentRulePager.allPageCount)}" arg2="${f:h(boostDocumentRulePager.allRecordCount)}"
-									/></span>
+								<span><la:message key="labels.pagination_page_guide_msg"
+										arg0="${f:h(boostDocumentRulePager.currentPageNumber)}"
+										arg1="${f:h(boostDocumentRulePager.allPageCount)}"
+										arg2="${f:h(boostDocumentRulePager.allRecordCount)}" /></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${boostDocumentRulePager.existPrePage}">
-										<li class="prev"><la:link href="list/${boostDocumentRulePager.currentPageNumber - 1}">
+										<li class="prev"><la:link
+												href="list/${boostDocumentRulePager.currentPageNumber - 1}">
 												<la:message key="labels.boost_document_rule_link_prev_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!boostDocumentRulePager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message key="labels.boost_document_rule_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message
+													key="labels.boost_document_rule_link_prev_page" /></a></li>
 									</c:if>
-									<c:forEach var="p" varStatus="s" items="${boostDocumentRulePager.pageNumberList}">
-										<li <c:if test="${p == boostDocumentRulePager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
-										</li>
+									<c:forEach var="p" varStatus="s"
+										items="${boostDocumentRulePager.pageNumberList}">
+										<li
+											<c:if test="${p == boostDocumentRulePager.currentPageNumber}">class="active"</c:if>><la:link
+												href="list/${p}">${p}</la:link></li>
 									</c:forEach>
 									<c:if test="${boostDocumentRulePager.existNextPage}">
-										<li class="next"><la:link href="list/${boostDocumentRulePager.currentPageNumber + 1}">
+										<li class="next"><la:link
+												href="list/${boostDocumentRulePager.currentPageNumber + 1}">
 												<la:message key="labels.boost_document_rule_link_next_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!boostDocumentRulePager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message key="labels.boost_document_rule_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message
+													key="labels.boost_document_rule_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 
@@ -112,7 +121,7 @@
 						</div>
 					</div>
 				</div>
-					
+
 			</section>
 		</div>
 

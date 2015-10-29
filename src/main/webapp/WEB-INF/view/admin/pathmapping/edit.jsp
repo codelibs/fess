@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.path_mapping_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.path_mapping_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -12,7 +13,7 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="pathMapping" />
 		</jsp:include>
-			
+
 		<div class="content-wrapper">
 			<%-- Content Header --%>
 			<section class="content-header">
@@ -20,21 +21,25 @@
 					<la:message key="labels.path_mapping_title_details" />
 				</h1>
 				<ol class="breadcrumb">
-			
+
 					<li><la:link href="/admin/pathmapping">
 							<la:message key="labels.path_mapping_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.path_mapping_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.path_mapping_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.path_mapping_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.path_mapping_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.path_mapping_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -63,10 +68,11 @@
 											<la:message key="labels.path_mapping_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link href="/admin/pathmapping">
-												<la:message key="labels.path_mapping_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/pathmapping"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.path_mapping_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>
@@ -74,9 +80,7 @@
 									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
-											<div class="alert alert-info">
-												${msg}
-											</div>
+											<div class="alert alert-info">${msg}</div>
 										</la:info>
 										<la:errors />
 									</div>
@@ -86,25 +90,28 @@
 										<la:text property="regex" styleClass="form-control" />
 									</div>
 									<div class="form-group">
-										<label for="replacement"><la:message key="labels.replacement" /></label>
+										<label for="replacement"><la:message
+												key="labels.replacement" /></label>
 										<la:text property="replacement" styleClass="form-control" />
 									</div>
 									<div class="form-group">
- 										<label for="processType"><la:message key="labels.processType" /></label>
- 										<la:select property="processType" styleClass="form-control">
- 											<la:option value="C">
- 												<la:message key="labels.path_mapping_pt_crawling" />
- 											</la:option>
- 											<la:option value="D">
- 												<la:message key="labels.path_mapping_pt_displaying" />
- 											</la:option>
- 											<la:option value="B">
- 												<la:message key="labels.path_mapping_pt_both" />
- 											</la:option>
- 										</la:select>
- 									</div>
+										<label for="processType"><la:message
+												key="labels.processType" /></label>
+										<la:select property="processType" styleClass="form-control">
+											<la:option value="C">
+												<la:message key="labels.path_mapping_pt_crawling" />
+											</la:option>
+											<la:option value="D">
+												<la:message key="labels.path_mapping_pt_displaying" />
+											</la:option>
+											<la:option value="B">
+												<la:message key="labels.path_mapping_pt_both" />
+											</la:option>
+										</la:select>
+									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message key="labels.sortOrder" /></label>
+										<label for="sortOrder"><la:message
+												key="labels.sortOrder" /></label>
 										<la:text property="sortOrder" styleClass="form-control" />
 									</div>
 								</div>

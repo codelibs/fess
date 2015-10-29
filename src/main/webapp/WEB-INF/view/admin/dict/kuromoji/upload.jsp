@@ -38,27 +38,25 @@
 								<h3 class="box-title">
 									<la:message key="labels.dict_kuromoji_link_upload" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"> <la:link
-											href="/admin/dict/">
-											<la:message key="labels.dict_list_link" />
-										</la:link>
-									</span> <span class="label label-default"> <la:link
-											href="list/0/?dictId=${f:u(dictId)}">
-											<la:message key="labels.dict_kuromoji_list_link" />
-										</la:link>
-									</span> <span class="label label-default"> <la:link
-											href="createpage/${f:u(dictId)}">
-											<la:message key="labels.dict_kuromoji_link_create" />
-										</la:link>
-									</span> <span class="label label-default"> <la:link
-											href="downloadpage/${f:u(dictId)}">
-											<la:message key="labels.dict_kuromoji_link_download" />
-										</la:link>
-									</span> <span class="label label-default"> <a href="#"> <la:message
-												key="labels.dict_kuromoji_link_upload" />
-									</a>
-									</span>
+								<div class="btn-group pull-right">
+									<la:link href="/admin/dict" styleClass="btn btn-primary btn-xs">
+										<la:message key="labels.dict_list_link" />
+									</la:link>
+									<la:link href="list/0/?dictId=${f:u(dictId)}"
+										styleClass="btn btn-primary btn-xs">
+										<la:message key="labels.dict_kuromoji_list_link" />
+									</la:link>
+									<la:link href="createpage/${f:u(dictId)}"
+										styleClass="btn btn-create btn-xs">
+										<la:message key="labels.dict_kuromoji_link_create" />
+									</la:link>
+									<la:link href="#" styleClass="btn btn-primary btn-xs">
+										<la:message key="labels.dict_kuromoji_link_download" />
+									</la:link>
+									<la:link href="uploadpage/${f:u(dictId)}"
+										styleClass="btn btn-success btn-xs disabled">
+										<la:message key="labels.dict_kuromoji_link_upload" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>

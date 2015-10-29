@@ -182,15 +182,13 @@
 								</div>
 								<%-- Box Footer --%>
 								<div class="box-footer">
-									<button type="submit" class="btn btn-success" name="update"
+									<button type="submit" class="btn btn-success" name="upload"
 										value="<la:message key="labels.design_button_upload" />">
 										<la:message key="labels.design_button_upload" />
 									</button>
 								</div>
 							</la:form>
 						</div>
-					</div>
-					<div class="col-md-6">
 					</div>
 				</div>
 

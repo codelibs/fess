@@ -37,10 +37,11 @@
 								<h3 class="box-title">
 									<la:message key="labels.data_crawling_link_list" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="createpage">
-											<la:message key="labels.data_crawling_link_create_new" />
-										</la:link></span>
+								<div class="btn-group pull-right">
+									<la:link href="createpage"
+										styleClass="btn btn-success btn-xs">
+										<la:message key="labels.data_crawling_link_create_new" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>

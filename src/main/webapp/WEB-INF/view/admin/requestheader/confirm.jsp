@@ -75,11 +75,11 @@
 											<la:message key="labels.request_header_link_confirm" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/requestheader">
-												<la:message key="labels.request_header_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/requestheader"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.request_header_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

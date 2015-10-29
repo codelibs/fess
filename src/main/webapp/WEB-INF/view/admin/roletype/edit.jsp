@@ -70,11 +70,11 @@
 											<la:message key="labels.roletype_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/roletype">
-												<la:message key="labels.roletype_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/roletype"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.roletype_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

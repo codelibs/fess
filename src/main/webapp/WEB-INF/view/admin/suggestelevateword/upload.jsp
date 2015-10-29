@@ -40,20 +40,21 @@
 								<h3 class="box-title">
 									<la:message key="labels.suggest_elevate_word_link_upload" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link
-											href="/admin/suggestelevateword">
-											<la:message key="labels.suggest_elevate_word_link_list" />
-										</la:link></span> <span class="label label-default"><la:link
-											href="createpage">
-											<la:message key="labels.suggest_elevate_word_link_create_new" />
-										</la:link></span> <span class="label label-default"><la:link
-											href="downloadpage">
-											<la:message key="labels.suggest_elevate_word_link_download" />
-										</la:link></span> <span class="label label-default"><la:link
-											href="uploadpage">
-											<la:message key="labels.suggest_elevate_word_link_upload" />
-										</la:link></span>
+								<div class="btn-group pull-right">
+									<la:link href="/admin/suggestelevateword"
+										styleClass="btn btn-default btn-xs">
+										<la:message key="labels.suggest_elevate_word_link_list" />
+									</la:link>
+									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+										<la:message key="labels.suggest_elevate_word_link_create_new" />
+									</la:link>
+									<la:link href="downloadpage"
+										styleClass="btn btn-primary btn-xs">
+										<la:message key="labels.suggest_elevate_word_link_download" />
+									</la:link>
+									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
+										<la:message key="labels.suggest_elevate_word_link_upload" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>

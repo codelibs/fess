@@ -65,11 +65,11 @@
 											<la:message key="labels.boost_document_rule_link_update" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"><la:link
-												href="/admin/boostdocumentrule">
-												<la:message key="labels.boost_document_rule_link_list" />
-											</la:link></span>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/boostdocumentrule"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.boost_document_rule_link_list" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>

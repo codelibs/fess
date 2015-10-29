@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.suggest_bad_word_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.suggest_bad_word_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -24,7 +25,8 @@
 					<li class="active"><la:link href="/admin/suggestbadword">
 							<la:message key="labels.suggest_bad_word_link_list" />
 						</la:link></li>
-					<li class="active"><a href="#"><la:message key="labels.suggest_bad_word_link_download" /></a></li>
+					<li class="active"><a href="#"><la:message
+								key="labels.suggest_bad_word_link_download" /></a></li>
 				</ol>
 			</section>
 
@@ -38,19 +40,21 @@
 								<h3 class="box-title">
 									<la:message key="labels.suggest_bad_word_link_download" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="/admin/suggestbadword">
+								<div class="btn-group pull-right">
+									<la:link href="/admin/suggestbadword"
+										styleClass="btn btn-default btn-xs">
 										<la:message key="labels.suggest_bad_word_link_list" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="createpage">
+									</la:link>
+									<la:link href="createpage" styleClass="btn btn-success btn-xs">
 										<la:message key="labels.suggest_bad_word_link_create_new" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="downloadpage">
+									</la:link>
+									<la:link href="downloadpage"
+										styleClass="btn btn-primary btn-xs">
 										<la:message key="labels.suggest_bad_word_link_download" />
-										</la:link></span>
-									<span class="label label-default"><la:link href="uploadpage">
+									</la:link>
+									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
 										<la:message key="labels.suggest_bad_word_link_upload" />
-										</la:link></span>
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -59,8 +63,11 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message key="labels.suggest_bad_word_file" /></th>
-												<td><input name="download" value="<la:message key="labels.suggest_bad_word_button_download"/>" type="submit" /></td>
+												<th class="col-xs-2"><la:message
+														key="labels.suggest_bad_word_file" /></th>
+												<td><input name="download"
+													value="<la:message key="labels.suggest_bad_word_button_download"/>"
+													type="submit" /></td>
 											</tr>
 										</tbody>
 									</table>
@@ -68,9 +75,7 @@
 
 							</div>
 							<%-- Box Footer --%>
-							<div class="box-footer">
-
-							</div>
+							<div class="box-footer"></div>
 						</div>
 					</div>
 				</div>

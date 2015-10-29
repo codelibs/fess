@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.file_crawling_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.file_crawling_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -37,10 +38,10 @@
 								<h3 class="box-title">
 									<la:message key="labels.file_crawling_link_list" />
 								</h3>
-								<div class="box-tools pull-right">
-									<span class="label label-default"><la:link href="createpage">
-											<la:message key="labels.file_crawling_link_create_new" />
-										</la:link></span>
+								<div class="btn-group pull-right">
+									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+										<la:message key="labels.file_crawling_link_create_new" />
+									</la:link>
 								</div>
 							</div>
 							<%-- Box Body --%>
@@ -48,9 +49,7 @@
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert alert-info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
@@ -70,16 +69,17 @@
 											</tr>
 										</thead>
 										<tbody>
-											<c:forEach var="data" varStatus="s" items="${fileConfigItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}" data-href="${contextPath}/admin/fileconfig/confirmpage/4/${f:u(data.id)}">
+											<c:forEach var="data" varStatus="s"
+												items="${fileConfigItems}">
+												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+													data-href="${contextPath}/admin/fileconfig/confirmpage/4/${f:u(data.id)}">
 													<td>${f:h(data.name)}</td>
-													<td style="text-align: center;">
-														<c:if test="${data.available=='true'}">
+													<td style="text-align: center;"><c:if
+															test="${data.available=='true'}">
 															<la:message key="labels.enabled" />
 														</c:if> <c:if test="${data.available=='false'}">
 															<la:message key="labels.disabled" />
-														</c:if>
-													</td>
+														</c:if></td>
 												</tr>
 											</c:forEach>
 										</tbody>
@@ -90,31 +90,38 @@
 							<%-- Box Footer --%>
 							<div class="box-footer">
 								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg" arg0="${f:h(fileConfigPager.currentPageNumber)}"
-										arg1="${f:h(fileConfigPager.allPageCount)}" arg2="${f:h(fileConfigPager.allRecordCount)}"
-									/></span>
+								<span><la:message key="labels.pagination_page_guide_msg"
+										arg0="${f:h(fileConfigPager.currentPageNumber)}"
+										arg1="${f:h(fileConfigPager.allPageCount)}"
+										arg2="${f:h(fileConfigPager.allRecordCount)}" /></span>
 
 								<%-- Paging Navigation --%>
 								<ul class="pagination pagination-sm no-margin pull-right">
 									<c:if test="${fileConfigPager.existPrePage}">
-										<li class="prev"><la:link href="list/${fileConfigPager.currentPageNumber - 1}">
+										<li class="prev"><la:link
+												href="list/${fileConfigPager.currentPageNumber - 1}">
 												<la:message key="labels.file_crawling_link_prev_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!fileConfigPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message key="labels.file_crawling_link_prev_page" /></a></li>
+										<li class="prev disabled"><a href="#"><la:message
+													key="labels.file_crawling_link_prev_page" /></a></li>
 									</c:if>
-									<c:forEach var="p" varStatus="s" items="${fileConfigPager.pageNumberList}">
-										<li <c:if test="${p == fileConfigPager.currentPageNumber}">class="active"</c:if>><la:link href="list/${p}">${p}</la:link>
-										</li>
+									<c:forEach var="p" varStatus="s"
+										items="${fileConfigPager.pageNumberList}">
+										<li
+											<c:if test="${p == fileConfigPager.currentPageNumber}">class="active"</c:if>><la:link
+												href="list/${p}">${p}</la:link></li>
 									</c:forEach>
 									<c:if test="${fileConfigPager.existNextPage}">
-										<li class="next"><la:link href="list/${fileConfigPager.currentPageNumber + 1}">
+										<li class="next"><la:link
+												href="list/${fileConfigPager.currentPageNumber + 1}">
 												<la:message key="labels.file_crawling_link_next_page" />
 											</la:link></li>
 									</c:if>
 									<c:if test="${!fileConfigPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message key="labels.file_crawling_link_next_page" /></a></li>
+										<li class="next disabled"><a href="#"><la:message
+													key="labels.file_crawling_link_next_page" /></a></li>
 									</c:if>
 								</ul>
 

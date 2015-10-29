@@ -22,7 +22,7 @@
 					<la:message key="labels.dict_kuromoji_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="list">
+					<li><la:link href="list/1?dictId=${f:u(dictId)}">
 							<la:message key="labels.dict_kuromoji_list_link" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
@@ -73,49 +73,27 @@
 											<la:message key="labels.dict_kuromoji_link_confirm" />
 										</c:if>
 									</h3>
-									<div class="box-tools pull-right">
-										<span class="label label-default"> <la:link
-												href="../list">
-												<la:message key="labels.dict_list_link" />
-											</la:link>
-										</span> <span class="label label-default"> <la:link
-												href="list/1?dictId=${f:u(dictId)}">
-												<la:message key="labels.dict_kuromoji_list_link" />
-											</la:link>
-										</span>
-										<c:if test="${crudMode == 1}">
-											<span class="label label-default"> <a href="#"> <la:message
-														key="labels.dict_kuromoji_link_create" />
-											</a>
-											</span>
-										</c:if>
-										<c:if test="${crudMode == 2}">
-											<span class="label label-default"> <a href="#"> <la:message
-														key="labels.dict_kuromoji_link_update" />
-											</a>
-											</span>
-										</c:if>
-										<c:if test="${crudMode == 3}">
-											<span class="label label-default"> <a href="#"> <la:message
-														key="labels.dict_kuromoji_link_delete" />
-											</a>
-											</span>
-										</c:if>
-										<c:if test="${crudMode == 4}">
-											<span class="label label-default"> <a href="#"> <la:message
-														key="labels.dict_kuromoji_link_confirm" />
-											</a>
-											</span>
-										</c:if>
-										<span class="label label-default"> <la:link
-												href="downloadpage/${f:u(dictId)}">
-												<la:message key="labels.dict_kuromoji_link_download" />
-											</la:link>
-										</span> <span class="label label-default"> <la:link
-												href="uploadpage/${f:u(dictId)}">
-												<la:message key="labels.dict_kuromoji_link_upload" />
-											</la:link>
-										</span>
+									<div class="btn-group pull-right">
+										<la:link href="../"
+											styleClass="btn btn-default btn-xs">
+											<la:message key="labels.dict_list_link" />
+										</la:link>
+										<la:link href="list/1?dictId=${f:u(dictId)}"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.dict_kuromoji_list_link" />
+										</la:link>
+										<la:link href="createpage/${f:u(dictId)}"
+											styleClass="btn btn-success btn-xs">
+											<la:message key="labels.dict_kuromoji_link_create" />
+										</la:link>
+										<la:link href="downloadpage/${f:u(dictId)}"
+											styleClass="btn btn-primary btn-xs">
+											<la:message key="labels.dict_kuromoji_link_download" />
+										</la:link>
+										<la:link href="uploadpage/${f:u(dictId)}"
+											styleClass="btn btn-success btn-xs">
+											<la:message key="labels.dict_kuromoji_link_upload" />
+										</la:link>
 									</div>
 								</div>
 								<%-- Box Body --%>
