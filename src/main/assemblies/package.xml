@@ -51,6 +51,7 @@
 			<directory>${project.basedir}/src/main/assemblies/files</directory>
 			<includes>
 				<include>logging.properties</include>
+				<include>tomcat_config.properties</include>
 			</includes>
 			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
 		</fileSet>

@@ -6,8 +6,6 @@ import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot extends TomcatBoot {
 
-    private static final String FESS_ENV_PROPERTIES = "fess_env.properties";
-
     private static final String LOGGING_PROPERTIES = "logging.properties";
 
     private static final String FESS_CONTEXT_PATH = "fess.context.path";
@@ -21,6 +19,8 @@ public class FessBoot extends TomcatBoot {
     private static final String FESS_WEBAPP_PATH = "fess.webapp.path";
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
+    private static final String TOMCAT_CONFIG_PATH = "tomcat.config.path";
 
     public FessBoot(final int port, final String contextPath) {
         super(port, contextPath);
@@ -60,16 +60,19 @@ public class FessBoot extends TomcatBoot {
             System.setProperty(JAVA_IO_TMPDIR, value);
         }
 
-        new FessBoot(getPort(), getContextPath()) //
-                .useTldDetect() // for JSP
-                .configure(FESS_ENV_PROPERTIES) // e.g. URIEncoding
-                .logging(LOGGING_PROPERTIES, op -> {
-                    op.ignoreNoFile();
-                    final String fessHomeDir = System.getProperty("fess.home");
-                    if (fessHomeDir != null) {
-                        op.replace("fess.home", fessHomeDir);
-                    }
-                }) // uses jdk14logger
+        final String tomcatConfigPath = getTomcatConfigPath();
+        TomcatBoot tomcatBoot = new FessBoot(getPort(), getContextPath()) //
+                .useTldDetect(); // for JSP
+        if (tomcatConfigPath != null) {
+            tomcatBoot.configure(tomcatConfigPath); // e.g. URIEncoding
+        }
+        tomcatBoot.logging(LOGGING_PROPERTIES, op -> {
+            op.ignoreNoFile();
+            final String fessHomeDir = System.getProperty("fess.home");
+            if (fessHomeDir != null) {
+                op.replace("fess.home", fessHomeDir);
+            }
+        }) // uses jdk14logger
                 .asDevelopment(isNoneEnv()).bootAwait();
     }
 
@@ -91,5 +94,9 @@ public class FessBoot extends TomcatBoot {
             return value;
         }
         return "/fess";
+    }
+
+    protected static String getTomcatConfigPath() {
+        return System.getProperty(TOMCAT_CONFIG_PATH);
     }
 }

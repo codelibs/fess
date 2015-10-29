@@ -556,6 +556,8 @@
 			<groupId>org.dbflute.tomcat</groupId>
 			<artifactId>tomcat-boot</artifactId>
 			<version>${tomcat.boot.version}</version>
+			<!-- Disable scope at development on IDEA -->
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- test -->
