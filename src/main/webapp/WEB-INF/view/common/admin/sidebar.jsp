@@ -6,16 +6,17 @@
 	<section class="sidebar">
 
 		<!-- search form -->
-		<todo:form action="/admin/searchList/search" method="get" styleClass="sidebar-form">
+		<form action="/admin/searchList/search" method="get" class="sidebar-form">
 			<div class="input-group">
-				<todo:text styleClass="form-control" property="query" title="Search" maxlength="1000" styleId="query" />
-				<span class="input-group-btn">
-					<button type='submit' name='search' id='search-btn' class="btn btn-flat">
+				<input type="text" name="query" id="query" class="form-control" maxlength="1000"
+					placeholder="<la:message key="labels.sidebar.placeholder_search" />"> <span class="input-group-btn">
+					<button type="submit" name="search" id="search-btn"
+						class="btn btn-flat">
 						<i class="fa fa-search"></i>
 					</button>
 				</span>
 			</div>
-		</todo:form>
+		</form>
 		<!-- /.search form -->
 
 		<!-- Sidebar Menu -->
