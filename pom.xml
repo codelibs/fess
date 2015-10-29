@@ -57,9 +57,6 @@
 
 		<!-- Crawler -->
 		<crawler.version>1.0.0-SNAPSHOT</crawler.version>
-		<tika.version>1.6</tika.version>
-		<poi.version>3.11-beta2</poi.version>
-		<pdfbox.version>1.8.7</pdfbox.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>1.7.3</elasticsearch.version>
@@ -144,6 +141,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
 				<executions>
 					<execution>
 						<id>unpack-provided</id>
@@ -162,9 +160,18 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<docencoding>UTF-8</docencoding>
+					<charset>UTF-8</charset>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5.5</version>
+				<version>2.6</version>
 				<configuration>
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
@@ -183,26 +190,29 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<version>1.10.b1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.11</version>
 				<configuration>
-					<header>${basedir}/src/etc/header.txt</header>
+					<header>http://www.codelibs.org/assets/license/header.txt</header>
+					<properties>
+						<year>2015</year>
+					</properties>
 					<includes>
 						<include>src/**/*.java</include>
 					</includes>
 					<encoding>UTF-8</encoding>
 					<headerDefinitions>
-						<headerDefinition>${basedir}/src/etc/header-definition.xml</headerDefinition>
+						<headerDefinition>http://www.codelibs.org/assets/license/header-definition-2.xml</headerDefinition>
 					</headerDefinitions>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>net.revelc.code</groupId>
@@ -217,15 +227,6 @@
 				</executions>
 				<configuration>
 					<configFile>${basedir}/src/config/eclipse/formatter/java.xml</configFile>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-					<docencoding>UTF-8</docencoding>
-					<charset>UTF-8</charset>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -433,6 +434,11 @@
 			<artifactId>corelib</artifactId>
 			<version>0.3.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>56.1</version>
+		</dependency>
 
 		<!-- fileupload -->
 		<dependency>
@@ -446,7 +452,7 @@
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>2.2.1</version>
+			<version>2.2.2</version>
 		</dependency>
 
 		<!-- mail -->
@@ -475,12 +481,6 @@
 			<groupId>org.codelibs.fess</groupId>
 			<artifactId>fess-crawler-lasta</artifactId>
 			<version>${crawler.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs.fess</groupId>
@@ -488,89 +488,9 @@
 			<version>${crawler.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.51</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcmail-jdk15on</artifactId>
-			<version>1.51</version>
-		</dependency>
-		<dependency>
 			<groupId>args4j</groupId>
 			<artifactId>args4j</artifactId>
 			<version>2.32</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
-			<version>${tika.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.uwyn</groupId>
-					<artifactId>jhighlight</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcprov-jdk15</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcmail-jdk15</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>jhighlight</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>53.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.pdfbox</groupId>
-			<artifactId>pdfbox</artifactId>
-			<version>${pdfbox.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>${poi.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>${poi.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-scratchpad</artifactId>
-			<version>${poi.version}</version>
 		</dependency>
 
 		<!-- json -->
@@ -593,7 +513,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>2.4.4</version>
+			<version>2.4.5</version>
 		</dependency>
 
 		<!-- phantomjsdriver -->
@@ -633,7 +553,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- jetty -->
+		<!-- Tomcat -->
 		<dependency>
 			<groupId>org.dbflute.tomcat</groupId>
 			<artifactId>tomcat-boot</artifactId>
