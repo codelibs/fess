@@ -98,10 +98,6 @@
 												<td><a href="${f:url('/admin/searchlist/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
 													<la:hidden property="sessionId" /></td>
 											</tr>
-											<tr>
-												<th><la:message key="labels.crawling_session_name" /></th>
-												<td>${f:h(sessionId)}</td>
-											</tr>
 											<c:forEach var="info" items="${crawlingSessionInfoItems}">
 												<tr>
 													<th>${f:h(info.keyMsg)}</th>

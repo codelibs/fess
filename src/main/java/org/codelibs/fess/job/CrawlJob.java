@@ -250,8 +250,8 @@ public class CrawlJob {
         // WEB-INF/lib
         appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/lib")), "WEB-INF/lib" + File.separator);
         // WEB-INF/crawler/lib
-        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/crawler/lib")), "WEB-INF/crawler" + File.separator + "lib"
-                + File.separator);
+        appendJarFile(cpSeparator, buf, new File(servletContext.getRealPath("/WEB-INF/crawler/lib")), "WEB-INF/crawler" + File.separator
+                + "lib" + File.separator);
         final File targetLibDir = new File(targetDir, "fess" + File.separator + "WEB-INF" + File.separator + "lib");
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);

@@ -1,5 +1,7 @@
 package org.codelibs.fess.es.exentity;
 
+import java.util.List;
+
 import org.codelibs.fess.es.bsentity.BsCrawlingSession;
 
 /**
@@ -8,6 +10,8 @@ import org.codelibs.fess.es.bsentity.BsCrawlingSession;
 public class CrawlingSession extends BsCrawlingSession {
 
     private static final long serialVersionUID = 1L;
+
+    private List<CrawlingSessionInfo> crawlingSessionInfoList;
 
     public CrawlingSession() {
     }
@@ -32,5 +36,13 @@ public class CrawlingSession extends BsCrawlingSession {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public void setCrawlingSessionInfoList(List<CrawlingSessionInfo> crawlingSessionInfoList) {
+        this.crawlingSessionInfoList = crawlingSessionInfoList;
+    }
+
+    public List<CrawlingSessionInfo> getCrawlingSessionInfoList() {
+        return crawlingSessionInfoList;
     }
 }

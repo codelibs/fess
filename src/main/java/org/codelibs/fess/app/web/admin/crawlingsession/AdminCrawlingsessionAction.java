@@ -121,22 +121,6 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DELETE);
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
-                });
-                form.crudMode = crudMode;
-            });
-        });
-    }
 
     @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final EditForm form) {
@@ -148,7 +132,9 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
         });
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp);
+        return asHtml(path_AdminCrawlingsession_ConfirmJsp).renderWith(data -> {
+            data.register("crawlingSessionInfoItems", crawlingSessionService.getCrawlingSessionInfoList(id));
+        });
     }
 
     // -----------------------------------------------------
@@ -168,6 +154,8 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
                 });
             });
+        }).renderWith(data -> {
+            data.register("crawlingSessionInfoItems", crawlingSessionService.getCrawlingSessionInfoList(id));
         });
     }
 

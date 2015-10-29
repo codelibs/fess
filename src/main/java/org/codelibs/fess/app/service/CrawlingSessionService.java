@@ -95,14 +95,18 @@ public class CrawlingSessionService implements Serializable {
     public void store(final CrawlingSession crawlingSession) {
         setupStoreCondition(crawlingSession);
 
-        crawlingSessionBhv.insertOrUpdate(crawlingSession);
+        crawlingSessionBhv.insertOrUpdate(crawlingSession, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
     public void delete(final CrawlingSession crawlingSession) {
         setupDeleteCondition(crawlingSession);
 
-        crawlingSessionBhv.delete(crawlingSession);
+        crawlingSessionBhv.delete(crawlingSession, op -> {
+            op.setRefresh(true);
+        });
 
     }
 
