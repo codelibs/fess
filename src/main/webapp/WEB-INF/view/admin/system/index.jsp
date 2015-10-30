@@ -14,7 +14,7 @@
 		</jsp:include>
 
 		<div id="content" class="content-wrapper">
-			<iframe id="contentFrame" src="<%=request.getContextPath()%>/admin/server/_plugin/kopf/" width="100%" height="400" seamless></iframe>
+			<iframe id="contentFrame" src="<%=request.getContextPath()%>/admin/server/_plugin/kopf/" seamless></iframe>
 		</div>
 
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
