@@ -47,7 +47,7 @@
 
 					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><la:link
 							href="/admin/system/">
-							<i class="fa fa-circle-o text-aqua"></i>
+							<i class="fa fa-dashboard text-aqua"></i>
 							<span><la:message key="labels.menu_system_config" /></span>
 						</la:link></li>
 
