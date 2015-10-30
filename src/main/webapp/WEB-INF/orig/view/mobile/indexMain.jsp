@@ -1,7 +1,7 @@
 <%@page pageEncoding="UTF-8" %>
     <div>
       <div style="text-align: center;">
-        <m:img src="logo-top.gif" magniWidth="0.8" style="vertical-align: middle;" />
+        <m:img src="logo-top.png" magniWidth="0.8" style="vertical-align: middle;" />
         <br/>
         <s:form>
           <div>

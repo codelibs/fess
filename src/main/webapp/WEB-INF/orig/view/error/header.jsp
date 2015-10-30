@@ -4,7 +4,7 @@
 		<div class="navbar-inner">
 			<div class="container">
 				<s:link styleClass="brand" href="/">
-					<img src="${f:url('/images/logo-head.gif')}"
+					<img src="${f:url('/images/logo-head.png')}"
 						alt="<bean:message key="labels.header_brand_name" />" />
 				</s:link>
 				<div class="navbar-form pull-right">

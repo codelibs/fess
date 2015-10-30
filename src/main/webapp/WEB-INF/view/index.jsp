@@ -32,7 +32,7 @@
 		<div class="row content">
 			<div class="center-block searchFormBox">
 				<h1 class="mainLogo">
-					<img src="${f:url('/images/logo.gif')}"
+					<img src="${f:url('/images/logo.png')}"
 						alt="<la:message key="labels.index_title" />" />
 				</h1>
 				<div>

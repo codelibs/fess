@@ -3,7 +3,7 @@
 ${fe:facetForm()}${fe:geoForm()}
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
 		<la:link styleClass="navbar-brand" href="/">
-			<img src="${f:url('/images/logo-head.gif')}" alt="<la:message key="labels.header_brand_name" />" />
+			<img src="${f:url('/images/logo-head.png')}" alt="<la:message key="labels.header_brand_name" />" />
 		</la:link>
 		<div class="form-inline navbar-form pull-right">
 			<la:text property="query" maxlength="1000" styleId="query" styleClass="form-control" autocomplete="off"/>
