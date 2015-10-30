@@ -30,15 +30,17 @@
 
 			<section class="content">
 
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box box-primary">
+								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<la:message key="labels.wizard_crawling_setting_title" />
 									</h3>
 								</div>
+								<%-- Box Body --%>
 								<div class="box-body">
 
 									<%-- Message: BEGIN --%>
@@ -50,28 +52,40 @@
 									</div>
 									<%-- Message: END --%>
 
+									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="crawlingConfigName"><la:message
+										<label for="crawlingConfigName" class="col-sm-3 control-label"><la:message
 												key="labels.wizard_crawling_config_name" /></label>
-										<la:text property="crawlingConfigName"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="crawlingConfigName"
+												styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="crawlingConfigPath"><la:message
+										<label for="crawlingConfigPath" class="col-sm-3 control-label"><la:message
 												key="labels.wizard_crawling_config_path" /></label>
-										<la:text property="crawlingConfigPath"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="crawlingConfigPath"
+												styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="maxAccessCount"><la:message
+										<label for="maxAccessCount" class="col-sm-3 control-label"><la:message
 												key="labels.maxAccessCount" /></label>
-										<la:text property="maxAccessCount" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="maxAccessCount" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="depth"><la:message key="labels.depth" /></label>
-										<la:text property="depth" styleClass="form-control" />
+										<label for="depth" class="col-sm-3 control-label"><la:message
+												key="labels.depth" /></label>
+										<div class="col-sm-9">
+											<la:text property="depth" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
+
+								<%-- Box Footer --%>
 								<div class="box-footer">
 									<button type="submit" class="btn" name="index"
 										value="<la:message key="labels.wizard_button_cancel"/>">
@@ -80,11 +94,13 @@
 									<button type="submit" class="btn btn-primary"
 										name="crawlingConfig"
 										value="<la:message key="labels.wizard_button_register_again"/>">
+										<i class="fa fa-repeat"></i>
 										<la:message key="labels.wizard_button_register_again" />
 									</button>
 									<button type="submit" class="btn btn-success"
 										name="crawlingConfigNext"
 										value="<la:message key="labels.wizard_button_register_next"/>">
+										<i class="fa fa-arrow-circle-right"></i>
 										<la:message key="labels.wizard_button_register_next" />
 									</button>
 								</div>

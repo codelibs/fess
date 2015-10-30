@@ -25,7 +25,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<la:hidden property="dictId" />
 					<c:if test="${crudMode==2}">
@@ -79,18 +79,23 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="term"><la:message
+										<label for="term" class="col-sm-3 control-label"><la:message
 												key="labels.dict_synonym_source" /></label>
-										<la:textarea property="inputs" rows="5"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:textarea property="inputs" rows="5"
+												styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="outputs"><la:message
+										<label for="outputs" class="col-sm-3 control-label"><la:message
 												key="labels.dict_synonym_target" /></label>
-										<la:textarea property="outputs" rows="5"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:textarea property="outputs" rows="5"
+												styleClass="form-control" />
+										</div>
 									</div>
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">

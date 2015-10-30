@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -89,53 +89,70 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="hostname"><la:message
+										<label for="hostname" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_hostname" /></label>
-										<la:text property="hostname" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="hostname" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="port"><la:message
+										<label for="port" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_port" /></label>
-										<la:text property="port" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="port" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="authRealm"><la:message
+										<label for="authRealm" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_realm" /></label>
-										<la:text property="authRealm" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="authRealm" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="protocolScheme"><la:message
+										<label for="protocolScheme" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_scheme" /></label>
-										<la:select property="protocolScheme" styleClass="form-control">
-											<c:forEach var="item" items="${protocolSchemeItems}">
-												<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="protocolScheme"
+												styleClass="form-control">
+												<c:forEach var="item" items="${protocolSchemeItems}">
+													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="username"><la:message
+										<label for="username" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_username" /></label>
-										<la:text property="username" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="username" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="password"><la:message
+										<label for="password" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_password" /></label>
-										<la:password property="password" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:password property="password" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="parameters"><la:message
+										<label for="parameters" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_parameters" /></label>
-										<la:textarea property="parameters" styleClass="form-control"
-											rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="parameters" styleClass="form-control"
+												rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="webConfigId"><la:message
+										<label for="webConfigId" class="col-sm-3 control-label"><la:message
 												key="labels.web_authentication_web_crawling_config" /></label>
-										<la:select property="webConfigId" styleClass="form-control">
-											<c:forEach var="item" items="${webConfigItems}">
-												<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="webConfigId" styleClass="form-control">
+												<c:forEach var="item" items="${webConfigItems}">
+													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 								</div>
 

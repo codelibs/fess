@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -89,14 +89,18 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="regularName"><la:message
+										<label for="regularName" class="col-sm-3 control-label"><la:message
 												key="labels.regular_name" /></label>
-										<la:text property="regularName" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="regularName" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="overlappingName"><la:message
+										<label for="overlappingName" class="col-sm-3 control-label"><la:message
 												key="labels.overlapping_name" /></label>
-										<la:text property="overlappingName" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="overlappingName" styleClass="form-control" />
+										</div>
 									</div>
 
 									<%-- Box Footer --%>

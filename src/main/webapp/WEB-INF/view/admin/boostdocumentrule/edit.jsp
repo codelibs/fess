@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.boost_document_rule_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.boost_document_rule_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -26,16 +27,20 @@
 							<la:message key="labels.boost_document_rule_link_list" />
 						</la:link></li>
 					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_create" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_create" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_update" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_update" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_delete" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_delete" /></a></li>
 					</c:if>
 					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message key="labels.boost_document_rule_link_confirm" /></a></li>
+						<li class="active"><a href="#"><la:message
+									key="labels.boost_document_rule_link_confirm" /></a></li>
 					</c:if>
 				</ol>
 			</section>
@@ -43,7 +48,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -84,21 +89,28 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="urlExpr"><la:message
+										<label for="urlExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_url_expr" /></label>
-										<la:text property="urlExpr" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="urlExpr" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="boostExpr"><la:message
+										<label for="boostExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_boost_expr" /></label>
-										<la:text property="boostExpr" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="boostExpr" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message
+										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_sort_order" /></label>
-										<la:text property="sortOrder" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="sortOrder" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">

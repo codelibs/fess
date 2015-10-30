@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -88,59 +88,80 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message
+										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="target"><la:message
+										<label for="target" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_target" /></label>
-										<la:text property="target" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="target" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="cronExpression"><la:message
+										<label for="cronExpression" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_cronExpression" /></label>
-										<la:text property="cronExpression" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="cronExpression" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="scriptType"><la:message
+										<label for="scriptType" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_scriptType" /></label>
-										<la:text property="scriptType" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="scriptType" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="scriptData"><la:message
+										<label for="scriptData" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_scriptData" /></label>
-										<la:textarea property="scriptData" styleClass="form-control"
-											rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="scriptData" styleClass="form-control"
+												rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="jobLogging"><la:message
+										<label for="jobLogging" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_jobLogging" /></label>
-										<div class="form-inline">
-											<la:checkbox property="jobLogging" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="jobLogging" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="crawler"><la:message
+										<label for="crawler" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_crawler" /></label>
-										<div class="form-inline">
-											<la:checkbox property="crawler" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="crawler" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="available"><la:message
+										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_status" /></label>
-										<div class="form-inline">
-											<la:checkbox property="available" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="available" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message
+										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
-										<la:text property="sortOrder" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="sortOrder" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
 

@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -98,29 +98,39 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="word"><la:message
+										<label for="word" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_suggest_word" /></label>
-										<la:text property="suggestWord" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="suggestWord" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="reading"><la:message
+										<label for="reading" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_reading" /></label>
-										<la:text property="reading" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="reading" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="targetRole"><la:message
+										<label for="targetRole" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_target_role" /></label>
-										<la:text property="targetRole" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="targetRole" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="targetLabel"><la:message
+										<label for="targetLabel" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_target_label" /></label>
-										<la:text property="targetLabel" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="targetLabel" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="boost"><la:message
+										<label for="boost" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_boost" /></label>
-										<la:text property="boost" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="boost" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
 								<%-- Box Footer --%>

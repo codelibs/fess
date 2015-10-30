@@ -70,7 +70,7 @@
 						<button type="submit" name="login"
 							class="btn btn-primary btn-block btn-flat"
 							value="<la:message key="labels.login"/>">
-							<i class="fa fa-sign-in"></i> &nbsp;
+							<i class="fa fa-sign-in"></i>
 							<la:message key="labels.login" />
 						</button>
 					</div>

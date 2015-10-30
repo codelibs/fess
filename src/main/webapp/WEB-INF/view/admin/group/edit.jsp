@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -86,8 +86,11 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message key="labels.group_name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.group_name" /></label>
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 
 								</div>

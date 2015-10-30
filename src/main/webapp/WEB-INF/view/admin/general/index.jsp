@@ -26,10 +26,10 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<div class="row">
 						<div class="col-md-12">
-							<div class="box box-primary">
+							<div class="box box-warning">
 								<%-- Box Header --%>
 								<%-- Box Body --%>
 								<div class="box-body">
@@ -43,68 +43,91 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="esHttpUrl"><la:message
+										<label for="esHttpUrl" class="col-sm-3 control-label"><la:message
 												key="labels.es_http_url" /></label>
-										<la:text property="esHttpUrl" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="esHttpUrl" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="searchLog"><la:message
+										<label for="searchLog" class="col-sm-3 control-label"><la:message
 												key="labels.search_log_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="searchLog" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="searchLog" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="userInfo"><la:message
+										<label for="userInfo" class="col-sm-3 control-label"><la:message
 												key="labels.user_info_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="userInfo" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="userInfo" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="userFavorite"><la:message
+										<label for="userFavorite" class="col-sm-3 control-label"><la:message
 												key="labels.user_favorite_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="userFavorite" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="userFavorite" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="appendQueryParameter"><la:message
+										<label for="appendQueryParameter"
+											class="col-sm-3 control-label"><la:message
 												key="labels.append_query_param_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="appendQueryParameter" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="appendQueryParameter" />
+													<la:message key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="webApiXml"><la:message
+										<label for="webApiXml" class="col-sm-3 control-label"><la:message
 												key="labels.web_api_xml_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="webApiXml" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="webApiXml" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="webApiJson"><la:message
+										<label for="webApiJson" class="col-sm-3 control-label"><la:message
 												key="labels.web_api_json_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="webApiJson" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="webApiJson" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="defaultLabelValue"><la:message
+										<label for="defaultLabelValue" class="col-sm-3 control-label"><la:message
 												key="labels.default_label_value" /></label>
-										<la:textarea property="defaultLabelValue"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:textarea property="defaultLabelValue"
+												styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="supportedSearch"><la:message
+										<label for="supportedSearch" class="col-sm-3 control-label"><la:message
 												key="labels.supported_search_feature" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:select property="supportedSearch"
 												styleClass="form-control">
 												<c:forEach var="item" items="${supportedSearchItems}">
@@ -114,89 +137,106 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="hotSearchWord"><la:message
+										<label for="hotSearchWord" class="col-sm-3 control-label"><la:message
 												key="labels.hot_search_word_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="hotSearchWord" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="hotSearchWord" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="purgeSearchLogDay"><la:message
+										<label for="purgeSearchLogDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_search_log_day" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="purgeSearchLogDay"
 												styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="purgeJobLogDay"><la:message
+										<label for="purgeJobLogDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_job_log_day" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="purgeJobLogDay" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="purgeUserInfoDay"><la:message
+										<label for="purgeUserInfoDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_user_info_day" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="purgeUserInfoDay"
 												styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="purgeByBots"><la:message
+										<label for="purgeByBots" class="col-sm-3 control-label"><la:message
 												key="labels.purge_by_bots" /></label>
-										<la:text property="purgeByBots" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="purgeByBots" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="notificationTo"><la:message
+										<label for="notificationTo" class="col-sm-3 control-label"><la:message
 												key="labels.notification_to" /></label>
-										<la:text property="notificationTo" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="notificationTo" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="csvFileEncoding"><la:message
+										<label for="csvFileEncoding" class="col-sm-3 control-label"><la:message
 												key="labels.csv_file_encoding" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="csvFileEncoding" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="diffCrawling"><la:message
+										<label for="diffCrawling" class="col-sm-3 control-label"><la:message
 												key="labels.diff_crawling" /></label>
-										<div class="form-inline">
-											<la:checkbox property="diffCrawling" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="diffCrawling" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="useAclAsRole"><la:message
+										<label for="useAclAsRole" class="col-sm-3 control-label"><la:message
 												key="labels.use_acl_as_role" /></label>
-										<div class="form-inline">
-											<la:checkbox property="useAclAsRole" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="useAclAsRole" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="serverRotation"><la:message
+										<label for="serverRotation" class="col-sm-3 control-label"><la:message
 												key="labels.server_rotation" /></label>
-										<div class="form-inline">
-											<la:checkbox property="serverRotation" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="serverRotation" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="crawlingThreadCount"><la:message
+										<label for="crawlingThreadCount"
+											class="col-sm-3 control-label"><la:message
 												key="labels.crawling_thread_count" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="crawlingThreadCount"
 												styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="dayForCleanup"><la:message
+										<label for="dayForCleanup" class="col-sm-3 control-label"><la:message
 												key="labels.day_for_cleanup" /></label>
-										<div class="form-inline">
+										<div class="form-inline col-sm-9">
 											<la:select property="dayForCleanup" styleClass="form-control">
 												<la:option value="-1">
 													<la:message key="labels.none" />
@@ -209,40 +249,47 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="ignoreFailureType"><la:message
+										<label for="ignoreFailureType" class="col-sm-3 control-label"><la:message
 												key="labels.ignore_failure_type" /></label>
-										<la:text property="ignoreFailureType"
-											styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="ignoreFailureType"
+												styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="failureCountThreshold"><la:message
+										<label for="failureCountThreshold"
+											class="col-sm-3 control-label"><la:message
 												key="labels.failure_count_threshold" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="failureCountThreshold"
 												styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="suggestSearchLog"><la:message
+										<label for="suggestSearchLog" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_search_log_enabled" /></label>
-										<div class="form-inline">
-											<la:checkbox property="suggestSearchLog" />
-											<la:message key="labels.enabled" />
+										<div class="col-sm-9">
+											<div class="checkbox">
+												<label> <la:checkbox property="suggestSearchLog" />
+													<la:message key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="purgeSuggestSearchLogDay"><la:message
+										<label for="purgeSuggestSearchLogDay"
+											class="col-sm-3 control-label"><la:message
 												key="labels.purge_suggest_search_log_day" /></label>
-										<div class="form-inline">
+										<div class="col-sm-9">
 											<la:text property="purgeSuggestSearchLogDay"
 												styleClass="form-control" />
 										</div>
 									</div>
-
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
-									<button type="submit" class="btn btn-primary" name="update"
+									<button type="submit" class="btn btn-warning" name="update"
 										value="<la:message key="labels.crawl_button_update" />">
 										<la:message key="labels.crawl_button_update" />
 									</button>

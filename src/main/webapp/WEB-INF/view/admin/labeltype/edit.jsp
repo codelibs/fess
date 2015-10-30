@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -88,41 +88,53 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message
+										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="paths"><la:message
+										<label for="paths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_value" /></label>
-										<la:text property="value" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="value" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="includedPaths"><la:message
+										<label for="includedPaths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_included_paths" /></label>
-										<la:textarea property="includedPaths"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="includedPaths"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="excludedPaths"><la:message
+										<label for="excludedPaths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_excluded_paths" /></label>
-										<la:textarea property="excludedPaths"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="excludedPaths"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message
+										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
-										<la:select property="roleTypeIds" multiple="true"
-											styleClass="form-control">
-											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="roleTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
+													<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message
+										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
-										<la:text property="sortOrder" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="sortOrder" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
 

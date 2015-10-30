@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -89,23 +89,29 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message
+										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.request_header_name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="value"><la:message
+										<label for="value" class="col-sm-3 control-label"><la:message
 												key="labels.request_header_value" /></label>
-										<la:text property="value" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="value" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="webConfigId"><la:message
+										<label for="webConfigId" class="col-sm-3 control-label"><la:message
 												key="labels.request_header_web_crawling_config" /></label>
-										<la:select property="webConfigId" styleClass="form-control">
-											<c:forEach var="item" items="${webConfigItems}">
-												<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="webConfigId" styleClass="form-control">
+												<c:forEach var="item" items="${webConfigItems}">
+													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 								</div>
 

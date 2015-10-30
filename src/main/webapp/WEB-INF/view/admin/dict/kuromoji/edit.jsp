@@ -25,7 +25,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<la:hidden property="dictId" />
 					<c:if test="${crudMode==2}">
@@ -79,26 +79,35 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="token"><la:message
+										<label for="token" class="col-sm-3 control-label"><la:message
 												key="labels.dict_kuromoji_token" /></label>
-										<la:text property="token" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="token" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="segmentation"><la:message
+										<label for="segmentation" class="col-sm-3 control-label"><la:message
 												key="labels.dict_kuromoji_segmentation" /></label>
-										<la:text property="segmentation" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="segmentation" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="reading"><la:message
+										<label for="reading" class="col-sm-3 control-label"><la:message
 												key="labels.dict_kuromoji_reading" /></label>
-										<la:text property="reading" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="reading" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="pos"><la:message
+										<label for="pos" class="col-sm-3 control-label"><la:message
 												key="labels.dict_kuromoji_pos" /></label>
-										<la:text property="pos" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="pos" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">

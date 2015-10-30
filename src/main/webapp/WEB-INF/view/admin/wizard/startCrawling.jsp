@@ -56,14 +56,16 @@
 									</p>
 								</div>
 								<div class="box-footer">
-									<button type="submit" class="btn" name="index"
-										value="<la:message key="labels.wizard_button_finish"/>">
-										<la:message key="labels.wizard_button_finish" />
-									</button>
 									<button type="submit" class="btn btn-success"
 										name="startCrawling"
 										value="<la:message key="labels.wizard_button_start_crawling"/>">
+										<i class="fa fa-play-circle"></i>
 										<la:message key="labels.wizard_button_start_crawling" />
+									</button>
+									<button type="submit" class="btn" name="index"
+										value="<la:message key="labels.wizard_button_finish"/>">
+										<i class="fa fa-step-forward"></i>
+										<la:message key="labels.wizard_button_finish" />
 									</button>
 								</div>
 							</div>

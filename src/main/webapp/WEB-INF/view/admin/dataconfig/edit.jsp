@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -88,66 +88,85 @@
 									</div>
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message key="labels.name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.name" /></label>
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="handlerName"><la:message
+										<label for="handlerName" class="col-sm-3 control-label"><la:message
 												key="labels.handler_name" /></label>
-										<la:select property="handlerName" size="1"
-											styleClass="form-control">
-											<c:forEach var="hn" varStatus="s" items="${handlerNameItems}">
-												<la:option value="${f:u(hn.value)}">${f:h(hn.label)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="handlerName" size="1"
+												styleClass="form-control">
+												<c:forEach var="hn" varStatus="s"
+													items="${handlerNameItems}">
+													<la:option value="${f:u(hn.value)}">${f:h(hn.label)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="handlerParameter"><la:message
+										<label for="handlerParameter" class="col-sm-3 control-label"><la:message
 												key="labels.handler_parameter" /></label>
-										<la:textarea property="handlerParameter"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="handlerParameter"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="handlerScript"><la:message
+										<label for="handlerScript" class="col-sm-3 control-label"><la:message
 												key="labels.handler_script" /></label>
-										<la:textarea property="handlerScript"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="handlerScript"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="boost"><la:message key="labels.boost" /></label>
-										<la:text property="boost" styleClass="form-control" />
+										<label for="boost" class="col-sm-3 control-label"><la:message
+												key="labels.boost" /></label>
+										<div class="col-sm-9">
+											<la:text property="boost" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message
+										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
-										<la:select property="roleTypeIds" multiple="true"
-											styleClass="form-control">
-											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="roleTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
+													<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message
+										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
-										<la:select property="labelTypeIds" multiple="true"
-											styleClass="form-control">
-											<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-												<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="labelTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
+													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="available"><la:message
+										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.available" /></label>
-										<la:select property="available" styleClass="form-control">
-											<la:option value="true">
-												<la:message key="labels.enabled" />
-											</la:option>
-											<la:option value="false">
-												<la:message key="labels.disabled" />
-											</la:option>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="available" styleClass="form-control">
+												<la:option value="true">
+													<la:message key="labels.enabled" />
+												</la:option>
+												<la:option value="false">
+													<la:message key="labels.disabled" />
+												</la:option>
+											</la:select>
+										</div>
 									</div>
 								</div>
 

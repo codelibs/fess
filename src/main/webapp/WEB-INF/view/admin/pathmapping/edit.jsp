@@ -46,7 +46,7 @@
 
 			<section class="content">
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -86,35 +86,45 @@
 									</div>
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="regex"><la:message key="labels.regex" /></label>
-										<la:text property="regex" styleClass="form-control" />
+										<label for="regex" class="col-sm-3 control-label"><la:message
+												key="labels.regex" /></label>
+										<div class="col-sm-9">
+											<la:text property="regex" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="replacement"><la:message
+										<label for="replacement" class="col-sm-3 control-label"><la:message
 												key="labels.replacement" /></label>
-										<la:text property="replacement" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="replacement" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="processType"><la:message
+										<label for="processType" class="col-sm-3 control-label"><la:message
 												key="labels.processType" /></label>
-										<la:select property="processType" styleClass="form-control">
-											<la:option value="C">
-												<la:message key="labels.path_mapping_pt_crawling" />
-											</la:option>
-											<la:option value="D">
-												<la:message key="labels.path_mapping_pt_displaying" />
-											</la:option>
-											<la:option value="B">
-												<la:message key="labels.path_mapping_pt_both" />
-											</la:option>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="processType" styleClass="form-control">
+												<la:option value="C">
+													<la:message key="labels.path_mapping_pt_crawling" />
+												</la:option>
+												<la:option value="D">
+													<la:message key="labels.path_mapping_pt_displaying" />
+												</la:option>
+												<la:option value="B">
+													<la:message key="labels.path_mapping_pt_both" />
+												</la:option>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="sortOrder"><la:message
+										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
-										<la:text property="sortOrder" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="sortOrder" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
+
 								<%-- Box Footer --%>
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">

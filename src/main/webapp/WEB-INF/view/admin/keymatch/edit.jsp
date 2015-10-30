@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -88,24 +88,32 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="term"><la:message
+										<label for="term" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_term" /></label>
-										<la:text property="term" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="term" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="query"><la:message
+										<label for="query" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_query" /></label>
-										<la:text property="query" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="query" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="maxSize"><la:message
+										<label for="maxSize" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_size" /></label>
-										<la:text property="maxSize" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="maxSize" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="boost"><la:message
+										<label for="boost" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_boost" /></label>
-										<la:text property="boost" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="boost" styleClass="form-control" />
+										</div>
 									</div>
 
 								</div>

@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -89,105 +89,139 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="name"><la:message key="labels.name" /></label>
-										<la:text property="name" styleClass="form-control" />
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.name" /></label>
+										<div class="col-sm-9">
+											<la:text property="name" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="urls"><la:message key="labels.urls" /></label>
-										<la:textarea property="urls" styleClass="form-control"
-											rows="5" />
+										<label for="urls" class="col-sm-3 control-label"><la:message
+												key="labels.urls" /></label>
+										<div class="col-sm-9">
+											<la:textarea property="urls" styleClass="form-control"
+												rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="includedUrls"><la:message
+										<label for="includedUrls" class="col-sm-3 control-label"><la:message
 												key="labels.included_urls" /></label>
-										<la:textarea property="includedUrls" styleClass="form-control"
-											rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="includedUrls"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="excludedUrls"><la:message
+										<label for="excludedUrls" class="col-sm-3 control-label"><la:message
 												key="labels.excluded_urls" /></label>
-										<la:textarea property="excludedUrls" styleClass="form-control"
-											rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="excludedUrls"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="includedDocUrls"><la:message
+										<label for="includedDocUrls" class="col-sm-3 control-label"><la:message
 												key="labels.included_doc_urls" /></label>
-										<la:textarea property="includedDocUrls"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="includedDocUrls"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="excludedDocUrls"><la:message
+										<label for="excludedDocUrls" class="col-sm-3 control-label"><la:message
 												key="labels.excluded_doc_urls" /></label>
-										<la:textarea property="excludedDocUrls"
-											styleClass="form-control" rows="5" />
+										<div class="col-sm-9">
+											<la:textarea property="excludedDocUrls"
+												styleClass="form-control" rows="5" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="configParameter"><la:message
+										<label for="configParameter" class="col-sm-3 control-label"><la:message
 												key="labels.config_parameter" /></label>
-										<la:text property="configParameter" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="configParameter" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="depth"><la:message key="labels.depth" /></label>
-										<la:text property="depth" styleClass="form-control" />
+										<label for="depth" class="col-sm-3 control-label"><la:message
+												key="labels.depth" /></label>
+										<div class="col-sm-9">
+											<la:text property="depth" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="maxAccessCount"><la:message
+										<label for="maxAccessCount" class="col-sm-3 control-label"><la:message
 												key="labels.max_access_count" /></label>
-										<la:text property="maxAccessCount" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="maxAccessCount" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="userAgent"><la:message
+										<label for="userAgent" class="col-sm-3 control-label"><la:message
 												key="labels.user_agent" /></label>
-										<la:text property="userAgent" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="userAgent" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="numOfThread"><la:message
+										<label for="numOfThread" class="col-sm-3 control-label"><la:message
 												key="labels.number_of_thread" /></label>
-										<la:text property="numOfThread" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="numOfThread" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="intervalTime"><la:message
+										<label for="intervalTime" class="col-sm-3 control-label"><la:message
 												key="labels.interval_time" /></label>
-										<div class="form-inline">
+										<div class="form-inline col-sm-9">
 											<la:text property="intervalTime" styleClass="form-control" />
 											<la:message key="labels.millisec" />
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="boost"><la:message key="labels.boost" /></label>
-										<la:text property="boost" styleClass="form-control" />
+										<label for="boost" class="col-sm-3 control-label"><la:message
+												key="labels.boost" /></label>
+										<div class="col-sm-9">
+											<la:text property="boost" styleClass="form-control" />
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message
+										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
-										<la:select property="roleTypeIds" multiple="true"
-											styleClass="form-control">
-											<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-												<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="roleTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
+													<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds"><la:message
+										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
-										<la:select property="labelTypeIds" multiple="true"
-											styleClass="form-control">
-											<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-												<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-											</c:forEach>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="labelTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
+													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
+												</c:forEach>
+											</la:select>
+										</div>
 									</div>
 									<div class="form-group">
-										<label for="available"><la:message
+										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.available" /></label>
-										<la:select property="available" styleClass="form-control">
-											<la:option value="true">
-												<la:message key="labels.enabled" />
-											</la:option>
-											<la:option value="false">
-												<la:message key="labels.disabled" />
-											</la:option>
-										</la:select>
+										<div class="col-sm-9">
+											<la:select property="available" styleClass="form-control">
+												<la:option value="true">
+													<la:message key="labels.enabled" />
+												</la:option>
+												<la:option value="false">
+													<la:message key="labels.disabled" />
+												</la:option>
+											</la:select>
+										</div>
 									</div>
 								</div>
 

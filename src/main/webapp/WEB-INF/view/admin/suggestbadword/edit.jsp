@@ -47,7 +47,7 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -98,9 +98,11 @@
 
 									<%-- Form Fields --%>
 									<div class="form-group">
-										<label for="word"><la:message
+										<label for="word" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_bad_word_suggest_word" /></label>
-										<la:text property="suggestWord" styleClass="form-control" />
+										<div class="col-sm-9">
+											<la:text property="suggestWord" styleClass="form-control" />
+										</div>
 									</div>
 								</div>
 								<%-- Box Footer --%>
