@@ -61,7 +61,7 @@ public class FessBoot extends TomcatBoot {
         }
 
         final String tomcatConfigPath = getTomcatConfigPath();
-        TomcatBoot tomcatBoot = new FessBoot(getPort(), getContextPath()) //
+        final TomcatBoot tomcatBoot = new FessBoot(getPort(), getContextPath()) //
                 .useTldDetect(); // for JSP
         if (tomcatConfigPath != null) {
             tomcatBoot.configure(tomcatConfigPath); // e.g. URIEncoding

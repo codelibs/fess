@@ -46,10 +46,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String ON = "on";
 
-    public static final String ASC = "asc";
-
-    public static final String DESC = "desc";
-
     public static final String READY = "ready";
 
     public static final String RUNNING = "running";

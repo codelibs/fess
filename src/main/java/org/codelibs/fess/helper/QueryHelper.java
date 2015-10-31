@@ -20,27 +20,52 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.PrefixQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TermRangeQuery;
+import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
-import org.codelibs.fess.entity.SearchQuery;
-import org.codelibs.fess.entity.SearchQuery.SortField;
+import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
-import org.codelibs.fess.util.QueryUtil;
+import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
+import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.web.ruts.message.ActionMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -48,19 +73,17 @@ public class QueryHelper implements Serializable {
 
     protected static final long serialVersionUID = 1L;
 
+    private static final String DEFAULT_FIELD = "_default";
+
     protected static final String SCORE_FIELD = "score";
 
     protected static final String INURL_FIELD = "inurl";
-
-    protected static final String NOT_ = "NOT ";
 
     protected static final String AND = "AND";
 
     protected static final String OR = "OR";
 
     protected static final String NOT = "NOT";
-
-    protected static final String _TO_ = " TO ";
 
     protected static final String _OR_ = " OR ";
 
@@ -109,17 +132,9 @@ public class QueryHelper implements Serializable {
 
     protected String[] supportedSortFields;
 
-    protected String[] supportedMltFields;
-
-    protected String[] supportedAnalysisFields;
-
     protected int highlightFragmentSize = 100;
 
-    protected boolean useBigram = true;
-
     protected String additionalQuery;
-
-    protected int maxFilterQueriesForRole = Integer.MAX_VALUE;
 
     protected long timeAllowed = -1;
 
@@ -129,13 +144,9 @@ public class QueryHelper implements Serializable {
 
     protected int maxSearchResultOffset = 100000;
 
-    protected List<SortField> defaultSortFieldList = new ArrayList<SortField>();
+    protected SortBuilder[] defaultSortBuilders;
 
     protected String highlightPrefix = "hl_";
-
-    protected String minimumShouldMatch = "100%";
-
-    protected String defType = "edismax";
 
     protected FacetInfo defaultFacetInfo;
 
@@ -193,583 +204,402 @@ public class QueryHelper implements Serializable {
                     new String[] { fieldHelper.createdField, fieldHelper.contentLengthField, fieldHelper.lastModifiedField,
                             fieldHelper.clickCountField, fieldHelper.favoriteCountField };
         }
-        if (supportedMltFields == null) {
-            supportedMltFields = new String[] { fieldHelper.contentField, "content_ja" };
-        }
-        if (supportedAnalysisFields == null) {
-            supportedAnalysisFields = new String[] { fieldHelper.contentField, "content_ja" };
-        }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.codelibs.fess.helper.QueryHelper#build(java.lang.String)
-     */
-    public SearchQuery build(final String query, final boolean envCondition) {
+    public QueryContext build(final String query, final Consumer<QueryContext> context) {
         String q;
-        if (envCondition && additionalQuery != null && StringUtil.isNotBlank(query)) {
+        if (additionalQuery != null && StringUtil.isNotBlank(query)) {
             q = query + " " + additionalQuery;
         } else {
             q = query;
         }
 
-        final SearchQuery searchQuery = buildQuery(q);
-        if (!searchQuery.queryExists()) {
-            searchQuery.query(StringUtil.EMPTY);
-        }
-
-        if (!envCondition) {
-            return searchQuery;
-        }
+        final QueryContext queryContext = buildBaseQuery(q, context);
 
         if (keyMatchHelper != null) {
             final List<String> docIdQueryList = keyMatchHelper.getDocIdQueryList();
-            if (docIdQueryList != null && searchQuery.queryExists()) {
-                final String originalQuery = searchQuery.getQuery();
-                final StringBuilder queryBuf = new StringBuilder(originalQuery.length() + 100);
-                queryBuf.append(originalQuery);
-                for (final String docIdQuery : docIdQueryList) {
-                    queryBuf.append(_OR_);
-                    queryBuf.append(docIdQuery);
-                }
-                searchQuery.setQuery(queryBuf.toString());
+            if (docIdQueryList != null && !docIdQueryList.isEmpty()) {
+                queryContext.addQuery(boolQuery -> {
+                    for (final String docIdQuery : docIdQueryList) {
+                        // TODO id query?
+                        boolQuery.should(QueryBuilders.queryStringQuery(docIdQuery));
+                    }
+                });
             }
         }
 
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();
-            if (roleSet.size() > maxFilterQueriesForRole) {
-                // add query
-                final String sq = searchQuery.getQuery();
-                final StringBuilder queryBuf = new StringBuilder(255);
-                final boolean hasQueries = sq.contains(_AND_) || sq.contains(_OR_);
-                if (hasQueries) {
-                    queryBuf.append('(');
-                }
-                queryBuf.append(sq);
-                if (hasQueries) {
-                    queryBuf.append(')');
-                }
-                queryBuf.append(_AND_);
-                if (roleSet.size() > 1) {
-                    queryBuf.append('(');
-                }
-                queryBuf.append(getRoleQuery(roleSet));
-                if (roleSet.size() > 1) {
-                    queryBuf.append(')');
-                }
-                searchQuery.query(queryBuf.toString());
-            } else if (!roleSet.isEmpty()) {
-                // add filter query
-                searchQuery.addFilterQuery(getRoleQuery(roleSet));
+            if (!roleSet.isEmpty()) {
+                final FilterBuilder filterBuilder =
+                        FilterBuilders.orFilter(roleSet.stream().map(name -> FilterBuilders.termFilter(fieldHelper.roleField, name))
+                                .toArray(n -> new FilterBuilder[n]));
+                queryContext.addFilter(filterBuilder);
             }
         }
-        return searchQuery;
+
+        if (!queryContext.hasSorts() && defaultSortBuilders != null) {
+            queryContext.addSorts(defaultSortBuilders);
+        }
+        return queryContext;
     }
 
-    private String getRoleQuery(final Set<String> roleList) {
-        final StringBuilder queryBuf = new StringBuilder(255);
-        boolean isFirst = true;
-        for (final String role : roleList) {
-            if (isFirst) {
-                isFirst = false;
+    public QueryContext buildBaseQuery(final String queryString, final Consumer<QueryContext> context) {
+        final QueryParser queryParser = getQueryParser();
+        try {
+            final QueryContext queryContext = new QueryContext(queryString);
+            final Query query = queryParser.parse(queryString);
+            final QueryBuilder queryBuilder = convertQuery(queryContext, query);
+            if (queryBuilder != null) {
+                queryContext.setQueryBuilder(queryBuilder);
             } else {
-                queryBuf.append(_OR_);
-
+                queryContext.setQueryBuilder(QueryBuilders.matchAllQuery());
             }
-            queryBuf.append(fieldHelper.roleField);
-            queryBuf.append(':');
-            queryBuf.append(QueryUtil.escapeValue(role));
+            context.accept(queryContext);
+            return queryContext;
+        } catch (final ParseException e) {
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Invalid query: " + queryString);
         }
-        return queryBuf.toString();
     }
 
-    protected SearchQuery buildQuery(final String query) {
-        final Map<String, String> sortFieldMap = new LinkedHashMap<String, String>();
-        final List<String> highLightQueryList = new ArrayList<String>();
-        final Map<String, List<String>> fieldLogMap = new HashMap<String, List<String>>();
-        final SearchQuery searchQuery = new SearchQuery();
-
-        final String q = buildQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
-        String queryString;
-        if (q == null || "()".equals(q)) {
-            queryString = StringUtil.EMPTY;
-        } else {
-            queryString = unbracketQuery(q);
-        }
-        searchQuery.setQuery(queryString);
-
-        searchQuery.setMinimumShouldMatch(minimumShouldMatch);
-        searchQuery.setDefType(defType);
-
-        for (final Map.Entry<String, String> entry : sortFieldMap.entrySet()) {
-            searchQuery.addSortField(entry.getKey(), entry.getValue());
-        }
-        // set queries to request for HighLight
-        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
-        if (request != null) {
-            request.setAttribute(Constants.HIGHLIGHT_QUERIES, highLightQueryList.toArray(new String[highLightQueryList.size()]));
-            request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
-        }
-        return searchQuery;
+    protected QueryParser getQueryParser() {
+        return new ExtendableQueryParser(DEFAULT_FIELD, new WhitespaceAnalyzer());
     }
 
-    protected String unbracketQuery(final String query) {
-        if (query.startsWith("(") && query.endsWith(")")) {
-            int count = 0;
-            int depth = 0;
-            int escape = 0;
-            for (int i = 0; i < query.length(); i++) {
-                final char c = query.charAt(i);
-                if (c == '\\') {
-                    escape++;
-                } else {
-                    if (c == '(' && escape % 2 == 0) {
-                        if (depth == 0) {
-                            count++;
-                        }
-                        depth++;
-                    } else if (c == ')' && escape % 2 == 0) {
-                        depth--;
-                    }
-                    escape = 0;
-                }
-            }
-            if (depth == 0 && count == 1) {
-                return unbracketQuery(query.substring(1, query.length() - 1));
-            }
+    protected QueryBuilder convertQuery(final QueryContext context, final Query query) {
+        if (query instanceof TermQuery) {
+            return convertTermQuery(context, (TermQuery) query);
+        } else if (query instanceof TermRangeQuery) {
+            return convertTermRangeQuery(context, (TermRangeQuery) query);
+        } else if (query instanceof FuzzyQuery) {
+            return convertFuzzyQuery(context, (FuzzyQuery) query);
+        } else if (query instanceof PrefixQuery) {
+            return convertPrefixQuery(context, (PrefixQuery) query);
+        } else if (query instanceof WildcardQuery) {
+            return convertWildcardQuery(context, (WildcardQuery) query);
+        } else if (query instanceof BooleanQuery) {
+            final BooleanQuery booleanQuery = (BooleanQuery) query;
+            return convertBooleanQuery(context, booleanQuery);
         }
-        return query;
-
+        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(ActionMessages.GLOBAL_PROPERTY_KEY),
+                "Unknown query: " + query.getClass() + " => " + query);
     }
 
-    protected String buildQuery(final String query, final Map<String, String> sortFieldMap, final List<String> highLightQueryList,
-            final Map<String, List<String>> fieldLogMap) {
-        final List<QueryPart> queryPartList = splitQuery(query, sortFieldMap, highLightQueryList, fieldLogMap);
-        if (queryPartList == null || queryPartList.isEmpty()) {
-            return null;
-        }
-
-        final StringBuilder queryBuf = new StringBuilder(255);
-        final List<String> notOperatorList = new ArrayList<String>();
-        final String defaultOperator = getDefaultOperator();
-        String operator = defaultOperator;
-        boolean notOperatorFlag = false;
-        int queryOperandCount = 0;
-        int contentOperandCount = 0;
-        final String queryLanguage = getQueryLanguage();
-        for (final QueryPart queryPart : queryPartList) {
-            if (queryPart.isParsed()) {
-                if (queryBuf.length() > 0) {
-                    queryBuf.append(operator);
-                }
-                queryBuf.append(queryPart.getValue());
-                continue;
-            }
-            final String value = queryPart.getValue();
-            boolean nonPrefix = false;
-            // check prefix
-            for (final String field : searchFields) {
-                String prefix = field + ":";
-                if (value.startsWith(prefix) && value.length() != prefix.length()) {
-                    if (queryBuf.length() > 0 && !notOperatorFlag) {
-                        queryBuf.append(operator);
-                    }
-                    boolean isInUrl = false;
-                    final String targetWord = value.substring(prefix.length());
-                    if (INURL_FIELD.equals(field)) {
-                        prefix = fieldHelper.urlField + ":";
-                        isInUrl = true;
-                    }
-                    String fieldLogWord;
-                    if (notOperatorFlag) {
-                        final StringBuilder buf = new StringBuilder(100);
-                        buf.append(prefix);
-                        if (isInUrl) {
-                            buf.append('*');
-                        }
-                        appendQueryValue(buf, targetWord, isInUrl ? false : useBigram);
-                        if (isInUrl) {
-                            buf.append('*');
-                        }
-                        notOperatorList.add(buf.toString());
-                        notOperatorFlag = false;
-                        fieldLogWord = NOT_ + targetWord;
-                    } else {
-                        queryBuf.append(prefix);
-                        if (isInUrl) {
-                            queryBuf.append('*');
-                        }
-                        appendQueryValue(queryBuf, targetWord, isInUrl ? false : useBigram);
-                        if (isInUrl) {
-                            queryBuf.append('*');
-                        }
-                        queryOperandCount++;
-                        fieldLogWord = targetWord;
-                    }
-                    appendFieldBoostValue(queryBuf, field, targetWord);
-
-                    nonPrefix = true;
-                    operator = defaultOperator;
-                    if (highlightFieldSet.contains(field)) {
-                        highLightQueryList.add(targetWord);
-                    }
-                    if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, field, fieldLogWord);
-                    }
+    protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery) {
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        for (final BooleanClause clause : booleanQuery.getClauses()) {
+            final QueryBuilder queryBuilder = convertQuery(context, clause.getQuery());
+            if (queryBuilder != null) {
+                switch (clause.getOccur()) {
+                case MUST:
+                    boolQuery.must(queryBuilder);
+                    break;
+                case SHOULD:
+                    boolQuery.must(queryBuilder);
+                    break;
+                case MUST_NOT:
+                    boolQuery.must(queryBuilder);
+                    break;
+                default:
                     break;
                 }
             }
-
-            // sort
-            if (value.startsWith(sortPrefix) && value.length() != sortPrefix.length()) {
-                final String[] sortFieldPairs = value.substring(sortPrefix.length()).split(",");
-                for (final String sortFieldPairStr : sortFieldPairs) {
-                    final String[] sortFieldPair = sortFieldPairStr.split("\\.");
-                    if (isSupportedSortField(sortFieldPair[0])) {
-                        if (sortFieldPair.length == 1) {
-                            sortFieldMap.put(sortFieldPair[0], Constants.ASC);
-                        } else {
-                            sortFieldMap.put(sortFieldPair[0], sortFieldPair[1]);
-                        }
-                    }
-                }
-                continue;
-            }
-
-            if (!nonPrefix) {
-                if (AND.equals(value)) {
-                    operator = _AND_;
-                } else if (OR.equals(value)) {
-                    operator = _OR_;
-                } else if (NOT.equals(value)) {
-                    notOperatorFlag = true;
-                } else if (notOperatorFlag) {
-                    final StringBuilder buf = new StringBuilder(100);
-
-                    buildContentQueryWithLang(buf, value, queryLanguage);
-                    notOperatorList.add(buf.toString());
-
-                    operator = defaultOperator;
-                    notOperatorFlag = false;
-                    highLightQueryList.add(value);
-
-                    if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, fieldHelper.contentField, NOT_ + value);
-                    }
-                } else {
-                    // content
-                    if (queryBuf.length() > 0) {
-                        queryBuf.append(operator);
-                    }
-                    buildContentQueryWithLang(queryBuf, value, queryLanguage);
-                    contentOperandCount++;
-
-                    operator = defaultOperator;
-                    highLightQueryList.add(value);
-
-                    if (fieldLogMap != null) {
-                        addFieldLogValue(fieldLogMap, fieldHelper.contentField, value);
-                    }
-
-                    if (keyMatchHelper != null) {
-                        keyMatchHelper.addSearchWord(value);
-                    }
-                }
-            }
         }
-
-        StringBuilder searchQueryBuf = new StringBuilder(255);
-        if (queryBuf.length() > 0) {
-            searchQueryBuf.append(queryBuf.toString());
-            operator = defaultOperator;
-        } else {
-            operator = StringUtil.EMPTY;
-        }
-        if (!notOperatorList.isEmpty()) {
-            final String q = searchQueryBuf.toString();
-            searchQueryBuf = new StringBuilder(255);
-            final int count = queryOperandCount + contentOperandCount;
-            if (count > 1) {
-                searchQueryBuf.append('(');
-            }
-            searchQueryBuf.append(q);
-            if (count > 1) {
-                searchQueryBuf.append(')');
-            }
-            for (final String notOperator : notOperatorList) {
-                searchQueryBuf.append(operator);
-                searchQueryBuf.append(NOT_);
-                searchQueryBuf.append(notOperator);
-                operator = defaultOperator;
-            }
-        }
-
-        return searchQueryBuf.toString();
+        return boolQuery;
     }
 
-    private void addFieldLogValue(final Map<String, List<String>> fieldLogMap, final String field, final String targetWord) {
-        List<String> logList = fieldLogMap.get(field);
-        if (logList == null) {
-            logList = new ArrayList<String>();
-            fieldLogMap.put(field, logList);
+    protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery) {
+        final String field = wildcardQuery.getField();
+        if (DEFAULT_FIELD.equals(field)) {
+            context.addFieldLog(field, wildcardQuery.getTerm().text());
+            return buildDefaultQueryBuilder(f -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()));
+        } else if (isSearchField(field)) {
+            context.addFieldLog(field, wildcardQuery.getTerm().text());
+            return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(wildcardQuery.getBoost());
+        } else {
+            final String origQuery = wildcardQuery.getTerm().toString();
+            context.addFieldLog(DEFAULT_FIELD, origQuery);
+            context.addHighlightedQuery(origQuery);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.wildcardQuery(f, origQuery));
         }
-        logList.add(targetWord);
     }
 
-    protected void appendQueryValue(final StringBuilder buf, final String query, final boolean useBigram) {
-        // check reserved
-        boolean reserved = false;
-        for (final String element : Constants.RESERVED) {
-            if (element.equals(query)) {
-                reserved = true;
-                break;
-            }
+    protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery) {
+        final String field = prefixQuery.getField();
+        if (DEFAULT_FIELD.equals(field)) {
+            context.addFieldLog(field, prefixQuery.getPrefix().text());
+            return buildDefaultQueryBuilder(f -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()));
+        } else if (isSearchField(field)) {
+            context.addFieldLog(field, prefixQuery.getPrefix().text());
+            return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(prefixQuery.getBoost());
+        } else {
+            final String origQuery = prefixQuery.getPrefix().toString();
+            context.addFieldLog(DEFAULT_FIELD, origQuery);
+            context.addHighlightedQuery(origQuery);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.prefixQuery(f, origQuery));
         }
+    }
 
-        if (reserved) {
-            buf.append('\\');
-            buf.append(query);
-            return;
+    protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery) {
+        final Term term = fuzzyQuery.getTerm();
+        final String field = term.field();
+        // TODO fuzzy value
+        if (DEFAULT_FIELD.equals(field)) {
+            context.addFieldLog(field, term.text());
+            return buildDefaultQueryBuilder(f -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(
+                    Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())));
+        } else if (isSearchField(field)) {
+            context.addFieldLog(field, term.text());
+            return QueryBuilders.fuzzyQuery(field, term.text()).boost(fuzzyQuery.getBoost())
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
+        } else {
+            final String origQuery = fuzzyQuery.toString();
+            context.addFieldLog(DEFAULT_FIELD, origQuery);
+            context.addHighlightedQuery(origQuery);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(
+                    Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())));
         }
+    }
 
-        String value = query;
-        if (useBigram && value.length() == 1 && !StringUtils.isAsciiPrintable(value)) {
-            // if using bigram, add ?
-            value = value + '?';
-        }
-
-        String fuzzyValue = null;
-        String proximityValue = null;
-        String caretValue = null;
-        final int tildePos = value.lastIndexOf('~');
-        final int caretPos = value.indexOf('^');
-        if (tildePos > caretPos) {
-            if (tildePos > 0) {
-                final String tildeValue = value.substring(tildePos);
-                if (tildeValue.length() > 1) {
-                    final StringBuilder buf1 = new StringBuilder();
-                    final StringBuilder buf2 = new StringBuilder();
-                    boolean isComma = false;
-                    for (int i = 1; i < tildeValue.length(); i++) {
-                        final char c = tildeValue.charAt(i);
-                        if (c >= '0' && c <= '9') {
-                            if (isComma) {
-                                buf2.append(c);
-                            } else {
-                                buf1.append(c);
-                            }
-                        } else if (c == '.') {
-                            if (isComma) {
-                                break;
-                            } else {
-                                isComma = true;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                    if (buf1.length() == 0) {
-                        fuzzyValue = "~";
-                    } else {
-                        final int intValue = Integer.parseInt(buf1.toString());
-                        if (intValue <= 0) {
-                            // fuzzy
-                            buf1.append('.').append(buf2.toString());
-                            fuzzyValue = '~' + buf1.toString();
-                        } else {
-                            // proximity
-                            proximityValue = '~' + Integer.toString(intValue);
-                        }
-                    }
+    protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery) {
+        final String field = termRangeQuery.getField();
+        if (isSearchField(field)) {
+            context.addFieldLog(field, termRangeQuery.toString(field));
+            final RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(field);
+            final BytesRef min = termRangeQuery.getLowerTerm();
+            if (min != null) {
+                if (termRangeQuery.includesLower()) {
+                    rangeQuery.gte(min.utf8ToString());
                 } else {
-                    fuzzyValue = "~";
+                    rangeQuery.gt(min.utf8ToString());
                 }
-
-                value = value.substring(0, tildePos);
             }
+            final BytesRef max = termRangeQuery.getUpperTerm();
+            if (max != null) {
+                if (termRangeQuery.includesUpper()) {
+                    rangeQuery.lte(max.utf8ToString());
+                } else {
+                    rangeQuery.lt(max.utf8ToString());
+                }
+            }
+            rangeQuery.boost(termRangeQuery.getBoost());
+            return rangeQuery;
         } else {
-            if (caretPos > 0) {
-                caretValue = value.substring(caretPos);
-                value = value.substring(0, caretPos);
-            }
+            final String origQuery = termRangeQuery.toString();
+            context.addFieldLog(DEFAULT_FIELD, origQuery);
+            context.addHighlightedQuery(origQuery);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, origQuery));
         }
-        if (value.startsWith("[") && value.endsWith("]")) {
-            appendRangeQueryValue(buf, value, '[', ']');
-        } else if (value.startsWith("{") && value.endsWith("}")) {
-            // TODO function
-            appendRangeQueryValue(buf, value, '{', '}');
-        } else {
-            if (proximityValue == null) {
-                buf.append(QueryUtil.escapeValue(value));
+    }
+
+    protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery) {
+        final String field = termQuery.getTerm().field();
+        final String text = termQuery.getTerm().text();
+        if (DEFAULT_FIELD.equals(field)) {
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(text);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, text));
+        } else if ("sort".equals(field)) {
+            final String[] values = text.split("\\.");
+            if (values.length > 2) {
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(ActionMessages.GLOBAL_PROPERTY_KEY,
+                        text), "Invalid sort field: " + termQuery);
+            }
+            final String sortField = values[0];
+            if (!isSortField(sortField)) {
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
+                        ActionMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
+            }
+            SortOrder sortOrder;
+            if (values.length == 2) {
+                sortOrder = SortOrder.valueOf(values[1]);
+                if (sortOrder == null) {
+                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
+                            ActionMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
+                }
             } else {
-                buf.append('"').append(QueryUtil.escapeValue(value)).append('"');
+                sortOrder = SortOrder.ASC;
             }
-        }
-
-        if (fuzzyValue != null) {
-            buf.append(fuzzyValue);
-        } else if (proximityValue != null) {
-            buf.append(proximityValue);
-        } else if (caretValue != null) {
-            buf.append(caretValue);
-        }
-    }
-
-    protected void appendRangeQueryValue(final StringBuilder buf, final String value, final char prefix, final char suffix) {
-        final String[] split = value.substring(1, value.length() - 1).split(_TO_);
-        if (split.length == 2 && split[0].length() > 0 && split[1].length() > 0) {
-            final String value1 = split[0].trim();
-            final String value2 = split[1].trim();
-            if ("*".equals(value1) && "*".equals(value2)) {
-                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
-                        "Invalid range: " + value);
-            }
-            buf.append(prefix);
-            buf.append(QueryUtil.escapeRangeValue(value1));
-            buf.append(_TO_);
-            buf.append(QueryUtil.escapeRangeValue(value2));
-            buf.append(suffix);
+            context.addSorts(SortBuilders.fieldSort(sortField).order(sortOrder));
+            return null;
+        } else if (INURL_FIELD.equals(field)) {
+            return QueryBuilders.wildcardQuery(field, text).boost(termQuery.getBoost());
+        } else if (isSearchField(field)) {
+            context.addFieldLog(field, text);
+            context.addHighlightedQuery(text);
+            return QueryBuilders.matchPhraseQuery(field, text).boost(termQuery.getBoost());
         } else {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryStrRange(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid range: " + value);
+            final String origQuery = termQuery.toString();
+            context.addFieldLog(DEFAULT_FIELD, origQuery);
+            context.addHighlightedQuery(origQuery);
+            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, origQuery));
         }
     }
 
-    private boolean isSupportedSortField(final String field) {
-        for (final String f : supportedSortFields) {
-            if (f.equals(field)) {
+    private boolean isSearchField(final String field) {
+        for (final String searchField : searchFields) {
+            if (searchField.equals(field)) {
                 return true;
             }
         }
         return false;
     }
 
-    protected List<QueryPart> splitQuery(final String query, final Map<String, String> sortFieldMap, final List<String> highLightQueryList,
-            final Map<String, List<String>> fieldLogMap) {
-        final List<QueryPart> valueList = new ArrayList<QueryPart>();
-        StringBuilder buf = new StringBuilder();
-        boolean quoted = false;
-        int parenthesis = 0;
-        int squareBracket = 0;
-        int curlyBracket = 0;
-        char oldChar = 0;
-        for (int i = 0; i < query.length(); i++) {
-            final char c = query.charAt(i);
-            if (oldChar == '\\' && (c == '"' || c == '(' || c == '{' || c == '[')) {
-                buf.append(c);
-            } else {
-                if (oldChar == '\\') {
-                    buf.append('\\');
-                }
-                switch (c) {
-                case '(':
-                    buf.append(c);
-                    if (!quoted && squareBracket == 0 && curlyBracket == 0) {
-                        parenthesis++;
-                    }
-                    break;
-                case ')':
-                    buf.append(c);
-                    if (!quoted && squareBracket == 0 && curlyBracket == 0) {
-                        parenthesis--;
-                    }
-                    break;
-                case '[':
-                    buf.append(c);
-                    if (!quoted && parenthesis == 0 && curlyBracket == 0) {
-                        squareBracket++;
-                    }
-                    break;
-                case ']':
-                    buf.append(c);
-                    if (!quoted && parenthesis == 0 && curlyBracket == 0) {
-                        squareBracket--;
-                    }
-                    break;
-                case '{':
-                    buf.append(c);
-                    if (!quoted && parenthesis == 0 && squareBracket == 0) {
-                        curlyBracket++;
-                    }
-                    break;
-                case '}':
-                    buf.append(c);
-                    if (!quoted && parenthesis == 0 && squareBracket == 0) {
-                        curlyBracket--;
-                    }
-                    break;
-                case '"':
-                    if (parenthesis == 0 && curlyBracket == 0 && squareBracket == 0) {
-                        quoted ^= true;
-                    } else {
-                        buf.append(c);
-                    }
-                    break;
-                case '\\':
-                    break;
-                case ' ':
-                case '\u3000':
-                    if (quoted || curlyBracket > 0 || squareBracket > 0 || parenthesis > 0) {
-                        buf.append(c);
-                    } else {
-                        if (buf.length() > 0) {
-                            addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);
-                        }
-                        buf = new StringBuilder();
-                    }
-                    break;
-                default:
-                    buf.append(c);
-                    break;
-                }
-            }
-            oldChar = c;
-        }
-        if (oldChar == '\\') {
-            buf.append('\\');
-        }
-        if (quoted) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryQuoted(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid quoted: " + query);
-        } else if (curlyBracket > 0) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryCurlyBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid curly bracket: " + query);
-        } else if (squareBracket > 0) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySquareBracket(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid square bracket: " + query);
-        } else if (parenthesis > 0) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParenthesis(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid parenthesis: " + query);
-        }
-        if (buf.length() > 0) {
-            addQueryPart(buf.toString(), valueList, sortFieldMap, highLightQueryList, fieldLogMap);
-        }
-        return valueList;
+    private QueryBuilder buildDefaultQueryBuilder(final Function<String, QueryBuilder> builder) {
+        // TODO boost
+        final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        final QueryBuilder titleQuery = builder.apply(fieldHelper.titleField);
+        boolQuery.should(titleQuery);
+        final QueryBuilder contentQuery = builder.apply(fieldHelper.contentField);
+        boolQuery.should(contentQuery);
+        getQueryLanguage().ifPresent(lang -> {
+            final QueryBuilder titleLangQuery = builder.apply(fieldHelper.titleField + "_" + lang);
+            boolQuery.should(titleLangQuery);
+            final QueryBuilder contentLangQuery = builder.apply(fieldHelper.contentField + "_" + lang);
+            boolQuery.should(contentLangQuery);
+        });
+        return boolQuery;
     }
 
-    private void addQueryPart(final String str, final List<QueryPart> valueList, final Map<String, String> sortFieldMap,
-            final List<String> highLightQueryList, final Map<String, List<String>> fieldLogMap) {
-        if (str.startsWith("[") || str.startsWith("{")) {
-            valueList.add(new QueryPart(str.trim()));
-        } else if (str.startsWith("(") && str.endsWith(")") && str.length() > 2) {
-            final String q = str.substring(1, str.length() - 1);
-            if (sortFieldMap != null && highLightQueryList != null) {
-                final String innerQuery = buildQuery(q, sortFieldMap, highLightQueryList, fieldLogMap);
-                if (StringUtil.isNotBlank(innerQuery)) {
-                    valueList.add(new QueryPart("(" + innerQuery + ")", true));
+    protected OptionalThing<String> getQueryLanguage() {
+        if (defaultQueryLanguage != null) {
+            return OptionalEntity.of(defaultQueryLanguage);
+        }
+        return LaRequestUtil.getOptionalRequest().map(request -> {
+            final Locale locale = request.getLocale();
+            if (locale == null) {
+                return null;
+            }
+            final String language = locale.getLanguage();
+            final String country = locale.getCountry();
+            if (StringUtil.isNotBlank(language)) {
+                if (StringUtil.isNotBlank(country)) {
+                    final String lang = language + "-" + country;
+                    if (fieldLanguageMap.containsKey(lang)) {
+                        return fieldLanguageMap.get(lang);
+                    }
                 }
-            } else {
-                // facet query
-                final String innerQuery = buildFacetQuery(q);
-                if (StringUtil.isNotBlank(innerQuery)) {
-                    valueList.add(new QueryPart("(" + innerQuery + ")", true));
+                if (fieldLanguageMap.containsKey(language)) {
+                    return fieldLanguageMap.get(language);
                 }
             }
-        } else {
-            valueList.add(new QueryPart(str.trim()));
+            return null;
+        });
+
+    }
+
+    public String buildOptionQuery(final Map<String, String[]> optionMap) {
+        if (optionMap == null) {
+            return StringUtil.EMPTY;
         }
+
+        // TODO
+        final StringBuilder buf = new StringBuilder();
+
+        //        final String[] qs = optionMap.get(Constants.OPTION_QUERY_Q);
+        //        if (qs != null) {
+        //            for (final String q : qs) {
+        //                if (StringUtil.isNotBlank(q)) {
+        //                    buf.append(' ');
+        //                    buf.append(q);
+        //                }
+        //            }
+        //        }
+        //
+        //        final String[] cqs = optionMap.get(Constants.OPTION_QUERY_CQ);
+        //        if (cqs != null) {
+        //            for (final String cq : cqs) {
+        //                if (StringUtil.isNotBlank(cq)) {
+        //                    buf.append(' ');
+        //                    char split = 0;
+        //                    final List<QueryPart> partList = splitQuery(cq.indexOf('"') >= 0 ? cq : "\"" + cq + "\"", null, null, null);
+        //                    for (final QueryPart part : partList) {
+        //                        if (split == 0) {
+        //                            split = ' ';
+        //                        } else {
+        //                            buf.append(split);
+        //                        }
+        //                        final String value = part.getValue();
+        //                        buf.append('"');
+        //                        buf.append(value);
+        //                        buf.append('"');
+        //                    }
+        //                }
+        //            }
+        //        }
+        //
+        //        final String[] oqs = optionMap.get(Constants.OPTION_QUERY_OQ);
+        //        if (oqs != null) {
+        //            for (final String oq : oqs) {
+        //                if (StringUtil.isNotBlank(oq)) {
+        //                    buf.append(' ');
+        //                    final List<QueryPart> partList = splitQuery(oq, null, null, null);
+        //                    final boolean append = partList.size() > 1 && optionMap.size() > 1;
+        //                    if (append) {
+        //                        buf.append('(');
+        //                    }
+        //                    String split = null;
+        //                    for (final QueryPart part : partList) {
+        //                        if (split == null) {
+        //                            split = _OR_;
+        //                        } else {
+        //                            buf.append(split);
+        //                        }
+        //                        final String value = part.getValue();
+        //                        final boolean hasSpace = value.matches(".*\\s.*");
+        //                        if (hasSpace) {
+        //                            buf.append('"');
+        //                        }
+        //                        buf.append(value);
+        //                        if (hasSpace) {
+        //                            buf.append('"');
+        //                        }
+        //                    }
+        //                    if (append) {
+        //                        buf.append(')');
+        //                    }
+        //                }
+        //            }
+        //        }
+        //
+        //        final String[] nqs = optionMap.get(Constants.OPTION_QUERY_NQ);
+        //        if (nqs != null) {
+        //            for (final String nq : nqs) {
+        //                if (StringUtil.isNotBlank(nq)) {
+        //                    buf.append(' ');
+        //                    String split = StringUtil.EMPTY;
+        //                    final List<QueryPart> partList = splitQuery(nq, null, null, null);
+        //                    for (final QueryPart part : partList) {
+        //                        buf.append(split);
+        //                        if (split.length() == 0) {
+        //                            split = " ";
+        //                        }
+        //                        buf.append(NOT_);
+        //                        final String value = part.getValue();
+        //                        final boolean hasSpace = value.matches(".*\\s.*");
+        //                        if (hasSpace) {
+        //                            buf.append('"');
+        //                        }
+        //                        buf.append(value);
+        //                        if (hasSpace) {
+        //                            buf.append('"');
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        return buf.toString().trim();
+    }
+
+    private boolean isSortField(final String field) {
+        for (final String f : supportedSortFields) {
+            if (f.equals(field)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isFacetField(final String field) {
@@ -785,304 +615,12 @@ public class QueryHelper implements Serializable {
         return flag;
     }
 
-    public String buildFacetQuery(final String query) {
-        final String q = buildFacetQueryInternal(query);
-        String queryString;
-        if (q == null || "()".equals(q)) {
-            queryString = StringUtil.EMPTY;
-        } else {
-            queryString = unbracketQuery(q);
-        }
-        return queryString;
-    }
-
-    protected String buildFacetQueryInternal(final String query) {
-        final List<QueryPart> queryPartList = splitQuery(query, null, null, null);
-        if (queryPartList.isEmpty()) {
-            return StringUtil.EMPTY;
-        }
-
-        final StringBuilder queryBuf = new StringBuilder(255);
-        final List<String> notOperatorList = new ArrayList<String>();
-        final String defaultOperator = getDefaultOperator();
-        String operator = defaultOperator;
-        boolean notOperatorFlag = false;
-        int queryOperandCount = 0;
-        int contentOperandCount = 0;
-        final String queryLanguage = getQueryLanguage();
-        for (final QueryPart queryPart : queryPartList) {
-            if (queryPart.isParsed()) {
-                if (queryBuf.length() > 0) {
-                    queryBuf.append(operator);
-                }
-                queryBuf.append(queryPart.getValue());
-                continue;
-            }
-            final String value = queryPart.getValue();
-            boolean nonPrefix = false;
-            // check prefix
-            for (final String field : facetFields) {
-                final String prefix = field + ":";
-                if (value.startsWith(prefix) && value.length() != prefix.length()) {
-                    if (queryBuf.length() > 0) {
-                        queryBuf.append(operator);
-                    }
-                    final String targetWord = value.substring(prefix.length());
-                    if (notOperatorFlag) {
-                        final StringBuilder buf = new StringBuilder(100);
-                        buf.append(prefix);
-                        appendQueryValue(buf, targetWord, useBigram);
-                        notOperatorList.add(buf.toString());
-                        notOperatorFlag = false;
-                    } else {
-                        queryBuf.append(prefix);
-                        appendQueryValue(queryBuf, targetWord, useBigram);
-                        queryOperandCount++;
-                    }
-                    nonPrefix = true;
-                    operator = defaultOperator;
-                    break;
-                }
-            }
-
-            // sort
-            if (value.startsWith(sortPrefix) && value.length() != sortPrefix.length()) {
-                // skip
-                continue;
-            }
-
-            if (!nonPrefix) {
-                if (AND.equals(value)) {
-                    operator = _AND_;
-                } else if (OR.equals(value)) {
-                    operator = _OR_;
-                } else if (NOT.equals(value)) {
-                    notOperatorFlag = true;
-                } else if (notOperatorFlag) {
-                    final StringBuilder buf = new StringBuilder(100);
-
-                    buildContentQueryWithLang(buf, value, queryLanguage);
-                    notOperatorList.add(buf.toString());
-
-                    operator = defaultOperator;
-                    notOperatorFlag = false;
-                } else {
-                    // content
-                    if (queryBuf.length() > 0) {
-                        queryBuf.append(operator);
-                    }
-                    buildContentQueryWithLang(queryBuf, value, queryLanguage);
-                    contentOperandCount++;
-
-                    operator = defaultOperator;
-                }
-            }
-        }
-
-        StringBuilder searchQueryBuf = new StringBuilder(255);
-        if (queryBuf.length() > 0) {
-            searchQueryBuf.append(queryBuf.toString());
-            operator = defaultOperator;
-        } else {
-            operator = StringUtil.EMPTY;
-        }
-        if (!notOperatorList.isEmpty()) {
-            final String q = searchQueryBuf.toString();
-            searchQueryBuf = new StringBuilder(255);
-            final int count = queryOperandCount + contentOperandCount;
-            if (count > 1) {
-                searchQueryBuf.append('(');
-            }
-            searchQueryBuf.append(q);
-            if (count > 1) {
-                searchQueryBuf.append(')');
-            }
-            for (final String notOperator : notOperatorList) {
-                searchQueryBuf.append(operator);
-                searchQueryBuf.append(NOT_);
-                searchQueryBuf.append(notOperator);
-                operator = defaultOperator;
-            }
-        }
-
-        return searchQueryBuf.toString();
-    }
-
-    protected void buildContentQueryWithLang(final StringBuilder buf, final String value, final String queryLanguage) {
-        buf.append('(');
-        buf.append(fieldHelper.titleField).append(':');
-        appendQueryValue(buf, value, useBigram);
-        appendFieldBoostValue(buf, fieldHelper.titleField, value);
-        buf.append(_OR_);
-        buf.append(fieldHelper.contentField).append(':');
-        appendQueryValue(buf, value, useBigram);
-        appendFieldBoostValue(buf, fieldHelper.contentField, value);
-        if (StringUtil.isNotBlank(queryLanguage)) {
-            final String languageField = "content_" + queryLanguage;
-            buf.append(_OR_);
-            buf.append(languageField);
-            buf.append(':');
-            appendQueryValue(buf, value, false);
-            appendFieldBoostValue(buf, languageField, value);
-        }
-        buf.append(')');
-    }
-
-    protected String getQueryLanguage() {
-        final String[] supportedLanguages = systemHelper.getSupportedLanguages();
-        if (supportedLanguages.length == 0) {
-            return null;
-        }
-        if (defaultQueryLanguage != null) {
-            return defaultQueryLanguage;
-        }
-        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
-        if (request == null) {
-            return null;
-        }
-        final Locale locale = request.getLocale();
-        if (locale == null) {
-            return null;
-        }
-        final String language = locale.getLanguage();
-        final String country = locale.getCountry();
-        if (StringUtil.isNotBlank(language)) {
-            if (StringUtil.isNotBlank(country)) {
-                final String lang = language + "_" + country;
-                for (final String value : supportedLanguages) {
-                    if (value.equals(lang)) {
-                        final String fieldLang = fieldLanguageMap.get(value);
-                        if (fieldLang == null) {
-                            return value;
-                        } else {
-                            return fieldLang;
-                        }
-                    }
-                }
-            }
-            for (final String value : supportedLanguages) {
-                if (value.equals(language)) {
-                    final String fieldLang = fieldLanguageMap.get(value);
-                    if (fieldLang == null) {
-                        return value;
-                    } else {
-                        return fieldLang;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     public boolean isFacetSortValue(final String sort) {
         return "count".equals(sort) || "index".equals(sort);
     }
 
-    public String buildOptionQuery(final Map<String, String[]> optionMap) {
-        if (optionMap == null) {
-            return StringUtil.EMPTY;
-        }
-
-        final StringBuilder buf = new StringBuilder();
-
-        final String[] qs = optionMap.get(Constants.OPTION_QUERY_Q);
-        if (qs != null) {
-            for (final String q : qs) {
-                if (StringUtil.isNotBlank(q)) {
-                    buf.append(' ');
-                    buf.append(q);
-                }
-            }
-        }
-
-        final String[] cqs = optionMap.get(Constants.OPTION_QUERY_CQ);
-        if (cqs != null) {
-            for (final String cq : cqs) {
-                if (StringUtil.isNotBlank(cq)) {
-                    buf.append(' ');
-                    char split = 0;
-                    final List<QueryPart> partList = splitQuery(cq.indexOf('"') >= 0 ? cq : "\"" + cq + "\"", null, null, null);
-                    for (final QueryPart part : partList) {
-                        if (split == 0) {
-                            split = ' ';
-                        } else {
-                            buf.append(split);
-                        }
-                        final String value = part.getValue();
-                        buf.append('"');
-                        buf.append(value);
-                        buf.append('"');
-                    }
-                }
-            }
-        }
-
-        final String[] oqs = optionMap.get(Constants.OPTION_QUERY_OQ);
-        if (oqs != null) {
-            for (final String oq : oqs) {
-                if (StringUtil.isNotBlank(oq)) {
-                    buf.append(' ');
-                    final List<QueryPart> partList = splitQuery(oq, null, null, null);
-                    final boolean append = partList.size() > 1 && optionMap.size() > 1;
-                    if (append) {
-                        buf.append('(');
-                    }
-                    String split = null;
-                    for (final QueryPart part : partList) {
-                        if (split == null) {
-                            split = _OR_;
-                        } else {
-                            buf.append(split);
-                        }
-                        final String value = part.getValue();
-                        final boolean hasSpace = value.matches(".*\\s.*");
-                        if (hasSpace) {
-                            buf.append('"');
-                        }
-                        buf.append(value);
-                        if (hasSpace) {
-                            buf.append('"');
-                        }
-                    }
-                    if (append) {
-                        buf.append(')');
-                    }
-                }
-            }
-        }
-
-        final String[] nqs = optionMap.get(Constants.OPTION_QUERY_NQ);
-        if (nqs != null) {
-            for (final String nq : nqs) {
-                if (StringUtil.isNotBlank(nq)) {
-                    buf.append(' ');
-                    String split = StringUtil.EMPTY;
-                    final List<QueryPart> partList = splitQuery(nq, null, null, null);
-                    for (final QueryPart part : partList) {
-                        buf.append(split);
-                        if (split.length() == 0) {
-                            split = " ";
-                        }
-                        buf.append(NOT_);
-                        final String value = part.getValue();
-                        final boolean hasSpace = value.matches(".*\\s.*");
-                        if (hasSpace) {
-                            buf.append('"');
-                        }
-                        buf.append(value);
-                        if (hasSpace) {
-                            buf.append('"');
-                        }
-                    }
-                }
-            }
-        }
-
-        return buf.toString().trim();
-    }
-
     public void setApiResponseFields(final String[] fields) {
-        apiResponseFieldSet = new HashSet<String>();
+        apiResponseFieldSet = new HashSet<>();
         for (final String field : fields) {
             apiResponseFieldSet.add(field);
         }
@@ -1137,6 +675,10 @@ public class QueryHelper implements Serializable {
      */
     public void setHighlightedFields(final String[] highlightedFields) {
         this.highlightedFields = highlightedFields;
+    }
+
+    public Stream<String> highlightedFields() {
+        return Stream.of(highlightedFields);
     }
 
     /**
@@ -1214,20 +756,6 @@ public class QueryHelper implements Serializable {
     }
 
     /**
-     * @return the useBigram
-     */
-    public boolean isUseBigram() {
-        return useBigram;
-    }
-
-    /**
-     * @param useBigram the useBigram to set
-     */
-    public void setUseBigram(final boolean useBigram) {
-        this.useBigram = useBigram;
-    }
-
-    /**
      * @return the additionalQuery
      */
     public String getAdditionalQuery() {
@@ -1239,14 +767,6 @@ public class QueryHelper implements Serializable {
      */
     public void setAdditionalQuery(final String additionalQuery) {
         this.additionalQuery = additionalQuery;
-    }
-
-    public int getMaxFilterQueriesForRole() {
-        return maxFilterQueriesForRole;
-    }
-
-    public void setMaxFilterQueriesForRole(final int maxFilterQuerysForRole) {
-        maxFilterQueriesForRole = maxFilterQuerysForRole;
     }
 
     /**
@@ -1289,19 +809,13 @@ public class QueryHelper implements Serializable {
         this.maxSearchResultOffset = maxSearchResultOffset;
     }
 
-    public void addDefaultSortField(final String fieldName, final String order) {
-        final SortField sortField = new SortField();
-        sortField.setField(fieldName);
-        sortField.setOrder(Constants.ASC.equalsIgnoreCase(order) ? Constants.ASC : Constants.DESC);
-        defaultSortFieldList.add(sortField);
-    }
-
-    public boolean hasDefaultSortFields() {
-        return !defaultSortFieldList.isEmpty();
-    }
-
-    public SortField[] getDefaultSortFields() {
-        return defaultSortFieldList.toArray(new SortField[defaultSortFieldList.size()]);
+    public void addDefaultSort(final String fieldName, final String order) {
+        final List<SortBuilder> list = new ArrayList<>();
+        if (defaultSortBuilders != null) {
+            Stream.of(defaultSortBuilders).forEach(builder -> list.add(builder));
+        }
+        list.add(SortBuilders.fieldSort(fieldName).order(SortOrder.ASC.toString().equalsIgnoreCase(order) ? SortOrder.ASC : SortOrder.DESC));
+        defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
     }
 
     public void setHighlightPrefix(final String highlightPrefix) {
@@ -1310,62 +824,6 @@ public class QueryHelper implements Serializable {
 
     public String getHighlightPrefix() {
         return highlightPrefix;
-    }
-
-    public String[] getSupportedMltFields() {
-        return supportedMltFields;
-    }
-
-    public void setSupportedMltFields(final String[] supportedMltFields) {
-        this.supportedMltFields = supportedMltFields;
-    }
-
-    public String getMoreLikeThisField(final String[] fields) {
-        if (fields == null || fields.length == 0) {
-            return null;
-        }
-        final List<String> list = new ArrayList<String>();
-        for (final String field : fields) {
-            if (StringUtil.isNotBlank(field)) {
-                for (final String f : field.split(",")) {
-                    final String value = f.trim();
-                    for (final String supported : supportedMltFields) {
-                        if (supported.equals(value)) {
-                            list.add(value);
-                        }
-                    }
-                }
-            }
-        }
-        if (list.isEmpty()) {
-            return null;
-        }
-        return StringUtils.join(list, ',');
-    }
-
-    public String getMinimumShouldMatch() {
-        return minimumShouldMatch;
-    }
-
-    public void setMinimumShouldMatch(final String minimumShouldMatch) {
-        this.minimumShouldMatch = minimumShouldMatch;
-    }
-
-    public String getDefType() {
-        return defType;
-    }
-
-    public void setDefType(final String defType) {
-        this.defType = defType;
-    }
-
-    public boolean isAnalysisFieldName(final String fieldName) {
-        for (final String f : supportedAnalysisFields) {
-            if (f.endsWith(fieldName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public FacetInfo getDefaultFacetInfo() {
@@ -1480,44 +938,4 @@ public class QueryHelper implements Serializable {
             buf.append('^').append(fieldBoostMap.get(field));
         }
     }
-
-    public static class QueryPart {
-        protected String value;
-
-        protected boolean parsed;
-
-        public QueryPart(final String value) {
-            this(value, false);
-        }
-
-        public QueryPart(final String value, final boolean parsed) {
-            this.value = value;
-            this.parsed = parsed;
-        }
-
-        /**
-         * @return the parsed
-         */
-        public boolean isParsed() {
-            return parsed;
-        }
-
-        /**
-         * @return the value
-         */
-        public String getValue() {
-            return value;
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            return "QueryPart [value=" + value + ", parsed=" + parsed + "]";
-        }
-    }
-
 }

@@ -19,14 +19,15 @@ public class SuggestApiManager extends BaseApiManager {
     }
 
     @Override
-    public boolean matches(HttpServletRequest request) {
+    public boolean matches(final HttpServletRequest request) {
         return false; // TODO remove
         //        final String servletPath = request.getServletPath();
         //        return servletPath.startsWith(pathPrefix);
     }
 
     @Override
-    public void process(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
+            ServletException {
         throw new UnsupportedOperationException("TODO");
     }
 

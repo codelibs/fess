@@ -512,7 +512,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Scheduler */
     public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
 
-    /** The key of the message: System */
+    /** The key of the message: Dashboard */
     public static final String LABELS_menu_system_config = "{labels.menu_system_config}";
 
     /** The key of the message: Index */
@@ -632,7 +632,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
-    /** The key of the message: Copyright(C) 2009-2015 CodeLibs Project. <span class="br-phone"></span>All Rights Reserved. */
+    /** The key of the message: Copyright(C) 2009-2015 <a href="https://github.com/codelibs">CodeLibs Project</a>. <span class="br-phone"></span>All Rights Reserved. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 
     /** The key of the message: Search */
@@ -839,11 +839,17 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Login */
     public static final String LABELS_LOGIN = "{labels.login}";
 
+    /** The key of the message: User name */
+    public static final String LABELS_LOGIN_placeholder_username = "{labels.login.placeholder_username}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_LOGIN_placeholder_password = "{labels.login.placeholder_password}";
+
     /** The key of the message: Copyright(C) 2009-2014 CodeLibs Project. All Rights Reserved. */
     public static final String LABELS_LOGIN_footer_copyright = "{labels.login.footer_copyright}";
 
     /** The key of the message: Login */
-    public static final String LABELS_login_title = "{labels.login_title}";
+    public static final String LABELS_LOGIN_TITLE = "{labels.login.title}";
 
     /** The key of the message: Labels */
     public static final String LABELS_index_label = "{labels.index_label}";
@@ -1115,7 +1121,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Remove Index Before */
     public static final String LABELS_day_for_cleanup = "{labels.day_for_cleanup}";
 
-    /** The key of the message: Day */
+    /** The key of the message: Day(s) */
     public static final String LABELS_DAY = "{labels.day}";
 
     /** The key of the message: Update */

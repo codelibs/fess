@@ -3,6 +3,7 @@ package org.codelibs.fess.es.client;
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,12 +30,12 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
-import org.codelibs.fess.entity.SearchQuery;
-import org.codelibs.fess.entity.SearchQuery.SortField;
+import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.indexer.FessSearchQueryException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.Action;
@@ -134,10 +135,8 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.search.SearchHit;
@@ -145,9 +144,6 @@ import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -670,7 +666,6 @@ public class FessEsClient implements Client {
     public static class SearchConditionBuilder {
         private final SearchRequestBuilder searchRequestBuilder;
         private String query;
-        private boolean administrativeAccess = false;
         private String[] responseFields;
         private int offset = Constants.DEFAULT_START_COUNT;
         private int size = Constants.DEFAULT_PAGE_SIZE;
@@ -691,7 +686,6 @@ public class FessEsClient implements Client {
         }
 
         public SearchConditionBuilder administrativeAccess() {
-            this.administrativeAccess = true;
             return this;
         }
 
@@ -721,15 +715,22 @@ public class FessEsClient implements Client {
         }
 
         public boolean build() {
-            if (offset > ComponentUtil.getQueryHelper().getMaxSearchResultOffset()) {
+            if (StringUtil.isBlank(query)) {
+                return false;
+            }
+
+            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+
+            if (offset > queryHelper.getMaxSearchResultOffset()) {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
-            final SearchQuery searchQuery = ComponentUtil.getQueryHelper().build(query, administrativeAccess);
-            final String q = searchQuery.getQuery();
-            if (StringUtil.isBlank(q)) {
-                return false;
-            }
+            final QueryContext queryContext = queryHelper.build(query, context -> {
+                // geo
+                    if (geoInfo != null && geoInfo.isAvailable()) {
+                        context.addFilter(geoInfo.toFilterBuilder());
+                    }
+                });
 
             searchRequestBuilder.setFrom(offset).setSize(size);
 
@@ -738,102 +739,49 @@ public class FessEsClient implements Client {
             }
 
             // sort
-            final SortField[] sortFields = searchQuery.getSortFields();
-            if (sortFields.length != 0) {
-                for (final SortField sortField : sortFields) {
-                    final FieldSortBuilder fieldSort = SortBuilders.fieldSort(sortField.getField());
-                    if (Constants.DESC.equals(sortField.getOrder())) {
-                        fieldSort.order(SortOrder.DESC);
-                    } else {
-                        fieldSort.order(SortOrder.ASC);
-                    }
-                    searchRequestBuilder.addSort(fieldSort);
-                }
-            } else if (ComponentUtil.getQueryHelper().hasDefaultSortFields()) {
-                for (final SortField sortField : ComponentUtil.getQueryHelper().getDefaultSortFields()) {
-                    final FieldSortBuilder fieldSort = SortBuilders.fieldSort(sortField.getField());
-                    if (Constants.DESC.equals(sortField.getOrder())) {
-                        fieldSort.order(SortOrder.DESC);
-                    } else {
-                        fieldSort.order(SortOrder.ASC);
-                    }
-                    searchRequestBuilder.addSort(fieldSort);
-                }
-            }
+            queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
+
             // highlighting
-            if (ComponentUtil.getQueryHelper().getHighlightedFields() != null
-                    && ComponentUtil.getQueryHelper().getHighlightedFields().length != 0) {
-                for (final String hf : ComponentUtil.getQueryHelper().getHighlightedFields()) {
-                    searchRequestBuilder.addHighlightedField(hf, ComponentUtil.getQueryHelper().getHighlightFragmentSize());
-                }
-            }
+            queryHelper.highlightedFields().forEach(
+                    hf -> searchRequestBuilder.addHighlightedField(hf, queryHelper.getHighlightFragmentSize()));
 
             // facets
             if (facetInfo != null) {
-                if (facetInfo.field != null) {
-                    for (final String f : facetInfo.field) {
-                        if (ComponentUtil.getQueryHelper().isFacetField(f)) {
-                            final String encodedField = BaseEncoding.base64().encode(f.getBytes(Charsets.UTF_8));
-                            final TermsBuilder termsBuilder =
-                                    AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                            // TODO order
-                            if (facetInfo.limit != null) {
-                                // TODO
-                                termsBuilder.size(Integer.parseInt(facetInfo.limit));
-                            }
-                            searchRequestBuilder.addAggregation(termsBuilder);
-                        } else {
-                            throw new FessSearchQueryException("Invalid facet field: " + f);
+                StreamUtil.of(facetInfo.field).forEach(f -> {
+                    if (queryHelper.isFacetField(f)) {
+                        final String encodedField = BaseEncoding.base64().encode(f.getBytes(Charsets.UTF_8));
+                        final TermsBuilder termsBuilder = AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
+                        // TODO order
+                        if (facetInfo.limit != null) {
+                            // TODO
+                            termsBuilder.size(Integer.parseInt(facetInfo.limit));
                         }
+                        searchRequestBuilder.addAggregation(termsBuilder);
+                    } else {
+                        throw new FessSearchQueryException("Invalid facet field: " + f);
                     }
-                }
-                if (facetInfo.query != null) {
-                    for (final String fq : facetInfo.query) {
-                        final String facetQuery = ComponentUtil.getQueryHelper().buildFacetQuery(fq);
-                        if (StringUtil.isNotBlank(facetQuery)) {
-                            final String encodedFacetQuery = BaseEncoding.base64().encode(facetQuery.getBytes(Charsets.UTF_8));
-                            final FilterAggregationBuilder filterBuilder =
-                                    AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
-                                            FilterBuilders.queryFilter(QueryBuilders.queryStringQuery(facetQuery)));
-                            // TODO order
-                            if (facetInfo.limit != null) {
-                                // TODO
-                                //    filterBuilder.size(Integer.parseInt(facetInfo .limit));
+                });
+                StreamUtil.of(facetInfo.query).forEach(
+                        fq -> {
+                            final QueryContext facetContext = queryHelper.buildBaseQuery(fq, c -> {});
+                            if (facetContext != null) {
+                                final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
+                                final FilterAggregationBuilder filterBuilder =
+                                        AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
+                                                FilterBuilders.queryFilter(facetContext.getQueryBuilder()));
+                                // TODO order
+                                if (facetInfo.limit != null) {
+                                    // TODO
+                                    //    filterBuilder.size(Integer.parseInt(facetInfo .limit));
+                                }
+                                searchRequestBuilder.addAggregation(filterBuilder);
+                            } else {
+                                throw new FessSearchQueryException("Invalid facet query: " + fq);
                             }
-                            searchRequestBuilder.addAggregation(filterBuilder);
-                        } else {
-                            throw new FessSearchQueryException("Invalid facet query: " + facetQuery);
-                        }
-                    }
-                }
+                        });
             }
 
-            BoolFilterBuilder boolFilterBuilder = null;
-
-            // query
-            QueryBuilder queryBuilder = QueryBuilders.queryStringQuery(q);
-            // filter query
-            if (searchQuery.hasFilterQueries()) {
-                if (boolFilterBuilder == null) {
-                    boolFilterBuilder = FilterBuilders.boolFilter();
-                }
-                for (final String filterQuery : searchQuery.getFilterQueries()) {
-                    boolFilterBuilder.must(FilterBuilders.queryFilter(QueryBuilders.queryStringQuery(filterQuery)));
-                }
-            }
-            // geo
-            if (geoInfo != null && geoInfo.isAvailable()) {
-                if (boolFilterBuilder == null) {
-                    boolFilterBuilder = FilterBuilders.boolFilter();
-                }
-                boolFilterBuilder.must(geoInfo.toFilterBuilder());
-            }
-
-            if (boolFilterBuilder != null) {
-                queryBuilder = QueryBuilders.filteredQuery(queryBuilder, boolFilterBuilder);
-            }
-
-            searchRequestBuilder.setQuery(queryBuilder);
+            searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
 
             return true;
         }

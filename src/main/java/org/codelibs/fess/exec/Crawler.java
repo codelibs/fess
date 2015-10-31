@@ -296,8 +296,8 @@ public class Crawler implements Serializable {
             }
 
             try {
-                FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
-                Postbox postbox = ComponentUtil.getComponent(Postbox.class);
+                final FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
+                final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
                 CrawlerPostcard.droppedInto(postbox, postcard -> {
                     postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
                     postcard.addReplyTo(fessConfig.getMailReturnPath());

@@ -126,7 +126,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         validate(form, messages -> {}, toIndexHtml());
-        String id = form.id;
+        final String id = form.id;
         crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
@@ -166,7 +166,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DELETE);
         validate(form, messages -> {}, toIndexHtml());
-        String id = form.id;
+        final String id = form.id;
         crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {
             crawlingSessionService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));

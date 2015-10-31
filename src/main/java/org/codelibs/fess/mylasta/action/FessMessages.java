@@ -294,7 +294,7 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Invalid password. */
     public static final String ERRORS_password_does_not_exist_in_session = "{errors.password_does_not_exist_in_session}";
 
-    /** The key of the message: The given query is invalid. */
+    /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
     /** The key of the message: An invalid quote character is used. */
@@ -314,6 +314,18 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: An invalid range is used. The example of the range format is "field:'{'Aida TO Carmen'}'". */
     public static final String ERRORS_invalid_query_str_range = "{errors.invalid_query_str_range}";
+
+    /** The key of the message: The given query is invalid. */
+    public static final String ERRORS_invalid_query_parse_error = "{errors.invalid_query_parse_error}";
+
+    /** The key of the message: The given sort ({0}) is invalid. */
+    public static final String ERRORS_invalid_query_sort_value = "{errors.invalid_query_sort_value}";
+
+    /** The key of the message: The given sort ({0}) is not supported. */
+    public static final String ERRORS_invalid_query_unsupported_sort_field = "{errors.invalid_query_unsupported_sort_field}";
+
+    /** The key of the message: The given sort order ({0}) is not supported. */
+    public static final String ERRORS_invalid_query_unsupported_sort_order = "{errors.invalid_query_unsupported_sort_order}";
 
     /** The key of the message: Invalid mode(expected value is {0}, but it's {1}). */
     public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
@@ -1786,7 +1798,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.invalid_query_unknown' with parameters.
      * <pre>
-     * message: The given query is invalid.
+     * message: The given query has unknown condition.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -1878,6 +1890,65 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryStrRange(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_invalid_query_str_range));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_parse_error' with parameters.
+     * <pre>
+     * message: The given query is invalid.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryParseError(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_query_parse_error));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_sort_value' with parameters.
+     * <pre>
+     * message: The given sort ({0}) is invalid.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQuerySortValue(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_query_sort_value, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_unsupported_sort_field' with parameters.
+     * <pre>
+     * message: The given sort ({0}) is not supported.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryUnsupportedSortField(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_query_unsupported_sort_field, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_query_unsupported_sort_order' with parameters.
+     * <pre>
+     * message: The given sort order ({0}) is not supported.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidQueryUnsupportedSortOrder(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_query_unsupported_sort_order, arg0));
         return this;
     }
 

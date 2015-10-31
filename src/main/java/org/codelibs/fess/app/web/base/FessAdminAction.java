@@ -100,6 +100,7 @@ public abstract class FessAdminAction extends FessBaseAction {
     @Override
     protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
         return new TypicalSimpleEmbeddedKeySupplier() {
+            @Override
             public String getErrorMessageForwardPath() {
                 return "/admin/error/error.jsp";
             }

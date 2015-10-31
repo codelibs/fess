@@ -128,12 +128,13 @@ public class SearchService {
         final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
         data.setFacetResponse(queryResponseList.getFacetResponse());
 
-        final String[] highlightQueries = (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+        @SuppressWarnings("unchecked")
+        final Set<String> highlightQueries = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (highlightQueries != null) {
             final StringBuilder buf = new StringBuilder(100);
-            for (final String q : highlightQueries) {
+            highlightQueries.stream().forEach(q -> {
                 buf.append("&hq=").append(q);
-            }
+            });
             data.setAppendHighlightParams(buf.toString());
         }
 
@@ -325,11 +326,11 @@ public class SearchService {
         return fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, id, field, value);
     }
 
-    public boolean bulkUpdate(Consumer<BulkRequestBuilder> consumer) {
-        BulkRequestBuilder builder = fessEsClient.prepareBulk();
+    public boolean bulkUpdate(final Consumer<BulkRequestBuilder> consumer) {
+        final BulkRequestBuilder builder = fessEsClient.prepareBulk();
         consumer.accept(builder);
         try {
-            BulkResponse response = builder.execute().get();
+            final BulkResponse response = builder.execute().get();
             if (response.hasFailures()) {
                 throw new FessEsClientException(response.buildFailureMessage());
             } else {

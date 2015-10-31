@@ -27,23 +27,23 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Base64Util;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FileConfigService;
@@ -101,7 +101,7 @@ public class ViewHelper implements Serializable {
 
     public String urlLinkEncoding = Constants.UTF_8;
 
-    public String[] highlightingFields = new String[] { "hl_content", "digest" };
+    public String[] highlightedFields = new String[] { "hl_content", "digest" };
 
     public boolean useHighlight = false;
 
@@ -158,11 +158,16 @@ public class ViewHelper implements Serializable {
     }
 
     public String getContentDescription(final Map<String, Object> document) {
-        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
-        final String[] queries = request == null ? StringUtil.EMPTY_STRINGS : (String[]) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final Set<String> queries = new HashSet<>();
+        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+            Set<String> set = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            if (set != null) {
+                queries.addAll(set);
+            }
+        });
         final int size = descriptionLength;
 
-        for (final String field : highlightingFields) {
+        for (final String field : highlightedFields) {
             final String text = getString(document, field);
             if (StringUtil.isNotBlank(text)) {
                 if (useHighlight) {
@@ -185,8 +190,9 @@ public class ViewHelper implements Serializable {
         return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
-    protected String highlight(final String content, final String[] queries) {
-        if (StringUtil.isBlank(content) || queries == null || queries.length == 0) {
+    @Deprecated
+    protected String highlight(final String content, final Set<String> queries) {
+        if (StringUtil.isBlank(content) || queries.isEmpty()) {
             return content;
         }
         String newContent = content;
@@ -313,16 +319,11 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendPDFSearchWord(final String url) {
-        final String[] queries = (String[]) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final Set<String> queries = (Set<String>) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
-            for (int i = 0; i < queries.length; i++) {
-                if (i != 0) {
-                    buf.append(' ');
-                }
-                buf.append(URLUtil.encode(queries[i], urlLinkEncoding));
-            }
+            buf.append(String.join(" ", queries.toArray(new String[queries.size()])));
             buf.append("%22");
             return buf.toString();
         }

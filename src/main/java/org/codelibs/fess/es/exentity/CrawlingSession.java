@@ -38,7 +38,7 @@ public class CrawlingSession extends BsCrawlingSession {
         asDocMeta().version(version);
     }
 
-    public void setCrawlingSessionInfoList(List<CrawlingSessionInfo> crawlingSessionInfoList) {
+    public void setCrawlingSessionInfoList(final List<CrawlingSessionInfo> crawlingSessionInfoList) {
         this.crawlingSessionInfoList = crawlingSessionInfoList;
     }
 

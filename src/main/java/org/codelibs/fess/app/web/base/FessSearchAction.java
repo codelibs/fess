@@ -100,6 +100,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     @Override
     protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
         return new TypicalSimpleEmbeddedKeySupplier() {
+            @Override
             public String getErrorMessageForwardPath() {
                 return "/error/system.jsp";
             }

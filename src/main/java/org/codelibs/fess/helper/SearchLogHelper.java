@@ -151,7 +151,7 @@ public class SearchLogHelper {
         final Map<String, UserInfo> userInfoMap = new HashMap<>();
         queue.stream().forEach(searchLog -> {
             final String userAgent = searchLog.getUserAgent();
-            boolean isBot = userAgent != null && Stream.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
+            final boolean isBot = userAgent != null && Stream.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
             if (!isBot) {
                 searchLog.getUserInfo().ifPresent(userInfo -> {
                     final String code = userInfo.getCode();
@@ -265,7 +265,7 @@ public class SearchLogHelper {
                             .stream()
                             .forEach(
                                     entry -> {
-                                        String id = docIdMap.get(entry.getKey());
+                                        final String id = docIdMap.get(entry.getKey());
                                         if (id != null) {
                                             builder.add(new UpdateRequest(fieldHelper.docIndex, fieldHelper.docType, id).doc(
                                                     fieldHelper.clickCountField, entry.getValue()));
