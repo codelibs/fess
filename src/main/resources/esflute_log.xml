@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<include path="esclient.xml"/>
+
+    <!-- The components of Behavior. -->
+    <component name="clickLogBhv" class="org.codelibs.fess.es.log.exbhv.ClickLogBhv"/>
+    <component name="favoriteLogBhv" class="org.codelibs.fess.es.log.exbhv.FavoriteLogBhv"/>
+    <component name="searchFieldLogBhv" class="org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv"/>
+    <component name="searchLogBhv" class="org.codelibs.fess.es.log.exbhv.SearchLogBhv"/>
+    <component name="userInfoBhv" class="org.codelibs.fess.es.log.exbhv.UserInfoBhv"/>
+</components>

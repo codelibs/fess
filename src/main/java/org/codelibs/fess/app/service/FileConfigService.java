@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2012-2015 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
@@ -26,13 +25,13 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
-import org.codelibs.fess.es.cbean.FileConfigCB;
-import org.codelibs.fess.es.exbhv.FileConfigBhv;
-import org.codelibs.fess.es.exbhv.FileConfigToLabelBhv;
-import org.codelibs.fess.es.exbhv.FileConfigToRoleBhv;
-import org.codelibs.fess.es.exentity.FileConfig;
-import org.codelibs.fess.es.exentity.FileConfigToLabel;
-import org.codelibs.fess.es.exentity.FileConfigToRole;
+import org.codelibs.fess.es.config.cbean.FileConfigCB;
+import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
+import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
+import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
+import org.codelibs.fess.es.config.exentity.FileConfig;
+import org.codelibs.fess.es.config.exentity.FileConfigToLabel;
+import org.codelibs.fess.es.config.exentity.FileConfigToRole;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 

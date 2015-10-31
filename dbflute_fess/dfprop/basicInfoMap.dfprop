@@ -51,10 +51,9 @@ map:{
     # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # o targetContainer: (Required)
     #  The target DI container.
-    #  If your target language is 'csharp', you can specify 'seasar' only.
     #  Your possible choices are:
     #
-    #       spring, guice, seasar, cdi
+    #       spring, guice, seasar, cdi, lasta_di
     #
     ; targetContainer = spring
     # - - - - - - - - - -/

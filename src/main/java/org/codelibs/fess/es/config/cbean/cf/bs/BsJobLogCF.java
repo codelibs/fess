@@ -1,0 +1,1246 @@
+/*
+ * Copyright 2012-2015 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.es.config.cbean.cf.bs;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+
+import org.codelibs.fess.es.config.allcommon.EsAbstractConditionFilter;
+import org.codelibs.fess.es.config.cbean.cf.JobLogCF;
+import org.codelibs.fess.es.config.cbean.cq.JobLogCQ;
+import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
+import org.elasticsearch.index.query.AndFilterBuilder;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.ExistsFilterBuilder;
+import org.elasticsearch.index.query.MissingFilterBuilder;
+import org.elasticsearch.index.query.NotFilterBuilder;
+import org.elasticsearch.index.query.OrFilterBuilder;
+import org.elasticsearch.index.query.PrefixFilterBuilder;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermsFilterBuilder;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public abstract class BsJobLogCF extends EsAbstractConditionFilter {
+
+    protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
+
+    // ===================================================================================
+    //                                                                       Query Control
+    //                                                                       =============
+    public void bool(BoolCall<JobLogCF> boolLambda) {
+        bool(boolLambda, null);
+    }
+
+    public void bool(BoolCall<JobLogCF> boolLambda, ConditionOptionCall<BoolFilterBuilder> opLambda) {
+        JobLogCF mustFilter = new JobLogCF();
+        JobLogCF shouldFilter = new JobLogCF();
+        JobLogCF mustNotFilter = new JobLogCF();
+        boolLambda.callback(mustFilter, shouldFilter, mustNotFilter);
+        if (mustFilter.hasFilters() || shouldFilter.hasFilters() || mustNotFilter.hasFilters()) {
+            BoolFilterBuilder builder =
+                    regBoolF(mustFilter.filterBuilderList, shouldFilter.filterBuilderList, mustNotFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void and(OperatorCall<JobLogCF> andLambda) {
+        and(andLambda, null);
+    }
+
+    public void and(OperatorCall<JobLogCF> andLambda, ConditionOptionCall<AndFilterBuilder> opLambda) {
+        JobLogCF andFilter = new JobLogCF();
+        andLambda.callback(andFilter);
+        if (andFilter.hasFilters()) {
+            AndFilterBuilder builder = regAndF(andFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void or(OperatorCall<JobLogCF> orLambda) {
+        or(orLambda, null);
+    }
+
+    public void or(OperatorCall<JobLogCF> orLambda, ConditionOptionCall<OrFilterBuilder> opLambda) {
+        JobLogCF orFilter = new JobLogCF();
+        orLambda.callback(orFilter);
+        if (orFilter.hasFilters()) {
+            OrFilterBuilder builder = regOrF(orFilter.filterBuilderList);
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void not(OperatorCall<JobLogCF> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<JobLogCF> notLambda, ConditionOptionCall<NotFilterBuilder> opLambda) {
+        JobLogCF notFilter = new JobLogCF();
+        notLambda.callback(notFilter);
+        if (notFilter.hasFilters()) {
+            if (notFilter.filterBuilderList.size() > 1) {
+                final String msg = "not filter must be one filter.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotFilterBuilder builder = regNotF(notFilter.filterBuilderList.get(0));
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    public void query(org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery.OperatorCall<JobLogCQ> queryLambda) {
+        query(queryLambda, null);
+    }
+
+    public void query(org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery.OperatorCall<JobLogCQ> queryLambda,
+            ConditionOptionCall<QueryFilterBuilder> opLambda) {
+        JobLogCQ query = new JobLogCQ();
+        queryLambda.callback(query);
+        if (query.hasQueries()) {
+            QueryFilterBuilder builder = regQueryF(query.getQuery());
+            if (opLambda != null) {
+                opLambda.callback(builder);
+            }
+        }
+    }
+
+    // ===================================================================================
+    //                                                                           Query Set
+    //                                                                           =========
+    public void setEndTime_NotEqual(Long endTime) {
+        setEndTime_NotEqual(endTime, null, null);
+    }
+
+    public void setEndTime_NotEqual(Long endTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setEndTime_Equal(endTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setEndTime_Equal(Long endTime) {
+        setEndTime_Term(endTime, null);
+    }
+
+    public void setEndTime_Equal(Long endTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setEndTime_Term(endTime, opLambda);
+    }
+
+    public void setEndTime_Term(Long endTime) {
+        setEndTime_Term(endTime, null);
+    }
+
+    public void setEndTime_Term(Long endTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("endTime", endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_Terms(Collection<Long> endTimeList) {
+        setEndTime_Terms(endTimeList, null);
+    }
+
+    public void setEndTime_Terms(Collection<Long> endTimeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("endTime", endTimeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_InScope(Collection<Long> endTimeList) {
+        setEndTime_Terms(endTimeList, null);
+    }
+
+    public void setEndTime_InScope(Collection<Long> endTimeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setEndTime_Terms(endTimeList, opLambda);
+    }
+
+    public void setEndTime_Exists() {
+        setEndTime_Exists(null);
+    }
+
+    public void setEndTime_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("endTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_Missing() {
+        setEndTime_Missing(null);
+    }
+
+    public void setEndTime_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("endTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_GreaterThan(Long endTime) {
+        setEndTime_GreaterThan(endTime, null);
+    }
+
+    public void setEndTime_GreaterThan(Long endTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("endTime", ConditionKey.CK_GREATER_THAN, endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_LessThan(Long endTime) {
+        setEndTime_LessThan(endTime, null);
+    }
+
+    public void setEndTime_LessThan(Long endTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("endTime", ConditionKey.CK_LESS_THAN, endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_GreaterEqual(Long endTime) {
+        setEndTime_GreaterEqual(endTime, null);
+    }
+
+    public void setEndTime_GreaterEqual(Long endTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("endTime", ConditionKey.CK_GREATER_EQUAL, endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_LessEqual(Long endTime) {
+        setEndTime_LessEqual(endTime, null);
+    }
+
+    public void setEndTime_LessEqual(Long endTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("endTime", ConditionKey.CK_LESS_EQUAL, endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotEqual(id, null, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setId_Equal(id, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
+    public void setId_Term(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Term(String id, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Terms(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("id", idList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_InScope(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setId_Terms(idList, opLambda);
+    }
+
+    public void setId_Prefix(String id) {
+        setId_Prefix(id, null);
+    }
+
+    public void setId_Prefix(String id, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Exists() {
+        setId_Exists(null);
+    }
+
+    public void setId_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Missing() {
+        setId_Missing(null);
+    }
+
+    public void setId_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("id");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_GreaterThan(String id) {
+        setId_GreaterThan(id, null);
+    }
+
+    public void setId_GreaterThan(String id, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("id", ConditionKey.CK_GREATER_THAN, id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_LessThan(String id) {
+        setId_LessThan(id, null);
+    }
+
+    public void setId_LessThan(String id, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("id", ConditionKey.CK_LESS_THAN, id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_GreaterEqual(String id) {
+        setId_GreaterEqual(id, null);
+    }
+
+    public void setId_GreaterEqual(String id, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("id", ConditionKey.CK_GREATER_EQUAL, id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_LessEqual(String id) {
+        setId_LessEqual(id, null);
+    }
+
+    public void setId_LessEqual(String id, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("id", ConditionKey.CK_LESS_EQUAL, id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_NotEqual(String jobName) {
+        setJobName_NotEqual(jobName, null, null);
+    }
+
+    public void setJobName_NotEqual(String jobName, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setJobName_Equal(jobName, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setJobName_Equal(String jobName) {
+        setJobName_Term(jobName, null);
+    }
+
+    public void setJobName_Equal(String jobName, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setJobName_Term(jobName, opLambda);
+    }
+
+    public void setJobName_Term(String jobName) {
+        setJobName_Term(jobName, null);
+    }
+
+    public void setJobName_Term(String jobName, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("jobName", jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_Terms(Collection<String> jobNameList) {
+        setJobName_Terms(jobNameList, null);
+    }
+
+    public void setJobName_Terms(Collection<String> jobNameList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("jobName", jobNameList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_InScope(Collection<String> jobNameList) {
+        setJobName_Terms(jobNameList, null);
+    }
+
+    public void setJobName_InScope(Collection<String> jobNameList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setJobName_Terms(jobNameList, opLambda);
+    }
+
+    public void setJobName_Prefix(String jobName) {
+        setJobName_Prefix(jobName, null);
+    }
+
+    public void setJobName_Prefix(String jobName, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("jobName", jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_Exists() {
+        setJobName_Exists(null);
+    }
+
+    public void setJobName_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("jobName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_Missing() {
+        setJobName_Missing(null);
+    }
+
+    public void setJobName_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("jobName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_GreaterThan(String jobName) {
+        setJobName_GreaterThan(jobName, null);
+    }
+
+    public void setJobName_GreaterThan(String jobName, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobName", ConditionKey.CK_GREATER_THAN, jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_LessThan(String jobName) {
+        setJobName_LessThan(jobName, null);
+    }
+
+    public void setJobName_LessThan(String jobName, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobName", ConditionKey.CK_LESS_THAN, jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_GreaterEqual(String jobName) {
+        setJobName_GreaterEqual(jobName, null);
+    }
+
+    public void setJobName_GreaterEqual(String jobName, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobName", ConditionKey.CK_GREATER_EQUAL, jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_LessEqual(String jobName) {
+        setJobName_LessEqual(jobName, null);
+    }
+
+    public void setJobName_LessEqual(String jobName, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobName", ConditionKey.CK_LESS_EQUAL, jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_NotEqual(String jobStatus) {
+        setJobStatus_NotEqual(jobStatus, null, null);
+    }
+
+    public void setJobStatus_NotEqual(String jobStatus, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setJobStatus_Equal(jobStatus, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setJobStatus_Equal(String jobStatus) {
+        setJobStatus_Term(jobStatus, null);
+    }
+
+    public void setJobStatus_Equal(String jobStatus, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setJobStatus_Term(jobStatus, opLambda);
+    }
+
+    public void setJobStatus_Term(String jobStatus) {
+        setJobStatus_Term(jobStatus, null);
+    }
+
+    public void setJobStatus_Term(String jobStatus, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("jobStatus", jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_Terms(Collection<String> jobStatusList) {
+        setJobStatus_Terms(jobStatusList, null);
+    }
+
+    public void setJobStatus_Terms(Collection<String> jobStatusList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("jobStatus", jobStatusList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_InScope(Collection<String> jobStatusList) {
+        setJobStatus_Terms(jobStatusList, null);
+    }
+
+    public void setJobStatus_InScope(Collection<String> jobStatusList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setJobStatus_Terms(jobStatusList, opLambda);
+    }
+
+    public void setJobStatus_Prefix(String jobStatus) {
+        setJobStatus_Prefix(jobStatus, null);
+    }
+
+    public void setJobStatus_Prefix(String jobStatus, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("jobStatus", jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_Exists() {
+        setJobStatus_Exists(null);
+    }
+
+    public void setJobStatus_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("jobStatus");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_Missing() {
+        setJobStatus_Missing(null);
+    }
+
+    public void setJobStatus_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("jobStatus");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_GreaterThan(String jobStatus) {
+        setJobStatus_GreaterThan(jobStatus, null);
+    }
+
+    public void setJobStatus_GreaterThan(String jobStatus, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobStatus", ConditionKey.CK_GREATER_THAN, jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_LessThan(String jobStatus) {
+        setJobStatus_LessThan(jobStatus, null);
+    }
+
+    public void setJobStatus_LessThan(String jobStatus, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobStatus", ConditionKey.CK_LESS_THAN, jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_GreaterEqual(String jobStatus) {
+        setJobStatus_GreaterEqual(jobStatus, null);
+    }
+
+    public void setJobStatus_GreaterEqual(String jobStatus, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobStatus", ConditionKey.CK_GREATER_EQUAL, jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_LessEqual(String jobStatus) {
+        setJobStatus_LessEqual(jobStatus, null);
+    }
+
+    public void setJobStatus_LessEqual(String jobStatus, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("jobStatus", ConditionKey.CK_LESS_EQUAL, jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_NotEqual(String scriptData) {
+        setScriptData_NotEqual(scriptData, null, null);
+    }
+
+    public void setScriptData_NotEqual(String scriptData, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptData_Equal(scriptData, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptData_Equal(String scriptData) {
+        setScriptData_Term(scriptData, null);
+    }
+
+    public void setScriptData_Equal(String scriptData, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptData_Term(scriptData, opLambda);
+    }
+
+    public void setScriptData_Term(String scriptData) {
+        setScriptData_Term(scriptData, null);
+    }
+
+    public void setScriptData_Term(String scriptData, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Terms(Collection<String> scriptDataList) {
+        setScriptData_Terms(scriptDataList, null);
+    }
+
+    public void setScriptData_Terms(Collection<String> scriptDataList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("scriptData", scriptDataList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_InScope(Collection<String> scriptDataList) {
+        setScriptData_Terms(scriptDataList, null);
+    }
+
+    public void setScriptData_InScope(Collection<String> scriptDataList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setScriptData_Terms(scriptDataList, opLambda);
+    }
+
+    public void setScriptData_Prefix(String scriptData) {
+        setScriptData_Prefix(scriptData, null);
+    }
+
+    public void setScriptData_Prefix(String scriptData, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Exists() {
+        setScriptData_Exists(null);
+    }
+
+    public void setScriptData_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("scriptData");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Missing() {
+        setScriptData_Missing(null);
+    }
+
+    public void setScriptData_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("scriptData");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_GreaterThan(String scriptData) {
+        setScriptData_GreaterThan(scriptData, null);
+    }
+
+    public void setScriptData_GreaterThan(String scriptData, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptData", ConditionKey.CK_GREATER_THAN, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_LessThan(String scriptData) {
+        setScriptData_LessThan(scriptData, null);
+    }
+
+    public void setScriptData_LessThan(String scriptData, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptData", ConditionKey.CK_LESS_THAN, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_GreaterEqual(String scriptData) {
+        setScriptData_GreaterEqual(scriptData, null);
+    }
+
+    public void setScriptData_GreaterEqual(String scriptData, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptData", ConditionKey.CK_GREATER_EQUAL, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_LessEqual(String scriptData) {
+        setScriptData_LessEqual(scriptData, null);
+    }
+
+    public void setScriptData_LessEqual(String scriptData, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptData", ConditionKey.CK_LESS_EQUAL, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_NotEqual(String scriptResult) {
+        setScriptResult_NotEqual(scriptResult, null, null);
+    }
+
+    public void setScriptResult_NotEqual(String scriptResult, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptResult_Equal(scriptResult, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptResult_Equal(String scriptResult) {
+        setScriptResult_Term(scriptResult, null);
+    }
+
+    public void setScriptResult_Equal(String scriptResult, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptResult_Term(scriptResult, opLambda);
+    }
+
+    public void setScriptResult_Term(String scriptResult) {
+        setScriptResult_Term(scriptResult, null);
+    }
+
+    public void setScriptResult_Term(String scriptResult, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("scriptResult", scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_Terms(Collection<String> scriptResultList) {
+        setScriptResult_Terms(scriptResultList, null);
+    }
+
+    public void setScriptResult_Terms(Collection<String> scriptResultList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("scriptResult", scriptResultList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_InScope(Collection<String> scriptResultList) {
+        setScriptResult_Terms(scriptResultList, null);
+    }
+
+    public void setScriptResult_InScope(Collection<String> scriptResultList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setScriptResult_Terms(scriptResultList, opLambda);
+    }
+
+    public void setScriptResult_Prefix(String scriptResult) {
+        setScriptResult_Prefix(scriptResult, null);
+    }
+
+    public void setScriptResult_Prefix(String scriptResult, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("scriptResult", scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_Exists() {
+        setScriptResult_Exists(null);
+    }
+
+    public void setScriptResult_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("scriptResult");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_Missing() {
+        setScriptResult_Missing(null);
+    }
+
+    public void setScriptResult_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("scriptResult");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_GreaterThan(String scriptResult) {
+        setScriptResult_GreaterThan(scriptResult, null);
+    }
+
+    public void setScriptResult_GreaterThan(String scriptResult, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptResult", ConditionKey.CK_GREATER_THAN, scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_LessThan(String scriptResult) {
+        setScriptResult_LessThan(scriptResult, null);
+    }
+
+    public void setScriptResult_LessThan(String scriptResult, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptResult", ConditionKey.CK_LESS_THAN, scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_GreaterEqual(String scriptResult) {
+        setScriptResult_GreaterEqual(scriptResult, null);
+    }
+
+    public void setScriptResult_GreaterEqual(String scriptResult, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptResult", ConditionKey.CK_GREATER_EQUAL, scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_LessEqual(String scriptResult) {
+        setScriptResult_LessEqual(scriptResult, null);
+    }
+
+    public void setScriptResult_LessEqual(String scriptResult, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptResult", ConditionKey.CK_LESS_EQUAL, scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_NotEqual(String scriptType) {
+        setScriptType_NotEqual(scriptType, null, null);
+    }
+
+    public void setScriptType_NotEqual(String scriptType, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setScriptType_Equal(scriptType, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setScriptType_Equal(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Equal(String scriptType, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setScriptType_Term(scriptType, opLambda);
+    }
+
+    public void setScriptType_Term(String scriptType) {
+        setScriptType_Term(scriptType, null);
+    }
+
+    public void setScriptType_Term(String scriptType, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Terms(Collection<String> scriptTypeList) {
+        setScriptType_Terms(scriptTypeList, null);
+    }
+
+    public void setScriptType_Terms(Collection<String> scriptTypeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("scriptType", scriptTypeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_InScope(Collection<String> scriptTypeList) {
+        setScriptType_Terms(scriptTypeList, null);
+    }
+
+    public void setScriptType_InScope(Collection<String> scriptTypeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setScriptType_Terms(scriptTypeList, opLambda);
+    }
+
+    public void setScriptType_Prefix(String scriptType) {
+        setScriptType_Prefix(scriptType, null);
+    }
+
+    public void setScriptType_Prefix(String scriptType, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Exists() {
+        setScriptType_Exists(null);
+    }
+
+    public void setScriptType_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Missing() {
+        setScriptType_Missing(null);
+    }
+
+    public void setScriptType_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_GreaterThan(String scriptType) {
+        setScriptType_GreaterThan(scriptType, null);
+    }
+
+    public void setScriptType_GreaterThan(String scriptType, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptType", ConditionKey.CK_GREATER_THAN, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_LessThan(String scriptType) {
+        setScriptType_LessThan(scriptType, null);
+    }
+
+    public void setScriptType_LessThan(String scriptType, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptType", ConditionKey.CK_LESS_THAN, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_GreaterEqual(String scriptType) {
+        setScriptType_GreaterEqual(scriptType, null);
+    }
+
+    public void setScriptType_GreaterEqual(String scriptType, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptType", ConditionKey.CK_GREATER_EQUAL, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_LessEqual(String scriptType) {
+        setScriptType_LessEqual(scriptType, null);
+    }
+
+    public void setScriptType_LessEqual(String scriptType, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("scriptType", ConditionKey.CK_LESS_EQUAL, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_NotEqual(Long startTime) {
+        setStartTime_NotEqual(startTime, null, null);
+    }
+
+    public void setStartTime_NotEqual(Long startTime, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setStartTime_Equal(startTime, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setStartTime_Equal(Long startTime) {
+        setStartTime_Term(startTime, null);
+    }
+
+    public void setStartTime_Equal(Long startTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setStartTime_Term(startTime, opLambda);
+    }
+
+    public void setStartTime_Term(Long startTime) {
+        setStartTime_Term(startTime, null);
+    }
+
+    public void setStartTime_Term(Long startTime, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("startTime", startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_Terms(Collection<Long> startTimeList) {
+        setStartTime_Terms(startTimeList, null);
+    }
+
+    public void setStartTime_Terms(Collection<Long> startTimeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("startTime", startTimeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_InScope(Collection<Long> startTimeList) {
+        setStartTime_Terms(startTimeList, null);
+    }
+
+    public void setStartTime_InScope(Collection<Long> startTimeList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setStartTime_Terms(startTimeList, opLambda);
+    }
+
+    public void setStartTime_Exists() {
+        setStartTime_Exists(null);
+    }
+
+    public void setStartTime_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("startTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_Missing() {
+        setStartTime_Missing(null);
+    }
+
+    public void setStartTime_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("startTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_GreaterThan(Long startTime) {
+        setStartTime_GreaterThan(startTime, null);
+    }
+
+    public void setStartTime_GreaterThan(Long startTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("startTime", ConditionKey.CK_GREATER_THAN, startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_LessThan(Long startTime) {
+        setStartTime_LessThan(startTime, null);
+    }
+
+    public void setStartTime_LessThan(Long startTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("startTime", ConditionKey.CK_LESS_THAN, startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_GreaterEqual(Long startTime) {
+        setStartTime_GreaterEqual(startTime, null);
+    }
+
+    public void setStartTime_GreaterEqual(Long startTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("startTime", ConditionKey.CK_GREATER_EQUAL, startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_LessEqual(Long startTime) {
+        setStartTime_LessEqual(startTime, null);
+    }
+
+    public void setStartTime_LessEqual(Long startTime, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("startTime", ConditionKey.CK_LESS_EQUAL, startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_NotEqual(String target) {
+        setTarget_NotEqual(target, null, null);
+    }
+
+    public void setTarget_NotEqual(String target, ConditionOptionCall<NotFilterBuilder> notOpLambda,
+            ConditionOptionCall<TermFilterBuilder> eqOpLambda) {
+        not(subCf -> {
+            subCf.setTarget_Equal(target, eqOpLambda);
+        }, notOpLambda);
+    }
+
+    public void setTarget_Equal(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Equal(String target, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        setTarget_Term(target, opLambda);
+    }
+
+    public void setTarget_Term(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Term(String target, ConditionOptionCall<TermFilterBuilder> opLambda) {
+        TermFilterBuilder builder = regTermF("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Terms(Collection<String> targetList) {
+        setTarget_Terms(targetList, null);
+    }
+
+    public void setTarget_Terms(Collection<String> targetList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        TermsFilterBuilder builder = regTermsF("target", targetList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_InScope(Collection<String> targetList) {
+        setTarget_Terms(targetList, null);
+    }
+
+    public void setTarget_InScope(Collection<String> targetList, ConditionOptionCall<TermsFilterBuilder> opLambda) {
+        setTarget_Terms(targetList, opLambda);
+    }
+
+    public void setTarget_Prefix(String target) {
+        setTarget_Prefix(target, null);
+    }
+
+    public void setTarget_Prefix(String target, ConditionOptionCall<PrefixFilterBuilder> opLambda) {
+        PrefixFilterBuilder builder = regPrefixF("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Exists() {
+        setTarget_Exists(null);
+    }
+
+    public void setTarget_Exists(ConditionOptionCall<ExistsFilterBuilder> opLambda) {
+        ExistsFilterBuilder builder = regExistsF("target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Missing() {
+        setTarget_Missing(null);
+    }
+
+    public void setTarget_Missing(ConditionOptionCall<MissingFilterBuilder> opLambda) {
+        MissingFilterBuilder builder = regMissingF("target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_GreaterThan(String target) {
+        setTarget_GreaterThan(target, null);
+    }
+
+    public void setTarget_GreaterThan(String target, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("target", ConditionKey.CK_GREATER_THAN, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_LessThan(String target) {
+        setTarget_LessThan(target, null);
+    }
+
+    public void setTarget_LessThan(String target, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("target", ConditionKey.CK_LESS_THAN, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_GreaterEqual(String target) {
+        setTarget_GreaterEqual(target, null);
+    }
+
+    public void setTarget_GreaterEqual(String target, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("target", ConditionKey.CK_GREATER_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_LessEqual(String target) {
+        setTarget_LessEqual(target, null);
+    }
+
+    public void setTarget_LessEqual(String target, ConditionOptionCall<RangeFilterBuilder> opLambda) {
+        RangeFilterBuilder builder = regRangeF("target", ConditionKey.CK_LESS_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+}

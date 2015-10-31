@@ -1,9 +1,0 @@
-package ${request.package}.cbean.cq;
-
-import ${request.package}.cbean.cq.bs.Bs${table.camelizedName}CQ;
-
-/**
- * @author FreeGen
- */
-public class ${table.camelizedName}CQ extends Bs${table.camelizedName}CQ {
-}

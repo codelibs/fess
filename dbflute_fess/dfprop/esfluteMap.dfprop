@@ -1,0 +1,34 @@
+map:{
+    # base package of generated classes
+    ; basePackage = org.codelibs.fess.es
+
+    # base path to JSON resource, URL or relative path
+    ; basePath = ../src/main/config/es
+
+    # settings for indexes
+    ; indexMap = map:{
+        # Index: .fess_user
+        ; .fess_user = map:{
+            ; package = user
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_user.xml
+        }
+        # Index: .fess_user
+        ; .fess_config = map:{
+            ; package = config
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_config.xml
+        }
+        # Index: .fess_user
+        ; fess_log = map:{
+            ; package = log
+            ; esclientDiFile = esclient.xml
+            ; esfluteDiFile = esflute_log.xml
+            ; mappingMap = map:{
+                ; type = map:{
+                    ; date@dateOptionalTime = LocalDateTime
+                }
+            }
+        }
+    }
+}

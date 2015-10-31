@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2012-2015 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
-import org.codelibs.fess.es.exentity.KeyMatch;
+import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 

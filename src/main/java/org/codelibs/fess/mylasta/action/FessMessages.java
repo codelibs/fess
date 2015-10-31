@@ -1,3 +1,18 @@
+/*
+ * Copyright 2012-2015 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
 package org.codelibs.fess.mylasta.action;
 
 import org.lastaflute.web.ruts.message.ActionMessage;
@@ -109,6 +124,18 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: is required */
     public static final String CONSTRAINTS_Required_MESSAGE = "{constraints.Required.message}";
+
+    /** The key of the message: should be integer */
+    public static final String CONSTRAINTS_IntegerType_MESSAGE = "{constraints.IntegerType.message}";
+
+    /** The key of the message: should be long */
+    public static final String CONSTRAINTS_LongType_MESSAGE = "{constraints.LongType.message}";
+
+    /** The key of the message: should be float */
+    public static final String CONSTRAINTS_FloatType_MESSAGE = "{constraints.FloatType.message}";
+
+    /** The key of the message: should be double */
+    public static final String CONSTRAINTS_DoubleType_MESSAGE = "{constraints.DoubleType.message}";
 
     /** The key of the message: could not login */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
@@ -921,6 +948,62 @@ public class FessMessages extends FessLabels {
     public FessMessages addConstraintsRequiredMessage(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(CONSTRAINTS_Required_MESSAGE));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.IntegerType.message' with parameters.
+     * <pre>
+     * message: should be integer
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsIntegerTypeMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_IntegerType_MESSAGE));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.LongType.message' with parameters.
+     * <pre>
+     * message: should be long
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsLongTypeMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_LongType_MESSAGE));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.FloatType.message' with parameters.
+     * <pre>
+     * message: should be float
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsFloatTypeMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_FloatType_MESSAGE));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.DoubleType.message' with parameters.
+     * <pre>
+     * message: should be double
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsDoubleTypeMessage(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_DoubleType_MESSAGE));
         return this;
     }
 

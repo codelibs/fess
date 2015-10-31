@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the CodeLibs Project and the Others.
+ * Copyright 2012-2015 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 package org.codelibs.fess.helper;
 
 import java.util.ArrayList;
@@ -33,15 +32,15 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
-import org.codelibs.fess.es.exbhv.ClickLogBhv;
-import org.codelibs.fess.es.exbhv.FavoriteLogBhv;
-import org.codelibs.fess.es.exbhv.SearchFieldLogBhv;
-import org.codelibs.fess.es.exbhv.SearchLogBhv;
-import org.codelibs.fess.es.exbhv.UserInfoBhv;
-import org.codelibs.fess.es.exentity.ClickLog;
-import org.codelibs.fess.es.exentity.SearchFieldLog;
-import org.codelibs.fess.es.exentity.SearchLog;
-import org.codelibs.fess.es.exentity.UserInfo;
+import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
+import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
+import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
+import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
+import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
+import org.codelibs.fess.es.log.exentity.ClickLog;
+import org.codelibs.fess.es.log.exentity.SearchFieldLog;
+import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.action.update.UpdateRequest;
