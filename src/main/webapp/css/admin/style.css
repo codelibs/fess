@@ -1,3 +1,27 @@
+.top5 {
+	margin-top: 0.5em;
+}
+
+.top10 {
+	margin-top: 1.0em;
+}
+
+.top15 {
+	margin-top: 1.5em;
+}
+
+.top20 {
+	margin-top: 2.0em;
+}
+
+.top25 {
+	margin-top: 2.5em;
+}
+
+.top30 {
+	margin-top: 3.0em;
+}
+
 .login-page .footer {
 	position: absolute;
 	bottom: 0;
