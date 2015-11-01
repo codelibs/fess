@@ -27,6 +27,13 @@
 			<li class="header">MENU</li>
 
 			<li
+				class="treeview <c:if test="${param.menuCategoryType=='dashboard'}">active</c:if>"><la:link
+					href="/admin/system/">
+					<i class="fa fa-dashboard"></i>
+					<span><la:message key="labels.menu_system_config" /></span>
+				</la:link></li>
+
+			<li
 				class="treeview <c:if test="${param.menuCategoryType=='system'}">active</c:if>"><a
 				href="#"><i class='fa fa-laptop'></i> <span><la:message
 							key="labels.menu_system" /></span> <i
@@ -43,12 +50,6 @@
 							href="/admin/general/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_crawl_config" /></span>
-						</la:link></li>
-
-					<li <c:if test="${param.menuType=='system'}">class="active"</c:if>><la:link
-							href="/admin/system/">
-							<i class="fa fa-dashboard text-aqua"></i>
-							<span><la:message key="labels.menu_system_config" /></span>
 						</la:link></li>
 
 					<li

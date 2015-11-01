@@ -9,8 +9,8 @@
 	<div class="wrapper">
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
-			<jsp:param name="menuCategoryType" value="system" />
-			<jsp:param name="menuType" value="system" />
+			<jsp:param name="menuCategoryType" value="dashboard" />
+			<jsp:param name="menuType" value="dashboard" />
 		</jsp:include>
 
 		<div id="content" class="content-wrapper">
