@@ -47,7 +47,8 @@ public class CreateForm implements Serializable {
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
-    public String maxSize;
+    @Digits(integer = 10, fraction = 0)
+    public Integer maxSize;
 
     @Required
     // @FloatType
@@ -63,7 +64,7 @@ public class CreateForm implements Serializable {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
-        maxSize = "10";
+        maxSize = 10;
         boost = 100.0f;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
