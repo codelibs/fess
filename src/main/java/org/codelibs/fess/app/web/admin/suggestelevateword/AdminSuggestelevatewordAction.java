@@ -25,8 +25,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -42,6 +40,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -80,14 +79,14 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SuggestElevateWordSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SuggestElevateWordSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         suggestElevateWordPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -95,15 +94,15 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final SuggestElevateWordSearchForm form) {
-        copyBeanToBean(form.searchParams, suggestElevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, suggestElevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final SuggestElevateWordSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         suggestElevateWordPager.clear();
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -111,16 +110,17 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final SuggestElevateWordSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminSuggestelevateword_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final SuggestElevateWordSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
+
         // restore from pager
-        copyBeanToBean(suggestElevateWordPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(suggestElevateWordPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -130,46 +130,86 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final SuggestElevateWordEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminSuggestelevateword_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminSuggestelevateword_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadSuggestElevateWord(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final SuggestElevateWordEditForm form) {
-        return asHtml(path_AdminSuggestelevateword_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final SuggestElevateWordEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadSuggestElevateWord(form);
+        final String id = form.id;
+        suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminSuggestelevateword_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadSuggestElevateWord(form);
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final SuggestElevateWordEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadSuggestElevateWord(form);
+        final String id = form.id;
+        suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
@@ -177,36 +217,46 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final SuggestElevateWordEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadSuggestElevateWord(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminSuggestelevateword_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        });
+    }
+
+    @Execute(token = TxToken.VALIDATE_KEEP)
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final SuggestElevateWordEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final SuggestElevateWordEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminSuggestelevateword_ConfirmJsp);
     }
 
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse downloadpage(final SuggestElevateWordSearchForm form) {
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse downloadpage(final SearchForm form) {
         return asHtml(path_AdminSuggestelevateword_DownloadJsp);
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse download(final SuggestElevateWordSearchForm form) {
+    public HtmlResponse download(final SearchForm form) {
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "elevateword.csv" + "\"");
@@ -223,8 +273,8 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse uploadpage(final SuggestElevateWordUploadForm form) {
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse uploadpage(final UploadForm form) {
         return asHtml(path_AdminSuggestelevateword_UploadJsp);
     }
 
@@ -232,31 +282,49 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse create(final SuggestElevateWordEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        suggestElevateWordService.store(createSuggestElevateWord(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createSuggestElevateWord(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            suggestElevateWordService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse update(final SuggestElevateWordEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        suggestElevateWordService.store(createSuggestElevateWord(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createSuggestElevateWord(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            suggestElevateWordService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final SuggestElevateWordEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        suggestElevateWordService.delete(getSuggestElevateWord(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+            suggestElevateWordService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse upload(final SuggestElevateWordUploadForm form) {
+    public HtmlResponse upload(final UploadForm form) {
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
@@ -310,58 +378,45 @@ public class AdminSuggestelevatewordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    //===================================================================================
+    // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        copyBeanToBean(getSuggestElevateWord(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected SuggestElevateWord getSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        final SuggestElevateWord suggestElevateWord = suggestElevateWordService.getSuggestElevateWord(createKeyMap(form));
-        if (suggestElevateWord == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return suggestElevateWord;
-    }
-
-    protected SuggestElevateWord createSuggestElevateWord(final SuggestElevateWordEditForm form) {
-        SuggestElevateWord suggestElevateWord;
+    protected OptionalEntity<SuggestElevateWord> createSuggestElevateWord(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            suggestElevateWord = getSuggestElevateWord(form);
-        } else {
-            suggestElevateWord = new SuggestElevateWord();
-            suggestElevateWord.setCreatedBy(username);
-            suggestElevateWord.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final SuggestElevateWord entity = new SuggestElevateWord();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return suggestElevateWordService.getSuggestElevateWord(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        suggestElevateWord.setUpdatedBy(username);
-        suggestElevateWord.setUpdatedTime(currentTime);
-        copyBeanToBean(form, suggestElevateWord, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        return suggestElevateWord;
-    }
-
-    protected Map<String, String> createKeyMap(final SuggestElevateWordEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
-    }
-
-    protected Map<String, String> createItem(final String label, final String value) {
-        final Map<String, String> map = new HashMap<String, String>(2);
-        map.put(Constants.ITEM_LABEL, label);
-        map.put(Constants.ITEM_VALUE, value);
-        return map;
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final SuggestElevateWordEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }

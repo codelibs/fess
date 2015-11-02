@@ -23,7 +23,7 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class SuggestElevateWordUploadForm implements Serializable {
+public class UploadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
