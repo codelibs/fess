@@ -66,3 +66,5 @@ Run package goal and then the release file is created in target/releases.
 
     $ mvn dbflute:download # (one time command)
     $ mvn dbflute:freegen
+    $ mvn license:format
+

@@ -1559,8 +1559,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_crawling_session_delete_all_link = "{labels.crawling_session_delete_all_link}";
 
-    /** The key of the message: Do you want to delete all? */
+    /** The key of the message: Do you really want to delete all? */
     public static final String LABELS_crawling_session_delete_all_confirmation = "{labels.crawling_session_delete_all_confirmation}";
+
+    /** The key of the message: Cancel */
+    public static final String LABELS_crawling_session_delete_all_cancel = "{labels.crawling_session_delete_all_cancel}";
 
     /** The key of the message: Crawling Status */
     public static final String LABELS_crawling_session_CrawlerStatus = "{labels.crawling_session_CrawlerStatus}";
@@ -2153,7 +2156,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Error Page (BadRequest) */
     public static final String LABELS_design_file_errorBadRequest = "{labels.design_file_errorBadRequest}";
 
-    /** The key of the message: Do you want to delete it? */
+    /** The key of the message: Do you really want to delete it? */
     public static final String LABELS_design_delete_confirmation = "{labels.design_delete_confirmation}";
 
     /** The key of the message: Edit Page View File */
@@ -2372,6 +2375,12 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete */
     public static final String LABELS_search_list_delete_link = "{labels.search_list_delete_link}";
 
+    /** The key of the message: Cancel */
+    public static final String LABELS_search_list_delete_cancel = "{labels.search_list_delete_cancel}";
+
+    /** The key of the message: Do you really want to delete? ({0}) */
+    public static final String LABELS_search_list_delete_confirmation = "{labels.search_list_delete_confirmation}";
+
     /** The key of the message: Search Log */
     public static final String LABELS_search_log_configuration = "{labels.search_log_configuration}";
 
@@ -2411,7 +2420,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_search_log_delete_all_link = "{labels.search_log_delete_all_link}";
 
-    /** The key of the message: Do you want to delete all? */
+    /** The key of the message: Do you really want to delete all? */
     public static final String LABELS_search_log_delete_all_confirmation = "{labels.search_log_delete_all_confirmation}";
 
     /** The key of the message: (Up) */
@@ -2498,8 +2507,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_failure_url_delete_all_link = "{labels.failure_url_delete_all_link}";
 
-    /** The key of the message: Do you want to delete all? */
+    /** The key of the message: Do you really want to delete all? */
     public static final String LABELS_failure_url_delete_all_confirmation = "{labels.failure_url_delete_all_confirmation}";
+
+    /** The key of the message: Cancel */
+    public static final String LABELS_failure_url_delete_all_cancel = "{labels.failure_url_delete_all_cancel}";
 
     /** The key of the message: Error Count */
     public static final String LABELS_failure_url_error_count = "{labels.failure_url_error_count}";
@@ -2734,7 +2746,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_user_info_delete_all_link = "{labels.user_info_delete_all_link}";
 
-    /** The key of the message: Do you want to delete all? */
+    /** The key of the message: Do you really want to delete all? */
     public static final String LABELS_user_info_delete_all_confirmation = "{labels.user_info_delete_all_confirmation}";
 
     /** The key of the message: Popular URL */
@@ -2767,7 +2779,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_favorite_log_delete_all_link = "{labels.favorite_log_delete_all_link}";
 
-    /** The key of the message: Do you want to delete it? */
+    /** The key of the message: Do you really want to delete it? */
     public static final String LABELS_favorite_log_delete_all_confirmation = "{labels.favorite_log_delete_all_confirmation}";
 
     /** The key of the message: Download (CSV) */
@@ -2962,7 +2974,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete All */
     public static final String LABELS_joblog_delete_all_link = "{labels.joblog_delete_all_link}";
 
-    /** The key of the message: Do you want to delete all? */
+    /** The key of the message: Do you really want to delete all? */
     public static final String LABELS_joblog_delete_all_confirmation = "{labels.joblog_delete_all_confirmation}";
 
     /** The key of the message: Dictionary List */
@@ -3607,8 +3619,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Reset */
     public static final String LABELS_crud_button_reset = "{labels.crud_button_reset}";
 
+    /** The key of the message: Cancel */
+    public static final String LABELS_crud_button_cancel = "{labels.crud_button_cancel}";
+
     /** The key of the message: Create New */
-    public static final String LABELS_crud_link_create_new = "{labels.crud_link_create_new}";
+    public static final String LABELS_crud_link_create = "{labels.crud_link_create}";
 
     /** The key of the message: Delete */
     public static final String LABELS_crud_link_delete = "{labels.crud_link_delete}";
@@ -3619,17 +3634,38 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Edit */
     public static final String LABELS_crud_link_edit = "{labels.crud_link_edit}";
 
+    /** The key of the message: Details */
+    public static final String LABELS_crud_link_details = "{labels.crud_link_details}";
+
+    /** The key of the message: List */
+    public static final String LABELS_crud_link_list = "{labels.crud_link_list}";
+
     /** The key of the message: Next */
     public static final String LABELS_crud_link_next_page = "{labels.crud_link_next_page}";
 
-    /** The key of the message: Back */
+    /** The key of the message: Prev */
     public static final String LABELS_crud_link_prev_page = "{labels.crud_link_prev_page}";
+
+    /** The key of the message: List */
+    public static final String LABELS_crud_title_list = "{labels.crud_title_list}";
+
+    /** The key of the message: Create */
+    public static final String LABELS_crud_title_create = "{labels.crud_title_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_crud_title_edit = "{labels.crud_title_edit}";
+
+    /** The key of the message: Confirm to delete */
+    public static final String LABELS_crud_title_delete = "{labels.crud_title_delete}";
+
+    /** The key of the message: Confirmation */
+    public static final String LABELS_crud_title_confirm = "{labels.crud_title_confirm}";
 
     /** The key of the message: Details */
     public static final String LABELS_crud_title_details = "{labels.crud_title_details}";
 
-    /** The key of the message: Confirmation */
-    public static final String LABELS_crud_title_confirm = "{labels.crud_title_confirm}";
+    /** The key of the message: Do you really want to delete it? */
+    public static final String LABELS_crud_delete_confirmation = "{labels.crud_delete_confirmation}";
 
     /** The key of the message: Fess */
     public static final String LABELS_admin_brand_title = "{labels.admin_brand_title}";

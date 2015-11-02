@@ -131,7 +131,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
         });
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlingsession_DetailsJsp).renderWith(data -> {
             data.register("crawlingSessionInfoItems", crawlingSessionService.getCrawlingSessionInfoList(id));
         });
     }
@@ -142,7 +142,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Execute
     public HtmlResponse confirmpage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminCrawlingsession_ConfirmJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminCrawlingsession_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {

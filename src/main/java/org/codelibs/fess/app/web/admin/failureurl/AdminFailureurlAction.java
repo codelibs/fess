@@ -114,7 +114,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         // form.id = id;
         // verifyCrudMode(form, CrudMode.CONFIRM);
         loadFailureUrl(form);
-        return asHtml(path_AdminFailureurl_ConfirmJsp);
+        return asHtml(path_AdminFailureurl_DetailsJsp);
     }
 
     // -----------------------------------------------------
