@@ -29,29 +29,14 @@
 			</section>
 
 			<section class="content">
-
 				<div class="row">
-					<div class="col-md-12">
+					<div class="col-xs-12">
 						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.search_list_configuration" />
 								</h3>
-								<la:form styleClass="form-inline">
-									<div class="form-group">
-										<label class="sr-only" for="sessionIdSearchBtn"></label>
-										<la:text styleClass="query form-control" property="query" title="Search"
-											size="50" maxlength="1000"
-											placeholder="Type a search query" />
-									</div>
-									<div class="form-group">
-										<button type="submit" class="btn btn-primary" name="search"
-											value="<la:message key="labels.search"/>">
-											<la:message key="labels.search" />
-										</button>
-									</div>
-								</la:form>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
@@ -62,22 +47,27 @@
 									</la:info>
 									<la:errors />
 								</div>
-
+								<la:form action="search" styleClass="form-inline">
+									<div class="form-group">
+										<label class="sr-only" for="sessionIdSearchBtn"></label>
+										<la:text styleClass="query form-control" property="query"
+											title="Search" size="50" maxlength="1000"
+											placeholder="Type a search query" />
+									</div>
+									<div class="form-group">
+										<button type="submit" class="btn btn-primary" name="search"
+											value="<la:message key="labels.search"/>">
+											<la:message key="labels.search" />
+										</button>
+									</div>
+								</la:form>
 								<%-- List --%>
 								<c:choose>
 									<c:when test="${allRecordCount == null}">
-										<div id="subheader"></div>
-										<div id="result">
-											<%--
-											<p>
-												<la:message key="labels.search_list_index_page" />
-											</p>
-											--%>
-										</div>
 									</c:when>
-									<c:when test="${f:h(allRecordCount) != 0}">
-										<div id="subheader">
-											<p>
+									<c:when test="${f:h(allRecordCount) > 0}">
+										<div id="subheader" class="row top10">
+											<div class="col-xs-12">
 												<la:message key="labels.search_result_status"
 													arg0="${f:h(query)}" arg1="${f:h(allRecordCount)}"
 													arg2="${f:h(currentStartRecordNumber)}"
@@ -86,40 +76,78 @@
 													<la:message key="labels.search_result_time"
 														arg0="${f:h(execTime)}" />
 												</c:if>
-											</p>
-										</div>
-
-										<div id="result">
-											<div>
-												<ol>
-													<c:forEach var="doc" varStatus="s" items="${documentItems}">
-														<li>
-															<h3 class="title">
-																<a href="${doc.urlLink}">${f:h(doc.contentTitle)}</a>
-															</h3>
-															<div class="body">
-																${doc.contentDescription}
-																<div style="text-align: right;">
-																	<c:if test="${!crawlerProcessRunning}">
-																		<la:link
-																			href="confirmDelete?query=${f:u(query)}&docId=${f:u(doc.docId)}&url=${f:u(doc.url)}">
-																			<la:message key="labels.search_list_delete_link" />
-																		</la:link>
-																	</c:if>
-																	<c:if test="${crawlerProcessRunning}">
-																		<la:message key="labels.search_list_delete_link" />
-																	</c:if>
-																</div>
-															</div>
-														</li>
-													</c:forEach>
-												</ol>
 											</div>
 										</div>
-
-										<div class="row center">
-											<div class="pagination">
-												<ul>
+										<div id="result">
+											<ol class="row">
+												<c:forEach var="doc" varStatus="s" items="${documentItems}">
+													<li class="col-sm-12">
+														<h3 class="title">
+															<a href="${doc.urlLink}">${f:h(doc.contentTitle)}</a>
+														</h3>
+														<div class="body col-sm-11">
+															${doc.contentDescription}</div> <c:if
+															test="${!crawlerProcessRunning}">
+															<button type="button"
+																class="btn btn-xs btn-danger col-sm-1"
+																data-toggle="modal" data-target="#confirmToDelete">
+																<i class="fa fa-trash"></i>
+																<la:message key="labels.search_list_delete_link" />
+															</button>
+															<div class="modal modal-danger fade" id="confirmToDelete"
+																tabindex="-1" role="dialog">
+																<div class="modal-dialog">
+																	<div class="modal-content">
+																		<div class="modal-header">
+																			<button type="button" class="close"
+																				data-dismiss="modal" aria-label="Close">
+																				<span aria-hidden="true">×</span>
+																			</button>
+																			<h4 class="modal-title">
+																				<la:message key="labels.search_list_delete_link" />
+																			</h4>
+																		</div>
+																		<div class="modal-body">
+																			<p>
+																				<la:message
+																					key="labels.search_list_delete_confirmation"
+																					arg0="${f:h(doc.urlLink)}" />
+																			</p>
+																		</div>
+																		<div class="modal-footer">
+																			<button type="button"
+																				class="btn btn-outline pull-left"
+																				data-dismiss="modal">
+																				<la:message key="labels.search_list_delete_cancel" />
+																			</button>
+																			<la:form action="delete">
+																				<%-- TODO: doc_id --%>
+																				<la:hidden property="docId"
+																					value="${f:u(doc.doc_id)}" />
+																				<la:hidden property="query"
+																					value="${f:u(query)}" />
+																				<button type="submit"
+																					class="btn btn-outline btn-danger">
+																					<i class="fa fa-trash"></i>
+																					<la:message key="labels.search_list_delete_link" />
+																				</button>
+																			</la:form>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</c:if> <c:if test="${crawlerProcessRunning}">
+															<div class="col-sm-1">
+																<la:message key="labels.search_list_delete_link" />
+															</div>
+														</c:if>
+													</li>
+												</c:forEach>
+											</ol>
+										</div>
+										<div class="row">
+											<div class="col-sm-12 text-center">
+												<ul class="pagination pagination-sm">
 													<c:if test="${existPrePage}">
 														<li class="prev"><la:link
 																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
@@ -153,25 +181,22 @@
 													</c:if>
 												</ul>
 											</div>
-											<div>
-												<span> ${currentPageNumber}/${allPageCount}
-													(${allRecordCount}) </span>
-											</div>
 										</div>
 									</c:when>
 									<c:otherwise>
-										<div id="subheader"></div>
-										<div id="result">
-											<p>
-												<la:message key="labels.did_not_match" arg0="${f:h(query)}" />
-											</p>
+										<div id="result" class="row top10">
+											<div class="col-sm-12">
+												<p class="callout callout-info">
+													<la:message key="labels.did_not_match" arg0="${f:h(query)}" />
+												</p>
+											</div>
 										</div>
 									</c:otherwise>
 								</c:choose>
-								<%-- Box Footer --%>
-								<div class="box-footer"></div>
 							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
 			</section>

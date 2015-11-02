@@ -6,7 +6,7 @@
 	<section class="sidebar">
 
 		<!-- search form -->
-		<form action="/admin/searchList/search" method="get"
+		<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="post"
 			class="sidebar-form">
 			<div class="input-group">
 				<input type="text" name="query" id="query" class="form-control"
@@ -20,7 +20,6 @@
 				</span>
 			</div>
 		</form>
-		<!-- /.search form -->
 
 		<!-- Sidebar Menu -->
 		<ul class="sidebar-menu">

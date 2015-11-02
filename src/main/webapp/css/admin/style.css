@@ -38,11 +38,26 @@
 	font-size: 13px;
 }
 
-button>i {
+button>i, a.btn>i {
 	margin-right: 0.2em;
 }
 
 .content-wrapper iframe {
 	border: 0;
 	width: 100%;
+}
+
+#result ol {
+	list-style: none !important;
+	padding-left: 0;
+}
+
+#result ol li {
+	margin-bottom: 0;
+}
+
+#result .title {
+	margin: 1.0em 0 0.5em 0;
+	font-size: 130%;
+	font-weight: 600;
 }

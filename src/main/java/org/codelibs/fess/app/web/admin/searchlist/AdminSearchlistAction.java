@@ -15,32 +15,32 @@
  */
 package org.codelibs.fess.app.web.admin.searchlist;
 
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.QueryResponseList;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
-import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author codelibs
@@ -49,20 +49,34 @@ import org.lastaflute.web.util.LaRequestUtil;
 public class AdminSearchlistAction extends FessAdminAction {
 
     // ===================================================================================
-    //                                                                           Attribute
-    //                                                                           =========
+    // Constant
+    //
+    private static final Logger logger = LoggerFactory
+            .getLogger(AdminSearchlistAction.class);
+
+    // ===================================================================================
+    // Attribute
+    // =========
     @Resource
     private SystemHelper systemHelper;
 
     @Resource
     protected FessEsClient fessEsClient;
+
     @Resource
     protected FieldHelper fieldHelper;
+
     @Resource
     protected QueryHelper queryHelper;
 
     @Resource
     protected JobHelper jobHelper;
+
+    @Resource
+    protected SearchService searchService;
+
+    @Resource
+    protected HttpServletRequest request;
 
     public List<Map<String, Object>> documentItems;
 
@@ -87,18 +101,19 @@ public class AdminSearchlistAction extends FessAdminAction {
     public String execTime;
 
     // ===================================================================================
-    //                                                                               Hook
-    //                                                                              ======
+    // Hook
+    // ======
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
 
-        runtime.registerData("helpLink", systemHelper.getHelpLink("searchList"));
+        runtime.registerData("helpLink",
+                systemHelper.getHelpLink("searchList"));
     }
 
     // ===================================================================================
-    //                                                                      Search Execute
-    //                                                                      ==============
+    // Search Execute
+    // ==============
     @Execute
     public HtmlResponse index(final SearchListForm form) {
         return asHtml(path_AdminSearchlist_IndexJsp);
@@ -116,7 +131,8 @@ public class AdminSearchlistAction extends FessAdminAction {
         });
     }
 
-    private void doSearchInternal(final RenderData data, final SearchListForm form) {
+    private void doSearchInternal(final RenderData data,
+            final SearchListForm form) {
         // init pager
         if (StringUtil.isBlank(form.start)) {
             form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
@@ -141,48 +157,41 @@ public class AdminSearchlistAction extends FessAdminAction {
             }
         }
 
-        final int offset = Integer.parseInt(form.start);
-        final int size = Integer.parseInt(form.num);
-
         try {
-            documentItems =
-                    fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, searchRequestBuilder -> {
-                        return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().offset(offset).size(size)
-                                .responseFields(queryHelper.getResponseFields()).build();
-                    });
+            final WebRenderData renderData = new WebRenderData(data);
+            searchService.search(request, form, renderData);
         } catch (final InvalidQueryException e) {
-            // TODO Log
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
+            throwValidationError(e.getMessageCode(),
+                    () -> asHtml(path_ErrorJsp));
         } catch (final ResultOffsetExceededException e) {
-            // TODO Log
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
+            throwValidationError(messages -> {
+                messages.addErrorsResultSizeExceeded(GLOBAL);
+            } , () -> asHtml(path_ErrorJsp));
         }
-        final QueryResponseList queryResponseList = (QueryResponseList) documentItems;
-        final NumberFormat nf = NumberFormat.getInstance(LaRequestUtil.getRequest().getLocale());
-        nf.setMaximumIntegerDigits(2);
-        nf.setMaximumFractionDigits(2);
-        try {
-            nf.format((double) queryResponseList.getExecTime() / 1000);
-        } catch (final Exception e) {}
-
-        copyBeanToBean(documentItems, this, option -> option.include("pageSize", "currentPageNumber", "allRecordCount", "allPageCount",
-                "existNextPage", "existPrevPage", "currentStartRecordNumber", "currentEndRecordNumber", "pageNumberList"));
     }
 
-    //@Execute(validator = false)
+    @Execute
     public HtmlResponse search(final SearchListForm form) {
         return doSearch(form);
     }
 
-    //@Execute(validator = false)
+    @Execute
     public HtmlResponse prev(final SearchListForm form) {
         return doMove(form, -1);
     }
 
-    //@Execute(validator = false)
+    @Execute
     public HtmlResponse next(final SearchListForm form) {
         return doMove(form, 1);
     }
 
-    //@Execute(validator = false)
+    @Execute
     public HtmlResponse move(final SearchListForm form) {
         return doMove(form, 0);
     }
@@ -218,15 +227,14 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
-    //                                               -------
+    // Confirm
+    // -------
     @Execute
     public HtmlResponse confirmDelete(final SearchListForm form) {
         return asHtml(path_AdminSearchlist_ConfirmDeleteJsp);
     }
 
-    @Execute(token = TxToken.VALIDATE)
-    //@Execute(validator = true, input = "index")
+    @Execute
     public HtmlResponse delete(final SearchListForm form) {
         return deleteByQuery(form);
     }
@@ -240,20 +248,117 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (!jobHelper.isCrawlProcessRunning()) {
                 System.currentTimeMillis();
                 try {
-                    final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
-                    fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
+                    final QueryBuilder query = QueryBuilders
+                            .termQuery(fieldHelper.docIdField, docId);
+                    fessEsClient.deleteByQuery(fieldHelper.docIndex,
+                            fieldHelper.docType, query);
                 } catch (final Exception e) {
                     // TODO Log
+                }
             }
-        }
-    }   );
+        });
         thread.start();
         saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
-        return redirectWith(getClass(), moreUrl("search").params("query", form.query));
+        return redirectWith(getClass(),
+                moreUrl("search").params("query", form.query));
     }
 
     public boolean isSolrProcessRunning() {
         return jobHelper.isCrawlProcessRunning();
     }
 
+    protected static class WebRenderData extends SearchRenderData {
+        private final RenderData data;
+
+        WebRenderData(final RenderData data) {
+            this.data = data;
+        }
+
+        @Override
+        public void setDocumentItems(
+                final List<Map<String, Object>> documentItems) {
+            data.register("documentItems", documentItems);
+            super.setDocumentItems(documentItems);
+        }
+
+        @Override
+        public void setExecTime(final String execTime) {
+            data.register("execTime", execTime);
+            super.setExecTime(execTime);
+        }
+
+        @Override
+        public void setPageSize(final int pageSize) {
+            data.register("pageSize", pageSize);
+            super.setPageSize(pageSize);
+        }
+
+        @Override
+        public void setCurrentPageNumber(final int currentPageNumber) {
+            data.register("currentPageNumber", currentPageNumber);
+            super.setCurrentPageNumber(currentPageNumber);
+        }
+
+        @Override
+        public void setAllRecordCount(final long allRecordCount) {
+            data.register("allRecordCount", allRecordCount);
+            super.setAllRecordCount(allRecordCount);
+        }
+
+        @Override
+        public void setAllPageCount(final int allPageCount) {
+            data.register("allPageCount", allPageCount);
+            super.setAllPageCount(allPageCount);
+        }
+
+        @Override
+        public void setExistNextPage(final boolean existNextPage) {
+            data.register("existNextPage", existNextPage);
+            super.setExistNextPage(existNextPage);
+        }
+
+        @Override
+        public void setExistPrevPage(final boolean existPrevPage) {
+            data.register("existPrevPage", existPrevPage);
+            super.setExistPrevPage(existPrevPage);
+        }
+
+        @Override
+        public void setCurrentStartRecordNumber(
+                final long currentStartRecordNumber) {
+            data.register("currentStartRecordNumber", currentStartRecordNumber);
+            super.setCurrentStartRecordNumber(currentStartRecordNumber);
+        }
+
+        @Override
+        public void setCurrentEndRecordNumber(
+                final long currentEndRecordNumber) {
+            data.register("currentEndRecordNumber", currentEndRecordNumber);
+            super.setCurrentEndRecordNumber(currentEndRecordNumber);
+        }
+
+        @Override
+        public void setPageNumberList(final List<String> pageNumberList) {
+            data.register("pageNumberList", pageNumberList);
+            super.setPageNumberList(pageNumberList);
+        }
+
+        @Override
+        public void setPartialResults(final boolean partialResults) {
+            data.register("partialResults", partialResults);
+            super.setPartialResults(partialResults);
+        }
+
+        @Override
+        public void setQueryTime(final long queryTime) {
+            data.register("queryTime", queryTime);
+            super.setQueryTime(queryTime);
+        }
+
+        @Override
+        public void setSearchQuery(final String searchQuery) {
+            data.register("searchQuery", searchQuery);
+            super.setSearchQuery(searchQuery);
+        }
+    }
 }
