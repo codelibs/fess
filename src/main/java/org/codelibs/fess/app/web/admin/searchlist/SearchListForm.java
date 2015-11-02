@@ -92,7 +92,6 @@ public class SearchListForm implements SearchRequestParams, Serializable {
 
     public FacetInfo facet;
 
-
     private int startPosition = -1;
 
     private int pageSize = -1;

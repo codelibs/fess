@@ -51,8 +51,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     // Constant
     //
-    private static final Logger logger = LoggerFactory
-            .getLogger(AdminSearchlistAction.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminSearchlistAction.class);
 
     // ===================================================================================
     // Attribute
@@ -107,8 +106,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
 
-        runtime.registerData("helpLink",
-                systemHelper.getHelpLink("searchList"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("searchList"));
     }
 
     // ===================================================================================
@@ -131,8 +129,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         });
     }
 
-    private void doSearchInternal(final RenderData data,
-            final SearchListForm form) {
+    private void doSearchInternal(final RenderData data, final SearchListForm form) {
         // init pager
         if (StringUtil.isBlank(form.start)) {
             form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
@@ -164,15 +161,14 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(e.getMessageCode(),
-                    () -> asHtml(path_ErrorJsp));
+            throwValidationError(e.getMessageCode(), () -> asHtml(path_ErrorJsp));
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
             throwValidationError(messages -> {
                 messages.addErrorsResultSizeExceeded(GLOBAL);
-            } , () -> asHtml(path_ErrorJsp));
+            }, () -> asHtml(path_ErrorJsp));
         }
     }
 
@@ -248,19 +244,16 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (!jobHelper.isCrawlProcessRunning()) {
                 System.currentTimeMillis();
                 try {
-                    final QueryBuilder query = QueryBuilders
-                            .termQuery(fieldHelper.docIdField, docId);
-                    fessEsClient.deleteByQuery(fieldHelper.docIndex,
-                            fieldHelper.docType, query);
+                    final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
+                    fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
                 } catch (final Exception e) {
                     // TODO Log
-                }
             }
-        });
+        }
+    }   );
         thread.start();
         saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
-        return redirectWith(getClass(),
-                moreUrl("search").params("query", form.query));
+        return redirectWith(getClass(), moreUrl("search").params("query", form.query));
     }
 
     public boolean isSolrProcessRunning() {
@@ -275,8 +268,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         }
 
         @Override
-        public void setDocumentItems(
-                final List<Map<String, Object>> documentItems) {
+        public void setDocumentItems(final List<Map<String, Object>> documentItems) {
             data.register("documentItems", documentItems);
             super.setDocumentItems(documentItems);
         }
@@ -324,15 +316,13 @@ public class AdminSearchlistAction extends FessAdminAction {
         }
 
         @Override
-        public void setCurrentStartRecordNumber(
-                final long currentStartRecordNumber) {
+        public void setCurrentStartRecordNumber(final long currentStartRecordNumber) {
             data.register("currentStartRecordNumber", currentStartRecordNumber);
             super.setCurrentStartRecordNumber(currentStartRecordNumber);
         }
 
         @Override
-        public void setCurrentEndRecordNumber(
-                final long currentEndRecordNumber) {
+        public void setCurrentEndRecordNumber(final long currentEndRecordNumber) {
             data.register("currentEndRecordNumber", currentEndRecordNumber);
             super.setCurrentEndRecordNumber(currentEndRecordNumber);
         }
