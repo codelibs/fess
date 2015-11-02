@@ -17,16 +17,36 @@ package org.codelibs.fess.app.web.admin.suggestbadword;
 
 import java.io.Serializable;
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.validation.Required;
 
 /**
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class SuggestBadWordUploadForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public MultipartFormFile suggestBadWordFile;
+    @Digits(integer = 10, fraction = 0)
+    public int crudMode;
 
+    @Required
+    public String suggestWord;
+
+    @Required
+    @Size(max = 1000)
+    public String createdBy;
+
+    @Required
+    @Digits(integer = 19, fraction = 0)
+    public Long createdTime;
+
+    public void initialize() {
+        createdBy = ComponentUtil.getSystemHelper().getUsername();
+        createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+    }
 }
