@@ -33,10 +33,12 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -80,9 +82,13 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+    public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
-        kuromojiPager.setCurrentPageNumber(pageNumber);
+        pageNumber.ifPresent(num -> {
+            kuromojiPager.setCurrentPageNumber(pageNumber.get());
+        }).orElse(() -> {
+            kuromojiPager.setCurrentPageNumber(0);
+        });
         return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -106,14 +112,6 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
-    @Execute
-    public HtmlResponse back(final SearchForm form) {
-        validate(form, messages -> {}, toIndexHtml());
-        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
-    }
-
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
         data.register("kuromojiItemItems", kuromojiService.getKuromojiList(form.dictId, kuromojiPager));
@@ -131,7 +129,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final String dictId) {
+    public HtmlResponse createnew(final String dictId) {
         return asHtml(path_AdminDictKuromoji_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -142,79 +140,34 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final String dictId, final int crudMode, final long id) {
-        verifyCrudMode(crudMode, CrudMode.EDIT);
-        return asHtml(path_AdminDictKuromoji_EditJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-                form.dictId = dictId;
-            });
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+    public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminDictKuromoji_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.EDIT;
+        HtmlNext next;
+        switch (form.crudMode) {
+        case CrudMode.EDIT: // back
+            form.crudMode = CrudMode.DETAILS;
+            next = path_AdminDictKuromoji_DetailsJsp;
+            break;
+        default:
+            form.crudMode = CrudMode.EDIT;
+            next = path_AdminDictKuromoji_EditJsp;
+            break;
+        }
         kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
         });
-        return asHtml(path_AdminDictKuromoji_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final String dictId, final int crudMode, final long id) {
-        verifyCrudMode(crudMode, CrudMode.DELETE);
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-                form.dictId = dictId;
-            });
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.DELETE;
-        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), toEditHtml());
-        });
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
+        return asHtml(next);
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final String dictId, final int crudMode, final long id) {
-        verifyCrudMode(crudMode, CrudMode.CONFIRM);
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp).useForm(EditForm.class, op -> {
+    public HtmlResponse details(final String dictId, final int crudMode, final long id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        return asHtml(path_AdminDictKuromoji_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -227,20 +180,6 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                 form.dictId = dictId;
             });
         });
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final CreateForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.EDIT;
-        return asHtml(path_AdminDictKuromoji_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -315,7 +254,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
@@ -332,7 +271,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());

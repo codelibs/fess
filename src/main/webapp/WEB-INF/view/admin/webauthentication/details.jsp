@@ -13,40 +13,14 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="webAuthentication" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.web_authentication_title_details" />
 				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="/admin/webauthentication">
-							<la:message key="labels.web_authentication_link_list" />
-						</la:link></li>
-					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message
-									key="labels.web_authentication_link_create" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message
-									key="labels.web_authentication_link_update" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message
-									key="labels.web_authentication_link_delete" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message
-									key="labels.web_authentication_link_confirm" /></a></li>
-					</c:if>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
-				<%-- Form --%>
 				<la:form>
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
@@ -61,26 +35,7 @@
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
-									<h3 class="box-title">
-										<c:if test="${crudMode == 1}">
-											<la:message key="labels.web_authentication_link_create" />
-										</c:if>
-										<c:if test="${crudMode == 2}">
-											<la:message key="labels.web_authentication_link_update" />
-										</c:if>
-										<c:if test="${crudMode == 3}">
-											<la:message key="labels.web_authentication_link_delete" />
-										</c:if>
-										<c:if test="${crudMode == 4}">
-											<la:message key="labels.web_authentication_link_confirm" />
-										</c:if>
-									</h3>
-									<div class="btn-group pull-right">
-										<la:link href="/admin/webauthentication"
-											styleClass="btn btn-primary btn-xs">
-											<la:message key="labels.web_authentication_link_list" />
-										</la:link>
-									</div>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
 								<%-- Box Body --%>
 								<div class="box-body">
@@ -91,7 +46,6 @@
 										</la:info>
 										<la:errors />
 									</div>
-
 									<%-- Form Fields --%>
 									<table class="table table-bordered">
 										<tbody>
@@ -141,65 +95,19 @@
 											</tr>
 										</tbody>
 									</table>
-
 								</div>
-								<%-- Box Footer --%>
+								<!-- /.box-body -->
 								<div class="box-footer">
-									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn" name="createagain"
-											value="<la:message key="labels.web_authentication_button_back" />">
-											<la:message key="labels.web_authentication_button_back" />
-										</button>
-										<button type="submit" class="btn btn-success" name="create"
-											value="<la:message key="labels.web_authentication_button_create" />">
-											<la:message key="labels.web_authentication_button_create" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn" name="editagain"
-											value="<la:message key="labels.web_authentication_button_back" />">
-											<la:message key="labels.web_authentication_button_back" />
-										</button>
-										<button type="submit" class="btn btn-warning" name="update"
-											value="<la:message key="labels.web_authentication_button_update" />">
-											<la:message key="labels.web_authentication_button_update" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.web_authentication_button_back" />">
-											<la:message key="labels.web_authentication_button_back" />
-										</button>
-										<button type="submit" class="btn btn-danger" name="delete"
-											value="<la:message key="labels.web_authentication_button_delete" />">
-											<la:message key="labels.web_authentication_button_delete" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.web_authentication_button_back" />">
-											<la:message key="labels.web_authentication_button_back" />
-										</button>
-										<button type="submit" class="btn btn-warning"
-											name="editfromconfirm"
-											value="<la:message key="labels.web_authentication_button_edit" />">
-											<la:message key="labels.web_authentication_button_edit" />
-										</button>
-										<button type="submit" class="btn btn-danger"
-											name="deletefromconfirm"
-											value="<la:message key="labels.web_authentication_button_delete" />">
-											<la:message key="labels.web_authentication_button_delete" />
-										</button>
-									</c:if>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

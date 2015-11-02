@@ -27,9 +27,11 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -70,8 +72,12 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
-        groupPager.setCurrentPageNumber(pageNumber);
+    public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
+        pageNumber.ifPresent(num -> {
+            groupPager.setCurrentPageNumber(pageNumber.get());
+        }).orElse(() -> {
+            groupPager.setCurrentPageNumber(0);
+        });
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -93,13 +99,6 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
-    @Execute
-    public HtmlResponse back(final SearchForm form) {
-        return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
-    }
-
     protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("groupItems", groupService.getGroupList(groupPager)); // page navi
 
@@ -114,7 +113,7 @@ public class AdminGroupAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage() {
+    public HtmlResponse createnew() {
         return asHtml(path_AdminGroup_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -124,86 +123,35 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.EDIT);
-        return asHtml(path_AdminGroup_EditJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                groupService.getGroup(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-            });
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse createagain(final CreateForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+    public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminGroup_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminGroup_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.EDIT;
+        HtmlNext next;
+        switch (form.crudMode) {
+        case CrudMode.EDIT: // back
+            form.crudMode = CrudMode.DETAILS;
+            next = path_AdminGroup_DetailsJsp;
+            break;
+        default:
+            form.crudMode = CrudMode.EDIT;
+            next = path_AdminGroup_EditJsp;
+            break;
+        }
         final String id = form.id;
         groupService.getGroup(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
         });
-        return asHtml(path_AdminGroup_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DELETE);
-        return asHtml(path_AdminGroup_ConfirmJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                groupService.getGroup(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-            });
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.DELETE;
-        final String id = form.id;
-        groupService.getGroup(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-        });
-        return asHtml(path_AdminGroup_ConfirmJsp);
+        return asHtml(next);
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.CONFIRM);
-        return asHtml(path_AdminGroup_ConfirmJsp).useForm(EditForm.class, op -> {
+    public HtmlResponse details(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        return asHtml(path_AdminGroup_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 groupService.getGroup(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -217,24 +165,10 @@ public class AdminGroupAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final CreateForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminGroup_ConfirmJsp);
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.EDIT;
-        return asHtml(path_AdminGroup_ConfirmJsp);
-    }
-
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
@@ -249,7 +183,7 @@ public class AdminGroupAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());

@@ -32,9 +32,11 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -82,9 +84,13 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+    public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         clearStoredPassword();
-        userPager.setCurrentPageNumber(pageNumber);
+        pageNumber.ifPresent(num -> {
+            userPager.setCurrentPageNumber(pageNumber.get());
+        }).orElse(() -> {
+            userPager.setCurrentPageNumber(0);
+        });
         return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -108,14 +114,6 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Execute
-    public HtmlResponse back(final SearchForm form) {
-        clearStoredPassword();
-        return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
-    }
-
     protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("userItems", userService.getUserList(userPager)); // page navi
         // restore from pager
@@ -134,7 +132,7 @@ public class AdminUserAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage() {
+    public HtmlResponse createnew() {
         clearStoredPassword();
         return asHtml(path_AdminUser_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -147,50 +145,19 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id) {
+    public HtmlResponse edit(final EditForm form) {
         clearStoredPassword();
-        verifyCrudMode(crudMode, CrudMode.EDIT);
-        return asHtml(path_AdminUser_EditJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                userService.getUser(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-                resetPassword(form);
-            });
-        }).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse createagain(final CreateForm form) {
-        clearStoredPassword();
-        verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final EditForm form) {
-        clearStoredPassword();
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final EditForm form) {
-        clearStoredPassword();
-        form.crudMode = CrudMode.EDIT;
+        HtmlNext next;
+        switch (form.crudMode) {
+        case CrudMode.EDIT: // back
+            form.crudMode = CrudMode.DETAILS;
+            next = path_AdminUser_DetailsJsp;
+            break;
+        default:
+            form.crudMode = CrudMode.EDIT;
+            next = path_AdminUser_EditJsp;
+            break;
+        }
         final String id = form.id;
         userService.getUser(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
@@ -199,56 +166,18 @@ public class AdminUserAction extends FessAdminAction {
         });
         resetPassword(form);
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id) {
-        clearStoredPassword();
-        verifyCrudMode(crudMode, CrudMode.DELETE);
-        return asHtml(path_AdminUser_ConfirmJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                userService.getUser(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-                });
-                form.crudMode = crudMode;
-                resetPassword(form);
-            });
-        }).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final EditForm form) {
-        clearStoredPassword();
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.DELETE;
-        final String id = form.id;
-        userService.getUser(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
-        });
-        resetPassword(form);
-        return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
+        return asHtml(next).renderWith(data -> {
             registerForms(data);
         });
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.CONFIRM);
-        return asHtml(path_AdminUser_ConfirmJsp).useForm(EditForm.class, op -> {
+    public HtmlResponse details(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        return asHtml(path_AdminUser_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 userService.getUser(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -265,32 +194,10 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final CreateForm form) {
-        verifyPassword(form);
-        storePassword(form);
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final EditForm form) {
-        verifyPassword(form);
-        storePassword(form);
-        validate(form, messages -> {}, toEditHtml());
-        form.crudMode = CrudMode.EDIT;
-        return asHtml(path_AdminUser_ConfirmJsp).renderWith(data -> {
-            registerForms(data);
-        });
-    }
-
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
@@ -305,7 +212,7 @@ public class AdminUserAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());

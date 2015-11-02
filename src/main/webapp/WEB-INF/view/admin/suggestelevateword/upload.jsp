@@ -21,6 +21,7 @@
 				<h1>
 					<la:message key="labels.suggest_elevate_word_configuration" />
 				</h1>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/suggestelevateword">
 							<la:message key="labels.suggest_elevate_word_link_list" />
@@ -37,9 +38,7 @@
 						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<h3 class="box-title">
-									<la:message key="labels.suggest_elevate_word_link_upload" />
-								</h3>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/suggestelevateword"
 										styleClass="btn btn-default btn-xs">

@@ -201,7 +201,6 @@
 				</div>
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

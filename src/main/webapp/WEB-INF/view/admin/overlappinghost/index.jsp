@@ -13,36 +13,20 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="overlappingHost" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.overlapping_host_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/overlappinghost">
-							<la:message key="labels.overlapping_host_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<h3 class="box-title">
-									<la:message key="labels.overlapping_host_link_list" />
-								</h3>
-								<div class="btn-group pull-right">
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.overlapping_host_link_create_new" />
-									</la:link>
-								</div>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
@@ -53,7 +37,6 @@
 									</la:info>
 									<la:errors />
 								</div>
-
 								<%-- List --%>
 								<c:if test="${overlappingHostPager.allRecordCount == 0}">
 									<p class="callout callout-info">
@@ -61,73 +44,40 @@
 									</p>
 								</c:if>
 								<c:if test="${overlappingHostPager.allRecordCount > 0}">
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th><la:message key="labels.regular_name" /></th>
-												<th><la:message key="labels.overlapping_name" /></th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach var="data" varStatus="s"
-												items="${overlappingHostItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-													data-href="${contextPath}/admin/overlappinghost/confirmpage/4/${f:u(data.id)}">
-													<td>${f:h(data.regularName)}</td>
-													<td>${f:h(data.overlappingName)}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
+									<div class="row">
+										<div class="col-sm-12">
+											<table class="table table-bordered table-striped">
+												<thead>
+													<tr>
+														<th><la:message key="labels.regular_name" /></th>
+														<th><la:message key="labels.overlapping_name" /></th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="data" varStatus="s"
+														items="${overlappingHostItems}">
+														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+															data-href="${contextPath}/admin/overlappinghost/details/4/${f:u(data.id)}">
+															<td>${f:h(data.regularName)}</td>
+															<td>${f:h(data.overlappingName)}</td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<c:set var="pager" value="${overlappingHostPager}"
+										scope="request" />
+									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 								</c:if>
-
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer">
-								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg"
-										arg0="${f:h(overlappingHostPager.currentPageNumber)}"
-										arg1="${f:h(overlappingHostPager.allPageCount)}"
-										arg2="${f:h(overlappingHostPager.allRecordCount)}" /></span>
-
-								<%-- Paging Navigation --%>
-								<ul class="pagination pagination-sm no-margin pull-right">
-									<c:if test="${overlappingHostPager.existPrePage}">
-										<li class="prev"><la:link
-												href="list/${overlappingHostPager.currentPageNumber - 1}">
-												<la:message key="labels.overlapping_host_link_prev_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!overlappingHostPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message
-													key="labels.overlapping_host_link_prev_page" /></a></li>
-									</c:if>
-									<c:forEach var="p" varStatus="s"
-										items="${overlappingHostPager.pageNumberList}">
-										<li
-											<c:if test="${p == overlappingHostPager.currentPageNumber}">class="active"</c:if>><la:link
-												href="list/${p}">${p}</la:link></li>
-									</c:forEach>
-									<c:if test="${overlappingHostPager.existNextPage}">
-										<li class="next"><la:link
-												href="list/${overlappingHostPager.currentPageNumber + 1}">
-												<la:message key="labels.overlapping_host_link_next_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!overlappingHostPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message
-													key="labels.overlapping_host_link_next_page" /></a></li>
-									</c:if>
-								</ul>
-
-							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

@@ -13,9 +13,7 @@
 			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="crawlingSession" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.crawling_session_configuration" />
@@ -95,7 +93,7 @@
 														<c:forEach var="data" varStatus="s"
 															items="${crawlingSessionItems}">
 															<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-																data-href="${contextPath}/admin/crawlingsession/confirmpage/4/${f:u(data.id)}">
+																data-href="${contextPath}/admin/crawlingsession/details/4/${f:u(data.id)}">
 																<td>${f:h(data.sessionId)}</td>
 																<td><fmt:formatDate
 																		value="${fe:date(data.createdTime)}"
@@ -201,7 +199,6 @@
 				</div>
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

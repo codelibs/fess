@@ -58,26 +58,7 @@
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
-									<h3 class="box-title">
-										<c:if test="${crudMode == 1}">
-											<la:message key="labels.crawling_session_link_create" />
-										</c:if>
-										<c:if test="${crudMode == 2}">
-											<la:message key="labels.crawling_session_link_update" />
-										</c:if>
-										<c:if test="${crudMode == 3}">
-											<la:message key="labels.crawling_session_link_delete" />
-										</c:if>
-										<c:if test="${crudMode == 4}">
-											<la:message key="labels.crawling_session_link_details" />
-										</c:if>
-									</h3>
-									<div class="btn-group pull-right">
-										<la:link href="/admin/crawlingsession"
-											styleClass="btn btn-primary btn-xs">
-											<la:message key="labels.crawling_session_link_list" />
-										</la:link>
-									</div>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
 								<%-- Box Body --%>
 								<div class="box-body">

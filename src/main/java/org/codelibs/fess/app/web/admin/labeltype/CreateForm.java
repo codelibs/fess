@@ -50,15 +50,12 @@ public class CreateForm implements Serializable {
     @Pattern(regexp = "^[a-zA-Z0-9_-| ]+$")
     public String value;
 
-    @Required
     @Size(max = 4000)
     public String includedPaths;
 
-    @Required
     @Size(max = 4000)
     public String excludedPaths;
 
-    @Required
     @Min(value = 0)
     @Max(value = 2147483647)
     @Digits(integer = 10, fraction = 0)

@@ -21,27 +21,7 @@
 				<h1>
 					<la:message key="labels.joblog_title_details" />
 				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="/admin/joblog">
-							<la:message key="labels.joblog_link_list" />
-						</la:link></li>
-					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message
-									key="labels.joblog_link_create" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message
-									key="labels.joblog_link_update" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message
-									key="labels.joblog_link_delete" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message
-									key="labels.joblog_link_confirm" /></a></li>
-					</c:if>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
 
 			<section class="content">

@@ -13,34 +13,20 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="pathMapping" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.path_mapping_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/pathmapping">
-							<la:message key="labels.path_mapping_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<h3 class="box-title">
-									<la:message key="labels.path_mapping_link_list" />
-								</h3>
-								<div class="btn-group pull-right">
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.path_mapping_link_create_new" />
-									</la:link>
-								</div>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
@@ -58,68 +44,37 @@
 									</p>
 								</c:if>
 								<c:if test="${pathMappingPager.allRecordCount > 0}">
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th><la:message key="labels.regex" /></th>
-												<th><la:message key="labels.replacement" /></th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach var="data" varStatus="s"
-												items="${pathMappingItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-													data-href="${contextPath}/admin/pathmapping/confirmpage/4/${f:u(data.id)}">
-													<td>${f:h(data.regex)}</td>
-													<td>${f:h(data.replacement)}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
+									<div class="row">
+										<div class="col-sm-12">
+											<table class="table table-bordered table-striped">
+												<thead>
+													<tr>
+														<th><la:message key="labels.regex" /></th>
+														<th><la:message key="labels.replacement" /></th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="data" varStatus="s"
+														items="${pathMappingItems}">
+														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+															data-href="${contextPath}/admin/pathmapping/details/4/${f:u(data.id)}">
+															<td>${f:h(data.regex)}</td>
+															<td>${f:h(data.replacement)}</td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<c:set var="pager" value="${pathMappingPager}" scope="request" />
+									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 								</c:if>
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer">
-								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg"
-										arg0="${f:h(pathMappingPager.currentPageNumber)}"
-										arg1="${f:h(pathMappingPager.allPageCount)}"
-										arg2="${f:h(pathMappingPager.allRecordCount)}" /></span>
-
-								<%-- Paging Navigation --%>
-								<ul class="pagination pagination-sm no-margin pull-right">
-									<c:if test="${pathMappingPager.existPrePage}">
-										<li class="prev"><la:link
-												href="list/${pathMappingPager.currentPageNumber - 1}">
-												<la:message key="labels.path_mapping_link_prev_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!pathMappingPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message
-													key="labels.path_mapping_link_prev_page" /></a></li>
-									</c:if>
-									<c:forEach var="p" varStatus="s"
-										items="${pathMappingPager.pageNumberList}">
-										<li
-											<c:if test="${p == pathMappingPager.currentPageNumber}">class="active"</c:if>><la:link
-												href="list/${p}">${p}</la:link></li>
-									</c:forEach>
-									<c:if test="${pathMappingPager.existNextPage}">
-										<li class="next"><la:link
-												href="list/${pathMappingPager.currentPageNumber + 1}">
-												<la:message key="labels.path_mapping_link_next_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!pathMappingPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message
-													key="labels.path_mapping_link_next_page" /></a></li>
-									</c:if>
-								</ul>
-							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

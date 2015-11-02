@@ -20,11 +20,7 @@
 				<h1>
 					<la:message key="labels.log_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/log">
-							<la:message key="labels.log_configuration" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
 
 			<section class="content">

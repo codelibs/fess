@@ -24,7 +24,7 @@ public class CrudMode {
 
     public static final int DELETE = 3;
 
-    public static final int CONFIRM = 4;
+    public static final int DETAILS = 4;
 
     protected CrudMode() {
         // nothing

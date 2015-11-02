@@ -15,34 +15,20 @@
 		</jsp:include>
 
 		<div class="content-wrapper">
-
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.file_crawling_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/fileconfig">
-							<la:message key="labels.file_crawling_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
 							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<h3 class="box-title">
-									<la:message key="labels.file_crawling_link_list" />
-								</h3>
-								<div class="btn-group pull-right">
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.file_crawling_link_create_new" />
-									</la:link>
-								</div>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">
@@ -53,7 +39,6 @@
 									</la:info>
 									<la:errors />
 								</div>
-
 								<%-- List --%>
 								<c:if test="${fileConfigPager.allRecordCount == 0}">
 									<p class="callout callout-info">
@@ -61,78 +46,45 @@
 									</p>
 								</c:if>
 								<c:if test="${fileConfigPager.allRecordCount > 0}">
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th><la:message key="labels.name" /></th>
-												<th><la:message key="labels.available" /></th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach var="data" varStatus="s"
-												items="${fileConfigItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-													data-href="${contextPath}/admin/fileconfig/confirmpage/4/${f:u(data.id)}">
-													<td>${f:h(data.name)}</td>
-													<td style="text-align: center;"><c:if
-															test="${data.available=='true'}">
-															<la:message key="labels.enabled" />
-														</c:if> <c:if test="${data.available=='false'}">
-															<la:message key="labels.disabled" />
-														</c:if></td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
+									<div class="row">
+										<div class="col-sm-12">
+											<table class="table table-bordered table-striped">
+												<thead>
+													<tr>
+														<th><la:message key="labels.name" /></th>
+														<th><la:message key="labels.available" /></th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="data" varStatus="s"
+														items="${fileConfigItems}">
+														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+															data-href="${contextPath}/admin/fileconfig/details/4/${f:u(data.id)}">
+															<td>${f:h(data.name)}</td>
+															<td style="text-align: center;"><c:if
+																	test="${data.available=='true'}">
+																	<la:message key="labels.enabled" />
+																</c:if> <c:if test="${data.available=='false'}">
+																	<la:message key="labels.disabled" />
+																</c:if></td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+											<c:set var="pager" value="${fileConfigPager}" scope="request" />
+											<c:import
+												url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+										</div>
+									</div>
 								</c:if>
-
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer">
-								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg"
-										arg0="${f:h(fileConfigPager.currentPageNumber)}"
-										arg1="${f:h(fileConfigPager.allPageCount)}"
-										arg2="${f:h(fileConfigPager.allRecordCount)}" /></span>
-
-								<%-- Paging Navigation --%>
-								<ul class="pagination pagination-sm no-margin pull-right">
-									<c:if test="${fileConfigPager.existPrePage}">
-										<li class="prev"><la:link
-												href="list/${fileConfigPager.currentPageNumber - 1}">
-												<la:message key="labels.file_crawling_link_prev_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!fileConfigPager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message
-													key="labels.file_crawling_link_prev_page" /></a></li>
-									</c:if>
-									<c:forEach var="p" varStatus="s"
-										items="${fileConfigPager.pageNumberList}">
-										<li
-											<c:if test="${p == fileConfigPager.currentPageNumber}">class="active"</c:if>><la:link
-												href="list/${p}">${p}</la:link></li>
-									</c:forEach>
-									<c:if test="${fileConfigPager.existNextPage}">
-										<li class="next"><la:link
-												href="list/${fileConfigPager.currentPageNumber + 1}">
-												<la:message key="labels.file_crawling_link_next_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!fileConfigPager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message
-													key="labels.file_crawling_link_next_page" /></a></li>
-									</c:if>
-								</ul>
-
-							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

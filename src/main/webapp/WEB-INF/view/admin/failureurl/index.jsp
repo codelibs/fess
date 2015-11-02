@@ -21,11 +21,7 @@
 				<h1>
 					<la:message key="labels.failure_url_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/failureurl">
-							<la:message key="labels.failure_url_configuration" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
 			<section class="content">
 				<div class="row">
@@ -120,7 +116,7 @@
 																<td><div style="width: 380px; overflow-x: auto;">${f:h(data.url)}</div></td>
 																<td>${f:h(data.lastAccessTimeForList)}</td>
 																<td style="overflow-x: auto;"><la:link
-																		href="confirmpage/4/${f:u(data.id)}">
+																		href="details/4/${f:u(data.id)}">
 																		<la:message key="labels.failure_url_link_confirm" />
 																	</la:link> <la:link href="deletepage/3/${f:u(data.id)}">
 																		<la:message key="labels.crud_link_delete" />

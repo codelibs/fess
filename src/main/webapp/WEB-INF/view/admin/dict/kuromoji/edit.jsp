@@ -14,17 +14,12 @@
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.dict_kuromoji_title" />
 				</h1>
 			</section>
-
 			<section class="content">
-
-				<%-- Form --%>
 				<la:form styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<la:hidden property="dictId" />
@@ -76,7 +71,6 @@
 										</la:info>
 										<la:errors />
 									</div>
-
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="token" class="col-sm-3 control-label"><la:message
@@ -107,40 +101,18 @@
 										</div>
 									</div>
 								</div>
-
-								<%-- Box Footer --%>
+								<!-- /.box-body -->
 								<div class="box-footer">
-									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.dict_kuromoji_button_back" />">
-											<la:message key="labels.dict_kuromoji_button_back" />
-										</button>
-										<button type="submit" class="btn btn-success"
-											name="confirmfromcreate"
-											value="<la:message key="labels.dict_kuromoji_button_confirm" />">
-											<la:message key="labels.dict_kuromoji_button_confirm" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.dict_kuromoji_button_back" />">
-											<la:message key="labels.dict_kuromoji_button_back" />
-										</button>
-										<button type="submit" class="btn btn-warning"
-											name="confirmfromupdate"
-											value="<la:message key="labels.dict_kuromoji_button_confirm" />">
-											<la:message key="labels.dict_kuromoji_button_confirm" />
-										</button>
-									</c:if>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

@@ -119,14 +119,14 @@ public class AdminJoblogAction extends FessAdminAction {
         form.id = id;
         verifyCrudMode(form, CrudMode.DELETE);
         loadJobLog(form);
-        return asHtml(path_AdminJoblog_ConfirmJsp);
+        return asHtml(path_AdminJoblog_DetailsJsp);
     }
 
     @Execute(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final JobLogEditForm form) {
         form.crudMode = CrudMode.DELETE;
         loadJobLog(form);
-        return asHtml(path_AdminJoblog_ConfirmJsp);
+        return asHtml(path_AdminJoblog_DetailsJsp);
     }
 
     // -----------------------------------------------------
@@ -136,9 +136,9 @@ public class AdminJoblogAction extends FessAdminAction {
     public HtmlResponse confirmpage(final int crudMode, final String id, final JobLogEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
+        verifyCrudMode(form, CrudMode.DETAILS);
         loadJobLog(form);
-        return asHtml(path_AdminJoblog_ConfirmJsp);
+        return asHtml(path_AdminJoblog_DetailsJsp);
     }
 
     // -----------------------------------------------------

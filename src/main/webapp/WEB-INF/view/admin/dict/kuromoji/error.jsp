@@ -18,11 +18,7 @@
 				<h1>
 					<la:message key="labels.wizard_start_title" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/dict/">
-							<la:message key="labels.dict_kuromoji_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
 
 			<section class="content">

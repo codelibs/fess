@@ -141,7 +141,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                               -------
     @Execute
     public HtmlResponse confirmpage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
         return asHtml(path_AdminCrawlingsession_ConfirmJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {

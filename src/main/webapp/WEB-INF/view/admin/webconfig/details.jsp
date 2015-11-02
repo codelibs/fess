@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.file_crawling_configuration" /></title>
+		key="labels.web_crawling_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -11,42 +11,16 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="crawl" />
-			<jsp:param name="menuType" value="fileConfig" />
+			<jsp:param name="menuType" value="webConfig" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.file_crawling_title_details" />
+					<la:message key="labels.web_crawling_title_details" />
 				</h1>
-				<ol class="breadcrumb">
-					<li><la:link href="/admin/fileconfig">
-							<la:message key="labels.file_crawling_link_list" />
-						</la:link></li>
-					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message
-									key="labels.file_crawling_link_create" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message
-									key="labels.file_crawling_link_update" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message
-									key="labels.file_crawling_link_delete" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 4}">
-						<li class="active"><a href="#"><la:message
-									key="labels.file_crawling_link_confirm" /></a></li>
-					</c:if>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
-				<%-- Form --%>
 				<la:form>
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
@@ -60,30 +34,10 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
-									<h3 class="box-title">
-										<c:if test="${crudMode == 1}">
-											<la:message key="labels.file_crawling_link_create" />
-										</c:if>
-										<c:if test="${crudMode == 2}">
-											<la:message key="labels.file_crawling_link_update" />
-										</c:if>
-										<c:if test="${crudMode == 3}">
-											<la:message key="labels.file_crawling_link_delete" />
-										</c:if>
-										<c:if test="${crudMode == 4}">
-											<la:message key="labels.file_crawling_link_confirm" />
-										</c:if>
-									</h3>
-									<div class="btn-group pull-right">
-										<la:link href="/admin/fileconfig"
-											styleClass="btn btn-primary btn-xs">
-											<la:message key="labels.file_crawling_link_list" />
-										</la:link>
-									</div>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
@@ -92,7 +46,6 @@
 										</la:info>
 										<la:errors />
 									</div>
-
 									<%-- Form Fields --%>
 									<table class="table table-bordered">
 										<tbody>
@@ -107,28 +60,28 @@
 												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.paths" /></th>
-												<td>${f:br(f:h(paths))}<la:hidden property="paths" /></td>
+												<th><la:message key="labels.urls" /></th>
+												<td>${f:br(f:h(urls))}<la:hidden property="urls" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.included_paths" /></th>
-												<td>${f:br(f:h(includedPaths))}<la:hidden
-														property="includedPaths" /></td>
+												<th><la:message key="labels.included_urls" /></th>
+												<td>${f:br(f:h(includedUrls))}<la:hidden
+														property="includedUrls" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.excluded_paths" /></th>
-												<td>${f:br(f:h(excludedPaths))}<la:hidden
-														property="excludedPaths" /></td>
+												<th><la:message key="labels.excluded_urls" /></th>
+												<td>${f:br(f:h(excludedUrls))}<la:hidden
+														property="excludedUrls" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.included_doc_paths" /></th>
-												<td>${f:br(f:h(includedDocPaths))}<la:hidden
-														property="includedDocPaths" /></td>
+												<th><la:message key="labels.included_doc_urls" /></th>
+												<td>${f:br(f:h(includedDocUrls))}<la:hidden
+														property="includedDocUrls" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.excluded_doc_paths" /></th>
-												<td>${f:br(f:h(excludedDocPaths))}<la:hidden
-														property="excludedDocPaths" /></td>
+												<th><la:message key="labels.excluded_doc_urls" /></th>
+												<td>${f:br(f:h(excludedDocUrls))}<la:hidden
+														property="excludedDocUrls" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.config_parameter" /></th>
@@ -145,6 +98,10 @@
 														property="maxAccessCount" /></td>
 											</tr>
 											<tr>
+												<th><la:message key="labels.user_agent" /></th>
+												<td>${f:h(userAgent)}<la:hidden property="userAgent" /></td>
+											</tr>
+											<tr>
 												<th><la:message key="labels.number_of_thread" /></th>
 												<td>${f:h(numOfThread)}<la:hidden
 														property="numOfThread" /></td>
@@ -152,8 +109,8 @@
 											<tr>
 												<th><la:message key="labels.interval_time" /></th>
 												<td>${f:h(intervalTime)}<la:hidden
-														property="intervalTime" />
-													<la:message key="labels.millisec" /></td>
+														property="intervalTime" /> <la:message
+														key="labels.millisec" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.boost" /></th>
@@ -165,7 +122,7 @@
 														items="${roleTypeItems}">
 														<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
 															<c:if test="${rtid==rt.id}">
-																	${f:h(rt.name)}<br />
+																					${f:h(rt.name)}<br />
 															</c:if>
 														</c:forEach>
 													</c:forEach> <la:select property="roleTypeIds" multiple="true"
@@ -204,64 +161,18 @@
 										</tbody>
 									</table>
 								</div>
-
-								<%-- Box Footer --%>
+								<!-- /.box-body -->
 								<div class="box-footer">
-									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.file_crawling_button_back" />">
-											<la:message key="labels.file_crawling_button_back" />
-										</button>
-										<button type="submit" class="btn btn-success" name="create"
-											value="<la:message key="labels.file_crawling_button_create" />">
-											<la:message key="labels.file_crawling_button_create" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.file_crawling_button_back" />">
-											<la:message key="labels.file_crawling_button_back" />
-										</button>
-										<button type="submit" class="btn btn-warning" name="update"
-											value="<la:message key="labels.file_crawling_button_update" />">
-											<la:message key="labels.file_crawling_button_update" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.file_crawling_button_back" />">
-											<la:message key="labels.file_crawling_button_back" />
-										</button>
-										<button type="submit" class="btn btn-danger" name="delete"
-											value="<la:message key="labels.file_crawling_button_delete" />">
-											<la:message key="labels.file_crawling_button_delete" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.file_crawling_button_back" />">
-											<la:message key="labels.file_crawling_button_back" />
-										</button>
-										<button type="submit" class="btn btn-warning"
-											name="editfromconfirm"
-											value="<la:message key="labels.file_crawling_button_edit" />">
-											<la:message key="labels.file_crawling_button_edit" />
-										</button>
-										<button type="submit" class="btn btn-danger"
-											name="deletefromconfirm"
-											value="<la:message key="labels.file_crawling_button_delete" />">
-											<la:message key="labels.file_crawling_button_delete" />
-										</button>
-									</c:if>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

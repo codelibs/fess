@@ -21,6 +21,7 @@
 				<h1>
 					<la:message key="labels.dict_kuromoji_title" />
 				</h1>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="list/0?dictId=${dictId}">
 							<la:message key="labels.dict_kuromoji_link_upload" />

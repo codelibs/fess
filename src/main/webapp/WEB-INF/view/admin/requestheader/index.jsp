@@ -13,23 +13,14 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="requestHeader" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.request_header_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/requestheader">
-							<la:message key="labels.request_header_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
@@ -41,14 +32,7 @@
 							<div class="box box-primary">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
-									<h3 class="box-title">
-										<la:message key="labels.request_header_link_list" />
-									</h3>
-									<div class="btn-group pull-right">
-										<la:link href="createpage" styleClass="btn btn-success btn-xs">
-											<la:message key="labels.request_header_link_create_new" />
-										</la:link>
-									</div>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
 								<%-- Box Body --%>
 								<div class="box-body">
@@ -59,7 +43,6 @@
 										</la:info>
 										<la:errors />
 									</div>
-
 									<%-- List --%>
 									<c:if test="${requestHeaderPager.allRecordCount == 0}">
 										<p class="callout callout-info">
@@ -79,63 +62,26 @@
 												<c:forEach var="data" varStatus="s"
 													items="${requestHeaderItems}">
 													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-														data-href="${contextPath}/admin/requestheader/confirmpage/4/${f:u(data.id)}">
+														data-href="${contextPath}/admin/requestheader/details/4/${f:u(data.id)}">
 														<td>${f:h(data.name)}</td>
 														<td>${f:h(data.webConfig.name)}</td>
 													</tr>
 												</c:forEach>
 											</tbody>
 										</table>
+										<c:set var="pager" value="${requestHeaderPager}"
+											scope="request" />
+										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 									</c:if>
-
 								</div>
-								<%-- Box Footer --%>
-								<div class="box-footer">
-									<%-- Paging Info --%>
-									<span><la:message key="labels.pagination_page_guide_msg"
-											arg0="${f:h(requestHeaderPager.currentPageNumber)}"
-											arg1="${f:h(requestHeaderPager.allPageCount)}"
-											arg2="${f:h(requestHeaderPager.allRecordCount)}" /></span>
-
-									<%-- Paging Navigation --%>
-									<ul class="pagination pagination-sm no-margin pull-right">
-										<c:if test="${requestHeaderPager.existPrePage}">
-											<li class="prev"><la:link
-													href="list/${requestHeaderPager.currentPageNumber - 1}">
-													<la:message key="labels.request_header_link_prev_page" />
-												</la:link></li>
-										</c:if>
-										<c:if test="${!requestHeaderPager.existPrePage}">
-											<li class="prev disabled"><a href="#"><la:message
-														key="labels.request_header_link_prev_page" /></a></li>
-										</c:if>
-										<c:forEach var="p" varStatus="s"
-											items="${requestHeaderPager.pageNumberList}">
-											<li
-												<c:if test="${p == requestHeaderPager.currentPageNumber}">class="active"</c:if>><la:link
-													href="list/${p}">${p}</la:link></li>
-										</c:forEach>
-										<c:if test="${requestHeaderPager.existNextPage}">
-											<li class="next"><la:link
-													href="list/${requestHeaderPager.currentPageNumber + 1}">
-													<la:message key="labels.request_header_link_next_page" />
-												</la:link></li>
-										</c:if>
-										<c:if test="${!requestHeaderPager.existNextPage}">
-											<li class="next disabled"><a href="#"><la:message
-														key="labels.request_header_link_next_page" /></a></li>
-										</c:if>
-									</ul>
-
-								</div>
+								<!-- /.box-body -->
 							</div>
+							<!-- /.box -->
 						</c:if>
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

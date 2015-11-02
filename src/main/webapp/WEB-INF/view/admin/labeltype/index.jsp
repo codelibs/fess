@@ -15,36 +15,20 @@
 		</jsp:include>
 
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.labeltype_configuration" />
 				</h1>
-				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/labeltype">
-							<la:message key="labels.labeltype_link_list" />
-						</la:link></li>
-				</ol>
+				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<h3 class="box-title">
-									<la:message key="labels.labeltype_link_list" />
-								</h3>
-								<div class="btn-group pull-right">
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.labeltype_link_create_new" />
-									</la:link>
-								</div>
+								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -53,7 +37,6 @@
 									</la:info>
 									<la:errors />
 								</div>
-
 								<%-- List --%>
 								<c:if test="${labelTypePager.allRecordCount == 0}">
 									<p class="callout callout-info">
@@ -61,70 +44,75 @@
 									</p>
 								</c:if>
 								<c:if test="${labelTypePager.allRecordCount > 0}">
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th><la:message key="labels.labeltype_name" /></th>
-											</tr>
-										</thead>
-										<tbody>
-											<c:forEach var="data" varStatus="s" items="${labelTypeItems}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-													data-href="${contextPath}/admin/labeltype/confirmpage/4/${f:u(data.id)}">
-													<td>${f:h(data.name)}</td>
-												</tr>
-											</c:forEach>
-										</tbody>
-									</table>
+									<div class="row">
+										<div class="col-sm-12">
+											<table class="table table-bordered table-striped">
+												<thead>
+													<tr>
+														<th><la:message key="labels.labeltype_name" /></th>
+													</tr>
+												</thead>
+												<tbody>
+													<c:forEach var="data" varStatus="s"
+														items="${labelTypeItems}">
+														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+															data-href="${contextPath}/admin/labeltype/details/4/${f:u(data.id)}">
+															<td>${f:h(data.name)}</td>
+														</tr>
+													</c:forEach>
+												</tbody>
+											</table>
+										</div>
+									</div>
+									<div class="row">
+										<%-- Paging Info --%>
+										<div class="col-sm-2">
+											<la:message key="labels.pagination_page_guide_msg"
+												arg0="${f:h(webConfigPager.currentPageNumber)}"
+												arg1="${f:h(webConfigPager.allPageCount)}"
+												arg2="${f:h(webConfigPager.allRecordCount)}" />
+										</div>
+										<%-- Paging Navigation --%>
+										<div class="col-sm-10">
+											<ul class="pagination pagination-sm no-margin pull-right">
+												<c:if test="${webConfigPager.existPrePage}">
+													<li class="prev"><la:link
+															href="list/${webConfigPager.currentPageNumber - 1}">
+															<la:message key="labels.prev_page" />
+														</la:link></li>
+												</c:if>
+												<c:if test="${!webConfigPager.existPrePage}">
+													<li class="prev disabled"><a href="#"><la:message
+																key="labels.prev_page" /></a></li>
+												</c:if>
+												<c:forEach var="p" varStatus="s"
+													items="${webConfigPager.pageNumberList}">
+													<li
+														<c:if test="${p == webConfigPager.currentPageNumber}">class="active"</c:if>><la:link
+															href="list/${p}">${p}</la:link></li>
+												</c:forEach>
+												<c:if test="${webConfigPager.existNextPage}">
+													<li class="next"><la:link
+															href="list/${webConfigPager.currentPageNumber + 1}">
+															<la:message key="labels.next_page" />
+														</la:link></li>
+												</c:if>
+												<c:if test="${!webConfigPager.existNextPage}">
+													<li class="next disabled"><a href="#"><la:message
+																key="labels.next_page" /></a></li>
+												</c:if>
+											</ul>
+										</div>
+									</div>
 								</c:if>
-
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer">
-								<%-- Paging Info --%>
-								<span><la:message key="labels.pagination_page_guide_msg"
-										arg0="${f:h(labelTypePager.currentPageNumber)}"
-										arg1="${f:h(labelTypePager.allPageCount)}"
-										arg2="${f:h(labelTypePager.allRecordCount)}" /></span>
-
-								<%-- Paging Navigation --%>
-								<ul class="pagination pagination-sm no-margin pull-right">
-									<c:if test="${labelTypePager.existPrePage}">
-										<li class="prev"><la:link
-												href="list/${labelTypePager.currentPageNumber - 1}">
-												<la:message key="labels.labeltype_link_prev_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!labelTypePager.existPrePage}">
-										<li class="prev disabled"><a href="#"><la:message
-													key="labels.labeltype_link_prev_page" /></a></li>
-									</c:if>
-									<c:forEach var="p" varStatus="s"
-										items="${labelTypePager.pageNumberList}">
-										<li
-											<c:if test="${p == labelTypePager.currentPageNumber}">class="active"</c:if>><la:link
-												href="list/${p}">${p}</la:link></li>
-									</c:forEach>
-									<c:if test="${labelTypePager.existNextPage}">
-										<li class="next"><la:link
-												href="list/${labelTypePager.currentPageNumber + 1}">
-												<la:message key="labels.labeltype_link_next_page" />
-											</la:link></li>
-									</c:if>
-									<c:if test="${!labelTypePager.existNextPage}">
-										<li class="next disabled"><a href="#"><la:message
-													key="labels.labeltype_link_next_page" /></a></li>
-									</c:if>
-								</ul>
-
-							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
