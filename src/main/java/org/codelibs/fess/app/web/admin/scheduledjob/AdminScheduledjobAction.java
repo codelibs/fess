@@ -32,6 +32,7 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.token.TxToken;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -51,8 +52,6 @@ public class AdminScheduledjobAction extends FessAdminAction {
     private SystemHelper systemHelper;
     @Resource
     protected JobHelper jobHelper;
-
-    private boolean running = false;
 
     // ===================================================================================
     //                                                                               Hook
@@ -208,12 +207,13 @@ public class AdminScheduledjobAction extends FessAdminAction {
                 scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
                     loadScheduledJob(form, entity);
                     form.crudMode = crudMode;
+                    LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+                        request.setAttribute("running", entity.isRunning());
+                    });
                 }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
                 });
             });
-        }).renderWith(data -> {
-            data.register("running", running);
         });
     }
 
@@ -221,18 +221,14 @@ public class AdminScheduledjobAction extends FessAdminAction {
     public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.CREATE;
-        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
-            data.register("running", running);
-        });
+        return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
-            data.register("running", running);
-        });
+        return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
 
     // -----------------------------------------------------
@@ -282,6 +278,8 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse start(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CONFIRM);
+        validate(form, messages -> {}, toEditHtml());
         final String id = form.id;
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
@@ -293,14 +291,17 @@ public class AdminScheduledjobAction extends FessAdminAction {
                 }, toEditHtml());
             }
         }).orElse(() -> {
-            // TODO 
-            });
+            throwValidationError(messages -> {
+                messages.addErrorsFailedToStartJob(GLOBAL, id);
+            }, toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
     public HtmlResponse stop(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CONFIRM);
+        validate(form, messages -> {}, toEditHtml());
         final String id = form.id;
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
@@ -313,8 +314,10 @@ public class AdminScheduledjobAction extends FessAdminAction {
                 }, toEditHtml());
             }
         }).orElse(() -> {
-            // TODO 
-            });
+            throwValidationError(messages -> {
+                messages.addErrorsFailedToStartJob(GLOBAL, id);
+            }, toEditHtml());
+        });
         return redirect(getClass());
     }
 
