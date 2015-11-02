@@ -16,8 +16,6 @@
 package org.codelibs.fess.app.web.admin.group;
 
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -28,6 +26,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -37,6 +36,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
+ * @author Keiichi Watanabe
  */
 public class AdminGroupAction extends FessAdminAction {
 
@@ -63,14 +63,14 @@ public class AdminGroupAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final GroupSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final GroupSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         groupPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -78,15 +78,15 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final GroupSearchForm form) {
-        copyBeanToBean(form.searchParams, groupPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, groupPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final GroupSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         groupPager.clear();
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -94,17 +94,17 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final GroupSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final GroupSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("groupItems", groupService.getGroupList(groupPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(groupPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(groupPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -114,46 +114,86 @@ public class AdminGroupAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final GroupEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminGroup_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminGroup_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                groupService.getGroup(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminGroup_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id, final GroupEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadGroup(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminGroup_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final GroupEditForm form) {
-        return asHtml(path_AdminGroup_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final GroupEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadGroup(form);
+        final String id = form.id;
+        groupService.getGroup(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminGroup_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final GroupEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadGroup(form);
-        return asHtml(path_AdminGroup_ConfirmJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminGroup_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                groupService.getGroup(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final GroupEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadGroup(form);
+        final String id = form.id;
+        groupService.getGroup(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
 
@@ -161,23 +201,33 @@ public class AdminGroupAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final GroupEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadGroup(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminGroup_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                groupService.getGroup(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        });
+    }
+
+    @Execute(token = TxToken.VALIDATE_KEEP)
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final GroupEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminGroup_ConfirmJsp);
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final GroupEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminGroup_ConfirmJsp);
     }
 
@@ -185,69 +235,80 @@ public class AdminGroupAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse create(final GroupEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        groupService.store(createGroup(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createGroup(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
+            groupService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse update(final GroupEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        groupService.store(createGroup(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createGroup(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
+            groupService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final GroupEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        groupService.delete(getGroup(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        groupService.getGroup(id).ifPresent(entity -> {
+            groupService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadGroup(final GroupEditForm form) {
-        copyBeanToBean(getGroup(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected Group getGroup(final GroupEditForm form) {
-        final Group group = groupService.getGroup(createKeyMap(form));
-        if (group == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+    protected OptionalEntity<Group> createGroup(final CreateForm form) {
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final Group entity = new Group();
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return groupService.getGroup(((EditForm) form).id).map(entity -> {
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        return group;
-    }
-
-    protected Group createGroup(final GroupEditForm form) {
-        Group group;
-        if (form.crudMode == CrudMode.EDIT) {
-            group = getGroup(form);
-        } else {
-            group = new Group();
-        }
-        copyBeanToBean(form, group, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        group.setId(Base64.getEncoder().encodeToString(group.getName().getBytes(Constants.CHARSET_UTF_8)));
-        return group;
-    }
-
-    protected Map<String, String> createKeyMap(final GroupEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final GroupEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }

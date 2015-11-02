@@ -17,31 +17,26 @@ package org.codelibs.fess.app.web.admin.group;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
  * @author shinsuke
+ * @author Keiichi Watanabe
  */
-public class GroupEditForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
+    @Digits(integer = 10, fraction = 0)
     public int crudMode;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
-    public String id;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 100)
+    @Required
+    @Size(max = 100)
     public String name;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Digits(integer=10, fraction=0)
-    public String versionNo;
-
     public void initialize() {
-        id = null;
-        name = null;
-        versionNo = null;
     }
 }

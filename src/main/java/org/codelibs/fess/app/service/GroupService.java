@@ -28,6 +28,7 @@ import org.codelibs.fess.es.user.cbean.GroupCB;
 import org.codelibs.fess.es.user.exbhv.GroupBhv;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class GroupService implements Serializable {
 
@@ -52,17 +53,8 @@ public class GroupService implements Serializable {
         return groupList;
     }
 
-    public Group getGroup(final Map<String, String> keys) {
-        final Group group = groupBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (group == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return group;
+    public OptionalEntity<Group> getGroup(final String id) {
+        return groupBhv.selectByPK(id);
     }
 
     public void store(final Group group) {
