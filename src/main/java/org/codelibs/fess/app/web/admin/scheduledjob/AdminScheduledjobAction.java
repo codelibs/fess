@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.scheduledjob;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -29,6 +26,7 @@ import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
@@ -38,6 +36,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
+ * @author Keiichi Watanabe
  */
 public class AdminScheduledjobAction extends FessAdminAction {
 
@@ -46,13 +45,10 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                                                           =========
     @Resource
     private ScheduledJobService scheduledJobService;
-
     @Resource
     private ScheduledJobPager scheduledJobPager;
-
     @Resource
-    protected SystemHelper systemHelper;
-
+    private SystemHelper systemHelper;
     @Resource
     protected JobHelper jobHelper;
 
@@ -71,14 +67,14 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final ScheduledjobSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final ScheduledjobSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         scheduledJobPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -86,15 +82,15 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final ScheduledjobSearchForm form) {
-        copyBeanToBean(form.searchParams, scheduledJobPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, scheduledJobPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final ScheduledjobSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         scheduledJobPager.clear();
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -102,17 +98,17 @@ public class AdminScheduledjobAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final ScheduledjobSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminScheduledjob_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final ScheduledjobSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(scheduledJobPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(scheduledJobPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(scheduledJobPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -122,46 +118,82 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse createpage(final ScheduledjobEditForm form) {
-        form.initialize();
-        form.crudMode = CrudMode.CREATE;
+    public HtmlResponse createpage() {
+        return asHtml(path_AdminScheduledjob_EditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse editpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.EDIT);
+        return asHtml(path_AdminScheduledjob_EditJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+                    loadScheduledJob(form, entity);
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
+    }
+
+    @Execute(token = TxToken.SAVE)
+    public HtmlResponse createagain(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.EDIT);
-        loadScheduledJob(form);
+    public HtmlResponse editagain(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, toEditHtml());
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse editagain(final ScheduledjobEditForm form) {
-        return asHtml(path_AdminScheduledjob_EditJsp);
-    }
-
-    @Execute(token = TxToken.SAVE)
-    public HtmlResponse editfromconfirm(final ScheduledjobEditForm form) {
+    public HtmlResponse editfromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
-        loadScheduledJob(form);
+        final String id = form.id;
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            loadScheduledJob(form, entity);
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminScheduledjob_EditJsp);
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final ScheduledjobEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadScheduledJob(form);
-        return asHtml(path_AdminScheduledjob_ConfirmJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminScheduledjob_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+                    loadScheduledJob(form, entity);
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final ScheduledjobEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
+        validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.DELETE;
-        loadScheduledJob(form);
+        final String id = form.id;
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            loadScheduledJob(form, entity);
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return asHtml(path_AdminScheduledjob_ConfirmJsp);
     }
 
@@ -169,27 +201,35 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final ScheduledjobEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        loadScheduledJob(form);
+    public HtmlResponse confirmpage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.CONFIRM);
+        return asHtml(path_AdminScheduledjob_ConfirmJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+                    loadScheduledJob(form, entity);
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                });
+            });
+        }).renderWith(data -> {
+            data.register("running", running);
+        });
+    }
+
+    @Execute(token = TxToken.VALIDATE_KEEP)
+    public HtmlResponse confirmfromcreate(final CreateForm form) {
+        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.CREATE;
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
             data.register("running", running);
         });
     }
 
     @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromcreate(final ScheduledjobEditForm form) {
+    public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
-        return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
-            data.register("running", running);
-        });
-    }
-
-    @Execute(token = TxToken.VALIDATE_KEEP)
-    public HtmlResponse confirmfromupdate(final ScheduledjobEditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        form.crudMode = CrudMode.EDIT;
         return asHtml(path_AdminScheduledjob_ConfirmJsp).renderWith(data -> {
             data.register("running", running);
         });
@@ -199,113 +239,139 @@ public class AdminScheduledjobAction extends FessAdminAction {
     //                                         Actually Crud
     //                                         -------------
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse create(final ScheduledjobEditForm form) {
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        scheduledJobService.store(createScheduledJob(form));
-        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        createScheduledJob(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            scheduledJobService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute(token = TxToken.VALIDATE)
-    public HtmlResponse update(final ScheduledjobEditForm form) {
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        scheduledJobService.store(createScheduledJob(form));
-        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        createScheduledJob(form).ifPresent(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            scheduledJobService.store(entity);
+            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse delete(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        scheduledJobService.delete(getScheduledJob(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toEditHtml());
+        final String id = form.id;
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            scheduledJobService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse start(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        final ScheduledJob scheduledJob = getScheduledJob(form);
-        try {
-            scheduledJob.start();
-            saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, scheduledJob.getName()));
-        } catch (final Exception e) {
-            throwValidationError(messages -> {
-                messages.addErrorsFailedToStartJob(GLOBAL, scheduledJob.getName());
-            }, toEditHtml());
-        }
+    public HtmlResponse start(final EditForm form) {
+        final String id = form.id;
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            try {
+                entity.start();
+                saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, entity.getName()));
+            } catch (final Exception e) {
+                throwValidationError(messages -> {
+                    messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
+                }, toEditHtml());
+            }
+        }).orElse(() -> {
+            // TODO 
+            });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse stop(final ScheduledjobEditForm form) {
-        verifyCrudMode(form, CrudMode.CONFIRM);
-        final ScheduledJob scheduledJob = getScheduledJob(form);
-        try {
-            final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(scheduledJob.getId());
-            jobExecutoer.shutdown();
-            saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, scheduledJob.getName()));
-        } catch (final Exception e) {
-            throwValidationError(messages -> {
-                messages.addErrorsFailedToStopJob(GLOBAL, scheduledJob.getName());
-            }, toEditHtml());
-        }
+    public HtmlResponse stop(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CONFIRM);
+        final String id = form.id;
+        scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            try {
+                final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(entity.getId());
+                jobExecutoer.shutdown();
+                saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, entity.getName()));
+            } catch (final Exception e) {
+                throwValidationError(messages -> {
+                    messages.addErrorsFailedToStopJob(GLOBAL, entity.getName());
+                }, toEditHtml());
+            }
+        }).orElse(() -> {
+            // TODO 
+            });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadScheduledJob(final ScheduledjobEditForm form) {
-        final ScheduledJob scheduledJob = getScheduledJob(form);
-        copyBeanToBean(scheduledJob, form, op -> op.exclude("crudMode"));
-        form.jobLogging = scheduledJob.isLoggingEnabled() ? Constants.ON : null;
-        form.crawler = scheduledJob.isCrawlerJob() ? Constants.ON : null;
-        form.available = scheduledJob.isEnabled() ? Constants.ON : null;
-        running = scheduledJob.isRunning();
+    protected void loadScheduledJob(final EditForm form, ScheduledJob entity) {
+        copyBeanToBean(entity, form, op -> op.exclude("crudMode").excludeNull());
+        form.jobLogging = entity.isLoggingEnabled() ? Constants.ON : null;
+        form.crawler = entity.isCrawlerJob() ? Constants.ON : null;
+        form.available = entity.isEnabled() ? Constants.ON : null;
     }
 
-    protected ScheduledJob getScheduledJob(final ScheduledjobEditForm form) {
-        final ScheduledJob scheduledJob = scheduledJobService.getScheduledJob(createKeyMap(form));
-        if (scheduledJob == null) {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
-        }
-        return scheduledJob;
-    }
-
-    protected ScheduledJob createScheduledJob(final ScheduledjobEditForm form) {
-        ScheduledJob scheduledJob;
+    protected OptionalEntity<ScheduledJob> createScheduledJob(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        if (form.crudMode == CrudMode.EDIT) {
-            scheduledJob = getScheduledJob(form);
-        } else {
-            scheduledJob = new ScheduledJob();
-            scheduledJob.setCreatedBy(username);
-            scheduledJob.setCreatedTime(currentTime);
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            if (form instanceof CreateForm) {
+                final ScheduledJob entity = new ScheduledJob();
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                entity.setUpdatedBy(username);
+                entity.setUpdatedTime(currentTime);
+                copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+                entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
+                entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
+                entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
+                return OptionalEntity.of(entity);
+            }
+            break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return scheduledJobService.getScheduledJob(((EditForm) form).id).map(entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+                    entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
+                    entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
+                    entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
+                    return entity;
+                });
+            }
+            break;
+        default:
+            break;
         }
-        scheduledJob.setUpdatedBy(username);
-        scheduledJob.setUpdatedTime(currentTime);
-        copyBeanToBean(form, scheduledJob, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-        scheduledJob.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
-        scheduledJob.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
-        scheduledJob.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
-        return scheduledJob;
-    }
-
-    protected Map<String, String> createKeyMap(final ScheduledjobEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+        return OptionalEntity.empty();
     }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final ScheduledjobEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toEditHtml());
         }
     }

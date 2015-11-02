@@ -28,6 +28,7 @@ import org.codelibs.fess.es.user.cbean.RoleCB;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class RoleService implements Serializable {
 
@@ -52,17 +53,8 @@ public class RoleService implements Serializable {
         return roleList;
     }
 
-    public Role getRole(final Map<String, String> keys) {
-        final Role role = roleBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (role == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return role;
+    public OptionalEntity<Role> getRole(final String id) {
+        return roleBhv.selectByPK(id);
     }
 
     public void store(final Role role) {

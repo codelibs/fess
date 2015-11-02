@@ -13,35 +13,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.group;
+package org.codelibs.fess.app.web.admin.suggestelevateword;
 
 import java.io.Serializable;
 
 /**
- * @author shinsuke
+ * @author codelibs
+ * @author Keiichi Watanabe
  */
-public class GroupEditForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
-    public int crudMode;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
     public String id;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 100)
-    public String name;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Digits(integer=10, fraction=0)
-    public String versionNo;
-
-    public void initialize() {
-        id = null;
-        name = null;
-        versionNo = null;
-    }
 }

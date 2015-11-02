@@ -29,6 +29,7 @@ import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.job.JobScheduler;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class ScheduledJobService implements Serializable {
 
@@ -57,17 +58,8 @@ public class ScheduledJobService implements Serializable {
         return scheduledJobList;
     }
 
-    public ScheduledJob getScheduledJob(final Map<String, String> keys) {
-        final ScheduledJob scheduledJob = scheduledJobBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (scheduledJob == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return scheduledJob;
+    public OptionalEntity<ScheduledJob> getScheduledJob(final String id) {
+        return scheduledJobBhv.selectByPK(id);
     }
 
     public void delete(final ScheduledJob scheduledJob) {

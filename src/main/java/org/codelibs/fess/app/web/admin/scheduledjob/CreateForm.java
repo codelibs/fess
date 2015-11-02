@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.fileconfig;
+package org.codelibs.fess.app.web.admin.scheduledjob;
 
 import java.io.Serializable;
 
@@ -23,78 +23,47 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.UriType;
-import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.annotation.CronExpression;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * @author shinsuke
  */
 public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public String[] roleTypeIds;
-
-    public String[] labelTypeIds;
-
     @Digits(integer = 10, fraction = 0)
-    public Integer crudMode;
+    public int crudMode;
 
     @Required
-    @Size(max = 200)
+    @Size(max = 100)
     public String name;
 
     @Required
-    @UriType(protocols = "file:,smb:")
-    @Size(max = 4000)
-    public String paths;
-
-    @Size(max = 4000)
-    public String includedPaths;
-
-    @Size(max = 4000)
-    public String excludedPaths;
-
-    @Size(max = 4000)
-    public String includedDocPaths;
-
-    @Size(max = 4000)
-    public String excludedDocPaths;
-
-    @Size(max = 4000)
-    public String configParameter;
-
-    @Min(value = 0)
-    @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
-    public Integer depth;
-
-    @Min(value = 0)
-    @Max(value = 9223372036854775807l)
-    @Digits(integer = 19, fraction = 0)
-    public Long maxAccessCount;
+    @Size(max = 100)
+    public String target;
 
     @Required
-    @Min(value = 0)
-    @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
-    public Integer numOfThread;
+    @Size(max = 100)
+    @CronExpression
+    public String cronExpression;
 
     @Required
-    @Min(value = 0)
-    @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
-    public Integer intervalTime;
+    @Size(max = 100)
+    public String scriptType;
 
-    @Required
-    // @FloatType
-    public float boost;
+    @Size(max = 4000)
+    public String scriptData;
 
-    @Required
-    @Size(max = 5)
+    // ignore
+    public String crawler;
+
+    // ignore
+    public String jobLogging;
+
+    // ignore
     public String available;
 
     @Required
@@ -112,12 +81,12 @@ public class CreateForm implements Serializable {
     public Long createdTime;
 
     public void initialize() {
-        crudMode = CrudMode.CREATE;
-        boost = 1.0f;
-        numOfThread = Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
-        intervalTime = Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
+        target = Constants.DEFAULT_JOB_TARGET;
+        cronExpression = Constants.DEFAULT_CRON_EXPRESSION;
+        scriptType = Constants.DEFAULT_JOB_SCRIPT_TYPE;
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+
     }
 }

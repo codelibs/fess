@@ -13,20 +13,32 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.suggestelevateword;
+package org.codelibs.fess.app.web.admin.role;
 
-import java.io.Serializable;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
  * @author Keiichi Watanabe
  */
-public class SuggestElevateWordUploadForm implements Serializable {
+public class EditForm extends CreateForm {
 
     private static final long serialVersionUID = 1L;
 
-    public MultipartFormFile suggestElevateWordFile;
+    @Required
+    @Size(max = 1000)
+    public String id;
+
+    @Size(max = 1000)
+    public String updatedBy;
+
+    @Digits(integer = 19, fraction = 0)
+    public Long updatedTime;
+
+    @Required
+    @Digits(integer = 10, fraction = 0)
+    public Integer versionNo;
 
 }

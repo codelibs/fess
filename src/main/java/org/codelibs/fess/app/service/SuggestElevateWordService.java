@@ -37,6 +37,7 @@ import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -71,17 +72,8 @@ public class SuggestElevateWordService implements Serializable {
         return suggestElevateWordList;
     }
 
-    public SuggestElevateWord getSuggestElevateWord(final Map<String, String> keys) {
-        final SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (suggestElevateWord == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return suggestElevateWord;
+    public OptionalEntity<SuggestElevateWord> getSuggestElevateWord(final String id) {
+        return suggestElevateWordBhv.selectByPK(id);
     }
 
     public void store(final SuggestElevateWord suggestElevateWord) {

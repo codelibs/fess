@@ -56,10 +56,8 @@ public class CreateForm implements Serializable {
     public String handlerScript;
 
     @Required
-    @Min(value = 0)
-    @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
-    public Integer boost;
+    // @FloatType
+    public float boost;
 
     @Required
     @Size(max = 5)
@@ -81,7 +79,7 @@ public class CreateForm implements Serializable {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
-        boost = 1;
+        boost = 1.0f;
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

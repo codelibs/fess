@@ -13,20 +13,30 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.suggestbadword;
+package org.codelibs.fess.app.web.admin.group;
 
 import java.io.Serializable;
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class SuggestBadWordUploadForm implements Serializable {
+public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public MultipartFormFile suggestBadWordFile;
+    @Digits(integer = 10, fraction = 0)
+    public int crudMode;
 
+    @Required
+    @Size(max = 100)
+    public String name;
+
+    public void initialize() {
+    }
 }

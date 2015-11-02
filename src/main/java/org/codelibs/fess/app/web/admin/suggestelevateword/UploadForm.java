@@ -13,18 +13,20 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.role;
+package org.codelibs.fess.app.web.admin.suggestelevateword;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 
 /**
- * @author shinsuke
+ * @author codelibs
+ * @author Keiichi Watanabe
  */
-public class RoleSearchForm implements Serializable {
+public class UploadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    public MultipartFormFile suggestElevateWordFile;
+
 }

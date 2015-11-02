@@ -13,18 +13,26 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.group;
+package org.codelibs.fess.app.web.admin.scheduledjob;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
 
 /**
- * @author shinsuke
+ * @author Keiichi Watanabe
  */
-public class GroupSearchForm implements Serializable {
+public class EditForm extends CreateForm {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    @Required
+    @Size(max = 1000)
+    public String id;
+
+    @Required
+    @Digits(integer = 10, fraction = 0)
+    public Integer versionNo;
+
 }
