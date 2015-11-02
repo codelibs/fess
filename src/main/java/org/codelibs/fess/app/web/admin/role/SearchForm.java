@@ -20,28 +20,9 @@ import java.io.Serializable;
 /**
  * @author shinsuke
  */
-public class RoleEditForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
-    public int crudMode;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
     public String id;
-
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 100)
-    public String name;
-
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Digits(integer=10, fraction=0)
-    public String versionNo;
-
-    public void initialize() {
-        id = null;
-        name = null;
-        versionNo = null;
-    }
 }
