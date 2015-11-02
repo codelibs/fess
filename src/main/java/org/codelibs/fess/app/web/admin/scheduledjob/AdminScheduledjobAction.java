@@ -240,6 +240,9 @@ public class AdminScheduledjobAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         createScheduledJob(form).ifPresent(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setAvailable(Constants.ON.equalsIgnoreCase(form.available));
+            entity.setCrawler(Constants.ON.equalsIgnoreCase(form.crawler));
+            entity.setJobLogging(Constants.ON.equalsIgnoreCase(form.jobLogging));
             scheduledJobService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -254,6 +257,9 @@ public class AdminScheduledjobAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         createScheduledJob(form).ifPresent(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setAvailable(Constants.ON.equalsIgnoreCase(form.available));
+            entity.setCrawler(Constants.ON.equalsIgnoreCase(form.crawler));
+            entity.setJobLogging(Constants.ON.equalsIgnoreCase(form.jobLogging));
             scheduledJobService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {

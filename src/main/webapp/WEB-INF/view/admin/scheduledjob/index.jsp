@@ -81,10 +81,10 @@
 															<la:message key="labels.scheduledjob_running" />
 														</c:if>
 														<c:if test="${!data.running}">
-															<c:if test="${data.available=='T'}">
+															<c:if test="${data.available}">
 																<la:message key="labels.scheduledjob_active" />
 															</c:if>
-															<c:if test="${data.available!='T'}">
+															<c:if test="${!data.available}">
 																<la:message key="labels.scheduledjob_nojob" />
 															</c:if>
 														</c:if></td>
