@@ -50,7 +50,8 @@ public class CreateForm implements Serializable {
     public String maxSize;
 
     @Required
-    public String boost;
+    // @FloatType
+    public float boost;
 
     @Required
     @Size(max = 255)
@@ -63,7 +64,7 @@ public class CreateForm implements Serializable {
     public void initialize() {
         crudMode = CrudMode.CREATE;
         maxSize = "10";
-        boost = "100.0";
+        boost = 100.0f;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
 

@@ -90,10 +90,8 @@ public class CreateForm implements Serializable {
     public Integer intervalTime;
 
     @Required
-    @Min(value = 0)
-    @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
-    public Integer boost;
+    // @FloatType
+    public float boost;
 
     @Required
     @Size(max = 5)
@@ -115,7 +113,7 @@ public class CreateForm implements Serializable {
 
     public void initialize() {
         crudMode = CrudMode.CREATE;
-        boost = 1;
+        boost = 1.0f;
         numOfThread = Constants.DEFAULT_NUM_OF_THREAD_FOR_FS;
         intervalTime = Constants.DEFAULT_INTERVAL_TIME_FOR_FS;
         sortOrder = 0;
