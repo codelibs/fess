@@ -240,7 +240,4 @@
 		<arg>"Mozilla/5.0 (compatible; Fess/" + org.codelibs.fess.Constants.FESS_VERSION + "; +http://fess.codelibs.org/bot.html)"</arg>
 	</component>
 
-	<component name="suggestHelper" class="org.codelibs.fess.helper.SuggestHelper">
-	</component>
-
 </components>

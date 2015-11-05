@@ -504,7 +504,7 @@ public class JsonApiManager extends BaseApiManager {
 
     }
 
-    protected void writeJsonResponse(final int status, final String body, final String errMsg) {
+    public static void writeJsonResponse(final int status, final String body, final String errMsg) {
         final String callback = LaRequestUtil.getRequest().getParameter("callback");
         final boolean isJsonp = StringUtil.isNotBlank(callback);
 
@@ -538,11 +538,11 @@ public class JsonApiManager extends BaseApiManager {
 
     }
 
-    protected String escapeCallbackName(final String callbackName) {
+    protected static String escapeCallbackName(final String callbackName) {
         return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
     }
 
-    protected String escapeJson(final Object obj) {
+    protected static String escapeJson(final Object obj) {
         if (obj == null) {
             return "null";
         }
@@ -583,7 +583,7 @@ public class JsonApiManager extends BaseApiManager {
         return buf.toString();
     }
 
-    protected String escapeJsonString(final String str) {
+    protected static String escapeJsonString(final String str) {
 
         final StringWriter out = new StringWriter(str.length() * 2);
         int sz;
@@ -653,7 +653,7 @@ public class JsonApiManager extends BaseApiManager {
         return out.toString();
     }
 
-    private String hex(final char ch) {
+    private static String hex(final char ch) {
         return Integer.toHexString(ch).toUpperCase();
     }
 
