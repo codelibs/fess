@@ -17,42 +17,45 @@ package org.codelibs.fess.app.web.admin.joblog;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
  * @author codelibs
  * @author Shunji Makino
  */
-public class JobLogEditForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Digits(integer=10, fraction=0)
+    @Digits(integer = 10, fraction = 0)
     public int crudMode;
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Digits(integer=19, fraction=0)
+    @Required
+    @Digits(integer = 19, fraction = 0)
     public String id;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String jobName;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String jobStatus;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String target;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String scriptType;
 
     public String scriptData;
 
     public String scriptResult;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @Required
     public String startTime;
 
-    //@DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
     public String endTime;
 
     public void initialize() {

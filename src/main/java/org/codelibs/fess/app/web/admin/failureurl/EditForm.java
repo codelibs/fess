@@ -19,11 +19,16 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 /**
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class FailureUrlEditForm implements Serializable {
+public class EditForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,12 +36,12 @@ public class FailureUrlEditForm implements Serializable {
 
     public String fileConfigName;
 
-    //@Digits(integer=10, fraction=0)
+    @Digits(integer = 10, fraction = 0)
     public String pageNumber;
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    //@Digits(integer=10, fraction=0)
+    @Digits(integer = 10, fraction = 0)
     // TODO necessary?
     public int crudMode;
 
@@ -44,29 +49,28 @@ public class FailureUrlEditForm implements Serializable {
         return pageNumber;
     }
 
-    //@Required(target = "confirmfromupdate,update,delete")
-    //@Maxbytelength(maxbytelength = 1000)
+    @Required
+    @Size(max = 1000)
     public String id;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String url;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
+    @Required
     public String threadName;
 
     public String errorName;
 
     public String errorLog;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@Digits(integer=10, fraction=0)
+    @Required
+    @Digits(integer = 10, fraction = 0)
     public String errorCount;
 
-    //@Required(target = "confirmfromcreate,create,confirmfromupdate,update,delete")
-    //@DateType(datePattern = Constants.DEFAULT_DATETIME_FORMAT)
+    @Required
     public String lastAccessTime;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String configId;
 
     public void initialize() {
