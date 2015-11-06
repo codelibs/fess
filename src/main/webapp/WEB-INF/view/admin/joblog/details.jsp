@@ -49,7 +49,7 @@
 											<la:message key="labels.joblog_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<la:message key="labels.joblog_link_confirm" />
+											<la:message key="labels.joblog_link_details" />
 										</c:if>
 									</h3>
 									<div class="btn-group pull-right">

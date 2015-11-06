@@ -41,6 +41,7 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
+import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserAgentHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
@@ -280,4 +281,7 @@ public final class ComponentUtil {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
 
+    public static SuggestHelper getSuggestHelper() {
+        return getComponent(SuggestHelper.class);
+    }
 }

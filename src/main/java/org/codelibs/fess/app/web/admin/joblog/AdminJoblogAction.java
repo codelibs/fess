@@ -15,9 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.joblog;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -25,7 +22,6 @@ import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
@@ -63,14 +59,14 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final JobLogSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final JobLogSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         jobLogPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -78,15 +74,15 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final JobLogSearchForm form) {
-        copyBeanToBean(form.searchParams, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final JobLogSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         jobLogPager.clear();
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -94,17 +90,17 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final JobLogSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final JobLogSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(jobLogPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(jobLogPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -114,69 +110,81 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletepage(final int crudMode, final String id, final JobLogEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DELETE);
-        loadJobLog(form);
-        return asHtml(path_AdminJoblog_DetailsJsp);
+    public HtmlResponse deletepage(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DELETE);
+        return asHtml(path_AdminJoblog_DetailsJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                jobLogService.getJobLog(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                });
+                form.crudMode = crudMode;
+            });
+        });
     }
 
     @Execute(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final JobLogEditForm form) {
+    public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
-        loadJobLog(form);
+        validate(form, messages -> {}, toIndexHtml());
+        String id = form.id;
+        jobLogService.getJobLog(id).ifPresent(entity -> {
+            copyBeanToBean(entity, form, op -> {});
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+        });
         return asHtml(path_AdminJoblog_DetailsJsp);
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final JobLogEditForm form) {
-        form.crudMode = crudMode;
-        form.id = id;
-        verifyCrudMode(form, CrudMode.DETAILS);
-        loadJobLog(form);
-        return asHtml(path_AdminJoblog_DetailsJsp);
+    public HtmlResponse details(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        return asHtml(path_AdminJoblog_DetailsJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                jobLogService.getJobLog(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                });
+            });
+        });
     }
 
     // -----------------------------------------------------
     //                                         Actually Crud
     //                                         -------------
     @Execute
-    public HtmlResponse delete(final JobLogEditForm form) {
-        verifyCrudMode(form, CrudMode.DELETE);
-        jobLogService.delete(getJobLog(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
+        validate(form, messages -> {}, toIndexHtml());
+        String id = form.id;
+        jobLogService.getJobLog(id).alwaysPresent(entity -> {
+            jobLogService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        });
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadJobLog(final JobLogEditForm form) {
-        copyBeanToBean(getJobLog(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected JobLog getJobLog(final JobLogEditForm form) {
-        final JobLog jobLog = jobLogService.getJobLog(createKeyMap(form));
-        return jobLog;
-    }
-
-    protected Map<String, String> createKeyMap(final JobLogEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
-    }
 
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    protected void verifyCrudMode(final JobLogEditForm form, final int expectedMode) {
-        if (form.crudMode != expectedMode) {
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
             throwValidationError(messages -> {
-                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(form.crudMode));
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
             }, toIndexHtml());
         }
     }

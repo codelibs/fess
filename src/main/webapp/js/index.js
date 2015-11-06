@@ -20,8 +20,8 @@ $(function(){
 
     $('#contentQuery').suggestor( {
         ajaxinfo: {
-            url: contextPath + '/suggest', // TODO rename
-            fn: 'keyword',
+            url: contextPath + '/suggest',
+            fn: '_default',
             num: 10
         },
         boxCssInfo: {

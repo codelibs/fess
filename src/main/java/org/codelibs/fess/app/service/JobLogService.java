@@ -29,6 +29,7 @@ import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 
 public class JobLogService implements Serializable {
 
@@ -57,17 +58,8 @@ public class JobLogService implements Serializable {
         return jobLogList;
     }
 
-    public JobLog getJobLog(final Map<String, String> keys) {
-        final JobLog jobLog = jobLogBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);//TODO
-        if (jobLog == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return jobLog;
+    public OptionalEntity<JobLog> getJobLog(final String id) {
+        return jobLogBhv.selectByPK(id);
     }
 
     public void store(final JobLog jobLog) {

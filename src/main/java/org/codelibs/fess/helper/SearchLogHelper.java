@@ -190,6 +190,8 @@ public class SearchLogHelper {
 
         if (!searchLogList.isEmpty()) {
             storeSearchLogList(searchLogList);
+            final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
+            suggestHelper.indexFromSearchLog(searchLogList);
         }
     }
 

@@ -20,11 +20,13 @@
 	<c:choose>
 		<c:when test="${crudMode == null}">
 			<la:link href="createnew" styleClass="btn btn-success btn-xs">
+				<i class="fa fa-plus"></i>
 				<la:message key="labels.web_crawling_link_create_new" />
 			</la:link>
 		</c:when>
 		<c:otherwise>
 			<la:link href="/admin/webconfig" styleClass="btn btn-primary btn-xs">
+				<i class="fa fa-th-list"></i>
 				<la:message key="labels.crud_link_list" />
 			</la:link>
 		</c:otherwise>

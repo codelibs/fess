@@ -107,6 +107,20 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+									<c:if test="${running}">
+										<button type="submit" class="btn btn-danger" name="stop"
+											value="<la:message key="labels.scheduledjob_button_stop" />">
+											<i class="fa fa-stop"></i>
+											<la:message key="labels.scheduledjob_button_stop" />
+										</button>
+									</c:if>
+									<c:if test="${!running}">
+										<button type="submit" class="btn btn-success" name="start"
+											value="<la:message key="labels.scheduledjob_button_start" />">
+											<i class="fa fa-play-circle"></i>
+											<la:message key="labels.scheduledjob_button_start" />
+										</button>
+									</c:if>
 								</div>
 								<!-- /.box-footer -->
 							</div>

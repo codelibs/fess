@@ -23,9 +23,11 @@ import java.util.Map;
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class FailureUrlSearchForm implements Serializable {
+public class SearchForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public String id;
 
     public Map<String, String> searchParams = new HashMap<String, String>();
 }

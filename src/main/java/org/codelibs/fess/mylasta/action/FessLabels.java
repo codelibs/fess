@@ -2501,8 +2501,14 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Last Access */
     public static final String LABELS_failure_url_last_access_time = "{labels.failure_url_last_access_time}";
 
-    /** The key of the message: Confirm */
-    public static final String LABELS_failure_url_link_confirm = "{labels.failure_url_link_confirm}";
+    /** The key of the message: List */
+    public static final String LABELS_failure_url_link_list = "{labels.failure_url_link_list}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_failure_url_link_details = "{labels.failure_url_link_details}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_failure_url_link_delete = "{labels.failure_url_link_delete}";
 
     /** The key of the message: Delete All */
     public static final String LABELS_failure_url_delete_all_link = "{labels.failure_url_delete_all_link}";
@@ -2517,7 +2523,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_failure_url_error_count = "{labels.failure_url_error_count}";
 
     /** The key of the message: Failure URL Details */
-    public static final String LABELS_failure_url_title_confirm = "{labels.failure_url_title_confirm}";
+    public static final String LABELS_failure_url_title_details = "{labels.failure_url_title_details}";
 
     /** The key of the message: ID */
     public static final String LABELS_failure_url_id = "{labels.failure_url_id}";
@@ -2971,11 +2977,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Job Log List */
     public static final String LABELS_joblog_title_list = "{labels.joblog_title_list}";
 
-    /** The key of the message: Delete All */
-    public static final String LABELS_joblog_delete_all_link = "{labels.joblog_delete_all_link}";
+    /** The key of the message: Delete */
+    public static final String LABELS_joblog_delete_link = "{labels.joblog_delete_link}";
 
-    /** The key of the message: Do you really want to delete all? */
-    public static final String LABELS_joblog_delete_all_confirmation = "{labels.joblog_delete_all_confirmation}";
+    /** The key of the message: Do you really want to delete? */
+    public static final String LABELS_joblog_delete_confirmation = "{labels.joblog_delete_confirmation}";
 
     /** The key of the message: Dictionary List */
     public static final String LABELS_dict_configuration = "{labels.dict_configuration}";

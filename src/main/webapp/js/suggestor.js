@@ -1,7 +1,7 @@
 ;(function($){
 
 $.fn.suggestor = function(setting) {
-	
+
 	var $boxElement;
 	var $textArea;
 	var inputText = "";
@@ -11,7 +11,7 @@ $.fn.suggestor = function(setting) {
 	var isMouseHover = false;
 	var started = false;
 	var interval = 5;
-	
+
 	var settingMinTerm = 1;
 	var settingAjaxInfo;
 	var settingAdjustWidthVal;
@@ -19,15 +19,15 @@ $.fn.suggestor = function(setting) {
 	var listSelectedCssInfo;
 	var listDeselectedCssInfo;
 	var boxCssInfo;
-	
+
 	var suggestingSts = false;
-	
+
 	var suggestor = {
 		init: function($element, setting) {
 			suggestingSts = false;
 			$boxElement = $("<div/>");
             $boxElement.addClass("suggestorBox");
-			
+
 			//style sheet
 			$boxElement.css("display","none");
 			$boxElement.css("position","absolute");
@@ -42,14 +42,14 @@ $.fn.suggestor = function(setting) {
 			} else {
 				$boxElement.css(setting.boxCssInfo);
 			}
-			
+
 			$textArea = $element;
 			$textArea.attr("autocomplete","off");
-			
+
 			isFocusList = false;
 			inputText = $textArea.val();
-			
-			
+
+
 			//設定
 			settingAjaxInfo = setting.ajaxinfo;
 			settingMinTerm = setting.minturm;
@@ -57,66 +57,71 @@ $.fn.suggestor = function(setting) {
 			listSelectedCssInfo = setting.listSelectedCssInfo;
 			listDeselectedCssInfo = setting.listDeselectedCssInfo;
 			settingAdjustWidthVal = setting.adjustWidthVal;
-			
+
 			boxCssInfo = setting.boxCssInfo;
-			
-			
+
+
 			$boxElement.hover(function() {
 				isMouseHover = true;
 			}, function() {
 				isMouseHover = false;
 			});
-			
-			
+
+
 			//ポジション設定
 			this.resize();
 			var suggestor = this;
 			$(window).resize(function() {
 				suggestor.resize();
 			});
-			
+
 			$("body").append($boxElement);
 		},
-		
+
 		suggest: function() {
 			suggestingSts = true;
-			
+
 			//ポジション設定
 			this.resize();
-			
+
 			var suggestor = this;
 			inputText = $textArea.val();
-			
+
 			listNum = 0;
 			listSelNum = 0;
-			
+
 			if(inputText.length < settingMinTerm) {
 				$boxElement.css("display","none");
 				suggestingSts = false;
 				return;
 			}
-			
-			
+
+
 			$.ajax({
 				url: settingAjaxInfo.url,
 				type:"get",
 				dataType: "jsonp",
 				cache : false,
-				data:{	q: $textArea.val(),
+				data:{	query: $textArea.val(),
 						fields: settingAjaxInfo.fn,
 						num: settingAjaxInfo.num * 2
 				}
 			}).done(function(obj) { suggestor.createAutoCompleteList(obj); }).fail(function(a,obj,b) { suggestingSts=false; return; });
-			
-		}, 
-		
-		
+
+		},
+
+
 		createAutoCompleteList: function(obj) {
-			var hits = obj.hits;
+			if(obj.response.status != 0) {
+				$boxElement.css("display","none");
+				return;
+			}
+
+			var hits = obj.response.result.hits;
 			var suggestor = this;
 			var addCount = 0;
-			
-			
+
+
 			listNum = 0;
 			if(typeof hits !== "undefined") {
 				var reslist = new Array();
@@ -127,11 +132,11 @@ $.fn.suggestor = function(setting) {
 				$olEle.css("list-style","none");
 				$olEle.css("padding","0");
 				$olEle.css("margin","2px");
-				
+
 				for(var i=0;i<reslist.length && listNum < settingAjaxInfo.num;i++) {
 					var str = reslist[i];
 					var chkCorrectWord = true;
-					
+
 					/*
 					//suggestionの子要素かチェック
 					var parentEle = $(reslist[i]).closest("arr");
@@ -141,7 +146,7 @@ $.fn.suggestor = function(setting) {
 						continue;
 					}
 					*/
-					
+
 					//すでに同じ文字が表示されてないかチェック。ゴミ抜き
 					if(str === $textArea.val()) {
 						chkCorrectWord = false;
@@ -155,7 +160,7 @@ $.fn.suggestor = function(setting) {
 							}
 						}
 					}
-					
+
 					if(chkCorrectWord) {
 						var $liEle = $("<li/>");
 						$liEle.html(str);
@@ -203,14 +208,14 @@ $.fn.suggestor = function(setting) {
 								listSelNum = 0
 							}
 						});
-						
+
 						$liEle.css("padding","2px");
-						
+
 						$olEle.append($liEle);
 						listNum++;
 					}
 				}
-				
+
 				if(listNum>0 && $textArea.val().length >= settingMinTerm) {
 					$boxElement.html("");
 					$boxElement.append($olEle);
@@ -223,15 +228,15 @@ $.fn.suggestor = function(setting) {
 			}
 			//ポジション設定
 			this.resize();
-			
+
 			suggestingSts = false;
 		},
-		
+
 		selectlist: function(direction) {
 			if($boxElement.css("display") == "none") {
 				return;
 			}
-			
+
 			if(direction == "down") {
 				listSelNum++;
 			} else if(direction == "up") {
@@ -239,15 +244,15 @@ $.fn.suggestor = function(setting) {
 			} else {
 				return;
 			}
-			
+
 			isFocusList = true;
-			
+
 			if(listSelNum < 0){
 				listSelNum = listNum;
 			} else if(listSelNum > listNum) {
 				listSelNum = 0;
 			}
-			
+
 			var a = $boxElement.children("ol").children("li");
 			$boxElement.children("ol").children("li").each(function(i){
 				if(i == (listSelNum-1)) {
@@ -272,20 +277,20 @@ $.fn.suggestor = function(setting) {
 			if(listSelNum == 0) {
 				$textArea.val(inputText);
 			}
-			
+
 		},
-		
+
 		fixList: function() {
 			if(listSelNum > 0) {
 				$textArea.val($($boxElement.children("ol").children("li").get(listSelNum-1)).html());
 			}
 			inputText = $textArea.val();
-			
+
 			isFocusList = false;
 			$boxElement.css("display","none");
 			listNum = 0;
 		},
-		
+
 		resize: function() {
 			$boxElement.css("top",$textArea.offset().top + $textArea.height() + 6);
             $boxElement.css("left",$textArea.offset().left);
@@ -296,9 +301,9 @@ $.fn.suggestor = function(setting) {
 			}
 		}
 	}
-	
+
 	suggestor.init($(this), setting);
-	
+
 	$(this).keydown( function(e){
 		if( ((e.keyCode >= 48) && (e.keyCode <= 90))
 			 || ((e.keyCode >= 96) && (e.keyCode <= 105))
@@ -324,7 +329,7 @@ $.fn.suggestor = function(setting) {
 			if(isFocusList) {
 				suggestor.fixList();
 			}
-		} 
+		}
 	});
 	$(this).keyup(  function(e){
 		if( ((e.keyCode >= 48) && (e.keyCode <= 90))
@@ -350,7 +355,7 @@ $.fn.suggestor = function(setting) {
 			suggestor.fixList();
 		}
 	});
-	
+
 	//テキストエリア監視
 	setInterval( function() {
 		if(interval < 5) {
@@ -365,6 +370,6 @@ $.fn.suggestor = function(setting) {
 			}
 		}
 	}, 100);
-	
+
 }
 })(jQuery);

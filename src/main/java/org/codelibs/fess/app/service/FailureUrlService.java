@@ -39,6 +39,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FailureUrlService implements Serializable {
@@ -71,17 +72,8 @@ public class FailureUrlService implements Serializable {
         return failureUrlList;
     }
 
-    public FailureUrl getFailureUrl(final Map<String, String> keys) {
-        final FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
-            cb.query().docMeta().setId_Equal(keys.get("id"));
-            setupEntityCondition(cb, keys);
-        }).orElse(null);
-        if (failureUrl == null) {
-            // TODO exception?
-            return null;
-        }
-
-        return failureUrl;
+    public OptionalEntity<FailureUrl> getFailureUrl(final String id) {
+        return failureUrlBhv.selectByPK(id);
     }
 
     public void store(final FailureUrl failureUrl) {

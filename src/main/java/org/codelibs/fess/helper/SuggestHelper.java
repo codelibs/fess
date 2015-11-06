@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,9 +24,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.log.exentity.SearchFieldLog;
+import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.suggest.Suggester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,32 +43,66 @@ public class SuggestHelper {
     @Resource
     protected SuggestBadWordBhv suggestBadWordBhv;
 
-    public String badwordFileDir = "./solr/core1/conf/";
+    @Resource
+    protected FessEsClient fessEsClient;
+
+    @Resource
+    protected FieldHelper fieldHelper;
+
+    public String[] contentFieldNames = { "_default" };
+
+    public String[] tagFieldNames = { "label" };
+
+    public String[] roleFieldNames = { "role" };
+
+    private static final String TEXT_SEP = " ";
+
+    protected Suggester suggester;
 
     @PostConstruct
     public void init() {
         final Thread th = new Thread(() -> {
-            // TODO replace with Elasticsearch
-                /*
-                while (true) {
-                    final PingResponse response = searchService.ping();
-                    final int status = response.getStatus();
-                    if (status == 0) {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Solr server was availabled. Refresh suggest words.");
-                        }
-                        refreshWords();
-                        break;
-                    }
-                    try {
-                        Thread.sleep(1 * 1000);
-                    } catch (final InterruptedException e) {
-                        //ignore
-                    }
-                }
-                */
-            });
+            fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+            suggester = Suggester.builder().build(fessEsClient, fieldHelper.docIndex);
+            suggester.createIndexIfNothing();
+        });
         th.start();
+    }
+
+    public Suggester suggester() {
+        return suggester;
+    }
+
+    public void indexFromSearchLog(final List<SearchLog> searchLogList) {
+        for (final SearchLog searchLog : searchLogList) {
+            // TODO if(getHitCount == 0) continue;
+
+            final StringBuilder sb = new StringBuilder();
+            final List<String> fields = new ArrayList<>();
+            final List<String> tags = new ArrayList<>();
+            final List<String> roles = new ArrayList<>();
+
+            for (final SearchFieldLog searchFieldLog : searchLog.getSearchFieldLogList()) {
+                final String name = searchFieldLog.getName();
+                if (isContentField(name)) {
+                    if (sb.length() > 0) {
+                        sb.append(TEXT_SEP);
+                    }
+                    sb.append(searchFieldLog.getValue());
+                    fields.add(name);
+                } else if (isTagField(name)) {
+                    tags.add(searchFieldLog.getValue());
+                } else if (isRoleField(name)) {
+                    roles.add(searchFieldLog.getValue());
+                }
+            }
+
+            if (sb.length() > 0) {
+                suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
+                        tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
+            }
+        }
+        suggester.refresh();
     }
 
     public void refreshWords() {
@@ -143,6 +180,7 @@ public class SuggestHelper {
         //        suggestService.commit();
     }
 
+    /*
     public void updateSolrBadwordFile() {
         suggestBadWordBhv.selectList(cb -> {
             cb.query().matchAll();
@@ -178,5 +216,33 @@ public class SuggestHelper {
         //                }
         //            }
         //        }
+    }
+    */
+
+    protected boolean isContentField(final String field) {
+        for (final String contentField : contentFieldNames) {
+            if (contentField.equals(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean isTagField(final String field) {
+        for (final String tagField : tagFieldNames) {
+            if (tagField.equals(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean isRoleField(final String field) {
+        for (final String roleField : roleFieldNames) {
+            if (roleField.equals(field)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -290,7 +290,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, toEditHtml());
         kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             kuromojiService.delete(form.dictId, entity);

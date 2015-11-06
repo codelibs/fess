@@ -13,10 +13,7 @@
 			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="failureUrl" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.failure_url_configuration" />
@@ -78,6 +75,7 @@
 										<div class="col-sm-offset-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" name="search"
 												value="<la:message key="labels.crud_button_search" />">
+												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
 											</button>
 											<button type="reset" class="btn btn-secondary" name="reset"
@@ -101,7 +99,7 @@
 									<c:if test="${failureUrlPager.allRecordCount > 0}">
 										<div class="row">
 											<div class="col-sm-12">
-												<table class="bordered-table zebra-striped dataTable">
+												<table class="table table-bordered table-striped dataTable">
 													<thead>
 														<tr>
 															<th><la:message key="labels.failure_url_url" /></th>
@@ -112,15 +110,12 @@
 													<tbody>
 														<c:forEach var="data" varStatus="s"
 															items="${failureUrlItems}">
-															<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
-																<td><div style="width: 380px; overflow-x: auto;">${f:h(data.url)}</div></td>
-																<td>${f:h(data.lastAccessTimeForList)}</td>
-																<td style="overflow-x: auto;"><la:link
-																		href="details/4/${f:u(data.id)}">
-																		<la:message key="labels.failure_url_link_confirm" />
-																	</la:link> <la:link href="deletepage/3/${f:u(data.id)}">
-																		<la:message key="labels.crud_link_delete" />
-																	</la:link></td>
+															<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+																data-href="details/4/${f:u(data.id)}">
+																<td>${f:h(data.url)}</td>
+																<td><fmt:formatDate
+																		value="${fe:date(data.lastAccessTime)}"
+																		pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
 															</tr>
 														</c:forEach>
 													</tbody>
@@ -219,7 +214,6 @@
 				</div>
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

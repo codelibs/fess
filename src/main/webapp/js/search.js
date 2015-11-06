@@ -173,8 +173,8 @@ $(function(){
 
     $('#query').suggestor( {
         ajaxinfo: {
-            url: contextPath + '/json',
-            fn: 'content',
+            url: contextPath + '/suggest',
+            fn: '_default',
             num: 10
         },
         boxCssInfo: {

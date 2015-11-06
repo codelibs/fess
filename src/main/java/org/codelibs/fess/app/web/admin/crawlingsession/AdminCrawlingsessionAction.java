@@ -137,10 +137,10 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id) {
+    public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         return asHtml(path_AdminCrawlingsession_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
@@ -163,7 +163,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                         -------------
     @Execute
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, toIndexHtml());
         final String id = form.id;
         crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {

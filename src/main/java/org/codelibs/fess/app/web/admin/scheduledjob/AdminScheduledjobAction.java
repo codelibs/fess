@@ -200,7 +200,7 @@ public class AdminScheduledjobAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, toEditHtml());
         final String id = form.id;
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
