@@ -79,7 +79,6 @@ public class RoleDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((Role) et).getId(), (et, vl) -> ((Role) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((Role) et).getName(), (et, vl) -> ((Role) et).setName(DfTypeUtil.toString(vl)), "name");
     }
 
@@ -117,14 +116,8 @@ public class RoleDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
 
     public ColumnInfo columnName() {
         return _columnName;
@@ -132,7 +125,6 @@ public class RoleDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnId());
         ls.add(columnName());
         return ls;
     }

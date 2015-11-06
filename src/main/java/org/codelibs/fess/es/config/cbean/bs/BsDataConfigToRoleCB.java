@@ -154,12 +154,12 @@ public class BsDataConfigToRoleCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
-        public void columnDataConfigId() {
-            doColumn("dataConfigId");
+        public void columnId() {
+            doColumn("_id");
         }
 
-        public void columnId() {
-            doColumn("id");
+        public void columnDataConfigId() {
+            doColumn("dataConfigId");
         }
 
         public void columnRoleTypeId() {

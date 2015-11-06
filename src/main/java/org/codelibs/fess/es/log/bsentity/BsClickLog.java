@@ -28,18 +28,11 @@ import org.codelibs.fess.es.log.bsentity.dbmeta.ClickLogDbm;
  */
 public class BsClickLog extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public ClickLogDbm asDBMeta() {
-        return ClickLogDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "click_log";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -56,18 +49,55 @@ public class BsClickLog extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public ClickLogDbm asDBMeta() {
+        return ClickLogDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "click_log";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (requestedTime != null) {
+            sourceMap.put("requestedTime", requestedTime);
+        }
+        if (searchLogId != null) {
+            sourceMap.put("searchLogId", searchLogId);
+        }
+        if (url != null) {
+            sourceMap.put("url", url);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(requestedTime);
+        sb.append(dm).append(searchLogId);
+        sb.append(dm).append(url);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public Long getRequestedTime() {
         checkSpecifiedProperty("requestedTime");
         return requestedTime;
@@ -80,7 +110,7 @@ public class BsClickLog extends EsAbstractEntity {
 
     public String getSearchLogId() {
         checkSpecifiedProperty("searchLogId");
-        return searchLogId;
+        return convertEmptyToNull(searchLogId);
     }
 
     public void setSearchLogId(String value) {
@@ -90,29 +120,11 @@ public class BsClickLog extends EsAbstractEntity {
 
     public String getUrl() {
         checkSpecifiedProperty("url");
-        return url;
+        return convertEmptyToNull(url);
     }
 
     public void setUrl(String value) {
         registerModifiedProperty("url");
         this.url = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (requestedTime != null) {
-            sourceMap.put("requestedTime", requestedTime);
-        }
-        if (searchLogId != null) {
-            sourceMap.put("searchLogId", searchLogId);
-        }
-        if (url != null) {
-            sourceMap.put("url", url);
-        }
-        return sourceMap;
     }
 }

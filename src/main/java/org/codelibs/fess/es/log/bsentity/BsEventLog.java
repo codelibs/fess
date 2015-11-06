@@ -28,18 +28,11 @@ import org.codelibs.fess.es.log.bsentity.dbmeta.EventLogDbm;
  */
 public class BsEventLog extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public EventLogDbm asDBMeta() {
-        return EventLogDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "event_log";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -62,6 +55,61 @@ public class BsEventLog extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public EventLogDbm asDBMeta() {
+        return EventLogDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "event_log";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (createdAt != null) {
+            sourceMap.put("createdAt", createdAt);
+        }
+        if (createdBy != null) {
+            sourceMap.put("createdBy", createdBy);
+        }
+        if (eventType != null) {
+            sourceMap.put("eventType", eventType);
+        }
+        if (message != null) {
+            sourceMap.put("message", message);
+        }
+        if (path != null) {
+            sourceMap.put("path", path);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdAt);
+        sb.append(dm).append(createdBy);
+        sb.append(dm).append(eventType);
+        sb.append(dm).append(message);
+        sb.append(dm).append(path);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
     public LocalDateTime getCreatedAt() {
@@ -76,7 +124,7 @@ public class BsEventLog extends EsAbstractEntity {
 
     public String getCreatedBy() {
         checkSpecifiedProperty("createdBy");
-        return createdBy;
+        return convertEmptyToNull(createdBy);
     }
 
     public void setCreatedBy(String value) {
@@ -86,7 +134,7 @@ public class BsEventLog extends EsAbstractEntity {
 
     public String getEventType() {
         checkSpecifiedProperty("eventType");
-        return eventType;
+        return convertEmptyToNull(eventType);
     }
 
     public void setEventType(String value) {
@@ -94,19 +142,9 @@ public class BsEventLog extends EsAbstractEntity {
         this.eventType = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getMessage() {
         checkSpecifiedProperty("message");
-        return message;
+        return convertEmptyToNull(message);
     }
 
     public void setMessage(String value) {
@@ -116,35 +154,11 @@ public class BsEventLog extends EsAbstractEntity {
 
     public String getPath() {
         checkSpecifiedProperty("path");
-        return path;
+        return convertEmptyToNull(path);
     }
 
     public void setPath(String value) {
         registerModifiedProperty("path");
         this.path = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (createdAt != null) {
-            sourceMap.put("createdAt", createdAt);
-        }
-        if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
-        }
-        if (eventType != null) {
-            sourceMap.put("eventType", eventType);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (message != null) {
-            sourceMap.put("message", message);
-        }
-        if (path != null) {
-            sourceMap.put("path", path);
-        }
-        return sourceMap;
     }
 }

@@ -19,14 +19,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.log.cbean.cf.EventLogCF;
 import org.codelibs.fess.es.log.cbean.cq.EventLogCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -54,16 +56,29 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<EventLogCQ, EventLogCF> filteredLambda) {
+    public void filtered(FilteredCall<EventLogCQ, EventLogCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<EventLogCQ, EventLogCF> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
-        EventLogCQ query = new EventLogCQ();
-        EventLogCF filter = new EventLogCF();
-        filteredLambda.callback(query, filter);
-        if (query.hasQueries()) {
-            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
+    public void filtered(FilteredCall<EventLogCQ, EventLogCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> {
+            filteredLambda.callback(must, filter);
+        }, opLambda);
+    }
+
+    public void not(OperatorCall<EventLogCQ> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<EventLogCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        EventLogCQ notQuery = new EventLogCQ();
+        notLambda.callback(notQuery);
+        if (notQuery.hasQueries()) {
+            if (notQuery.queryBuilderList.size() > 1) {
+                final String msg = "not query must be one query.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.queryBuilderList.get(0));
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -78,9 +93,12 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
         EventLogCQ mustQuery = new EventLogCQ();
         EventLogCQ shouldQuery = new EventLogCQ();
         EventLogCQ mustNotQuery = new EventLogCQ();
-        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
-            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        EventLogCQ filterQuery = new EventLogCQ();
+        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
+            BoolQueryBuilder builder =
+                    regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList,
+                            filterQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -90,6 +108,73 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                           Query Set
     //                                                                           =========
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
+    public void setId_Term(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("_id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Terms(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        IdsQueryBuilder builder = regIdsQ(idList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_InScope(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_InScope(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        setId_Terms(idList, opLambda);
+    }
+
+    public BsEventLogCQ addOrderBy_Id_Asc() {
+        regOBA("_id");
+        return this;
+    }
+
+    public BsEventLogCQ addOrderBy_Id_Desc() {
+        regOBD("_id");
+        return this;
+    }
+
     public void setCreatedAt_Equal(LocalDateTime createdAt) {
         setCreatedAt_Term(createdAt, null);
     }
@@ -104,6 +189,25 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
 
     public void setCreatedAt_Term(LocalDateTime createdAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("createdAt", createdAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
+    }
+
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedAt_NotTerm(createdAt, opLambda);
+    }
+
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
+    }
+
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdAt", createdAt));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -240,6 +344,25 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Term(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedBy_NotTerm(createdBy, opLambda);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdBy", createdBy));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -392,6 +515,25 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setEventType_NotEqual(String eventType) {
+        setEventType_NotTerm(eventType, null);
+    }
+
+    public void setEventType_NotEqual(String eventType, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setEventType_NotTerm(eventType, opLambda);
+    }
+
+    public void setEventType_NotTerm(String eventType) {
+        setEventType_NotTerm(eventType, null);
+    }
+
+    public void setEventType_NotTerm(String eventType, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("eventType", eventType));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setEventType_Terms(Collection<String> eventTypeList) {
         setEventType_Terms(eventTypeList, null);
     }
@@ -520,153 +662,6 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setId_Equal(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setId_Term(id, opLambda);
-    }
-
-    public void setId_Term(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Terms(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("id", idList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_InScope(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_Terms(idList, opLambda);
-    }
-
-    public void setId_Match(String id) {
-        setId_Match(id, null);
-    }
-
-    public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrase(String id) {
-        setId_MatchPhrase(id, null);
-    }
-
-    public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrasePrefix(String id) {
-        setId_MatchPhrasePrefix(id, null);
-    }
-
-    public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Fuzzy(String id) {
-        setId_Fuzzy(id, null);
-    }
-
-    public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Prefix(String id) {
-        setId_Prefix(id, null);
-    }
-
-    public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterThan(String id) {
-        setId_GreaterThan(id, null);
-    }
-
-    public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessThan(String id) {
-        setId_LessThan(id, null);
-    }
-
-    public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterEqual(String id) {
-        setId_GreaterEqual(id, null);
-    }
-
-    public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessEqual(String id) {
-        setId_LessEqual(id, null);
-    }
-
-    public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsEventLogCQ addOrderBy_Id_Asc() {
-        regOBA("id");
-        return this;
-    }
-
-    public BsEventLogCQ addOrderBy_Id_Desc() {
-        regOBD("id");
-        return this;
-    }
-
     public void setMessage_Equal(String message) {
         setMessage_Term(message, null);
     }
@@ -681,6 +676,25 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
 
     public void setMessage_Term(String message, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("message", message);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMessage_NotEqual(String message) {
+        setMessage_NotTerm(message, null);
+    }
+
+    public void setMessage_NotEqual(String message, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setMessage_NotTerm(message, opLambda);
+    }
+
+    public void setMessage_NotTerm(String message) {
+        setMessage_NotTerm(message, null);
+    }
+
+    public void setMessage_NotTerm(String message, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("message", message));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -828,6 +842,25 @@ public abstract class BsEventLogCQ extends EsAbstractConditionQuery {
 
     public void setPath_Term(String path, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("path", path);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPath_NotEqual(String path) {
+        setPath_NotTerm(path, null);
+    }
+
+    public void setPath_NotEqual(String path, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPath_NotTerm(path, opLambda);
+    }
+
+    public void setPath_NotTerm(String path) {
+        setPath_NotTerm(path, null);
+    }
+
+    public void setPath_NotTerm(String path, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("path", path));
         if (opLambda != null) {
             opLambda.callback(builder);
         }

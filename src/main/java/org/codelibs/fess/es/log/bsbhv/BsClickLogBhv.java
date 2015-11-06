@@ -74,7 +74,6 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
     protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setRequestedTime(DfTypeUtil.toLong(source.get("requestedTime")));
             result.setSearchLogId(DfTypeUtil.toString(source.get("searchLogId")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));

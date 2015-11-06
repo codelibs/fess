@@ -77,7 +77,6 @@ public abstract class BsEventLogBhv extends EsAbstractBehavior<EventLog, EventLo
             result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setEventType(DfTypeUtil.toString(source.get("eventType")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setMessage(DfTypeUtil.toString(source.get("message")));
             result.setPath(DfTypeUtil.toString(source.get("path")));
             return result;

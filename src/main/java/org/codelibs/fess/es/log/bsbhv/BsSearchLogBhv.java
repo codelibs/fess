@@ -77,7 +77,6 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
             result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
             result.setClientIp(DfTypeUtil.toString(source.get("clientIp")));
             result.setHitCount(DfTypeUtil.toLong(source.get("hitCount")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
             result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
             result.setReferer(DfTypeUtil.toString(source.get("referer")));

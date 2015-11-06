@@ -155,7 +155,7 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
         }
 
         public void columnId() {
-            doColumn("id");
+            doColumn("_id");
         }
 
         public void columnName() {

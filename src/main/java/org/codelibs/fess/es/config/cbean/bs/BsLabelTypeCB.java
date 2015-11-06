@@ -154,6 +154,10 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
@@ -164,10 +168,6 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
 
         public void columnExcludedPaths() {
             doColumn("excludedPaths");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnIncludedPaths() {

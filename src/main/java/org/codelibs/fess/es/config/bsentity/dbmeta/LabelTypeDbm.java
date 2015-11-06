@@ -85,7 +85,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
                 "createdTime");
         setupEpg(_epgMap, et -> ((LabelType) et).getExcludedPaths(),
                 (et, vl) -> ((LabelType) et).setExcludedPaths(DfTypeUtil.toString(vl)), "excludedPaths");
-        setupEpg(_epgMap, et -> ((LabelType) et).getId(), (et, vl) -> ((LabelType) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((LabelType) et).getIncludedPaths(),
                 (et, vl) -> ((LabelType) et).setIncludedPaths(DfTypeUtil.toString(vl)), "includedPaths");
         setupEpg(_epgMap, et -> ((LabelType) et).getName(), (et, vl) -> ((LabelType) et).setName(DfTypeUtil.toString(vl)), "name");
@@ -138,8 +137,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
@@ -163,10 +160,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
 
     public ColumnInfo columnExcludedPaths() {
         return _columnExcludedPaths;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnIncludedPaths() {
@@ -198,7 +191,6 @@ public class LabelTypeDbm extends AbstractDBMeta {
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
         ls.add(columnExcludedPaths());
-        ls.add(columnId());
         ls.add(columnIncludedPaths());
         ls.add(columnName());
         ls.add(columnSortOrder());

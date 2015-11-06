@@ -76,7 +76,6 @@ public abstract class BsUserInfoBhv extends EsAbstractBehavior<UserInfo, UserInf
             final RESULT result = entityType.newInstance();
             result.setCode(DfTypeUtil.toString(source.get("code")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

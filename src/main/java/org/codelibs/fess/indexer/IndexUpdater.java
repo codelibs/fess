@@ -47,7 +47,6 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -169,13 +168,11 @@ public class IndexUpdater extends Thread {
             final Consumer<SearchRequestBuilder> cb =
                     builder -> {
                         final QueryBuilder queryBuilder =
-                                QueryBuilders.filteredQuery(
-                                        QueryBuilders.matchAllQuery(),
-                                        FilterBuilders
-                                                .boolFilter()
-                                                .must(FilterBuilders.termsFilter(EsAccessResult.SESSION_ID, sessionIdList))
-                                                .must(FilterBuilders.termFilter(EsAccessResult.STATUS,
-                                                        org.codelibs.fess.crawler.Constants.OK_STATUS)));
+                                QueryBuilders
+                                        .boolQuery()
+                                        .filter(QueryBuilders.termQuery(EsAccessResult.SESSION_ID, sessionIdList))
+                                        .filter(QueryBuilders.termQuery(EsAccessResult.STATUS,
+                                                org.codelibs.fess.crawler.Constants.OK_STATUS));
                         builder.setQuery(queryBuilder);
                         builder.setFrom(0);
                         if (maxDocumentCacheSize <= 0) {

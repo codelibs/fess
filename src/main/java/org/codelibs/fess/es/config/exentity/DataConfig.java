@@ -382,7 +382,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

@@ -31,4 +31,13 @@ public class Group extends BsGroup {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    public String getId() {
+        return asDocMeta().id();
+    }
+
+    public void setId(String id) {
+        asDocMeta().id(id);
+    }
+
 }

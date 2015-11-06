@@ -75,7 +75,6 @@ public abstract class BsDataConfigToLabelBhv extends EsAbstractBehavior<DataConf
         try {
             final RESULT result = entityType.newInstance();
             result.setDataConfigId(DfTypeUtil.toString(source.get("dataConfigId")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

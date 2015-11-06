@@ -83,7 +83,6 @@ public class RoleTypeDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((RoleType) et).getCreatedTime(), (et, vl) -> ((RoleType) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((RoleType) et).getId(), (et, vl) -> ((RoleType) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((RoleType) et).getName(), (et, vl) -> ((RoleType) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((RoleType) et).getSortOrder(), (et, vl) -> ((RoleType) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
@@ -132,8 +131,6 @@ public class RoleTypeDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
@@ -151,10 +148,6 @@ public class RoleTypeDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnName() {
@@ -181,7 +174,6 @@ public class RoleTypeDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnName());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());

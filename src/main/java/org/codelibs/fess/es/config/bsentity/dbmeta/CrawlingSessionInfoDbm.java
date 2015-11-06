@@ -83,8 +83,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
                 (et, vl) -> ((CrawlingSessionInfo) et).setCrawlingSessionId(DfTypeUtil.toString(vl)), "crawlingSessionId");
         setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getCreatedTime(),
                 (et, vl) -> ((CrawlingSessionInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getId(), (et, vl) -> ((CrawlingSessionInfo) et).setId(DfTypeUtil.toString(vl)),
-                "id");
         setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getKey(),
                 (et, vl) -> ((CrawlingSessionInfo) et).setKey(DfTypeUtil.toString(vl)), "key");
         setupEpg(_epgMap, et -> ((CrawlingSessionInfo) et).getValue(),
@@ -129,8 +127,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
             "crawlingSessionId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
@@ -142,10 +138,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnKey() {
@@ -160,7 +152,6 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCrawlingSessionId());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnKey());
         ls.add(columnValue());
         return ls;

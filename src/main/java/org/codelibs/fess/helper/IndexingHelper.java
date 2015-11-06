@@ -22,7 +22,6 @@ import java.util.Map;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.count.CountResponse;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
@@ -69,8 +68,8 @@ public class IndexingHelper {
             }
 
             final QueryBuilder queryBuilder =
-                    QueryBuilders.filteredQuery(QueryBuilders.termQuery(fieldHelper.urlField, inputDoc.get(fieldHelper.urlField)),
-                            FilterBuilders.termFilter(fieldHelper.configIdField, configIdValue));
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.urlField, inputDoc.get(fieldHelper.urlField)))
+                            .filter(QueryBuilders.termQuery(fieldHelper.configIdField, configIdValue));
 
             final List<Map<String, Object>> docs =
                     getDocumentListByQuery(fessEsClient, queryBuilder, new String[] { fieldHelper.idField, fieldHelper.docIdField });

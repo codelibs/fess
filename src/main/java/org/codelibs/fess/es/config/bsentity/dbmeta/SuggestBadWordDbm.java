@@ -83,7 +83,6 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
                 (et, vl) -> ((SuggestBadWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((SuggestBadWord) et).getCreatedTime(),
                 (et, vl) -> ((SuggestBadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getId(), (et, vl) -> ((SuggestBadWord) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((SuggestBadWord) et).getSuggestWord(),
                 (et, vl) -> ((SuggestBadWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
         setupEpg(_epgMap, et -> ((SuggestBadWord) et).getTargetLabel(),
@@ -134,8 +133,6 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
@@ -153,10 +150,6 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnSuggestWord() {
@@ -183,7 +176,6 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnSuggestWord());
         ls.add(columnTargetLabel());
         ls.add(columnTargetRole());

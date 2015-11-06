@@ -76,7 +76,6 @@ public abstract class BsCrawlingSessionInfoBhv extends EsAbstractBehavior<Crawli
             final RESULT result = entityType.newInstance();
             result.setCrawlingSessionId(DfTypeUtil.toString(source.get("crawlingSessionId")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setKey(DfTypeUtil.toString(source.get("key")));
             result.setValue(DfTypeUtil.toString(source.get("value")));
             return result;

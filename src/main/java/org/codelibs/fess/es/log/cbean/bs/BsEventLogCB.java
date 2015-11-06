@@ -154,6 +154,10 @@ public class BsEventLogCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnCreatedAt() {
             doColumn("createdAt");
         }
@@ -164,10 +168,6 @@ public class BsEventLogCB extends EsAbstractConditionBean {
 
         public void columnEventType() {
             doColumn("eventType");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnMessage() {

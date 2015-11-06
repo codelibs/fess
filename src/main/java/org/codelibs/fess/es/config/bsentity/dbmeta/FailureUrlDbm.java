@@ -87,7 +87,6 @@ public class FailureUrlDbm extends AbstractDBMeta {
                 "errorLog");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getErrorName(), (et, vl) -> ((FailureUrl) et).setErrorName(DfTypeUtil.toString(vl)),
                 "errorName");
-        setupEpg(_epgMap, et -> ((FailureUrl) et).getId(), (et, vl) -> ((FailureUrl) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getLastAccessTime(),
                 (et, vl) -> ((FailureUrl) et).setLastAccessTime(DfTypeUtil.toLong(vl)), "lastAccessTime");
         setupEpg(_epgMap, et -> ((FailureUrl) et).getThreadName(), (et, vl) -> ((FailureUrl) et).setThreadName(DfTypeUtil.toString(vl)),
@@ -137,8 +136,6 @@ public class FailureUrlDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnErrorName = cci("errorName", "errorName", null, null, String.class, "errorName", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLastAccessTime = cci("lastAccessTime", "lastAccessTime", null, null, Long.class, "lastAccessTime",
             null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnThreadName = cci("threadName", "threadName", null, null, String.class, "threadName", null, false,
@@ -162,10 +159,6 @@ public class FailureUrlDbm extends AbstractDBMeta {
         return _columnErrorName;
     }
 
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
-
     public ColumnInfo columnLastAccessTime() {
         return _columnLastAccessTime;
     }
@@ -184,7 +177,6 @@ public class FailureUrlDbm extends AbstractDBMeta {
         ls.add(columnErrorCount());
         ls.add(columnErrorLog());
         ls.add(columnErrorName());
-        ls.add(columnId());
         ls.add(columnLastAccessTime());
         ls.add(columnThreadName());
         ls.add(columnUrl());

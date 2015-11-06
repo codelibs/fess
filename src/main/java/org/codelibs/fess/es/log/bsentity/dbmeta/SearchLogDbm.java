@@ -84,7 +84,6 @@ public class SearchLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
                 "clientIp");
         setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getId(), (et, vl) -> ((SearchLog) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((SearchLog) et).getQueryOffset(), (et, vl) -> ((SearchLog) et).setQueryOffset(DfTypeUtil.toInteger(vl)),
                 "queryOffset");
         setupEpg(_epgMap, et -> ((SearchLog) et).getQueryPageSize(),
@@ -144,8 +143,6 @@ public class SearchLogDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHitCount = cci("hitCount", "hitCount", null, null, Long.class, "hitCount", null, false, false, false,
             "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryOffset = cci("queryOffset", "queryOffset", null, null, Integer.class, "queryOffset", null,
             false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryPageSize = cci("queryPageSize", "queryPageSize", null, null, Integer.class, "queryPageSize",
@@ -175,10 +172,6 @@ public class SearchLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnHitCount() {
         return _columnHitCount;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnQueryOffset() {
@@ -222,7 +215,6 @@ public class SearchLogDbm extends AbstractDBMeta {
         ls.add(columnAccessType());
         ls.add(columnClientIp());
         ls.add(columnHitCount());
-        ls.add(columnId());
         ls.add(columnQueryOffset());
         ls.add(columnQueryPageSize());
         ls.add(columnReferer());

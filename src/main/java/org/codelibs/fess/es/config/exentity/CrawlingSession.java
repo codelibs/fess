@@ -35,12 +35,10 @@ public class CrawlingSession extends BsCrawlingSession {
         setSessionId(sessionId);
     }
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

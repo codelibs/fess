@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.LabelTypeDbm;
  */
 public class BsLabelType extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public LabelTypeDbm asDBMeta() {
-        return LabelTypeDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "label_type";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -74,108 +67,21 @@ public class BsLabelType extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
-    //                                                                            Accessor
-    //                                                                            ========
-    public String getCreatedBy() {
-        checkSpecifiedProperty("createdBy");
-        return createdBy;
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public LabelTypeDbm asDBMeta() {
+        return LabelTypeDbm.getInstance();
     }
 
-    public void setCreatedBy(String value) {
-        registerModifiedProperty("createdBy");
-        this.createdBy = value;
+    @Override
+    public String asTableDbName() {
+        return "label_type";
     }
 
-    public Long getCreatedTime() {
-        checkSpecifiedProperty("createdTime");
-        return createdTime;
-    }
-
-    public void setCreatedTime(Long value) {
-        registerModifiedProperty("createdTime");
-        this.createdTime = value;
-    }
-
-    public String getExcludedPaths() {
-        checkSpecifiedProperty("excludedPaths");
-        return excludedPaths;
-    }
-
-    public void setExcludedPaths(String value) {
-        registerModifiedProperty("excludedPaths");
-        this.excludedPaths = value;
-    }
-
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
-    public String getIncludedPaths() {
-        checkSpecifiedProperty("includedPaths");
-        return includedPaths;
-    }
-
-    public void setIncludedPaths(String value) {
-        registerModifiedProperty("includedPaths");
-        this.includedPaths = value;
-    }
-
-    public String getName() {
-        checkSpecifiedProperty("name");
-        return name;
-    }
-
-    public void setName(String value) {
-        registerModifiedProperty("name");
-        this.name = value;
-    }
-
-    public Integer getSortOrder() {
-        checkSpecifiedProperty("sortOrder");
-        return sortOrder;
-    }
-
-    public void setSortOrder(Integer value) {
-        registerModifiedProperty("sortOrder");
-        this.sortOrder = value;
-    }
-
-    public String getUpdatedBy() {
-        checkSpecifiedProperty("updatedBy");
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String value) {
-        registerModifiedProperty("updatedBy");
-        this.updatedBy = value;
-    }
-
-    public Long getUpdatedTime() {
-        checkSpecifiedProperty("updatedTime");
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(Long value) {
-        registerModifiedProperty("updatedTime");
-        this.updatedTime = value;
-    }
-
-    public String getValue() {
-        checkSpecifiedProperty("value");
-        return value;
-    }
-
-    public void setValue(String value) {
-        registerModifiedProperty("value");
-        this.value = value;
-    }
-
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
@@ -187,9 +93,6 @@ public class BsLabelType extends EsAbstractEntity {
         }
         if (excludedPaths != null) {
             sourceMap.put("excludedPaths", excludedPaths);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
         }
         if (includedPaths != null) {
             sourceMap.put("includedPaths", includedPaths);
@@ -210,5 +113,120 @@ public class BsLabelType extends EsAbstractEntity {
             sourceMap.put("value", value);
         }
         return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdBy);
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(excludedPaths);
+        sb.append(dm).append(includedPaths);
+        sb.append(dm).append(name);
+        sb.append(dm).append(sortOrder);
+        sb.append(dm).append(updatedBy);
+        sb.append(dm).append(updatedTime);
+        sb.append(dm).append(value);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
+    //                                                                            Accessor
+    //                                                                            ========
+    public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
+        return convertEmptyToNull(createdBy);
+    }
+
+    public void setCreatedBy(String value) {
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
+    }
+
+    public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
+        return createdTime;
+    }
+
+    public void setCreatedTime(Long value) {
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
+    }
+
+    public String getExcludedPaths() {
+        checkSpecifiedProperty("excludedPaths");
+        return convertEmptyToNull(excludedPaths);
+    }
+
+    public void setExcludedPaths(String value) {
+        registerModifiedProperty("excludedPaths");
+        this.excludedPaths = value;
+    }
+
+    public String getIncludedPaths() {
+        checkSpecifiedProperty("includedPaths");
+        return convertEmptyToNull(includedPaths);
+    }
+
+    public void setIncludedPaths(String value) {
+        registerModifiedProperty("includedPaths");
+        this.includedPaths = value;
+    }
+
+    public String getName() {
+        checkSpecifiedProperty("name");
+        return convertEmptyToNull(name);
+    }
+
+    public void setName(String value) {
+        registerModifiedProperty("name");
+        this.name = value;
+    }
+
+    public Integer getSortOrder() {
+        checkSpecifiedProperty("sortOrder");
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer value) {
+        registerModifiedProperty("sortOrder");
+        this.sortOrder = value;
+    }
+
+    public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
+        return convertEmptyToNull(updatedBy);
+    }
+
+    public void setUpdatedBy(String value) {
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
+    }
+
+    public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(Long value) {
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
+    }
+
+    public String getValue() {
+        checkSpecifiedProperty("value");
+        return convertEmptyToNull(value);
+    }
+
+    public void setValue(String value) {
+        registerModifiedProperty("value");
+        this.value = value;
     }
 }

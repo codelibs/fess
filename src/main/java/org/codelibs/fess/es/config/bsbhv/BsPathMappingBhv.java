@@ -76,7 +76,6 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setProcessType(DfTypeUtil.toString(source.get("processType")));
             result.setRegex(DfTypeUtil.toString(source.get("regex")));
             result.setReplacement(DfTypeUtil.toString(source.get("replacement")));

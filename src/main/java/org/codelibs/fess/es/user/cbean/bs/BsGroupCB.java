@@ -155,7 +155,7 @@ public class BsGroupCB extends EsAbstractConditionBean {
         }
 
         public void columnId() {
-            doColumn("id");
+            doColumn("_id");
         }
 
         public void columnName() {

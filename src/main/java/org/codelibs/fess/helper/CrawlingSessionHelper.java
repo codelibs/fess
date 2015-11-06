@@ -165,7 +165,7 @@ public class CrawlingSessionHelper implements Serializable {
                         final Terms terms = response.getAggregations().get(fieldHelper.segmentField);
                         for (final Bucket bucket : terms.getBuckets()) {
                             final Map<String, String> map = new HashMap<String, String>(2);
-                            map.put(fieldHelper.segmentField, bucket.getKey());
+                            map.put(fieldHelper.segmentField, bucket.getKey().toString());
                             map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
                             sessionIdList.add(map);
                         }

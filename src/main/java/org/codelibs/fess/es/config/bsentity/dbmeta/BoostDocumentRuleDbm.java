@@ -85,7 +85,6 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
                 (et, vl) -> ((BoostDocumentRule) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getCreatedTime(),
                 (et, vl) -> ((BoostDocumentRule) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getId(), (et, vl) -> ((BoostDocumentRule) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getSortOrder(),
                 (et, vl) -> ((BoostDocumentRule) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
         setupEpg(_epgMap, et -> ((BoostDocumentRule) et).getUpdatedBy(),
@@ -136,8 +135,6 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -157,10 +154,6 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnSortOrder() {
@@ -184,7 +177,6 @@ public class BoostDocumentRuleDbm extends AbstractDBMeta {
         ls.add(columnBoostExpr());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

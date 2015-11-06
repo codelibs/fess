@@ -81,7 +81,6 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedTime(), (et, vl) -> ((FavoriteLog) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((FavoriteLog) et).getId(), (et, vl) -> ((FavoriteLog) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUserInfoId(), (et, vl) -> ((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
                 "userInfoId");
@@ -123,8 +122,6 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
@@ -132,10 +129,6 @@ public class FavoriteLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnUrl() {
@@ -149,7 +142,6 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnUrl());
         ls.add(columnUserInfoId());
         return ls;

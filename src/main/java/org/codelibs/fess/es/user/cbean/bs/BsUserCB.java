@@ -154,12 +154,12 @@ public class BsUserCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
-        public void columnGroups() {
-            doColumn("groups");
+        public void columnId() {
+            doColumn("_id");
         }
 
-        public void columnId() {
-            doColumn("id");
+        public void columnGroups() {
+            doColumn("groups");
         }
 
         public void columnName() {

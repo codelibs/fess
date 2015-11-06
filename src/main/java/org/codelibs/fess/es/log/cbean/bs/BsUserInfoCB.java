@@ -154,16 +154,16 @@ public class BsUserInfoCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnCode() {
             doColumn("code");
         }
 
         public void columnCreatedTime() {
             doColumn("createdTime");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnUpdatedTime() {

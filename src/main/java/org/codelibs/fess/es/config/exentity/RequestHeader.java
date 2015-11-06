@@ -27,12 +27,10 @@ public class RequestHeader extends BsRequestHeader {
     private static final long serialVersionUID = 1L;
     private WebConfig webConfig;
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

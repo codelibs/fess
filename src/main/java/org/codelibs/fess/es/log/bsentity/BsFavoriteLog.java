@@ -28,18 +28,11 @@ import org.codelibs.fess.es.log.bsentity.dbmeta.FavoriteLogDbm;
  */
 public class BsFavoriteLog extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public FavoriteLogDbm asDBMeta() {
-        return FavoriteLogDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "favorite_log";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -56,6 +49,53 @@ public class BsFavoriteLog extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public FavoriteLogDbm asDBMeta() {
+        return FavoriteLogDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "favorite_log";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (createdTime != null) {
+            sourceMap.put("createdTime", createdTime);
+        }
+        if (url != null) {
+            sourceMap.put("url", url);
+        }
+        if (userInfoId != null) {
+            sourceMap.put("userInfoId", userInfoId);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(url);
+        sb.append(dm).append(userInfoId);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
     public Long getCreatedTime() {
@@ -68,19 +108,9 @@ public class BsFavoriteLog extends EsAbstractEntity {
         this.createdTime = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getUrl() {
         checkSpecifiedProperty("url");
-        return url;
+        return convertEmptyToNull(url);
     }
 
     public void setUrl(String value) {
@@ -90,29 +120,11 @@ public class BsFavoriteLog extends EsAbstractEntity {
 
     public String getUserInfoId() {
         checkSpecifiedProperty("userInfoId");
-        return userInfoId;
+        return convertEmptyToNull(userInfoId);
     }
 
     public void setUserInfoId(String value) {
         registerModifiedProperty("userInfoId");
         this.userInfoId = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (url != null) {
-            sourceMap.put("url", url);
-        }
-        if (userInfoId != null) {
-            sourceMap.put("userInfoId", userInfoId);
-        }
-        return sourceMap;
     }
 }

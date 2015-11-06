@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.JobLogDbm;
  */
 public class BsJobLog extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public JobLogDbm asDBMeta() {
-        return JobLogDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "job_log";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -71,106 +64,26 @@ public class BsJobLog extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
-    //                                                                            Accessor
-    //                                                                            ========
-    public Long getEndTime() {
-        checkSpecifiedProperty("endTime");
-        return endTime;
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public JobLogDbm asDBMeta() {
+        return JobLogDbm.getInstance();
     }
 
-    public void setEndTime(Long value) {
-        registerModifiedProperty("endTime");
-        this.endTime = value;
+    @Override
+    public String asTableDbName() {
+        return "job_log";
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
-    public String getJobName() {
-        checkSpecifiedProperty("jobName");
-        return jobName;
-    }
-
-    public void setJobName(String value) {
-        registerModifiedProperty("jobName");
-        this.jobName = value;
-    }
-
-    public String getJobStatus() {
-        checkSpecifiedProperty("jobStatus");
-        return jobStatus;
-    }
-
-    public void setJobStatus(String value) {
-        registerModifiedProperty("jobStatus");
-        this.jobStatus = value;
-    }
-
-    public String getScriptData() {
-        checkSpecifiedProperty("scriptData");
-        return scriptData;
-    }
-
-    public void setScriptData(String value) {
-        registerModifiedProperty("scriptData");
-        this.scriptData = value;
-    }
-
-    public String getScriptResult() {
-        checkSpecifiedProperty("scriptResult");
-        return scriptResult;
-    }
-
-    public void setScriptResult(String value) {
-        registerModifiedProperty("scriptResult");
-        this.scriptResult = value;
-    }
-
-    public String getScriptType() {
-        checkSpecifiedProperty("scriptType");
-        return scriptType;
-    }
-
-    public void setScriptType(String value) {
-        registerModifiedProperty("scriptType");
-        this.scriptType = value;
-    }
-
-    public Long getStartTime() {
-        checkSpecifiedProperty("startTime");
-        return startTime;
-    }
-
-    public void setStartTime(Long value) {
-        registerModifiedProperty("startTime");
-        this.startTime = value;
-    }
-
-    public String getTarget() {
-        checkSpecifiedProperty("target");
-        return target;
-    }
-
-    public void setTarget(String value) {
-        registerModifiedProperty("target");
-        this.target = value;
-    }
-
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (endTime != null) {
             sourceMap.put("endTime", endTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
         }
         if (jobName != null) {
             sourceMap.put("jobName", jobName);
@@ -194,5 +107,109 @@ public class BsJobLog extends EsAbstractEntity {
             sourceMap.put("target", target);
         }
         return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(endTime);
+        sb.append(dm).append(jobName);
+        sb.append(dm).append(jobStatus);
+        sb.append(dm).append(scriptData);
+        sb.append(dm).append(scriptResult);
+        sb.append(dm).append(scriptType);
+        sb.append(dm).append(startTime);
+        sb.append(dm).append(target);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
+    //                                                                            Accessor
+    //                                                                            ========
+    public Long getEndTime() {
+        checkSpecifiedProperty("endTime");
+        return endTime;
+    }
+
+    public void setEndTime(Long value) {
+        registerModifiedProperty("endTime");
+        this.endTime = value;
+    }
+
+    public String getJobName() {
+        checkSpecifiedProperty("jobName");
+        return convertEmptyToNull(jobName);
+    }
+
+    public void setJobName(String value) {
+        registerModifiedProperty("jobName");
+        this.jobName = value;
+    }
+
+    public String getJobStatus() {
+        checkSpecifiedProperty("jobStatus");
+        return convertEmptyToNull(jobStatus);
+    }
+
+    public void setJobStatus(String value) {
+        registerModifiedProperty("jobStatus");
+        this.jobStatus = value;
+    }
+
+    public String getScriptData() {
+        checkSpecifiedProperty("scriptData");
+        return convertEmptyToNull(scriptData);
+    }
+
+    public void setScriptData(String value) {
+        registerModifiedProperty("scriptData");
+        this.scriptData = value;
+    }
+
+    public String getScriptResult() {
+        checkSpecifiedProperty("scriptResult");
+        return convertEmptyToNull(scriptResult);
+    }
+
+    public void setScriptResult(String value) {
+        registerModifiedProperty("scriptResult");
+        this.scriptResult = value;
+    }
+
+    public String getScriptType() {
+        checkSpecifiedProperty("scriptType");
+        return convertEmptyToNull(scriptType);
+    }
+
+    public void setScriptType(String value) {
+        registerModifiedProperty("scriptType");
+        this.scriptType = value;
+    }
+
+    public Long getStartTime() {
+        checkSpecifiedProperty("startTime");
+        return startTime;
+    }
+
+    public void setStartTime(Long value) {
+        registerModifiedProperty("startTime");
+        this.startTime = value;
+    }
+
+    public String getTarget() {
+        checkSpecifiedProperty("target");
+        return convertEmptyToNull(target);
+    }
+
+    public void setTarget(String value) {
+        registerModifiedProperty("target");
+        this.target = value;
     }
 }

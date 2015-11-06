@@ -79,7 +79,6 @@ public class WebConfigToLabelDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((WebConfigToLabel) et).getId(), (et, vl) -> ((WebConfigToLabel) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((WebConfigToLabel) et).getLabelTypeId(),
                 (et, vl) -> ((WebConfigToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
         setupEpg(_epgMap, et -> ((WebConfigToLabel) et).getWebConfigId(),
@@ -120,16 +119,10 @@ public class WebConfigToLabelDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
 
     public ColumnInfo columnLabelTypeId() {
         return _columnLabelTypeId;
@@ -141,7 +134,6 @@ public class WebConfigToLabelDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnId());
         ls.add(columnLabelTypeId());
         ls.add(columnWebConfigId());
         return ls;

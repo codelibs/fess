@@ -176,24 +176,6 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
     }
 
     // ===================================================================================
-    //                                                                      Basic Override
-    //                                                                      ==============
-    @Override
-    public int instanceHash() { // #pending
-        return 0;
-    }
-
-    @Override
-    public String toStringWithRelation() { // #pending
-        return null;
-    }
-
-    @Override
-    public String buildDisplayString(String name, boolean column, boolean relation) { // #pending
-        return null;
-    }
-
-    // ===================================================================================
     //                                                                      Classification
     //                                                                      ==============
     @Override
@@ -206,9 +188,42 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
     }
 
     // ===================================================================================
+    //                                                                        Empty String
+    //                                                                        ============
+    protected String convertEmptyToNull(String value) {
+        return (value != null && value.length() == 0) ? null : value;
+    }
+
+    // ===================================================================================
     //                                                                              Source
     //                                                                              ======
     public abstract Map<String, Object> toSource();
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    // #pending hashCode(), equals()
+    @Override
+    public int instanceHash() {
+        return super.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ":" + doBuildColumnString(", ") + "@" + Integer.toHexString(hashCode());
+    }
+
+    protected abstract String doBuildColumnString(String dm);
+
+    @Override
+    public String toStringWithRelation() { // #pending
+        return toString();
+    }
+
+    @Override
+    public String buildDisplayString(String name, boolean column, boolean relation) { // #pending
+        return toString();
+    }
 
     // ===================================================================================
     //                                                                        Assist Class

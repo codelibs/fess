@@ -19,14 +19,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cf.FailureUrlCF;
 import org.codelibs.fess.es.config.cbean.cq.FailureUrlCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -54,16 +56,29 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<FailureUrlCQ, FailureUrlCF> filteredLambda) {
+    public void filtered(FilteredCall<FailureUrlCQ, FailureUrlCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<FailureUrlCQ, FailureUrlCF> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
-        FailureUrlCQ query = new FailureUrlCQ();
-        FailureUrlCF filter = new FailureUrlCF();
-        filteredLambda.callback(query, filter);
-        if (query.hasQueries()) {
-            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
+    public void filtered(FilteredCall<FailureUrlCQ, FailureUrlCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> {
+            filteredLambda.callback(must, filter);
+        }, opLambda);
+    }
+
+    public void not(OperatorCall<FailureUrlCQ> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<FailureUrlCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        FailureUrlCQ notQuery = new FailureUrlCQ();
+        notLambda.callback(notQuery);
+        if (notQuery.hasQueries()) {
+            if (notQuery.queryBuilderList.size() > 1) {
+                final String msg = "not query must be one query.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.queryBuilderList.get(0));
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -78,9 +93,12 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         FailureUrlCQ mustQuery = new FailureUrlCQ();
         FailureUrlCQ shouldQuery = new FailureUrlCQ();
         FailureUrlCQ mustNotQuery = new FailureUrlCQ();
-        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
-            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        FailureUrlCQ filterQuery = new FailureUrlCQ();
+        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
+            BoolQueryBuilder builder =
+                    regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList,
+                            filterQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -90,6 +108,73 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                           Query Set
     //                                                                           =========
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
+    public void setId_Term(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("_id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Terms(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        IdsQueryBuilder builder = regIdsQ(idList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_InScope(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_InScope(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        setId_Terms(idList, opLambda);
+    }
+
+    public BsFailureUrlCQ addOrderBy_Id_Asc() {
+        regOBA("_id");
+        return this;
+    }
+
+    public BsFailureUrlCQ addOrderBy_Id_Desc() {
+        regOBD("_id");
+        return this;
+    }
+
     public void setConfigId_Equal(String configId) {
         setConfigId_Term(configId, null);
     }
@@ -104,6 +189,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setConfigId_Term(String configId, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("configId", configId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigId_NotEqual(String configId) {
+        setConfigId_NotTerm(configId, null);
+    }
+
+    public void setConfigId_NotEqual(String configId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setConfigId_NotTerm(configId, opLambda);
+    }
+
+    public void setConfigId_NotTerm(String configId) {
+        setConfigId_NotTerm(configId, null);
+    }
+
+    public void setConfigId_NotTerm(String configId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("configId", configId));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -256,6 +360,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setErrorCount_NotEqual(Integer errorCount) {
+        setErrorCount_NotTerm(errorCount, null);
+    }
+
+    public void setErrorCount_NotEqual(Integer errorCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setErrorCount_NotTerm(errorCount, opLambda);
+    }
+
+    public void setErrorCount_NotTerm(Integer errorCount) {
+        setErrorCount_NotTerm(errorCount, null);
+    }
+
+    public void setErrorCount_NotTerm(Integer errorCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorCount", errorCount));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setErrorCount_Terms(Collection<Integer> errorCountList) {
         setErrorCount_Terms(errorCountList, null);
     }
@@ -387,6 +510,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setErrorLog_Term(String errorLog, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("errorLog", errorLog);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setErrorLog_NotEqual(String errorLog) {
+        setErrorLog_NotTerm(errorLog, null);
+    }
+
+    public void setErrorLog_NotEqual(String errorLog, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setErrorLog_NotTerm(errorLog, opLambda);
+    }
+
+    public void setErrorLog_NotTerm(String errorLog) {
+        setErrorLog_NotTerm(errorLog, null);
+    }
+
+    public void setErrorLog_NotTerm(String errorLog, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorLog", errorLog));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -539,6 +681,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setErrorName_NotEqual(String errorName) {
+        setErrorName_NotTerm(errorName, null);
+    }
+
+    public void setErrorName_NotEqual(String errorName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setErrorName_NotTerm(errorName, opLambda);
+    }
+
+    public void setErrorName_NotTerm(String errorName) {
+        setErrorName_NotTerm(errorName, null);
+    }
+
+    public void setErrorName_NotTerm(String errorName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorName", errorName));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setErrorName_Terms(Collection<String> errorNameList) {
         setErrorName_Terms(errorNameList, null);
     }
@@ -667,153 +828,6 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setId_Equal(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setId_Term(id, opLambda);
-    }
-
-    public void setId_Term(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Terms(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("id", idList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_InScope(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_Terms(idList, opLambda);
-    }
-
-    public void setId_Match(String id) {
-        setId_Match(id, null);
-    }
-
-    public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrase(String id) {
-        setId_MatchPhrase(id, null);
-    }
-
-    public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrasePrefix(String id) {
-        setId_MatchPhrasePrefix(id, null);
-    }
-
-    public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Fuzzy(String id) {
-        setId_Fuzzy(id, null);
-    }
-
-    public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Prefix(String id) {
-        setId_Prefix(id, null);
-    }
-
-    public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterThan(String id) {
-        setId_GreaterThan(id, null);
-    }
-
-    public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessThan(String id) {
-        setId_LessThan(id, null);
-    }
-
-    public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterEqual(String id) {
-        setId_GreaterEqual(id, null);
-    }
-
-    public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessEqual(String id) {
-        setId_LessEqual(id, null);
-    }
-
-    public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsFailureUrlCQ addOrderBy_Id_Asc() {
-        regOBA("id");
-        return this;
-    }
-
-    public BsFailureUrlCQ addOrderBy_Id_Desc() {
-        regOBD("id");
-        return this;
-    }
-
     public void setLastAccessTime_Equal(Long lastAccessTime) {
         setLastAccessTime_Term(lastAccessTime, null);
     }
@@ -828,6 +842,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setLastAccessTime_Term(Long lastAccessTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("lastAccessTime", lastAccessTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastAccessTime_NotEqual(Long lastAccessTime) {
+        setLastAccessTime_NotTerm(lastAccessTime, null);
+    }
+
+    public void setLastAccessTime_NotEqual(Long lastAccessTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setLastAccessTime_NotTerm(lastAccessTime, opLambda);
+    }
+
+    public void setLastAccessTime_NotTerm(Long lastAccessTime) {
+        setLastAccessTime_NotTerm(lastAccessTime, null);
+    }
+
+    public void setLastAccessTime_NotTerm(Long lastAccessTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("lastAccessTime", lastAccessTime));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -964,6 +997,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setThreadName_Term(String threadName, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("threadName", threadName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setThreadName_NotEqual(String threadName) {
+        setThreadName_NotTerm(threadName, null);
+    }
+
+    public void setThreadName_NotEqual(String threadName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setThreadName_NotTerm(threadName, opLambda);
+    }
+
+    public void setThreadName_NotTerm(String threadName) {
+        setThreadName_NotTerm(threadName, null);
+    }
+
+    public void setThreadName_NotTerm(String threadName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("threadName", threadName));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1111,6 +1163,25 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setUrl_Term(String url, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_NotEqual(String url) {
+        setUrl_NotTerm(url, null);
+    }
+
+    public void setUrl_NotEqual(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUrl_NotTerm(url, opLambda);
+    }
+
+    public void setUrl_NotTerm(String url) {
+        setUrl_NotTerm(url, null);
+    }
+
+    public void setUrl_NotTerm(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("url", url));
         if (opLambda != null) {
             opLambda.callback(builder);
         }

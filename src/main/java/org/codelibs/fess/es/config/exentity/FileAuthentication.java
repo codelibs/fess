@@ -27,12 +27,10 @@ public class FileAuthentication extends BsFileAuthentication {
     private static final long serialVersionUID = 1L;
     private FileConfig fileConfig;
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

@@ -18,6 +18,8 @@ package org.codelibs.fess.es.client;
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,11 +48,13 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.indexer.FessSearchQueryException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.Action;
@@ -59,7 +63,6 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
@@ -76,9 +79,6 @@ import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.exists.ExistsRequest;
 import org.elasticsearch.action.exists.ExistsRequestBuilder;
 import org.elasticsearch.action.exists.ExistsResponse;
@@ -107,8 +107,6 @@ import org.elasticsearch.action.indexedscripts.get.GetIndexedScriptResponse;
 import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptRequest;
 import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptRequestBuilder;
 import org.elasticsearch.action.indexedscripts.put.PutIndexedScriptResponse;
-import org.elasticsearch.action.mlt.MoreLikeThisRequest;
-import org.elasticsearch.action.mlt.MoreLikeThisRequestBuilder;
 import org.elasticsearch.action.percolate.MultiPercolateRequest;
 import org.elasticsearch.action.percolate.MultiPercolateRequestBuilder;
 import org.elasticsearch.action.percolate.MultiPercolateResponse;
@@ -126,36 +124,37 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchScrollRequestBuilder;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.suggest.SuggestRequest;
 import org.elasticsearch.action.suggest.SuggestRequestBuilder;
 import org.elasticsearch.action.suggest.SuggestResponse;
-import org.elasticsearch.action.termvector.MultiTermVectorsRequest;
-import org.elasticsearch.action.termvector.MultiTermVectorsRequestBuilder;
-import org.elasticsearch.action.termvector.MultiTermVectorsResponse;
-import org.elasticsearch.action.termvector.TermVectorRequest;
-import org.elasticsearch.action.termvector.TermVectorRequestBuilder;
-import org.elasticsearch.action.termvector.TermVectorResponse;
+import org.elasticsearch.action.termvectors.MultiTermVectorsRequest;
+import org.elasticsearch.action.termvectors.MultiTermVectorsRequestBuilder;
+import org.elasticsearch.action.termvectors.MultiTermVectorsResponse;
+import org.elasticsearch.action.termvectors.TermVectorsRequest;
+import org.elasticsearch.action.termvectors.TermVectorsRequestBuilder;
+import org.elasticsearch.action.termvectors.TermVectorsResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.support.Headers;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
-import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -183,6 +182,10 @@ public class FessEsClient implements Client {
     protected List<String> indexConfigList = new ArrayList<>();
 
     protected Map<String, List<String>> configListMap = new HashMap<>();
+
+    protected int sizeForDelete = 100;
+
+    protected String scrollForDelete = "1m";
 
     public void addIndexConfig(final String path) {
         indexConfigList.add(path);
@@ -218,7 +221,11 @@ public class FessEsClient implements Client {
     }
 
     public void addTransportAddress(final String host, final int port) {
-        transportAddressList.add(new InetSocketTransportAddress(host, port));
+        try {
+            transportAddressList.add(new InetSocketTransportAddress(InetAddress.getByName(host), port));
+        } catch (UnknownHostException e) {
+            throw new FessSystemException("Failed to resolve the hostname: " + host, e);
+        }
     }
 
     @PostConstruct
@@ -268,10 +275,10 @@ public class FessEsClient implements Client {
             client = runner.client();
             addTransportAddress("localhost", runner.node().settings().getAsInt("transport.tcp.port", 9300));
         } else {
-            final Builder settingsBuilder = ImmutableSettings.settingsBuilder();
+            final Builder settingsBuilder = Settings.settingsBuilder();
             settingsBuilder.put("cluster.name", clusterName);
             final Settings settings = settingsBuilder.build();
-            final TransportClient transportClient = new TransportClient(settings);
+            final TransportClient transportClient = TransportClient.builder().settings(settings).build();
             for (final TransportAddress address : transportAddressList) {
                 transportClient.addTransportAddress(address);
             }
@@ -311,7 +318,7 @@ public class FessEsClient implements Client {
                 try {
                     client.prepareExists(configIndex).execute().actionGet();
                     exists = true;
-                } catch (final IndexMissingException e) {
+                } catch (final IndexNotFoundException e) {
                     // ignore
             }
             if (!exists) {
@@ -437,23 +444,35 @@ public class FessEsClient implements Client {
         }
     }
 
-    public void deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
-        try {
-            // TODO replace with deleting bulk ids with scroll/scan
-            client.prepareDeleteByQuery(index).setQuery(queryBuilder).setTypes(type).execute().actionGet().forEach(res -> {
-                final ShardOperationFailedException[] failures = res.getFailures();
-                if (failures.length > 0) {
-                    final StringBuilder buf = new StringBuilder(200);
-                    buf.append("Failed to delete documents in some shards.");
-                    for (final ShardOperationFailedException failure : failures) {
-                        buf.append('\n').append(failure.toString());
-                    }
-                    throw new FessEsClientException(buf.toString());
-                }
-            });
-        } catch (final ElasticsearchException e) {
-            throw new FessEsClientException("Failed to delete documents.", e);
+    public int deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
+
+        final SearchResponse response =
+                client.prepareSearch(index).setTypes(type).setSearchType(SearchType.SCAN).setScroll(scrollForDelete).setSize(sizeForDelete)
+                        .setQuery(queryBuilder).execute().actionGet();
+
+        int count = 0;
+        String scrollId = response.getScrollId();
+        while (scrollId != null) {
+            final SearchResponse scrollResponse = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet();
+            scrollId = scrollResponse.getScrollId();
+            final SearchHits searchHits = scrollResponse.getHits();
+            final SearchHit[] hits = searchHits.getHits();
+            if (hits.length == 0) {
+                scrollId = null;
+                break;
+            }
+
+            final BulkRequestBuilder bulkRequest = client.prepareBulk();
+            for (final SearchHit hit : hits) {
+                bulkRequest.add(client.prepareDelete(index, type, hit.getId()));
+            }
+            count += hits.length;
+            final BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+            if (bulkResponse.hasFailures()) {
+                throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
+            }
         }
+        return count;
     }
 
     public <T> T get(final String index, final String type, final String id, final SearchCondition<GetRequestBuilder> condition,
@@ -743,7 +762,9 @@ public class FessEsClient implements Client {
             final QueryContext queryContext = queryHelper.build(query, context -> {
                 // geo
                     if (geoInfo != null && geoInfo.isAvailable()) {
-                        context.addFilter(geoInfo.toFilterBuilder());
+                        context.addQuery(boolQuery -> {
+                            boolQuery.filter(geoInfo.toQueryBuilder());
+                        });
                     }
                 });
 
@@ -783,7 +804,7 @@ public class FessEsClient implements Client {
                                 final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
                                 final FilterAggregationBuilder filterBuilder =
                                         AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
-                                                FilterBuilders.queryFilter(facetContext.getQueryBuilder()));
+                                                facetContext.getQueryBuilder());
                                 // TODO order
                                 if (facetInfo.limit != null) {
                                     // TODO
@@ -856,24 +877,6 @@ public class FessEsClient implements Client {
     //
     // Elasticsearch Client
     //
-
-    @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> ActionFuture<Response> execute(
-            final Action<Request, Response, RequestBuilder, Client> action, final Request request) {
-        return client.execute(action, request);
-    }
-
-    @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> void execute(
-            final Action<Request, Response, RequestBuilder, Client> action, final Request request, final ActionListener<Response> listener) {
-        client.execute(action, request, listener);
-    }
-
-    @Override
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder, Client>> RequestBuilder prepareExecute(
-            final Action<Request, Response, RequestBuilder, Client> action) {
-        return client.prepareExecute(action);
-    }
 
     @Override
     public ThreadPool threadPool() {
@@ -963,21 +966,6 @@ public class FessEsClient implements Client {
     @Override
     public BulkRequestBuilder prepareBulk() {
         return client.prepareBulk();
-    }
-
-    @Override
-    public ActionFuture<DeleteByQueryResponse> deleteByQuery(final DeleteByQueryRequest request) {
-        return client.deleteByQuery(request);
-    }
-
-    @Override
-    public void deleteByQuery(final DeleteByQueryRequest request, final ActionListener<DeleteByQueryResponse> listener) {
-        client.deleteByQuery(request, listener);
-    }
-
-    @Override
-    public DeleteByQueryRequestBuilder prepareDeleteByQuery(final String... indices) {
-        return client.prepareDeleteByQuery(indices);
     }
 
     @Override
@@ -1166,56 +1154,6 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public ActionFuture<SearchResponse> moreLikeThis(final MoreLikeThisRequest request) {
-        return client.moreLikeThis(request);
-    }
-
-    @Override
-    public void moreLikeThis(final MoreLikeThisRequest request, final ActionListener<SearchResponse> listener) {
-        client.moreLikeThis(request, listener);
-    }
-
-    @Override
-    public MoreLikeThisRequestBuilder prepareMoreLikeThis(final String index, final String type, final String id) {
-        return client.prepareMoreLikeThis(index, type, id);
-    }
-
-    @Override
-    public ActionFuture<TermVectorResponse> termVector(final TermVectorRequest request) {
-        return client.termVector(request);
-    }
-
-    @Override
-    public void termVector(final TermVectorRequest request, final ActionListener<TermVectorResponse> listener) {
-        client.termVector(request, listener);
-    }
-
-    @Override
-    public TermVectorRequestBuilder prepareTermVector() {
-        return client.prepareTermVector();
-    }
-
-    @Override
-    public TermVectorRequestBuilder prepareTermVector(final String index, final String type, final String id) {
-        return client.prepareTermVector(index, type, id);
-    }
-
-    @Override
-    public ActionFuture<MultiTermVectorsResponse> multiTermVectors(final MultiTermVectorsRequest request) {
-        return client.multiTermVectors(request);
-    }
-
-    @Override
-    public void multiTermVectors(final MultiTermVectorsRequest request, final ActionListener<MultiTermVectorsResponse> listener) {
-        client.multiTermVectors(request, listener);
-    }
-
-    @Override
-    public MultiTermVectorsRequestBuilder prepareMultiTermVectors() {
-        return client.prepareMultiTermVectors();
-    }
-
-    @Override
     public ActionFuture<PercolateResponse> percolate(final PercolateRequest request) {
         return client.percolate(request);
     }
@@ -1293,6 +1231,92 @@ public class FessEsClient implements Client {
     @Override
     public Settings settings() {
         return client.settings();
+    }
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
+            Action<Request, Response, RequestBuilder> action, Request request) {
+        return client.execute(action, request);
+    }
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
+            Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
+        client.execute(action, request, listener);
+    }
+
+    @Override
+    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
+            Action<Request, Response, RequestBuilder> action) {
+        return client.prepareExecute(action);
+    }
+
+    @Override
+    public ActionFuture<TermVectorsResponse> termVectors(TermVectorsRequest request) {
+        return client.termVectors(request);
+    }
+
+    @Override
+    public void termVectors(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
+        client.termVector(request, listener);
+    }
+
+    @Override
+    public TermVectorsRequestBuilder prepareTermVectors() {
+        return client.prepareTermVectors();
+    }
+
+    @Override
+    public TermVectorsRequestBuilder prepareTermVectors(String index, String type, String id) {
+        return client.prepareTermVectors(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<TermVectorsResponse> termVector(TermVectorsRequest request) {
+        return client.termVector(request);
+    }
+
+    @Override
+    public void termVector(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
+        client.termVector(request, listener);
+    }
+
+    @Override
+    public TermVectorsRequestBuilder prepareTermVector() {
+        return client.prepareTermVector();
+    }
+
+    @Override
+    public TermVectorsRequestBuilder prepareTermVector(String index, String type, String id) {
+        return client.prepareTermVector(index, type, id);
+    }
+
+    @Override
+    public ActionFuture<MultiTermVectorsResponse> multiTermVectors(MultiTermVectorsRequest request) {
+        return client.multiTermVectors(request);
+    }
+
+    @Override
+    public void multiTermVectors(MultiTermVectorsRequest request, ActionListener<MultiTermVectorsResponse> listener) {
+        client.multiTermVectors(request, listener);
+    }
+
+    @Override
+    public MultiTermVectorsRequestBuilder prepareMultiTermVectors() {
+        return client.prepareMultiTermVectors();
+    }
+
+    @Override
+    public Headers headers() {
+        return client.headers();
+    }
+
+    public void setSizeForDelete(int sizeForDelete) {
+        this.sizeForDelete = sizeForDelete;
+    }
+
+    public void setScrollForDelete(String scrollForDelete) {
+        this.scrollForDelete = scrollForDelete;
     }
 
 }

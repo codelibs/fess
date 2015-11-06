@@ -82,7 +82,6 @@ public class UserInfoDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((UserInfo) et).getCode(), (et, vl) -> ((UserInfo) et).setCode(DfTypeUtil.toString(vl)), "code");
         setupEpg(_epgMap, et -> ((UserInfo) et).getCreatedTime(), (et, vl) -> ((UserInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((UserInfo) et).getId(), (et, vl) -> ((UserInfo) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((UserInfo) et).getUpdatedTime(), (et, vl) -> ((UserInfo) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
     }
@@ -125,8 +124,6 @@ public class UserInfoDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
@@ -138,10 +135,6 @@ public class UserInfoDbm extends AbstractDBMeta {
         return _columnCreatedTime;
     }
 
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
-
     public ColumnInfo columnUpdatedTime() {
         return _columnUpdatedTime;
     }
@@ -150,7 +143,6 @@ public class UserInfoDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCode());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnUpdatedTime());
         return ls;
     }

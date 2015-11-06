@@ -28,18 +28,11 @@ import org.codelibs.fess.es.log.bsentity.dbmeta.UserInfoDbm;
  */
 public class BsUserInfo extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public UserInfoDbm asDBMeta() {
-        return UserInfoDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "user_info";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -56,11 +49,58 @@ public class BsUserInfo extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public UserInfoDbm asDBMeta() {
+        return UserInfoDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "user_info";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (code != null) {
+            sourceMap.put("code", code);
+        }
+        if (createdTime != null) {
+            sourceMap.put("createdTime", createdTime);
+        }
+        if (updatedTime != null) {
+            sourceMap.put("updatedTime", updatedTime);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(code);
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(updatedTime);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
     public String getCode() {
         checkSpecifiedProperty("code");
-        return code;
+        return convertEmptyToNull(code);
     }
 
     public void setCode(String value) {
@@ -78,16 +118,6 @@ public class BsUserInfo extends EsAbstractEntity {
         this.createdTime = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public Long getUpdatedTime() {
         checkSpecifiedProperty("updatedTime");
         return updatedTime;
@@ -96,23 +126,5 @@ public class BsUserInfo extends EsAbstractEntity {
     public void setUpdatedTime(Long value) {
         registerModifiedProperty("updatedTime");
         this.updatedTime = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (code != null) {
-            sourceMap.put("code", code);
-        }
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
-        }
-        return sourceMap;
     }
 }

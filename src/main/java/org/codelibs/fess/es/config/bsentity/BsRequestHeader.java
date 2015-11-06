@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.RequestHeaderDbm;
  */
 public class BsRequestHeader extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public RequestHeaderDbm asDBMeta() {
-        return RequestHeaderDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "request_header";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -68,11 +61,74 @@ public class BsRequestHeader extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public RequestHeaderDbm asDBMeta() {
+        return RequestHeaderDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "request_header";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (createdBy != null) {
+            sourceMap.put("createdBy", createdBy);
+        }
+        if (createdTime != null) {
+            sourceMap.put("createdTime", createdTime);
+        }
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        if (updatedBy != null) {
+            sourceMap.put("updatedBy", updatedBy);
+        }
+        if (updatedTime != null) {
+            sourceMap.put("updatedTime", updatedTime);
+        }
+        if (value != null) {
+            sourceMap.put("value", value);
+        }
+        if (webConfigId != null) {
+            sourceMap.put("webConfigId", webConfigId);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdBy);
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(name);
+        sb.append(dm).append(updatedBy);
+        sb.append(dm).append(updatedTime);
+        sb.append(dm).append(value);
+        sb.append(dm).append(webConfigId);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
     public String getCreatedBy() {
         checkSpecifiedProperty("createdBy");
-        return createdBy;
+        return convertEmptyToNull(createdBy);
     }
 
     public void setCreatedBy(String value) {
@@ -90,19 +146,9 @@ public class BsRequestHeader extends EsAbstractEntity {
         this.createdTime = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getName() {
         checkSpecifiedProperty("name");
-        return name;
+        return convertEmptyToNull(name);
     }
 
     public void setName(String value) {
@@ -112,7 +158,7 @@ public class BsRequestHeader extends EsAbstractEntity {
 
     public String getUpdatedBy() {
         checkSpecifiedProperty("updatedBy");
-        return updatedBy;
+        return convertEmptyToNull(updatedBy);
     }
 
     public void setUpdatedBy(String value) {
@@ -132,7 +178,7 @@ public class BsRequestHeader extends EsAbstractEntity {
 
     public String getValue() {
         checkSpecifiedProperty("value");
-        return value;
+        return convertEmptyToNull(value);
     }
 
     public void setValue(String value) {
@@ -142,41 +188,11 @@ public class BsRequestHeader extends EsAbstractEntity {
 
     public String getWebConfigId() {
         checkSpecifiedProperty("webConfigId");
-        return webConfigId;
+        return convertEmptyToNull(webConfigId);
     }
 
     public void setWebConfigId(String value) {
         registerModifiedProperty("webConfigId");
         this.webConfigId = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
-        }
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (name != null) {
-            sourceMap.put("name", name);
-        }
-        if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
-        }
-        if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
-        }
-        if (value != null) {
-            sourceMap.put("value", value);
-        }
-        if (webConfigId != null) {
-            sourceMap.put("webConfigId", webConfigId);
-        }
-        return sourceMap;
     }
 }

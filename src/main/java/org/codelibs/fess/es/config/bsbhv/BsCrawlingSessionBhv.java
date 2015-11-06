@@ -76,7 +76,6 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
             final RESULT result = entityType.newInstance();
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setExpiredTime(DfTypeUtil.toLong(source.get("expiredTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setSessionId(DfTypeUtil.toString(source.get("sessionId")));
             return result;

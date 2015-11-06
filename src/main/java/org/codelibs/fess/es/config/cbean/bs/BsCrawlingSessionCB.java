@@ -154,16 +154,16 @@ public class BsCrawlingSessionCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
 
         public void columnExpiredTime() {
             doColumn("expiredTime");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnName() {

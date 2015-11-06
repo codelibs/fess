@@ -75,7 +75,6 @@ public abstract class BsFileConfigToLabelBhv extends EsAbstractBehavior<FileConf
         try {
             final RESULT result = entityType.newInstance();
             result.setFileConfigId(DfTypeUtil.toString(source.get("fileConfigId")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

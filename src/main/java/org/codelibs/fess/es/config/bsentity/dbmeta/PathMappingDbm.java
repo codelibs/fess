@@ -83,7 +83,6 @@ public class PathMappingDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((PathMapping) et).getCreatedTime(), (et, vl) -> ((PathMapping) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((PathMapping) et).getId(), (et, vl) -> ((PathMapping) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((PathMapping) et).getProcessType(),
                 (et, vl) -> ((PathMapping) et).setProcessType(DfTypeUtil.toString(vl)), "processType");
         setupEpg(_epgMap, et -> ((PathMapping) et).getRegex(), (et, vl) -> ((PathMapping) et).setRegex(DfTypeUtil.toString(vl)), "regex");
@@ -135,8 +134,6 @@ public class PathMappingDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnProcessType = cci("processType", "processType", null, null, String.class, "processType", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRegex = cci("regex", "regex", null, null, String.class, "regex", null, false, false, false, "String",
@@ -156,10 +153,6 @@ public class PathMappingDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnProcessType() {
@@ -190,7 +183,6 @@ public class PathMappingDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnProcessType());
         ls.add(columnRegex());
         ls.add(columnReplacement());

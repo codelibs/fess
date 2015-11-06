@@ -77,7 +77,6 @@ public abstract class BsBoostDocumentRuleBhv extends EsAbstractBehavior<BoostDoc
             result.setBoostExpr(DfTypeUtil.toString(source.get("boostExpr")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));

@@ -77,7 +77,6 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
             result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setReading(DfTypeUtil.toString(source.get("reading")));
             result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
             result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));

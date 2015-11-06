@@ -154,6 +154,10 @@ public class BsFileConfigCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAvailable() {
             doColumn("available");
         }
@@ -184,10 +188,6 @@ public class BsFileConfigCB extends EsAbstractConditionBean {
 
         public void columnExcludedPaths() {
             doColumn("excludedPaths");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnIncludedDocPaths() {

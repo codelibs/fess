@@ -5,14 +5,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "name" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -23,15 +16,8 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "groups" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -53,14 +39,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "name" : {
             "type" : "string",
             "index" : "not_analyzed"

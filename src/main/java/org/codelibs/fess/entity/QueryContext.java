@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import org.codelibs.fess.Constants;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -50,10 +49,6 @@ public class QueryContext {
             request.setAttribute(Constants.HIGHLIGHT_QUERIES, highlightedQuerySet);
             request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
         });
-    }
-
-    public void addFilter(final FilterBuilder filterBuilder) {
-        queryBuilder = QueryBuilders.filteredQuery(queryBuilder, filterBuilder);
     }
 
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {
@@ -102,6 +97,10 @@ public class QueryContext {
 
     public void addHighlightedQuery(String text) {
         highlightedQuerySet.add(text);
+    }
+
+    public String getQueryString() {
+        return queryString;
     }
 
 }

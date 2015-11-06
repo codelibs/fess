@@ -154,6 +154,10 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAvailable() {
             doColumn("available");
         }
@@ -180,10 +184,6 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
 
         public void columnHandlerScript() {
             doColumn("handlerScript");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnName() {

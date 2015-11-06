@@ -19,14 +19,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cf.FileAuthenticationCF;
 import org.codelibs.fess.es.config.cbean.cq.FileAuthenticationCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -54,17 +56,30 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<FileAuthenticationCQ, FileAuthenticationCF> filteredLambda) {
+    public void filtered(FilteredCall<FileAuthenticationCQ, FileAuthenticationCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<FileAuthenticationCQ, FileAuthenticationCF> filteredLambda,
-            ConditionOptionCall<FilteredQueryBuilder> opLambda) {
-        FileAuthenticationCQ query = new FileAuthenticationCQ();
-        FileAuthenticationCF filter = new FileAuthenticationCF();
-        filteredLambda.callback(query, filter);
-        if (query.hasQueries()) {
-            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
+    public void filtered(FilteredCall<FileAuthenticationCQ, FileAuthenticationCQ> filteredLambda,
+            ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> {
+            filteredLambda.callback(must, filter);
+        }, opLambda);
+    }
+
+    public void not(OperatorCall<FileAuthenticationCQ> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<FileAuthenticationCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        FileAuthenticationCQ notQuery = new FileAuthenticationCQ();
+        notLambda.callback(notQuery);
+        if (notQuery.hasQueries()) {
+            if (notQuery.queryBuilderList.size() > 1) {
+                final String msg = "not query must be one query.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.queryBuilderList.get(0));
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -79,9 +94,12 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         FileAuthenticationCQ mustQuery = new FileAuthenticationCQ();
         FileAuthenticationCQ shouldQuery = new FileAuthenticationCQ();
         FileAuthenticationCQ mustNotQuery = new FileAuthenticationCQ();
-        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
-            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        FileAuthenticationCQ filterQuery = new FileAuthenticationCQ();
+        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
+            BoolQueryBuilder builder =
+                    regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList,
+                            filterQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -91,6 +109,73 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                           Query Set
     //                                                                           =========
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
+    public void setId_Term(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("_id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Terms(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        IdsQueryBuilder builder = regIdsQ(idList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_InScope(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_InScope(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        setId_Terms(idList, opLambda);
+    }
+
+    public BsFileAuthenticationCQ addOrderBy_Id_Asc() {
+        regOBA("_id");
+        return this;
+    }
+
+    public BsFileAuthenticationCQ addOrderBy_Id_Desc() {
+        regOBD("_id");
+        return this;
+    }
+
     public void setCreatedBy_Equal(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }
@@ -105,6 +190,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Term(String createdBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedBy_NotTerm(createdBy, opLambda);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdBy", createdBy));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -257,6 +361,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotTerm(createdTime, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedTime_NotTerm(createdTime, opLambda);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime) {
+        setCreatedTime_NotTerm(createdTime, null);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
         setCreatedTime_Terms(createdTimeList, null);
     }
@@ -388,6 +511,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setFileConfigId_Term(String fileConfigId, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("fileConfigId", fileConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setFileConfigId_NotEqual(String fileConfigId) {
+        setFileConfigId_NotTerm(fileConfigId, null);
+    }
+
+    public void setFileConfigId_NotEqual(String fileConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setFileConfigId_NotTerm(fileConfigId, opLambda);
+    }
+
+    public void setFileConfigId_NotTerm(String fileConfigId) {
+        setFileConfigId_NotTerm(fileConfigId, null);
+    }
+
+    public void setFileConfigId_NotTerm(String fileConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("fileConfigId", fileConfigId));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -540,6 +682,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setHostname_NotEqual(String hostname) {
+        setHostname_NotTerm(hostname, null);
+    }
+
+    public void setHostname_NotEqual(String hostname, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setHostname_NotTerm(hostname, opLambda);
+    }
+
+    public void setHostname_NotTerm(String hostname) {
+        setHostname_NotTerm(hostname, null);
+    }
+
+    public void setHostname_NotTerm(String hostname, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("hostname", hostname));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHostname_Terms(Collection<String> hostnameList) {
         setHostname_Terms(hostnameList, null);
     }
@@ -668,153 +829,6 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setId_Equal(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setId_Term(id, opLambda);
-    }
-
-    public void setId_Term(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Terms(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("id", idList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_InScope(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_Terms(idList, opLambda);
-    }
-
-    public void setId_Match(String id) {
-        setId_Match(id, null);
-    }
-
-    public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrase(String id) {
-        setId_MatchPhrase(id, null);
-    }
-
-    public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrasePrefix(String id) {
-        setId_MatchPhrasePrefix(id, null);
-    }
-
-    public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Fuzzy(String id) {
-        setId_Fuzzy(id, null);
-    }
-
-    public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Prefix(String id) {
-        setId_Prefix(id, null);
-    }
-
-    public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterThan(String id) {
-        setId_GreaterThan(id, null);
-    }
-
-    public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessThan(String id) {
-        setId_LessThan(id, null);
-    }
-
-    public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterEqual(String id) {
-        setId_GreaterEqual(id, null);
-    }
-
-    public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessEqual(String id) {
-        setId_LessEqual(id, null);
-    }
-
-    public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsFileAuthenticationCQ addOrderBy_Id_Asc() {
-        regOBA("id");
-        return this;
-    }
-
-    public BsFileAuthenticationCQ addOrderBy_Id_Desc() {
-        regOBD("id");
-        return this;
-    }
-
     public void setParameters_Equal(String parameters) {
         setParameters_Term(parameters, null);
     }
@@ -829,6 +843,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setParameters_Term(String parameters, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("parameters", parameters);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameters_NotEqual(String parameters) {
+        setParameters_NotTerm(parameters, null);
+    }
+
+    public void setParameters_NotEqual(String parameters, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setParameters_NotTerm(parameters, opLambda);
+    }
+
+    public void setParameters_NotTerm(String parameters) {
+        setParameters_NotTerm(parameters, null);
+    }
+
+    public void setParameters_NotTerm(String parameters, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("parameters", parameters));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -981,6 +1014,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPassword_NotEqual(String password) {
+        setPassword_NotTerm(password, null);
+    }
+
+    public void setPassword_NotEqual(String password, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPassword_NotTerm(password, opLambda);
+    }
+
+    public void setPassword_NotTerm(String password) {
+        setPassword_NotTerm(password, null);
+    }
+
+    public void setPassword_NotTerm(String password, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("password", password));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPassword_Terms(Collection<String> passwordList) {
         setPassword_Terms(passwordList, null);
     }
@@ -1128,6 +1180,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPort_NotEqual(Integer port) {
+        setPort_NotTerm(port, null);
+    }
+
+    public void setPort_NotEqual(Integer port, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPort_NotTerm(port, opLambda);
+    }
+
+    public void setPort_NotTerm(Integer port) {
+        setPort_NotTerm(port, null);
+    }
+
+    public void setPort_NotTerm(Integer port, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("port", port));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPort_Terms(Collection<Integer> portList) {
         setPort_Terms(portList, null);
     }
@@ -1259,6 +1330,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setProtocolScheme_Term(String protocolScheme, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("protocolScheme", protocolScheme);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setProtocolScheme_NotEqual(String protocolScheme) {
+        setProtocolScheme_NotTerm(protocolScheme, null);
+    }
+
+    public void setProtocolScheme_NotEqual(String protocolScheme, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setProtocolScheme_NotTerm(protocolScheme, opLambda);
+    }
+
+    public void setProtocolScheme_NotTerm(String protocolScheme) {
+        setProtocolScheme_NotTerm(protocolScheme, null);
+    }
+
+    public void setProtocolScheme_NotTerm(String protocolScheme, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("protocolScheme", protocolScheme));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1411,6 +1501,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_NotEqual(String updatedBy) {
+        setUpdatedBy_NotTerm(updatedBy, null);
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUpdatedBy_NotTerm(updatedBy, opLambda);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy) {
+        setUpdatedBy_NotTerm(updatedBy, null);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedBy", updatedBy));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_Terms(Collection<String> updatedByList) {
         setUpdatedBy_Terms(updatedByList, null);
     }
@@ -1558,6 +1667,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedTime_NotEqual(Long updatedTime) {
+        setUpdatedTime_NotTerm(updatedTime, null);
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUpdatedTime_NotTerm(updatedTime, opLambda);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime) {
+        setUpdatedTime_NotTerm(updatedTime, null);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedTime", updatedTime));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {
         setUpdatedTime_Terms(updatedTimeList, null);
     }
@@ -1689,6 +1817,25 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setUsername_Term(String username, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("username", username);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUsername_NotEqual(String username) {
+        setUsername_NotTerm(username, null);
+    }
+
+    public void setUsername_NotEqual(String username, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUsername_NotTerm(username, opLambda);
+    }
+
+    public void setUsername_NotTerm(String username) {
+        setUsername_NotTerm(username, null);
+    }
+
+    public void setUsername_NotTerm(String username, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("username", username));
         if (opLambda != null) {
             opLambda.callback(builder);
         }

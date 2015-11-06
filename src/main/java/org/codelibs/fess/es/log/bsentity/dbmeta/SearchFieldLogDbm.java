@@ -79,7 +79,6 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((SearchFieldLog) et).getId(), (et, vl) -> ((SearchFieldLog) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((SearchFieldLog) et).getName(), (et, vl) -> ((SearchFieldLog) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((SearchFieldLog) et).getSearchLogId(),
                 (et, vl) -> ((SearchFieldLog) et).setSearchLogId(DfTypeUtil.toString(vl)), "searchLogId");
@@ -121,18 +120,12 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSearchLogId = cci("searchLogId", "searchLogId", null, null, String.class, "searchLogId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
             0, 0, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
 
     public ColumnInfo columnName() {
         return _columnName;
@@ -148,7 +141,6 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnId());
         ls.add(columnName());
         ls.add(columnSearchLogId());
         ls.add(columnValue());

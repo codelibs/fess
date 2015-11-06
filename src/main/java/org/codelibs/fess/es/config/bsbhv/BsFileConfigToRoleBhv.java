@@ -75,7 +75,6 @@ public abstract class BsFileConfigToRoleBhv extends EsAbstractBehavior<FileConfi
         try {
             final RESULT result = entityType.newInstance();
             result.setFileConfigId(DfTypeUtil.toString(source.get("fileConfigId")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

@@ -83,7 +83,6 @@ public class OverlappingHostDbm extends AbstractDBMeta {
                 (et, vl) -> ((OverlappingHost) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((OverlappingHost) et).getCreatedTime(),
                 (et, vl) -> ((OverlappingHost) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((OverlappingHost) et).getId(), (et, vl) -> ((OverlappingHost) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((OverlappingHost) et).getOverlappingName(),
                 (et, vl) -> ((OverlappingHost) et).setOverlappingName(DfTypeUtil.toString(vl)), "overlappingName");
         setupEpg(_epgMap, et -> ((OverlappingHost) et).getRegularName(),
@@ -134,8 +133,6 @@ public class OverlappingHostDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnOverlappingName = cci("overlappingName", "overlappingName", null, null, String.class,
             "overlappingName", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRegularName = cci("regularName", "regularName", null, null, String.class, "regularName", null, false,
@@ -153,10 +150,6 @@ public class OverlappingHostDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnOverlappingName() {
@@ -183,7 +176,6 @@ public class OverlappingHostDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnOverlappingName());
         ls.add(columnRegularName());
         ls.add(columnSortOrder());

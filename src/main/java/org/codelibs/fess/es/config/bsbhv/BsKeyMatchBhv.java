@@ -77,7 +77,6 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
             result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setMaxSize(DfTypeUtil.toInteger(source.get("maxSize")));
             result.setQuery(DfTypeUtil.toString(source.get("query")));
             result.setTerm(DfTypeUtil.toString(source.get("term")));

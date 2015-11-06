@@ -19,14 +19,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cf.FileConfigCF;
 import org.codelibs.fess.es.config.cbean.cq.FileConfigCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
+import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -54,16 +56,29 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<FileConfigCQ, FileConfigCF> filteredLambda) {
+    public void filtered(FilteredCall<FileConfigCQ, FileConfigCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<FileConfigCQ, FileConfigCF> filteredLambda, ConditionOptionCall<FilteredQueryBuilder> opLambda) {
-        FileConfigCQ query = new FileConfigCQ();
-        FileConfigCF filter = new FileConfigCF();
-        filteredLambda.callback(query, filter);
-        if (query.hasQueries()) {
-            FilteredQueryBuilder builder = regFilteredQ(query.getQuery(), filter.getFilter());
+    public void filtered(FilteredCall<FileConfigCQ, FileConfigCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> {
+            filteredLambda.callback(must, filter);
+        }, opLambda);
+    }
+
+    public void not(OperatorCall<FileConfigCQ> notLambda) {
+        not(notLambda, null);
+    }
+
+    public void not(OperatorCall<FileConfigCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        FileConfigCQ notQuery = new FileConfigCQ();
+        notLambda.callback(notQuery);
+        if (notQuery.hasQueries()) {
+            if (notQuery.queryBuilderList.size() > 1) {
+                final String msg = "not query must be one query.";
+                throw new IllegalConditionBeanOperationException(msg);
+            }
+            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.queryBuilderList.get(0));
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -78,9 +93,12 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         FileConfigCQ mustQuery = new FileConfigCQ();
         FileConfigCQ shouldQuery = new FileConfigCQ();
         FileConfigCQ mustNotQuery = new FileConfigCQ();
-        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery);
-        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries()) {
-            BoolQueryBuilder builder = regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList);
+        FileConfigCQ filterQuery = new FileConfigCQ();
+        boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
+        if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
+            BoolQueryBuilder builder =
+                    regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList,
+                            filterQuery.queryBuilderList);
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -90,6 +108,73 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                           Query Set
     //                                                                           =========
+    public void setId_Equal(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setId_Term(id, opLambda);
+    }
+
+    public void setId_Term(String id) {
+        setId_Term(id, null);
+    }
+
+    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("_id", id);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_NotEqual(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id) {
+        setId_NotTerm(id, null);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_Terms(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_Terms(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        IdsQueryBuilder builder = regIdsQ(idList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setId_InScope(Collection<String> idList) {
+        setId_Terms(idList, null);
+    }
+
+    public void setId_InScope(Collection<String> idList, ConditionOptionCall<IdsQueryBuilder> opLambda) {
+        setId_Terms(idList, opLambda);
+    }
+
+    public BsFileConfigCQ addOrderBy_Id_Asc() {
+        regOBA("_id");
+        return this;
+    }
+
+    public BsFileConfigCQ addOrderBy_Id_Desc() {
+        regOBD("_id");
+        return this;
+    }
+
     public void setAvailable_Equal(Boolean available) {
         setAvailable_Term(available, null);
     }
@@ -104,6 +189,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setAvailable_Term(Boolean available, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("available", available);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAvailable_NotEqual(Boolean available) {
+        setAvailable_NotTerm(available, null);
+    }
+
+    public void setAvailable_NotEqual(Boolean available, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setAvailable_NotTerm(available, opLambda);
+    }
+
+    public void setAvailable_NotTerm(Boolean available) {
+        setAvailable_NotTerm(available, null);
+    }
+
+    public void setAvailable_NotTerm(Boolean available, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("available", available));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -245,6 +349,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setBoost_NotEqual(Float boost) {
+        setBoost_NotTerm(boost, null);
+    }
+
+    public void setBoost_NotEqual(Float boost, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setBoost_NotTerm(boost, opLambda);
+    }
+
+    public void setBoost_NotTerm(Float boost) {
+        setBoost_NotTerm(boost, null);
+    }
+
+    public void setBoost_NotTerm(Float boost, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("boost", boost));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setBoost_Terms(Collection<Float> boostList) {
         setBoost_Terms(boostList, null);
     }
@@ -376,6 +499,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setConfigParameter_Term(String configParameter, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_NotEqual(String configParameter) {
+        setConfigParameter_NotTerm(configParameter, null);
+    }
+
+    public void setConfigParameter_NotEqual(String configParameter, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setConfigParameter_NotTerm(configParameter, opLambda);
+    }
+
+    public void setConfigParameter_NotTerm(String configParameter) {
+        setConfigParameter_NotTerm(configParameter, null);
+    }
+
+    public void setConfigParameter_NotTerm(String configParameter, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("configParameter", configParameter));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -528,6 +670,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_NotEqual(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedBy_NotTerm(createdBy, opLambda);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy) {
+        setCreatedBy_NotTerm(createdBy, null);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdBy", createdBy));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_Terms(Collection<String> createdByList) {
         setCreatedBy_Terms(createdByList, null);
     }
@@ -675,6 +836,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_NotEqual(Long createdTime) {
+        setCreatedTime_NotTerm(createdTime, null);
+    }
+
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedTime_NotTerm(createdTime, opLambda);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime) {
+        setCreatedTime_NotTerm(createdTime, null);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
         setCreatedTime_Terms(createdTimeList, null);
     }
@@ -811,6 +991,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDepth_NotEqual(Integer depth) {
+        setDepth_NotTerm(depth, null);
+    }
+
+    public void setDepth_NotEqual(Integer depth, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setDepth_NotTerm(depth, opLambda);
+    }
+
+    public void setDepth_NotTerm(Integer depth) {
+        setDepth_NotTerm(depth, null);
+    }
+
+    public void setDepth_NotTerm(Integer depth, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("depth", depth));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setDepth_Terms(Collection<Integer> depthList) {
         setDepth_Terms(depthList, null);
     }
@@ -942,6 +1141,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedDocPaths_Term(String excludedDocPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("excludedDocPaths", excludedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocPaths_NotEqual(String excludedDocPaths) {
+        setExcludedDocPaths_NotTerm(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_NotEqual(String excludedDocPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setExcludedDocPaths_NotTerm(excludedDocPaths, opLambda);
+    }
+
+    public void setExcludedDocPaths_NotTerm(String excludedDocPaths) {
+        setExcludedDocPaths_NotTerm(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_NotTerm(String excludedDocPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("excludedDocPaths", excludedDocPaths));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1094,6 +1312,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedPaths_NotEqual(String excludedPaths) {
+        setExcludedPaths_NotTerm(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_NotEqual(String excludedPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setExcludedPaths_NotTerm(excludedPaths, opLambda);
+    }
+
+    public void setExcludedPaths_NotTerm(String excludedPaths) {
+        setExcludedPaths_NotTerm(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_NotTerm(String excludedPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("excludedPaths", excludedPaths));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedPaths_Terms(Collection<String> excludedPathsList) {
         setExcludedPaths_Terms(excludedPathsList, null);
     }
@@ -1222,153 +1459,6 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setId_Equal(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Equal(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setId_Term(id, opLambda);
-    }
-
-    public void setId_Term(String id) {
-        setId_Term(id, null);
-    }
-
-    public void setId_Term(String id, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Terms(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_Terms(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("id", idList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_InScope(Collection<String> idList) {
-        setId_Terms(idList, null);
-    }
-
-    public void setId_InScope(Collection<String> idList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setId_Terms(idList, opLambda);
-    }
-
-    public void setId_Match(String id) {
-        setId_Match(id, null);
-    }
-
-    public void setId_Match(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrase(String id) {
-        setId_MatchPhrase(id, null);
-    }
-
-    public void setId_MatchPhrase(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_MatchPhrasePrefix(String id) {
-        setId_MatchPhrasePrefix(id, null);
-    }
-
-    public void setId_MatchPhrasePrefix(String id, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Fuzzy(String id) {
-        setId_Fuzzy(id, null);
-    }
-
-    public void setId_Fuzzy(String id, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_Prefix(String id) {
-        setId_Prefix(id, null);
-    }
-
-    public void setId_Prefix(String id, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("id", id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterThan(String id) {
-        setId_GreaterThan(id, null);
-    }
-
-    public void setId_GreaterThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessThan(String id) {
-        setId_LessThan(id, null);
-    }
-
-    public void setId_LessThan(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_THAN, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_GreaterEqual(String id) {
-        setId_GreaterEqual(id, null);
-    }
-
-    public void setId_GreaterEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_GREATER_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setId_LessEqual(String id) {
-        setId_LessEqual(id, null);
-    }
-
-    public void setId_LessEqual(String id, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("id", ConditionKey.CK_LESS_EQUAL, id);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsFileConfigCQ addOrderBy_Id_Asc() {
-        regOBA("id");
-        return this;
-    }
-
-    public BsFileConfigCQ addOrderBy_Id_Desc() {
-        regOBD("id");
-        return this;
-    }
-
     public void setIncludedDocPaths_Equal(String includedDocPaths) {
         setIncludedDocPaths_Term(includedDocPaths, null);
     }
@@ -1383,6 +1473,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedDocPaths_Term(String includedDocPaths, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("includedDocPaths", includedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocPaths_NotEqual(String includedDocPaths) {
+        setIncludedDocPaths_NotTerm(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_NotEqual(String includedDocPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setIncludedDocPaths_NotTerm(includedDocPaths, opLambda);
+    }
+
+    public void setIncludedDocPaths_NotTerm(String includedDocPaths) {
+        setIncludedDocPaths_NotTerm(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_NotTerm(String includedDocPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("includedDocPaths", includedDocPaths));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1535,6 +1644,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedPaths_NotEqual(String includedPaths) {
+        setIncludedPaths_NotTerm(includedPaths, null);
+    }
+
+    public void setIncludedPaths_NotEqual(String includedPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setIncludedPaths_NotTerm(includedPaths, opLambda);
+    }
+
+    public void setIncludedPaths_NotTerm(String includedPaths) {
+        setIncludedPaths_NotTerm(includedPaths, null);
+    }
+
+    public void setIncludedPaths_NotTerm(String includedPaths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("includedPaths", includedPaths));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedPaths_Terms(Collection<String> includedPathsList) {
         setIncludedPaths_Terms(includedPathsList, null);
     }
@@ -1682,6 +1810,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIntervalTime_NotEqual(Integer intervalTime) {
+        setIntervalTime_NotTerm(intervalTime, null);
+    }
+
+    public void setIntervalTime_NotEqual(Integer intervalTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setIntervalTime_NotTerm(intervalTime, opLambda);
+    }
+
+    public void setIntervalTime_NotTerm(Integer intervalTime) {
+        setIntervalTime_NotTerm(intervalTime, null);
+    }
+
+    public void setIntervalTime_NotTerm(Integer intervalTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("intervalTime", intervalTime));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIntervalTime_Terms(Collection<Integer> intervalTimeList) {
         setIntervalTime_Terms(intervalTimeList, null);
     }
@@ -1818,6 +1965,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setMaxAccessCount_NotEqual(Long maxAccessCount) {
+        setMaxAccessCount_NotTerm(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_NotEqual(Long maxAccessCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setMaxAccessCount_NotTerm(maxAccessCount, opLambda);
+    }
+
+    public void setMaxAccessCount_NotTerm(Long maxAccessCount) {
+        setMaxAccessCount_NotTerm(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_NotTerm(Long maxAccessCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("maxAccessCount", maxAccessCount));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setMaxAccessCount_Terms(Collection<Long> maxAccessCountList) {
         setMaxAccessCount_Terms(maxAccessCountList, null);
     }
@@ -1949,6 +2115,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setName_Term(String name, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_NotEqual(String name) {
+        setName_NotTerm(name, null);
+    }
+
+    public void setName_NotEqual(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setName_NotTerm(name, opLambda);
+    }
+
+    public void setName_NotTerm(String name) {
+        setName_NotTerm(name, null);
+    }
+
+    public void setName_NotTerm(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("name", name));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2101,6 +2286,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setNumOfThread_NotEqual(Integer numOfThread) {
+        setNumOfThread_NotTerm(numOfThread, null);
+    }
+
+    public void setNumOfThread_NotEqual(Integer numOfThread, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setNumOfThread_NotTerm(numOfThread, opLambda);
+    }
+
+    public void setNumOfThread_NotTerm(Integer numOfThread) {
+        setNumOfThread_NotTerm(numOfThread, null);
+    }
+
+    public void setNumOfThread_NotTerm(Integer numOfThread, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("numOfThread", numOfThread));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setNumOfThread_Terms(Collection<Integer> numOfThreadList) {
         setNumOfThread_Terms(numOfThreadList, null);
     }
@@ -2232,6 +2436,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setPaths_Term(String paths, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("paths", paths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPaths_NotEqual(String paths) {
+        setPaths_NotTerm(paths, null);
+    }
+
+    public void setPaths_NotEqual(String paths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPaths_NotTerm(paths, opLambda);
+    }
+
+    public void setPaths_NotTerm(String paths) {
+        setPaths_NotTerm(paths, null);
+    }
+
+    public void setPaths_NotTerm(String paths, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("paths", paths));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2384,6 +2607,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSortOrder_NotEqual(Integer sortOrder) {
+        setSortOrder_NotTerm(sortOrder, null);
+    }
+
+    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setSortOrder_NotTerm(sortOrder, opLambda);
+    }
+
+    public void setSortOrder_NotTerm(Integer sortOrder) {
+        setSortOrder_NotTerm(sortOrder, null);
+    }
+
+    public void setSortOrder_NotTerm(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("sortOrder", sortOrder));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setSortOrder_Terms(Collection<Integer> sortOrderList) {
         setSortOrder_Terms(sortOrderList, null);
     }
@@ -2515,6 +2757,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Term(String updatedBy, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy) {
+        setUpdatedBy_NotTerm(updatedBy, null);
+    }
+
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUpdatedBy_NotTerm(updatedBy, opLambda);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy) {
+        setUpdatedBy_NotTerm(updatedBy, null);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedBy", updatedBy));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2662,6 +2923,25 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedTime_Term(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("updatedTime", updatedTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime) {
+        setUpdatedTime_NotTerm(updatedTime, null);
+    }
+
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUpdatedTime_NotTerm(updatedTime, opLambda);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime) {
+        setUpdatedTime_NotTerm(updatedTime, null);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedTime", updatedTime));
         if (opLambda != null) {
             opLambda.callback(builder);
         }

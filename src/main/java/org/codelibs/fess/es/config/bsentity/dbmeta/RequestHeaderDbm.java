@@ -83,7 +83,6 @@ public class RequestHeaderDbm extends AbstractDBMeta {
                 (et, vl) -> ((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedTime(),
                 (et, vl) -> ((RequestHeader) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getId(), (et, vl) -> ((RequestHeader) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getName(), (et, vl) -> ((RequestHeader) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedBy(),
                 (et, vl) -> ((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
@@ -133,8 +132,6 @@ public class RequestHeaderDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -152,10 +149,6 @@ public class RequestHeaderDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnName() {
@@ -182,7 +175,6 @@ public class RequestHeaderDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnName());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

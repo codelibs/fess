@@ -28,18 +28,11 @@ import org.codelibs.fess.es.user.bsentity.dbmeta.UserDbm;
  */
 public class BsUser extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public UserDbm asDBMeta() {
-        return UserDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "user";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -59,6 +52,57 @@ public class BsUser extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public UserDbm asDBMeta() {
+        return UserDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "user";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (groups != null) {
+            sourceMap.put("groups", groups);
+        }
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        if (password != null) {
+            sourceMap.put("password", password);
+        }
+        if (roles != null) {
+            sourceMap.put("roles", roles);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(groups);
+        sb.append(dm).append(name);
+        sb.append(dm).append(password);
+        sb.append(dm).append(roles);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
     public String[] getGroups() {
@@ -71,19 +115,9 @@ public class BsUser extends EsAbstractEntity {
         this.groups = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getName() {
         checkSpecifiedProperty("name");
-        return name;
+        return convertEmptyToNull(name);
     }
 
     public void setName(String value) {
@@ -93,7 +127,7 @@ public class BsUser extends EsAbstractEntity {
 
     public String getPassword() {
         checkSpecifiedProperty("password");
-        return password;
+        return convertEmptyToNull(password);
     }
 
     public void setPassword(String value) {
@@ -109,26 +143,5 @@ public class BsUser extends EsAbstractEntity {
     public void setRoles(String[] value) {
         registerModifiedProperty("roles");
         this.roles = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (groups != null) {
-            sourceMap.put("groups", groups);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (name != null) {
-            sourceMap.put("name", name);
-        }
-        if (password != null) {
-            sourceMap.put("password", password);
-        }
-        if (roles != null) {
-            sourceMap.put("roles", roles);
-        }
-        return sourceMap;
     }
 }

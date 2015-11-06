@@ -154,6 +154,10 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAvailable() {
             doColumn("available");
         }
@@ -184,10 +188,6 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
 
         public void columnExcludedUrls() {
             doColumn("excludedUrls");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnIncludedDocUrls() {

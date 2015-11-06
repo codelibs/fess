@@ -154,6 +154,10 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnConfigId() {
             doColumn("configId");
         }
@@ -168,10 +172,6 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
 
         public void columnErrorName() {
             doColumn("errorName");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnLastAccessTime() {

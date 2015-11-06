@@ -74,7 +74,6 @@ public abstract class BsSearchFieldLogBhv extends EsAbstractBehavior<SearchField
     protected <RESULT extends SearchFieldLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setSearchLogId(DfTypeUtil.toString(source.get("searchLogId")));
             result.setValue(DfTypeUtil.toString(source.get("value")));

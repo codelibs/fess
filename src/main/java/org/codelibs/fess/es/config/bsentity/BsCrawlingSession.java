@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingSessionDbm;
  */
 public class BsCrawlingSession extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public CrawlingSessionDbm asDBMeta() {
-        return CrawlingSessionDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "crawling_session";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -57,6 +50,57 @@ public class BsCrawlingSession extends EsAbstractEntity {
     protected String sessionId;
 
     // [Referrers] *comment only
+
+    // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public CrawlingSessionDbm asDBMeta() {
+        return CrawlingSessionDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "crawling_session";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (createdTime != null) {
+            sourceMap.put("createdTime", createdTime);
+        }
+        if (expiredTime != null) {
+            sourceMap.put("expiredTime", expiredTime);
+        }
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        if (sessionId != null) {
+            sourceMap.put("sessionId", sessionId);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(expiredTime);
+        sb.append(dm).append(name);
+        sb.append(dm).append(sessionId);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
 
     // ===================================================================================
     //                                                                            Accessor
@@ -81,19 +125,9 @@ public class BsCrawlingSession extends EsAbstractEntity {
         this.expiredTime = value;
     }
 
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getName() {
         checkSpecifiedProperty("name");
-        return name;
+        return convertEmptyToNull(name);
     }
 
     public void setName(String value) {
@@ -103,32 +137,11 @@ public class BsCrawlingSession extends EsAbstractEntity {
 
     public String getSessionId() {
         checkSpecifiedProperty("sessionId");
-        return sessionId;
+        return convertEmptyToNull(sessionId);
     }
 
     public void setSessionId(String value) {
         registerModifiedProperty("sessionId");
         this.sessionId = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
-        }
-        if (expiredTime != null) {
-            sourceMap.put("expiredTime", expiredTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (name != null) {
-            sourceMap.put("name", name);
-        }
-        if (sessionId != null) {
-            sourceMap.put("sessionId", sessionId);
-        }
-        return sourceMap;
     }
 }

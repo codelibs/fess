@@ -75,7 +75,6 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
         try {
             final RESULT result = entityType.newInstance();
             result.setGroups(toStringArray(source.get("groups")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setPassword(DfTypeUtil.toString(source.get("password")));
             result.setRoles(toStringArray(source.get("roles")));

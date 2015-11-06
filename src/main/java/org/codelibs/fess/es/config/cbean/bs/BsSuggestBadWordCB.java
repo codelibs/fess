@@ -154,16 +154,16 @@ public class BsSuggestBadWordCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
 
         public void columnCreatedTime() {
             doColumn("createdTime");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnSuggestWord() {

@@ -74,7 +74,6 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     protected <RESULT extends Group> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

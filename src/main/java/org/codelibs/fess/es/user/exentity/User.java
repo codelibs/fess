@@ -36,6 +36,14 @@ public class User extends BsUser {
         asDocMeta().version(version);
     }
 
+    public String getId() {
+        return asDocMeta().id();
+    }
+
+    public void setId(String id) {
+        asDocMeta().id(id);
+    }
+
     public String[] getRoleNames() {
         return Stream.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
@@ -45,4 +53,5 @@ public class User extends BsUser {
         return Stream.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
     }
+
 }

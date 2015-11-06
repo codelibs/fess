@@ -76,7 +76,6 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));

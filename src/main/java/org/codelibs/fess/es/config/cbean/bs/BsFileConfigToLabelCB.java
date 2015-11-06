@@ -154,12 +154,12 @@ public class BsFileConfigToLabelCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
-        public void columnFileConfigId() {
-            doColumn("fileConfigId");
+        public void columnId() {
+            doColumn("_id");
         }
 
-        public void columnId() {
-            doColumn("id");
+        public void columnFileConfigId() {
+            doColumn("fileConfigId");
         }
 
         public void columnLabelTypeId() {

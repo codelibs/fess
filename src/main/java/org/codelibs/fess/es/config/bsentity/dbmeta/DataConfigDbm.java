@@ -92,7 +92,6 @@ public class DataConfigDbm extends AbstractDBMeta {
                 (et, vl) -> ((DataConfig) et).setHandlerParameter(DfTypeUtil.toString(vl)), "handlerParameter");
         setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerScript(),
                 (et, vl) -> ((DataConfig) et).setHandlerScript(DfTypeUtil.toString(vl)), "handlerScript");
-        setupEpg(_epgMap, et -> ((DataConfig) et).getId(), (et, vl) -> ((DataConfig) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((DataConfig) et).getName(), (et, vl) -> ((DataConfig) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((DataConfig) et).getSortOrder(), (et, vl) -> ((DataConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
@@ -150,8 +149,6 @@ public class DataConfigDbm extends AbstractDBMeta {
             "handlerParameter", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHandlerScript = cci("handlerScript", "handlerScript", null, null, String.class, "handlerScript",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
@@ -189,10 +186,6 @@ public class DataConfigDbm extends AbstractDBMeta {
         return _columnHandlerScript;
     }
 
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
-
     public ColumnInfo columnName() {
         return _columnName;
     }
@@ -218,7 +211,6 @@ public class DataConfigDbm extends AbstractDBMeta {
         ls.add(columnHandlerName());
         ls.add(columnHandlerParameter());
         ls.add(columnHandlerScript());
-        ls.add(columnId());
         ls.add(columnName());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());

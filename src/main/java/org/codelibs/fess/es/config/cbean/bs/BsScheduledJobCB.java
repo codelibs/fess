@@ -154,6 +154,10 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAvailable() {
             doColumn("available");
         }
@@ -172,10 +176,6 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
 
         public void columnCronExpression() {
             doColumn("cronExpression");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnJobLogging() {

@@ -154,6 +154,10 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnBoost() {
             doColumn("boost");
         }
@@ -164,10 +168,6 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
 
         public void columnCreatedTime() {
             doColumn("createdTime");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnMaxSize() {

@@ -76,7 +76,6 @@ public abstract class BsRequestHeaderBhv extends EsAbstractBehavior<RequestHeade
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));

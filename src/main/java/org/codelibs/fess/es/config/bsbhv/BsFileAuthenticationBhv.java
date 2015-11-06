@@ -78,7 +78,6 @@ public abstract class BsFileAuthenticationBhv extends EsAbstractBehavior<FileAut
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setFileConfigId(DfTypeUtil.toString(source.get("fileConfigId")));
             result.setHostname(DfTypeUtil.toString(source.get("hostname")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setParameters(DfTypeUtil.toString(source.get("parameters")));
             result.setPassword(DfTypeUtil.toString(source.get("password")));
             result.setPort(DfTypeUtil.toInteger(source.get("port")));

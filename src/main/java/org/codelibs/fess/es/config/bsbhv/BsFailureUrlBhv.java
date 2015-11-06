@@ -78,7 +78,6 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
             result.setErrorCount(DfTypeUtil.toInteger(source.get("errorCount")));
             result.setErrorLog(DfTypeUtil.toString(source.get("errorLog")));
             result.setErrorName(DfTypeUtil.toString(source.get("errorName")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setLastAccessTime(DfTypeUtil.toLong(source.get("lastAccessTime")));
             result.setThreadName(DfTypeUtil.toString(source.get("threadName")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));

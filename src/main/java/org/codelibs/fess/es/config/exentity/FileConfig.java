@@ -293,7 +293,6 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

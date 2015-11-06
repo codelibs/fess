@@ -75,7 +75,6 @@ public abstract class BsDataConfigToRoleBhv extends EsAbstractBehavior<DataConfi
         try {
             final RESULT result = entityType.newInstance();
             result.setDataConfigId(DfTypeUtil.toString(source.get("dataConfigId")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

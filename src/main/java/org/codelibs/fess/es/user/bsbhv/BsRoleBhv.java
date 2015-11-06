@@ -74,7 +74,6 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     protected <RESULT extends Role> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

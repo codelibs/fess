@@ -80,7 +80,6 @@ public class JobLogDbm extends AbstractDBMeta {
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
         setupEpg(_epgMap, et -> ((JobLog) et).getEndTime(), (et, vl) -> ((JobLog) et).setEndTime(DfTypeUtil.toLong(vl)), "endTime");
-        setupEpg(_epgMap, et -> ((JobLog) et).getId(), (et, vl) -> ((JobLog) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((JobLog) et).getJobName(), (et, vl) -> ((JobLog) et).setJobName(DfTypeUtil.toString(vl)), "jobName");
         setupEpg(_epgMap, et -> ((JobLog) et).getJobStatus(), (et, vl) -> ((JobLog) et).setJobStatus(DfTypeUtil.toString(vl)), "jobStatus");
         setupEpg(_epgMap, et -> ((JobLog) et).getScriptData(), (et, vl) -> ((JobLog) et).setScriptData(DfTypeUtil.toString(vl)),
@@ -129,8 +128,6 @@ public class JobLogDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnEndTime = cci("endTime", "endTime", null, null, Long.class, "endTime", null, false, false, false,
             "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobName = cci("jobName", "jobName", null, null, String.class, "jobName", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobStatus = cci("jobStatus", "jobStatus", null, null, String.class, "jobStatus", null, false, false,
@@ -148,10 +145,6 @@ public class JobLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnEndTime() {
         return _columnEndTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnJobName() {
@@ -185,7 +178,6 @@ public class JobLogDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnEndTime());
-        ls.add(columnId());
         ls.add(columnJobName());
         ls.add(columnJobStatus());
         ls.add(columnScriptData());

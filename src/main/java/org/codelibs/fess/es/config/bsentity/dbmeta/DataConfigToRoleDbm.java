@@ -81,7 +81,6 @@ public class DataConfigToRoleDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((DataConfigToRole) et).getDataConfigId(),
                 (et, vl) -> ((DataConfigToRole) et).setDataConfigId(DfTypeUtil.toString(vl)), "dataConfigId");
-        setupEpg(_epgMap, et -> ((DataConfigToRole) et).getId(), (et, vl) -> ((DataConfigToRole) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((DataConfigToRole) et).getRoleTypeId(),
                 (et, vl) -> ((DataConfigToRole) et).setRoleTypeId(DfTypeUtil.toString(vl)), "roleTypeId");
     }
@@ -122,17 +121,11 @@ public class DataConfigToRoleDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnDataConfigId = cci("dataConfigId", "dataConfigId", null, null, String.class, "dataConfigId", null,
             false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRoleTypeId = cci("roleTypeId", "roleTypeId", null, null, String.class, "roleTypeId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnDataConfigId() {
         return _columnDataConfigId;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnRoleTypeId() {
@@ -142,7 +135,6 @@ public class DataConfigToRoleDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnDataConfigId());
-        ls.add(columnId());
         ls.add(columnRoleTypeId());
         return ls;
     }

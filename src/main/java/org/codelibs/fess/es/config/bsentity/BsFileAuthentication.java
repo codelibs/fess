@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.FileAuthenticationDbm;
  */
 public class BsFileAuthentication extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public FileAuthenticationDbm asDBMeta() {
-        return FileAuthenticationDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "file_authentication";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -80,128 +73,21 @@ public class BsFileAuthentication extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
-    //                                                                            Accessor
-    //                                                                            ========
-    public String getCreatedBy() {
-        checkSpecifiedProperty("createdBy");
-        return createdBy;
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public FileAuthenticationDbm asDBMeta() {
+        return FileAuthenticationDbm.getInstance();
     }
 
-    public void setCreatedBy(String value) {
-        registerModifiedProperty("createdBy");
-        this.createdBy = value;
+    @Override
+    public String asTableDbName() {
+        return "file_authentication";
     }
 
-    public Long getCreatedTime() {
-        checkSpecifiedProperty("createdTime");
-        return createdTime;
-    }
-
-    public void setCreatedTime(Long value) {
-        registerModifiedProperty("createdTime");
-        this.createdTime = value;
-    }
-
-    public String getFileConfigId() {
-        checkSpecifiedProperty("fileConfigId");
-        return fileConfigId;
-    }
-
-    public void setFileConfigId(String value) {
-        registerModifiedProperty("fileConfigId");
-        this.fileConfigId = value;
-    }
-
-    public String getHostname() {
-        checkSpecifiedProperty("hostname");
-        return hostname;
-    }
-
-    public void setHostname(String value) {
-        registerModifiedProperty("hostname");
-        this.hostname = value;
-    }
-
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
-    public String getParameters() {
-        checkSpecifiedProperty("parameters");
-        return parameters;
-    }
-
-    public void setParameters(String value) {
-        registerModifiedProperty("parameters");
-        this.parameters = value;
-    }
-
-    public String getPassword() {
-        checkSpecifiedProperty("password");
-        return password;
-    }
-
-    public void setPassword(String value) {
-        registerModifiedProperty("password");
-        this.password = value;
-    }
-
-    public Integer getPort() {
-        checkSpecifiedProperty("port");
-        return port;
-    }
-
-    public void setPort(Integer value) {
-        registerModifiedProperty("port");
-        this.port = value;
-    }
-
-    public String getProtocolScheme() {
-        checkSpecifiedProperty("protocolScheme");
-        return protocolScheme;
-    }
-
-    public void setProtocolScheme(String value) {
-        registerModifiedProperty("protocolScheme");
-        this.protocolScheme = value;
-    }
-
-    public String getUpdatedBy() {
-        checkSpecifiedProperty("updatedBy");
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String value) {
-        registerModifiedProperty("updatedBy");
-        this.updatedBy = value;
-    }
-
-    public Long getUpdatedTime() {
-        checkSpecifiedProperty("updatedTime");
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(Long value) {
-        registerModifiedProperty("updatedTime");
-        this.updatedTime = value;
-    }
-
-    public String getUsername() {
-        checkSpecifiedProperty("username");
-        return username;
-    }
-
-    public void setUsername(String value) {
-        registerModifiedProperty("username");
-        this.username = value;
-    }
-
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
@@ -216,9 +102,6 @@ public class BsFileAuthentication extends EsAbstractEntity {
         }
         if (hostname != null) {
             sourceMap.put("hostname", hostname);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
         }
         if (parameters != null) {
             sourceMap.put("parameters", parameters);
@@ -242,5 +125,142 @@ public class BsFileAuthentication extends EsAbstractEntity {
             sourceMap.put("username", username);
         }
         return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(createdBy);
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(fileConfigId);
+        sb.append(dm).append(hostname);
+        sb.append(dm).append(parameters);
+        sb.append(dm).append(password);
+        sb.append(dm).append(port);
+        sb.append(dm).append(protocolScheme);
+        sb.append(dm).append(updatedBy);
+        sb.append(dm).append(updatedTime);
+        sb.append(dm).append(username);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
+    //                                                                            Accessor
+    //                                                                            ========
+    public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
+        return convertEmptyToNull(createdBy);
+    }
+
+    public void setCreatedBy(String value) {
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
+    }
+
+    public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
+        return createdTime;
+    }
+
+    public void setCreatedTime(Long value) {
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
+    }
+
+    public String getFileConfigId() {
+        checkSpecifiedProperty("fileConfigId");
+        return convertEmptyToNull(fileConfigId);
+    }
+
+    public void setFileConfigId(String value) {
+        registerModifiedProperty("fileConfigId");
+        this.fileConfigId = value;
+    }
+
+    public String getHostname() {
+        checkSpecifiedProperty("hostname");
+        return convertEmptyToNull(hostname);
+    }
+
+    public void setHostname(String value) {
+        registerModifiedProperty("hostname");
+        this.hostname = value;
+    }
+
+    public String getParameters() {
+        checkSpecifiedProperty("parameters");
+        return convertEmptyToNull(parameters);
+    }
+
+    public void setParameters(String value) {
+        registerModifiedProperty("parameters");
+        this.parameters = value;
+    }
+
+    public String getPassword() {
+        checkSpecifiedProperty("password");
+        return convertEmptyToNull(password);
+    }
+
+    public void setPassword(String value) {
+        registerModifiedProperty("password");
+        this.password = value;
+    }
+
+    public Integer getPort() {
+        checkSpecifiedProperty("port");
+        return port;
+    }
+
+    public void setPort(Integer value) {
+        registerModifiedProperty("port");
+        this.port = value;
+    }
+
+    public String getProtocolScheme() {
+        checkSpecifiedProperty("protocolScheme");
+        return convertEmptyToNull(protocolScheme);
+    }
+
+    public void setProtocolScheme(String value) {
+        registerModifiedProperty("protocolScheme");
+        this.protocolScheme = value;
+    }
+
+    public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
+        return convertEmptyToNull(updatedBy);
+    }
+
+    public void setUpdatedBy(String value) {
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
+    }
+
+    public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(Long value) {
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
+    }
+
+    public String getUsername() {
+        checkSpecifiedProperty("username");
+        return convertEmptyToNull(username);
+    }
+
+    public void setUsername(String value) {
+        registerModifiedProperty("username");
+        this.username = value;
     }
 }

@@ -57,8 +57,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -230,10 +228,13 @@ public class QueryHelper implements Serializable {
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();
             if (!roleSet.isEmpty()) {
-                final FilterBuilder filterBuilder =
-                        FilterBuilders.orFilter(roleSet.stream().map(name -> FilterBuilders.termFilter(fieldHelper.roleField, name))
-                                .toArray(n -> new FilterBuilder[n]));
-                queryContext.addFilter(filterBuilder);
+                queryContext.addQuery(boolQuery -> {
+                    BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+                    roleSet.stream().forEach(name -> {
+                        roleQuery.filter(QueryBuilders.termQuery(fieldHelper.roleField, name));
+                    });
+                    boolQuery.filter(roleQuery);
+                });
             }
         }
 

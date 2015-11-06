@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.WebConfigToRoleDbm;
  */
 public class BsWebConfigToRole extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public WebConfigToRoleDbm asDBMeta() {
-        return WebConfigToRoleDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "web_config_to_role";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -53,21 +46,54 @@ public class BsWebConfigToRole extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public WebConfigToRoleDbm asDBMeta() {
+        return WebConfigToRoleDbm.getInstance();
+    }
+
+    @Override
+    public String asTableDbName() {
+        return "web_config_to_role";
+    }
+
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (roleTypeId != null) {
+            sourceMap.put("roleTypeId", roleTypeId);
+        }
+        if (webConfigId != null) {
+            sourceMap.put("webConfigId", webConfigId);
+        }
+        return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(roleTypeId);
+        sb.append(dm).append(webConfigId);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getRoleTypeId() {
         checkSpecifiedProperty("roleTypeId");
-        return roleTypeId;
+        return convertEmptyToNull(roleTypeId);
     }
 
     public void setRoleTypeId(String value) {
@@ -77,26 +103,11 @@ public class BsWebConfigToRole extends EsAbstractEntity {
 
     public String getWebConfigId() {
         checkSpecifiedProperty("webConfigId");
-        return webConfigId;
+        return convertEmptyToNull(webConfigId);
     }
 
     public void setWebConfigId(String value) {
         registerModifiedProperty("webConfigId");
         this.webConfigId = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (roleTypeId != null) {
-            sourceMap.put("roleTypeId", roleTypeId);
-        }
-        if (webConfigId != null) {
-            sourceMap.put("webConfigId", webConfigId);
-        }
-        return sourceMap;
     }
 }

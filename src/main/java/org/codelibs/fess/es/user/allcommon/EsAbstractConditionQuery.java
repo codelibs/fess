@@ -33,9 +33,8 @@ import org.dbflute.dbmeta.name.ColumnSqlName;
 import org.dbflute.exception.InvalidQueryRegisteredException;
 import org.dbflute.util.Srl;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
@@ -141,16 +140,13 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
     // ===================================================================================
     //                                                                            Register
     //                                                                            ========
-    protected FilteredQueryBuilder regFilteredQ(QueryBuilder queryBuilder, FilterBuilder filterBuilder) {
-        assertObjectNotNull("queryBuilder", queryBuilder);
-        assertObjectNotNull("filterBuilder", filterBuilder);
-        return QueryBuilders.filteredQuery(queryBuilder, filterBuilder);
-    }
 
-    protected BoolQueryBuilder regBoolCQ(List<QueryBuilder> mustList, List<QueryBuilder> shouldList, List<QueryBuilder> mustNotList) {
+    protected BoolQueryBuilder regBoolCQ(List<QueryBuilder> mustList, List<QueryBuilder> shouldList, List<QueryBuilder> mustNotList,
+            List<QueryBuilder> filterList) {
         assertObjectNotNull("mustList", mustList);
         assertObjectNotNull("shouldList", shouldList);
         assertObjectNotNull("mustNotList", mustNotList);
+        assertObjectNotNull("filterList", filterList);
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         mustList.forEach(query -> {
             boolQuery.must(query);
@@ -160,6 +156,9 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         });
         mustNotList.forEach(query -> {
             boolQuery.mustNot(query);
+        });
+        filterList.forEach(query -> {
+            boolQuery.filter(query);
         });
         return boolQuery;
     }
@@ -176,6 +175,13 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         TermsQueryBuilder termsQuery = QueryBuilders.termsQuery(name, values);
         regQ(termsQuery);
         return termsQuery;
+    }
+
+    protected IdsQueryBuilder regIdsQ(Collection<String> values) {
+        checkEsInvalidQueryCollection("_id", values);
+        IdsQueryBuilder idsQuery = QueryBuilders.idsQuery(asTableDbName()).addIds(values);
+        regQ(idsQuery);
+        return idsQuery;
     }
 
     protected MatchQueryBuilder regMatchQ(String name, Object value) {
@@ -453,11 +459,11 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
     @FunctionalInterface
     public interface BoolCall<CQ extends EsAbstractConditionQuery> {
 
-        void callback(CQ must, CQ should, CQ mustNot);
+        void callback(CQ must, CQ should, CQ mustNot, CQ filter);
     }
 
     @FunctionalInterface
-    public interface FilteredCall<CQ extends EsAbstractConditionQuery, CF extends EsAbstractConditionFilter> {
+    public interface FilteredCall<CQ extends EsAbstractConditionQuery, CF extends EsAbstractConditionQuery> {
 
         void callback(CQ query, CF filter);
     }

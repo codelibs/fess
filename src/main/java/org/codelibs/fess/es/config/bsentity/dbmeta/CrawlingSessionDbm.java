@@ -83,7 +83,6 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
                 (et, vl) -> ((CrawlingSession) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((CrawlingSession) et).getExpiredTime(),
                 (et, vl) -> ((CrawlingSession) et).setExpiredTime(DfTypeUtil.toLong(vl)), "expiredTime");
-        setupEpg(_epgMap, et -> ((CrawlingSession) et).getId(), (et, vl) -> ((CrawlingSession) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((CrawlingSession) et).getName(), (et, vl) -> ((CrawlingSession) et).setName(DfTypeUtil.toString(vl)),
                 "name");
         setupEpg(_epgMap, et -> ((CrawlingSession) et).getSessionId(),
@@ -128,8 +127,6 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSessionId = cci("sessionId", "sessionId", null, null, String.class, "sessionId", null, false, false,
@@ -141,10 +138,6 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
 
     public ColumnInfo columnExpiredTime() {
         return _columnExpiredTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnName() {
@@ -159,7 +152,6 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedTime());
         ls.add(columnExpiredTime());
-        ls.add(columnId());
         ls.add(columnName());
         ls.add(columnSessionId());
         return ls;

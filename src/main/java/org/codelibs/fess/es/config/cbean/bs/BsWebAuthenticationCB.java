@@ -154,6 +154,10 @@ public class BsWebAuthenticationCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAuthRealm() {
             doColumn("authRealm");
         }
@@ -168,10 +172,6 @@ public class BsWebAuthenticationCB extends EsAbstractConditionBean {
 
         public void columnHostname() {
             doColumn("hostname");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnParameters() {

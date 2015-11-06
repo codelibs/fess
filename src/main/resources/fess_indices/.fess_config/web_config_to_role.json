@@ -6,14 +6,7 @@
     "_all": {
       "enabled": false
     },
-    "_id": {
-      "path": "id"
-    },
     "properties": {
-      "id": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
       "webConfigId": {
         "type": "string",
         "index": "not_analyzed"

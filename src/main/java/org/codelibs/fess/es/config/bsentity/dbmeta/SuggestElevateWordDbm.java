@@ -85,8 +85,6 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
                 (et, vl) -> ((SuggestElevateWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getCreatedTime(),
                 (et, vl) -> ((SuggestElevateWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getId(), (et, vl) -> ((SuggestElevateWord) et).setId(DfTypeUtil.toString(vl)),
-                "id");
         setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getReading(),
                 (et, vl) -> ((SuggestElevateWord) et).setReading(DfTypeUtil.toString(vl)), "reading");
         setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getSuggestWord(),
@@ -141,8 +139,6 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
@@ -166,10 +162,6 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnReading() {
@@ -201,7 +193,6 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
         ls.add(columnBoost());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnReading());
         ls.add(columnSuggestWord());
         ls.add(columnTargetLabel());

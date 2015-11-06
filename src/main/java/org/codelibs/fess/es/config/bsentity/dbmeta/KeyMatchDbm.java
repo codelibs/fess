@@ -84,7 +84,6 @@ public class KeyMatchDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getCreatedTime(), (et, vl) -> ((KeyMatch) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((KeyMatch) et).getId(), (et, vl) -> ((KeyMatch) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getMaxSize(), (et, vl) -> ((KeyMatch) et).setMaxSize(DfTypeUtil.toInteger(vl)), "maxSize");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getQuery(), (et, vl) -> ((KeyMatch) et).setQuery(DfTypeUtil.toString(vl)), "query");
         setupEpg(_epgMap, et -> ((KeyMatch) et).getTerm(), (et, vl) -> ((KeyMatch) et).setTerm(DfTypeUtil.toString(vl)), "term");
@@ -134,8 +133,6 @@ public class KeyMatchDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMaxSize = cci("maxSize", "maxSize", null, null, Integer.class, "maxSize", null, false, false, false,
             "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQuery = cci("query", "query", null, null, String.class, "query", null, false, false, false, "String",
@@ -157,10 +154,6 @@ public class KeyMatchDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnMaxSize() {
@@ -188,7 +181,6 @@ public class KeyMatchDbm extends AbstractDBMeta {
         ls.add(columnBoost());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
-        ls.add(columnId());
         ls.add(columnMaxSize());
         ls.add(columnQuery());
         ls.add(columnTerm());

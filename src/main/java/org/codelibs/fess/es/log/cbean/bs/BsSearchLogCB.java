@@ -154,6 +154,10 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnAccessType() {
             doColumn("accessType");
         }
@@ -164,10 +168,6 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
 
         public void columnHitCount() {
             doColumn("hitCount");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnQueryOffset() {

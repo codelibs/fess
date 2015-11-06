@@ -28,9 +28,23 @@ import org.codelibs.fess.es.user.bsentity.dbmeta.GroupDbm;
  */
 public class BsGroup extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    /** name */
+    protected String name;
+
+    // [Referrers] *comment only
+
+    // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
     @Override
     public GroupDbm asDBMeta() {
         return GroupDbm.getInstance();
@@ -42,45 +56,41 @@ public class BsGroup extends EsAbstractEntity {
     }
 
     // ===================================================================================
-    //                                                                           Attribute
-    //                                                                           =========
-    /** name */
-    protected String name;
+    //                                                                              Source
+    //                                                                              ======
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        return sourceMap;
+    }
 
-    // [Referrers] *comment only
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(name);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
 
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
     public String getName() {
         checkSpecifiedProperty("name");
-        return name;
+        return convertEmptyToNull(name);
     }
 
     public void setName(String value) {
         registerModifiedProperty("name");
         this.name = value;
-    }
-
-    @Override
-    public Map<String, Object> toSource() {
-        Map<String, Object> sourceMap = new HashMap<>();
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
-        }
-        if (name != null) {
-            sourceMap.put("name", name);
-        }
-        return sourceMap;
     }
 }

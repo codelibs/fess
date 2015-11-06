@@ -93,7 +93,6 @@ public class FileConfigDbm extends AbstractDBMeta {
                 (et, vl) -> ((FileConfig) et).setExcludedDocPaths(DfTypeUtil.toString(vl)), "excludedDocPaths");
         setupEpg(_epgMap, et -> ((FileConfig) et).getExcludedPaths(),
                 (et, vl) -> ((FileConfig) et).setExcludedPaths(DfTypeUtil.toString(vl)), "excludedPaths");
-        setupEpg(_epgMap, et -> ((FileConfig) et).getId(), (et, vl) -> ((FileConfig) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((FileConfig) et).getIncludedDocPaths(),
                 (et, vl) -> ((FileConfig) et).setIncludedDocPaths(DfTypeUtil.toString(vl)), "includedDocPaths");
         setupEpg(_epgMap, et -> ((FileConfig) et).getIncludedPaths(),
@@ -164,8 +163,6 @@ public class FileConfigDbm extends AbstractDBMeta {
             "excludedDocPaths", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedPaths = cci("excludedPaths", "excludedPaths", null, null, String.class, "excludedPaths",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedDocPaths = cci("includedDocPaths", "includedDocPaths", null, null, String.class,
             "includedDocPaths", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedPaths = cci("includedPaths", "includedPaths", null, null, String.class, "includedPaths",
@@ -219,10 +216,6 @@ public class FileConfigDbm extends AbstractDBMeta {
         return _columnExcludedPaths;
     }
 
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
-
     public ColumnInfo columnIncludedDocPaths() {
         return _columnIncludedDocPaths;
     }
@@ -273,7 +266,6 @@ public class FileConfigDbm extends AbstractDBMeta {
         ls.add(columnDepth());
         ls.add(columnExcludedDocPaths());
         ls.add(columnExcludedPaths());
-        ls.add(columnId());
         ls.add(columnIncludedDocPaths());
         ls.add(columnIncludedPaths());
         ls.add(columnIntervalTime());

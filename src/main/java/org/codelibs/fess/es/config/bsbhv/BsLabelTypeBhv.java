@@ -77,7 +77,6 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setExcludedPaths(DfTypeUtil.toString(source.get("excludedPaths")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setIncludedPaths(DfTypeUtil.toString(source.get("includedPaths")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));

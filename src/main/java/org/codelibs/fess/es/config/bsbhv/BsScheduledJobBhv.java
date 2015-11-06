@@ -79,7 +79,6 @@ public abstract class BsScheduledJobBhv extends EsAbstractBehavior<ScheduledJob,
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setCronExpression(DfTypeUtil.toString(source.get("cronExpression")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setJobLogging(DfTypeUtil.toBoolean(source.get("jobLogging")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setScriptData(DfTypeUtil.toString(source.get("scriptData")));

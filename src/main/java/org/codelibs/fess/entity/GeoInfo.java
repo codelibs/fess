@@ -17,8 +17,8 @@ package org.codelibs.fess.entity;
 
 import org.codelibs.core.lang.StringUtil;
 import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 
 public class GeoInfo {
     //@Mask(mask = "-?([0-9]+|[0-9]+\\.[0-9]+)")
@@ -35,7 +35,7 @@ public class GeoInfo {
 
     private boolean isInit = false;
 
-    private FilterBuilder builder;
+    private QueryBuilder builder;
 
     private void init() {
         if (!isInit) {
@@ -74,7 +74,7 @@ public class GeoInfo {
                     }
                 }
 
-                builder = FilterBuilders.geoDistanceFilter("geo_info").distance(dist, DistanceUnit.KILOMETERS).lat(lat).lon(lon);
+                builder = QueryBuilders.geoDistanceQuery("geo_info").distance(dist, DistanceUnit.KILOMETERS).lat(lat).lon(lon);
             } catch (final NumberFormatException e) {
                 clear();
             }
@@ -93,7 +93,7 @@ public class GeoInfo {
         return builder != null;
     }
 
-    public FilterBuilder toFilterBuilder() {
+    public QueryBuilder toQueryBuilder() {
         init();
         return builder;
     }

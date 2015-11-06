@@ -74,7 +74,6 @@ public abstract class BsWebConfigToLabelBhv extends EsAbstractBehavior<WebConfig
     protected <RESULT extends WebConfigToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
             result.setWebConfigId(DfTypeUtil.toString(source.get("webConfigId")));
             return result;

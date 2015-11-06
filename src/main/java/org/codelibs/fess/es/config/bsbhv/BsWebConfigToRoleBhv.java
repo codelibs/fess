@@ -74,7 +74,6 @@ public abstract class BsWebConfigToRoleBhv extends EsAbstractBehavior<WebConfigT
     protected <RESULT extends WebConfigToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
             result.setWebConfigId(DfTypeUtil.toString(source.get("webConfigId")));
             return result;

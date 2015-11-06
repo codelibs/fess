@@ -93,7 +93,6 @@ public class WebConfigDbm extends AbstractDBMeta {
                 (et, vl) -> ((WebConfig) et).setExcludedDocUrls(DfTypeUtil.toString(vl)), "excludedDocUrls");
         setupEpg(_epgMap, et -> ((WebConfig) et).getExcludedUrls(), (et, vl) -> ((WebConfig) et).setExcludedUrls(DfTypeUtil.toString(vl)),
                 "excludedUrls");
-        setupEpg(_epgMap, et -> ((WebConfig) et).getId(), (et, vl) -> ((WebConfig) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((WebConfig) et).getIncludedDocUrls(),
                 (et, vl) -> ((WebConfig) et).setIncludedDocUrls(DfTypeUtil.toString(vl)), "includedDocUrls");
         setupEpg(_epgMap, et -> ((WebConfig) et).getIncludedUrls(), (et, vl) -> ((WebConfig) et).setIncludedUrls(DfTypeUtil.toString(vl)),
@@ -166,8 +165,6 @@ public class WebConfigDbm extends AbstractDBMeta {
             "excludedDocUrls", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedUrls = cci("excludedUrls", "excludedUrls", null, null, String.class, "excludedUrls", null,
             false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedDocUrls = cci("includedDocUrls", "includedDocUrls", null, null, String.class,
             "includedDocUrls", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedUrls = cci("includedUrls", "includedUrls", null, null, String.class, "includedUrls", null,
@@ -221,10 +218,6 @@ public class WebConfigDbm extends AbstractDBMeta {
 
     public ColumnInfo columnExcludedUrls() {
         return _columnExcludedUrls;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnIncludedDocUrls() {
@@ -281,7 +274,6 @@ public class WebConfigDbm extends AbstractDBMeta {
         ls.add(columnDepth());
         ls.add(columnExcludedDocUrls());
         ls.add(columnExcludedUrls());
-        ls.add(columnId());
         ls.add(columnIncludedDocUrls());
         ls.add(columnIncludedUrls());
         ls.add(columnIntervalTime());

@@ -85,7 +85,6 @@ public class EventLogDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((EventLog) et).getEventType(), (et, vl) -> ((EventLog) et).setEventType(DfTypeUtil.toString(vl)),
                 "eventType");
-        setupEpg(_epgMap, et -> ((EventLog) et).getId(), (et, vl) -> ((EventLog) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((EventLog) et).getMessage(), (et, vl) -> ((EventLog) et).setMessage(DfTypeUtil.toString(vl)), "message");
         setupEpg(_epgMap, et -> ((EventLog) et).getPath(), (et, vl) -> ((EventLog) et).setPath(DfTypeUtil.toString(vl)), "path");
     }
@@ -130,8 +129,6 @@ public class EventLogDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnEventType = cci("eventType", "eventType", null, null, String.class, "eventType", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMessage = cci("message", "message", null, null, String.class, "message", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0,
@@ -149,10 +146,6 @@ public class EventLogDbm extends AbstractDBMeta {
         return _columnEventType;
     }
 
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
-
     public ColumnInfo columnMessage() {
         return _columnMessage;
     }
@@ -166,7 +159,6 @@ public class EventLogDbm extends AbstractDBMeta {
         ls.add(columnCreatedAt());
         ls.add(columnCreatedBy());
         ls.add(columnEventType());
-        ls.add(columnId());
         ls.add(columnMessage());
         ls.add(columnPath());
         return ls;

@@ -75,7 +75,6 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
         try {
             final RESULT result = entityType.newInstance();
             result.setEndTime(DfTypeUtil.toLong(source.get("endTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setJobName(DfTypeUtil.toString(source.get("jobName")));
             result.setJobStatus(DfTypeUtil.toString(source.get("jobStatus")));
             result.setScriptData(DfTypeUtil.toString(source.get("scriptData")));

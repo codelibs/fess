@@ -6,9 +6,6 @@
     "_source": {
       "enabled": true
     },
-    "_id": {
-      "path": "id"
-    },
     "dynamic_templates": [
       {
         "lang_ar": {
@@ -476,10 +473,6 @@
         "index": "not_analyzed"
       },
       "host": {
-        "type": "string",
-        "index": "not_analyzed"
-      },
-      "id": {
         "type": "string",
         "index": "not_analyzed"
       },

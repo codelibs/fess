@@ -60,8 +60,8 @@
 		<crawler.version>1.0.0-SNAPSHOT</crawler.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>1.7.3</elasticsearch.version>
-		<cluster.runner.version>1.7.0.1-SNAPSHOT</cluster.runner.version>
+		<elasticsearch.version>2.0.0</elasticsearch.version>
+		<cluster.runner.version>2.0.0.0-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.3.8-RC9</tomcat.boot.version>
@@ -277,26 +277,26 @@
 						<mkdir dir="${basedir}/target/plugins" />
 						<get dest="${basedir}/target/plugins">
 							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/1.7.1/elasticsearch-analysis-kuromoji-neologd-1.7.1.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/2.0.0-SNAPSHOT/elasticsearch-analysis-kuromoji-neologd-2.0.0-20151105.074711-1.zip" />
 							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/1.5.0/elasticsearch-analysis-synonym-1.5.0.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0-SNAPSHOT/elasticsearch-analysis-synonym-2.0.0-20151104.150646-1.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/1.7.1-SNAPSHOT/elasticsearch-configsync-1.7.1-20151008.061136-2.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151105.133219-2.zip" />
 							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/1.7.0/elasticsearch-langfield-1.7.0.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0-SNAPSHOT/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
 							<url
 								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-1.5.7.1.zip" />
 						</get>
 						<delete dir="${basedir}/plugins" />
 						<mkdir dir="${basedir}/plugins" />
 						<unzip dest="${basedir}/plugins/analysis-kuromoji-neologd"
-							src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-1.7.1.zip" />
+							src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-2.0.0-20151105.074711-1.zip" />
 						<unzip dest="${basedir}/plugins/analysis-synonym"
-							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-1.5.0.zip" />
+							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0-20151104.150646-1.zip" />
 						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-1.7.1-20151008.061136-2.zip" />
+							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151105.133219-2.zip" />
 						<unzip dest="${basedir}/plugins/langfield"
-							src="${basedir}/target/plugins/elasticsearch-langfield-1.7.0.zip" />
+							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
 						<unzip dest="${basedir}/plugins/kopf"
 							src="${basedir}/target/plugins/elasticsearch-kopf-1.5.7.1.zip" />
 					</tasks>
@@ -392,18 +392,6 @@
 		</dependency>
 
 		<!-- servlet -->
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>${servlet.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>javax.servlet.jsp-api</artifactId>
-			<version>${jsp.version}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
@@ -558,6 +546,24 @@
 			<version>${tomcat.boot.version}</version>
 			<!-- Disable scope at development on IDEA -->
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-juli</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-util-scan</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- test -->

@@ -76,7 +76,6 @@ public abstract class BsSuggestBadWordBhv extends EsAbstractBehavior<SuggestBadW
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
             result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));
             result.setTargetRole(DfTypeUtil.toString(source.get("targetRole")));

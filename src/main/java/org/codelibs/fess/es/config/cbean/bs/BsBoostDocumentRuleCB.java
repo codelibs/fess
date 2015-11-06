@@ -154,6 +154,10 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
+        public void columnId() {
+            doColumn("_id");
+        }
+
         public void columnBoostExpr() {
             doColumn("boostExpr");
         }
@@ -164,10 +168,6 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
 
         public void columnCreatedTime() {
             doColumn("createdTime");
-        }
-
-        public void columnId() {
-            doColumn("id");
         }
 
         public void columnSortOrder() {

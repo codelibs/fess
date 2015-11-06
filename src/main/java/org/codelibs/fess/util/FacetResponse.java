@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.Constants;
-import org.elasticsearch.common.base.Charsets;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
 public class FacetResponse {
@@ -60,7 +60,7 @@ public class FacetResponse {
             final String encodedField = termFacet.getName().substring(Constants.FACET_FIELD_PREFIX.length());
             name = new String(BaseEncoding.base64().decode(encodedField), Charsets.UTF_8);
             for (final Terms.Bucket tfEntry : termFacet.getBuckets()) {
-                valueCountMap.put(tfEntry.getKeyAsText().string(), tfEntry.getDocCount());
+                valueCountMap.put(tfEntry.getKeyAsString(), tfEntry.getDocCount());
             }
         }
 

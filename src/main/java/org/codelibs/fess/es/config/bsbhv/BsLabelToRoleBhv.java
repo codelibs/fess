@@ -74,7 +74,6 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
     protected <RESULT extends LabelToRole> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
             result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
             return result;

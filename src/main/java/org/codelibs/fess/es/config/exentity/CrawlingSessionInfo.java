@@ -32,12 +32,10 @@ public class CrawlingSessionInfo extends BsCrawlingSessionInfo {
 
     private OptionalEntity<CrawlingSession> crawlingSession;
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

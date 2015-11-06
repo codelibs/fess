@@ -76,7 +76,6 @@ public abstract class BsOverlappingHostBhv extends EsAbstractBehavior<Overlappin
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setId(DfTypeUtil.toString(source.get("id")));
             result.setOverlappingName(DfTypeUtil.toString(source.get("overlappingName")));
             result.setRegularName(DfTypeUtil.toString(source.get("regularName")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));

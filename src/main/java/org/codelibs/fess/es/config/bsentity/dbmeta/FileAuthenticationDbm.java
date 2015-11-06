@@ -87,8 +87,6 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
                 (et, vl) -> ((FileAuthentication) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
         setupEpg(_epgMap, et -> ((FileAuthentication) et).getHostname(),
                 (et, vl) -> ((FileAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getId(), (et, vl) -> ((FileAuthentication) et).setId(DfTypeUtil.toString(vl)),
-                "id");
         setupEpg(_epgMap, et -> ((FileAuthentication) et).getParameters(),
                 (et, vl) -> ((FileAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
         setupEpg(_epgMap, et -> ((FileAuthentication) et).getPassword(),
@@ -147,8 +145,6 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
             false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHostname = cci("hostname", "hostname", null, null, String.class, "hostname", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnParameters = cci("parameters", "parameters", null, null, String.class, "parameters", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
@@ -178,10 +174,6 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
 
     public ColumnInfo columnHostname() {
         return _columnHostname;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnParameters() {
@@ -218,7 +210,6 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
         ls.add(columnCreatedTime());
         ls.add(columnFileConfigId());
         ls.add(columnHostname());
-        ls.add(columnId());
         ls.add(columnParameters());
         ls.add(columnPassword());
         ls.add(columnPort());

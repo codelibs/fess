@@ -91,12 +91,10 @@ public class ClickLog extends BsClickLog {
         this.clickCount = clickCount;
     }
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

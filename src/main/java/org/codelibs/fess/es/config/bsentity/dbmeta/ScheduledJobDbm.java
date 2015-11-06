@@ -89,7 +89,6 @@ public class ScheduledJobDbm extends AbstractDBMeta {
                 (et, vl) -> ((ScheduledJob) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getCronExpression(),
                 (et, vl) -> ((ScheduledJob) et).setCronExpression(DfTypeUtil.toString(vl)), "cronExpression");
-        setupEpg(_epgMap, et -> ((ScheduledJob) et).getId(), (et, vl) -> ((ScheduledJob) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getJobLogging(),
                 (et, vl) -> ((ScheduledJob) et).setJobLogging(DfTypeUtil.toBoolean(vl)), "jobLogging");
         setupEpg(_epgMap, et -> ((ScheduledJob) et).getName(), (et, vl) -> ((ScheduledJob) et).setName(DfTypeUtil.toString(vl)), "name");
@@ -151,8 +150,6 @@ public class ScheduledJobDbm extends AbstractDBMeta {
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCronExpression = cci("cronExpression", "cronExpression", null, null, String.class, "cronExpression",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobLogging = cci("jobLogging", "jobLogging", null, null, Boolean.class, "jobLogging", null, false,
             false, false, "Boolean", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
@@ -188,10 +185,6 @@ public class ScheduledJobDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCronExpression() {
         return _columnCronExpression;
-    }
-
-    public ColumnInfo columnId() {
-        return _columnId;
     }
 
     public ColumnInfo columnJobLogging() {
@@ -233,7 +226,6 @@ public class ScheduledJobDbm extends AbstractDBMeta {
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
         ls.add(columnCronExpression());
-        ls.add(columnId());
         ls.add(columnJobLogging());
         ls.add(columnName());
         ls.add(columnScriptData());

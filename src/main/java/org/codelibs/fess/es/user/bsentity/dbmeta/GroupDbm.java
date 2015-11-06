@@ -79,7 +79,6 @@ public class GroupDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((Group) et).getId(), (et, vl) -> ((Group) et).setId(DfTypeUtil.toString(vl)), "id");
         setupEpg(_epgMap, et -> ((Group) et).getName(), (et, vl) -> ((Group) et).setName(DfTypeUtil.toString(vl)), "name");
     }
 
@@ -117,14 +116,8 @@ public class GroupDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnId = cci("id", "id", null, null, String.class, "id", null, false, false, false, "String", 0, 0, null,
-            false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
-
-    public ColumnInfo columnId() {
-        return _columnId;
-    }
 
     public ColumnInfo columnName() {
         return _columnName;
@@ -132,7 +125,6 @@ public class GroupDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnId());
         ls.add(columnName());
         return ls;
     }

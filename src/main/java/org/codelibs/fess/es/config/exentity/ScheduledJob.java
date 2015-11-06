@@ -48,12 +48,10 @@ public class ScheduledJob extends BsScheduledJob {
         new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
     }
 
-    @Override
     public String getId() {
         return asDocMeta().id();
     }
 
-    @Override
     public void setId(final String id) {
         asDocMeta().id(id);
     }

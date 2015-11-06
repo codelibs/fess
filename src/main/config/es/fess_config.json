@@ -5,14 +5,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "labelTypeId" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -27,15 +20,8 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "dataConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -49,9 +35,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -59,10 +42,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "processType" : {
             "type" : "string",
@@ -92,9 +71,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "boostExpr" : {
             "type" : "string",
@@ -106,10 +82,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "sortOrder" : {
             "type" : "integer"
@@ -131,15 +103,8 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "fileConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -153,16 +118,9 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "endTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "jobName" : {
             "type" : "string",
@@ -197,9 +155,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -207,10 +162,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "name" : {
             "type" : "string",
@@ -235,9 +186,6 @@
       "web_config" : {
         "_all" : {
           "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
         },
         "properties" : {
           "available" : {
@@ -265,10 +213,6 @@
             "index" : "not_analyzed"
           },
           "excludedUrls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -317,9 +261,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "authRealm" : {
             "type" : "string",
@@ -333,10 +274,6 @@
             "type" : "long"
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -376,15 +313,8 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "dataConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -398,9 +328,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -408,10 +335,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "overlappingName" : {
             "type" : "string",
@@ -437,9 +360,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -447,10 +367,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "name" : {
             "type" : "string",
@@ -477,9 +393,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -487,10 +400,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "suggestWord" : {
             "type" : "string",
@@ -516,9 +425,6 @@
       "data_config" : {
         "_all" : {
           "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
         },
         "properties" : {
           "available" : {
@@ -546,10 +452,6 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "name" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -570,9 +472,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "crawlingSessionId" : {
             "type" : "string",
@@ -580,10 +479,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "key" : {
             "type" : "string",
@@ -599,14 +494,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "roleTypeId" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -621,9 +509,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -637,10 +522,6 @@
             "index" : "not_analyzed"
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -676,19 +557,12 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdTime" : {
             "type" : "long"
           },
           "expiredTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "name" : {
             "type" : "string",
@@ -704,9 +578,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "boost" : {
             "type" : "float"
@@ -717,10 +588,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "maxSize" : {
             "type" : "integer"
@@ -746,14 +613,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "labelTypeId" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -768,9 +628,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "boost" : {
             "type" : "float"
@@ -781,10 +638,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "reading" : {
             "type" : "string",
@@ -815,15 +668,8 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "fileConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -836,9 +682,6 @@
       "file_config" : {
         "_all" : {
           "enabled" : false
-        },
-        "_id" : {
-          "path" : "id"
         },
         "properties" : {
           "available" : {
@@ -866,10 +709,6 @@
             "index" : "not_analyzed"
           },
           "excludedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -914,9 +753,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "available" : {
             "type" : "boolean"
@@ -932,10 +768,6 @@
             "type" : "long"
           },
           "cronExpression" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -974,9 +806,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "configId" : {
             "type" : "string",
@@ -990,10 +819,6 @@
             "index" : "not_analyzed"
           },
           "errorName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -1014,9 +839,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdBy" : {
             "type" : "string",
@@ -1026,10 +848,6 @@
             "type" : "long"
           },
           "excludedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },

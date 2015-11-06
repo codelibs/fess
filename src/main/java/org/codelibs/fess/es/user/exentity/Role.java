@@ -31,4 +31,12 @@ public class Role extends BsRole {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    public String getId() {
+        return asDocMeta().id();
+    }
+
+    public void setId(String id) {
+        asDocMeta().id(id);
+    }
 }

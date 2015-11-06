@@ -28,18 +28,11 @@ import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordDbm;
  */
 public class BsSuggestElevateWord extends EsAbstractEntity {
 
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
     private static final long serialVersionUID = 1L;
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
-
-    @Override
-    public SuggestElevateWordDbm asDBMeta() {
-        return SuggestElevateWordDbm.getInstance();
-    }
-
-    @Override
-    public String asTableDbName() {
-        return "suggest_elevate_word";
-    }
 
     // ===================================================================================
     //                                                                           Attribute
@@ -74,108 +67,21 @@ public class BsSuggestElevateWord extends EsAbstractEntity {
     // [Referrers] *comment only
 
     // ===================================================================================
-    //                                                                            Accessor
-    //                                                                            ========
-    public Float getBoost() {
-        checkSpecifiedProperty("boost");
-        return boost;
+    //                                                                             DB Meta
+    //                                                                             =======
+    @Override
+    public SuggestElevateWordDbm asDBMeta() {
+        return SuggestElevateWordDbm.getInstance();
     }
 
-    public void setBoost(Float value) {
-        registerModifiedProperty("boost");
-        this.boost = value;
+    @Override
+    public String asTableDbName() {
+        return "suggest_elevate_word";
     }
 
-    public String getCreatedBy() {
-        checkSpecifiedProperty("createdBy");
-        return createdBy;
-    }
-
-    public void setCreatedBy(String value) {
-        registerModifiedProperty("createdBy");
-        this.createdBy = value;
-    }
-
-    public Long getCreatedTime() {
-        checkSpecifiedProperty("createdTime");
-        return createdTime;
-    }
-
-    public void setCreatedTime(Long value) {
-        registerModifiedProperty("createdTime");
-        this.createdTime = value;
-    }
-
-    public String getId() {
-        checkSpecifiedProperty("id");
-        return asDocMeta().id();
-    }
-
-    public void setId(String value) {
-        registerModifiedProperty("id");
-        asDocMeta().id(value);
-    }
-
-    public String getReading() {
-        checkSpecifiedProperty("reading");
-        return reading;
-    }
-
-    public void setReading(String value) {
-        registerModifiedProperty("reading");
-        this.reading = value;
-    }
-
-    public String getSuggestWord() {
-        checkSpecifiedProperty("suggestWord");
-        return suggestWord;
-    }
-
-    public void setSuggestWord(String value) {
-        registerModifiedProperty("suggestWord");
-        this.suggestWord = value;
-    }
-
-    public String getTargetLabel() {
-        checkSpecifiedProperty("targetLabel");
-        return targetLabel;
-    }
-
-    public void setTargetLabel(String value) {
-        registerModifiedProperty("targetLabel");
-        this.targetLabel = value;
-    }
-
-    public String getTargetRole() {
-        checkSpecifiedProperty("targetRole");
-        return targetRole;
-    }
-
-    public void setTargetRole(String value) {
-        registerModifiedProperty("targetRole");
-        this.targetRole = value;
-    }
-
-    public String getUpdatedBy() {
-        checkSpecifiedProperty("updatedBy");
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String value) {
-        registerModifiedProperty("updatedBy");
-        this.updatedBy = value;
-    }
-
-    public Long getUpdatedTime() {
-        checkSpecifiedProperty("updatedTime");
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(Long value) {
-        registerModifiedProperty("updatedTime");
-        this.updatedTime = value;
-    }
-
+    // ===================================================================================
+    //                                                                              Source
+    //                                                                              ======
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
@@ -187,9 +93,6 @@ public class BsSuggestElevateWord extends EsAbstractEntity {
         }
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
-        }
-        if (asDocMeta().id() != null) {
-            sourceMap.put("id", asDocMeta().id());
         }
         if (reading != null) {
             sourceMap.put("reading", reading);
@@ -210,5 +113,120 @@ public class BsSuggestElevateWord extends EsAbstractEntity {
             sourceMap.put("updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    // ===================================================================================
+    //                                                                      Basic Override
+    //                                                                      ==============
+    @Override
+    protected String doBuildColumnString(String dm) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(boost);
+        sb.append(dm).append(createdBy);
+        sb.append(dm).append(createdTime);
+        sb.append(dm).append(reading);
+        sb.append(dm).append(suggestWord);
+        sb.append(dm).append(targetLabel);
+        sb.append(dm).append(targetRole);
+        sb.append(dm).append(updatedBy);
+        sb.append(dm).append(updatedTime);
+        if (sb.length() > dm.length()) {
+            sb.delete(0, dm.length());
+        }
+        sb.insert(0, "{").append("}");
+        return sb.toString();
+    }
+
+    // ===================================================================================
+    //                                                                            Accessor
+    //                                                                            ========
+    public Float getBoost() {
+        checkSpecifiedProperty("boost");
+        return boost;
+    }
+
+    public void setBoost(Float value) {
+        registerModifiedProperty("boost");
+        this.boost = value;
+    }
+
+    public String getCreatedBy() {
+        checkSpecifiedProperty("createdBy");
+        return convertEmptyToNull(createdBy);
+    }
+
+    public void setCreatedBy(String value) {
+        registerModifiedProperty("createdBy");
+        this.createdBy = value;
+    }
+
+    public Long getCreatedTime() {
+        checkSpecifiedProperty("createdTime");
+        return createdTime;
+    }
+
+    public void setCreatedTime(Long value) {
+        registerModifiedProperty("createdTime");
+        this.createdTime = value;
+    }
+
+    public String getReading() {
+        checkSpecifiedProperty("reading");
+        return convertEmptyToNull(reading);
+    }
+
+    public void setReading(String value) {
+        registerModifiedProperty("reading");
+        this.reading = value;
+    }
+
+    public String getSuggestWord() {
+        checkSpecifiedProperty("suggestWord");
+        return convertEmptyToNull(suggestWord);
+    }
+
+    public void setSuggestWord(String value) {
+        registerModifiedProperty("suggestWord");
+        this.suggestWord = value;
+    }
+
+    public String getTargetLabel() {
+        checkSpecifiedProperty("targetLabel");
+        return convertEmptyToNull(targetLabel);
+    }
+
+    public void setTargetLabel(String value) {
+        registerModifiedProperty("targetLabel");
+        this.targetLabel = value;
+    }
+
+    public String getTargetRole() {
+        checkSpecifiedProperty("targetRole");
+        return convertEmptyToNull(targetRole);
+    }
+
+    public void setTargetRole(String value) {
+        registerModifiedProperty("targetRole");
+        this.targetRole = value;
+    }
+
+    public String getUpdatedBy() {
+        checkSpecifiedProperty("updatedBy");
+        return convertEmptyToNull(updatedBy);
+    }
+
+    public void setUpdatedBy(String value) {
+        registerModifiedProperty("updatedBy");
+        this.updatedBy = value;
+    }
+
+    public Long getUpdatedTime() {
+        checkSpecifiedProperty("updatedTime");
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(Long value) {
+        registerModifiedProperty("updatedTime");
+        this.updatedTime = value;
     }
 }

@@ -154,12 +154,12 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
             columnList.add(name);
         }
 
-        public void columnCreatedTime() {
-            doColumn("createdTime");
+        public void columnId() {
+            doColumn("_id");
         }
 
-        public void columnId() {
-            doColumn("id");
+        public void columnCreatedTime() {
+            doColumn("createdTime");
         }
 
         public void columnUrl() {

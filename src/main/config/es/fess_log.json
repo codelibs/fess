@@ -5,14 +5,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "name" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -31,16 +24,9 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "url" : {
             "type" : "string",
@@ -56,9 +42,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "createdAt" : {
             "type" : "date",
@@ -69,10 +52,6 @@
             "index" : "not_analyzed"
           },
           "eventType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "id" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -89,14 +68,7 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "requestedTime" : {
             "type" : "long"
           },
@@ -114,9 +86,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "accessType" : {
             "type" : "string",
@@ -128,10 +97,6 @@
           },
           "hitCount" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "queryOffset" : {
             "type" : "integer"
@@ -171,9 +136,6 @@
         "_all" : {
           "enabled" : false
         },
-        "_id" : {
-          "path" : "id"
-        },
         "properties" : {
           "code" : {
             "type" : "string",
@@ -181,10 +143,6 @@
           },
           "createdTime" : {
             "type" : "long"
-          },
-          "id" : {
-            "type" : "string",
-            "index" : "not_analyzed"
           },
           "updatedTime" : {
             "type" : "long"
