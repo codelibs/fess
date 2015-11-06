@@ -13,10 +13,7 @@
 			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="searchList" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.search_list_configuration" />
@@ -27,7 +24,6 @@
 						</la:link></li>
 				</ol>
 			</section>
-
 			<section class="content">
 				<div class="row">
 					<div class="col-xs-12">
@@ -57,6 +53,7 @@
 									<div class="form-group">
 										<button type="submit" class="btn btn-primary" name="search"
 											value="<la:message key="labels.search"/>">
+											<i class="fa fa-search"></i>
 											<la:message key="labels.search" />
 										</button>
 									</div>
@@ -124,8 +121,7 @@
 																				<%-- TODO: doc_id --%>
 																				<la:hidden property="docId"
 																					value="${f:u(doc.doc_id)}" />
-																				<la:hidden property="query"
-																					value="${f:u(query)}" />
+																				<la:hidden property="query" value="${f:u(query)}" />
 																				<button type="submit"
 																					class="btn btn-outline btn-danger">
 																					<i class="fa fa-trash"></i>

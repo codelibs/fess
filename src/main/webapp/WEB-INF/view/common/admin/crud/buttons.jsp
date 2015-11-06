@@ -2,33 +2,40 @@
 <c:if test="${crudMode == 1}">
 	<button type="submit" class="btn" name="list"
 		value="<la:message key="labels.crud_button_back" />">
+		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<button type="submit" class="btn btn-success" name="create"
 		value="<la:message key="labels.crud_button_create" />">
+		<i class="fa fa-plus"></i>
 		<la:message key="labels.crud_button_create" />
 	</button>
 </c:if>
 <c:if test="${crudMode == 2}">
 	<button type="submit" class="btn" name="edit" value="back">
+		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<button type="submit" class="btn btn-warning" name="update"
 		value="<la:message key="labels.crud_button_update" />">
+		<i class="fa fa-pencil"></i>
 		<la:message key="labels.crud_button_update" />
 	</button>
 </c:if>
 <c:if test="${crudMode == 4}">
 	<button type="submit" class="btn" name="list" value="back">
+		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
 	<button type="submit" class="btn btn-warning" name="edit"
 		value="<la:message key="labels.crud_button_edit" />">
+		<i class="fa fa-pencil"></i>
 		<la:message key="labels.crud_button_edit" />
 	</button>
 	<button type="button" class="btn btn-danger" name="delete"
 		data-toggle="modal" data-target="#confirmToDelete"
 		value="<la:message key="labels.crud_button_delete" />">
+		<i class="fa fa-trash"></i>
 		<la:message key="labels.crud_button_delete" />
 	</button>
 	<div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
@@ -57,6 +64,7 @@
 					<button type="submit" class="btn btn-outline btn-danger"
 						name="delete"
 						value="<la:message key="labels.crud_button_delete" />">
+						<i class="fa fa-trash"></i>
 						<la:message key="labels.crud_button_delete" />
 					</button>
 				</div>

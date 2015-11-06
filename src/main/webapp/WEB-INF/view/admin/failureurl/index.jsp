@@ -13,10 +13,7 @@
 			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="failureUrl" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.failure_url_configuration" />
@@ -78,6 +75,7 @@
 										<div class="col-sm-offset-2 col-sm-10">
 											<button type="submit" class="btn btn-primary" name="search"
 												value="<la:message key="labels.crud_button_search" />">
+												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
 											</button>
 											<button type="reset" class="btn btn-secondary" name="reset"
@@ -117,8 +115,10 @@
 																<td>${f:h(data.lastAccessTimeForList)}</td>
 																<td style="overflow-x: auto;"><la:link
 																		href="details/4/${f:u(data.id)}">
+																		<i class="fa fa-check"></i>
 																		<la:message key="labels.failure_url_link_confirm" />
 																	</la:link> <la:link href="deletepage/3/${f:u(data.id)}">
+																		<i class="fa fa-trash"></i>
 																		<la:message key="labels.crud_link_delete" />
 																	</la:link></td>
 															</tr>
@@ -219,7 +219,6 @@
 				</div>
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
