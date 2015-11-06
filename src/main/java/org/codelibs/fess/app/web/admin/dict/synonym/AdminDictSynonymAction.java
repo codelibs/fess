@@ -323,7 +323,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, toEditHtml());
         synonymService.getSynonymItem(form.dictId, form.id).ifPresent(entity -> {
             synonymService.delete(form.dictId, entity);

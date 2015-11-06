@@ -164,7 +164,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                         -------------
     @Execute
     public HtmlResponse delete(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, toIndexHtml());
         String id = form.id;
         jobLogService.getJobLog(id).alwaysPresent(entity -> {
