@@ -137,10 +137,10 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id) {
+    public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         return asHtml(path_AdminCrawlingsession_DetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {

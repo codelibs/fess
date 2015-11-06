@@ -105,10 +105,10 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final FailureUrlEditForm form) {
+    public HtmlResponse details(final int crudMode, final String id, final FailureUrlEditForm form) {
         // TODO
         // form.crudMode = crudMode;
         // form.id = id;

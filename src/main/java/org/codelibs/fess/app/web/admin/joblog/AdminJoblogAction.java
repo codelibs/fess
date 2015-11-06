@@ -130,10 +130,10 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     // -----------------------------------------------------
-    //                                               Confirm
+    //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse confirmpage(final int crudMode, final String id, final JobLogEditForm form) {
+    public HtmlResponse details(final int crudMode, final String id, final JobLogEditForm form) {
         form.crudMode = crudMode;
         form.id = id;
         verifyCrudMode(form, CrudMode.DETAILS);
