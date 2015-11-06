@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.joblog;
 import java.io.Serializable;
 
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
 
