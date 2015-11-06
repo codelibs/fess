@@ -15,21 +15,19 @@
  */
 package org.codelibs.fess.app.web.admin.failureurl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.app.service.FailureUrlService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author codelibs
@@ -60,14 +58,14 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final FailureUrlSearchForm form) {
+    public HtmlResponse index(final SearchForm form) {
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse list(final Integer pageNumber, final FailureUrlSearchForm form) {
+    public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         failureUrlPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -75,15 +73,15 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final FailureUrlSearchForm form) {
-        copyBeanToBean(form.searchParams, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+    public HtmlResponse search(final SearchForm form) {
+        copyBeanToBean(form, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
-    public HtmlResponse reset(final FailureUrlSearchForm form) {
+    public HtmlResponse reset(final SearchForm form) {
         failureUrlPager.clear();
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -91,30 +89,37 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse back(final FailureUrlSearchForm form) {
+    public HtmlResponse back(final SearchForm form) {
         return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
-    protected void searchPaging(final RenderData data, final FailureUrlSearchForm form) {
+    protected void searchPaging(final RenderData data, final SearchForm form) {
         data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(failureUrlPager, form.searchParams, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(failureUrlPager, form, op -> op.include("id"));
     }
 
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
     @Execute
-    public HtmlResponse details(final int crudMode, final String id, final FailureUrlEditForm form) {
-        // TODO
-        // form.crudMode = crudMode;
-        // form.id = id;
-        // verifyCrudMode(form, CrudMode.CONFIRM);
-        loadFailureUrl(form);
-        return asHtml(path_AdminFailureurl_DetailsJsp);
+    public HtmlResponse details(final int crudMode, final String id) {
+        verifyCrudMode(crudMode, CrudMode.DETAILS);
+        return asHtml(path_AdminFailureurl_DetailsJsp).useForm(EditForm.class, op -> {
+            op.setup(form -> {
+                failureUrlService.getFailureUrl(id).ifPresent(entity -> {
+                    copyBeanToBean(entity, form, copyOp -> {
+                        copyOp.excludeNull();
+                    });
+                    form.crudMode = crudMode;
+                }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                });
+            });
+        });
     }
 
     // -----------------------------------------------------
@@ -122,40 +127,39 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                         -------------
 
     @Execute
-    public HtmlResponse delete(final FailureUrlEditForm form) {
-        // TODO verifyCrudMode(form, CrudMode.DELETE);
-        failureUrlService.delete(getFailureUrl(form));
-        saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+    public HtmlResponse delete(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.DELETE);
+        validate(form, messages -> {}, toIndexHtml());
+        String id = form.id;
+        failureUrlService.getFailureUrl(id).alwaysPresent(entity -> {
+            failureUrlService.delete(entity);
+            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+        });
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse deleteall(final FailureUrlEditForm form) {
+    public HtmlResponse deleteall(final EditForm form) {
+        validate(form, messages -> {}, toIndexHtml());
         failureUrlService.deleteAll(failureUrlPager);
         saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 
     // ===================================================================================
-    //                                                                        Assist Logic
+    //                                                                        Small Helper
     //                                                                        ============
-
-    protected void loadFailureUrl(final FailureUrlEditForm form) {
-        copyBeanToBean(getFailureUrl(form), form, op -> op.exclude("crudMode"));
-    }
-
-    protected FailureUrl getFailureUrl(final FailureUrlEditForm form) {
-        final FailureUrl failureUrl = failureUrlService.getFailureUrl(createKeyMap(form));
-        if (failureUrl == null) {
-            // TODO
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
+            throwValidationError(messages -> {
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
+            }, toIndexHtml());
         }
-        return failureUrl;
     }
 
-    protected Map<String, String> createKeyMap(final FailureUrlEditForm form) {
-        final Map<String, String> keys = new HashMap<String, String>();
-        keys.put("id", form.id);
-        return keys;
+    protected VaErrorHook toIndexHtml() {
+        return () -> {
+            return asHtml(path_AdminJoblog_IndexJsp);
+        };
     }
-
 }
