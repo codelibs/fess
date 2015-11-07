@@ -70,36 +70,36 @@
 										<%-- Paging Info --%>
 										<div class="col-sm-2">
 											<la:message key="labels.pagination_page_guide_msg"
-												arg0="${f:h(webConfigPager.currentPageNumber)}"
-												arg1="${f:h(webConfigPager.allPageCount)}"
-												arg2="${f:h(webConfigPager.allRecordCount)}" />
+												arg0="${f:h(keyMatchPager.currentPageNumber)}"
+												arg1="${f:h(keyMatchPager.allPageCount)}"
+												arg2="${f:h(keyMatchPager.allRecordCount)}" />
 										</div>
 										<%-- Paging Navigation --%>
 										<div class="col-sm-10">
 											<ul class="pagination pagination-sm no-margin pull-right">
-												<c:if test="${webConfigPager.existPrePage}">
+												<c:if test="${keyMatchPager.existPrePage}">
 													<li class="prev"><la:link
-															href="list/${webConfigPager.currentPageNumber - 1}">
+															href="list/${keyMatchPager.currentPageNumber - 1}">
 															<la:message key="labels.prev_page" />
 														</la:link></li>
 												</c:if>
-												<c:if test="${!webConfigPager.existPrePage}">
+												<c:if test="${!keyMatchPager.existPrePage}">
 													<li class="prev disabled"><a href="#"><la:message
 																key="labels.prev_page" /></a></li>
 												</c:if>
 												<c:forEach var="p" varStatus="s"
-													items="${webConfigPager.pageNumberList}">
+													items="${keyMatchPager.pageNumberList}">
 													<li
-														<c:if test="${p == webConfigPager.currentPageNumber}">class="active"</c:if>><la:link
+														<c:if test="${p == keyMatchPager.currentPageNumber}">class="active"</c:if>><la:link
 															href="list/${p}">${p}</la:link></li>
 												</c:forEach>
-												<c:if test="${webConfigPager.existNextPage}">
+												<c:if test="${keyMatchPager.existNextPage}">
 													<li class="next"><la:link
-															href="list/${webConfigPager.currentPageNumber + 1}">
+															href="list/${keyMatchPager.currentPageNumber + 1}">
 															<la:message key="labels.next_page" />
 														</la:link></li>
 												</c:if>
-												<c:if test="${!webConfigPager.existNextPage}">
+												<c:if test="${!keyMatchPager.existNextPage}">
 													<li class="next disabled"><a href="#"><la:message
 																key="labels.next_page" /></a></li>
 												</c:if>
