@@ -38,6 +38,9 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/crawlingsession/index.jsp */
     HtmlNext path_AdminCrawlingsession_IndexJsp = new HtmlNext("/admin/crawlingsession/index.jsp");
 
+    /** The path of the HTML: /admin/dashboard/dashboard.jsp */
+    HtmlNext path_AdminDashboard_DashboardJsp = new HtmlNext("/admin/dashboard/dashboard.jsp");
+
     /** The path of the HTML: /admin/data/index.jsp */
     HtmlNext path_AdminData_IndexJsp = new HtmlNext("/admin/data/index.jsp");
 
@@ -250,9 +253,6 @@ public interface FessHtmlPath {
 
     /** The path of the HTML: /admin/suggestelevateword/upload.jsp */
     HtmlNext path_AdminSuggestelevateword_UploadJsp = new HtmlNext("/admin/suggestelevateword/upload.jsp");
-
-    /** The path of the HTML: /admin/system/index.jsp */
-    HtmlNext path_AdminSystem_IndexJsp = new HtmlNext("/admin/system/index.jsp");
 
     /** The path of the HTML: /admin/systeminfo/index.jsp */
     HtmlNext path_AdminSysteminfo_IndexJsp = new HtmlNext("/admin/systeminfo/index.jsp");

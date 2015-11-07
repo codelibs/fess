@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.system_title_configuration" /></title>
+<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.dashboard_title_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -14,12 +14,12 @@
 		</jsp:include>
 
 		<div id="content" class="content-wrapper">
-			<iframe id="contentFrame" src="<%=request.getContextPath()%>/admin/server/_plugin/kopf/" seamless></iframe>
+			<iframe id="contentFrame" src="<%=request.getContextPath()%>${serverPath}/_plugin/kopf/" seamless></iframe>
 		</div>
 
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
-	<script src="${f:url('/js/admin/system.js')}" type="text/javascript"></script>
+	<script src="${f:url('/js/admin/dashboard.js')}" type="text/javascript"></script>
 </body>
 </html>

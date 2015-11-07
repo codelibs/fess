@@ -13,10 +13,11 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.system;
+package org.codelibs.fess.app.web.admin.dashboard;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.api.es.EsApiManager;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
@@ -27,14 +28,17 @@ import org.lastaflute.web.response.HtmlResponse;
  * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class AdminSystemAction extends FessAdminAction {
+public class AdminDashboardAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
 
     @Resource
-    private SystemHelper systemHelper;
+    protected SystemHelper systemHelper;
+
+    @Resource
+    protected EsApiManager esApiManager;
 
     // ===================================================================================
     //                                                                               Hook
@@ -42,7 +46,7 @@ public class AdminSystemAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("system"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("dashboard"));
     }
 
     // ===================================================================================
@@ -50,7 +54,10 @@ public class AdminSystemAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index() {
-        return asHtml(path_AdminSystem_IndexJsp);
+        esApiManager.saveToken();
+        return asHtml(path_AdminDashboard_DashboardJsp).renderWith(data -> {
+            data.register("serverPath", esApiManager.getServerPath());
+        });
     }
 
 }

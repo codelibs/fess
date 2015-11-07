@@ -28,10 +28,10 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
 
-    /** The key of the configuration. e.g. 31556926 */
+    /** The key of the configuration. e.g. 3600 */
     String COOKIE_DEFAULT_EXPIRE = "cookie.default.expire";
 
-    /** The key of the configuration. e.g. 315360000 */
+    /** The key of the configuration. e.g. 86400 */
     String COOKIE_ETERNAL_EXPIRE = "cookie.eternal.expire";
 
     /** The key of the configuration. e.g. FES */
@@ -86,7 +86,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'cookie.default.expire'. <br>
-     * The value is, e.g. 31556926 <br>
+     * The value is, e.g. 3600 <br>
      * comment: The default expire of cookie in seconds e.g. 31556926: one year, 86400: one day
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -94,7 +94,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'cookie.default.expire' as {@link Integer}. <br>
-     * The value is, e.g. 31556926 <br>
+     * The value is, e.g. 3600 <br>
      * comment: The default expire of cookie in seconds e.g. 31556926: one year, 86400: one day
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
@@ -103,7 +103,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'cookie.eternal.expire'. <br>
-     * The value is, e.g. 315360000 <br>
+     * The value is, e.g. 86400 <br>
      * comment: The eternal expire of cookie in seconds e.g. 315360000: ten year, 86400: one day
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -111,7 +111,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'cookie.eternal.expire' as {@link Integer}. <br>
-     * The value is, e.g. 315360000 <br>
+     * The value is, e.g. 86400 <br>
      * comment: The eternal expire of cookie in seconds e.g. 315360000: ten year, 86400: one day
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.

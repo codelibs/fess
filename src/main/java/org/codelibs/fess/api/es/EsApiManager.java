@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.FilterChain;
@@ -28,7 +29,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codelibs.core.exception.IORuntimeException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -37,11 +37,16 @@ import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.servlet.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EsApiManager extends BaseApiManager {
+    private static final String ADMIN_SERVER = "/admin/server_";
+
     private static final Logger logger = LoggerFactory.getLogger(EsApiManager.class);
 
     @Resource
@@ -50,7 +55,7 @@ public class EsApiManager extends BaseApiManager {
     protected String[] acceptedRoles = new String[] { "admin" };
 
     public EsApiManager() {
-        setPathPrefix("/admin/server");
+        setPathPrefix(ADMIN_SERVER);
     }
 
     @Override
@@ -66,10 +71,26 @@ public class EsApiManager extends BaseApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
-        String path = request.getServletPath().substring(pathPrefix.length());
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
+        getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
+            String servletPath = request.getServletPath();
+            String pathPrefix = ADMIN_SERVER + token;
+            if (!servletPath.startsWith(pathPrefix)) {
+                throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid access token.");
+            }
+            final String path;
+            String value = servletPath.substring(pathPrefix.length());
+            if (!value.startsWith("/")) {
+                path = "/" + value;
+            } else {
+                path = value;
+            }
+            processRequest(request, response, path);
+        }).orElse(() -> {
+            throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid session.");
+        });
+    }
+
+    protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, String path) {
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
         final CurlRequest curlRequest = new CurlRequest(httpMethod, getUrl() + path);
         request.getParameterMap().entrySet().stream().forEach(entry -> {
@@ -85,7 +106,7 @@ public class EsApiManager extends BaseApiManager {
                 try (ServletInputStream in = request.getInputStream(); OutputStream out = con.getOutputStream()) {
                     CopyUtil.copy(in, out);
                 } catch (final IOException e) {
-                    throw new IORuntimeException(e);
+                    throw new WebApiException(HttpServletResponse.SC_BAD_REQUEST, e);
                 }
             }
         }).execute(con -> {
@@ -96,17 +117,31 @@ public class EsApiManager extends BaseApiManager {
                 try (InputStream err = con.getErrorStream()) {
                     logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
                 } catch (final IOException e1) {}
-                throw new IORuntimeException(e);
+                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
         });
-        // TODO exception
     }
 
     public void setAcceptedRoles(final String[] acceptedRoles) {
         this.acceptedRoles = acceptedRoles;
     }
 
+    public String getServerPath() {
+        return getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
+                .orElseGet(() -> {
+                    throw new FessSystemException("Cannot create an access token.");
+                });
+    }
+
     protected String getUrl() {
         return crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
+    }
+
+    public void saveToken() {
+        getSessionManager().setAttribute(Constants.ES_API_ACCESS_TOKEN, UUID.randomUUID().toString().replace("-", ""));
+    }
+
+    private SessionManager getSessionManager() {
+        return ComponentUtil.getSessionManager();
     }
 }

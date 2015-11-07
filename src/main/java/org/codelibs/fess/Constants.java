@@ -326,4 +326,6 @@ public class Constants extends CoreLibConstants {
     public static final String ELASTICSEARCH_WEB_URL_PROPERTY = "es.http.url";
 
     public static final String ELASTICSEARCH_WEB_URL = "http://localhost:9201";
+
+    public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";
 }

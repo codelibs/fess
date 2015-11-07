@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import org.codelibs.fess.app.web.admin.system.AdminSystemAction;
+import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -44,7 +44,7 @@ public class LoginAction extends FessSearchAction {
     }
 
     private HtmlResponse getHtmlResponse() {
-        return getUserBean().map(user -> redirect(AdminSystemAction.class)).orElse(asHtml(path_Login_IndexJsp));
+        return getUserBean().map(user -> redirect(AdminDashboardAction.class)).orElse(asHtml(path_Login_IndexJsp));
     }
 
     @Execute

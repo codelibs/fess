@@ -528,7 +528,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
 
     /** The key of the message: Dashboard */
-    public static final String LABELS_menu_system_config = "{labels.menu_system_config}";
+    public static final String LABELS_menu_dashboard_config = "{labels.menu_dashboard_config}";
 
     /** The key of the message: Index */
     public static final String LABELS_menu_document_config = "{labels.menu_document_config}";
@@ -1356,7 +1356,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_overlapping_host_link_next_page = "{labels.overlapping_host_link_next_page}";
 
     /** The key of the message: System Configuration */
-    public static final String LABELS_system_title_configuration = "{labels.system_title_configuration}";
+    public static final String LABELS_dashboard_title_configuration = "{labels.dashboard_title_configuration}";
 
     /** The key of the message: System Status */
     public static final String LABELS_system_title_system_status = "{labels.system_title_system_status}";

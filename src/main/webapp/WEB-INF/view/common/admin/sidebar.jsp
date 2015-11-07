@@ -27,9 +27,9 @@
 
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='dashboard'}">active</c:if>"><la:link
-					href="/admin/system/">
+					href="/admin/dashboard/">
 					<i class="fa fa-dashboard"></i>
-					<span><la:message key="labels.menu_system_config" /></span>
+					<span><la:message key="labels.menu_dashboard_config" /></span>
 				</la:link></li>
 
 			<li
