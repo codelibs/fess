@@ -24,14 +24,11 @@ public class DesignForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // TODO jflute target needed? (2015/07/25)
-    //@Required(target = "upload")
     @Required
     public MultipartFormFile designFile;
 
     public String designFileName;
 
-    // TODO jflute unneeded? no validator at the method (2015/07/25)
-    //@Required(target = "edit,editAsUseDefault,download,delete")
+    @Required
     public String fileName;
 }

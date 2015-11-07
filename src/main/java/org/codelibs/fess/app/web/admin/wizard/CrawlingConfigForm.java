@@ -33,15 +33,8 @@ public class CrawlingConfigForm implements Serializable {
     @Size(max = 1000)
     public String crawlingConfigPath;
 
-    // TODO
-    //    @Min(0)
-    //    @Max(Integer.MAX_VALUE)
-    public String depth;
+    public Integer depth;
 
-    // TODO
-    @Size(max = 100)
-    //    @Min(0)
-    //    @Max(Long.MAX_VALUE)
-    public String maxAccessCount;
+    public Long maxAccessCount;
 
 }

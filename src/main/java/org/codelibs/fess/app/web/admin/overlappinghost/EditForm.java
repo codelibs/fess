@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.app.web.admin.overlappinghost;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author Keiichi Watanabe
@@ -34,11 +34,11 @@ public class EditForm extends CreateForm {
     @Size(max = 1000)
     public String updatedBy;
 
-    @Digits(integer = 19, fraction = 0)
+    @ValidateTypeFailure
     public Long updatedTime;
 
     @Required
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public Integer versionNo;
 
 }

@@ -17,11 +17,11 @@ package org.codelibs.fess.app.web.admin.suggestelevateword;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author codelibs
@@ -31,8 +31,8 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Digits(integer = 10, fraction = 0)
-    public int crudMode;
+    @ValidateTypeFailure
+    public Integer crudMode;
 
     @Required
     public String suggestWord;
@@ -44,15 +44,15 @@ public class CreateForm implements Serializable {
     public String targetLabel;
 
     @Required
-    // @FloatType
-    public float boost;
+    @ValidateTypeFailure
+    public Float boost;
 
     @Required
     @Size(max = 1000)
     public String createdBy;
 
     @Required
-    @Digits(integer = 19, fraction = 0)
+    @ValidateTypeFailure
     public Long createdTime;
 
     public void initialize() {

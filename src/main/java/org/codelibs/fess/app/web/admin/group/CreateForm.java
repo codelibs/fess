@@ -17,10 +17,10 @@ package org.codelibs.fess.app.web.admin.group;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author shinsuke
@@ -30,8 +30,8 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Digits(integer = 10, fraction = 0)
-    public int crudMode;
+    @ValidateTypeFailure
+    public Integer crudMode;
 
     @Required
     @Size(max = 100)

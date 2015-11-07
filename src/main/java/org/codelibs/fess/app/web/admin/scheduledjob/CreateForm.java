@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.admin.scheduledjob;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -26,6 +25,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.annotation.CronExpression;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author shinsuke
@@ -34,7 +34,7 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public int crudMode;
 
     @Required
@@ -57,19 +57,16 @@ public class CreateForm implements Serializable {
     @Size(max = 4000)
     public String scriptData;
 
-    // ignore
     public String crawler;
 
-    // ignore
     public String jobLogging;
 
-    // ignore
     public String available;
 
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public Integer sortOrder;
 
     @Required
@@ -77,7 +74,7 @@ public class CreateForm implements Serializable {
     public String createdBy;
 
     @Required
-    @Digits(integer = 19, fraction = 0)
+    @ValidateTypeFailure
     public Long createdTime;
 
     public void initialize() {

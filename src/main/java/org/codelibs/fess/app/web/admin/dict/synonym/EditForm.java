@@ -15,9 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.dict.synonym;
 
-import javax.validation.constraints.Digits;
-
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author shinsuke
@@ -28,7 +27,7 @@ public class EditForm extends CreateForm {
     private static final long serialVersionUID = 1L;
 
     @Required
-    @Digits(integer = 19, fraction = 0)
+    @ValidateTypeFailure
     public Long id;
 
     public String getDisplayId() {

@@ -155,16 +155,16 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setBoost(1.0f);
                 wConfig.setCreatedBy(username);
                 wConfig.setCreatedTime(now);
-                if (StringUtil.isNotBlank(form.depth)) {
-                    wConfig.setDepth(Integer.parseInt(form.depth));
+                if (form.depth != null) {
+                    wConfig.setDepth(form.depth);
                 }
                 wConfig.setExcludedDocUrls(getDefaultString("default.config.web.excludedDocUrls", StringUtil.EMPTY));
                 wConfig.setExcludedUrls(getDefaultString("default.config.web.excludedUrls", StringUtil.EMPTY));
                 wConfig.setIncludedDocUrls(getDefaultString("default.config.web.includedDocUrls", StringUtil.EMPTY));
                 wConfig.setIncludedUrls(getDefaultString("default.config.web.includedUrls", StringUtil.EMPTY));
                 wConfig.setIntervalTime(getDefaultInteger("default.config.web.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_WEB));
-                if (StringUtil.isNotBlank(form.maxAccessCount)) {
-                    wConfig.setMaxAccessCount(Long.parseLong(form.maxAccessCount));
+                if (form.maxAccessCount != null) {
+                    wConfig.setMaxAccessCount(form.maxAccessCount);
                 }
                 wConfig.setName(configName);
                 wConfig.setNumOfThread(getDefaultInteger("default.config.web.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB));
@@ -183,16 +183,16 @@ public class AdminWizardAction extends FessAdminAction {
                 fConfig.setBoost(1.0f);
                 fConfig.setCreatedBy(username);
                 fConfig.setCreatedTime(now);
-                if (StringUtil.isNotBlank(form.depth)) {
-                    fConfig.setDepth(Integer.parseInt(form.depth));
+                if (form.depth != null) {
+                    fConfig.setDepth(form.depth);
                 }
                 fConfig.setExcludedDocPaths(getDefaultString("default.config.file.excludedDocPaths", StringUtil.EMPTY));
                 fConfig.setExcludedPaths(getDefaultString("default.config.file.excludedPaths", StringUtil.EMPTY));
                 fConfig.setIncludedDocPaths(getDefaultString("default.config.file.includedDocPaths", StringUtil.EMPTY));
                 fConfig.setIncludedPaths(getDefaultString("default.config.file.includedPaths", StringUtil.EMPTY));
                 fConfig.setIntervalTime(getDefaultInteger("default.config.file.intervalTime", Constants.DEFAULT_INTERVAL_TIME_FOR_FS));
-                if (StringUtil.isNotBlank(form.maxAccessCount)) {
-                    fConfig.setMaxAccessCount(Long.parseLong(form.maxAccessCount));
+                if (form.maxAccessCount != null) {
+                    fConfig.setMaxAccessCount(form.maxAccessCount);
                 }
                 fConfig.setName(configName);
                 fConfig.setNumOfThread(getDefaultInteger("default.config.file.numOfThread", Constants.DEFAULT_NUM_OF_THREAD_FOR_FS));

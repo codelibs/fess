@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.admin.overlappinghost;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -25,6 +24,7 @@ import javax.validation.constraints.Size;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author codelibs
@@ -34,7 +34,7 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public Integer crudMode;
 
     @Required
@@ -48,7 +48,7 @@ public class CreateForm implements Serializable {
     @Required
     @Min(value = 0)
     @Max(value = 2147483647)
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public Integer sortOrder;
 
     @Required
@@ -56,7 +56,7 @@ public class CreateForm implements Serializable {
     public String createdBy;
 
     @Required
-    @Digits(integer = 19, fraction = 0)
+    @ValidateTypeFailure
     public Long createdTime;
 
     public void initialize() {

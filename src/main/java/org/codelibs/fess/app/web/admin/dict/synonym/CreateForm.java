@@ -17,11 +17,11 @@ package org.codelibs.fess.app.web.admin.dict.synonym;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author shinsuke
@@ -34,7 +34,7 @@ public class CreateForm implements Serializable {
     @Required
     public String dictId;
 
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public Integer crudMode;
 
     @Required

@@ -19,10 +19,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author codelibs
@@ -36,14 +36,14 @@ public class EditForm implements Serializable {
 
     public String fileConfigName;
 
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public String pageNumber;
 
+    // TODO remove?
     public Map<String, String> searchParams = new HashMap<String, String>();
 
-    @Digits(integer = 10, fraction = 0)
-    // TODO necessary?
-    public int crudMode;
+    @ValidateTypeFailure
+    public Integer crudMode;
 
     public String getCurrentPageNumber() {
         return pageNumber;
@@ -64,7 +64,7 @@ public class EditForm implements Serializable {
     public String errorLog;
 
     @Required
-    @Digits(integer = 10, fraction = 0)
+    @ValidateTypeFailure
     public String errorCount;
 
     @Required

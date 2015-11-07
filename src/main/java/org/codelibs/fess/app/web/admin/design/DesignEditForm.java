@@ -22,5 +22,6 @@ package org.codelibs.fess.app.web.admin.design;
 public class DesignEditForm {
 
     public String fileName;
+
     public String content;
 }
