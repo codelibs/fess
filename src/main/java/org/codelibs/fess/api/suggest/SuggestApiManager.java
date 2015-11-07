@@ -68,8 +68,8 @@ public class SuggestApiManager extends BaseApiManager {
             final SuggestResponse suggestResponse = builder.execute().getResponse();
 
             buf.append("\"result\":{");
-
-            buf.append("\"index\":\"").append(suggestResponse.getIndex()).append('\"');
+            // TODO removed?
+            //            buf.append("\"index\":\"").append(suggestResponse.getIndex()).append('\"');
 
             buf.append(",\"took\":\"").append(suggestResponse.getTookMs()).append('\"');
 

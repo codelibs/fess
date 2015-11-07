@@ -1258,7 +1258,7 @@ public class FessEsClient implements Client {
 
     @Override
     public void termVectors(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
-        client.termVector(request, listener);
+        client.termVectors(request, listener);
     }
 
     @Override
@@ -1272,21 +1272,25 @@ public class FessEsClient implements Client {
     }
 
     @Override
+    @Deprecated
     public ActionFuture<TermVectorsResponse> termVector(TermVectorsRequest request) {
         return client.termVector(request);
     }
 
     @Override
+    @Deprecated
     public void termVector(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
         client.termVector(request, listener);
     }
 
     @Override
+    @Deprecated
     public TermVectorsRequestBuilder prepareTermVector() {
         return client.prepareTermVector();
     }
 
     @Override
+    @Deprecated
     public TermVectorsRequestBuilder prepareTermVector(String index, String type, String id) {
         return client.prepareTermVector(index, type, id);
     }

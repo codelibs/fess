@@ -38,7 +38,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -131,7 +130,8 @@ public class AdminUserAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
         clearStoredPassword();
         return asHtml(path_AdminUser_EditJsp).useForm(CreateForm.class, op -> {
@@ -144,7 +144,8 @@ public class AdminUserAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         clearStoredPassword();
         HtmlNext next;

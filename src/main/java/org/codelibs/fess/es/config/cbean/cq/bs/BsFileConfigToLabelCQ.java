@@ -75,11 +75,11 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         FileConfigToLabelCQ notQuery = new FileConfigToLabelCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
-            if (notQuery.queryBuilderList.size() > 1) {
+            if (notQuery.getQueryBuilderList().size() > 1) {
                 final String msg = "not query must be one query.";
                 throw new IllegalConditionBeanOperationException(msg);
             }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.queryBuilderList.get(0));
+            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -98,8 +98,8 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.queryBuilderList, shouldQuery.queryBuilderList, mustNotQuery.queryBuilderList,
-                            filterQuery.queryBuilderList);
+                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
+                            filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }

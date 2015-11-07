@@ -38,7 +38,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +100,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                             Execute
     //                                                                             =======
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse index() {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
@@ -188,7 +188,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse delete(final DesignForm form) {
         final File file = getTargetFile(form);
         if (file == null) {
@@ -205,7 +206,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // -----------------------------------------------------
     //                                                 Edit
     //                                                ------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final DesignEditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
@@ -217,7 +219,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return asHtml(path_AdminDesign_AdminDesignEditJsp);
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse editAsUseDefault(final DesignEditForm form) {
         final String jspType = "orig/view";
         final File jspFile = getJspFile(form.fileName, jspType);
@@ -229,7 +232,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return asHtml(path_AdminDesign_AdminDesignEditJsp);
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse update(final DesignEditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
@@ -248,7 +252,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return redirect(getClass());
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse back() {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }

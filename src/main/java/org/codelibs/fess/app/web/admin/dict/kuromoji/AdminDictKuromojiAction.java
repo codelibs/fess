@@ -40,7 +40,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -128,7 +127,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse createnew(final String dictId) {
         return asHtml(path_AdminDictKuromoji_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -139,7 +139,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         HtmlNext next;
@@ -185,7 +186,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse downloadpage(final String dictId) {
         return asHtml(path_AdminDictKuromoji_DownloadJsp).useForm(DownloadForm.class, op -> {
             op.setup(form -> {
@@ -200,7 +202,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
@@ -216,7 +219,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse uploadpage(final String dictId) {
         return asHtml(path_AdminDictKuromoji_UploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
@@ -231,7 +235,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {

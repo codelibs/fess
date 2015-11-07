@@ -33,7 +33,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -117,7 +116,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
         return asHtml(path_AdminWebconfig_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -129,7 +129,8 @@ public class AdminWebconfigAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         HtmlNext next;

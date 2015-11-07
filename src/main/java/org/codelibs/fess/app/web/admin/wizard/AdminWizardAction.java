@@ -41,7 +41,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.token.TxToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,12 +90,14 @@ public class AdminWizardAction extends FessAdminAction {
         return asHtml(path_AdminWizard_IndexJsp).useForm(IndexForm.class);
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse crawlingConfigForm() {
         return asHtml(path_AdminWizard_CrawlingConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_CrawlingConfigJsp);
@@ -106,7 +107,8 @@ public class AdminWizardAction extends FessAdminAction {
         return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_CrawlingConfigJsp);
@@ -266,12 +268,14 @@ public class AdminWizardAction extends FessAdminAction {
         return path;
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse startCrawlingForm() {
         return asHtml(path_AdminWizard_StartCrawlingJsp).useForm(StartCrawlingForm.class);
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
         if (!jobHelper.isCrawlProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();

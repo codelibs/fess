@@ -93,6 +93,10 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         return boolQuery;
     }
 
+    public List<QueryBuilder> getQueryBuilderList() {
+        return queryBuilderList != null ? queryBuilderList : Collections.emptyList();
+    }
+
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====

@@ -39,11 +39,11 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp8</dbflute.version>
-		<lastaflute.version>0.6.5-RC1</lastaflute.version>
+		<lastaflute.version>0.6.5-RC3</lastaflute.version>
 		<lasta.taglib.version>0.6.0</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
-		<mailflute.version>0.4.3-RC1</mailflute.version>
+		<mailflute.version>0.4.3-RC2</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.12</slf4j.version>
@@ -281,11 +281,11 @@
 							<url
 								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0-SNAPSHOT/elasticsearch-analysis-synonym-2.0.0-20151104.150646-1.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151105.133219-2.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151105.213152-3.zip" />
 							<url
 								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0-SNAPSHOT/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
 							<url
-								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-1.5.7.1.zip" />
+								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
 						</get>
 						<delete dir="${basedir}/plugins" />
 						<mkdir dir="${basedir}/plugins" />
@@ -294,11 +294,11 @@
 						<unzip dest="${basedir}/plugins/analysis-synonym"
 							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0-20151104.150646-1.zip" />
 						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151105.133219-2.zip" />
+							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151105.213152-3.zip" />
 						<unzip dest="${basedir}/plugins/langfield"
 							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
 						<unzip dest="${basedir}/plugins/kopf"
-							src="${basedir}/target/plugins/elasticsearch-kopf-1.5.7.1.zip" />
+							src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
 					</tasks>
 				</configuration>
 				<goals>
@@ -439,11 +439,6 @@
 			<groupId>org.codelibs.fess</groupId>
 			<artifactId>fess-suggest</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codelibs</groupId>
-			<artifactId>lucene-analyzers-kuromoji-ipadic-neologd</artifactId>
-			<version>4.10.4-20150501</version>
 		</dependency>
 
 		<!-- fileupload -->

@@ -170,7 +170,7 @@ public class IndexUpdater extends Thread {
                         final QueryBuilder queryBuilder =
                                 QueryBuilders
                                         .boolQuery()
-                                        .filter(QueryBuilders.termQuery(EsAccessResult.SESSION_ID, sessionIdList))
+                                        .filter(QueryBuilders.termsQuery(EsAccessResult.SESSION_ID, sessionIdList))
                                         .filter(QueryBuilders.termQuery(EsAccessResult.STATUS,
                                                 org.codelibs.fess.crawler.Constants.OK_STATUS));
                         builder.setQuery(queryBuilder);

@@ -47,7 +47,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.lastaflute.web.validation.VaErrorHook;
 
@@ -128,7 +127,8 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
         return asHtml(path_AdminSuggestbadword_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -138,7 +138,8 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         HtmlNext next;
@@ -184,12 +185,14 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse downloadpage(final SearchForm form) {
         return asHtml(path_AdminSuggestbadword_DownloadJsp);
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse download(final SearchForm form) {
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
@@ -207,7 +210,8 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse uploadpage(final UploadForm form) {
         return asHtml(path_AdminSuggestbadword_UploadJsp);
     }
@@ -257,7 +261,8 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse upload(final UploadForm form) {
         BufferedInputStream is = null;
         File tempFile = null;

@@ -27,7 +27,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -109,7 +108,8 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DELETE);
         return asHtml(path_AdminJoblog_DetailsJsp).useForm(EditForm.class, op -> {
@@ -126,7 +126,8 @@ public class AdminJoblogAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         validate(form, messages -> {}, toIndexHtml());

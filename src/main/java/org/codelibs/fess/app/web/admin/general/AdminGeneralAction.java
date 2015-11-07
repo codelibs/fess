@@ -31,7 +31,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
@@ -61,7 +60,8 @@ public class AdminGeneralAction extends FessAdminAction {
 
     // ===================================================================================
     //
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse index() {
         return asHtml(path_AdminGeneral_IndexJsp).useForm(EditForm.class, setup -> {
             setup.setup(form -> {
@@ -70,7 +70,8 @@ public class AdminGeneralAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse update(final EditForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminGeneral_IndexJsp);

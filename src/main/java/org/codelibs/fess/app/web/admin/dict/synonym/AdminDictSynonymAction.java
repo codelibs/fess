@@ -42,7 +42,6 @@ import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -130,7 +129,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse createnew(final String dictId) {
         return asHtml(path_AdminDictSynonym_EditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
@@ -141,7 +141,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         HtmlNext next;
@@ -189,7 +190,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                               Confirm
     //                                               -------
 
-    @Execute(token = TxToken.VALIDATE_KEEP)
+    @Execute
+    //(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromcreate(final CreateForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.CREATE;
@@ -200,7 +202,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         return asHtml(path_AdminDictSynonym_DetailsJsp);
     }
 
-    @Execute(token = TxToken.VALIDATE_KEEP)
+    @Execute
+    //(token = TxToken.VALIDATE_KEEP)
     public HtmlResponse confirmfromupdate(final EditForm form) {
         validate(form, messages -> {}, toEditHtml());
         form.crudMode = CrudMode.EDIT;
@@ -214,7 +217,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                              Download
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse downloadpage(final String dictId) {
         return asHtml(path_AdminDictSynonym_DownloadJsp).useForm(DownloadForm.class, op -> {
             op.setup(form -> {
@@ -229,7 +233,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         return synonymService.getSynonymFile(form.dictId).map(file -> {
@@ -245,7 +250,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse uploadpage(final String dictId) {
         return asHtml(path_AdminDictSynonym_UploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
@@ -260,7 +266,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
         });
     }
 
-    @Execute(token = TxToken.VALIDATE)
+    @Execute
+    //(token = TxToken.VALIDATE)
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         return synonymService.getSynonymFile(form.dictId).map(file -> {

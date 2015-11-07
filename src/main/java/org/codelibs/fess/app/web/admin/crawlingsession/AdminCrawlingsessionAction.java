@@ -28,7 +28,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.token.TxToken;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
@@ -121,7 +120,8 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
 
-    @Execute(token = TxToken.SAVE)
+    @Execute
+    //(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
         validate(form, messages -> {}, toIndexHtml());
