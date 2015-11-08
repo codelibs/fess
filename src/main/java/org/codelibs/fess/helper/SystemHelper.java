@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.File;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -59,8 +60,6 @@ public class SystemHelper implements Serializable {
     private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx256m", "-XX:MaxMetaspaceSize=128m",
             "-XX:CompressedClassSpaceSize=32m", "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC",
             "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+UseParNewGC", "-XX:+UseTLAB", "-XX:+DisableExplicitGC" };
-
-    private String logFilePath = System.getProperty("fess.log.path", "target/logs");
 
     private String javaCommandPath = "java";
 
@@ -133,11 +132,14 @@ public class SystemHelper implements Serializable {
     }
 
     public String getLogFilePath() {
-        return logFilePath;
-    }
-
-    public void setLogFilePath(final String logFilePath) {
-        this.logFilePath = logFilePath;
+        final String value = System.getProperty("fess.log.path");
+        if (value != null) {
+            return value;
+        } else {
+            final String userDir = System.getProperty("user.dir");
+            final File targetDir = new File(userDir, "target");
+            return new File(targetDir, "logs").getAbsolutePath();
+        }
     }
 
     public String encodeUrlFilter(final String path) {

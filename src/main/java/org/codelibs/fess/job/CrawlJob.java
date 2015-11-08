@@ -269,11 +269,7 @@ public class CrawlJob {
         }
 
         crawlerCmdList.add("-Dfess.crawler.process=true");
-        if (logFilePath == null) {
-            final String value = System.getProperty("fess.log.path");
-            logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
-        }
-        crawlerCmdList.add("-Dfess.log.path=" + logFilePath);
+        crawlerCmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(crawlerCmdList, "lasta.env", null, null);
         addSystemProperty(crawlerCmdList, "fess.log.name", "fess-crawler", "-crawler");
         addSystemProperty(crawlerCmdList, "fess.log.level", null, null);

@@ -57,7 +57,7 @@
 											<c:forEach var="logFile" varStatus="s" items="${logFileItems}">
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
 													<td>
-														<la:link href="download/${f:u(logFile.logFileName)}">${f:h(logFile.name)}</la:link>
+														<la:link href="download/${f:u(logFile.id)}" target="_blank">${f:h(logFile.name)}</la:link>
 													</td>
 													<td style="overflow-x: auto;">
 														<fmt:formatDate	value="${logFile.lastModified}" type="BOTH" dateStyle="MEDIUM" />

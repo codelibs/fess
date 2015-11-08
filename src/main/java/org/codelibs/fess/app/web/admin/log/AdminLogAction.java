@@ -15,17 +15,32 @@
  */
 package org.codelibs.fess.app.web.admin.log;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+
+import com.google.common.base.Charsets;
 
 /**
  * @author codelibs
@@ -43,46 +58,57 @@ public class AdminLogAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse index(final LogForm form) {
-        return asHtml(path_AdminLog_IndexJsp).renderWith(data -> {
-            data.register("logFileItems", getLogFileItems());
-        });
+    public HtmlResponse index() {
+        return toIndexPage();
     }
 
-    //@Execute(validator = true, input = "index", urlPattern = "download/{logFileName}")
-    public HtmlResponse download(final LogForm form) {
-        // TODO
-        return redirect(getClass());
-        /*
-        final String logFilePath = ComponentUtil.getSystemHelper().getLogFilePath();
+    @Execute
+    public ActionResponse download(final String id) {
+        String filename = new String(Base64.getDecoder().decode(id), Charsets.UTF_8).replace("..", "").replaceAll("\\s", "");
+        final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
-            final File file = new File(logFilePath);
-            final File parentDir = file.getParentFile();
-            String fileName;
-            try {
-                fileName = new String(Base64.decodeBase64(logForm.logFileName.getBytes(Constants.UTF_8)), Constants.UTF_8);
-            } catch (final UnsupportedEncodingException e1) {
-                fileName =
-                        new String(Base64.decodeBase64(logForm.logFileName.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
-            }
-            final File logFile = new File(parentDir, fileName);
-            if (logFile.isFile()) {
-                try {
-                    LaResponseUtil.download(fileName, new FileInputStream(logFile));
-                    return null;
-                } catch (final FileNotFoundException e) {
-                    logger.warn("Could not find " + logFile.getAbsolutePath(), e);
+            Path path = Paths.get(logFilePath, filename);
+            return asStream(filename).contentType("text/plain; charset=UTF-8").stream(out -> {
+                try (InputStream in = Files.newInputStream(path)) {
+                    out.write(in);
                 }
-            }
+            });
         }
-        throw new SSCActionMessagesException("errors.could_not_find_log_file", new Object[] { logForm.logFileName });
-        */
+        throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), () -> {
+            return toIndexPage();
+        });
+        return redirect(getClass());
     }
 
     public List<Map<String, Object>> getLogFileItems() {
-        // TODO
         final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
+        final String logFilePath = systemHelper.getLogFilePath();
+        if (StringUtil.isNotBlank(logFilePath)) {
+            Path logDirPath = Paths.get(logFilePath);
+            try (Stream<Path> stream = Files.list(logDirPath)) {
+                stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
+                    Map<String, Object> map = new HashMap<>();
+                    String name = filePath.getFileName().toString();
+                    map.put("id", Base64.getEncoder().encodeToString(name.getBytes(Charsets.UTF_8)));
+                    map.put("name", name);
+                    try {
+                        map.put("lastModified", new Date(Files.getLastModifiedTime(filePath).toMillis()));
+                    } catch (IOException e) {
+                        throw new IORuntimeException(e);
+                    }
+                    logFileItems.add(map);
+                });
+            } catch (Exception e) {
+                throw new FessSystemException("Failed to access log files.", e);
+            }
+        }
         return logFileItems;
+    }
+
+    private HtmlResponse toIndexPage() {
+        return asHtml(path_AdminLog_IndexJsp).renderWith(data -> {
+            data.register("logFileItems", getLogFileItems());
+        });
     }
 
 }
