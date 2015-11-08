@@ -19,7 +19,7 @@
 					<la:message key="labels.crawling_session_configuration" />
 				</h1>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="/admin/crawlingsession">
+					<li class="active"><la:link href="/admin/crawlinginfo">
 							<la:message key="labels.crawling_session_title" />
 						</la:link></li>
 				</ol>
@@ -45,7 +45,7 @@
 								</div>
 								<div class="row">
 									<div class="col-sm-12">
-										<la:form styleClass="form-inline">
+										<la:form styleClass="form-inline" action="/admin/crawlinginfo">
 											<div class="form-group">
 												<c:set var="ph_session_id">
 													<la:message key="labels.crawling_session_session_id_search" />
@@ -93,7 +93,7 @@
 													<c:forEach var="data" varStatus="s"
 														items="${crawlingSessionItems}">
 														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-															data-href="${contextPath}/admin/crawlingsession/details/4/${f:u(data.id)}">
+															data-href="${contextPath}/admin/crawlinginfo/details/4/${f:u(data.id)}">
 															<td>${f:h(data.sessionId)}</td>
 															<td><fmt:formatDate
 																	value="${fe:date(data.createdTime)}"

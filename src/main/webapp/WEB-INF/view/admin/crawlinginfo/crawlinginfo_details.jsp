@@ -22,21 +22,9 @@
 					<la:message key="labels.crawling_session_title_confirm" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="/admin/crawlingsession">
+					<li><la:link href="/admin/crawlinginfo">
 							<la:message key="labels.crawling_session_link_list" />
 						</la:link></li>
-					<c:if test="${crudMode == 1}">
-						<li class="active"><a href="#"><la:message
-									key="labels.crawling_session_link_create" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 2}">
-						<li class="active"><a href="#"><la:message
-									key="labels.crawling_session_link_update" /></a></li>
-					</c:if>
-					<c:if test="${crudMode == 3}">
-						<li class="active"><a href="#"><la:message
-									key="labels.crawling_session_link_delete" /></a></li>
-					</c:if>
 					<c:if test="${crudMode == 4}">
 						<li class="active"><a href="#"><la:message
 									key="labels.crawling_session_link_details" /></a></li>
@@ -47,9 +35,9 @@
 			<section class="content">
 
 				<%-- Form --%>
-				<la:form>
+				<la:form action="/admin/crawlinginfo">
 					<la:hidden property="crudMode" />
-					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
+					<c:if test="${crudMode==4}">
 						<la:hidden property="id" />
 					</c:if>
 					<div class="row">
@@ -91,37 +79,49 @@
 								</div>
 								<%-- Box Footer --%>
 								<div class="box-footer">
-									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.crawling_session_button_back" />">
-											<la:message key="labels.crawling_session_button_back" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.crawling_session_button_back" />">
-											<la:message key="labels.crawling_session_button_back" />
-										</button>
-									</c:if>
-									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="back"
-											value="<la:message key="labels.crawling_session_button_back" />">
-											<la:message key="labels.crawling_session_button_back" />
-										</button>
-										<button type="submit" class="btn btn-danger" name="delete"
-											value="<la:message key="labels.crawling_session_button_delete" />">
-											<la:message key="labels.crawling_session_button_delete" />
-										</button>
-									</c:if>
 									<c:if test="${crudMode == 4}">
 										<button type="submit" class="btn" name="back"
 											value="<la:message key="labels.crawling_session_button_back" />">
 											<la:message key="labels.crawling_session_button_back" />
 										</button>
-										<button type="submit" class="btn btn-danger" name="deletefromconfirm"
+										<button type="button" class="btn btn-danger" name="delete"
+											data-toggle="modal" data-target="#confirmToDelete"
 											value="<la:message key="labels.crawling_session_button_delete" />">
 											<la:message key="labels.crawling_session_button_delete" />
 										</button>
+									    <div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
+									        role="dialog">
+									        <div class="modal-dialog">
+									            <div class="modal-content">
+									                <div class="modal-header">
+									                    <button type="button" class="close" data-dismiss="modal"
+									                        aria-label="Close">
+									                        <span aria-hidden="true">×</span>
+									                    </button>
+									                    <h4 class="modal-title">
+									                        <la:message key="labels.crud_title_delete" />
+									                    </h4>
+									                </div>
+									                <div class="modal-body">
+									                    <p>
+									                        <la:message key="labels.crud_delete_confirmation" />
+									                    </p>
+									                </div>
+									                <div class="modal-footer">
+									                    <button type="button" class="btn btn-outline pull-left"
+									                        data-dismiss="modal">
+									                        <la:message key="labels.crud_button_cancel" />
+									                    </button>
+									                    <button type="submit" class="btn btn-outline btn-danger"
+									                        name="delete"
+									                        value="<la:message key="labels.crud_button_delete" />">
+									                        <i class="fa fa-trash"></i>
+									                        <la:message key="labels.crud_button_delete" />
+									                    </button>
+									                </div>
+									            </div>
+									        </div>
+									    </div>
 									</c:if>
 								</div>
 							</div>

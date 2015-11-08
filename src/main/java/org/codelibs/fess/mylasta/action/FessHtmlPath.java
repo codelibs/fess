@@ -32,11 +32,11 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/boostdocumentrule/index.jsp */
     HtmlNext path_AdminBoostdocumentrule_IndexJsp = new HtmlNext("/admin/boostdocumentrule/index.jsp");
 
-    /** The path of the HTML: /admin/crawlingsession/details.jsp */
-    HtmlNext path_AdminCrawlingsession_DetailsJsp = new HtmlNext("/admin/crawlingsession/details.jsp");
+    /** The path of the HTML: /admin/crawlinginfo/crawlinginfo_details.jsp */
+    HtmlNext path_AdminCrawlinginfo_CrawlinginfoDetailsJsp = new HtmlNext("/admin/crawlinginfo/crawlinginfo_details.jsp");
 
-    /** The path of the HTML: /admin/crawlingsession/index.jsp */
-    HtmlNext path_AdminCrawlingsession_IndexJsp = new HtmlNext("/admin/crawlingsession/index.jsp");
+    /** The path of the HTML: /admin/crawlinginfo/crawlinginfo_list.jsp */
+    HtmlNext path_AdminCrawlinginfo_CrawlinginfoListJsp = new HtmlNext("/admin/crawlinginfo/crawlinginfo_list.jsp");
 
     /** The path of the HTML: /admin/dashboard/dashboard.jsp */
     HtmlNext path_AdminDashboard_DashboardJsp = new HtmlNext("/admin/dashboard/dashboard.jsp");

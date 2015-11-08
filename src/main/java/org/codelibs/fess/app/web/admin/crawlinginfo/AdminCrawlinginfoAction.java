@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.crawlingsession;
+package org.codelibs.fess.app.web.admin.crawlinginfo;
 
 import javax.annotation.Resource;
 
@@ -34,7 +34,7 @@ import org.lastaflute.web.validation.VaErrorHook;
  * @author shinsuke
  * @author Shunji Makino
  */
-public class AdminCrawlingsessionAction extends FessAdminAction {
+public class AdminCrawlinginfoAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
@@ -54,7 +54,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("crawlingSession"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink("crawlingInfo"));
     }
 
     // ===================================================================================
@@ -70,7 +70,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -78,7 +78,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         crawlingSessionPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -86,7 +86,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -94,14 +94,14 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         crawlingSessionPager.clear();
-        return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
-        return asHtml(path_AdminCrawlingsession_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -116,25 +116,6 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Edit Execute
     //                                                                        ============
-    // -----------------------------------------------------
-    //                                            Entry Page
-    //                                            ----------
-
-    @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse deletefromconfirm(final EditForm form) {
-        form.crudMode = CrudMode.DELETE;
-        validate(form, messages -> {}, toIndexHtml());
-        final String id = form.id;
-        crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
-        });
-        return asHtml(path_AdminCrawlingsession_DetailsJsp).renderWith(data -> {
-            data.register("crawlingSessionInfoItems", crawlingSessionService.getCrawlingSessionInfoList(id));
-        });
-    }
 
     // -----------------------------------------------------
     //                                               Details
@@ -142,7 +123,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminCrawlingsession_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminCrawlinginfo_CrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -190,7 +171,7 @@ public class AdminCrawlingsessionAction extends FessAdminAction {
 
     protected VaErrorHook toIndexHtml() {
         return () -> {
-            return asHtml(path_AdminCrawlingsession_IndexJsp);
+            return asHtml(path_AdminCrawlinginfo_CrawlinginfoListJsp);
         };
     }
 }

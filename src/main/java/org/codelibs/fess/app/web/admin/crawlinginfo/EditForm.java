@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.crawlingsession;
+package org.codelibs.fess.app.web.admin.crawlinginfo;
 
 import java.io.Serializable;
 

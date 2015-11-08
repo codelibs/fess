@@ -605,8 +605,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Config Info */
     public static final String LABELS_menu_system_info = "{labels.menu_system_info}";
 
-    /** The key of the message: Session Info */
-    public static final String LABELS_menu_session_info = "{labels.menu_session_info}";
+    /** The key of the message: Crawling Info */
+    public static final String LABELS_menu_crawling_info = "{labels.menu_crawling_info}";
 
     /** The key of the message: Log Files */
     public static final String LABELS_menu_log = "{labels.menu_log}";
@@ -1505,7 +1505,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Purge Suggest Docs by Search Words */
     public static final String LABELS_purge_suggest_search_log_day = "{labels.purge_suggest_search_log_day}";
 
-    /** The key of the message: Session Information */
+    /** The key of the message: Crawling Information */
     public static final String LABELS_crawling_session_title = "{labels.crawling_session_title}";
 
     /** The key of the message: Crawling Information */
@@ -1517,7 +1517,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Delete */
     public static final String LABELS_crawling_session_button_delete = "{labels.crawling_session_button_delete}";
 
-    /** The key of the message: Crawling Session */
+    /** The key of the message: Crawling Info */
     public static final String LABELS_crawling_session_configuration = "{labels.crawling_session_configuration}";
 
     /** The key of the message: Search */

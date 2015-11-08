@@ -231,10 +231,10 @@
 						</la:link></li>
 
 					<li
-						<c:if test="${param.menuType=='crawlingSession'}">class="active"</c:if>><la:link
-							href="/admin/crawlingsession/">
+						<c:if test="${param.menuType=='crawlingInfo'}">class="active"</c:if>><la:link
+							href="/admin/crawlinginfo/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_session_info" /></span>
+							<span><la:message key="labels.menu_crawling_info" /></span>
 						</la:link></li>
 
 					<li <c:if test="${param.menuType=='log'}">class="active"</c:if>><la:link

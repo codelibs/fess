@@ -233,6 +233,7 @@ public class CrawlingSessionService implements Serializable {
     }
 
     public void importCsv(final Reader reader) {
+        @SuppressWarnings("resource")
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
         final DateFormat formatter = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
         try {
