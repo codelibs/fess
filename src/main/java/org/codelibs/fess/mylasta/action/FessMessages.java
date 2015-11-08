@@ -140,10 +140,6 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} cannot convert as {propertyType}. */
     public static final String CONSTRAINTS_TypeAny_MESSAGE = "{constraints.TypeAny.message}";
 
-    /** The key of the message: {item} cannot convert as {propertyType}. */
-    public static final String ORG_LASTAFLUTE_VALIDATOR_CONSTRAINTS_TypeAny_MESSAGE =
-            "{org.lastaflute.validator.constraints.TypeAny.message}";
-
     /** The key of the message: could not login. */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
 
@@ -1054,23 +1050,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addConstraintsTypeAnyMessage(String property, String item, String propertyType) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(CONSTRAINTS_TypeAny_MESSAGE, item, propertyType));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'org.lastaflute.validator.constraints.TypeAny.message' with parameters.
-     * <pre>
-     * message: {item} cannot convert as {propertyType}.
-     * comment: TODO workaround
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param item The parameter item for message. (NotNull)
-     * @param propertyType The parameter propertyType for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addOrgLastafluteValidatorConstraintsTypeAnyMessage(String property, String item, String propertyType) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ORG_LASTAFLUTE_VALIDATOR_CONSTRAINTS_TypeAny_MESSAGE, item, propertyType));
         return this;
     }
 
