@@ -77,41 +77,41 @@ public class AdminGeneralAction extends FessAdminAction {
             return asHtml(path_AdminGeneral_IndexJsp);
         });
 
-        crawlerProperties.setProperty(Constants.DIFF_CRAWLING_PROPERTY,
+        updateProperty(Constants.DIFF_CRAWLING_PROPERTY,
                 form.diffCrawling != null && Constants.ON.equalsIgnoreCase(form.diffCrawling) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.USE_ACL_AS_ROLE,
+        updateProperty(Constants.USE_ACL_AS_ROLE,
                 form.useAclAsRole != null && Constants.ON.equalsIgnoreCase(form.useAclAsRole) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
-        crawlerProperties.setProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount);
-        crawlerProperties.setProperty(Constants.SEARCH_LOG_PROPERTY,
+        updateProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
+        updateProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount);
+        updateProperty(Constants.SEARCH_LOG_PROPERTY,
                 form.searchLog != null && Constants.ON.equalsIgnoreCase(form.searchLog) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.USER_INFO_PROPERTY,
-                form.userInfo != null && Constants.ON.equalsIgnoreCase(form.userInfo) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.USER_FAVORITE_PROPERTY,
+        updateProperty(Constants.USER_INFO_PROPERTY, form.userInfo != null && Constants.ON.equalsIgnoreCase(form.userInfo) ? Constants.TRUE
+                : Constants.FALSE);
+        updateProperty(Constants.USER_FAVORITE_PROPERTY,
                 form.userFavorite != null && Constants.ON.equalsIgnoreCase(form.userFavorite) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.WEB_API_XML_PROPERTY,
+        updateProperty(Constants.WEB_API_XML_PROPERTY,
                 form.webApiXml != null && Constants.ON.equalsIgnoreCase(form.webApiXml) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.WEB_API_JSON_PROPERTY,
+        updateProperty(Constants.WEB_API_JSON_PROPERTY,
                 form.webApiJson != null && Constants.ON.equalsIgnoreCase(form.webApiJson) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, form.defaultLabelValue);
-        crawlerProperties.setProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY,
+        updateProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, form.defaultLabelValue);
+        updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY,
                 form.appendQueryParameter != null && Constants.ON.equalsIgnoreCase(form.appendQueryParameter) ? Constants.TRUE
                         : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, form.supportedSearch);
-        crawlerProperties.setProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
-        crawlerProperties.setProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
-        crawlerProperties.setProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
+        updateProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, form.supportedSearch);
+        updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
+        updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
+        updateProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
                 form.hotSearchWord != null && Constants.ON.equalsIgnoreCase(form.hotSearchWord) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
-        crawlerProperties.setProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay);
-        crawlerProperties.setProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, form.purgeJobLogDay);
-        crawlerProperties.setProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, form.purgeUserInfoDay);
-        crawlerProperties.setProperty(Constants.PURGE_BY_BOTS_PROPERTY, form.purgeByBots);
-        crawlerProperties.setProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
-        crawlerProperties.setProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
+        updateProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
+        updateProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay);
+        updateProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, form.purgeJobLogDay);
+        updateProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, form.purgeUserInfoDay);
+        updateProperty(Constants.PURGE_BY_BOTS_PROPERTY, form.purgeByBots);
+        updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
+        updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
                 form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
-        crawlerProperties.setProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay);
-        crawlerProperties.setProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, form.esHttpUrl);
+        updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay);
+        updateProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, form.esHttpUrl);
 
         crawlerProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -144,6 +144,10 @@ public class AdminGeneralAction extends FessAdminAction {
         form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay = crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30");
         form.esHttpUrl = crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
+    }
+
+    private void updateProperty(String key, String value) {
+        crawlerProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
     }
 
     private Integer getPropertyAsInteger(final String key, final int defaultValue) {
