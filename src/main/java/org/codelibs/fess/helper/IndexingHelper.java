@@ -47,7 +47,7 @@ public class IndexingHelper {
             fessEsClient.addAll(fieldHelper.docIndex, fieldHelper.docType, docList);
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size() + " docs (ES: " + (System.currentTimeMillis() - execTime) + "ms)");
+            logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
         }
         docList.clear();
     }

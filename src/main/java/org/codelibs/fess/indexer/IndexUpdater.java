@@ -467,7 +467,7 @@ public class IndexUpdater extends Thread {
         }
         final long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
-            logger.info("Processing " + arList.size() + "/" + totalHits + " docs (DB: " + (System.currentTimeMillis() - execTime) + "ms)");
+            logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
         }
         if (totalHits > unprocessedDocumentSize) {
             if (logger.isInfoEnabled()) {
