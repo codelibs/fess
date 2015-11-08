@@ -76,15 +76,6 @@
 																</c:if> <c:if test="${data.endTime==null}">
 																	<la:message key="labels.none" />
 																</c:if></td>
-															<td><la:link styleClass="btn btn-xs btn-primary"
-																	href="details/4/${f:u(data.id)}">
-																	<i class="fa fa-check"></i>
-																	<la:message key="labels.joblog_link_details" />
-																</la:link> <la:link styleClass="btn btn-xs btn-danger"
-																	href="deletepage/3/${f:u(data.id)}">
-																	<i class="fa fa-trash"></i>
-																	<la:message key="labels.joblog_link_delete" />
-																</la:link></td>
 														</tr>
 													</c:forEach>
 												</tbody>
