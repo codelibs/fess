@@ -72,7 +72,7 @@
 									</la:info>
 									<la:errors />
 								</div>
-								<la:form target="_blank">
+								<la:form>
 									<div>
 										<la:hidden property="dictId" />
 										<table class="table table-bordered table-striped">
