@@ -124,6 +124,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             form.query = null;
             return redirect(getClass());
         }
+        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
         return asHtml(path_AdminSearchlist_IndexJsp).renderWith(data -> {
             doSearchInternal(data, form);
         });
@@ -177,7 +178,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (pageNumber < 1) {
                 pageNumber = 1;
             }
-            form.start = (pageNumber - 1) * form.num;
+            form.start = (pageNumber - 1) * form.getPageSize();
         }
         return doSearch(form);
     }

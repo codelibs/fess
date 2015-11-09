@@ -181,7 +181,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         File file = getTargetFile(form).get();
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
-        };
+        }
+
         return asStream(file.getName()).stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);

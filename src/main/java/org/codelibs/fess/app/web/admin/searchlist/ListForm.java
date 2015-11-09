@@ -26,7 +26,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
@@ -54,10 +53,10 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     public String[] lang;
 
-    @Required
+    // @Required
     public String docId;
 
-    @Required
+    // @Required
     public String url;
 
     @Override
@@ -95,31 +94,24 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     public FacetInfo facet;
 
-    private int startPosition = -1;
-
-    private int pageSize = -1;
-
     @Override
     public int getStartPosition() {
-        if (startPosition != -1) {
-            return startPosition;
+        if (start == null) {
+            start = ComponentUtil.getQueryHelper().getDefaultStart();
         }
-        startPosition = start;
-        return startPosition;
+        return start;
     }
 
     @Override
     public int getPageSize() {
-        if (pageSize != -1) {
-            return pageSize;
-        }
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        pageSize = num;
-        if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
-            pageSize = queryHelper.getMaxPageSize();
+        if (num == null) {
+            num = queryHelper.getDefaultPageSize();
         }
-        num = pageSize;
-        return pageSize;
+        if (num > queryHelper.getMaxPageSize() || num <= 0) {
+            num = queryHelper.getMaxPageSize();
+        }
+        return num;
     }
 
     @Override
@@ -141,7 +133,7 @@ public class ListForm implements SearchRequestParams, Serializable {
     public String getSort() {
         return sort;
     }
-    
+
     public void initialize() {
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
         if (start == null) {
@@ -153,5 +145,5 @@ public class ListForm implements SearchRequestParams, Serializable {
             num = queryHelper.getMaxPageSize();
         }
     }
-    
+
 }
