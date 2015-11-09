@@ -15,10 +15,11 @@
  */
 package org.codelibs.fess.helper;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -31,6 +32,15 @@ import org.codelibs.fess.es.config.exentity.SuggestBadWord;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.suggest.Suggester;
+import org.codelibs.fess.suggest.concurrent.Deferred;
+import org.codelibs.fess.suggest.constants.FieldNames;
+import org.codelibs.fess.suggest.entity.SuggestItem;
+import org.codelibs.fess.suggest.index.contents.document.DocumentReader;
+import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
+import org.codelibs.fess.suggest.settings.SuggestSettings;
+import org.codelibs.fess.suggest.util.SuggestUtil;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,16 +65,25 @@ public class SuggestHelper {
 
     public String[] roleFieldNames = { "role" };
 
+    public String[] contentsIndex = { "content", "title" };
+
     private static final String TEXT_SEP = " ";
 
     protected Suggester suggester;
+
+    protected final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @PostConstruct
     public void init() {
         final Thread th = new Thread(() -> {
             fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
             suggester = Suggester.builder().build(fessEsClient, fieldHelper.docIndex);
+            suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
+            for (final String field : contentsIndex) {
+                suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
+            }
             suggester.createIndexIfNothing();
+            initialized.set(true);
         });
         th.start();
     }
@@ -103,6 +122,49 @@ public class SuggestHelper {
             }
         }
         suggester.refresh();
+    }
+
+    public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
+        while (!initialized.get()) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                error.accept(e);
+                return;
+            }
+        }
+
+        createFessIndexTest();
+
+        DocumentReader reader = new ESSourceReader(fessEsClient, suggester.settings(), fieldHelper.docIndex, fieldHelper.docType);
+
+        suggester.indexer().indexFromDocument(reader, 2, 100).done(response -> {
+            suggester.refresh();
+
+            //TODO delete old doc
+
+                success.accept(true);
+            }).error(t -> error.accept(t));
+    }
+
+    public void purge(LocalDateTime time) {
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.BASIC_ISO_DATE)));
+
+        boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
+        boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
+
+        SuggestUtil.deleteByQuery(fessEsClient, suggester.getIndex(), suggester.getType(), boolQueryBuilder);
+    }
+
+    public void createFessIndexTest() {
+        Map<String, Object> source = new HashMap<>();
+        source.put("content", "aaa bbbb baa aaa   aaaa,,, aaa bbbb 検索　検索 「検索」");
+        source.put("title", "shirobako shirobako");
+
+        fessEsClient.prepareIndex(fieldHelper.docIndex, fieldHelper.docType).setSource(source).execute().actionGet();
+        fessEsClient.admin().indices().prepareRefresh().execute().actionGet();
     }
 
     public void refreshWords() {

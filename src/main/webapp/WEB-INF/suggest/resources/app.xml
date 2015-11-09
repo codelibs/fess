@@ -5,86 +5,8 @@
 	<include path="convention.xml" />
 	<include path="fess.xml" />
 
-	<include path="crawler_es.xml" />
-
-	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
-	</component>
-	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
-	</component>
-	<component name="webFsIndexHelper" class="org.codelibs.fess.helper.WebFsIndexHelper">
-	</component>
-	<component name="dataIndexHelper" class="org.codelibs.fess.helper.DataIndexHelper">
-	</component>
-	<component name="overlappingHostHelper" class="org.codelibs.fess.helper.OverlappingHostHelper">
-	</component>
-	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
-		<!-- 
-		<postConstruct name="addIntervalRule">
-			<arg>"5:00"</arg>
-			<arg>"10:00"</arg>
-			<arg>"2,3,4,5,6"</arg>
-			<arg>3600000</arg>
-		</postConstruct>
-		 -->
-	</component>
-	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
-	</component>
-	<component name="indexUpdater" class="org.codelibs.fess.indexer.IndexUpdater"
-		instance="prototype">
-		<!-- 
-		<property name="maxDocumentCacheSize">5</property>
-		<property name="unprocessedDocumentSize">100</property>
-		<property name="threadDump">false</property>
-		<postConstruct name="addBoostDocumentRule">
-			<arg>
-				<component class="org.codelibs.fess.indexer.BoostDocumentRule">
-					<property name="matchExpression">"url.matches(\".*fess.*\")"</property>
-					<property name="boostExpression">"1000.0"</property>
-				</component>
-			</arg>
-		</postConstruct>
-		<postConstruct name="addDefaultDocValue">
-			<arg>"FieldName"</arg>
-			<arg>"VALUE"</arg>
-		</postConstruct>
-		 -->
-	</component>
-	<component name="fileTypeHelper" class="org.codelibs.fess.helper.FileTypeHelper">
-		<postConstruct name="add">
-			<arg>"text/html"</arg>
-			<arg>"html"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/msword"</arg>
-			<arg>"word"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</arg>
-			<arg>"word"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/vnd.ms-excel"</arg>
-			<arg>"excel"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</arg>
-			<arg>"excel"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/vnd.ms-powerpoint"</arg>
-			<arg>"powerpoint"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/vnd.openxmlformats-officedocument.presentationml.presentation"</arg>
-			<arg>"powerpoint"</arg>
-		</postConstruct>
-		<postConstruct name="add">
-			<arg>"application/pdf"</arg>
-			<arg>"pdf"</arg>
-		</postConstruct>
-	</component>
-	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
-		instance="prototype">
+	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreater"
+			   instance="prototype">
 	</component>
 
 </components>

@@ -66,7 +66,7 @@ $(function(){
 			}
 
 			$screenshot.children().remove();
-			
+
 			var content = '<a href="' + buf.join('') + '"><img src="screenshot?queryId='
 				+ queryId + '&docId=' + docId + '"></a>'
 			$screenshot.append(content);
@@ -100,7 +100,7 @@ $(function(){
 					queryId: $queryId.val()
 					}
 			}).done(function ( data ) {
-				if(data.response.status === 0 
+				if(data.response.status === 0
 					&& typeof data.response.result !== 'undefined'
 					&& data.response.result === 'ok'){
 					var $favorited = $favorite.siblings('.favorited');
@@ -129,7 +129,7 @@ $(function(){
 				queryId: $queryId.val()
 			}
 		}).done(function ( data ) {
-			if(data.response.status === 0 
+			if(data.response.status === 0
 				&& typeof data.response.num !== 'undefined'
 				&& data.response.num > 0){
 				var docIds = data.response.docIds;
@@ -174,7 +174,7 @@ $(function(){
     $('#query').suggestor( {
         ajaxinfo: {
             url: contextPath + '/suggest',
-            fn: '_default',
+            fn: '_default,content,title',
             num: 10
         },
         boxCssInfo: {

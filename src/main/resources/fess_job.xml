@@ -10,6 +10,8 @@
 	<!-- Jobs -->
 	<component name="crawlJob" class="org.codelibs.fess.job.CrawlJob" instance="prototype">
 	</component>
+	<component name="suggestJob" class="org.codelibs.fess.job.SuggestJob" instance="prototype">
+	</component>
 	<component name="aggregateLogJob" class="org.codelibs.fess.job.AggregateLogJob" instance="prototype">
 	</component>
 	<component name="updateHotWordJob" class="org.codelibs.fess.job.UpdateHotWordJob" instance="prototype">
