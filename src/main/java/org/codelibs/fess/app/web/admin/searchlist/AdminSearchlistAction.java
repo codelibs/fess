@@ -186,34 +186,21 @@ public class AdminSearchlistAction extends FessAdminAction {
     // -----------------------------------------------------
     // Confirm
     // -------
-    @Execute
-    public HtmlResponse confirmDelete(final ListForm form) {
-        return asHtml(path_AdminSearchlist_ConfirmDeleteJsp);
-    }
 
     @Execute
-    public HtmlResponse delete(final ListForm form) {
-        return deleteByQuery(form);
-    }
-
-    private HtmlResponse deleteByQuery(final ListForm form) {
+    public HtmlResponse delete(final DeleteForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_AdminSearchlist_IndexJsp));
         final String docId = form.docId;
         if (jobHelper.isCrawlProcessRunning()) {
-            // TODO Error
+            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asHtml(path_AdminSearchlist_IndexJsp));
         }
-        final Thread thread = new Thread(() -> {
-            if (!jobHelper.isCrawlProcessRunning()) {
-                System.currentTimeMillis();
-                try {
-                    final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
-                    fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
-                } catch (final Exception e) {
-                    // TODO Log
-            }
+        try {
+            final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
+            fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
+            saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
+        } catch (final Exception e) {
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), () -> asHtml(path_AdminSearchlist_IndexJsp));
         }
-    }   );
-        thread.start();
-        saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
         return redirectWith(getClass(), moreUrl("search").params("query", form.query));
     }
 

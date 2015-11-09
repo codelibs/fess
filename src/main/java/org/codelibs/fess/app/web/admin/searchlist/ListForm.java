@@ -53,12 +53,6 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     public String[] lang;
 
-    // @Required
-    public String docId;
-
-    // @Required
-    public String url;
-
     @Override
     public String getQuery() {
         return query;

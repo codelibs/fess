@@ -324,6 +324,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Invalid password. */
     public static final String ERRORS_password_does_not_exist_in_session = "{errors.password_does_not_exist_in_session}";
 
+    /** The key of the message: Crawler is running. The document cannot be deteled. */
+    public static final String ERRORS_cannot_delete_doc_because_of_running = "{errors.cannot_delete_doc_because_of_running}";
+
+    /** The key of the message: Failed to delete document. */
+    public static final String ERRORS_failed_to_delete_doc_in_admin = "{errors.failed_to_delete_doc_in_admin}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1921,6 +1927,34 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsPasswordDoesNotExistInSession(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_password_does_not_exist_in_session));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.cannot_delete_doc_because_of_running' with parameters.
+     * <pre>
+     * message: Crawler is running. The document cannot be deteled.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCannotDeleteDocBecauseOfRunning(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_cannot_delete_doc_because_of_running));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_delete_doc_in_admin' with parameters.
+     * <pre>
+     * message: Failed to delete document.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDeleteDocInAdmin(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_delete_doc_in_admin));
         return this;
     }
 
