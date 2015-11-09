@@ -218,9 +218,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/scheduledjob/index.jsp */
     HtmlNext path_AdminScheduledjob_IndexJsp = new HtmlNext("/admin/scheduledjob/index.jsp");
 
-    /** The path of the HTML: /admin/searchlist/confirmDelete.jsp */
-    HtmlNext path_AdminSearchlist_ConfirmDeleteJsp = new HtmlNext("/admin/searchlist/confirmDelete.jsp");
-
     /** The path of the HTML: /admin/searchlist/index.jsp */
     HtmlNext path_AdminSearchlist_IndexJsp = new HtmlNext("/admin/searchlist/index.jsp");
 
