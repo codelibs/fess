@@ -268,41 +268,40 @@ public class AdminScheduledjobAction extends FessAdminAction {
         form.available = entity.isEnabled() ? Constants.ON : null;
     }
 
-    protected OptionalEntity<ScheduledJob> createScheduledJob(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
+    private OptionalEntity<ScheduledJob> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final ScheduledJob entity = new ScheduledJob();
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                entity.setUpdatedBy(username);
-                entity.setUpdatedTime(currentTime);
-                copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-                entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
-                entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
-                entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
-                return OptionalEntity.of(entity);
+                return OptionalEntity.of(new ScheduledJob()).map(entity -> {
+                    entity.setCreatedBy(username);
+                    entity.setCreatedTime(currentTime);
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return scheduledJobService.getScheduledJob(((EditForm) form).id).map(entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-                    entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
-                    entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
-                    entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
-                    return entity;
-                });
+                return scheduledJobService.getScheduledJob(((EditForm) form).id);
             }
             break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<ScheduledJob> createScheduledJob(final CreateForm form) {
+        final String username = systemHelper.getUsername();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setJobLogging(Constants.ON.equals(form.jobLogging) ? Constants.T : Constants.F);
+            entity.setCrawler(Constants.ON.equals(form.crawler) ? Constants.T : Constants.F);
+            entity.setAvailable(Constants.ON.equals(form.available) ? Constants.T : Constants.F);
+            return entity;
+        });
     }
 
     // ===================================================================================

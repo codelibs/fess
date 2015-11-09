@@ -22,7 +22,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -113,47 +112,26 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Search Execute
     // ==============
     @Execute
-    public HtmlResponse index(final SearchListForm form) {
+    public HtmlResponse index(final ListForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
         return asHtml(path_AdminSearchlist_IndexJsp);
     }
 
-    protected HtmlResponse doSearch(final SearchListForm form) {
+    protected HtmlResponse doSearch(final ListForm form) {
 
         if (StringUtil.isBlank(form.query)) {
             // redirect to index page
             form.query = null;
             return redirect(getClass());
         }
+        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
         return asHtml(path_AdminSearchlist_IndexJsp).renderWith(data -> {
             doSearchInternal(data, form);
         });
     }
 
-    private void doSearchInternal(final RenderData data, final SearchListForm form) {
-        // init pager
-        if (StringUtil.isBlank(form.start)) {
-            form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
-        } else {
-            try {
-                Long.parseLong(form.start);
-            } catch (final NumberFormatException e) {
-                form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
-            }
-        }
-        if (StringUtil.isBlank(form.num)) {
-            form.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
-        } else {
-            try {
-                final int num = Integer.parseInt(form.num);
-                if (num > 100) {
-                    // max page size
-                    form.num = "100";
-                }
-            } catch (final NumberFormatException e) {
-                form.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
-            }
-        }
-
+    private void doSearchInternal(final RenderData data, final ListForm form) {
+        form.initialize();
         try {
             final WebRenderData renderData = new WebRenderData(data);
             searchService.search(request, form, renderData);
@@ -173,52 +151,35 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse search(final SearchListForm form) {
+    public HtmlResponse search(final ListForm form) {
         return doSearch(form);
     }
 
     @Execute
-    public HtmlResponse prev(final SearchListForm form) {
+    public HtmlResponse prev(final ListForm form) {
         return doMove(form, -1);
     }
 
     @Execute
-    public HtmlResponse next(final SearchListForm form) {
+    public HtmlResponse next(final ListForm form) {
         return doMove(form, 1);
     }
 
     @Execute
-    public HtmlResponse move(final SearchListForm form) {
+    public HtmlResponse move(final ListForm form) {
         return doMove(form, 0);
     }
 
-    protected HtmlResponse doMove(final SearchListForm form, final int move) {
-        int size = Constants.DEFAULT_PAGE_SIZE;
-        if (StringUtil.isBlank(form.num)) {
-            form.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
-        } else {
-            try {
-                size = Integer.parseInt(form.num);
-            } catch (final NumberFormatException e) {
-                form.num = String.valueOf(Constants.DEFAULT_PAGE_SIZE);
+    protected HtmlResponse doMove(final ListForm form, final int move) {
+        form.initialize();
+        Integer pageNumber = form.pn;
+        if (pageNumber != null && pageNumber > 0) {
+            pageNumber = pageNumber + move;
+            if (pageNumber < 1) {
+                pageNumber = 1;
             }
+            form.start = (pageNumber - 1) * form.getPageSize();
         }
-
-        if (StringUtil.isBlank(form.pn)) {
-            form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
-        } else {
-            Integer pageNumber = Integer.parseInt(form.pn);
-            if (pageNumber != null && pageNumber > 0) {
-                pageNumber = pageNumber + move;
-                if (pageNumber < 1) {
-                    pageNumber = 1;
-                }
-                form.start = String.valueOf((pageNumber - 1) * size);
-            } else {
-                form.start = String.valueOf(Constants.DEFAULT_START_COUNT);
-            }
-        }
-
         return doSearch(form);
     }
 
@@ -226,16 +187,16 @@ public class AdminSearchlistAction extends FessAdminAction {
     // Confirm
     // -------
     @Execute
-    public HtmlResponse confirmDelete(final SearchListForm form) {
+    public HtmlResponse confirmDelete(final ListForm form) {
         return asHtml(path_AdminSearchlist_ConfirmDeleteJsp);
     }
 
     @Execute
-    public HtmlResponse delete(final SearchListForm form) {
+    public HtmlResponse delete(final ListForm form) {
         return deleteByQuery(form);
     }
 
-    private HtmlResponse deleteByQuery(final SearchListForm form) {
+    private HtmlResponse deleteByQuery(final ListForm form) {
         final String docId = form.docId;
         if (jobHelper.isCrawlProcessRunning()) {
             // TODO Error

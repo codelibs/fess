@@ -19,42 +19,44 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.core.lang.StringUtil;
+import javax.validation.constraints.Size;
+
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
  * @author codelibs
  * @author Keiichi Watanabe
  */
 //public class SearchListForm implements Serializable {
-public class SearchListForm implements SearchRequestParams, Serializable {
+public class ListForm implements SearchRequestParams, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String query;
 
     public String sort;
 
-    //@Digits(integer=10, fraction=0)
-    public String start;
+    @ValidateTypeFailure
+    public Integer start;
 
-    //@Digits(integer=10, fraction=0)
-    public String pn;
+    @ValidateTypeFailure
+    public Integer pn;
 
-    //@Digits(integer=10, fraction=0)
-    public String num;
+    @ValidateTypeFailure
+    public Integer num;
 
     public String[] lang;
 
-    //@Required(target = "confirmDelete,delete")
+    // @Required
     public String docId;
 
-    //@Required(target = "confirmDelete")
+    // @Required
     public String url;
 
     @Override
@@ -66,7 +68,7 @@ public class SearchListForm implements SearchRequestParams, Serializable {
 
     public String additional[];
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String op;
 
     @Override
@@ -92,51 +94,24 @@ public class SearchListForm implements SearchRequestParams, Serializable {
 
     public FacetInfo facet;
 
-    private int startPosition = -1;
-
-    private int pageSize = -1;
-
     @Override
     public int getStartPosition() {
-        if (startPosition != -1) {
-            return startPosition;
+        if (start == null) {
+            start = ComponentUtil.getQueryHelper().getDefaultStart();
         }
-
-        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        if (StringUtil.isBlank(start)) {
-            startPosition = queryHelper.getDefaultStart();
-        } else {
-            try {
-                startPosition = Integer.parseInt(start);
-            } catch (final NumberFormatException e) {
-                startPosition = queryHelper.getDefaultStart();
-            }
-        }
-        start = String.valueOf(startPosition);
-        return startPosition;
+        return start;
     }
 
     @Override
     public int getPageSize() {
-        if (pageSize != -1) {
-            return pageSize;
-        }
-
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        if (StringUtil.isBlank(num)) {
-            pageSize = queryHelper.getDefaultPageSize();
-        } else {
-            try {
-                pageSize = Integer.parseInt(num);
-                if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
-                    pageSize = queryHelper.getMaxPageSize();
-                }
-            } catch (final NumberFormatException e) {
-                pageSize = queryHelper.getDefaultPageSize();
-            }
+        if (num == null) {
+            num = queryHelper.getDefaultPageSize();
         }
-        num = String.valueOf(pageSize);
-        return pageSize;
+        if (num > queryHelper.getMaxPageSize() || num <= 0) {
+            num = queryHelper.getMaxPageSize();
+        }
+        return num;
     }
 
     @Override
@@ -158,4 +133,17 @@ public class SearchListForm implements SearchRequestParams, Serializable {
     public String getSort() {
         return sort;
     }
+
+    public void initialize() {
+        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        if (start == null) {
+            start = queryHelper.getDefaultStart();
+        }
+        if (num == null) {
+            num = queryHelper.getDefaultPageSize();
+        } else if (num > queryHelper.getMaxPageSize()) {
+            num = queryHelper.getMaxPageSize();
+        }
+    }
+
 }

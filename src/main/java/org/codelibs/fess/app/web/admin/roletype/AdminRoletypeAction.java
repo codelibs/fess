@@ -172,7 +172,6 @@ public class AdminRoletypeAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createRoleType(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             roleTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -186,7 +185,6 @@ public class AdminRoletypeAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createRoleType(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             roleTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -212,33 +210,37 @@ public class AdminRoletypeAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected OptionalEntity<RoleType> createRoleType(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
+    private OptionalEntity<RoleType> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final RoleType entity = new RoleType();
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                entity.setUpdatedBy(username);
-                entity.setUpdatedTime(currentTime);
-                return OptionalEntity.of(entity);
+                return OptionalEntity.of(new RoleType()).map(entity -> {
+                    entity.setCreatedBy(username);
+                    entity.setCreatedTime(currentTime);
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return roleTypeService.getRoleType(((EditForm) form).id).map(entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    return entity;
-                });
+                return roleTypeService.getRoleType(((EditForm) form).id);
             }
             break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<RoleType> createRoleType(final CreateForm form) {
+        final String username = systemHelper.getUsername();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            return entity;
+        });
     }
 
     // ===================================================================================

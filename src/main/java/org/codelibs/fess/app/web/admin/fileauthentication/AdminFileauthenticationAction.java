@@ -193,7 +193,6 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createFileAuthentication(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             fileAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -207,7 +206,6 @@ public class AdminFileauthenticationAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createFileAuthentication(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             fileAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -233,33 +231,37 @@ public class AdminFileauthenticationAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected OptionalEntity<FileAuthentication> createFileAuthentication(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
+    private OptionalEntity<FileAuthentication> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final FileAuthentication entity = new FileAuthentication();
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                entity.setUpdatedBy(username);
-                entity.setUpdatedTime(currentTime);
-                return OptionalEntity.of(entity);
+                return OptionalEntity.of(new FileAuthentication()).map(entity -> {
+                    entity.setCreatedBy(username);
+                    entity.setCreatedTime(currentTime);
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return fileAuthenticationService.getFileAuthentication(((EditForm) form).id).map(entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    return entity;
-                });
+                return fileAuthenticationService.getFileAuthentication(((EditForm) form).id);
             }
             break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<FileAuthentication> createFileAuthentication(final CreateForm form) {
+        final String username = systemHelper.getUsername();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            return entity;
+        });
     }
 
     protected void registerProtocolSchemeItems(final RenderData data) {

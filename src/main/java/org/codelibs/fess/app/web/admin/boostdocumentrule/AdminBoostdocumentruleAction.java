@@ -171,7 +171,6 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createBoostDocumentRule(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -185,7 +184,6 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createBoostDocumentRule(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -212,33 +210,37 @@ public class AdminBoostdocumentruleAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    protected OptionalEntity<BoostDocumentRule> createBoostDocumentRule(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
+    private OptionalEntity<BoostDocumentRule> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final BoostDocumentRule entity = new BoostDocumentRule();
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                entity.setUpdatedBy(username);
-                entity.setUpdatedTime(currentTime);
-                return OptionalEntity.of(entity);
+                return OptionalEntity.of(new BoostDocumentRule()).map(entity -> {
+                    entity.setCreatedBy(username);
+                    entity.setCreatedTime(currentTime);
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return boostDocumentRuleService.getBoostDocumentRule(((EditForm) form).id).map(entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    return entity;
-                });
+                return boostDocumentRuleService.getBoostDocumentRule(((EditForm) form).id);
             }
             break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<BoostDocumentRule> createBoostDocumentRule(final CreateForm form) {
+        final String username = systemHelper.getUsername();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            return entity;
+        });
     }
 
     // ===================================================================================
