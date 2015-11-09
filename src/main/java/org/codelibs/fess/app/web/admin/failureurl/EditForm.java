@@ -16,8 +16,6 @@
 package org.codelibs.fess.app.web.admin.failureurl;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.validation.constraints.Size;
 
@@ -38,9 +36,6 @@ public class EditForm implements Serializable {
 
     @ValidateTypeFailure
     public String pageNumber;
-
-    // TODO remove?
-    public Map<String, String> searchParams = new HashMap<String, String>();
 
     @ValidateTypeFailure
     public Integer crudMode;

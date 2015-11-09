@@ -41,33 +41,33 @@
 								</div>
 								<la:form styleClass="form-horizontal">
 									<div class="form-group">
-										<label for="searchParams.url" class="col-sm-2 control-label"><la:message
+										<label for="url" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
-											<la:text property="searchParams.url"
+											<la:text property="url"
 												styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group row">
-										<label for="searchParams.errorCountMin"
+										<label for="errorCountMin"
 											class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_count" /></label>
 										<div class="col-xs-2">
-											<la:text property="searchParams.errorCountMin" size="2"
+											<la:text property="errorCountMin" size="2"
 												styleClass="form-control"></la:text>
 										</div>
 										<div class="pull-left">-</div>
 										<div class="col-xs-2">
-											<la:text property="searchParams.errorCountMax" size="2"
+											<la:text property="errorCountMax" size="2"
 												styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="searchParams.errorName"
+										<label for="errorName"
 											class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
-											<la:text property="searchParams.errorName"
+											<la:text property="errorName"
 												styleClass="form-control"></la:text>
 										</div>
 									</div>
@@ -78,7 +78,7 @@
 												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
 											</button>
-											<button type="reset" class="btn btn-secondary" name="reset"
+											<button type="submit" class="btn btn-secondary" name="reset"
 												value="<la:message key="labels.crud_button_reset" />">
 												<la:message key="labels.crud_button_reset" />
 											</button>

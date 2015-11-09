@@ -99,7 +99,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(failureUrlPager, form, op -> op.include("id"));
+        copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));
     }
 
     // -----------------------------------------------------
