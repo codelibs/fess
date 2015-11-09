@@ -18,6 +18,21 @@
 				<h1>
 					<la:message key="labels.dict_synonym_title" />
 				</h1>
+				<ol class="breadcrumb">
+					<li><la:link href="list">
+							<la:message key="labels.dict_list_link" />
+						</la:link></li>
+					<li><la:link href="list/0/?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_synonym_list_link" />
+						</la:link></li>
+					<c:if test="${crudMode == 1}">
+						<li class="active"><la:message
+								key="labels.dict_synonym_link_create" /></li>
+					</c:if>
+					<c:if test="${crudMode == 2}">
+						<li class="active"><la:message key="labels.dict_synonym_link_edit" /></li>
+					</c:if>
+				</ol>
 			</section>
 			<section class="content">
 				<la:form styleClass="form-horizontal">
@@ -37,27 +52,32 @@
 											<la:message key="labels.dict_synonym_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<la:message key="labels.dict_synonym_link_update" />
+											<la:message key="labels.dict_synonym_link_edit" />
 										</c:if>
 									</h3>
 									<div class="btn-group pull-right">
 										<la:link href="../" styleClass="btn btn-default btn-xs">
+											<i class="fa fa-book"></i>
 											<la:message key="labels.dict_list_link" />
 										</la:link>
 										<la:link href="list/1?dictId=${f:u(dictId)}"
 											styleClass="btn btn-primary btn-xs">
+											<i class="fa fa-th-list"></i>
 											<la:message key="labels.dict_synonym_list_link" />
 										</la:link>
-										<la:link href="createpage/${f:u(dictId)}"
+										<la:link href="createnew/${f:u(dictId)}"
 											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-plus"></i>
 											<la:message key="labels.dict_synonym_link_create" />
 										</la:link>
 										<la:link href="downloadpage/${f:u(dictId)}"
 											styleClass="btn btn-primary btn-xs">
+											<i class="fa fa-download"></i>
 											<la:message key="labels.dict_synonym_link_download" />
 										</la:link>
 										<la:link href="uploadpage/${f:u(dictId)}"
 											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-upload"></i>
 											<la:message key="labels.dict_synonym_link_upload" />
 										</la:link>
 									</div>
