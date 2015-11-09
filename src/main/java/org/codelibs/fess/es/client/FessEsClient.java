@@ -50,6 +50,7 @@ import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.indexer.FessSearchQueryException;
 import org.codelibs.fess.util.ComponentUtil;
@@ -539,17 +540,28 @@ public class FessEsClient implements Client {
 
     public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
-        return getDocument(index, type, condition, (response, hit) -> {
-            final Map<String, Object> source = hit.getSource();
-            if (source != null) {
-                return source;
-            }
-            final Map<String, SearchHitField> fields = hit.getFields();
-            if (fields != null) {
-                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-            }
-            return null;
-        });
+        return getDocument(
+                index,
+                type,
+                condition,
+                (response, hit) -> {
+                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final Map<String, Object> source = hit.getSource();
+                    if (source != null) {
+                        Map<String, Object> docMap = new HashMap<>(source);
+                        docMap.put(fieldHelper.idField, hit.getId());
+                        return docMap;
+                    }
+                    final Map<String, SearchHitField> fields = hit.getFields();
+                    if (fields != null) {
+                        Map<String, Object> docMap =
+                                fields.entrySet().stream()
+                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+                        docMap.put(fieldHelper.idField, hit.getId());
+                        return docMap;
+                    }
+                    return null;
+                });
     }
 
     public <T> OptionalEntity<T> getDocument(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
@@ -567,17 +579,30 @@ public class FessEsClient implements Client {
 
     public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type, final String id,
             final SearchCondition<GetRequestBuilder> condition) {
-        return getDocument(index, type, id, condition, (response, result) -> {
-            final Map<String, Object> source = response.getSource();
-            if (source != null) {
-                return source;
-            }
-            final Map<String, GetField> fields = response.getFields();
-            if (fields != null) {
-                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-            }
-            return null;
-        });
+        return getDocument(
+                index,
+                type,
+                id,
+                condition,
+                (response, result) -> {
+                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final Map<String, Object> source = response.getSource();
+                    if (source != null) {
+                        Map<String, Object> docMap = new HashMap<>(source);
+                        docMap.put(fieldHelper.idField, response.getId());
+                        return docMap;
+                    }
+                    final Map<String, GetField> fields = response.getFields();
+                    if (fields != null) {
+                        Map<String, Object> docMap =
+                                fields.entrySet().stream()
+                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+                        docMap.put(fieldHelper.idField, response.getId());
+                        return docMap;
+                    }
+                    return null;
+
+                });
     }
 
     public <T> OptionalEntity<T> getDocument(final String index, final String type, final String id,
@@ -591,17 +616,28 @@ public class FessEsClient implements Client {
 
     public List<Map<String, Object>> getDocumentList(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
-        return getDocumentList(index, type, condition, (response, hit) -> {
-            final Map<String, Object> source = hit.getSource();
-            if (source != null) {
-                return source;
-            }
-            final Map<String, SearchHitField> fields = hit.getFields();
-            if (fields != null) {
-                return fields.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-            }
-            return null;
-        });
+        return getDocumentList(
+                index,
+                type,
+                condition,
+                (response, hit) -> {
+                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final Map<String, Object> source = hit.getSource();
+                    if (source != null) {
+                        Map<String, Object> docMap = new HashMap<>(source);
+                        docMap.put(fieldHelper.idField, hit.getId());
+                        return docMap;
+                    }
+                    final Map<String, SearchHitField> fields = hit.getFields();
+                    if (fields != null) {
+                        Map<String, Object> docMap =
+                                fields.entrySet().stream()
+                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
+                        docMap.put(fieldHelper.idField, hit.getId());
+                        return docMap;
+                    }
+                    return null;
+                });
     }
 
     public <T> List<T> getDocumentList(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
@@ -687,9 +723,11 @@ public class FessEsClient implements Client {
     }
 
     public void addAll(final String index, final String type, final List<Map<String, Object>> docList) {
+        FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
-            bulkRequestBuilder.add(client.prepareIndex(index, type).setSource(doc));
+            Object id = doc.remove(fieldHelper.idField);
+            bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(doc));
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet();
         if (response.hasFailures()) {
@@ -824,8 +862,9 @@ public class FessEsClient implements Client {
     }
 
     public boolean store(final String index, final String type, final Object obj) {
+        FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final Map<String, Object> source = BeanUtil.copyBeanToNewMap(obj);
-        final String id = (String) source.remove("id");
+        final String id = (String) source.remove(fieldHelper.idField);
         final Long version = (Long) source.remove("version");
         IndexResponse response;
         try {
@@ -834,7 +873,7 @@ public class FessEsClient implements Client {
                 response =
                         client.prepareIndex(index, type).setSource(source).setRefresh(true).setOpType(OpType.CREATE).execute().actionGet();
             } else {
-                // update
+                // create or update
                 response =
                         client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX).setVersion(version)
                                 .execute().actionGet();

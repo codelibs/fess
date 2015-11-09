@@ -29,7 +29,7 @@ public class FieldHelper {
 
     public String docIdField = "doc_id";
 
-    public String idField = "id";
+    public String idField = "_id";
 
     public String langField = "lang";
 
