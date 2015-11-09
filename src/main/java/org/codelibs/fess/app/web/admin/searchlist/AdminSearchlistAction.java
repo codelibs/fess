@@ -118,13 +118,13 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     protected HtmlResponse doSearch(final ListForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_AdminSearchlist_IndexJsp));
 
         if (StringUtil.isBlank(form.query)) {
             // redirect to index page
             form.query = null;
             return redirect(getClass());
         }
-        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
         return asHtml(path_AdminSearchlist_IndexJsp).renderWith(data -> {
             doSearchInternal(data, form);
         });
@@ -139,7 +139,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(e.getMessageCode(), () -> asHtml(path_ErrorJsp));
+            throwValidationError(e.getMessageCode(), () -> asHtml(path_AdminSearchlist_IndexJsp));
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -192,14 +192,16 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asHtml(path_AdminSearchlist_IndexJsp));
         final String docId = form.docId;
         if (jobHelper.isCrawlProcessRunning()) {
-            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asHtml(path_AdminSearchlist_IndexJsp));
+            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL),
+                    () -> asHtml(path_AdminSearchlist_IndexJsp));
         }
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
             fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
             saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
         } catch (final Exception e) {
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), () -> asHtml(path_AdminSearchlist_IndexJsp));
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),
+                    () -> asHtml(path_AdminSearchlist_IndexJsp));
         }
         return redirectWith(getClass(), moreUrl("search").params("query", form.query));
     }
