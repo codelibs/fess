@@ -113,6 +113,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ==============
     @Execute
     public HtmlResponse index(final ListForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
         return asHtml(path_AdminSearchlist_IndexJsp);
     }
 
