@@ -21,7 +21,7 @@ $(function(){
     $('#contentQuery').suggestor( {
         ajaxinfo: {
             url: contextPath + '/suggest',
-            fn: '_default',
+            fn: '_default,content,title',
             num: 10
         },
         boxCssInfo: {
