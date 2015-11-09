@@ -196,7 +196,6 @@ public class AdminDataconfigAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createDataConfig(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -210,7 +209,6 @@ public class AdminDataconfigAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createDataConfig(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -236,33 +234,37 @@ public class AdminDataconfigAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected OptionalEntity<DataConfig> createDataConfig(final CreateForm form) {
-        final String username = systemHelper.getUsername();
-        final long currentTime = systemHelper.getCurrentTimeAsLong();
+    private OptionalEntity<DataConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final DataConfig entity = new DataConfig();
-                entity.setCreatedBy(username);
-                entity.setCreatedTime(currentTime);
-                entity.setUpdatedBy(username);
-                entity.setUpdatedTime(currentTime);
-                return OptionalEntity.of(entity);
+                return OptionalEntity.of(new DataConfig()).map(entity -> {
+                    entity.setCreatedBy(username);
+                    entity.setCreatedTime(currentTime);
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return dataConfigService.getDataConfig(((EditForm) form).id).map(entity -> {
-                    entity.setUpdatedBy(username);
-                    entity.setUpdatedTime(currentTime);
-                    return entity;
-                });
+                return dataConfigService.getDataConfig(((EditForm) form).id);
             }
             break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<DataConfig> createDataConfig(final CreateForm form) {
+        final String username = systemHelper.getUsername();
+        final long currentTime = systemHelper.getCurrentTimeAsLong();
+        return getEntity(form, username, currentTime).map(entity -> {
+            entity.setUpdatedBy(username);
+            entity.setUpdatedTime(currentTime);
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            return entity;
+        });
     }
 
     protected void registerRolesAndLabels(final RenderData data) {

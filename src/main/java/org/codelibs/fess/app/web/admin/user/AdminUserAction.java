@@ -203,8 +203,6 @@ public class AdminUserAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createUser(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude("crudMode", "password", "confirmPassword"));
-            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -219,8 +217,6 @@ public class AdminUserAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         //verifyPassword(form);
         createUser(form).ifPresent(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude("crudMode", "password", "confirmPassword"));
-            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -246,20 +242,11 @@ public class AdminUserAction extends FessAdminAction {
     //===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected OptionalEntity<User> createUser(final CreateForm form) {
+    private OptionalEntity<User> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                final User entity = new User();
-                sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
-                    entity.setPassword(password);
-                });
-                return OptionalEntity.of(entity);
-            }
-            break;
-        case CrudMode.EDIT:
-            if (form instanceof EditForm) {
-                return userService.getUser(((EditForm) form).id).map(entity -> {
+                return OptionalEntity.of(new User()).map(entity -> {
                     sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
                         entity.setPassword(password);
                     });
@@ -267,10 +254,23 @@ public class AdminUserAction extends FessAdminAction {
                 });
             }
             break;
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                return userService.getUser(((EditForm) form).id);
+            }
+            break;
         default:
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<User> createUser(final CreateForm form) {
+        return getEntity(form).map(entity -> {
+            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
+            return entity;
+        });
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
