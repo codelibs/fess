@@ -13,54 +13,57 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.dict_kuromoji_title" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
-					<li class="active"><la:link href="list/0?dictId=${dictId}">
-							<la:message key="labels.dict_kuromoji_link_upload" />
+					<li><la:link href="list">
+							<la:message key="labels.dict_list_link" />
 						</la:link></li>
+					<li><la:link href="list/0/?dictId=${f:u(dictId)}">
+							<la:message key="labels.dict_kuromoji_list_link" />
+						</la:link></li>
+					<li class="active"><la:message
+							key="labels.dict_kuromoji_link_upload" /></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.dict_kuromoji_link_upload" />
 								</h3>
 								<div class="btn-group pull-right">
-									<la:link href="/admin/dict" styleClass="btn btn-primary btn-xs">
+									<la:link href="/admin/dict" styleClass="btn btn-default btn-xs">
+										<i class="fa fa-book"></i>
 										<la:message key="labels.dict_list_link" />
 									</la:link>
 									<la:link href="list/0/?dictId=${f:u(dictId)}"
 										styleClass="btn btn-primary btn-xs">
+										<i class="fa fa-th-list"></i>
 										<la:message key="labels.dict_kuromoji_list_link" />
 									</la:link>
-									<la:link href="createpage/${f:u(dictId)}"
-										styleClass="btn btn-create btn-xs">
+									<la:link href="createnew/${f:u(dictId)}"
+										styleClass="btn btn-success btn-xs">
+										<i class="fa fa-plus"></i>
 										<la:message key="labels.dict_kuromoji_link_create" />
 									</la:link>
-									<la:link href="#" styleClass="btn btn-primary btn-xs">
+									<la:link href="downloadpage/${f:u(dictId)}"
+										styleClass="btn btn-primary btn-xs">
+										<i class="fa fa-download"></i>
 										<la:message key="labels.dict_kuromoji_link_download" />
 									</la:link>
-									<la:link href="uploadpage/${f:u(dictId)}"
-										styleClass="btn btn-success btn-xs disabled">
+									<la:link href="#" styleClass="btn btn-success btn-xs disabled">
+										<i class="fa fa-upload"></i>
 										<la:message key="labels.dict_kuromoji_link_upload" />
 									</la:link>
 								</div>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -69,8 +72,6 @@
 									</la:info>
 									<la:errors />
 								</div>
-
-								<%-- Edit Form: BEGIN --%>
 								<la:form action="upload" enctype="multipart/form-data">
 									<div>
 										<la:hidden property="dictId" />
@@ -87,9 +88,10 @@
 											<tfoot>
 												<tr>
 													<td colspan="2">
-														<button type="submit" class="btn btn-primary"
+														<button type="submit" class="btn btn-success"
 															name="upload"
 															value="<la:message key="labels.dict_kuromoji_button_upload" />">
+															<i class="fa fa-upload"></i>
 															<la:message key="labels.dict_kuromoji_button_upload" />
 														</button>
 													</td>
@@ -98,16 +100,14 @@
 										</table>
 									</div>
 								</la:form>
-								<%-- Edit Form: END --%>
-
 							</div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

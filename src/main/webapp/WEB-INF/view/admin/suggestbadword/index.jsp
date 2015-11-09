@@ -32,7 +32,7 @@
 										styleClass="btn btn-default btn-xs">
 										<la:message key="labels.suggest_bad_word_link_list" />
 									</la:link>
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+									<la:link href="createnew" styleClass="btn btn-success btn-xs">
 										<la:message key="labels.suggest_bad_word_link_create_new" />
 									</la:link>
 									<la:link href="downloadpage"
@@ -44,7 +44,6 @@
 									</la:link>
 								</div>
 							</div>
-							<%-- Box Body --%>
 							<div class="box-body">
 								<%-- Message --%>
 								<div>

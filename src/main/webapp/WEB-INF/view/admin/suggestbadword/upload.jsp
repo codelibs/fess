@@ -44,7 +44,7 @@
 										styleClass="btn btn-default btn-xs">
 										<la:message key="labels.suggest_bad_word_link_list" />
 									</la:link>
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+									<la:link href="createnew" styleClass="btn btn-success btn-xs">
 										<la:message key="labels.suggest_bad_word_link_create_new" />
 									</la:link>
 									<la:link href="downloadpage"
@@ -56,7 +56,7 @@
 									</la:link>
 								</div>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<la:form action="upload" enctype="multipart/form-data">
 									<table class="table table-bordered">
@@ -79,17 +79,14 @@
 										</tfoot>
 									</table>
 								</la:form>
-
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer"></div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

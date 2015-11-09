@@ -33,6 +33,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
@@ -177,10 +178,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Execute
     public StreamResponse download(final DesignForm form) {
-        final File file = getTargetFile(form);
+        File file = getTargetFile(form).get();
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
         }
+
         return asStream(file.getName()).stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
@@ -191,14 +193,14 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse delete(final DesignForm form) {
-        final File file = getTargetFile(form);
-        if (file == null) {
+        getTargetFile(form).ifPresent(file -> {
+            if (!file.delete()) {
+                logger.error("Failed to delete {}", file.getAbsolutePath());
+                throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), toMainHtml());
+            }
+        }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
-        }
-        if (!file.delete()) {
-            logger.error("Failed to delete {}", file.getAbsolutePath());
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), toMainHtml());
-        }
+        });
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, form.fileName));
         return redirect(getClass());
     }
@@ -261,21 +263,16 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private File getTargetFile(final DesignForm form) {
+    private OptionalEntity<File> getTargetFile(final DesignForm form) {
         final File baseDir = new File(getServletContext().getRealPath("/"));
         final File targetFile = new File(getServletContext().getRealPath(form.fileName));
         final List<File> fileList = getAccessibleFileList(baseDir);
-        boolean exist = false;
         for (final File file : fileList) {
             if (targetFile.equals(file)) {
-                exist = true;
-                break;
+                return OptionalEntity.of(targetFile);
             }
         }
-        if (exist) {
-            return targetFile;
-        }
-        return null;
+        return OptionalEntity.empty();
     }
 
     private List<File> getAccessibleFileList(final File baseDir) {

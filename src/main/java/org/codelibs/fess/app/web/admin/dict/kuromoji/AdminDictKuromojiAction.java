@@ -207,7 +207,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentType("text/plain; charset=UTF-8").stream(out -> {
+            return asStream(new File(file.getPath()).getName()).stream(out -> {
                 try (InputStream inputStream = file.getInputStream()) {
                     out.write(inputStream);
                 }
@@ -266,10 +266,6 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createKuromojiItem(form).ifPresent(entity -> {
-            entity.setNewToken(form.token);
-            entity.setNewSegmentation(form.segmentation);
-            entity.setNewReading(form.reading);
-            entity.setNewPos(form.pos);
             kuromojiService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -283,10 +279,6 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createKuromojiItem(form).ifPresent(entity -> {
-            entity.setNewToken(form.token);
-            entity.setNewSegmentation(form.segmentation);
-            entity.setNewReading(form.reading);
-            entity.setNewPos(form.pos);
             kuromojiService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -312,7 +304,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
+    private OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
@@ -329,6 +321,16 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<KuromojiItem> createKuromojiItem(final CreateForm form) {
+        return getEntity(form).map(entity -> {
+            entity.setNewToken(form.token);
+            entity.setNewSegmentation(form.segmentation);
+            entity.setNewReading(form.reading);
+            entity.setNewPos(form.pos);
+            return entity;
+        });
     }
 
     // ===================================================================================

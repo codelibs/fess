@@ -13,10 +13,7 @@
 			<jsp:param name="menuCategoryType" value="suggest" />
 			<jsp:param name="menuType" value="suggestBadWord" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.suggest_bad_word_configuration" />
@@ -30,13 +27,10 @@
 								key="labels.suggest_bad_word_link_download" /></a></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								<div class="btn-group pull-right">
@@ -44,7 +38,7 @@
 										styleClass="btn btn-default btn-xs">
 										<la:message key="labels.suggest_bad_word_link_list" />
 									</la:link>
-									<la:link href="createpage" styleClass="btn btn-success btn-xs">
+									<la:link href="createnew" styleClass="btn btn-success btn-xs">
 										<la:message key="labels.suggest_bad_word_link_create_new" />
 									</la:link>
 									<la:link href="downloadpage"
@@ -56,7 +50,7 @@
 									</la:link>
 								</div>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<la:form>
 									<table class="table table-bordered">
@@ -71,17 +65,14 @@
 										</tbody>
 									</table>
 								</la:form>
-
 							</div>
-							<%-- Box Footer --%>
-							<div class="box-footer"></div>
+							<!-- /.box-body -->
 						</div>
+						<!-- /.box -->
 					</div>
 				</div>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>

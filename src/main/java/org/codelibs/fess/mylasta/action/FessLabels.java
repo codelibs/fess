@@ -3029,13 +3029,13 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_dict_synonym_link_create = "{labels.dict_synonym_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_dict_synonym_link_update = "{labels.dict_synonym_link_update}";
+    public static final String LABELS_dict_synonym_link_edit = "{labels.dict_synonym_link_edit}";
 
     /** The key of the message: Delete */
     public static final String LABELS_dict_synonym_link_delete = "{labels.dict_synonym_link_delete}";
 
-    /** The key of the message: Confirm */
-    public static final String LABELS_dict_synonym_link_confirm = "{labels.dict_synonym_link_confirm}";
+    /** The key of the message: Details */
+    public static final String LABELS_dict_synonym_link_details = "{labels.dict_synonym_link_details}";
 
     /** The key of the message: Download */
     public static final String LABELS_dict_synonym_link_download = "{labels.dict_synonym_link_download}";
@@ -3089,13 +3089,13 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_dict_kuromoji_link_create = "{labels.dict_kuromoji_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_dict_kuromoji_link_update = "{labels.dict_kuromoji_link_update}";
+    public static final String LABELS_dict_kuromoji_link_edit = "{labels.dict_kuromoji_link_edit}";
 
     /** The key of the message: Delete */
     public static final String LABELS_dict_kuromoji_link_delete = "{labels.dict_kuromoji_link_delete}";
 
-    /** The key of the message: Confirm */
-    public static final String LABELS_dict_kuromoji_link_confirm = "{labels.dict_kuromoji_link_confirm}";
+    /** The key of the message: Details */
+    public static final String LABELS_dict_kuromoji_link_details = "{labels.dict_kuromoji_link_details}";
 
     /** The key of the message: Download */
     public static final String LABELS_dict_kuromoji_link_download = "{labels.dict_kuromoji_link_download}";

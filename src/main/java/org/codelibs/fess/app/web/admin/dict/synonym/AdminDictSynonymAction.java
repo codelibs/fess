@@ -238,7 +238,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         return synonymService.getSynonymFile(form.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).contentType("text/plain; charset=UTF-8").stream(out -> {
+            return asStream(new File(file.getPath()).getName()).stream(out -> {
                 try (InputStream inputStream = file.getInputStream()) {
                     out.write(inputStream);
                 }
@@ -297,12 +297,6 @@ public class AdminDictSynonymAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         createSynonymItem(form).ifPresent(entity -> {
-            final String[] newInputs = splitLine(form.inputs);
-            validateSynonymString(newInputs, () -> confirmfromcreate(form));
-            entity.setNewInputs(newInputs);
-            final String[] newOutputs = splitLine(form.outputs);
-            validateSynonymString(newOutputs, () -> confirmfromcreate(form));
-            entity.setNewOutputs(newOutputs);
             synonymService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -316,12 +310,6 @@ public class AdminDictSynonymAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         createSynonymItem(form).ifPresent(entity -> {
-            final String[] newInputs = splitLine(form.inputs);
-            validateSynonymString(newInputs, () -> confirmfromupdate(form));
-            entity.setNewInputs(newInputs);
-            final String[] newOutputs = splitLine(form.outputs);
-            validateSynonymString(newOutputs, () -> confirmfromupdate(form));
-            entity.setNewOutputs(newOutputs);
             synonymService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -347,7 +335,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form) {
+    private OptionalEntity<SynonymItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
@@ -364,6 +352,18 @@ public class AdminDictSynonymAction extends FessAdminAction {
             break;
         }
         return OptionalEntity.empty();
+    }
+
+    protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form) {
+        return getEntity(form).map(entity -> {
+            final String[] newInputs = splitLine(form.inputs);
+            validateSynonymString(newInputs, () -> confirmfromcreate(form));
+            entity.setNewInputs(newInputs);
+            final String[] newOutputs = splitLine(form.outputs);
+            validateSynonymString(newOutputs, () -> confirmfromcreate(form));
+            entity.setNewOutputs(newOutputs);
+            return entity;
+        });
     }
 
     // ===================================================================================

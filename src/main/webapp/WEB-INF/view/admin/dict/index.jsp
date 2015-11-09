@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title><la:message key="labels.admin_brand_title"/> | <la:message key="labels.dict_configuration" /></title>
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.dict_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -12,39 +13,36 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="dict" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-				<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.dict_list_title" />
 				</h1>
+				<ol class="breadcrumb">
+					<li><la:link href="list">
+							<la:message key="labels.dict_list_link" />
+						</la:link></li>
+					<li><la:message key="labels.dict_synonym_list_link" /></li>
+				</ol>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.dict_list_link" />
 								</h3>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
 									<la:info id="msg" message="true">
-										<div class="alert alert-info">
-											${msg}
-										</div>
+										<div class="alert alert-info">${msg}</div>
 									</la:info>
 									<la:errors />
 								</div>
-
 								<%-- List --%>
 								<c:if test="${fn:length(dictFiles) == 0}">
 									<p class="callout callout-info">
@@ -62,8 +60,9 @@
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
 												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
-														<td>${f:h(data.type)}</td>
-														<td><la:link href="${f:h(data.type)}/?dictId=${f:h(data.id)}">${f:h(data.path)}</la:link></td>
+													<td>${f:h(data.type)}</td>
+													<td><la:link
+															href="${f:h(data.type)}/?dictId=${f:h(data.id)}">${f:h(data.path)}</la:link></td>
 												</tr>
 											</c:forEach>
 										</tbody>
