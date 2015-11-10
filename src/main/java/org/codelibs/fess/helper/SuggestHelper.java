@@ -18,10 +18,8 @@ package org.codelibs.fess.helper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -138,8 +136,6 @@ public class SuggestHelper {
             }
         }
 
-        createFessIndexTest();
-
         DocumentReader reader = new ESSourceReader(fessEsClient, suggester.settings(), fieldHelper.docIndex, fieldHelper.docType);
 
         suggester.indexer().indexFromDocument(reader, 2, 100).done(response -> {
@@ -160,15 +156,6 @@ public class SuggestHelper {
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
         SuggestUtil.deleteByQuery(fessEsClient, suggester.getIndex(), suggester.getType(), boolQueryBuilder);
-    }
-
-    public void createFessIndexTest() {
-        Map<String, Object> source = new HashMap<>();
-        source.put("content", "aaa bbbb baa aaa   aaaa,,, aaa bbbb 検索　検索 「検索」");
-        source.put("title", "shirobako shirobako");
-
-        fessEsClient.prepareIndex(fieldHelper.docIndex, fieldHelper.docType).setSource(source).execute().actionGet();
-        fessEsClient.admin().indices().prepareRefresh().execute().actionGet();
     }
 
     public void refreshWords() {
