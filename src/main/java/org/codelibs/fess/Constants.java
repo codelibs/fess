@@ -328,4 +328,6 @@ public class Constants extends CoreLibConstants {
     public static final String ELASTICSEARCH_WEB_URL = "http://localhost:9201";
 
     public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";
+
+    public static final String ADMIN_PACKAGE = "org.codelibs.fess.app.web.admin";
 }

@@ -25,6 +25,9 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
+    /** The key of the configuration. e.g. admin */
+    String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
+
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
 
@@ -75,6 +78,14 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getDomainTitle();
+
+    /**
+     * Get the value for the key 'authentication.admin.roles'. <br>
+     * The value is, e.g. admin <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAuthenticationAdminRoles();
 
     /**
      * Get the value for the key 'cookie.default.path'. <br>
@@ -202,6 +213,10 @@ public interface FessConfig extends FessEnv {
 
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
+        }
+
+        public String getAuthenticationAdminRoles() {
+            return get(FessConfig.AUTHENTICATION_ADMIN_ROLES);
         }
 
         public String getCookieDefaultPath() {
