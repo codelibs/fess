@@ -31,6 +31,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.lang3.ArrayUtils;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -202,6 +203,8 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
+        verifyPassword(form);
+        storePassword(form);
         createUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -215,7 +218,10 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        //verifyPassword(form);
+        verifyPassword(form);
+        if (StringUtil.isNotBlank(form.password)) {
+            storePassword(form);
+        }
         createUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -240,18 +246,13 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     //===================================================================================
-    //                                                                        Assist Logic
-    //                                                                        ============
+    //                                                                       Assist Logic
+    //                                                                       ============
     private OptionalEntity<User> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new User()).map(entity -> {
-                    sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
-                        entity.setPassword(password);
-                    });
-                    return entity;
-                });
+                return OptionalEntity.of(new User());
             }
             break;
         case CrudMode.EDIT:
@@ -267,7 +268,10 @@ public class AdminUserAction extends FessAdminAction {
 
     protected OptionalEntity<User> createUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
+            copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
+            sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
+                entity.setPassword(password);
+            });
             entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             return entity;
         });
@@ -294,11 +298,13 @@ public class AdminUserAction extends FessAdminAction {
 
     protected void verifyPassword(final CreateForm form) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
+            form.confirmPassword = null;
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);
             }, toEditHtml());
         }
         if (form.password != null && !form.password.equals(form.confirmPassword)) {
+            form.confirmPassword = null;
             throwValidationError(messages -> {
                 messages.addErrorsInvalidConfirmPassword(GLOBAL);
             }, toEditHtml());
