@@ -252,7 +252,10 @@ public class AdminUserAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new User());
+                return OptionalEntity.of(new User()).map(entity -> {
+                    entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
@@ -272,7 +275,6 @@ public class AdminUserAction extends FessAdminAction {
             sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
                 entity.setPassword(password);
             });
-            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             return entity;
         });
     }
