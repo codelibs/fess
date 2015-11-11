@@ -425,7 +425,7 @@ public class FessEsClient implements Client {
                                             }
                                         }
                                     } catch (Exception e) {
-                                        logger.warn("Failed to parse " + configIndex + "/" + configType + " mapping.");
+                                        logger.warn("Failed to parse " + dataPath.toString());
                                     }
                                     return StringUtil.EMPTY;
                                 });
