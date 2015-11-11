@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title>${f:h(displayQuery)}- <la:message
+<title>${f:h(displayQuery)}-<la:message
 		key="labels.search_title" /></title>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
@@ -15,6 +15,8 @@
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${f:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<jsp:include page="header.jsp" />
@@ -81,18 +83,6 @@
 						</span>
 					</c:if>
 				</p>
-			</div>
-			<div class="col-md-3">
-				<c:if test="${!empty username}">
-					<p class="username">
-						<la:message key="labels.searchheader_username"
-							arg0="${f:h(username)}" />
-						|
-						<la:link href="/logout" styleClass="logout-link">
-							<la:message key="labels.logout" />
-						</la:link>
-					</p>
-				</c:if>
 			</div>
 		</div>
 		<c:if test="${fe:hswsize(null) != 0}">

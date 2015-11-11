@@ -1,27 +1,59 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="search" method="get" styleId="searchForm" styleClass="searchResultForm">
+<la:form action="search" method="get" styleId="searchForm"
+	styleClass="searchResultForm">
 ${fe:facetForm()}${fe:geoForm()}
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
-		<la:link styleClass="navbar-brand" href="/">
-			<img src="${f:url('/images/logo-head.png')}" alt="<la:message key="labels.header_brand_name" />" />
-		</la:link>
-		<div class="form-inline navbar-form pull-right">
-			<la:text property="query" maxlength="1000" styleId="query" styleClass="form-control" autocomplete="off"/>
-			<button class="btn medium btn-primary" type="submit" name="search" id="searchButton">
-				<i class="icon-search icon-white"></i><span class="hidden-phone"><la:message key="labels.search" /></span>
-			</button>
-			<a href="#searchOptions" role="button" class="btn btn-secondary" data-toggle="modal"><i class="icon-cog"></i><span
-				class="hidden-phone"
-			><la:message key="labels.header_form_option_btn" /></span></a>
+		<div class="container">
+			<la:link styleClass="navbar-brand" href="/">
+				<img src="${f:url('/images/logo-head.png')}"
+					alt="<la:message key="labels.header_brand_name" />" />
+			</la:link>
+			<div class="form-inline navbar-form pull-right">
+				<la:text property="query" maxlength="1000" styleId="query"
+					styleClass="form-control" autocomplete="off" />
+				<div class="btn-group">
+					<button type="submit" name="search" id="searchButton"
+						class="btn btn-primary">
+						<i class="fa fa-search"></i>
+						<la:message key="labels.search" />
+					</button>
+					<button type="button" class="btn btn-primary dropdown-toggle"
+						data-toggle="dropdown" aria-expanded="false">
+						<span class="caret"></span> <span class="sr-only"><la:message
+								key="labels.header_form_option_btn" /></span>
+					</button>
+					<div class="dropdown-menu" aria-labelledby="optionMenu">
+						<a href="#searchOptions" class="dropdown-item" data-toggle="modal"><la:message
+								key="labels.header_form_option_btn" /></a>
+					</div>
+				</div>
+			</div>
+			<ul class="nav navbar-nav pull-right">
+				<c:if test="${!empty username && username != 'guest'}">
+					<li class="nav-item">
+						<div class="dropdown">
+							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+								href="#" role="button" aria-haspopup="true"
+								aria-expanded="false"> <i class="fa fa-user"></i>${username}
+							</a>
+							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/logout" styleClass="dropdown-item">
+									<la:message key="labels.logout" />
+								</la:link>
+							</div>
+						</div>
+					</li>
+				</c:if>
+			</ul>
 		</div>
 	</nav>
-	<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog" aria-labelledby="searchOptionsLabel"
-		aria-hidden="true"
-	>
+	<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog"
+		aria-labelledby="searchOptionsLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
 						<span aria-hidden="true">&times;</span> <span class="sr-only">Close</span>
 					</button>
 					<h4 class="modal-title" id="searchOptionsLabel">
@@ -31,7 +63,8 @@ ${fe:facetForm()}${fe:geoForm()}
 				<div class="modal-body">
 					<fieldset class="form-group">
 						<label for="contentNum"><la:message key="labels.index_num" /></label>
-						<la:select property="num" styleId="numSearchOption" styleClass="form-control" style="display:block;">
+						<la:select property="num" styleId="numSearchOption"
+							styleClass="form-control" style="display:block;">
 							<option value="">
 								<la:message key="labels.search_result_select_num" />
 							</option>
@@ -44,8 +77,10 @@ ${fe:facetForm()}${fe:geoForm()}
 						</la:select>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="contentSort"><la:message key="labels.index_sort" /></label>
-						<la:select property="sort" styleId="sortSearchOption" styleClass="form-control" style="display:block;">
+						<label for="contentSort"><la:message
+								key="labels.index_sort" /></label>
+						<la:select property="sort" styleId="sortSearchOption"
+							styleClass="form-control" style="display:block;">
 							<option value="">
 								<la:message key="labels.search_result_select_sort" />
 							</option>
@@ -86,8 +121,10 @@ ${fe:facetForm()}${fe:geoForm()}
 						</la:select>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="contentLang"><la:message key="labels.index_lang" /></label>
-						<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="form-control">
+						<label for="contentLang"><la:message
+								key="labels.index_lang" /></label>
+						<la:select property="lang" styleId="langSearchOption"
+							multiple="true" styleClass="form-control">
 							<c:forEach var="item" items="${langItems}">
 								<la:option value="${f:u(item.value)}">
 													${f:h(item.label)}
@@ -97,8 +134,11 @@ ${fe:facetForm()}${fe:geoForm()}
 					</fieldset>
 					<c:if test="${displayLabelTypeItems}">
 						<fieldset class="form-group">
-							<label for="contentLabelType"><la:message key="labels.index_label" /></label>
-							<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="form-control">
+							<label for="contentLabelType"><la:message
+									key="labels.index_label" /></label>
+							<la:select property="fields.label"
+								styleId="labelTypeSearchOption" multiple="true"
+								styleClass="form-control">
 								<c:forEach var="item" items="${labelTypeItems}">
 									<la:option value="${f:u(item.value)}">
 														${f:h(item.label)}
@@ -112,7 +152,8 @@ ${fe:facetForm()}${fe:geoForm()}
 					<button class="btn btn-secondary" id="searchOptionsClearButton">
 						<la:message key="labels.search_options_clear" />
 					</button>
-					<button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">
+					<button class="btn btn-secondary" data-dismiss="modal"
+						aria-hidden="true">
 						<la:message key="labels.search_options_close" />
 					</button>
 					<button class="btn btn-primary" type="submit">
@@ -122,5 +163,6 @@ ${fe:facetForm()}${fe:geoForm()}
 			</div>
 		</div>
 	</div>
+	<!--  /.modal -->
 </la:form>
 

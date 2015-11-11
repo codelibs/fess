@@ -824,9 +824,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Labels:  */
     public static final String LABELS_searchoptions_menu_labels = "{labels.searchoptions_menu_labels}";
 
-    /** The key of the message: Username: {0} */
-    public static final String LABELS_searchheader_username = "{labels.searchheader_username}";
-
     /** The key of the message: Error */
     public static final String LABELS_error_title = "{labels.error_title}";
 
@@ -854,7 +851,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Login */
     public static final String LABELS_LOGIN = "{labels.login}";
 
-    /** The key of the message: User name */
+    /** The key of the message: Username */
     public static final String LABELS_LOGIN_placeholder_username = "{labels.login.placeholder_username}";
 
     /** The key of the message: Password */
@@ -952,6 +949,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Options */
     public static final String LABELS_header_form_option_btn = "{labels.header_form_option_btn}";
+
+    /** The key of the message: Username: {0} */
+    public static final String LABELS_header_username = "{labels.header_username}";
 
     /** The key of the message: Accessing {0}<br>At a first time starting, it might take a little more time to open the file. */
     public static final String LABELS_open_uri = "{labels.open_uri}";

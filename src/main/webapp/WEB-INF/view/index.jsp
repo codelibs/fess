@@ -14,20 +14,35 @@
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${f:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
-		<ul class="nav navbar-nav pull-right">
-			<li class="nav-item"><c:if test="${!empty username}">
-					<la:link href="/logout" styleClass="nav-link logout-link">
-						<la:message key="labels.logout" />
-					</la:link>
-				</c:if></li>
-			<li class="nav-item"><la:link href="/help"
-					styleClass="nav-link help-link">
-					<la:message key="labels.index_help" />
-				</la:link></li>
-		</ul>
+		<div class="container">
+			<ul class="nav navbar-nav pull-right">
+				<c:if test="${!empty username && username != 'guest'}">
+					<li class="nav-item">
+						<div class="dropdown">
+							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+								href="#" role="button" aria-haspopup="true"
+								aria-expanded="false"> <i class="fa fa-user"></i>${username}
+							</a>
+							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/logout" styleClass="dropdown-item">
+									<la:message key="labels.logout" />
+								</la:link>
+							</div>
+						</div>
+					</li>
+				</c:if>
+				<li class="nav-item"><la:link href="/help"
+						styleClass="nav-link help-link">
+						<i class="fa fa-question-circle"></i>
+						<la:message key="labels.index_help" />
+					</la:link></li>
+			</ul>
+		</div>
 	</nav>
 	<div class="container">
 		<div class="row content">
@@ -66,13 +81,15 @@
 								</p>
 							</div>
 						</c:if>
-						<div class="clearfix searchButtonBox">
+						<div class="clearfix searchButtonBox btn-group">
 							<button type="submit" name="search" id="searchButton"
 								class="btn btn-primary">
+								<i class="fa fa-search"></i>
 								<la:message key="labels.index_form_search_btn" />
 							</button>
 							<button type="button" class="btn btn-secondary"
 								data-toggle="modal" data-target="#searchOptions">
+								<i class="fa fa-cog"></i>
 								<la:message key="labels.index_form_option_btn" />
 							</button>
 						</div>

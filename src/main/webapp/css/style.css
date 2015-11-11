@@ -1,5 +1,4 @@
 /* Override some defaults */
-
 body {
 	padding-top: 70px;
 }
@@ -8,26 +7,24 @@ body {
 	min-height: 500px;
 }
 
-h1,
-h2,
-h3 {
-  line-height: 32px;
+h1, h2, h3 {
+	line-height: 32px;
 }
 
 h1 {
-  font-size: 30px;
+	font-size: 30px;
 }
 
 h2 {
-  font-size: 24px;
+	font-size: 24px;
 }
 
 h3 {
-  font-size: 18px;
+	font-size: 18px;
 }
 
 .navbar .logout-link {
-    margin-right: 10px;
+	margin-right: 10px;
 }
 
 .navbar .logout-link, .navbar .help-link {
@@ -40,11 +37,15 @@ h3 {
 }
 
 .nav-list li.reset {
-    margin-top: 10px;
+	margin-top: 10px;
 }
 
 .center {
 	text-align: center;
+}
+
+h1.mainLogo {
+	margin-bottom: 1em;
 }
 
 #result ol {
@@ -61,7 +62,7 @@ h3 {
 
 #result .body a.cache {
 	color: #093;
-    margin-left: 10px;
+	margin-left: 10px;
 }
 
 #result .favorited {
@@ -83,7 +84,6 @@ h3 {
 	margin-top: 10px;
 }
 
-
 #contentOptionButton {
 	margin-left: 10px;
 }
@@ -97,158 +97,145 @@ h3 {
 }
 
 .move-to-top {
-    margin-bottom: 10px;
+	margin-bottom: 10px;
 }
 
 .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -webkit-text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
 }
 
 .searchResultForm {
-    margin:0;
+	margin: 0;
 }
 
 #searchOptionMenu span {
-    margin-right:10px;
+	margin-right: 10px;
 }
 
 .username {
-    text-align:right;
+	text-align: right;
 }
 
 /* Large desktop */
-@media (min-width: 74.9em) {
+@media ( min-width : 74.9em) {
 	.visible-phone {
-		display: none!important;
+		display: none !important;
 	}
-
-    #query {
-	    width: 500px;
-    }
-
-    #contentQuery {
-	    width: 500px;
-    }
+	#query {
+		width: 500px;
+	}
+	#contentQuery {
+		width: 500px;
+	}
 }
- 
+
 /* Large devices (desktops, less than 75em) */
-@media (max-width: 74.9em) {
+@media ( max-width : 74.9em) {
 	.visible-phone {
-		display: none!important;
+		display: none !important;
 	}
-
-    .br-tablet {
-	    display: block;
-    }
-
-    #query {
-	    width: 200px;
-    }
-
-    #contentQuery {
-	    width: 500px;
-    }
+	.br-tablet {
+		display: block;
+	}
+	#query {
+		width: 200px;
+	}
+	#contentQuery {
+		width: 500px;
+	}
 }
- 
+
 /* Medium devices (tablets, less than 62em) */
-@media (max-width: 61.9em) {
-    #query {
-	    width: 300px;
-    }
-
-    #contentQuery {
-	    width: 500px;
-    }
+@media ( max-width : 61.9em) {
+	#query {
+		width: 300px;
+	}
+	#contentQuery {
+		width: 500px;
+	}
 }
- 
+
 /* Small devices (landscape phones, less than 48em) */
-@media (max-width: 47.9em) {
-    .br-phone {
-	    display: block;
-    }
-
-    #query {
-	    width: 150px;
-    }
-
-    #contentQuery {
-	    width: 200px;
-    }
-
-    .searchFormBox {
-	    margin-top: 20px;
-    }
-
-    #result ol {
-        margin-left: 0;
-    }
-
-    .hotSearchWordBody {
-        width: 440px;
-    }
-
-    #result .site {
-        width: 440px;
-    }
-
-    #result .info {
-        display: none;
-    }
+@media ( max-width : 47.9em) {
+	.br-phone {
+		display: block;
+	}
+	#query {
+		width: 150px;
+	}
+	#contentQuery {
+		width: 200px;
+	}
+	.searchFormBox {
+		margin-top: 20px;
+	}
+	#result ol {
+		margin-left: 0;
+	}
+	.hotSearchWordBody {
+		width: 440px;
+	}
+	#result .site {
+		width: 440px;
+	}
+	#result .info {
+		display: none;
+	}
 }
 
 /* Extra small devices (portrait phones, less than 34em) */
-@media (max-width: 360px) {
-    .br-phone {
-	    display: block;
-    }
-
-    .mainLogo img {
-	    width: 200px;
-    }
-
-    .brand img {
-	    width: 80px;
-    }
-
-    #query {
-	    width: 100px;
-    }
-
-    .searchFormBox {
-	    margin-top: 80px;
-    }
-
-    .hotSearchWordBody {
-        width: 280px;
-    }
-
-    #result .site {
-        width: 280px;
-    }
-
-    #result .info {
-        display: none;
-    }
+@media ( max-width : 360px) {
+	.br-phone {
+		display: block;
+	}
+	.mainLogo img {
+		width: 200px;
+	}
+	.brand img {
+		width: 80px;
+	}
+	#query {
+		width: 100px;
+	}
+	.searchFormBox {
+		margin-top: 80px;
+	}
+	.hotSearchWordBody {
+		width: 280px;
+	}
+	#result .site {
+		width: 280px;
+	}
+	#result .info {
+		display: none;
+	}
 }
 
-@media (max-width: 767px) and (min-width: 481px){
+@media ( max-width : 767px) and (min-width: 481px) {
 }
 
-@media (max-height: 480px){
+@media ( max-height : 480px) {
 	#searchOptions {
 		max-height: 450px;
-        overflow-y:scroll;
+		overflow-y: scroll;
 	}
 }
 
-@media (max-height: 390px){
+@media ( max-height : 390px) {
 	#searchOptions {
 		max-height: 300px;
-        overflow-y:scroll;
+		overflow-y: scroll;
 	}
 }
 
+button>i, a>i {
+	margin-right: 0.2em;
+}
+
+nav.navbar .form-inline {
+	margin-left: 20px;
+}
