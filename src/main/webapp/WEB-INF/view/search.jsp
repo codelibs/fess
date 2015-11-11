@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title>${f:h(displayQuery)} - <la:message
+<title>${f:h(displayQuery)}- <la:message
 		key="labels.search_title" /></title>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
@@ -22,67 +22,76 @@
 		<div class="row">
 			<div class="col-md-9">
 				<p id="searchOptionMenu">
-					<span>
-						<la:message key="labels.searchoptions_menu_sort" />
-						<a href="#searchOptions" data-toggle="modal">
-						<c:if test="${empty sort}"><la:message key="labels.searchoptions_score" /></c:if>
-						<c:if test="${sort=='created.asc'}"><la:message key="labels.search_result_sort_created_asc" /></c:if>
-						<c:if test="${sort=='created.desc'}"><la:message key="labels.search_result_sort_created_desc" /></c:if>
-						<c:if test="${sort=='contentLength.asc'}"><la:message key="labels.search_result_sort_contentLength_asc" /></c:if>
-						<c:if test="${sort=='contentLength.desc'}"><la:message key="labels.search_result_sort_contentLength_desc" /></c:if>
-						<c:if test="${sort=='lastModified.asc'}"><la:message key="labels.search_result_sort_lastModified_asc" /></c:if>
-						<c:if test="${sort=='lastModified.desc'}"><la:message key="labels.search_result_sort_lastModified_desc" /></c:if>
-						<c:if test="${sort=='clickCount_l_x_dv.asc'}"><la:message key="labels.search_result_sort_clickCount_asc" /></c:if>
-						<c:if test="${sort=='clickCount_l_x_dv.desc'}"><la:message key="labels.search_result_sort_clickCount_desc" /></c:if>
-						<c:if test="${sort=='favoriteCount_l_x_dv.asc'}"><la:message key="labels.search_result_sort_favoriteCount_asc" /></c:if>
-						<c:if test="${sort=='favoriteCount_l_x_dv.desc'}"><la:message key="labels.search_result_sort_favoriteCount_desc" /></c:if>
-						</a>
-					</span>
-					<span>
-						<la:message key="labels.searchoptions_menu_num" />
-						<a href="#searchOptions" data-toggle="modal">
-						<la:message key="labels.searchoptions_num" arg0="${f:h(num)}" />
-						</a>
-					</span>
-					<span>
-						<la:message key="labels.searchoptions_menu_lang" />
-						<a href="#searchOptions" data-toggle="modal">
-						<c:if test="${empty lang}"><la:message key="labels.searchoptions_all" /></c:if>
-						<c:if test="${!empty lang}">
-							<c:forEach var="sLang" items="${lang}">
-								<c:forEach var="item" items="${langItems}">
-									<c:if test="${item.value==sLang}">${f:h(item.label)}</c:if>
+					<span> <la:message key="labels.searchoptions_menu_sort" />
+						<a href="#searchOptions" data-toggle="modal"> <c:if
+								test="${empty sort}">
+								<la:message key="labels.searchoptions_score" />
+							</c:if> <c:if test="${sort=='created.asc'}">
+								<la:message key="labels.search_result_sort_created_asc" />
+							</c:if> <c:if test="${sort=='created.desc'}">
+								<la:message key="labels.search_result_sort_created_desc" />
+							</c:if> <c:if test="${sort=='contentLength.asc'}">
+								<la:message key="labels.search_result_sort_contentLength_asc" />
+							</c:if> <c:if test="${sort=='contentLength.desc'}">
+								<la:message key="labels.search_result_sort_contentLength_desc" />
+							</c:if> <c:if test="${sort=='lastModified.asc'}">
+								<la:message key="labels.search_result_sort_lastModified_asc" />
+							</c:if> <c:if test="${sort=='lastModified.desc'}">
+								<la:message key="labels.search_result_sort_lastModified_desc" />
+							</c:if> <c:if test="${sort=='clickCount_l_x_dv.asc'}">
+								<la:message key="labels.search_result_sort_clickCount_asc" />
+							</c:if> <c:if test="${sort=='clickCount_l_x_dv.desc'}">
+								<la:message key="labels.search_result_sort_clickCount_desc" />
+							</c:if> <c:if test="${sort=='favoriteCount_l_x_dv.asc'}">
+								<la:message key="labels.search_result_sort_favoriteCount_asc" />
+							</c:if> <c:if test="${sort=='favoriteCount_l_x_dv.desc'}">
+								<la:message key="labels.search_result_sort_favoriteCount_desc" />
+							</c:if>
+					</a>
+					</span> <span> <la:message key="labels.searchoptions_menu_num" />
+						<a href="#searchOptions" data-toggle="modal"> <la:message
+								key="labels.searchoptions_num" arg0="${f:h(num)}" />
+					</a>
+					</span> <span> <la:message key="labels.searchoptions_menu_lang" />
+						<a href="#searchOptions" data-toggle="modal"> <c:if
+								test="${empty lang}">
+								<la:message key="labels.searchoptions_all" />
+							</c:if> <c:if test="${!empty lang}">
+								<c:forEach var="sLang" items="${lang}">
+									<c:forEach var="item" items="${langItems}">
+										<c:if test="${item.value==sLang}">${f:h(item.label)}</c:if>
+									</c:forEach>
 								</c:forEach>
-							</c:forEach>
-						</c:if>
-						</a>
+							</c:if>
+					</a>
 					</span>
 					<c:if test="${displayLabelTypeItems}">
-					<span>
-						<la:message key="labels.searchoptions_menu_labels" />
-						<a href="#searchOptions" data-toggle="modal">
-						<c:if test="${empty fields.label}"><la:message key="labels.searchoptions_all" /></c:if>
-						<c:if test="${!empty fields.label}">
-							<c:forEach var="sLabel" items="${fields.label}">
-								<c:forEach var="item" items="${labelTypeItems}">
-									<c:if test="${item.value==sLabel}">${f:h(item.label)}</c:if>
-								</c:forEach>
-							</c:forEach>
-						</c:if>
+						<span> <la:message key="labels.searchoptions_menu_labels" />
+							<a href="#searchOptions" data-toggle="modal"> <c:if
+									test="${empty fields.label}">
+									<la:message key="labels.searchoptions_all" />
+								</c:if> <c:if test="${!empty fields.label}">
+									<c:forEach var="sLabel" items="${fields.label}">
+										<c:forEach var="item" items="${labelTypeItems}">
+											<c:if test="${item.value==sLabel}">${f:h(item.label)}</c:if>
+										</c:forEach>
+									</c:forEach>
+								</c:if>
 						</a>
-					</span>
+						</span>
 					</c:if>
 				</p>
 			</div>
 			<div class="col-md-3">
 				<c:if test="${!empty username}">
-				<p class="username">
-					<la:message key="labels.searchheader_username" arg0="${f:h(username)}" />
-					|
-					<la:link href="/login/logout" styleClass="logout-link">
-						<la:message key="labels.logout" />
-					</la:link>
-				</p>
+					<p class="username">
+						<la:message key="labels.searchheader_username"
+							arg0="${f:h(username)}" />
+						|
+						<la:link href="/logout" styleClass="logout-link">
+							<la:message key="labels.logout" />
+						</la:link>
+					</p>
 				</c:if>
 			</div>
 		</div>
@@ -92,7 +101,8 @@
 					<p class="hotSearchWordBody ellipsis">
 						<la:message key="labels.search_hot_search_word" />
 						<c:forEach var="item" items="${fe:hsw(null, 5)}">
-							<la:link href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+							<la:link
+								href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 						</c:forEach>
 					</p>
 				</div>
@@ -111,7 +121,8 @@
 		</c:choose>
 		<jsp:include page="footer.jsp" />
 	</div>
-	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="contextPath"
+		value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
