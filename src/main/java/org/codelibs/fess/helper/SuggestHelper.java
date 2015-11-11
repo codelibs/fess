@@ -159,7 +159,7 @@ public class SuggestHelper {
     }
 
     public void refreshWords() {
-        deleteAllBadWord();
+        deleteAllBadWords();
         storeAllElevateWords();
     }
 
@@ -218,59 +218,36 @@ public class SuggestHelper {
         //        }
     }
 
-    public void deleteAllBadWord() {
+    public void deleteAllBadWords() {
         final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
             cb.query().matchAll();
         });
-        final Set<String> badWords = new HashSet<String>();
+        final Set<String> badWords = new HashSet<>();
         for (final SuggestBadWord suggestBadWord : list) {
             final String word = suggestBadWord.getSuggestWord();
             badWords.add(word);
         }
-        // TODO
-        //        suggestService.updateBadWords(badWords);
-        //        suggestService.deleteBadWords();
-        //        suggestService.commit();
+        suggester.settings().badword().deleteAll();
     }
 
-    /*
-    public void updateSolrBadwordFile() {
-        suggestBadWordBhv.selectList(cb -> {
+    public void storeAllBadWords() {
+        deleteAllBadWords();
+        final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
             cb.query().matchAll();
         });
-
-        final File dir = new File(System.getProperty("catalina.home").replace("¥", "/") + "/" + badwordFileDir);
-        if (!dir.exists() || !dir.isDirectory()) {
-            logger.warn(dir.getAbsolutePath() + " does not exist.");
-            return;
+        for (final SuggestBadWord suggestBadWord : list) {
+            final String word = suggestBadWord.getSuggestWord();
+            suggester.indexer().addBadWord(word);
         }
-
-        // TODO
-        //        final File file = new File(dir, SuggestConstants.BADWORD_FILENAME);
-        //        BufferedWriter bw = null;
-        //        try {
-        //            if (!file.exists()) {
-        //                file.createNewFile();
-        //            }
-        //            bw = new BufferedWriter(new FileWriter(file, false));
-        //            for (final SuggestBadWord suggestBadWord : list) {
-        //                bw.write(suggestBadWord.getSuggestWord());
-        //                bw.newLine();
-        //            }
-        //            bw.close();
-        //        } catch (final IOException e) {
-        //            logger.warn("Failed to update badword file.", e);
-        //        } finally {
-        //            if (bw != null) {
-        //                try {
-        //                    bw.close();
-        //                } catch (final Exception e2) {
-        //                    //ignore
-        //                }
-        //            }
-        //        }
     }
-    */
+
+    public void addBadWord(final String badWord) {
+        suggester.indexer().addBadWord(badWord);
+    }
+
+    public void deleteBadWord(final String badWord) {
+        suggester.indexer().deleteBadWord(badWord);
+    }
 
     protected boolean isContentField(final String field) {
         for (final String contentField : contentFieldNames) {

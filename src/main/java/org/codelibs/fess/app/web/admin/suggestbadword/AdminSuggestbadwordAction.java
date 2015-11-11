@@ -39,6 +39,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.SuggestBadWord;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -66,6 +67,8 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
     private SystemHelper systemHelper;
     @Resource
     protected DynamicProperties crawlerProperties;
+    @Resource
+    protected SuggestHelper suggestHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -225,6 +228,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         createSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
+            suggestHelper.addBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
@@ -238,6 +242,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         createSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
+            suggestHelper.storeAllBadWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -252,6 +257,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
         final String id = form.id;
         suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
             suggestBadWordService.delete(entity);
+            suggestHelper.deleteBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
@@ -297,6 +303,7 @@ public class AdminSuggestbadwordAction extends FessAdminAction {
                 try {
                     reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
                     suggestBadWordService.importCsv(reader);
+                    suggestHelper.storeAllBadWords();
                 } catch (final Exception e) {
                     throw new FessSystemException("Failed to import data.", e);
                 } finally {
