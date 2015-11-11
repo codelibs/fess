@@ -17,9 +17,12 @@ package org.codelibs.fess.app.web.base.login;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
@@ -104,7 +107,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
 
     @Override
     protected void checkPermission(final LoginHandlingResource resource) throws LoginRequiredException {
-        super.checkPermission(resource);
+        if (resource.getActionClass().getName().startsWith(Constants.ADMIN_PACKAGE)) {
+            getSessionUserBean().ifPresent(user -> {
+                if (!user.hasRoles(fessConfig.getAuthenticationAdminRoles().split(","))) {
+                    throw new UserRoleLoginException(RootAction.class);
+                }
+            });
+        }
     }
 
     // ===================================================================================

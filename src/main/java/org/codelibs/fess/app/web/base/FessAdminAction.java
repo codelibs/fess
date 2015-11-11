@@ -21,12 +21,15 @@ import javax.servlet.ServletContext;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
+import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.callback.TypicalEmbeddedKeySupplier;
 import org.lastaflute.web.callback.TypicalKey.TypicalSimpleEmbeddedKeySupplier;
 import org.lastaflute.web.login.LoginManager;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -106,4 +109,17 @@ public abstract class FessAdminAction extends FessBaseAction {
             }
         };
     }
+
+    // ===================================================================================
+    //                                                                               Hook
+    //                                                                              ======
+    @Override
+    public ActionResponse godHandPrologue(final ActionRuntime runtime) {
+        try {
+            return super.godHandPrologue(runtime);
+        } catch (UserRoleLoginException e) {
+            return redirect(e.getActionClass());
+        }
+    }
+
 }

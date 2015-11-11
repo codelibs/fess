@@ -216,7 +216,10 @@ public class AdminGroupAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new Group());
+                return OptionalEntity.of(new Group()).map(entity -> {
+                    entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
@@ -233,7 +236,6 @@ public class AdminGroupAction extends FessAdminAction {
     protected OptionalEntity<Group> createGroup(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             return entity;
         });
     }

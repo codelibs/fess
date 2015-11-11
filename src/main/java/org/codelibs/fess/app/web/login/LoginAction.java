@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.login;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
 
 public class LoginAction extends FessSearchAction {
@@ -55,7 +56,15 @@ public class LoginAction extends FessSearchAction {
         });
         final String email = form.username;
         final String password = form.password;
-        return fessLoginAssist.loginRedirect(email, password, op -> {}, () -> getHtmlResponse());
+        form.clearSecurityInfo();
+        try {
+            return fessLoginAssist.loginRedirect(email, password, op -> {}, () -> getHtmlResponse());
+        } catch (LoginFailureException lfe) {
+            throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> {
+                return asHtml(path_Login_IndexJsp);
+            });
+        }
+        return redirect(getClass());
     }
 
 }

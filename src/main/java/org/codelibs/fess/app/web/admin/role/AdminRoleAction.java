@@ -216,7 +216,10 @@ public class AdminRoleAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new Role());
+                return OptionalEntity.of(new Role()).map(entity -> {
+                    entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                    return entity;
+                });
             }
             break;
         case CrudMode.EDIT:
@@ -233,7 +236,6 @@ public class AdminRoleAction extends FessAdminAction {
     protected OptionalEntity<Role> createRole(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            entity.setId(Base64.getEncoder().encodeToString(entity.getName().getBytes(Constants.CHARSET_UTF_8)));
             return entity;
         });
     }
