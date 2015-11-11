@@ -23,14 +23,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.entity.LoginInfo;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.UnsupportedSearchException;
 import org.codelibs.fess.helper.FieldHelper;
@@ -136,15 +134,7 @@ public abstract class FessSearchAction extends FessBaseAction {
             locale = Locale.ENGLISH;
         }
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
-
-        final HttpSession session = request.getSession(false);
-        if (session != null) {
-            final Object obj = session.getAttribute(Constants.USER_INFO);
-            if (obj instanceof LoginInfo) {
-                final LoginInfo loginInfo = (LoginInfo) obj;
-                runtime.registerData("username", loginInfo.getUsername());
-            }
-        }
+        runtime.registerData("username", systemHelper.getUsername());
     }
 
     // ===================================================================================

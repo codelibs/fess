@@ -19,11 +19,12 @@
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
 		<ul class="nav navbar-nav pull-right">
 			<li class="nav-item"><c:if test="${!empty username}">
-					<la:link href="/login/logout" styleClass="logout-link">
+					<la:link href="/logout" styleClass="nav-link logout-link">
 						<la:message key="labels.logout" />
 					</la:link>
 				</c:if></li>
-			<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
+			<li class="nav-item"><la:link href="/help"
+					styleClass="nav-link help-link">
 					<la:message key="labels.index_help" />
 				</la:link></li>
 		</ul>
@@ -37,9 +38,7 @@
 				</h1>
 				<div>
 					<la:info id="msg" message="true">
-						<div class="alert-message info">
-							${msg}
-						</div>
+						<div class="alert-message info">${msg}</div>
 					</la:info>
 					<la:errors header="errors.front_header"
 						footer="errors.front_footer" prefix="errors.front_prefix"
@@ -51,8 +50,9 @@
 					<fieldset>
 						<div class="clearfix">
 							<div class="input">
-								<la:text styleClass="query form-control center-block" property="query" size="50"
-									maxlength="1000" styleId="contentQuery" autocomplete="off" />
+								<la:text styleClass="query form-control center-block"
+									property="query" size="50" maxlength="1000"
+									styleId="contentQuery" autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${fe:hswsize(null) != 0}">
@@ -60,7 +60,8 @@
 								<p class="hotSearchWordBody ellipsis">
 									<la:message key="labels.search_hot_search_word" />
 									<c:forEach var="item" items="${fe:hsw(null, 5)}">
-										<la:link href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+										<la:link
+											href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 									</c:forEach>
 								</p>
 							</div>
@@ -70,17 +71,20 @@
 								class="btn btn-primary">
 								<la:message key="labels.index_form_search_btn" />
 							</button>
-							<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#searchOptions">
+							<button type="button" class="btn btn-secondary"
+								data-toggle="modal" data-target="#searchOptions">
 								<la:message key="labels.index_form_option_btn" />
 							</button>
 						</div>
 					</fieldset>
-					<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog" aria-labelledby="searchOptionsLabel"
+					<div class="modal fade" id="searchOptions" tabindex="-1"
+						role="dialog" aria-labelledby="searchOptionsLabel"
 						aria-hidden="true">
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<button type="button" class="close" data-dismiss="modal"
+										aria-label="Close">
 										<span aria-hidden="true">&times;</span> <span class="sr-only">Close</span>
 									</button>
 									<h4 class="modal-title" id="searchOptionsLabel">
@@ -89,8 +93,10 @@
 								</div>
 								<div class="modal-body">
 									<fieldset class="form-group">
-										<label for="contentNum"><la:message key="labels.index_num" /></label>
-										<la:select property="num" styleId="numSearchOption" styleClass="form-control" style="display:block;">
+										<label for="contentNum"><la:message
+												key="labels.index_num" /></label>
+										<la:select property="num" styleId="numSearchOption"
+											styleClass="form-control" style="display:block;">
 											<option value="">
 												<la:message key="labels.search_result_select_num" />
 											</option>
@@ -103,8 +109,10 @@
 										</la:select>
 									</fieldset>
 									<fieldset class="form-group">
-										<label for="contentSort"><la:message key="labels.index_sort" /></label>
-										<la:select property="sort" styleId="sortSearchOption" styleClass="form-control" style="display:block;">
+										<label for="contentSort"><la:message
+												key="labels.index_sort" /></label>
+										<la:select property="sort" styleId="sortSearchOption"
+											styleClass="form-control" style="display:block;">
 											<option value="">
 												<la:message key="labels.search_result_select_sort" />
 											</option>
@@ -115,16 +123,19 @@
 												<la:message key="labels.search_result_sort_created_desc" />
 											</la:option>
 											<la:option value="contentLength.asc">
-												<la:message key="labels.search_result_sort_contentLength_asc" />
+												<la:message
+													key="labels.search_result_sort_contentLength_asc" />
 											</la:option>
 											<la:option value="contentLength.desc">
-												<la:message key="labels.search_result_sort_contentLength_desc" />
+												<la:message
+													key="labels.search_result_sort_contentLength_desc" />
 											</la:option>
 											<la:option value="lastModified.asc">
 												<la:message key="labels.search_result_sort_lastModified_asc" />
 											</la:option>
 											<la:option value="lastModified.desc">
-												<la:message key="labels.search_result_sort_lastModified_desc" />
+												<la:message
+													key="labels.search_result_sort_lastModified_desc" />
 											</la:option>
 											<c:if test="${searchLogSupport}">
 												<la:option value="clickCount_l_x_dv.asc">
@@ -136,17 +147,21 @@
 											</c:if>
 											<c:if test="${favoriteSupport}">
 												<la:option value="favoriteCount_l_x_dv.asc">
-													<la:message key="labels.search_result_sort_favoriteCount_asc" />
+													<la:message
+														key="labels.search_result_sort_favoriteCount_asc" />
 												</la:option>
 												<la:option value="favoriteCount_l_x_dv.desc">
-													<la:message key="labels.search_result_sort_favoriteCount_desc" />
+													<la:message
+														key="labels.search_result_sort_favoriteCount_desc" />
 												</la:option>
 											</c:if>
 										</la:select>
 									</fieldset>
 									<fieldset class="form-group">
-										<label for="contentLang"><la:message key="labels.index_lang" /></label>
-										<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="form-control">
+										<label for="contentLang"><la:message
+												key="labels.index_lang" /></label>
+										<la:select property="lang" styleId="langSearchOption"
+											multiple="true" styleClass="form-control">
 											<c:forEach var="item" items="${langItems}">
 												<la:option value="${f:u(item.value)}">
 																	${f:h(item.label)}
@@ -156,8 +171,11 @@
 									</fieldset>
 									<c:if test="${displayLabelTypeItems}">
 										<fieldset class="form-group">
-											<label for="contentLabelType"><la:message key="labels.index_label" /></label>
-											<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="form-control">
+											<label for="contentLabelType"><la:message
+													key="labels.index_label" /></label>
+											<la:select property="fields.label"
+												styleId="labelTypeSearchOption" multiple="true"
+												styleClass="form-control">
 												<c:forEach var="item" items="${labelTypeItems}">
 													<la:option value="${f:u(item.value)}">
 														${f:h(item.label)}
@@ -183,7 +201,8 @@
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>
-	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="contextPath"
+		value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>

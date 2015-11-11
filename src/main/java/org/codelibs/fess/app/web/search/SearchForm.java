@@ -97,6 +97,8 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     public Map<String, String[]> options = new HashMap<>();
 
+    public String username;
+
     private int startPosition = -1;
 
     private int pageSize = -1;
