@@ -15,9 +15,8 @@
  */
 package org.codelibs.fess.mylasta.action;
 
-import java.util.stream.Stream;
-
 import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.login.TypicalUserBean;
 
 /**
@@ -63,18 +62,18 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     }
 
     public boolean hasRole(final String role) {
-        return Stream.of(user.getRoleNames()).anyMatch(s -> s.equals(role));
+        return StreamUtil.of(user.getRoleNames()).anyMatch(s -> s.equals(role));
     }
 
     public boolean hasRoles(final String[] acceptedRoles) {
-        return Stream.of(user.getRoleNames()).anyMatch(s1 -> Stream.of(acceptedRoles).anyMatch(s2 -> s2.equals(s1)));
+        return StreamUtil.of(user.getRoleNames()).anyMatch(s1 -> StreamUtil.of(acceptedRoles).anyMatch(s2 -> s2.equals(s1)));
     }
 
     public boolean hasGroup(final String group) {
-        return Stream.of(user.getGroupNames()).anyMatch(s -> s.equals(group));
+        return StreamUtil.of(user.getGroupNames()).anyMatch(s -> s.equals(group));
     }
 
     public boolean hasGroups(final String[] acceptedGroups) {
-        return Stream.of(user.getGroupNames()).anyMatch(s1 -> Stream.of(acceptedGroups).anyMatch(s2 -> s2.equals(s1)));
+        return StreamUtil.of(user.getGroupNames()).anyMatch(s1 -> StreamUtil.of(acceptedGroups).anyMatch(s2 -> s2.equals(s1)));
     }
 }

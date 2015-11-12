@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
@@ -48,6 +47,7 @@ import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
@@ -300,7 +300,7 @@ public class Crawler implements Serializable {
                 CrawlerPostcard.droppedInto(postbox, postcard -> {
                     postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
                     postcard.addReplyTo(fessConfig.getMailReturnPath());
-                    Stream.of(toAddresses).forEach(address -> {
+                    StreamUtil.of(toAddresses).forEach(address -> {
                         postcard.addTo(address);
                     });
                     BeanUtil.copyMapToBean(dataMap, postcard);

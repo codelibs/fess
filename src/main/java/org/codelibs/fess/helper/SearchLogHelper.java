@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -43,6 +42,7 @@ import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
@@ -150,7 +150,7 @@ public class SearchLogHelper {
         final Map<String, UserInfo> userInfoMap = new HashMap<>();
         queue.stream().forEach(searchLog -> {
             final String userAgent = searchLog.getUserAgent();
-            final boolean isBot = userAgent != null && Stream.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
+            final boolean isBot = userAgent != null && StreamUtil.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
             if (!isBot) {
                 searchLog.getUserInfo().ifPresent(userInfo -> {
                     final String code = userInfo.getCode();

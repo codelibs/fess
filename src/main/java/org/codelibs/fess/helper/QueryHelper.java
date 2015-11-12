@@ -53,6 +53,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -678,7 +679,7 @@ public class QueryHelper implements Serializable {
     }
 
     public Stream<String> highlightedFields() {
-        return Stream.of(highlightedFields);
+        return StreamUtil.of(highlightedFields);
     }
 
     /**
@@ -812,7 +813,7 @@ public class QueryHelper implements Serializable {
     public void addDefaultSort(final String fieldName, final String order) {
         final List<SortBuilder> list = new ArrayList<>();
         if (defaultSortBuilders != null) {
-            Stream.of(defaultSortBuilders).forEach(builder -> list.add(builder));
+            StreamUtil.of(defaultSortBuilders).forEach(builder -> list.add(builder));
         }
         list.add(SortBuilders.fieldSort(fieldName).order(SortOrder.ASC.toString().equalsIgnoreCase(order) ? SortOrder.ASC : SortOrder.DESC));
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);

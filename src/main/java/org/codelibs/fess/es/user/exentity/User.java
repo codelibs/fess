@@ -16,10 +16,10 @@
 package org.codelibs.fess.es.user.exentity;
 
 import java.util.Base64;
-import java.util.stream.Stream;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.user.bsentity.BsUser;
+import org.codelibs.fess.util.StreamUtil;
 
 /**
  * @author FreeGen
@@ -45,12 +45,12 @@ public class User extends BsUser {
     }
 
     public String[] getRoleNames() {
-        return Stream.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
+        return StreamUtil.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
     }
 
     public String[] getGroupNames() {
-        return Stream.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
+        return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
     }
 

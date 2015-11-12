@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -78,7 +78,7 @@ public class QueryContext {
     }
 
     public void addSorts(final SortBuilder... sortBuilders) {
-        Stream.of(sortBuilders).forEach(sortBuilder -> sortBuilderList.add(sortBuilder));
+        StreamUtil.of(sortBuilders).forEach(sortBuilder -> sortBuilderList.add(sortBuilder));
     }
 
     public boolean hasSorts() {
