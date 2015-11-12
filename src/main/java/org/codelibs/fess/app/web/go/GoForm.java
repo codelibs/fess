@@ -25,10 +25,12 @@ public class GoForm {
     public String docId;
 
     @Size(max = 10000)
+    @Required
     public String rt;
 
     public String hash;
 
+    @Required
     public String queryId;
 
     public Integer order;

@@ -370,5 +370,11 @@ public class SearchAction extends FessSearchAction {
             data.register("searchQuery", searchQuery);
             super.setSearchQuery(searchQuery);
         }
+
+        @Override
+        public void setRequestedTime(long requestedTime) {
+            data.register("requestedTime", requestedTime);
+            super.setRequestedTime(requestedTime);
+        }
     }
 }

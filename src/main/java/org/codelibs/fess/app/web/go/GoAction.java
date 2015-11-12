@@ -64,6 +64,7 @@ public class GoAction extends FessSearchAction {
     @Execute
     public ActionResponse index(final GoForm form) throws IOException {
         searchAvailable();
+        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
 
         Map<String, Object> doc = null;
         try {
