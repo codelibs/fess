@@ -4,7 +4,7 @@
 <components>
 	<component name="fessEsClient" class="org.codelibs.fess.es.client.FessEsClient">
 		<property name="settings">
-			{"http.cors.enabled":"true", "index.number_of_replicas":"0"}
+			{"http.cors.enabled":"true", "http.cors.allow-origin":"*", "index.number_of_replicas":"0"}
 		</property>
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
