@@ -44,13 +44,11 @@
 										<label for="url" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_url" /></label>
 										<div class="col-sm-10">
-											<la:text property="url"
-												styleClass="form-control"></la:text>
+											<la:text property="url" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group row">
-										<label for="errorCountMin"
-											class="col-sm-2 control-label"><la:message
+										<label for="errorCountMin" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_count" /></label>
 										<div class="col-xs-2">
 											<la:text property="errorCountMin" size="2"
@@ -63,12 +61,10 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="errorName"
-											class="col-sm-2 control-label"><la:message
+										<label for="errorName" class="col-sm-2 control-label"><la:message
 												key="labels.failure_url_search_error_name" /></label>
 										<div class="col-sm-10">
-											<la:text property="errorName"
-												styleClass="form-control"></la:text>
+											<la:text property="errorName" styleClass="form-control"></la:text>
 										</div>
 									</div>
 									<div class="form-group">
@@ -104,6 +100,8 @@
 														<tr>
 															<th><la:message key="labels.failure_url_url" /></th>
 															<th><la:message
+																	key="labels.failure_url_search_error_name" /></th>
+															<th><la:message
 																	key="labels.failure_url_last_access_time" /></th>
 														</tr>
 													</thead>
@@ -113,6 +111,7 @@
 															<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
 																data-href="details/4/${f:u(data.id)}">
 																<td>${f:h(data.url)}</td>
+																<td>${f:h(data.errorName)}</td>
 																<td><fmt:formatDate
 																		value="${fe:date(data.lastAccessTime)}"
 																		pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
@@ -167,6 +166,7 @@
 											<div class="col-sm-12 center">
 												<button type="button" class="btn btn-danger"
 													data-toggle="modal" data-target="#confirmToDeleteAll">
+													<i class="fa fa-trash"></i>
 													<la:message key="labels.failure_url_delete_all_link" />
 												</button>
 											</div>

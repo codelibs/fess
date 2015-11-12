@@ -13,20 +13,14 @@
 			<jsp:param name="menuCategoryType" value="log" />
 			<jsp:param name="menuType" value="failureUrl" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.failure_url_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
-
 			<section class="content">
-
-				<%-- Form --%>
 				<la:form>
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
@@ -55,6 +49,7 @@
 									<div class="btn-group pull-right">
 										<la:link href="/admin/failureurl"
 											styleClass="btn btn-primary btn-xs">
+											<i class="fa fa-th-list"></i>
 											<la:message key="labels.failure_url_link_list" />
 										</la:link>
 									</div>
@@ -68,84 +63,82 @@
 										</la:info>
 										<la:errors />
 									</div>
-
-									<%-- Form Fields --%>
-									<table class="table table-bordered">
-										<tbody>
-											<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
+									<div class="table-responsive">
+										<table class="table table-bordered">
+											<tbody>
+												<c:if test="${crudMode==2 || crudMode==3 || crudMode==4}">
+													<tr>
+														<th><la:message key="labels.failure_url_id" /></th>
+														<td>${f:h(id)}<la:hidden property="id" /></td>
+													</tr>
+												</c:if>
 												<tr>
-													<th style="width: 150px;"><la:message
-															key="labels.failure_url_id" /></th>
-													<td style="width: 350px;">${f:h(id)}<la:hidden
-															property="id" /></td>
+													<th><la:message key="labels.failure_url_url" /></th>
+													<td>${f:h(url)} <la:hidden property="url" />
+													</td>
 												</tr>
-											</c:if>
-											<tr>
-												<th><la:message key="labels.failure_url_url" /></th>
-												<td><div style="width: 350px; overflow-x: auto;">
-														${f:h(url)}
-														<la:hidden property="url" />
-													</div></td>
-											</tr>
-											<tr>
-												<th><la:message key="labels.failure_url_thread_name" /></th>
-												<td>${f:h(threadName)}<la:hidden property="threadName" /></td>
-											</tr>
-											<tr>
-												<th><la:message key="labels.failure_url_error_name" /></th>
-												<td>${f:h(errorName)}<la:hidden property="errorName" /></td>
-											</tr>
-											<tr>
-												<th><la:message key="labels.failure_url_error_log" /></th>
-												<td><div style="width: 350px; overflow-x: auto;">
-														${f:br(f:nbsp(f:h(errorLog)))}
-														<la:hidden property="errorLog" />
-													</div></td>
-											</tr>
-											<tr>
-												<th><la:message key="labels.failure_url_error_count" /></th>
-												<td>${f:h(errorCount)}<la:hidden property="errorCount" /></td>
-											</tr>
-											<tr>
-												<th><la:message
-														key="labels.failure_url_last_access_time" /></th>
-												<td>${f:h(lastAccessTime)}<la:hidden
-														property="lastAccessTime" /></td>
-											</tr>
-											<tr>
-												<th><la:message
-														key="labels.failure_url_web_config_name" /></th>
-												<td>${f:h(webConfigName)}</td>
-											</tr>
-											<tr>
-												<th><la:message
-														key="labels.failure_url_file_config_name" /></th>
-												<td>${f:h(fileConfigName)}</td>
-											</tr>
-										</tbody>
-									</table>
-
+												<tr>
+													<th><la:message key="labels.failure_url_thread_name" /></th>
+													<td>${f:h(threadName)}<la:hidden property="threadName" /></td>
+												</tr>
+												<tr>
+													<th><la:message key="labels.failure_url_error_name" /></th>
+													<td>${f:h(errorName)}<la:hidden property="errorName" /></td>
+												</tr>
+												<tr>
+													<th><la:message key="labels.failure_url_error_log" /></th>
+													<td>${f:br(f:nbsp(f:h(errorLog)))} <la:hidden
+															property="errorLog" />
+													</td>
+												</tr>
+												<tr>
+													<th><la:message key="labels.failure_url_error_count" /></th>
+													<td>${f:h(errorCount)}<la:hidden property="errorCount" /></td>
+												</tr>
+												<tr>
+													<th><la:message
+															key="labels.failure_url_last_access_time" /></th>
+													<td>${f:h(lastAccessTime)}<la:hidden
+															property="lastAccessTime" /></td>
+												</tr>
+												<tr>
+													<th><la:message
+															key="labels.failure_url_web_config_name" /></th>
+													<td>${f:h(webConfigName)}</td>
+												</tr>
+												<tr>
+													<th><la:message
+															key="labels.failure_url_file_config_name" /></th>
+													<td>${f:h(fileConfigName)}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
 								</div>
-								<%-- Box Footer --%>
+								<!-- /.box-body -->
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="back"
+										<button type="submit" class="btn" name="list"
 											value="<la:message key="labels.crud_button_back" />">
+											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
 										</button>
 										<button type="submit" class="btn btn-danger" name="delete"
 											value="<la:message key="labels.crud_button_delete" />">
+											<i class="fa fa-trash"></i>
 											<la:message key="labels.crud_button_delete" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn" name="back"
+										<button type="submit" class="btn" name="list"
 											value="<la:message key="labels.crud_button_back" />">
+											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
 										</button>
 										<button type="button" class="btn btn-danger" name="delete"
 											data-toggle="modal" data-target="#confirmToDelete"
 											value="<la:message key="labels.crud_button_delete" />">
+											<i class="fa fa-trash"></i>
 											<la:message key="labels.crud_button_delete" />
 										</button>
 										<div class="modal modal-danger fade" id="confirmToDelete"
@@ -183,7 +176,9 @@
 										</div>
 									</c:if>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
