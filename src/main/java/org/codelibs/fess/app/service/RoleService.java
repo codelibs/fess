@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.RolePager;
 import org.codelibs.fess.es.user.cbean.RoleCB;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -36,6 +37,9 @@ public class RoleService implements Serializable {
 
     @Resource
     protected RoleBhv roleBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<Role> getRoleList(final RolePager rolePager) {
 
@@ -106,9 +110,10 @@ public class RoleService implements Serializable {
 
     }
 
-    public List<Role> getAvailableRoleList() {
+    public List<Role> getAvailableRoleList(Integer size) {
         return roleBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.paging(size, 1);
         });
     }
 

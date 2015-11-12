@@ -37,6 +37,7 @@ import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
@@ -70,6 +71,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Resource
     protected SessionManager sessionManager;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     // ===================================================================================
     //                                                                               Hook

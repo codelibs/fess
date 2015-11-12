@@ -25,6 +25,12 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
+    /** The key of the configuration. e.g. 100 */
+    String FORM_ROLE_LIST_SIZE = "form.role.list.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String FORM_GROUP_LIST_SIZE = "form.group.list.size";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
@@ -78,6 +84,36 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getDomainTitle();
+
+    /**
+     * Get the value for the key 'form.role.list.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFormRoleListSize();
+
+    /**
+     * Get the value for the key 'form.role.list.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getFormRoleListSizeAsInteger();
+
+    /**
+     * Get the value for the key 'form.group.list.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFormGroupListSize();
+
+    /**
+     * Get the value for the key 'form.group.list.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getFormGroupListSizeAsInteger();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -213,6 +249,22 @@ public interface FessConfig extends FessEnv {
 
         public String getDomainTitle() {
             return get(FessConfig.DOMAIN_TITLE);
+        }
+
+        public String getFormRoleListSize() {
+            return get(FessConfig.FORM_ROLE_LIST_SIZE);
+        }
+
+        public Integer getFormRoleListSizeAsInteger() {
+            return getAsInteger(FessConfig.FORM_ROLE_LIST_SIZE);
+        }
+
+        public String getFormGroupListSize() {
+            return get(FessConfig.FORM_GROUP_LIST_SIZE);
+        }
+
+        public Integer getFormGroupListSizeAsInteger() {
+            return getAsInteger(FessConfig.FORM_GROUP_LIST_SIZE);
         }
 
         public String getAuthenticationAdminRoles() {
