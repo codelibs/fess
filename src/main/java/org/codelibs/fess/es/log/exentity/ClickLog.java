@@ -15,12 +15,7 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
-import java.time.LocalDateTime;
-
 import org.codelibs.fess.es.log.bsentity.BsClickLog;
-import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
-import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.optional.OptionalEntity;
 
 /**
  * @author FreeGen
@@ -28,58 +23,6 @@ import org.dbflute.optional.OptionalEntity;
 public class ClickLog extends BsClickLog {
 
     private static final long serialVersionUID = 1L;
-
-    private LocalDateTime queryRequestedAt;
-
-    private String userSessionId;
-
-    private String docId;
-
-    private long clickCount;
-
-    private OptionalEntity<SearchLog> searchLog;
-
-    public OptionalEntity<SearchLog> getSearchLog() {
-        if (searchLog == null) {
-            final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
-            searchLog = searchLogBhv.selectEntity(cb -> {
-                cb.query().docMeta().setId_Equal(getSearchLogId());
-            });
-        }
-        return searchLog;
-    }
-
-    public String getUserSessionId() {
-        return userSessionId;
-    }
-
-    public void setUserSessionId(final String userSessionId) {
-        this.userSessionId = userSessionId;
-    }
-
-    public LocalDateTime getQueryRequestedAt() {
-        return queryRequestedAt;
-    }
-
-    public void setQueryRequestedAt(final LocalDateTime queryRequestedAt) {
-        this.queryRequestedAt = queryRequestedAt;
-    }
-
-    public String getDocId() {
-        return docId;
-    }
-
-    public void setDocId(final String docId) {
-        this.docId = docId;
-    }
-
-    public long getClickCount() {
-        return clickCount;
-    }
-
-    public void setClickCount(final long clickCount) {
-        this.clickCount = clickCount;
-    }
 
     public String getId() {
         return asDocMeta().id();

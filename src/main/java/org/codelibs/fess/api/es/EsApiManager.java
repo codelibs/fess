@@ -62,7 +62,7 @@ public class EsApiManager extends BaseApiManager {
     public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
         if (servletPath.startsWith(pathPrefix)) {
-            final FessLoginAssist loginAssist = ComponentUtil.getLoginAssist();
+            final FessLoginAssist loginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
             return loginAssist.getSessionUserBean().map(user -> user.hasRoles(acceptedRoles)).orElseGet(() -> Boolean.FALSE).booleanValue();
         }
         return false;
@@ -142,6 +142,6 @@ public class EsApiManager extends BaseApiManager {
     }
 
     private SessionManager getSessionManager() {
-        return ComponentUtil.getSessionManager();
+        return ComponentUtil.getComponent(SessionManager.class);
     }
 }

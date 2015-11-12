@@ -15,13 +15,23 @@
  */
 package org.codelibs.fess.app.web.error;
 
-import org.codelibs.fess.app.web.search.SearchForm;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-// TODO workaround
-public class ErrorForm extends SearchForm {
+public class ErrorForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public Map<String, String[]> fields = new HashMap<>();
+
+    public String query;
+
     public String url;
 
+    public String num;
+
+    public String sort;
+
+    public String lang;
 }

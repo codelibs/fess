@@ -166,6 +166,10 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("user");
         }
 
+        public void columnQueryId() {
+            doColumn("queryId");
+        }
+
         public void columnClientIp() {
             doColumn("clientIp");
         }

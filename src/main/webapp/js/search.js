@@ -25,6 +25,8 @@ $(function(){
 	$result.on('mousedown', 'a.link', function(e){
 		var docId = $(this).attr('data-id'),
 			rt = $('#rt').val(),
+			queryId = $('#queryId').val(),
+			order = $(this).attr('data-order'),
 			url = $(this).attr('href'),
 			buf = [];
 		buf.push(contextPath);
@@ -32,6 +34,10 @@ $(function(){
 		buf.push(rt);
 		buf.push('&docId=');
 		buf.push(docId);
+		buf.push('&queryId=');
+		buf.push(queryId);
+		buf.push('&order=');
+		buf.push(order);
 
 		var hashIndex = url.indexOf('#');
 		if (hashIndex >= 0) {

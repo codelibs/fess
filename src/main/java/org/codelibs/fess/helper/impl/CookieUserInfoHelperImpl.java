@@ -116,12 +116,10 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     }
 
     @Override
-    public String generateQueryId(final String query, final List<Map<String, Object>> documentItems) {
+    public void storeQueryId(final String queryId, final List<Map<String, Object>> documentItems) {
         final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
             final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-
-            final String queryId = getId();
 
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentItems) {
@@ -134,10 +132,8 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
             if (!docIdList.isEmpty()) {
                 final Map<String, String[]> resultDocIdsCache = getResultDocIdsCache(session);
                 resultDocIdsCache.put(queryId, docIdList.toArray(new String[docIdList.size()]));
-                return queryId;
             }
         }
-        return StringUtil.EMPTY;
     }
 
     @Override

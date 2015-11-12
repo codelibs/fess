@@ -15,12 +15,21 @@
  */
 package org.codelibs.fess.app.web.go;
 
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 public class GoForm {
-    //@Required(target = "go,cache")
-    //@Maxbytelength(maxbytelength = 100)
+    @Required
+    @Size(max = 100)
     public String docId;
 
+    @Size(max = 10000)
     public String rt;
 
     public String hash;
+
+    public String queryId;
+
+    public Integer order;
 }

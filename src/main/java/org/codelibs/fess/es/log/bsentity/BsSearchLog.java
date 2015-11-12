@@ -43,6 +43,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** user */
     protected String user;
 
+    /** queryId */
+    protected String queryId;
+
     /** clientIp */
     protected String clientIp;
 
@@ -106,6 +109,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (user != null) {
             sourceMap.put("user", user);
         }
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
         if (clientIp != null) {
             sourceMap.put("clientIp", clientIp);
         }
@@ -153,6 +159,7 @@ public class BsSearchLog extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(accessType);
         sb.append(dm).append(user);
+        sb.append(dm).append(queryId);
         sb.append(dm).append(clientIp);
         sb.append(dm).append(hitCount);
         sb.append(dm).append(queryOffset);
@@ -193,6 +200,16 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setUser(String value) {
         registerModifiedProperty("user");
         this.user = value;
+    }
+
+    public String getQueryId() {
+        checkSpecifiedProperty("queryId");
+        return convertEmptyToNull(queryId);
+    }
+
+    public void setQueryId(String value) {
+        registerModifiedProperty("queryId");
+        this.queryId = value;
     }
 
     public String getClientIp() {

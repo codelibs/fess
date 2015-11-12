@@ -21,7 +21,6 @@ import java.util.List;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.log.bsentity.BsSearchLog;
-import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
@@ -89,16 +88,6 @@ public class SearchLog extends BsSearchLog {
 
     public void setUserInfo(final OptionalEntity<UserInfo> userInfo) {
         this.userInfo = userInfo;
-    }
-
-    public List<ClickLog> getClickLogList() {
-        if (clickLogList == null) {
-            final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
-            clickLogList = clickLogBhv.selectList(cb -> {
-                cb.query().setSearchLogId_Equal(getId());
-            });
-        }
-        return clickLogList;
     }
 
     public List<SearchFieldLog> getSearchFieldLogList() {

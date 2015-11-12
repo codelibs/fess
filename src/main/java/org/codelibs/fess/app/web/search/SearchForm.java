@@ -19,12 +19,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codelibs.core.lang.StringUtil;
+import javax.validation.constraints.Size;
+
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class SearchForm implements SearchRequestParams, Serializable {
 
@@ -32,58 +34,29 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     public Map<String, String[]> fields = new HashMap<>();
 
-    //@Maxbytelength(maxbytelength = 1000)
+    @Size(max = 1000)
     public String query;
 
+    @Size(max = 1000)
     public String sort;
 
-    public String num;
+    @ValidateTypeFailure
+    public Integer num;
 
     public String[] lang;
 
     public String additional[];
 
-    //@Maxbytelength(maxbytelength = 10)
+    @Size(max = 10)
     public String op;
 
-    //@Digits(integer=10, fraction=0)
-    public String start;
+    @ValidateTypeFailure
+    public Integer start;
 
-    //@Digits(integer=10, fraction=0)
-    public String pn;
-
-    //@Maxbytelength(maxbytelength = 1000)
-    public String queryId;
+    @ValidateTypeFailure
+    public Integer pn;
 
     // response redirect
-
-    //@Required(target = "go")
-    //@Maxbytelength(maxbytelength = 4000)
-    public String rt;
-
-    //@Required(target = "go,cache")
-    //@Maxbytelength(maxbytelength = 100)
-    public String docId;
-
-    public String[] hq;
-
-    //@Maxbytelength(maxbytelength = 1000)
-    public String hash;
-
-    // xml/json
-
-    //@Maxbytelength(maxbytelength = 20)
-    public String type;
-
-    //@Maxbytelength(maxbytelength = 255)
-    public String callback;
-
-    public String[] fn;
-
-    // hotsearchword
-
-    //@Maxbytelength(maxbytelength = 100)
-    public String range;
 
     // geo
 
@@ -97,53 +70,30 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     public Map<String, String[]> options = new HashMap<>();
 
-    public String username;
-
-    private int startPosition = -1;
-
-    private int pageSize = -1;
-
     @Override
     public int getStartPosition() {
-        if (startPosition != -1) {
-            return startPosition;
-        }
-
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        if (StringUtil.isBlank(start)) {
-            startPosition = queryHelper.getDefaultStart();
-        } else {
-            try {
-                startPosition = Integer.parseInt(start);
-            } catch (final NumberFormatException e) {
-                startPosition = queryHelper.getDefaultStart();
-            }
+        if (start == null) {
+            start = queryHelper.getDefaultStart();
         }
-        start = String.valueOf(startPosition);
-        return startPosition;
+        return start;
     }
 
     @Override
     public int getPageSize() {
-        if (pageSize != -1) {
-            return pageSize;
-        }
-
         final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-        if (StringUtil.isBlank(num)) {
-            pageSize = queryHelper.getDefaultPageSize();
+        if (num == null) {
+            num = queryHelper.getDefaultPageSize();
         } else {
             try {
-                pageSize = Integer.parseInt(num);
-                if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
-                    pageSize = queryHelper.getMaxPageSize();
+                if (num.intValue() > queryHelper.getMaxPageSize() || num.intValue() <= 0) {
+                    num = queryHelper.getMaxPageSize();
                 }
             } catch (final NumberFormatException e) {
-                pageSize = queryHelper.getDefaultPageSize();
+                num = queryHelper.getDefaultPageSize();
             }
         }
-        num = String.valueOf(pageSize);
-        return pageSize;
+        return num;
     }
 
     @Override

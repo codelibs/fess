@@ -7,7 +7,15 @@
       "enabled": false
     },
     "properties": {
-      "searchLogId": {
+      "docId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "queryId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "userSessionId": {
         "type": "string",
         "index": "not_analyzed"
       },
@@ -15,7 +23,14 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "order": {
+        "type": "integer"
+      },
       "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
+      "queryRequestedAt": {
         "type": "date",
         "format": "date_optional_time"
       }

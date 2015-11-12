@@ -18,7 +18,6 @@ package org.codelibs.fess.util;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.crawler.service.DataService;
@@ -51,7 +50,6 @@ import org.codelibs.fess.job.JobExecutor;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
-import org.lastaflute.web.servlet.session.SessionManager;
 
 public final class ComponentUtil {
     private static final String FESS_ES_CLIENT = "fessEsClient";
@@ -263,14 +261,6 @@ public final class ComponentUtil {
 
     public static FessEsClient getFessEsClient() {
         return SingletonLaContainer.getComponent(FESS_ES_CLIENT);
-    }
-
-    public static FessLoginAssist getLoginAssist() {
-        return getComponent(FessLoginAssist.class);
-    }
-
-    public static SessionManager getSessionManager() {
-        return getComponent(SessionManager.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

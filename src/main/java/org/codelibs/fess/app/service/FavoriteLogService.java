@@ -18,12 +18,14 @@ package org.codelibs.fess.app.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Resource;
 
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.es.log.exentity.FavoriteLog;
+import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.cbean.result.ListResultBean;
 
@@ -37,12 +39,10 @@ public class FavoriteLogService {
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
-    public boolean addUrl(final String userCode, final String url) {
+    public boolean addUrl(String userCode, BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
         return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
-            favoriteLog.setUserInfoId(userInfo.getId());
-            favoriteLog.setUrl(url);
-            favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
+            favoriteLogLambda.accept(userInfo, favoriteLog);
             favoriteLogBhv.insert(favoriteLog);
             return true;
         }).orElse(false);

@@ -43,6 +43,12 @@ public class BsFavoriteLog extends EsAbstractEntity {
     /** url */
     protected String url;
 
+    /** docId */
+    protected String docId;
+
+    /** queryId */
+    protected String queryId;
+
     /** userInfoId */
     protected String userInfoId;
 
@@ -73,6 +79,12 @@ public class BsFavoriteLog extends EsAbstractEntity {
         if (url != null) {
             sourceMap.put("url", url);
         }
+        if (docId != null) {
+            sourceMap.put("docId", docId);
+        }
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
         if (userInfoId != null) {
             sourceMap.put("userInfoId", userInfoId);
         }
@@ -87,6 +99,8 @@ public class BsFavoriteLog extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(createdAt);
         sb.append(dm).append(url);
+        sb.append(dm).append(docId);
+        sb.append(dm).append(queryId);
         sb.append(dm).append(userInfoId);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -116,6 +130,26 @@ public class BsFavoriteLog extends EsAbstractEntity {
     public void setUrl(String value) {
         registerModifiedProperty("url");
         this.url = value;
+    }
+
+    public String getDocId() {
+        checkSpecifiedProperty("docId");
+        return convertEmptyToNull(docId);
+    }
+
+    public void setDocId(String value) {
+        registerModifiedProperty("docId");
+        this.docId = value;
+    }
+
+    public String getQueryId() {
+        checkSpecifiedProperty("queryId");
+        return convertEmptyToNull(queryId);
+    }
+
+    public void setQueryId(String value) {
+        registerModifiedProperty("queryId");
+        this.queryId = value;
     }
 
     public String getUserInfoId() {

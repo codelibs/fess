@@ -15,6 +15,14 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "docId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "queryId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "createdAt": {
         "type": "date",
         "format": "date_optional_time"

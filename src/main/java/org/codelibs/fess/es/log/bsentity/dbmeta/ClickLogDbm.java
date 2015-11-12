@@ -79,11 +79,16 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
+        setupEpg(_epgMap, et -> ((ClickLog) et).getQueryRequestedAt(),
+                (et, vl) -> ((ClickLog) et).setQueryRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "queryRequestedAt");
         setupEpg(_epgMap, et -> ((ClickLog) et).getRequestedAt(),
                 (et, vl) -> ((ClickLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
-        setupEpg(_epgMap, et -> ((ClickLog) et).getSearchLogId(), (et, vl) -> ((ClickLog) et).setSearchLogId(DfTypeUtil.toString(vl)),
-                "searchLogId");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getQueryId(), (et, vl) -> ((ClickLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getDocId(), (et, vl) -> ((ClickLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getUserSessionId(), (et, vl) -> ((ClickLog) et).setUserSessionId(DfTypeUtil.toString(vl)),
+                "userSessionId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getUrl(), (et, vl) -> ((ClickLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getOrder(), (et, vl) -> ((ClickLog) et).setOrder(DfTypeUtil.toInteger(vl)), "order");
     }
 
     @Override
@@ -120,30 +125,58 @@ public class ClickLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
+    protected final ColumnInfo _columnQueryRequestedAt = cci("queryRequestedAt", "queryRequestedAt", null, null, LocalDateTime.class,
+            "queryRequestedAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
             false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSearchLogId = cci("searchLogId", "searchLogId", null, null, String.class, "searchLogId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId",
+            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnOrder = cci("order", "order", null, null, Integer.class, "order", null, false, false, false,
+            "Integer", 0, 0, null, false, null, null, null, null, null, false);
+
+    public ColumnInfo columnQueryRequestedAt() {
+        return _columnQueryRequestedAt;
+    }
 
     public ColumnInfo columnRequestedAt() {
         return _columnRequestedAt;
     }
 
-    public ColumnInfo columnSearchLogId() {
-        return _columnSearchLogId;
+    public ColumnInfo columnQueryId() {
+        return _columnQueryId;
+    }
+
+    public ColumnInfo columnDocId() {
+        return _columnDocId;
+    }
+
+    public ColumnInfo columnUserSessionId() {
+        return _columnUserSessionId;
     }
 
     public ColumnInfo columnUrl() {
         return _columnUrl;
     }
 
+    public ColumnInfo columnOrder() {
+        return _columnOrder;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
+        ls.add(columnQueryRequestedAt());
         ls.add(columnRequestedAt());
-        ls.add(columnSearchLogId());
+        ls.add(columnQueryId());
+        ls.add(columnDocId());
+        ls.add(columnUserSessionId());
         ls.add(columnUrl());
+        ls.add(columnOrder());
         return ls;
     }
 

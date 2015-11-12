@@ -166,6 +166,14 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
             doColumn("url");
         }
 
+        public void columnDocId() {
+            doColumn("docId");
+        }
+
+        public void columnQueryId() {
+            doColumn("queryId");
+        }
+
         public void columnUserInfoId() {
             doColumn("userInfoId");
         }

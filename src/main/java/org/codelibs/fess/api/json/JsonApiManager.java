@@ -31,7 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -51,11 +50,13 @@ import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
+import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,6 +362,7 @@ public class JsonApiManager extends BaseApiManager {
         final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         try {
             final String docId = request.getParameter("docId");
@@ -371,46 +373,52 @@ public class JsonApiManager extends BaseApiManager {
                 throw new WebApiException(6, "No searched urls.");
             }
 
-            searchService
-                    .getDocumentByDocId(docId, new String[] { fieldHelper.idField, fieldHelper.urlField, fieldHelper.favoriteCountField })
-                    .ifPresent(doc -> {
-                        final String favoriteUrl = doc == null ? null : DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
-                        final String userCode = userInfoHelper.getUserCode();
+            searchService.getDocumentByDocId(docId, new String[] { fieldHelper.urlField }).ifPresent(doc -> {
+                final String favoriteUrl = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                final String userCode = userInfoHelper.getUserCode();
 
-                        if (StringUtil.isBlank(userCode)) {
-                            throw new WebApiException(2, "No user session.");
-                        } else if (StringUtil.isBlank(favoriteUrl)) {
-                            throw new WebApiException(2, "URL is null.");
-                        }
+                if (StringUtil.isBlank(userCode)) {
+                    throw new WebApiException(2, "No user session.");
+                } else if (StringUtil.isBlank(favoriteUrl)) {
+                    throw new WebApiException(2, "URL is null.");
+                }
 
-                        boolean found = false;
-                        for (final String id : docIds) {
-                            if (docId.equals(id)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            throw new WebApiException(5, "Not found: " + favoriteUrl);
-                        }
+                boolean found = false;
+                for (final String id : docIds) {
+                    if (docId.equals(id)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new WebApiException(5, "Not found: " + favoriteUrl);
+                }
 
-                        if (!favoriteLogService.addUrl(userCode, favoriteUrl)) {
-                            throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
-                        }
+                if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
+                    favoriteLog.setUserInfoId(userInfo.getId());
+                    favoriteLog.setUrl(favoriteUrl);
+                    favoriteLog.setDocId(docId);
+                    favoriteLog.setQueryId(queryId);
+                    favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
+                })) {
+                    throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
+                }
 
-                        final String id = DocumentUtil.getValue(doc, fieldHelper.idField, String.class);
-                        final Long count = DocumentUtil.getValue(doc, fieldHelper.favoriteCountField, Long.class);
-                        if (count != null) {
-                            searchService.update(id, fieldHelper.favoriteCountField, count.longValue() + 1);
-                        } else {
-                            throw new WebApiException(7, "Failed to update count: " + favoriteUrl);
-                        }
+                final String id = DocumentUtil.getValue(doc, fieldHelper.idField, String.class);
+                searchService.update(id, builder -> {
+                    Script script = new Script("ctx._source." + fieldHelper.favoriteCountField + "+=1");
+                    builder.setScript(script);
+                    Map<String, Object> upsertMap = new HashMap<>();
+                    upsertMap.put(fieldHelper.favoriteCountField, 1);
+                    builder.setUpsert(upsertMap);
+                    builder.setRefresh(true);
+                });
 
-                        writeJsonResponse(0, "\"result\":\"ok\"", null);
+                writeJsonResponse(0, "\"result\":\"ok\"", null);
 
-                    }).orElse(() -> {
-                        throw new WebApiException(6, "Not found: " + docId);
-                    });
+            }).orElse(() -> {
+                throw new WebApiException(6, "Not found: " + docId);
+            });
 
         } catch (final Exception e) {
             int status;
@@ -576,7 +584,7 @@ public class JsonApiManager extends BaseApiManager {
             buf.append(obj);
         } else if (obj instanceof Date) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            buf.append('\"').append(StringEscapeUtils.escapeXml(sdf.format(obj))).append('\"');
+            buf.append('\"').append(escapeJsonString(sdf.format(obj))).append('\"');
         } else {
             buf.append('\"').append(escapeJsonString(obj.toString())).append('\"');
         }

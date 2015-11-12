@@ -44,6 +44,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.script.Script;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,7 +193,9 @@ public class SearchLogHelper {
     private void storeSearchLogList(final List<SearchLog> searchLogList) {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
         final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
-        searchLogBhv.batchUpdate(searchLogList);
+        searchLogBhv.batchUpdate(searchLogList, op -> {
+            op.setRefresh(true);
+        });
         searchLogList.stream().forEach(searchLog -> {
             final List<SearchFieldLog> fieldLogList = new ArrayList<>();
             searchLog.getSearchFieldLogList().stream().forEach(fieldLog -> {
@@ -204,30 +207,26 @@ public class SearchLogHelper {
     }
 
     protected void processClickLogQueue(final Queue<ClickLog> queue) {
-        final Map<String, Long> clickCountMap = new HashMap<>();
+        final Map<String, Integer> clickCountMap = new HashMap<>();
         final List<ClickLog> clickLogList = new ArrayList<>();
         for (final ClickLog clickLog : queue) {
             try {
                 final SearchLogBhv searchLogBhv = SingletonLaContainer.getComponent(SearchLogBhv.class);
                 searchLogBhv.selectEntity(cb -> {
-                    cb.query().setRequestedAt_Equal(clickLog.getQueryRequestedAt());
-                    cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
+                    cb.query().setQueryId_Equal(clickLog.getQueryId());
                 }).ifPresent(entity -> {
-                    clickLog.setSearchLogId(entity.getId());
                     clickLogList.add(clickLog);
+                    final String docId = clickLog.getDocId();
+                    Integer countObj = clickCountMap.get(docId);
+                    if (countObj == null) {
+                        countObj = Integer.valueOf(1);
+                    } else {
+                        countObj = countObj.intValue() + 1;
+                    }
+                    clickCountMap.put(docId, countObj);
                 }).orElse(() -> {
                     logger.warn("Not Found for SearchLog: " + clickLog);
                 });
-
-                final String docId = clickLog.getDocId();
-                Long countObj = clickCountMap.get(docId);
-                if (countObj == null) {
-                    final long clickCount = clickLog.getClickCount();
-                    countObj = Long.valueOf(clickCount + 1);
-                } else {
-                    countObj = countObj.longValue() + 1;
-                }
-                clickCountMap.put(docId, countObj);
             } catch (final Exception e) {
                 logger.warn("Failed to process: " + clickLog, e);
             }
@@ -244,28 +243,19 @@ public class SearchLogHelper {
         if (!clickCountMap.isEmpty()) {
             final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
             try {
-                final Map<String, String> docIdMap = new HashMap<>();
-                searchService
-                        .getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                                new String[] { fieldHelper.idField, fieldHelper.docIdField })
-                        .stream()
-                        .forEach(
-                                doc -> {
-                                    docIdMap.put(DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class),
-                                            DocumentUtil.getValue(doc, fieldHelper.idField, String.class));
-                                });
                 searchService.bulkUpdate(builder -> {
-                    clickCountMap
-                            .entrySet()
-                            .stream()
-                            .forEach(
-                                    entry -> {
-                                        final String id = docIdMap.get(entry.getKey());
-                                        if (id != null) {
-                                            builder.add(new UpdateRequest(fieldHelper.docIndex, fieldHelper.docType, id).doc(
-                                                    fieldHelper.clickCountField, entry.getValue()));
-                                        }
-                                    });
+                    searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
+                            new String[] { fieldHelper.docIdField }).forEach(doc -> {
+                        String id = DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class);
+                        String docId = DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class);
+                        if (id != null && docId != null && clickCountMap.containsKey(docId)) {
+                            Integer count = clickCountMap.get(docId);
+                            Script script = new Script("ctx._source." + fieldHelper.clickCountField + "+=" + count.toString());
+                            Map<String, Object> upsertMap = new HashMap<>();
+                            upsertMap.put(fieldHelper.clickCountField, 1);
+                            builder.add(new UpdateRequest(fieldHelper.docIndex, fieldHelper.docType, id).script(script).upsert(upsertMap));
+                        }
+                    });
                 });
             } catch (final Exception e) {
                 logger.warn("Failed to update clickCounts", e);

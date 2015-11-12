@@ -22,7 +22,7 @@ public interface UserInfoHelper {
 
     String getUserCode();
 
-    String generateQueryId(String query, List<Map<String, Object>> documentItems);
+    void storeQueryId(String query, List<Map<String, Object>> documentItems);
 
     String[] getResultDocIds(String queryId);
 

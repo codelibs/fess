@@ -82,6 +82,9 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedAt(),
                 (et, vl) -> ((FavoriteLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getDocId(), (et, vl) -> ((FavoriteLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getQueryId(), (et, vl) -> ((FavoriteLog) et).setQueryId(DfTypeUtil.toString(vl)),
+                "queryId");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUserInfoId(), (et, vl) -> ((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
                 "userInfoId");
     }
@@ -124,6 +127,10 @@ public class FavoriteLogDbm extends AbstractDBMeta {
             false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
@@ -135,6 +142,14 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         return _columnUrl;
     }
 
+    public ColumnInfo columnDocId() {
+        return _columnDocId;
+    }
+
+    public ColumnInfo columnQueryId() {
+        return _columnQueryId;
+    }
+
     public ColumnInfo columnUserInfoId() {
         return _columnUserInfoId;
     }
@@ -143,6 +158,8 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedAt());
         ls.add(columnUrl());
+        ls.add(columnDocId());
+        ls.add(columnQueryId());
         ls.add(columnUserInfoId());
         return ls;
     }

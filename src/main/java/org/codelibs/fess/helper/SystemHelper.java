@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RoleTypeService;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.RoleType;
 import org.codelibs.fess.util.ComponentUtil;
@@ -119,7 +120,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String getUsername() {
-        return ComponentUtil.getLoginAssist().getSessionUserBean().map(user -> {
+        return ComponentUtil.getComponent(FessLoginAssist.class).getSessionUserBean().map(user -> {
             return user.getUserId();
         }).orElse(Constants.GUEST_USER);
     }

@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -48,10 +49,14 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
+import org.codelibs.fess.util.QueryUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.update.UpdateRequestBuilder;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.index.query.QueryBuilders;
 
 public class SearchService {
@@ -166,6 +171,8 @@ public class SearchService {
         }
         data.setExecTime(execTime);
 
+        String queryId = QueryUtil.generateId();
+
         data.setPageSize(queryResponseList.getPageSize());
         data.setCurrentPageNumber(queryResponseList.getCurrentPageNumber());
         data.setAllRecordCount(queryResponseList.getAllRecordCount());
@@ -179,15 +186,16 @@ public class SearchService {
         data.setQueryTime(queryResponseList.getQueryTime());
         data.setSearchQuery(query);
         data.setRequestedTime(requestedTime);
+        data.setQueryId(queryId);
 
         // search log
         if (searchLogSupport) {
-            storeSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), query, pageStart, pageSize, queryResponseList);
+            storeSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart, pageSize, queryResponseList);
         }
     }
 
-    protected void storeSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String query,
-            final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
+    protected void storeSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String queryId,
+            final String query, final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
 
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final SearchLog searchLog = new SearchLog();
@@ -199,6 +207,7 @@ public class SearchService {
             }
         }
 
+        searchLog.setQueryId(queryId);
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
         searchLog.setResponseTime(queryResponseList.getExecTime());
         searchLog.setQueryTime(queryResponseList.getQueryTime());
@@ -207,7 +216,7 @@ public class SearchService {
         searchLog.setRequestedAt(requestedTime);
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
-        ComponentUtil.getLoginAssist().getSessionUserBean().ifPresent(user -> {
+        ComponentUtil.getComponent(FessLoginAssist.class).getSessionUserBean().ifPresent(user -> {
             searchLog.setUser(user.getUserId());
         });
 
@@ -336,6 +345,17 @@ public class SearchService {
 
     public boolean update(final String id, final String field, final Object value) {
         return fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, id, field, value);
+    }
+
+    public boolean update(final String id, Consumer<UpdateRequestBuilder> builderLambda) {
+        try {
+            UpdateRequestBuilder builder = fessEsClient.prepareUpdate(fieldHelper.docIndex, fieldHelper.docType, id);
+            builderLambda.accept(builder);
+            UpdateResponse response = builder.execute().actionGet();
+            return response.isCreated();
+        } catch (final ElasticsearchException e) {
+            throw new FessEsClientException("Failed to update doc  " + id, e);
+        }
     }
 
     public boolean bulkUpdate(final Consumer<BulkRequestBuilder> consumer) {

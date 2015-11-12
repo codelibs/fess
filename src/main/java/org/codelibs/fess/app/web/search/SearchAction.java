@@ -97,13 +97,14 @@ public class SearchAction extends FessSearchAction {
 
     protected HtmlResponse doSearch(final SearchForm form) {
         searchAvailable();
+        validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
 
         if (viewHelper.isUseSession()) {
             final HttpSession session = request.getSession(false);
             if (session != null) {
                 final Object resultsPerPage = session.getAttribute(Constants.RESULTS_PER_PAGE);
-                if (resultsPerPage != null) {
-                    form.num = resultsPerPage.toString();
+                if (resultsPerPage instanceof Integer) {
+                    form.num = (Integer) resultsPerPage;
                 }
             }
         }
@@ -133,14 +134,13 @@ public class SearchAction extends FessSearchAction {
             try {
                 final WebRenderData renderData = new WebRenderData(data);
                 searchService.search(request, form, renderData);
-                form.rt = Long.toString(renderData.getRequestedTime());
                 // favorite or screenshot
                 if (favoriteSupport || screenShotManager != null) {
-                    final String searchQuery = renderData.getSearchQuery();
+                    final String queryId = renderData.getQueryId();
                     final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
-                    form.queryId = userInfoHelper.generateQueryId(searchQuery, documentItems);
+                    userInfoHelper.storeQueryId(queryId, documentItems);
                     if (screenShotManager != null) {
-                        screenShotManager.storeRequest(form.queryId, documentItems);
+                        screenShotManager.storeRequest(queryId, documentItems);
                         data.register("screenShotSupport", true);
                     }
                 }
@@ -164,21 +164,17 @@ public class SearchAction extends FessSearchAction {
 
     protected HtmlResponse doMove(final SearchForm form, final int move) {
         int start = queryHelper.getDefaultStart();
-        if (StringUtil.isNotBlank(form.pn)) {
-            try {
-                int pageNumber = Integer.parseInt(form.pn);
-                if (pageNumber > 0) {
-                    pageNumber = pageNumber + move;
-                    if (pageNumber < 1) {
-                        pageNumber = 1;
-                    }
-                    start = (pageNumber - 1) * form.getPageSize();
+        if (form.pn != null) {
+            int pageNumber = form.pn;
+            if (pageNumber > 0) {
+                pageNumber = pageNumber + move;
+                if (pageNumber < 1) {
+                    pageNumber = 1;
                 }
-            } catch (final NumberFormatException e) {
-                // ignore
+                start = (pageNumber - 1) * form.getPageSize();
             }
         }
-        form.start = String.valueOf(start);
+        form.start = start;
 
         return doSearch(form);
     }
@@ -271,6 +267,12 @@ public class SearchAction extends FessSearchAction {
 
         WebRenderData(final RenderData data) {
             this.data = data;
+        }
+
+        @Override
+        public void setQueryId(final String queryId) {
+            data.register("queryId", queryId);
+            super.setQueryId(queryId);
         }
 
         @Override

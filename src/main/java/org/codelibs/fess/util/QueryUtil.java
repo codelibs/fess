@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.UUID;
+
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 
 public class QueryUtil {
@@ -42,5 +45,9 @@ public class QueryUtil {
             }
         }
         return escapedValue;
+    }
+
+    public static String generateId() {
+        return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
     }
 }

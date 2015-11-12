@@ -76,6 +76,8 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
             final RESULT result = entityType.newInstance();
             result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
+            result.setDocId(DfTypeUtil.toString(source.get("docId")));
+            result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

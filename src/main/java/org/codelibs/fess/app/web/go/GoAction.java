@@ -70,7 +70,7 @@ public class GoAction extends FessSearchAction {
             doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, form.docId);
                 queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                queryRequestBuilder.addFields(fieldHelper.urlField);
                 return true;
             }).get();
         } catch (final Exception e) {
@@ -98,12 +98,10 @@ public class GoAction extends FessSearchAction {
                 clickLog.setQueryRequestedAt(DfTypeUtil.toLocalDateTime(Long.parseLong(form.rt)));
                 clickLog.setUserSessionId(userSessionId);
                 clickLog.setDocId(form.docId);
-                long clickCount = 0;
-                final Integer count = DocumentUtil.getValue(doc, fieldHelper.clickCountField, Integer.class);
-                if (count != null) {
-                    clickCount = count.longValue();
+                clickLog.setQueryId(form.queryId);
+                if (form.order != null) {
+                    clickLog.setOrder(form.order);
                 }
-                clickLog.setClickCount(clickCount);
                 searchLogHelper.addClickLog(clickLog);
             }
         }

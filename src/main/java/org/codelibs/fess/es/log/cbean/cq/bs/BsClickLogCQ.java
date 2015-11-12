@@ -175,6 +175,161 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setQueryRequestedAt_Equal(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_Term(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_Equal(LocalDateTime queryRequestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryRequestedAt_Term(queryRequestedAt, opLambda);
+    }
+
+    public void setQueryRequestedAt_Term(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_Term(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_Term(LocalDateTime queryRequestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("queryRequestedAt", queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_NotEqual(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_NotTerm(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_NotEqual(LocalDateTime queryRequestedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setQueryRequestedAt_NotTerm(queryRequestedAt, opLambda);
+    }
+
+    public void setQueryRequestedAt_NotTerm(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_NotTerm(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_NotTerm(LocalDateTime queryRequestedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("queryRequestedAt", queryRequestedAt));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_Terms(Collection<LocalDateTime> queryRequestedAtList) {
+        setQueryRequestedAt_Terms(queryRequestedAtList, null);
+    }
+
+    public void setQueryRequestedAt_Terms(Collection<LocalDateTime> queryRequestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("queryRequestedAt", queryRequestedAtList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_InScope(Collection<LocalDateTime> queryRequestedAtList) {
+        setQueryRequestedAt_Terms(queryRequestedAtList, null);
+    }
+
+    public void setQueryRequestedAt_InScope(Collection<LocalDateTime> queryRequestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setQueryRequestedAt_Terms(queryRequestedAtList, opLambda);
+    }
+
+    public void setQueryRequestedAt_Match(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_Match(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_Match(LocalDateTime queryRequestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("queryRequestedAt", queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_MatchPhrase(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_MatchPhrase(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_MatchPhrase(LocalDateTime queryRequestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("queryRequestedAt", queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_MatchPhrasePrefix(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_MatchPhrasePrefix(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_MatchPhrasePrefix(LocalDateTime queryRequestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("queryRequestedAt", queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_Fuzzy(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_Fuzzy(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_Fuzzy(LocalDateTime queryRequestedAt, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("queryRequestedAt", queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_GreaterThan(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_GreaterThan(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_GreaterThan(LocalDateTime queryRequestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryRequestedAt", ConditionKey.CK_GREATER_THAN, queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_LessThan(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_LessThan(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_LessThan(LocalDateTime queryRequestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryRequestedAt", ConditionKey.CK_LESS_THAN, queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_GreaterEqual(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_GreaterEqual(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_GreaterEqual(LocalDateTime queryRequestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryRequestedAt", ConditionKey.CK_GREATER_EQUAL, queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryRequestedAt_LessEqual(LocalDateTime queryRequestedAt) {
+        setQueryRequestedAt_LessEqual(queryRequestedAt, null);
+    }
+
+    public void setQueryRequestedAt_LessEqual(LocalDateTime queryRequestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryRequestedAt", ConditionKey.CK_LESS_EQUAL, queryRequestedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_QueryRequestedAt_Asc() {
+        regOBA("queryRequestedAt");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_QueryRequestedAt_Desc() {
+        regOBD("queryRequestedAt");
+        return this;
+    }
+
     public void setRequestedAt_Equal(LocalDateTime requestedAt) {
         setRequestedAt_Term(requestedAt, null);
     }
@@ -330,169 +485,501 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setSearchLogId_Equal(String searchLogId) {
-        setSearchLogId_Term(searchLogId, null);
+    public void setQueryId_Equal(String queryId) {
+        setQueryId_Term(queryId, null);
     }
 
-    public void setSearchLogId_Equal(String searchLogId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setSearchLogId_Term(searchLogId, opLambda);
+    public void setQueryId_Equal(String queryId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryId_Term(queryId, opLambda);
     }
 
-    public void setSearchLogId_Term(String searchLogId) {
-        setSearchLogId_Term(searchLogId, null);
+    public void setQueryId_Term(String queryId) {
+        setQueryId_Term(queryId, null);
     }
 
-    public void setSearchLogId_Term(String searchLogId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("searchLogId", searchLogId);
+    public void setQueryId_Term(String queryId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_NotEqual(String searchLogId) {
-        setSearchLogId_NotTerm(searchLogId, null);
+    public void setQueryId_NotEqual(String queryId) {
+        setQueryId_NotTerm(queryId, null);
     }
 
-    public void setSearchLogId_NotEqual(String searchLogId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSearchLogId_NotTerm(searchLogId, opLambda);
+    public void setQueryId_NotEqual(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setQueryId_NotTerm(queryId, opLambda);
     }
 
-    public void setSearchLogId_NotTerm(String searchLogId) {
-        setSearchLogId_NotTerm(searchLogId, null);
+    public void setQueryId_NotTerm(String queryId) {
+        setQueryId_NotTerm(queryId, null);
     }
 
-    public void setSearchLogId_NotTerm(String searchLogId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("searchLogId", searchLogId));
+    public void setQueryId_NotTerm(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("queryId", queryId));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_Terms(Collection<String> searchLogIdList) {
-        setSearchLogId_Terms(searchLogIdList, null);
+    public void setQueryId_Terms(Collection<String> queryIdList) {
+        setQueryId_Terms(queryIdList, null);
     }
 
-    public void setSearchLogId_Terms(Collection<String> searchLogIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("searchLogId", searchLogIdList);
+    public void setQueryId_Terms(Collection<String> queryIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("queryId", queryIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_InScope(Collection<String> searchLogIdList) {
-        setSearchLogId_Terms(searchLogIdList, null);
+    public void setQueryId_InScope(Collection<String> queryIdList) {
+        setQueryId_Terms(queryIdList, null);
     }
 
-    public void setSearchLogId_InScope(Collection<String> searchLogIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setSearchLogId_Terms(searchLogIdList, opLambda);
+    public void setQueryId_InScope(Collection<String> queryIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setQueryId_Terms(queryIdList, opLambda);
     }
 
-    public void setSearchLogId_Match(String searchLogId) {
-        setSearchLogId_Match(searchLogId, null);
+    public void setQueryId_Match(String queryId) {
+        setQueryId_Match(queryId, null);
     }
 
-    public void setSearchLogId_Match(String searchLogId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("searchLogId", searchLogId);
+    public void setQueryId_Match(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_MatchPhrase(String searchLogId) {
-        setSearchLogId_MatchPhrase(searchLogId, null);
+    public void setQueryId_MatchPhrase(String queryId) {
+        setQueryId_MatchPhrase(queryId, null);
     }
 
-    public void setSearchLogId_MatchPhrase(String searchLogId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("searchLogId", searchLogId);
+    public void setQueryId_MatchPhrase(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_MatchPhrasePrefix(String searchLogId) {
-        setSearchLogId_MatchPhrasePrefix(searchLogId, null);
+    public void setQueryId_MatchPhrasePrefix(String queryId) {
+        setQueryId_MatchPhrasePrefix(queryId, null);
     }
 
-    public void setSearchLogId_MatchPhrasePrefix(String searchLogId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("searchLogId", searchLogId);
+    public void setQueryId_MatchPhrasePrefix(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_Fuzzy(String searchLogId) {
-        setSearchLogId_Fuzzy(searchLogId, null);
+    public void setQueryId_Fuzzy(String queryId) {
+        setQueryId_Fuzzy(queryId, null);
     }
 
-    public void setSearchLogId_Fuzzy(String searchLogId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("searchLogId", searchLogId);
+    public void setQueryId_Fuzzy(String queryId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_Prefix(String searchLogId) {
-        setSearchLogId_Prefix(searchLogId, null);
+    public void setQueryId_Prefix(String queryId) {
+        setQueryId_Prefix(queryId, null);
     }
 
-    public void setSearchLogId_Prefix(String searchLogId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("searchLogId", searchLogId);
+    public void setQueryId_Prefix(String queryId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("queryId", queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_GreaterThan(String searchLogId) {
-        setSearchLogId_GreaterThan(searchLogId, null);
+    public void setQueryId_GreaterThan(String queryId) {
+        setQueryId_GreaterThan(queryId, null);
     }
 
-    public void setSearchLogId_GreaterThan(String searchLogId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("searchLogId", ConditionKey.CK_GREATER_THAN, searchLogId);
+    public void setQueryId_GreaterThan(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_GREATER_THAN, queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_LessThan(String searchLogId) {
-        setSearchLogId_LessThan(searchLogId, null);
+    public void setQueryId_LessThan(String queryId) {
+        setQueryId_LessThan(queryId, null);
     }
 
-    public void setSearchLogId_LessThan(String searchLogId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("searchLogId", ConditionKey.CK_LESS_THAN, searchLogId);
+    public void setQueryId_LessThan(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_LESS_THAN, queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_GreaterEqual(String searchLogId) {
-        setSearchLogId_GreaterEqual(searchLogId, null);
+    public void setQueryId_GreaterEqual(String queryId) {
+        setQueryId_GreaterEqual(queryId, null);
     }
 
-    public void setSearchLogId_GreaterEqual(String searchLogId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("searchLogId", ConditionKey.CK_GREATER_EQUAL, searchLogId);
+    public void setQueryId_GreaterEqual(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_GREATER_EQUAL, queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSearchLogId_LessEqual(String searchLogId) {
-        setSearchLogId_LessEqual(searchLogId, null);
+    public void setQueryId_LessEqual(String queryId) {
+        setQueryId_LessEqual(queryId, null);
     }
 
-    public void setSearchLogId_LessEqual(String searchLogId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("searchLogId", ConditionKey.CK_LESS_EQUAL, searchLogId);
+    public void setQueryId_LessEqual(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_LESS_EQUAL, queryId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsClickLogCQ addOrderBy_SearchLogId_Asc() {
-        regOBA("searchLogId");
+    public BsClickLogCQ addOrderBy_QueryId_Asc() {
+        regOBA("queryId");
         return this;
     }
 
-    public BsClickLogCQ addOrderBy_SearchLogId_Desc() {
-        regOBD("searchLogId");
+    public BsClickLogCQ addOrderBy_QueryId_Desc() {
+        regOBD("queryId");
+        return this;
+    }
+
+    public void setDocId_Equal(String docId) {
+        setDocId_Term(docId, null);
+    }
+
+    public void setDocId_Equal(String docId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setDocId_Term(docId, opLambda);
+    }
+
+    public void setDocId_Term(String docId) {
+        setDocId_Term(docId, null);
+    }
+
+    public void setDocId_Term(String docId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_NotEqual(String docId) {
+        setDocId_NotTerm(docId, null);
+    }
+
+    public void setDocId_NotEqual(String docId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setDocId_NotTerm(docId, opLambda);
+    }
+
+    public void setDocId_NotTerm(String docId) {
+        setDocId_NotTerm(docId, null);
+    }
+
+    public void setDocId_NotTerm(String docId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("docId", docId));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_Terms(Collection<String> docIdList) {
+        setDocId_Terms(docIdList, null);
+    }
+
+    public void setDocId_Terms(Collection<String> docIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("docId", docIdList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_InScope(Collection<String> docIdList) {
+        setDocId_Terms(docIdList, null);
+    }
+
+    public void setDocId_InScope(Collection<String> docIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setDocId_Terms(docIdList, opLambda);
+    }
+
+    public void setDocId_Match(String docId) {
+        setDocId_Match(docId, null);
+    }
+
+    public void setDocId_Match(String docId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_MatchPhrase(String docId) {
+        setDocId_MatchPhrase(docId, null);
+    }
+
+    public void setDocId_MatchPhrase(String docId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_MatchPhrasePrefix(String docId) {
+        setDocId_MatchPhrasePrefix(docId, null);
+    }
+
+    public void setDocId_MatchPhrasePrefix(String docId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_Fuzzy(String docId) {
+        setDocId_Fuzzy(docId, null);
+    }
+
+    public void setDocId_Fuzzy(String docId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_Prefix(String docId) {
+        setDocId_Prefix(docId, null);
+    }
+
+    public void setDocId_Prefix(String docId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_GreaterThan(String docId) {
+        setDocId_GreaterThan(docId, null);
+    }
+
+    public void setDocId_GreaterThan(String docId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("docId", ConditionKey.CK_GREATER_THAN, docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_LessThan(String docId) {
+        setDocId_LessThan(docId, null);
+    }
+
+    public void setDocId_LessThan(String docId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("docId", ConditionKey.CK_LESS_THAN, docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_GreaterEqual(String docId) {
+        setDocId_GreaterEqual(docId, null);
+    }
+
+    public void setDocId_GreaterEqual(String docId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("docId", ConditionKey.CK_GREATER_EQUAL, docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_LessEqual(String docId) {
+        setDocId_LessEqual(docId, null);
+    }
+
+    public void setDocId_LessEqual(String docId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("docId", ConditionKey.CK_LESS_EQUAL, docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_DocId_Asc() {
+        regOBA("docId");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_DocId_Desc() {
+        regOBD("docId");
+        return this;
+    }
+
+    public void setUserSessionId_Equal(String userSessionId) {
+        setUserSessionId_Term(userSessionId, null);
+    }
+
+    public void setUserSessionId_Equal(String userSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUserSessionId_Term(userSessionId, opLambda);
+    }
+
+    public void setUserSessionId_Term(String userSessionId) {
+        setUserSessionId_Term(userSessionId, null);
+    }
+
+    public void setUserSessionId_Term(String userSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_NotEqual(String userSessionId) {
+        setUserSessionId_NotTerm(userSessionId, null);
+    }
+
+    public void setUserSessionId_NotEqual(String userSessionId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUserSessionId_NotTerm(userSessionId, opLambda);
+    }
+
+    public void setUserSessionId_NotTerm(String userSessionId) {
+        setUserSessionId_NotTerm(userSessionId, null);
+    }
+
+    public void setUserSessionId_NotTerm(String userSessionId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("userSessionId", userSessionId));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_Terms(Collection<String> userSessionIdList) {
+        setUserSessionId_Terms(userSessionIdList, null);
+    }
+
+    public void setUserSessionId_Terms(Collection<String> userSessionIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("userSessionId", userSessionIdList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_InScope(Collection<String> userSessionIdList) {
+        setUserSessionId_Terms(userSessionIdList, null);
+    }
+
+    public void setUserSessionId_InScope(Collection<String> userSessionIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUserSessionId_Terms(userSessionIdList, opLambda);
+    }
+
+    public void setUserSessionId_Match(String userSessionId) {
+        setUserSessionId_Match(userSessionId, null);
+    }
+
+    public void setUserSessionId_Match(String userSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_MatchPhrase(String userSessionId) {
+        setUserSessionId_MatchPhrase(userSessionId, null);
+    }
+
+    public void setUserSessionId_MatchPhrase(String userSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_MatchPhrasePrefix(String userSessionId) {
+        setUserSessionId_MatchPhrasePrefix(userSessionId, null);
+    }
+
+    public void setUserSessionId_MatchPhrasePrefix(String userSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_Fuzzy(String userSessionId) {
+        setUserSessionId_Fuzzy(userSessionId, null);
+    }
+
+    public void setUserSessionId_Fuzzy(String userSessionId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_Prefix(String userSessionId) {
+        setUserSessionId_Prefix(userSessionId, null);
+    }
+
+    public void setUserSessionId_Prefix(String userSessionId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_GreaterThan(String userSessionId) {
+        setUserSessionId_GreaterThan(userSessionId, null);
+    }
+
+    public void setUserSessionId_GreaterThan(String userSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userSessionId", ConditionKey.CK_GREATER_THAN, userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_LessThan(String userSessionId) {
+        setUserSessionId_LessThan(userSessionId, null);
+    }
+
+    public void setUserSessionId_LessThan(String userSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userSessionId", ConditionKey.CK_LESS_THAN, userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_GreaterEqual(String userSessionId) {
+        setUserSessionId_GreaterEqual(userSessionId, null);
+    }
+
+    public void setUserSessionId_GreaterEqual(String userSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userSessionId", ConditionKey.CK_GREATER_EQUAL, userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserSessionId_LessEqual(String userSessionId) {
+        setUserSessionId_LessEqual(userSessionId, null);
+    }
+
+    public void setUserSessionId_LessEqual(String userSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("userSessionId", ConditionKey.CK_LESS_EQUAL, userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_UserSessionId_Asc() {
+        regOBA("userSessionId");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_UserSessionId_Desc() {
+        regOBD("userSessionId");
         return this;
     }
 
@@ -659,6 +1146,161 @@ public abstract class BsClickLogCQ extends EsAbstractConditionQuery {
 
     public BsClickLogCQ addOrderBy_Url_Desc() {
         regOBD("url");
+        return this;
+    }
+
+    public void setOrder_Equal(Integer order) {
+        setOrder_Term(order, null);
+    }
+
+    public void setOrder_Equal(Integer order, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setOrder_Term(order, opLambda);
+    }
+
+    public void setOrder_Term(Integer order) {
+        setOrder_Term(order, null);
+    }
+
+    public void setOrder_Term(Integer order, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("order", order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_NotEqual(Integer order) {
+        setOrder_NotTerm(order, null);
+    }
+
+    public void setOrder_NotEqual(Integer order, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setOrder_NotTerm(order, opLambda);
+    }
+
+    public void setOrder_NotTerm(Integer order) {
+        setOrder_NotTerm(order, null);
+    }
+
+    public void setOrder_NotTerm(Integer order, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("order", order));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Terms(Collection<Integer> orderList) {
+        setOrder_Terms(orderList, null);
+    }
+
+    public void setOrder_Terms(Collection<Integer> orderList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("order", orderList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_InScope(Collection<Integer> orderList) {
+        setOrder_Terms(orderList, null);
+    }
+
+    public void setOrder_InScope(Collection<Integer> orderList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setOrder_Terms(orderList, opLambda);
+    }
+
+    public void setOrder_Match(Integer order) {
+        setOrder_Match(order, null);
+    }
+
+    public void setOrder_Match(Integer order, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("order", order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_MatchPhrase(Integer order) {
+        setOrder_MatchPhrase(order, null);
+    }
+
+    public void setOrder_MatchPhrase(Integer order, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("order", order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_MatchPhrasePrefix(Integer order) {
+        setOrder_MatchPhrasePrefix(order, null);
+    }
+
+    public void setOrder_MatchPhrasePrefix(Integer order, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("order", order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_Fuzzy(Integer order) {
+        setOrder_Fuzzy(order, null);
+    }
+
+    public void setOrder_Fuzzy(Integer order, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("order", order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_GreaterThan(Integer order) {
+        setOrder_GreaterThan(order, null);
+    }
+
+    public void setOrder_GreaterThan(Integer order, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("order", ConditionKey.CK_GREATER_THAN, order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_LessThan(Integer order) {
+        setOrder_LessThan(order, null);
+    }
+
+    public void setOrder_LessThan(Integer order, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("order", ConditionKey.CK_LESS_THAN, order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_GreaterEqual(Integer order) {
+        setOrder_GreaterEqual(order, null);
+    }
+
+    public void setOrder_GreaterEqual(Integer order, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("order", ConditionKey.CK_GREATER_EQUAL, order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setOrder_LessEqual(Integer order) {
+        setOrder_LessEqual(order, null);
+    }
+
+    public void setOrder_LessEqual(Integer order, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("order", ConditionKey.CK_LESS_EQUAL, order);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsClickLogCQ addOrderBy_Order_Asc() {
+        regOBA("order");
+        return this;
+    }
+
+    public BsClickLogCQ addOrderBy_Order_Desc() {
+        regOBD("order");
         return this;
     }
 

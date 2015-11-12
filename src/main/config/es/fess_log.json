@@ -33,6 +33,14 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
+          "docId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "queryId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
           "userInfoId" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -70,17 +78,32 @@
           "enabled" : false
         },
         "properties" : {
+          "queryRequestedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
+          },
           "requestedAt" : {
             "type" : "date",
             "format" : "date_optional_time"
           },
-          "searchLogId" : {
+          "queryId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "docId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "userSessionId" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
           "url" : {
             "type" : "string",
             "index" : "not_analyzed"
+          },
+          "order" : {
+            "type" : "integer"
           }
         }
       },
@@ -94,6 +117,10 @@
             "index" : "not_analyzed"
           },
           "user" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "queryId" : {
             "type" : "string",
             "index" : "not_analyzed"
           },

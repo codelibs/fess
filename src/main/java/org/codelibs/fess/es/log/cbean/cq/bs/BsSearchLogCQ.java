@@ -507,6 +507,172 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setQueryId_Equal(String queryId) {
+        setQueryId_Term(queryId, null);
+    }
+
+    public void setQueryId_Equal(String queryId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryId_Term(queryId, opLambda);
+    }
+
+    public void setQueryId_Term(String queryId) {
+        setQueryId_Term(queryId, null);
+    }
+
+    public void setQueryId_Term(String queryId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_NotEqual(String queryId) {
+        setQueryId_NotTerm(queryId, null);
+    }
+
+    public void setQueryId_NotEqual(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setQueryId_NotTerm(queryId, opLambda);
+    }
+
+    public void setQueryId_NotTerm(String queryId) {
+        setQueryId_NotTerm(queryId, null);
+    }
+
+    public void setQueryId_NotTerm(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("queryId", queryId));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_Terms(Collection<String> queryIdList) {
+        setQueryId_Terms(queryIdList, null);
+    }
+
+    public void setQueryId_Terms(Collection<String> queryIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("queryId", queryIdList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_InScope(Collection<String> queryIdList) {
+        setQueryId_Terms(queryIdList, null);
+    }
+
+    public void setQueryId_InScope(Collection<String> queryIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setQueryId_Terms(queryIdList, opLambda);
+    }
+
+    public void setQueryId_Match(String queryId) {
+        setQueryId_Match(queryId, null);
+    }
+
+    public void setQueryId_Match(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_MatchPhrase(String queryId) {
+        setQueryId_MatchPhrase(queryId, null);
+    }
+
+    public void setQueryId_MatchPhrase(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_MatchPhrasePrefix(String queryId) {
+        setQueryId_MatchPhrasePrefix(queryId, null);
+    }
+
+    public void setQueryId_MatchPhrasePrefix(String queryId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_Fuzzy(String queryId) {
+        setQueryId_Fuzzy(queryId, null);
+    }
+
+    public void setQueryId_Fuzzy(String queryId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_Prefix(String queryId) {
+        setQueryId_Prefix(queryId, null);
+    }
+
+    public void setQueryId_Prefix(String queryId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_GreaterThan(String queryId) {
+        setQueryId_GreaterThan(queryId, null);
+    }
+
+    public void setQueryId_GreaterThan(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_GREATER_THAN, queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_LessThan(String queryId) {
+        setQueryId_LessThan(queryId, null);
+    }
+
+    public void setQueryId_LessThan(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_LESS_THAN, queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_GreaterEqual(String queryId) {
+        setQueryId_GreaterEqual(queryId, null);
+    }
+
+    public void setQueryId_GreaterEqual(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_GREATER_EQUAL, queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryId_LessEqual(String queryId) {
+        setQueryId_LessEqual(queryId, null);
+    }
+
+    public void setQueryId_LessEqual(String queryId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryId", ConditionKey.CK_LESS_EQUAL, queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_QueryId_Asc() {
+        regOBA("queryId");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_QueryId_Desc() {
+        regOBD("queryId");
+        return this;
+    }
+
     public void setClientIp_Equal(String clientIp) {
         setClientIp_Term(clientIp, null);
     }

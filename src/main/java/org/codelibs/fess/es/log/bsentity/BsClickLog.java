@@ -37,14 +37,26 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** queryRequestedAt */
+    protected LocalDateTime queryRequestedAt;
+
     /** requestedAt */
     protected LocalDateTime requestedAt;
 
-    /** searchLogId */
-    protected String searchLogId;
+    /** queryId */
+    protected String queryId;
+
+    /** docId */
+    protected String docId;
+
+    /** userSessionId */
+    protected String userSessionId;
 
     /** url */
     protected String url;
+
+    /** order */
+    protected Integer order;
 
     // [Referrers] *comment only
 
@@ -67,14 +79,26 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
+        if (queryRequestedAt != null) {
+            sourceMap.put("queryRequestedAt", queryRequestedAt);
+        }
         if (requestedAt != null) {
             sourceMap.put("requestedAt", requestedAt);
         }
-        if (searchLogId != null) {
-            sourceMap.put("searchLogId", searchLogId);
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
+        if (docId != null) {
+            sourceMap.put("docId", docId);
+        }
+        if (userSessionId != null) {
+            sourceMap.put("userSessionId", userSessionId);
         }
         if (url != null) {
             sourceMap.put("url", url);
+        }
+        if (order != null) {
+            sourceMap.put("order", order);
         }
         return sourceMap;
     }
@@ -85,9 +109,13 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(queryRequestedAt);
         sb.append(dm).append(requestedAt);
-        sb.append(dm).append(searchLogId);
+        sb.append(dm).append(queryId);
+        sb.append(dm).append(docId);
+        sb.append(dm).append(userSessionId);
         sb.append(dm).append(url);
+        sb.append(dm).append(order);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -98,6 +126,16 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public LocalDateTime getQueryRequestedAt() {
+        checkSpecifiedProperty("queryRequestedAt");
+        return queryRequestedAt;
+    }
+
+    public void setQueryRequestedAt(LocalDateTime value) {
+        registerModifiedProperty("queryRequestedAt");
+        this.queryRequestedAt = value;
+    }
+
     public LocalDateTime getRequestedAt() {
         checkSpecifiedProperty("requestedAt");
         return requestedAt;
@@ -108,14 +146,34 @@ public class BsClickLog extends EsAbstractEntity {
         this.requestedAt = value;
     }
 
-    public String getSearchLogId() {
-        checkSpecifiedProperty("searchLogId");
-        return convertEmptyToNull(searchLogId);
+    public String getQueryId() {
+        checkSpecifiedProperty("queryId");
+        return convertEmptyToNull(queryId);
     }
 
-    public void setSearchLogId(String value) {
-        registerModifiedProperty("searchLogId");
-        this.searchLogId = value;
+    public void setQueryId(String value) {
+        registerModifiedProperty("queryId");
+        this.queryId = value;
+    }
+
+    public String getDocId() {
+        checkSpecifiedProperty("docId");
+        return convertEmptyToNull(docId);
+    }
+
+    public void setDocId(String value) {
+        registerModifiedProperty("docId");
+        this.docId = value;
+    }
+
+    public String getUserSessionId() {
+        checkSpecifiedProperty("userSessionId");
+        return convertEmptyToNull(userSessionId);
+    }
+
+    public void setUserSessionId(String value) {
+        registerModifiedProperty("userSessionId");
+        this.userSessionId = value;
     }
 
     public String getUrl() {
@@ -126,5 +184,15 @@ public class BsClickLog extends EsAbstractEntity {
     public void setUrl(String value) {
         registerModifiedProperty("url");
         this.url = value;
+    }
+
+    public Integer getOrder() {
+        checkSpecifiedProperty("order");
+        return order;
+    }
+
+    public void setOrder(Integer value) {
+        registerModifiedProperty("order");
+        this.order = value;
     }
 }

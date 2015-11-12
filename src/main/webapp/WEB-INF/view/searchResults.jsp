@@ -23,13 +23,13 @@
 </c:if>
 <div id="result" class="row content">
 	<input type="hidden" id="queryId" value="${f:u(queryId)}" />
-	<input type="hidden" id="rt" value="${f:u(rt)}" />
+	<input type="hidden" id="rt" value="${f:u(requestedTime)}" />
 	<div class="col-md-8">
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title ellipsis">
-						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.doc_id}">${f:h(doc.contentTitle)}</a>
+						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}" data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.contentTitle)}</a>
 					</h3>
 					<div class="body">
 						<div class="description">${doc.contentDescription}</div>
