@@ -25,6 +25,7 @@
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
 							<la:link href="../fileconfig/" styleClass="btn btn-primary">
+								<i class="fa fa-arrow-circle-right"></i>
 								<la:message key="labels.file_authentication_create_file_config" />
 							</la:link>
 						</c:if>
