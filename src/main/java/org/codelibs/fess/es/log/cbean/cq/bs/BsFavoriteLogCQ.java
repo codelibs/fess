@@ -175,158 +175,158 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setCreatedTime_Equal(Long createdTime) {
-        setCreatedTime_Term(createdTime, null);
+    public void setCreatedAt_Equal(LocalDateTime createdAt) {
+        setCreatedAt_Term(createdAt, null);
     }
 
-    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setCreatedTime_Term(createdTime, opLambda);
+    public void setCreatedAt_Equal(LocalDateTime createdAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedAt_Term(createdAt, opLambda);
     }
 
-    public void setCreatedTime_Term(Long createdTime) {
-        setCreatedTime_Term(createdTime, null);
+    public void setCreatedAt_Term(LocalDateTime createdAt) {
+        setCreatedAt_Term(createdAt, null);
     }
 
-    public void setCreatedTime_Term(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("createdTime", createdTime);
+    public void setCreatedAt_Term(LocalDateTime createdAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime) {
-        setCreatedTime_NotTerm(createdTime, null);
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedTime_NotTerm(createdTime, opLambda);
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedAt_NotTerm(createdAt, opLambda);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime) {
-        setCreatedTime_NotTerm(createdTime, null);
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdAt", createdAt));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
-        setCreatedTime_Terms(createdTimeList, null);
+    public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList) {
+        setCreatedAt_Terms(createdAtList, null);
     }
 
-    public void setCreatedTime_Terms(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("createdTime", createdTimeList);
+    public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdAt", createdAtList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_InScope(Collection<Long> createdTimeList) {
-        setCreatedTime_Terms(createdTimeList, null);
+    public void setCreatedAt_InScope(Collection<LocalDateTime> createdAtList) {
+        setCreatedAt_Terms(createdAtList, null);
     }
 
-    public void setCreatedTime_InScope(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedTime_Terms(createdTimeList, opLambda);
+    public void setCreatedAt_InScope(Collection<LocalDateTime> createdAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setCreatedAt_Terms(createdAtList, opLambda);
     }
 
-    public void setCreatedTime_Match(Long createdTime) {
-        setCreatedTime_Match(createdTime, null);
+    public void setCreatedAt_Match(LocalDateTime createdAt) {
+        setCreatedAt_Match(createdAt, null);
     }
 
-    public void setCreatedTime_Match(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("createdTime", createdTime);
+    public void setCreatedAt_Match(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime) {
-        setCreatedTime_MatchPhrase(createdTime, null);
+    public void setCreatedAt_MatchPhrase(LocalDateTime createdAt) {
+        setCreatedAt_MatchPhrase(createdAt, null);
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
+    public void setCreatedAt_MatchPhrase(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime) {
-        setCreatedTime_MatchPhrasePrefix(createdTime, null);
+    public void setCreatedAt_MatchPhrasePrefix(LocalDateTime createdAt) {
+        setCreatedAt_MatchPhrasePrefix(createdAt, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
+    public void setCreatedAt_MatchPhrasePrefix(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime) {
-        setCreatedTime_Fuzzy(createdTime, null);
+    public void setCreatedAt_Fuzzy(LocalDateTime createdAt) {
+        setCreatedAt_Fuzzy(createdAt, null);
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
+    public void setCreatedAt_Fuzzy(LocalDateTime createdAt, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_GreaterThan(Long createdTime) {
-        setCreatedTime_GreaterThan(createdTime, null);
+    public void setCreatedAt_GreaterThan(LocalDateTime createdAt) {
+        setCreatedAt_GreaterThan(createdAt, null);
     }
 
-    public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+    public void setCreatedAt_GreaterThan(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_GREATER_THAN, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_LessThan(Long createdTime) {
-        setCreatedTime_LessThan(createdTime, null);
+    public void setCreatedAt_LessThan(LocalDateTime createdAt) {
+        setCreatedAt_LessThan(createdAt, null);
     }
 
-    public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+    public void setCreatedAt_LessThan(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_LESS_THAN, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_GreaterEqual(Long createdTime) {
-        setCreatedTime_GreaterEqual(createdTime, null);
+    public void setCreatedAt_GreaterEqual(LocalDateTime createdAt) {
+        setCreatedAt_GreaterEqual(createdAt, null);
     }
 
-    public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+    public void setCreatedAt_GreaterEqual(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_GREATER_EQUAL, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_LessEqual(Long createdTime) {
-        setCreatedTime_LessEqual(createdTime, null);
+    public void setCreatedAt_LessEqual(LocalDateTime createdAt) {
+        setCreatedAt_LessEqual(createdAt, null);
     }
 
-    public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+    public void setCreatedAt_LessEqual(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_LESS_EQUAL, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsFavoriteLogCQ addOrderBy_CreatedTime_Asc() {
-        regOBA("createdTime");
+    public BsFavoriteLogCQ addOrderBy_CreatedAt_Asc() {
+        regOBA("createdAt");
         return this;
     }
 
-    public BsFavoriteLogCQ addOrderBy_CreatedTime_Desc() {
-        regOBD("createdTime");
+    public BsFavoriteLogCQ addOrderBy_CreatedAt_Desc() {
+        regOBD("createdAt");
         return this;
     }
 

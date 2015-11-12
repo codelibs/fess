@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.helper;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -115,24 +115,19 @@ public class SearchLogHelper {
 
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
 
-            final List<UserInfo> list = userInfoBhv.selectList(cb -> {
-                cb.query().setCode_Equal(userCode);
-                cb.query().addOrderBy_UpdatedTime_Desc();
+            final LocalDateTime now = ComponentUtil.getSystemHelper().getCurrentTimeAsLocalDateTime();
+            userInfoBhv.selectByPK(userCode).ifPresent(userInfo -> {
+                userInfo.setUpdatedAt(now);
+                new Thread(() -> {
+                    userInfoBhv.insertOrUpdate(userInfo);
+                }).start();
+            }).orElse(() -> {
+                UserInfo userInfo = new UserInfo();
+                userInfo.setId(userCode);
+                userInfo.setCreatedAt(now);
+                userInfo.setUpdatedAt(now);
+                userInfoBhv.insert(userInfo);
             });
-
-            final UserInfo userInfo;
-            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-            if (list.isEmpty()) {
-                userInfo = new UserInfo();
-                userInfo.setCode(userCode);
-                userInfo.setCreatedTime(now);
-            } else {
-                userInfo = list.get(0);
-            }
-            userInfo.setUpdatedTime(now);
-            new Thread(() -> {
-                userInfoBhv.insertOrUpdate(userInfo);
-            }).start();
             userInfoCache.put(userCode, current);
         }
     }
@@ -153,10 +148,10 @@ public class SearchLogHelper {
             final boolean isBot = userAgent != null && StreamUtil.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
             if (!isBot) {
                 searchLog.getUserInfo().ifPresent(userInfo -> {
-                    final String code = userInfo.getCode();
+                    final String code = userInfo.getId();
                     final UserInfo oldUserInfo = userInfoMap.get(code);
                     if (oldUserInfo != null) {
-                        userInfo.setCreatedTime(oldUserInfo.getCreatedTime());
+                        userInfo.setCreatedAt(oldUserInfo.getCreatedAt());
                     }
                     userInfoMap.put(code, userInfo);
                 });
@@ -168,22 +163,21 @@ public class SearchLogHelper {
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<>();
             final UserInfoBhv userInfoBhv = SingletonLaContainer.getComponent(UserInfoBhv.class);
-            final List<UserInfo> list = userInfoBhv.selectList(cb -> {
-                cb.query().setCode_InScope(userInfoMap.keySet());
-            });
-            for (final UserInfo userInfo : list) {
-                final String code = userInfo.getCode();
+            userInfoBhv.selectList(cb -> {
+                cb.query().setId_InScope(userInfoMap.keySet());
+            }).forEach(userInfo -> {
+                final String code = userInfo.getId();
                 final UserInfo entity = userInfoMap.get(code);
-                BeanUtil.copyBeanToBean(userInfo, entity, option -> option.include("id", "createdTime"));
+                entity.setId(userInfo.getId());
+                entity.setCreatedAt(userInfo.getCreatedAt());
                 updateList.add(entity);
                 insertList.remove(entity);
-            }
+            });
             userInfoBhv.batchInsert(insertList);
             userInfoBhv.batchUpdate(updateList);
             searchLogList.stream().forEach(searchLog -> {
                 searchLog.getUserInfo().ifPresent(userInfo -> {
-                    final UserInfo entity = userInfoMap.get(userInfo.getCode());
-                    searchLog.setUserInfoId(entity.getId());
+                    searchLog.setUserInfoId(userInfo.getId());
                 });
             });
         }
@@ -216,7 +210,7 @@ public class SearchLogHelper {
             try {
                 final SearchLogBhv searchLogBhv = SingletonLaContainer.getComponent(SearchLogBhv.class);
                 searchLogBhv.selectEntity(cb -> {
-                    cb.query().setRequestedTime_Equal(clickLog.getQueryRequestedTime());
+                    cb.query().setRequestedAt_Equal(clickLog.getQueryRequestedAt());
                     cb.query().setUserSessionId_Equal(clickLog.getUserSessionId());
                 }).ifPresent(entity -> {
                     clickLog.setSearchLogId(entity.getId());

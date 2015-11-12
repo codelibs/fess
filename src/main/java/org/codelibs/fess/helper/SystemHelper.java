@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -129,6 +130,10 @@ public class SystemHelper implements Serializable {
 
     public long getCurrentTimeAsLong() {
         return System.currentTimeMillis();
+    }
+
+    public LocalDateTime getCurrentTimeAsLocalDateTime() {
+        return LocalDateTime.now();
     }
 
     public String getLogFilePath() {

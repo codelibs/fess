@@ -75,13 +75,15 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
         try {
             final RESULT result = entityType.newInstance();
             result.setAccessType(DfTypeUtil.toString(source.get("accessType")));
+            result.setUser(DfTypeUtil.toString(source.get("user")));
             result.setClientIp(DfTypeUtil.toString(source.get("clientIp")));
             result.setHitCount(DfTypeUtil.toLong(source.get("hitCount")));
             result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
             result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
             result.setReferer(DfTypeUtil.toString(source.get("referer")));
-            result.setRequestedTime(DfTypeUtil.toLong(source.get("requestedTime")));
-            result.setResponseTime(DfTypeUtil.toInteger(source.get("responseTime")));
+            result.setRequestedAt(DfTypeUtil.toLocalDateTime(source.get("requestedAt")));
+            result.setResponseTime(DfTypeUtil.toLong(source.get("responseTime")));
+            result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
             result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
             result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));

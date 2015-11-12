@@ -74,7 +74,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     protected <RESULT extends FavoriteLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             return result;

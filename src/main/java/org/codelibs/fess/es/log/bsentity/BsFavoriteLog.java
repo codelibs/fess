@@ -37,8 +37,8 @@ public class BsFavoriteLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** createdTime */
-    protected Long createdTime;
+    /** createdAt */
+    protected LocalDateTime createdAt;
 
     /** url */
     protected String url;
@@ -67,8 +67,8 @@ public class BsFavoriteLog extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+        if (createdAt != null) {
+            sourceMap.put("createdAt", createdAt);
         }
         if (url != null) {
             sourceMap.put("url", url);
@@ -85,7 +85,7 @@ public class BsFavoriteLog extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
-        sb.append(dm).append(createdTime);
+        sb.append(dm).append(createdAt);
         sb.append(dm).append(url);
         sb.append(dm).append(userInfoId);
         if (sb.length() > dm.length()) {
@@ -98,14 +98,14 @@ public class BsFavoriteLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public Long getCreatedTime() {
-        checkSpecifiedProperty("createdTime");
-        return createdTime;
+    public LocalDateTime getCreatedAt() {
+        checkSpecifiedProperty("createdAt");
+        return createdAt;
     }
 
-    public void setCreatedTime(Long value) {
-        registerModifiedProperty("createdTime");
-        this.createdTime = value;
+    public void setCreatedAt(LocalDateTime value) {
+        registerModifiedProperty("createdAt");
+        this.createdAt = value;
     }
 
     public String getUrl() {

@@ -25,8 +25,9 @@
           "enabled" : false
         },
         "properties" : {
-          "createdTime" : {
-            "type" : "long"
+          "createdAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
           },
           "url" : {
             "type" : "string",
@@ -45,7 +46,7 @@
         "properties" : {
           "createdAt" : {
             "type" : "date",
-            "format" : "dateOptionalTime"
+            "format" : "date_optional_time"
           },
           "createdBy" : {
             "type" : "string",
@@ -69,8 +70,9 @@
           "enabled" : false
         },
         "properties" : {
-          "requestedTime" : {
-            "type" : "long"
+          "requestedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
           },
           "searchLogId" : {
             "type" : "string",
@@ -91,6 +93,10 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
+          "user" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
           "clientIp" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -108,11 +114,15 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
-          "requestedTime" : {
-            "type" : "long"
+          "requestedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
           },
           "responseTime" : {
-            "type" : "integer"
+            "type" : "long"
+          },
+          "queryTime" : {
+            "type" : "long"
           },
           "searchWord" : {
             "type" : "string",
@@ -137,15 +147,13 @@
           "enabled" : false
         },
         "properties" : {
-          "code" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+          "createdAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
           },
-          "createdTime" : {
-            "type" : "long"
-          },
-          "updatedTime" : {
-            "type" : "long"
+          "updatedAt" : {
+            "type" : "date",
+            "format" : "date_optional_time"
           }
         }
       }

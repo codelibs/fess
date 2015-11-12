@@ -23,7 +23,8 @@
         "index": "not_analyzed"
       },
       "createdAt": {
-        "type": "date"
+        "type": "date",
+        "format": "date_optional_time"
       }
     }
   }

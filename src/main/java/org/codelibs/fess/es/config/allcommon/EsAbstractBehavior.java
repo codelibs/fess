@@ -230,6 +230,10 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     protected IndexRequestBuilder createInsertRequest(final EsAbstractEntity esEntity) {
         final IndexRequestBuilder builder = client.prepareIndex(asEsIndex(), asEsIndexType()).setSource(esEntity.toSource());
+        final String id = esEntity.asDocMeta().id();
+        if (id != null) {
+            builder.setId(id);
+        }
         final RequestOptionCall<IndexRequestBuilder> indexOption = esEntity.asDocMeta().indexOption();
         if (indexOption != null) {
             indexOption.callback(builder);

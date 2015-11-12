@@ -74,9 +74,8 @@ public abstract class BsUserInfoBhv extends EsAbstractBehavior<UserInfo, UserInf
     protected <RESULT extends UserInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCode(DfTypeUtil.toString(source.get("code")));
-            result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
-            result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
+            result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
+            result.setUpdatedAt(DfTypeUtil.toLocalDateTime(source.get("updatedAt")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

@@ -7,15 +7,13 @@
       "enabled": false
     },
     "properties": {
-      "code": {
-        "type": "string",
-        "index": "not_analyzed"
+      "createdAt": {
+        "type": "date",
+        "format": "date_optional_time"
       },
-      "createdTime": {
-        "type": "long"
-      },
-      "updatedTime": {
-        "type": "long"
+      "updatedAt": {
+        "type": "date",
+        "format": "date_optional_time"
       }
     }
   }

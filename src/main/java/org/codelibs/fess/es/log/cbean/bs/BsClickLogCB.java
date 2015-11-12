@@ -158,8 +158,8 @@ public class BsClickLogCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnRequestedTime() {
-            doColumn("requestedTime");
+        public void columnRequestedAt() {
+            doColumn("requestedAt");
         }
 
         public void columnSearchLogId() {

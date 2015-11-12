@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,14 +61,6 @@ public class SearchLog extends BsSearchLog {
 
     }
 
-    public String getRequestedTimeForList() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
-        if (getRequestedTime() != null) {
-            return sdf.format(getRequestedTime());
-        }
-        return null;
-    }
-
     public void addSearchFieldLogValue(final String name, final String value) {
         if (StringUtil.isNotBlank(name) && StringUtil.isNotBlank(value)) {
             final SearchFieldLog fieldLog = new SearchFieldLog();
@@ -87,11 +78,11 @@ public class SearchLog extends BsSearchLog {
     }
 
     public OptionalEntity<UserInfo> getUserInfo() {
-        if (userInfo == null) {
+        if (getUserInfoId() == null) {
+            return OptionalEntity.empty();
+        } else if (userInfo == null) {
             final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
-            userInfo = userInfoBhv.selectEntity(cb -> {
-                cb.query().docMeta().setId_Equal(getUserInfoId());
-            });
+            userInfo = userInfoBhv.selectByPK(getUserInfoId());
         }
         return userInfo;
     }
@@ -118,6 +109,12 @@ public class SearchLog extends BsSearchLog {
             });
         }
         return searchFieldLogList;
+    }
+
+    @Override
+    public void setUserInfoId(String value) {
+        userInfo = null;
+        super.setUserInfoId(value);
     }
 
 }

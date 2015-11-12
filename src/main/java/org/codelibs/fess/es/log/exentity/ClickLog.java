@@ -15,10 +15,8 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.log.bsentity.BsClickLog;
 import org.codelibs.fess.es.log.exbhv.SearchLogBhv;
 import org.codelibs.fess.util.ComponentUtil;
@@ -31,7 +29,7 @@ public class ClickLog extends BsClickLog {
 
     private static final long serialVersionUID = 1L;
 
-    private long queryRequestedTime;
+    private LocalDateTime queryRequestedAt;
 
     private String userSessionId;
 
@@ -59,20 +57,12 @@ public class ClickLog extends BsClickLog {
         this.userSessionId = userSessionId;
     }
 
-    public long getQueryRequestedTime() {
-        return queryRequestedTime;
+    public LocalDateTime getQueryRequestedAt() {
+        return queryRequestedAt;
     }
 
-    public void setQueryRequestedTime(final long queryRequestedTime) {
-        this.queryRequestedTime = queryRequestedTime;
-    }
-
-    public String getRequestedTimeForList() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.DEFAULT_DATETIME_FORMAT);
-        if (getRequestedTime() != null) {
-            return sdf.format(new Date(getRequestedTime()));
-        }
-        return null;
+    public void setQueryRequestedAt(final LocalDateTime queryRequestedAt) {
+        this.queryRequestedAt = queryRequestedAt;
     }
 
     public String getDocId() {

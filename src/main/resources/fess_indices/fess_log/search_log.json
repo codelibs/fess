@@ -7,15 +7,23 @@
       "enabled": false
     },
     "properties": {
+      "user": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "searchWord": {
         "type": "string",
         "index": "not_analyzed"
       },
-      "requestedTime": {
-        "type": "long"
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
       },
       "responseTime": {
-        "type": "integer"
+        "type": "long"
+      },
+      "queryTime": {
+        "type": "long"
       },
       "hitCount": {
         "type": "long"

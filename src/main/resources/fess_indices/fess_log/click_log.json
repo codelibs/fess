@@ -15,8 +15,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "requestedTime": {
-        "type": "long"
+      "requestedAt": {
+        "type": "date",
+        "format": "date_optional_time"
       }
     }
   }

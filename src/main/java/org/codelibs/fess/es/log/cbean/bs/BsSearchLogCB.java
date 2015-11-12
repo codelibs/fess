@@ -162,6 +162,10 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("accessType");
         }
 
+        public void columnUser() {
+            doColumn("user");
+        }
+
         public void columnClientIp() {
             doColumn("clientIp");
         }
@@ -182,12 +186,16 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("referer");
         }
 
-        public void columnRequestedTime() {
-            doColumn("requestedTime");
+        public void columnRequestedAt() {
+            doColumn("requestedAt");
         }
 
         public void columnResponseTime() {
             doColumn("responseTime");
+        }
+
+        public void columnQueryTime() {
+            doColumn("queryTime");
         }
 
         public void columnSearchWord() {

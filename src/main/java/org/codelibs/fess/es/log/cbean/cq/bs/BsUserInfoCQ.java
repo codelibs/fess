@@ -27,7 +27,6 @@ import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NotQueryBuilder;
-import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -175,479 +174,313 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setCode_Equal(String code) {
-        setCode_Term(code, null);
+    public void setCreatedAt_Equal(LocalDateTime createdAt) {
+        setCreatedAt_Term(createdAt, null);
     }
 
-    public void setCode_Equal(String code, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setCode_Term(code, opLambda);
+    public void setCreatedAt_Equal(LocalDateTime createdAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCreatedAt_Term(createdAt, opLambda);
     }
 
-    public void setCode_Term(String code) {
-        setCode_Term(code, null);
+    public void setCreatedAt_Term(LocalDateTime createdAt) {
+        setCreatedAt_Term(createdAt, null);
     }
 
-    public void setCode_Term(String code, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("code", code);
+    public void setCreatedAt_Term(LocalDateTime createdAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_NotEqual(String code) {
-        setCode_NotTerm(code, null);
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCode_NotEqual(String code, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCode_NotTerm(code, opLambda);
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCreatedAt_NotTerm(createdAt, opLambda);
     }
 
-    public void setCode_NotTerm(String code) {
-        setCode_NotTerm(code, null);
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt) {
+        setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCode_NotTerm(String code, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("code", code));
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdAt", createdAt));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_Terms(Collection<String> codeList) {
-        setCode_Terms(codeList, null);
+    public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList) {
+        setCreatedAt_Terms(createdAtList, null);
     }
 
-    public void setCode_Terms(Collection<String> codeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("code", codeList);
+    public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("createdAt", createdAtList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_InScope(Collection<String> codeList) {
-        setCode_Terms(codeList, null);
+    public void setCreatedAt_InScope(Collection<LocalDateTime> createdAtList) {
+        setCreatedAt_Terms(createdAtList, null);
     }
 
-    public void setCode_InScope(Collection<String> codeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCode_Terms(codeList, opLambda);
+    public void setCreatedAt_InScope(Collection<LocalDateTime> createdAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setCreatedAt_Terms(createdAtList, opLambda);
     }
 
-    public void setCode_Match(String code) {
-        setCode_Match(code, null);
+    public void setCreatedAt_Match(LocalDateTime createdAt) {
+        setCreatedAt_Match(createdAt, null);
     }
 
-    public void setCode_Match(String code, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("code", code);
+    public void setCreatedAt_Match(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_MatchPhrase(String code) {
-        setCode_MatchPhrase(code, null);
+    public void setCreatedAt_MatchPhrase(LocalDateTime createdAt) {
+        setCreatedAt_MatchPhrase(createdAt, null);
     }
 
-    public void setCode_MatchPhrase(String code, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("code", code);
+    public void setCreatedAt_MatchPhrase(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_MatchPhrasePrefix(String code) {
-        setCode_MatchPhrasePrefix(code, null);
+    public void setCreatedAt_MatchPhrasePrefix(LocalDateTime createdAt) {
+        setCreatedAt_MatchPhrasePrefix(createdAt, null);
     }
 
-    public void setCode_MatchPhrasePrefix(String code, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("code", code);
+    public void setCreatedAt_MatchPhrasePrefix(LocalDateTime createdAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_Fuzzy(String code) {
-        setCode_Fuzzy(code, null);
+    public void setCreatedAt_Fuzzy(LocalDateTime createdAt) {
+        setCreatedAt_Fuzzy(createdAt, null);
     }
 
-    public void setCode_Fuzzy(String code, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("code", code);
+    public void setCreatedAt_Fuzzy(LocalDateTime createdAt, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("createdAt", createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_Prefix(String code) {
-        setCode_Prefix(code, null);
+    public void setCreatedAt_GreaterThan(LocalDateTime createdAt) {
+        setCreatedAt_GreaterThan(createdAt, null);
     }
 
-    public void setCode_Prefix(String code, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("code", code);
+    public void setCreatedAt_GreaterThan(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_GREATER_THAN, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_GreaterThan(String code) {
-        setCode_GreaterThan(code, null);
+    public void setCreatedAt_LessThan(LocalDateTime createdAt) {
+        setCreatedAt_LessThan(createdAt, null);
     }
 
-    public void setCode_GreaterThan(String code, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("code", ConditionKey.CK_GREATER_THAN, code);
+    public void setCreatedAt_LessThan(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_LESS_THAN, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_LessThan(String code) {
-        setCode_LessThan(code, null);
+    public void setCreatedAt_GreaterEqual(LocalDateTime createdAt) {
+        setCreatedAt_GreaterEqual(createdAt, null);
     }
 
-    public void setCode_LessThan(String code, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("code", ConditionKey.CK_LESS_THAN, code);
+    public void setCreatedAt_GreaterEqual(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_GREATER_EQUAL, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_GreaterEqual(String code) {
-        setCode_GreaterEqual(code, null);
+    public void setCreatedAt_LessEqual(LocalDateTime createdAt) {
+        setCreatedAt_LessEqual(createdAt, null);
     }
 
-    public void setCode_GreaterEqual(String code, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("code", ConditionKey.CK_GREATER_EQUAL, code);
+    public void setCreatedAt_LessEqual(LocalDateTime createdAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("createdAt", ConditionKey.CK_LESS_EQUAL, createdAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCode_LessEqual(String code) {
-        setCode_LessEqual(code, null);
-    }
-
-    public void setCode_LessEqual(String code, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("code", ConditionKey.CK_LESS_EQUAL, code);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsUserInfoCQ addOrderBy_Code_Asc() {
-        regOBA("code");
+    public BsUserInfoCQ addOrderBy_CreatedAt_Asc() {
+        regOBA("createdAt");
         return this;
     }
 
-    public BsUserInfoCQ addOrderBy_Code_Desc() {
-        regOBD("code");
+    public BsUserInfoCQ addOrderBy_CreatedAt_Desc() {
+        regOBD("createdAt");
         return this;
     }
 
-    public void setCreatedTime_Equal(Long createdTime) {
-        setCreatedTime_Term(createdTime, null);
+    public void setUpdatedAt_Equal(LocalDateTime updatedAt) {
+        setUpdatedAt_Term(updatedAt, null);
     }
 
-    public void setCreatedTime_Equal(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setCreatedTime_Term(createdTime, opLambda);
+    public void setUpdatedAt_Equal(LocalDateTime updatedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUpdatedAt_Term(updatedAt, opLambda);
     }
 
-    public void setCreatedTime_Term(Long createdTime) {
-        setCreatedTime_Term(createdTime, null);
+    public void setUpdatedAt_Term(LocalDateTime updatedAt) {
+        setUpdatedAt_Term(updatedAt, null);
     }
 
-    public void setCreatedTime_Term(Long createdTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("createdTime", createdTime);
+    public void setUpdatedAt_Term(LocalDateTime updatedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime) {
-        setCreatedTime_NotTerm(createdTime, null);
+    public void setUpdatedAt_NotEqual(LocalDateTime updatedAt) {
+        setUpdatedAt_NotTerm(updatedAt, null);
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedTime_NotTerm(createdTime, opLambda);
+    public void setUpdatedAt_NotEqual(LocalDateTime updatedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUpdatedAt_NotTerm(updatedAt, opLambda);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime) {
-        setCreatedTime_NotTerm(createdTime, null);
+    public void setUpdatedAt_NotTerm(LocalDateTime updatedAt) {
+        setUpdatedAt_NotTerm(updatedAt, null);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
+    public void setUpdatedAt_NotTerm(LocalDateTime updatedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedAt", updatedAt));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
-        setCreatedTime_Terms(createdTimeList, null);
+    public void setUpdatedAt_Terms(Collection<LocalDateTime> updatedAtList) {
+        setUpdatedAt_Terms(updatedAtList, null);
     }
 
-    public void setCreatedTime_Terms(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("createdTime", createdTimeList);
+    public void setUpdatedAt_Terms(Collection<LocalDateTime> updatedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("updatedAt", updatedAtList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_InScope(Collection<Long> createdTimeList) {
-        setCreatedTime_Terms(createdTimeList, null);
+    public void setUpdatedAt_InScope(Collection<LocalDateTime> updatedAtList) {
+        setUpdatedAt_Terms(updatedAtList, null);
     }
 
-    public void setCreatedTime_InScope(Collection<Long> createdTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCreatedTime_Terms(createdTimeList, opLambda);
+    public void setUpdatedAt_InScope(Collection<LocalDateTime> updatedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUpdatedAt_Terms(updatedAtList, opLambda);
     }
 
-    public void setCreatedTime_Match(Long createdTime) {
-        setCreatedTime_Match(createdTime, null);
+    public void setUpdatedAt_Match(LocalDateTime updatedAt) {
+        setUpdatedAt_Match(updatedAt, null);
     }
 
-    public void setCreatedTime_Match(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("createdTime", createdTime);
+    public void setUpdatedAt_Match(LocalDateTime updatedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime) {
-        setCreatedTime_MatchPhrase(createdTime, null);
+    public void setUpdatedAt_MatchPhrase(LocalDateTime updatedAt) {
+        setUpdatedAt_MatchPhrase(updatedAt, null);
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
+    public void setUpdatedAt_MatchPhrase(LocalDateTime updatedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime) {
-        setCreatedTime_MatchPhrasePrefix(createdTime, null);
+    public void setUpdatedAt_MatchPhrasePrefix(LocalDateTime updatedAt) {
+        setUpdatedAt_MatchPhrasePrefix(updatedAt, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
+    public void setUpdatedAt_MatchPhrasePrefix(LocalDateTime updatedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime) {
-        setCreatedTime_Fuzzy(createdTime, null);
+    public void setUpdatedAt_Fuzzy(LocalDateTime updatedAt) {
+        setUpdatedAt_Fuzzy(updatedAt, null);
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
+    public void setUpdatedAt_Fuzzy(LocalDateTime updatedAt, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_GreaterThan(Long createdTime) {
-        setCreatedTime_GreaterThan(createdTime, null);
+    public void setUpdatedAt_GreaterThan(LocalDateTime updatedAt) {
+        setUpdatedAt_GreaterThan(updatedAt, null);
     }
 
-    public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+    public void setUpdatedAt_GreaterThan(LocalDateTime updatedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("updatedAt", ConditionKey.CK_GREATER_THAN, updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_LessThan(Long createdTime) {
-        setCreatedTime_LessThan(createdTime, null);
+    public void setUpdatedAt_LessThan(LocalDateTime updatedAt) {
+        setUpdatedAt_LessThan(updatedAt, null);
     }
 
-    public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+    public void setUpdatedAt_LessThan(LocalDateTime updatedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("updatedAt", ConditionKey.CK_LESS_THAN, updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_GreaterEqual(Long createdTime) {
-        setCreatedTime_GreaterEqual(createdTime, null);
+    public void setUpdatedAt_GreaterEqual(LocalDateTime updatedAt) {
+        setUpdatedAt_GreaterEqual(updatedAt, null);
     }
 
-    public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+    public void setUpdatedAt_GreaterEqual(LocalDateTime updatedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("updatedAt", ConditionKey.CK_GREATER_EQUAL, updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCreatedTime_LessEqual(Long createdTime) {
-        setCreatedTime_LessEqual(createdTime, null);
+    public void setUpdatedAt_LessEqual(LocalDateTime updatedAt) {
+        setUpdatedAt_LessEqual(updatedAt, null);
     }
 
-    public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+    public void setUpdatedAt_LessEqual(LocalDateTime updatedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("updatedAt", ConditionKey.CK_LESS_EQUAL, updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsUserInfoCQ addOrderBy_CreatedTime_Asc() {
-        regOBA("createdTime");
+    public BsUserInfoCQ addOrderBy_UpdatedAt_Asc() {
+        regOBA("updatedAt");
         return this;
     }
 
-    public BsUserInfoCQ addOrderBy_CreatedTime_Desc() {
-        regOBD("createdTime");
-        return this;
-    }
-
-    public void setUpdatedTime_Equal(Long updatedTime) {
-        setUpdatedTime_Term(updatedTime, null);
-    }
-
-    public void setUpdatedTime_Equal(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setUpdatedTime_Term(updatedTime, opLambda);
-    }
-
-    public void setUpdatedTime_Term(Long updatedTime) {
-        setUpdatedTime_Term(updatedTime, null);
-    }
-
-    public void setUpdatedTime_Term(Long updatedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("updatedTime", updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_NotEqual(Long updatedTime) {
-        setUpdatedTime_NotTerm(updatedTime, null);
-    }
-
-    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedTime_NotTerm(updatedTime, opLambda);
-    }
-
-    public void setUpdatedTime_NotTerm(Long updatedTime) {
-        setUpdatedTime_NotTerm(updatedTime, null);
-    }
-
-    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedTime", updatedTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {
-        setUpdatedTime_Terms(updatedTimeList, null);
-    }
-
-    public void setUpdatedTime_Terms(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("updatedTime", updatedTimeList);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_InScope(Collection<Long> updatedTimeList) {
-        setUpdatedTime_Terms(updatedTimeList, null);
-    }
-
-    public void setUpdatedTime_InScope(Collection<Long> updatedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setUpdatedTime_Terms(updatedTimeList, opLambda);
-    }
-
-    public void setUpdatedTime_Match(Long updatedTime) {
-        setUpdatedTime_Match(updatedTime, null);
-    }
-
-    public void setUpdatedTime_Match(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("updatedTime", updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_MatchPhrase(Long updatedTime) {
-        setUpdatedTime_MatchPhrase(updatedTime, null);
-    }
-
-    public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime) {
-        setUpdatedTime_MatchPhrasePrefix(updatedTime, null);
-    }
-
-    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_Fuzzy(Long updatedTime) {
-        setUpdatedTime_Fuzzy(updatedTime, null);
-    }
-
-    public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_GreaterThan(Long updatedTime) {
-        setUpdatedTime_GreaterThan(updatedTime, null);
-    }
-
-    public void setUpdatedTime_GreaterThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_LessThan(Long updatedTime) {
-        setUpdatedTime_LessThan(updatedTime, null);
-    }
-
-    public void setUpdatedTime_LessThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_GreaterEqual(Long updatedTime) {
-        setUpdatedTime_GreaterEqual(updatedTime, null);
-    }
-
-    public void setUpdatedTime_GreaterEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public void setUpdatedTime_LessEqual(Long updatedTime) {
-        setUpdatedTime_LessEqual(updatedTime, null);
-    }
-
-    public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
-    }
-
-    public BsUserInfoCQ addOrderBy_UpdatedTime_Asc() {
-        regOBA("updatedTime");
-        return this;
-    }
-
-    public BsUserInfoCQ addOrderBy_UpdatedTime_Desc() {
-        regOBD("updatedTime");
+    public BsUserInfoCQ addOrderBy_UpdatedAt_Desc() {
+        regOBD("updatedAt");
         return this;
     }
 

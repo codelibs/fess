@@ -40,6 +40,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** accessType */
     protected String accessType;
 
+    /** user */
+    protected String user;
+
     /** clientIp */
     protected String clientIp;
 
@@ -55,11 +58,14 @@ public class BsSearchLog extends EsAbstractEntity {
     /** referer */
     protected String referer;
 
-    /** requestedTime */
-    protected Long requestedTime;
+    /** requestedAt */
+    protected LocalDateTime requestedAt;
 
     /** responseTime */
-    protected Integer responseTime;
+    protected Long responseTime;
+
+    /** queryTime */
+    protected Long queryTime;
 
     /** searchWord */
     protected String searchWord;
@@ -97,6 +103,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (accessType != null) {
             sourceMap.put("accessType", accessType);
         }
+        if (user != null) {
+            sourceMap.put("user", user);
+        }
         if (clientIp != null) {
             sourceMap.put("clientIp", clientIp);
         }
@@ -112,11 +121,14 @@ public class BsSearchLog extends EsAbstractEntity {
         if (referer != null) {
             sourceMap.put("referer", referer);
         }
-        if (requestedTime != null) {
-            sourceMap.put("requestedTime", requestedTime);
+        if (requestedAt != null) {
+            sourceMap.put("requestedAt", requestedAt);
         }
         if (responseTime != null) {
             sourceMap.put("responseTime", responseTime);
+        }
+        if (queryTime != null) {
+            sourceMap.put("queryTime", queryTime);
         }
         if (searchWord != null) {
             sourceMap.put("searchWord", searchWord);
@@ -140,13 +152,15 @@ public class BsSearchLog extends EsAbstractEntity {
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(accessType);
+        sb.append(dm).append(user);
         sb.append(dm).append(clientIp);
         sb.append(dm).append(hitCount);
         sb.append(dm).append(queryOffset);
         sb.append(dm).append(queryPageSize);
         sb.append(dm).append(referer);
-        sb.append(dm).append(requestedTime);
+        sb.append(dm).append(requestedAt);
         sb.append(dm).append(responseTime);
+        sb.append(dm).append(queryTime);
         sb.append(dm).append(searchWord);
         sb.append(dm).append(userAgent);
         sb.append(dm).append(userInfoId);
@@ -169,6 +183,16 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setAccessType(String value) {
         registerModifiedProperty("accessType");
         this.accessType = value;
+    }
+
+    public String getUser() {
+        checkSpecifiedProperty("user");
+        return convertEmptyToNull(user);
+    }
+
+    public void setUser(String value) {
+        registerModifiedProperty("user");
+        this.user = value;
     }
 
     public String getClientIp() {
@@ -221,24 +245,34 @@ public class BsSearchLog extends EsAbstractEntity {
         this.referer = value;
     }
 
-    public Long getRequestedTime() {
-        checkSpecifiedProperty("requestedTime");
-        return requestedTime;
+    public LocalDateTime getRequestedAt() {
+        checkSpecifiedProperty("requestedAt");
+        return requestedAt;
     }
 
-    public void setRequestedTime(Long value) {
-        registerModifiedProperty("requestedTime");
-        this.requestedTime = value;
+    public void setRequestedAt(LocalDateTime value) {
+        registerModifiedProperty("requestedAt");
+        this.requestedAt = value;
     }
 
-    public Integer getResponseTime() {
+    public Long getResponseTime() {
         checkSpecifiedProperty("responseTime");
         return responseTime;
     }
 
-    public void setResponseTime(Integer value) {
+    public void setResponseTime(Long value) {
         registerModifiedProperty("responseTime");
         this.responseTime = value;
+    }
+
+    public Long getQueryTime() {
+        checkSpecifiedProperty("queryTime");
+        return queryTime;
+    }
+
+    public void setQueryTime(Long value) {
+        registerModifiedProperty("queryTime");
+        this.queryTime = value;
     }
 
     public String getSearchWord() {

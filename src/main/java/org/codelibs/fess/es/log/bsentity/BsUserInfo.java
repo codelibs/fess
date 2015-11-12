@@ -37,14 +37,11 @@ public class BsUserInfo extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** code */
-    protected String code;
+    /** createdAt */
+    protected LocalDateTime createdAt;
 
-    /** createdTime */
-    protected Long createdTime;
-
-    /** updatedTime */
-    protected Long updatedTime;
+    /** updatedAt */
+    protected LocalDateTime updatedAt;
 
     // [Referrers] *comment only
 
@@ -67,14 +64,11 @@ public class BsUserInfo extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (code != null) {
-            sourceMap.put("code", code);
+        if (createdAt != null) {
+            sourceMap.put("createdAt", createdAt);
         }
-        if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
-        }
-        if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+        if (updatedAt != null) {
+            sourceMap.put("updatedAt", updatedAt);
         }
         return sourceMap;
     }
@@ -85,9 +79,8 @@ public class BsUserInfo extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
-        sb.append(dm).append(code);
-        sb.append(dm).append(createdTime);
-        sb.append(dm).append(updatedTime);
+        sb.append(dm).append(createdAt);
+        sb.append(dm).append(updatedAt);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -98,33 +91,23 @@ public class BsUserInfo extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getCode() {
-        checkSpecifiedProperty("code");
-        return convertEmptyToNull(code);
+    public LocalDateTime getCreatedAt() {
+        checkSpecifiedProperty("createdAt");
+        return createdAt;
     }
 
-    public void setCode(String value) {
-        registerModifiedProperty("code");
-        this.code = value;
+    public void setCreatedAt(LocalDateTime value) {
+        registerModifiedProperty("createdAt");
+        this.createdAt = value;
     }
 
-    public Long getCreatedTime() {
-        checkSpecifiedProperty("createdTime");
-        return createdTime;
+    public LocalDateTime getUpdatedAt() {
+        checkSpecifiedProperty("updatedAt");
+        return updatedAt;
     }
 
-    public void setCreatedTime(Long value) {
-        registerModifiedProperty("createdTime");
-        this.createdTime = value;
-    }
-
-    public Long getUpdatedTime() {
-        checkSpecifiedProperty("updatedTime");
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(Long value) {
-        registerModifiedProperty("updatedTime");
-        this.updatedTime = value;
+    public void setUpdatedAt(LocalDateTime value) {
+        registerModifiedProperty("updatedAt");
+        this.updatedAt = value;
     }
 }

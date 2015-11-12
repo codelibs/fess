@@ -341,6 +341,172 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setUser_Equal(String user) {
+        setUser_Term(user, null);
+    }
+
+    public void setUser_Equal(String user, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setUser_Term(user, opLambda);
+    }
+
+    public void setUser_Term(String user) {
+        setUser_Term(user, null);
+    }
+
+    public void setUser_Term(String user, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_NotEqual(String user) {
+        setUser_NotTerm(user, null);
+    }
+
+    public void setUser_NotEqual(String user, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setUser_NotTerm(user, opLambda);
+    }
+
+    public void setUser_NotTerm(String user) {
+        setUser_NotTerm(user, null);
+    }
+
+    public void setUser_NotTerm(String user, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("user", user));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_Terms(Collection<String> userList) {
+        setUser_Terms(userList, null);
+    }
+
+    public void setUser_Terms(Collection<String> userList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("user", userList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_InScope(Collection<String> userList) {
+        setUser_Terms(userList, null);
+    }
+
+    public void setUser_InScope(Collection<String> userList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setUser_Terms(userList, opLambda);
+    }
+
+    public void setUser_Match(String user) {
+        setUser_Match(user, null);
+    }
+
+    public void setUser_Match(String user, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_MatchPhrase(String user) {
+        setUser_MatchPhrase(user, null);
+    }
+
+    public void setUser_MatchPhrase(String user, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_MatchPhrasePrefix(String user) {
+        setUser_MatchPhrasePrefix(user, null);
+    }
+
+    public void setUser_MatchPhrasePrefix(String user, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_Fuzzy(String user) {
+        setUser_Fuzzy(user, null);
+    }
+
+    public void setUser_Fuzzy(String user, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_Prefix(String user) {
+        setUser_Prefix(user, null);
+    }
+
+    public void setUser_Prefix(String user, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_GreaterThan(String user) {
+        setUser_GreaterThan(user, null);
+    }
+
+    public void setUser_GreaterThan(String user, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("user", ConditionKey.CK_GREATER_THAN, user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_LessThan(String user) {
+        setUser_LessThan(user, null);
+    }
+
+    public void setUser_LessThan(String user, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("user", ConditionKey.CK_LESS_THAN, user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_GreaterEqual(String user) {
+        setUser_GreaterEqual(user, null);
+    }
+
+    public void setUser_GreaterEqual(String user, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("user", ConditionKey.CK_GREATER_EQUAL, user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_LessEqual(String user) {
+        setUser_LessEqual(user, null);
+    }
+
+    public void setUser_LessEqual(String user, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("user", ConditionKey.CK_LESS_EQUAL, user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_User_Asc() {
+        regOBA("user");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_User_Desc() {
+        regOBD("user");
+        return this;
+    }
+
     public void setClientIp_Equal(String clientIp) {
         setClientIp_Term(clientIp, null);
     }
@@ -1138,300 +1304,300 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setRequestedTime_Equal(Long requestedTime) {
-        setRequestedTime_Term(requestedTime, null);
+    public void setRequestedAt_Equal(LocalDateTime requestedAt) {
+        setRequestedAt_Term(requestedAt, null);
     }
 
-    public void setRequestedTime_Equal(Long requestedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setRequestedTime_Term(requestedTime, opLambda);
+    public void setRequestedAt_Equal(LocalDateTime requestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRequestedAt_Term(requestedAt, opLambda);
     }
 
-    public void setRequestedTime_Term(Long requestedTime) {
-        setRequestedTime_Term(requestedTime, null);
+    public void setRequestedAt_Term(LocalDateTime requestedAt) {
+        setRequestedAt_Term(requestedAt, null);
     }
 
-    public void setRequestedTime_Term(Long requestedTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("requestedTime", requestedTime);
+    public void setRequestedAt_Term(LocalDateTime requestedAt, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("requestedAt", requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_NotEqual(Long requestedTime) {
-        setRequestedTime_NotTerm(requestedTime, null);
+    public void setRequestedAt_NotEqual(LocalDateTime requestedAt) {
+        setRequestedAt_NotTerm(requestedAt, null);
     }
 
-    public void setRequestedTime_NotEqual(Long requestedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setRequestedTime_NotTerm(requestedTime, opLambda);
+    public void setRequestedAt_NotEqual(LocalDateTime requestedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setRequestedAt_NotTerm(requestedAt, opLambda);
     }
 
-    public void setRequestedTime_NotTerm(Long requestedTime) {
-        setRequestedTime_NotTerm(requestedTime, null);
+    public void setRequestedAt_NotTerm(LocalDateTime requestedAt) {
+        setRequestedAt_NotTerm(requestedAt, null);
     }
 
-    public void setRequestedTime_NotTerm(Long requestedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("requestedTime", requestedTime));
+    public void setRequestedAt_NotTerm(LocalDateTime requestedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("requestedAt", requestedAt));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_Terms(Collection<Long> requestedTimeList) {
-        setRequestedTime_Terms(requestedTimeList, null);
+    public void setRequestedAt_Terms(Collection<LocalDateTime> requestedAtList) {
+        setRequestedAt_Terms(requestedAtList, null);
     }
 
-    public void setRequestedTime_Terms(Collection<Long> requestedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("requestedTime", requestedTimeList);
+    public void setRequestedAt_Terms(Collection<LocalDateTime> requestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("requestedAt", requestedAtList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_InScope(Collection<Long> requestedTimeList) {
-        setRequestedTime_Terms(requestedTimeList, null);
+    public void setRequestedAt_InScope(Collection<LocalDateTime> requestedAtList) {
+        setRequestedAt_Terms(requestedAtList, null);
     }
 
-    public void setRequestedTime_InScope(Collection<Long> requestedTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setRequestedTime_Terms(requestedTimeList, opLambda);
+    public void setRequestedAt_InScope(Collection<LocalDateTime> requestedAtList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setRequestedAt_Terms(requestedAtList, opLambda);
     }
 
-    public void setRequestedTime_Match(Long requestedTime) {
-        setRequestedTime_Match(requestedTime, null);
+    public void setRequestedAt_Match(LocalDateTime requestedAt) {
+        setRequestedAt_Match(requestedAt, null);
     }
 
-    public void setRequestedTime_Match(Long requestedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("requestedTime", requestedTime);
+    public void setRequestedAt_Match(LocalDateTime requestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("requestedAt", requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_MatchPhrase(Long requestedTime) {
-        setRequestedTime_MatchPhrase(requestedTime, null);
+    public void setRequestedAt_MatchPhrase(LocalDateTime requestedAt) {
+        setRequestedAt_MatchPhrase(requestedAt, null);
     }
 
-    public void setRequestedTime_MatchPhrase(Long requestedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("requestedTime", requestedTime);
+    public void setRequestedAt_MatchPhrase(LocalDateTime requestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("requestedAt", requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_MatchPhrasePrefix(Long requestedTime) {
-        setRequestedTime_MatchPhrasePrefix(requestedTime, null);
+    public void setRequestedAt_MatchPhrasePrefix(LocalDateTime requestedAt) {
+        setRequestedAt_MatchPhrasePrefix(requestedAt, null);
     }
 
-    public void setRequestedTime_MatchPhrasePrefix(Long requestedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("requestedTime", requestedTime);
+    public void setRequestedAt_MatchPhrasePrefix(LocalDateTime requestedAt, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("requestedAt", requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_Fuzzy(Long requestedTime) {
-        setRequestedTime_Fuzzy(requestedTime, null);
+    public void setRequestedAt_Fuzzy(LocalDateTime requestedAt) {
+        setRequestedAt_Fuzzy(requestedAt, null);
     }
 
-    public void setRequestedTime_Fuzzy(Long requestedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("requestedTime", requestedTime);
+    public void setRequestedAt_Fuzzy(LocalDateTime requestedAt, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("requestedAt", requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_GreaterThan(Long requestedTime) {
-        setRequestedTime_GreaterThan(requestedTime, null);
+    public void setRequestedAt_GreaterThan(LocalDateTime requestedAt) {
+        setRequestedAt_GreaterThan(requestedAt, null);
     }
 
-    public void setRequestedTime_GreaterThan(Long requestedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("requestedTime", ConditionKey.CK_GREATER_THAN, requestedTime);
+    public void setRequestedAt_GreaterThan(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_GREATER_THAN, requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_LessThan(Long requestedTime) {
-        setRequestedTime_LessThan(requestedTime, null);
+    public void setRequestedAt_LessThan(LocalDateTime requestedAt) {
+        setRequestedAt_LessThan(requestedAt, null);
     }
 
-    public void setRequestedTime_LessThan(Long requestedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("requestedTime", ConditionKey.CK_LESS_THAN, requestedTime);
+    public void setRequestedAt_LessThan(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_LESS_THAN, requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_GreaterEqual(Long requestedTime) {
-        setRequestedTime_GreaterEqual(requestedTime, null);
+    public void setRequestedAt_GreaterEqual(LocalDateTime requestedAt) {
+        setRequestedAt_GreaterEqual(requestedAt, null);
     }
 
-    public void setRequestedTime_GreaterEqual(Long requestedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("requestedTime", ConditionKey.CK_GREATER_EQUAL, requestedTime);
+    public void setRequestedAt_GreaterEqual(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_GREATER_EQUAL, requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setRequestedTime_LessEqual(Long requestedTime) {
-        setRequestedTime_LessEqual(requestedTime, null);
+    public void setRequestedAt_LessEqual(LocalDateTime requestedAt) {
+        setRequestedAt_LessEqual(requestedAt, null);
     }
 
-    public void setRequestedTime_LessEqual(Long requestedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("requestedTime", ConditionKey.CK_LESS_EQUAL, requestedTime);
+    public void setRequestedAt_LessEqual(LocalDateTime requestedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("requestedAt", ConditionKey.CK_LESS_EQUAL, requestedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsSearchLogCQ addOrderBy_RequestedTime_Asc() {
-        regOBA("requestedTime");
+    public BsSearchLogCQ addOrderBy_RequestedAt_Asc() {
+        regOBA("requestedAt");
         return this;
     }
 
-    public BsSearchLogCQ addOrderBy_RequestedTime_Desc() {
-        regOBD("requestedTime");
+    public BsSearchLogCQ addOrderBy_RequestedAt_Desc() {
+        regOBD("requestedAt");
         return this;
     }
 
-    public void setResponseTime_Equal(Integer responseTime) {
+    public void setResponseTime_Equal(Long responseTime) {
         setResponseTime_Term(responseTime, null);
     }
 
-    public void setResponseTime_Equal(Integer responseTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+    public void setResponseTime_Equal(Long responseTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
         setResponseTime_Term(responseTime, opLambda);
     }
 
-    public void setResponseTime_Term(Integer responseTime) {
+    public void setResponseTime_Term(Long responseTime) {
         setResponseTime_Term(responseTime, null);
     }
 
-    public void setResponseTime_Term(Integer responseTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+    public void setResponseTime_Term(Long responseTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
         TermQueryBuilder builder = regTermQ("responseTime", responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_NotEqual(Integer responseTime) {
+    public void setResponseTime_NotEqual(Long responseTime) {
         setResponseTime_NotTerm(responseTime, null);
     }
 
-    public void setResponseTime_NotEqual(Integer responseTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+    public void setResponseTime_NotEqual(Long responseTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
         setResponseTime_NotTerm(responseTime, opLambda);
     }
 
-    public void setResponseTime_NotTerm(Integer responseTime) {
+    public void setResponseTime_NotTerm(Long responseTime) {
         setResponseTime_NotTerm(responseTime, null);
     }
 
-    public void setResponseTime_NotTerm(Integer responseTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+    public void setResponseTime_NotTerm(Long responseTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
         NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("responseTime", responseTime));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_Terms(Collection<Integer> responseTimeList) {
+    public void setResponseTime_Terms(Collection<Long> responseTimeList) {
         setResponseTime_Terms(responseTimeList, null);
     }
 
-    public void setResponseTime_Terms(Collection<Integer> responseTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setResponseTime_Terms(Collection<Long> responseTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
         TermsQueryBuilder builder = regTermsQ("responseTime", responseTimeList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_InScope(Collection<Integer> responseTimeList) {
+    public void setResponseTime_InScope(Collection<Long> responseTimeList) {
         setResponseTime_Terms(responseTimeList, null);
     }
 
-    public void setResponseTime_InScope(Collection<Integer> responseTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+    public void setResponseTime_InScope(Collection<Long> responseTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
         setResponseTime_Terms(responseTimeList, opLambda);
     }
 
-    public void setResponseTime_Match(Integer responseTime) {
+    public void setResponseTime_Match(Long responseTime) {
         setResponseTime_Match(responseTime, null);
     }
 
-    public void setResponseTime_Match(Integer responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setResponseTime_Match(Long responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchQ("responseTime", responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_MatchPhrase(Integer responseTime) {
+    public void setResponseTime_MatchPhrase(Long responseTime) {
         setResponseTime_MatchPhrase(responseTime, null);
     }
 
-    public void setResponseTime_MatchPhrase(Integer responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setResponseTime_MatchPhrase(Long responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchPhraseQ("responseTime", responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_MatchPhrasePrefix(Integer responseTime) {
+    public void setResponseTime_MatchPhrasePrefix(Long responseTime) {
         setResponseTime_MatchPhrasePrefix(responseTime, null);
     }
 
-    public void setResponseTime_MatchPhrasePrefix(Integer responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+    public void setResponseTime_MatchPhrasePrefix(Long responseTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
         MatchQueryBuilder builder = regMatchPhrasePrefixQ("responseTime", responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_Fuzzy(Integer responseTime) {
+    public void setResponseTime_Fuzzy(Long responseTime) {
         setResponseTime_Fuzzy(responseTime, null);
     }
 
-    public void setResponseTime_Fuzzy(Integer responseTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+    public void setResponseTime_Fuzzy(Long responseTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
         FuzzyQueryBuilder builder = regFuzzyQ("responseTime", responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_GreaterThan(Integer responseTime) {
+    public void setResponseTime_GreaterThan(Long responseTime) {
         setResponseTime_GreaterThan(responseTime, null);
     }
 
-    public void setResponseTime_GreaterThan(Integer responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setResponseTime_GreaterThan(Long responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("responseTime", ConditionKey.CK_GREATER_THAN, responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_LessThan(Integer responseTime) {
+    public void setResponseTime_LessThan(Long responseTime) {
         setResponseTime_LessThan(responseTime, null);
     }
 
-    public void setResponseTime_LessThan(Integer responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setResponseTime_LessThan(Long responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("responseTime", ConditionKey.CK_LESS_THAN, responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_GreaterEqual(Integer responseTime) {
+    public void setResponseTime_GreaterEqual(Long responseTime) {
         setResponseTime_GreaterEqual(responseTime, null);
     }
 
-    public void setResponseTime_GreaterEqual(Integer responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setResponseTime_GreaterEqual(Long responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("responseTime", ConditionKey.CK_GREATER_EQUAL, responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setResponseTime_LessEqual(Integer responseTime) {
+    public void setResponseTime_LessEqual(Long responseTime) {
         setResponseTime_LessEqual(responseTime, null);
     }
 
-    public void setResponseTime_LessEqual(Integer responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+    public void setResponseTime_LessEqual(Long responseTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("responseTime", ConditionKey.CK_LESS_EQUAL, responseTime);
         if (opLambda != null) {
             opLambda.callback(builder);
@@ -1445,6 +1611,161 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
 
     public BsSearchLogCQ addOrderBy_ResponseTime_Desc() {
         regOBD("responseTime");
+        return this;
+    }
+
+    public void setQueryTime_Equal(Long queryTime) {
+        setQueryTime_Term(queryTime, null);
+    }
+
+    public void setQueryTime_Equal(Long queryTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setQueryTime_Term(queryTime, opLambda);
+    }
+
+    public void setQueryTime_Term(Long queryTime) {
+        setQueryTime_Term(queryTime, null);
+    }
+
+    public void setQueryTime_Term(Long queryTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("queryTime", queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_NotEqual(Long queryTime) {
+        setQueryTime_NotTerm(queryTime, null);
+    }
+
+    public void setQueryTime_NotEqual(Long queryTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setQueryTime_NotTerm(queryTime, opLambda);
+    }
+
+    public void setQueryTime_NotTerm(Long queryTime) {
+        setQueryTime_NotTerm(queryTime, null);
+    }
+
+    public void setQueryTime_NotTerm(Long queryTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("queryTime", queryTime));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_Terms(Collection<Long> queryTimeList) {
+        setQueryTime_Terms(queryTimeList, null);
+    }
+
+    public void setQueryTime_Terms(Collection<Long> queryTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("queryTime", queryTimeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_InScope(Collection<Long> queryTimeList) {
+        setQueryTime_Terms(queryTimeList, null);
+    }
+
+    public void setQueryTime_InScope(Collection<Long> queryTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setQueryTime_Terms(queryTimeList, opLambda);
+    }
+
+    public void setQueryTime_Match(Long queryTime) {
+        setQueryTime_Match(queryTime, null);
+    }
+
+    public void setQueryTime_Match(Long queryTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("queryTime", queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_MatchPhrase(Long queryTime) {
+        setQueryTime_MatchPhrase(queryTime, null);
+    }
+
+    public void setQueryTime_MatchPhrase(Long queryTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("queryTime", queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_MatchPhrasePrefix(Long queryTime) {
+        setQueryTime_MatchPhrasePrefix(queryTime, null);
+    }
+
+    public void setQueryTime_MatchPhrasePrefix(Long queryTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("queryTime", queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_Fuzzy(Long queryTime) {
+        setQueryTime_Fuzzy(queryTime, null);
+    }
+
+    public void setQueryTime_Fuzzy(Long queryTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("queryTime", queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_GreaterThan(Long queryTime) {
+        setQueryTime_GreaterThan(queryTime, null);
+    }
+
+    public void setQueryTime_GreaterThan(Long queryTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryTime", ConditionKey.CK_GREATER_THAN, queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_LessThan(Long queryTime) {
+        setQueryTime_LessThan(queryTime, null);
+    }
+
+    public void setQueryTime_LessThan(Long queryTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryTime", ConditionKey.CK_LESS_THAN, queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_GreaterEqual(Long queryTime) {
+        setQueryTime_GreaterEqual(queryTime, null);
+    }
+
+    public void setQueryTime_GreaterEqual(Long queryTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryTime", ConditionKey.CK_GREATER_EQUAL, queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setQueryTime_LessEqual(Long queryTime) {
+        setQueryTime_LessEqual(queryTime, null);
+    }
+
+    public void setQueryTime_LessEqual(Long queryTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("queryTime", ConditionKey.CK_LESS_EQUAL, queryTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_QueryTime_Asc() {
+        regOBA("queryTime");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_QueryTime_Desc() {
+        regOBD("queryTime");
         return this;
     }
 

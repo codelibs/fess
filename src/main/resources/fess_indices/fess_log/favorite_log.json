@@ -15,8 +15,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "createdTime": {
-        "type": "long"
+      "createdAt": {
+        "type": "date",
+        "format": "date_optional_time"
       }
     }
   }

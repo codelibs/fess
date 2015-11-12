@@ -79,8 +79,8 @@ public class ClickLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((ClickLog) et).getRequestedTime(), (et, vl) -> ((ClickLog) et).setRequestedTime(DfTypeUtil.toLong(vl)),
-                "requestedTime");
+        setupEpg(_epgMap, et -> ((ClickLog) et).getRequestedAt(),
+                (et, vl) -> ((ClickLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
         setupEpg(_epgMap, et -> ((ClickLog) et).getSearchLogId(), (et, vl) -> ((ClickLog) et).setSearchLogId(DfTypeUtil.toString(vl)),
                 "searchLogId");
         setupEpg(_epgMap, et -> ((ClickLog) et).getUrl(), (et, vl) -> ((ClickLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
@@ -120,15 +120,15 @@ public class ClickLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnRequestedTime = cci("requestedTime", "requestedTime", null, null, Long.class, "requestedTime", null,
-            false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
+            false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSearchLogId = cci("searchLogId", "searchLogId", null, null, String.class, "searchLogId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnRequestedTime() {
-        return _columnRequestedTime;
+    public ColumnInfo columnRequestedAt() {
+        return _columnRequestedAt;
     }
 
     public ColumnInfo columnSearchLogId() {
@@ -141,7 +141,7 @@ public class ClickLogDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnRequestedTime());
+        ls.add(columnRequestedAt());
         ls.add(columnSearchLogId());
         ls.add(columnUrl());
         return ls;

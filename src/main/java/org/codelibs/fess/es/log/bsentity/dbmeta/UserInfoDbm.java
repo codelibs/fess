@@ -79,11 +79,10 @@ public class UserInfoDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((UserInfo) et).getCode(), (et, vl) -> ((UserInfo) et).setCode(DfTypeUtil.toString(vl)), "code");
-        setupEpg(_epgMap, et -> ((UserInfo) et).getCreatedTime(), (et, vl) -> ((UserInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)),
-                "createdTime");
-        setupEpg(_epgMap, et -> ((UserInfo) et).getUpdatedTime(), (et, vl) -> ((UserInfo) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
-                "updatedTime");
+        setupEpg(_epgMap, et -> ((UserInfo) et).getCreatedAt(), (et, vl) -> ((UserInfo) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)),
+                "createdAt");
+        setupEpg(_epgMap, et -> ((UserInfo) et).getUpdatedAt(), (et, vl) -> ((UserInfo) et).setUpdatedAt(DfTypeUtil.toLocalDateTime(vl)),
+                "updatedAt");
     }
 
     @Override
@@ -120,30 +119,23 @@ public class UserInfoDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCode = cci("code", "code", null, null, String.class, "code", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
+            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedAt = cci("updatedAt", "updatedAt", null, null, LocalDateTime.class, "updatedAt", null, false,
+            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCode() {
-        return _columnCode;
+    public ColumnInfo columnCreatedAt() {
+        return _columnCreatedAt;
     }
 
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
+    public ColumnInfo columnUpdatedAt() {
+        return _columnUpdatedAt;
     }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnCode());
-        ls.add(columnCreatedTime());
-        ls.add(columnUpdatedTime());
+        ls.add(columnCreatedAt());
+        ls.add(columnUpdatedAt());
         return ls;
     }
 

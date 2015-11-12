@@ -81,6 +81,7 @@ public class SearchLogDbm extends AbstractDBMeta {
     {
         setupEpg(_epgMap, et -> ((SearchLog) et).getAccessType(), (et, vl) -> ((SearchLog) et).setAccessType(DfTypeUtil.toString(vl)),
                 "accessType");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getUser(), (et, vl) -> ((SearchLog) et).setUser(DfTypeUtil.toString(vl)), "user");
         setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
                 "clientIp");
         setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
@@ -89,10 +90,12 @@ public class SearchLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((SearchLog) et).getQueryPageSize(),
                 (et, vl) -> ((SearchLog) et).setQueryPageSize(DfTypeUtil.toInteger(vl)), "queryPageSize");
         setupEpg(_epgMap, et -> ((SearchLog) et).getReferer(), (et, vl) -> ((SearchLog) et).setReferer(DfTypeUtil.toString(vl)), "referer");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getRequestedTime(), (et, vl) -> ((SearchLog) et).setRequestedTime(DfTypeUtil.toLong(vl)),
-                "requestedTime");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getResponseTime(), (et, vl) -> ((SearchLog) et).setResponseTime(DfTypeUtil.toInteger(vl)),
+        setupEpg(_epgMap, et -> ((SearchLog) et).getRequestedAt(),
+                (et, vl) -> ((SearchLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getResponseTime(), (et, vl) -> ((SearchLog) et).setResponseTime(DfTypeUtil.toLong(vl)),
                 "responseTime");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getQueryTime(), (et, vl) -> ((SearchLog) et).setQueryTime(DfTypeUtil.toLong(vl)),
+                "queryTime");
         setupEpg(_epgMap, et -> ((SearchLog) et).getSearchWord(), (et, vl) -> ((SearchLog) et).setSearchWord(DfTypeUtil.toString(vl)),
                 "searchWord");
         setupEpg(_epgMap, et -> ((SearchLog) et).getUserAgent(), (et, vl) -> ((SearchLog) et).setUserAgent(DfTypeUtil.toString(vl)),
@@ -139,6 +142,8 @@ public class SearchLogDbm extends AbstractDBMeta {
     //                                                                         ===========
     protected final ColumnInfo _columnAccessType = cci("accessType", "accessType", null, null, String.class, "accessType", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUser = cci("user", "user", null, null, String.class, "user", null, false, false, false, "String", 0,
+            0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnClientIp = cci("clientIp", "clientIp", null, null, String.class, "clientIp", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHitCount = cci("hitCount", "hitCount", null, null, Long.class, "hitCount", null, false, false, false,
@@ -149,10 +154,12 @@ public class SearchLogDbm extends AbstractDBMeta {
             null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnReferer = cci("referer", "referer", null, null, String.class, "referer", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRequestedTime = cci("requestedTime", "requestedTime", null, null, Long.class, "requestedTime", null,
+    protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
+            false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnResponseTime = cci("responseTime", "responseTime", null, null, Long.class, "responseTime", null,
             false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnResponseTime = cci("responseTime", "responseTime", null, null, Integer.class, "responseTime", null,
-            false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryTime = cci("queryTime", "queryTime", null, null, Long.class, "queryTime", null, false, false,
+            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSearchWord = cci("searchWord", "searchWord", null, null, String.class, "searchWord", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
@@ -164,6 +171,10 @@ public class SearchLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnAccessType() {
         return _columnAccessType;
+    }
+
+    public ColumnInfo columnUser() {
+        return _columnUser;
     }
 
     public ColumnInfo columnClientIp() {
@@ -186,12 +197,16 @@ public class SearchLogDbm extends AbstractDBMeta {
         return _columnReferer;
     }
 
-    public ColumnInfo columnRequestedTime() {
-        return _columnRequestedTime;
+    public ColumnInfo columnRequestedAt() {
+        return _columnRequestedAt;
     }
 
     public ColumnInfo columnResponseTime() {
         return _columnResponseTime;
+    }
+
+    public ColumnInfo columnQueryTime() {
+        return _columnQueryTime;
     }
 
     public ColumnInfo columnSearchWord() {
@@ -213,13 +228,15 @@ public class SearchLogDbm extends AbstractDBMeta {
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnAccessType());
+        ls.add(columnUser());
         ls.add(columnClientIp());
         ls.add(columnHitCount());
         ls.add(columnQueryOffset());
         ls.add(columnQueryPageSize());
         ls.add(columnReferer());
-        ls.add(columnRequestedTime());
+        ls.add(columnRequestedAt());
         ls.add(columnResponseTime());
+        ls.add(columnQueryTime());
         ls.add(columnSearchWord());
         ls.add(columnUserAgent());
         ls.add(columnUserInfoId());

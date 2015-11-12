@@ -79,8 +79,8 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedTime(), (et, vl) -> ((FavoriteLog) et).setCreatedTime(DfTypeUtil.toLong(vl)),
-                "createdTime");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedAt(),
+                (et, vl) -> ((FavoriteLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
         setupEpg(_epgMap, et -> ((FavoriteLog) et).getUserInfoId(), (et, vl) -> ((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
                 "userInfoId");
@@ -120,15 +120,15 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
+            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
             null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
+    public ColumnInfo columnCreatedAt() {
+        return _columnCreatedAt;
     }
 
     public ColumnInfo columnUrl() {
@@ -141,7 +141,7 @@ public class FavoriteLogDbm extends AbstractDBMeta {
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnCreatedTime());
+        ls.add(columnCreatedAt());
         ls.add(columnUrl());
         ls.add(columnUserInfoId());
         return ls;

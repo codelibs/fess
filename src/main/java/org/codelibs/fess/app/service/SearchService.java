@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.service;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +41,6 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.es.log.exentity.SearchLog;
-import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -49,6 +49,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -153,11 +154,6 @@ public class SearchService {
             data.setAppendHighlightParams(buf.toString());
         }
 
-        // search log
-        if (searchLogSupport) {
-            storeSearchLog(request, requestedTime, query, pageStart, pageSize, queryResponseList);
-        }
-
         queryResponseList.setExecTime(System.currentTimeMillis() - startTime);
         final NumberFormat nf = NumberFormat.getInstance(request.getLocale());
         nf.setMaximumIntegerDigits(2);
@@ -183,40 +179,41 @@ public class SearchService {
         data.setQueryTime(queryResponseList.getQueryTime());
         data.setSearchQuery(query);
         data.setRequestedTime(requestedTime);
+
+        // search log
+        if (searchLogSupport) {
+            storeSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), query, pageStart, pageSize, queryResponseList);
+        }
     }
 
-    protected void storeSearchLog(final HttpServletRequest request, final long requestedTime, final String query, final int pageStart,
-            final int pageSize, final QueryResponseList queryResponseList) {
+    protected void storeSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String query,
+            final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
 
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
         final SearchLog searchLog = new SearchLog();
 
-        String userCode = null;
         if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
-            userCode = userInfoHelper.getUserCode();
-            if (StringUtil.isNotBlank(userCode)) {
-                final UserInfo userInfo = new UserInfo();
-                userInfo.setCode(userCode);
-                userInfo.setCreatedTime(requestedTime);
-                userInfo.setUpdatedTime(requestedTime);
-                searchLog.setUserInfo(OptionalEntity.of(userInfo));
+            String userCode = userInfoHelper.getUserCode();
+            if (userCode != null) {
+                searchLog.setUserSessionId(userCode);
             }
         }
 
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
-        searchLog.setResponseTime(Integer.valueOf((int) queryResponseList.getExecTime()));
+        searchLog.setResponseTime(queryResponseList.getExecTime());
+        searchLog.setQueryTime(queryResponseList.getQueryTime());
         searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
         searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
-        searchLog.setRequestedTime(requestedTime);
+        searchLog.setRequestedAt(requestedTime);
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
+        ComponentUtil.getLoginAssist().getSessionUserBean().ifPresent(user -> {
+            searchLog.setUser(user.getUserId());
+        });
 
         searchLog.setClientIp(StringUtils.abbreviate(request.getRemoteAddr(), 50));
         searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
         searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
-        if (userCode != null) {
-            searchLog.setUserSessionId(userCode);
-        }
         final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
         if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);

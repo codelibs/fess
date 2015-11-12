@@ -38,13 +38,11 @@ public class FavoriteLogService {
     protected FavoriteLogBhv favoriteLogBhv;
 
     public boolean addUrl(final String userCode, final String url) {
-        return userInfoBhv.selectEntity(cb -> {
-            cb.query().setCode_Equal(userCode);
-        }).map(userInfo -> {
+        return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLog.setUserInfoId(userInfo.getId());
             favoriteLog.setUrl(url);
-            favoriteLog.setCreatedTime(systemHelper.getCurrentTimeAsLong());
+            favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
             favoriteLogBhv.insert(favoriteLog);
             return true;
         }).orElse(false);
@@ -55,9 +53,7 @@ public class FavoriteLogService {
             return urlList;
         }
 
-        return userInfoBhv.selectEntity(cb -> {
-            cb.query().setCode_Equal(userCode);
-        }).map(userInfo -> {
+        return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final ListResultBean<FavoriteLog> list = favoriteLogBhv.selectList(cb2 -> {
                 cb2.query().setUserInfoId_Equal(userInfo.getId());
                 cb2.query().setUrl_InScope(urlList);

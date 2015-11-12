@@ -37,8 +37,8 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** requestedTime */
-    protected Long requestedTime;
+    /** requestedAt */
+    protected LocalDateTime requestedAt;
 
     /** searchLogId */
     protected String searchLogId;
@@ -67,8 +67,8 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (requestedTime != null) {
-            sourceMap.put("requestedTime", requestedTime);
+        if (requestedAt != null) {
+            sourceMap.put("requestedAt", requestedAt);
         }
         if (searchLogId != null) {
             sourceMap.put("searchLogId", searchLogId);
@@ -85,7 +85,7 @@ public class BsClickLog extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
-        sb.append(dm).append(requestedTime);
+        sb.append(dm).append(requestedAt);
         sb.append(dm).append(searchLogId);
         sb.append(dm).append(url);
         if (sb.length() > dm.length()) {
@@ -98,14 +98,14 @@ public class BsClickLog extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public Long getRequestedTime() {
-        checkSpecifiedProperty("requestedTime");
-        return requestedTime;
+    public LocalDateTime getRequestedAt() {
+        checkSpecifiedProperty("requestedAt");
+        return requestedAt;
     }
 
-    public void setRequestedTime(Long value) {
-        registerModifiedProperty("requestedTime");
-        this.requestedTime = value;
+    public void setRequestedAt(LocalDateTime value) {
+        registerModifiedProperty("requestedAt");
+        this.requestedAt = value;
     }
 
     public String getSearchLogId() {
