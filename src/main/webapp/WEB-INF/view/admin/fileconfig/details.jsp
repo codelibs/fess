@@ -160,6 +160,11 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+									<button type="submit" class="btn btn-success" name="createnewjob"
+										value="createnewjob">
+										<i class="fa fa-plus-circle"></i>
+										<la:message key="labels.file_crawling_button_create_job" />
+									</button>
 								</div>
 								<!-- /.box-footer -->
 							</div>

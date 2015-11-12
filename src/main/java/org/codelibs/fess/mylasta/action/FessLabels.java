@@ -1010,6 +1010,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Edit */
     public static final String LABELS_file_crawling_button_edit = "{labels.file_crawling_button_edit}";
 
+    /** The key of the message: Create new job */
+    public static final String LABELS_file_crawling_button_create_job = "{labels.file_crawling_button_create_job}";
+
     /** The key of the message: Create New */
     public static final String LABELS_file_crawling_link_create_new = "{labels.file_crawling_link_create_new}";
 
@@ -1040,6 +1043,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_file_crawling_link_next_page = "{labels.file_crawling_link_next_page}";
 
+    /** The key of the message: File Crawler - {0} */
+    public static final String LABELS_file_crawling_job_title = "{labels.file_crawling_job_title}";
+
     /** The key of the message: Web Crawling */
     public static final String LABELS_web_crawling_configuration = "{labels.web_crawling_configuration}";
 
@@ -1069,6 +1075,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Confirm */
     public static final String LABELS_web_crawling_button_confirm = "{labels.web_crawling_button_confirm}";
+
+    /** The key of the message: Create new job */
+    public static final String LABELS_web_crawling_button_create_job = "{labels.web_crawling_button_create_job}";
 
     /** The key of the message: Confirm Web Crawling Configuration */
     public static final String LABELS_web_crawling_title_confirm = "{labels.web_crawling_title_confirm}";
@@ -1111,6 +1120,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Next */
     public static final String LABELS_web_crawling_link_next_page = "{labels.web_crawling_link_next_page}";
+
+    /** The key of the message: Web Crawler - {0} */
+    public static final String LABELS_web_crawling_job_title = "{labels.web_crawling_job_title}";
 
     /** The key of the message: General Configuration */
     public static final String LABELS_crawler_configuration = "{labels.crawler_configuration}";
@@ -2210,6 +2222,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Edit */
     public static final String LABELS_data_crawling_button_edit = "{labels.data_crawling_button_edit}";
 
+    /** The key of the message: Create new job */
+    public static final String LABELS_data_crawling_button_create_job = "{labels.data_crawling_button_create_job}";
+
     /** The key of the message: Create New */
     public static final String LABELS_data_crawling_link_create_new = "{labels.data_crawling_link_create_new}";
 
@@ -2239,6 +2254,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Next */
     public static final String LABELS_data_crawling_link_next_page = "{labels.data_crawling_link_next_page}";
+
+    /** The key of the message: Data Crawler - {0} */
+    public static final String LABELS_data_crawling_job_title = "{labels.data_crawling_job_title}";
 
     /** The key of the message: Configuration Wizard */
     public static final String LABELS_wizard_title_configuration = "{labels.wizard_title_configuration}";
@@ -2895,6 +2913,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Next */
     public static final String LABELS_scheduledjob_link_next_page = "{labels.scheduledjob_link_next_page}";
+
+    /** The key of the message: return container.getComponent("crawlJob").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); */
+    public static final String LABELS_scheduledjob_script_template = "{labels.scheduledjob_script_template}";
 
     /** The key of the message: Back */
     public static final String LABELS_joblog_button_back = "{labels.joblog_button_back}";
