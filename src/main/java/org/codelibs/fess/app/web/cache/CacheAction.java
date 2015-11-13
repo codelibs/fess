@@ -54,7 +54,7 @@ public class CacheAction extends FessSearchAction {
             doc = fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryRequestBuilder -> {
                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                 queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                queryRequestBuilder.addFields(queryHelper.getCacheResponseFields());
                 return true;
             }).get();
         } catch (final Exception e) {

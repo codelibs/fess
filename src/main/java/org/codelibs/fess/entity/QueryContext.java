@@ -39,23 +39,24 @@ public class QueryContext {
 
     private final String queryString;
 
-    private final Set<String> highlightedQuerySet = new HashSet<>();
+    private Set<String> highlightedQuerySet = null;
 
     private Map<String, List<String>> fieldLogMap = null;
 
     @SuppressWarnings("unchecked")
-    public QueryContext(final String queryString, final boolean fieldLogEnable) {
+    public QueryContext(final String queryString, final boolean isQuery) {
         this.queryString = queryString;
-        LaRequestUtil.getOptionalRequest().ifPresent(request -> {
-            request.setAttribute(Constants.HIGHLIGHT_QUERIES, highlightedQuerySet);
-            if (fieldLogEnable) {
+        if (isQuery) {
+            LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+                highlightedQuerySet = new HashSet<>();
+                request.setAttribute(Constants.HIGHLIGHT_QUERIES, highlightedQuerySet);
                 fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
                 if (fieldLogMap == null) {
                     fieldLogMap = new HashMap<>();
                     request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
                 }
-            }
-        });
+            });
+        }
     }
 
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {
@@ -107,7 +108,9 @@ public class QueryContext {
     }
 
     public void addHighlightedQuery(String text) {
-        highlightedQuerySet.add(text);
+        if (highlightedQuerySet != null) {
+            highlightedQuerySet.add(text);
+        }
     }
 
     public String getQueryString() {

@@ -35,8 +35,8 @@
 						<div class="description">${doc.contentDescription}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.sitePath)}</cite>
-							<c:if test="${doc.hasCache_s_s=='true'}">
-								<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightQueries}" class="cache"><la:message
+							<c:if test="${doc.has_cache=='true'}">
+								<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightParams}" class="cache"><la:message
 										key="labels.search_result_cache" /></la:link>
 							</c:if>
 						</div>

@@ -398,15 +398,15 @@ public class ViewHelper implements Serializable {
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
-        String url = DocumentUtil.getValue(doc, "urlLink", String.class);
+        String url = DocumentUtil.getValue(doc, "url", String.class);
         if (url == null) {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
         String createdStr;
-        final Long created = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCreated(), Long.class);
+        final Date created = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCreated(), Date.class);
         if (created != null) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            createdStr = sdf.format(new Date(created.longValue()));
+            createdStr = sdf.format(created);
         } else {
             createdStr = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
@@ -415,7 +415,7 @@ public class ViewHelper implements Serializable {
 
         doc.put("queries", queries);
 
-        String cache = (String) doc.get(fessConfig.getIndexFieldCache());
+        String cache = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCache(), String.class);
         if (cache != null) {
             cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
