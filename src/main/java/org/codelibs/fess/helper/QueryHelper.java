@@ -212,7 +212,8 @@ public class QueryHelper implements Serializable {
             q = query;
         }
 
-        final QueryContext queryContext = buildBaseQuery(q, context);
+        final QueryContext queryContext = new QueryContext(q, true);
+        buildBaseQuery(queryContext, context);
 
         if (keyMatchHelper != null) {
             final List<String> docIdQueryList = keyMatchHelper.getDocIdQueryList();
@@ -245,11 +246,10 @@ public class QueryHelper implements Serializable {
         return queryContext;
     }
 
-    public QueryContext buildBaseQuery(final String queryString, final Consumer<QueryContext> context) {
+    public void buildBaseQuery(final QueryContext queryContext, final Consumer<QueryContext> context) {
         final QueryParser queryParser = getQueryParser();
         try {
-            final QueryContext queryContext = new QueryContext(queryString);
-            final Query query = queryParser.parse(queryString);
+            final Query query = queryParser.parse(queryContext.getQueryString());
             final QueryBuilder queryBuilder = convertQuery(queryContext, query);
             if (queryBuilder != null) {
                 queryContext.setQueryBuilder(queryBuilder);
@@ -257,10 +257,9 @@ public class QueryHelper implements Serializable {
                 queryContext.setQueryBuilder(QueryBuilders.matchAllQuery());
             }
             context.accept(queryContext);
-            return queryContext;
         } catch (final ParseException e) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(ActionMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid query: " + queryString);
+                    "Invalid query: " + queryContext.getQueryString());
         }
     }
 

@@ -855,21 +855,18 @@ public class FessEsClient implements Client {
                 });
                 StreamUtil.of(facetInfo.query).forEach(
                         fq -> {
-                            final QueryContext facetContext = queryHelper.buildBaseQuery(fq, c -> {});
-                            if (facetContext != null) {
-                                final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
-                                final FilterAggregationBuilder filterBuilder =
-                                        AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
-                                                facetContext.getQueryBuilder());
-                                // TODO order
-                                if (facetInfo.limit != null) {
-                                    // TODO
-                                    //    filterBuilder.size(Integer.parseInt(facetInfo .limit));
-                                }
-                                searchRequestBuilder.addAggregation(filterBuilder);
-                            } else {
-                                throw new FessSearchQueryException("Invalid facet query: " + fq);
+                            final QueryContext facetContext = new QueryContext(fq, false);
+                            queryHelper.buildBaseQuery(facetContext, c -> {});
+                            final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
+                            final FilterAggregationBuilder filterBuilder =
+                                    AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
+                                            facetContext.getQueryBuilder());
+                            // TODO order
+                            if (facetInfo.limit != null) {
+                                // TODO
+                                //    filterBuilder.size(Integer.parseInt(facetInfo .limit));
                             }
+                            searchRequestBuilder.addAggregation(filterBuilder);
                         });
             }
 

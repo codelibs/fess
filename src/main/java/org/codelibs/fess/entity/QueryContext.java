@@ -41,20 +41,20 @@ public class QueryContext {
 
     private final Set<String> highlightedQuerySet = new HashSet<>();
 
-    private Map<String, List<String>> fieldLogMap;
+    private Map<String, List<String>> fieldLogMap = null;
 
-    public QueryContext(final String queryString) {
+    @SuppressWarnings("unchecked")
+    public QueryContext(final String queryString, final boolean fieldLogEnable) {
         this.queryString = queryString;
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             request.setAttribute(Constants.HIGHLIGHT_QUERIES, highlightedQuerySet);
-            @SuppressWarnings("unchecked")
-            final Map<String, List<String>> existFieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
-            if (existFieldLogMap != null) {
-                fieldLogMap = existFieldLogMap;
-            } else {
-                fieldLogMap = new HashMap<>();
+            if (fieldLogEnable) {
+                fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
+                if (fieldLogMap == null) {
+                    fieldLogMap = new HashMap<>();
+                    request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
+                }
             }
-            request.setAttribute(Constants.FIELD_LOGS, fieldLogMap);
         });
     }
 
@@ -94,6 +94,10 @@ public class QueryContext {
     }
 
     public void addFieldLog(String field, String text) {
+        if (fieldLogMap == null) {
+            return;
+        }
+
         List<String> list = fieldLogMap.get(field);
         if (list == null) {
             list = new ArrayList<>();
