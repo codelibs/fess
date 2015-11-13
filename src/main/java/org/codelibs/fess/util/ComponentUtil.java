@@ -27,7 +27,6 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -47,6 +46,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
@@ -115,8 +115,6 @@ public final class ComponentUtil {
     private static final String KEY_MATCH_HELPER = "keyMatchHelper";
 
     private static final String INDEXING_HELPER = "indexingHelper";
-
-    private static final String FIELD_HELPER = "fieldHelper";
 
     private static final String ELASTICSEARCH_CLIENT = FESS_ES_CLIENT;
 
@@ -235,10 +233,6 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(INDEXING_HELPER);
     }
 
-    public static FieldHelper getFieldHelper() {
-        return SingletonLaContainer.getComponent(FIELD_HELPER);
-    }
-
     public static UserInfoHelper getUserInfoHelper() {
         return SingletonLaContainer.getComponent(USER_INFO_HELPER);
     }
@@ -261,6 +255,10 @@ public final class ComponentUtil {
 
     public static FessEsClient getFessEsClient() {
         return SingletonLaContainer.getComponent(FESS_ES_CLIENT);
+    }
+
+    public static FessConfig getFessConfig() {
+        return SingletonLaContainer.getComponent(FessConfig.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

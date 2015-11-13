@@ -28,9 +28,9 @@ import javax.servlet.http.HttpSession;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -119,11 +119,11 @@ public class CookieUserInfoHelperImpl implements UserInfoHelper {
     public void storeQueryId(final String queryId, final List<Map<String, Object>> documentItems) {
         final HttpSession session = LaRequestUtil.getRequest().getSession(false);
         if (session != null) {
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentItems) {
-                final Object docId = map.get(fieldHelper.docIdField);
+                final Object docId = map.get(fessConfig.getIndexFieldDocId());
                 if (docId != null && docId.toString().length() > 0) {
                     docIdList.add(docId.toString());
                 }

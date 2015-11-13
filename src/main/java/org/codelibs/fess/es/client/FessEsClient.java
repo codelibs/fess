@@ -50,9 +50,9 @@ import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.indexer.FessSearchQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
@@ -563,11 +563,11 @@ public class FessEsClient implements Client {
                 type,
                 condition,
                 (response, hit) -> {
-                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = hit.getSource();
                     if (source != null) {
                         Map<String, Object> docMap = new HashMap<>(source);
-                        docMap.put(fieldHelper.idField, hit.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     final Map<String, SearchHitField> fields = hit.getFields();
@@ -575,7 +575,7 @@ public class FessEsClient implements Client {
                         Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-                        docMap.put(fieldHelper.idField, hit.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     return null;
@@ -603,11 +603,11 @@ public class FessEsClient implements Client {
                 id,
                 condition,
                 (response, result) -> {
-                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = response.getSource();
                     if (source != null) {
                         Map<String, Object> docMap = new HashMap<>(source);
-                        docMap.put(fieldHelper.idField, response.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), response.getId());
                         return docMap;
                     }
                     final Map<String, GetField> fields = response.getFields();
@@ -615,7 +615,7 @@ public class FessEsClient implements Client {
                         Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-                        docMap.put(fieldHelper.idField, response.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), response.getId());
                         return docMap;
                     }
                     return null;
@@ -639,11 +639,11 @@ public class FessEsClient implements Client {
                 type,
                 condition,
                 (response, hit) -> {
-                    FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = hit.getSource();
                     if (source != null) {
                         Map<String, Object> docMap = new HashMap<>(source);
-                        docMap.put(fieldHelper.idField, hit.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     final Map<String, SearchHitField> fields = hit.getFields();
@@ -651,7 +651,7 @@ public class FessEsClient implements Client {
                         Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-                        docMap.put(fieldHelper.idField, hit.getId());
+                        docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     return null;
@@ -741,10 +741,10 @@ public class FessEsClient implements Client {
     }
 
     public void addAll(final String index, final String type, final List<Map<String, Object>> docList) {
-        FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
-            Object id = doc.remove(fieldHelper.idField);
+            Object id = doc.remove(fessConfig.getIndexFieldId());
             bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(doc));
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet();
@@ -877,9 +877,9 @@ public class FessEsClient implements Client {
     }
 
     public boolean store(final String index, final String type, final Object obj) {
-        FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, Object> source = BeanUtil.copyBeanToNewMap(obj);
-        final String id = (String) source.remove(fieldHelper.idField);
+        final String id = (String) source.remove(fessConfig.getIndexFieldId());
         final Long version = (Long) source.remove("version");
         IndexResponse response;
         try {

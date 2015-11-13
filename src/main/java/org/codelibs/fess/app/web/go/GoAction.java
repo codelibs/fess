@@ -68,10 +68,10 @@ public class GoAction extends FessSearchAction {
 
         Map<String, Object> doc = null;
         try {
-            doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
-                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, form.docId);
+            doc = fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryRequestBuilder -> {
+                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                 queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(fieldHelper.urlField);
+                queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl());
                 return true;
             }).get();
         } catch (final Exception e) {
@@ -82,7 +82,7 @@ public class GoAction extends FessSearchAction {
                 messages.addErrorsDocidNotFound(GLOBAL, form.docId);
             }, () -> asHtml(path_ErrorJsp));
         }
-        final String url = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+        final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (url == null) {
             throwValidationError(messages -> {
                 messages.addErrorsDocumentNotFound(GLOBAL, form.docId);

@@ -57,6 +57,7 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.UserAgentHelper.UserAgentType;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
@@ -146,12 +147,12 @@ public class ViewHelper implements Serializable {
 
     public String getContentTitle(final Map<String, Object> document) {
         final int size = titleLength;
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String title;
-        if (StringUtil.isNotBlank(getString(document, fieldHelper.titleField))) {
-            title = getString(document, fieldHelper.titleField);
+        if (StringUtil.isNotBlank(getString(document, fessConfig.getIndexFieldTitle()))) {
+            title = getString(document, fessConfig.getIndexFieldTitle());
         } else {
-            title = getString(document, fieldHelper.urlField);
+            title = getString(document, fessConfig.getIndexFieldUrl());
         }
         return StringUtils.abbreviate(title, size);
     }
@@ -159,6 +160,7 @@ public class ViewHelper implements Serializable {
     public String getContentDescription(final Map<String, Object> document) {
         final Set<String> queries = new HashSet<>();
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
+            @SuppressWarnings("unchecked")
             Set<String> set = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
             if (set != null) {
                 queries.addAll(set);
@@ -303,8 +305,8 @@ public class ViewHelper implements Serializable {
 
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
         if (Constants.TRUE.equals(crawlerProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-            final String mimetype = getString(document, fieldHelper.mimetypeField);
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final String mimetype = getString(document, fessConfig.getIndexFieldMimetype());
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
                     return appendPDFSearchWord(url);
@@ -318,6 +320,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendPDFSearchWord(final String url) {
+        @SuppressWarnings("unchecked")
         final Set<String> queries = (Set<String>) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
@@ -387,7 +390,7 @@ public class ViewHelper implements Serializable {
     }
 
     public String createCacheContent(final Map<String, Object> doc, final String[] queries) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getViewTemplatePath().toFile());
         final Handlebars handlebars = new Handlebars(loader);
 
@@ -400,7 +403,7 @@ public class ViewHelper implements Serializable {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
         String createdStr;
-        final Long created = DocumentUtil.getValue(doc, fieldHelper.createdField, Long.class);
+        final Long created = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCreated(), Long.class);
         if (created != null) {
             final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             createdStr = sdf.format(new Date(created.longValue()));
@@ -412,7 +415,7 @@ public class ViewHelper implements Serializable {
 
         doc.put("queries", queries);
 
-        String cache = (String) doc.get(fieldHelper.cacheField);
+        String cache = (String) doc.get(fessConfig.getIndexFieldCache());
         if (cache != null) {
             cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
@@ -421,7 +424,7 @@ public class ViewHelper implements Serializable {
                 doc.put("hlCache", cache);
             }
         } else {
-            doc.put(fieldHelper.cacheField, StringUtil.EMPTY);
+            doc.put(fessConfig.getIndexFieldCache(), StringUtil.EMPTY);
             doc.put("hlCache", StringUtil.EMPTY);
         }
 
@@ -479,9 +482,9 @@ public class ViewHelper implements Serializable {
         if (logger.isDebugEnabled()) {
             logger.debug("writing the content of: " + doc);
         }
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final Object configIdObj = doc.get(fieldHelper.configIdField);
+        final Object configIdObj = doc.get(fessConfig.getIndexFieldConfigId());
         if (configIdObj == null) {
             throw new FessSystemException("configId is null.");
         }
@@ -507,7 +510,7 @@ public class ViewHelper implements Serializable {
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configIdObj);
         }
-        final String url = (String) doc.get(fieldHelper.urlField);
+        final String url = (String) doc.get(fessConfig.getIndexFieldUrl());
         final CrawlerClientFactory crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
         config.initializeClientFactory(crawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);

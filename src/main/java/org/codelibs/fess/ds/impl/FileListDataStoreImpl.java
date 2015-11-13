@@ -41,8 +41,8 @@ import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
@@ -159,15 +159,15 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         protected boolean addDocument(final Map<String, Object> dataMap) {
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             synchronized (indexUpdateCallback) {
                 // required check
-                if (!dataMap.containsKey(fieldHelper.urlField) || dataMap.get(fieldHelper.urlField) == null) {
+                if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
                     logger.warn("Could not add a doc. Invalid data: " + dataMap);
                     return false;
                 }
 
-                final String url = dataMap.get(fieldHelper.urlField).toString();
+                final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
                 try {
                     final CrawlerClient client = crawlerClientFactory.getClient(url);
                     if (client == null) {
@@ -227,10 +227,10 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 logger.debug("Deleting " + dataMap);
             }
 
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
             // required check
-            if (!dataMap.containsKey(fieldHelper.urlField) || dataMap.get(fieldHelper.urlField) == null) {
+            if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
                 logger.warn("Could not delete a doc. Invalid data: " + dataMap);
                 return false;
             }

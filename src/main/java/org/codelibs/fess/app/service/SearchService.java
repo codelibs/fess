@@ -42,11 +42,11 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.es.log.exentity.SearchLog;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.fess.util.QueryUtil;
@@ -80,7 +80,7 @@ public class SearchService {
     protected SystemHelper systemHelper;
 
     @Resource
-    protected FieldHelper fieldHelper;
+    protected FessConfig fessConfig;
 
     @Resource
     protected QueryHelper queryHelper;
@@ -123,7 +123,7 @@ public class SearchService {
             queryBuf.append(" sort:").append(params.getSort());
         }
         if (params.getLanguages() != null) {
-            appendQueries(queryBuf, fieldHelper.langField, params.getLanguages());
+            appendQueries(queryBuf, fessConfig.getIndexFieldLang(), params.getLanguages());
         }
 
         final String query = queryBuf.toString().trim();
@@ -132,8 +132,8 @@ public class SearchService {
         final int pageSize = params.getPageSize();
         final List<Map<String, Object>> documentItems =
                 fessEsClient.search(
-                        fieldHelper.docIndex,
-                        fieldHelper.docType,
+                        fessConfig.getIndexDocumentIndex(),
+                        fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
                                     .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
@@ -327,16 +327,16 @@ public class SearchService {
     }
 
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields) {
-        return fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, builder -> {
-            builder.setQuery(QueryBuilders.termQuery(fieldHelper.docIdField, docId));
+        return fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
+            builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
             builder.addFields(fields);
             return true;
         });
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields) {
-        return fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, builder -> {
-            builder.setQuery(QueryBuilders.termsQuery(fieldHelper.docIdField, docIds));
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
+            builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
             builder.setSize(queryHelper.getMaxPageSize());
             builder.addFields(fields);
             return true;
@@ -344,12 +344,13 @@ public class SearchService {
     }
 
     public boolean update(final String id, final String field, final Object value) {
-        return fessEsClient.update(fieldHelper.docIndex, fieldHelper.docType, id, field, value);
+        return fessEsClient.update(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id, field, value);
     }
 
     public boolean update(final String id, Consumer<UpdateRequestBuilder> builderLambda) {
         try {
-            UpdateRequestBuilder builder = fessEsClient.prepareUpdate(fieldHelper.docIndex, fieldHelper.docType, id);
+            UpdateRequestBuilder builder =
+                    fessEsClient.prepareUpdate(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
             UpdateResponse response = builder.execute().actionGet();
             return response.isCreated();

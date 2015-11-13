@@ -16,7 +16,9 @@
 package org.codelibs.fess.helper;
 
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class QueryHelperTest extends UnitFessTestCase {
 
@@ -26,8 +28,8 @@ public class QueryHelperTest extends UnitFessTestCase {
     public void setUp() throws Exception {
         super.setUp();
         queryHelper = new QueryHelper();
-        FieldHelper fieldHelper = new FieldHelper();
-        registerMockInstance(fieldHelper);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        registerMockInstance(fessConfig);
         registerMockInstance(new SystemHelper());
         inject(queryHelper);
         queryHelper.init();

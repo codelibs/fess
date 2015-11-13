@@ -33,7 +33,7 @@ import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.helper.FieldHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -109,10 +109,10 @@ public class ScreenShotManager {
     }
 
     public void generate(final Map<String, Object> docMap) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         for (final ScreenShotGenerator generator : generatorList) {
             if (generator.isTarget(docMap)) {
-                final String url = DocumentUtil.getValue(docMap, fieldHelper.urlField, String.class);
+                final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
                 final String path = getImageFilename(docMap);
                 if (!screenShotTaskQueue.offer(new ScreenShotTask(url, new File(baseDir, path), generator))) {
                     logger.warn("Failed to offer a screenshot task: " + url + " -> " + path);
@@ -124,8 +124,8 @@ public class ScreenShotManager {
 
     protected String getImageFilename(final Map<String, Object> docMap) {
         final StringBuilder buf = new StringBuilder(50);
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final String docid = DocumentUtil.getValue(docMap, fieldHelper.docIdField, String.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String docid = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldDocId(), String.class);
         for (int i = 0; i < docid.length(); i++) {
             if (i > 0 && i % splitSize == 0) {
                 buf.append('/');
@@ -137,10 +137,10 @@ public class ScreenShotManager {
     }
 
     public void storeRequest(final String queryId, final List<Map<String, Object>> documentItems) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Map<String, String> dataMap = new HashMap<String, String>(documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {
-            final String docid = (String) docMap.get(fieldHelper.docIdField);
+            final String docid = (String) docMap.get(fessConfig.getIndexFieldDocId());
             final String screenShotPath = getImageFilename(docMap);
             if (StringUtil.isNotBlank(docid) && StringUtil.isNotBlank(screenShotPath)) {
                 dataMap.put(docid, screenShotPath);

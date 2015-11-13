@@ -64,13 +64,15 @@ public class ScreenshotAction extends FessSearchAction {
         OutputStream out = null;
         BufferedInputStream in = null;
         try {
-            final Map<String, Object> doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
-                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, form.docId);
-                queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(queryHelper.getResponseFields());
-                return true;
-            }).get();
-            final String url = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+            final Map<String, Object> doc =
+                    fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                            queryRequestBuilder -> {
+                                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
+                                queryRequestBuilder.setQuery(termQuery);
+                                queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                                return true;
+                            }).get();
+            final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
             if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
                 // 404
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);

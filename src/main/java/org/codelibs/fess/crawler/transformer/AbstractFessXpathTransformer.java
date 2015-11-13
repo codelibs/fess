@@ -23,7 +23,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
-import org.codelibs.fess.helper.FieldHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,8 +117,8 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
     }
 
     protected void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        if (fieldHelper.urlField.equals(key)) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.getIndexFieldUrl().equals(key)) {
             dataMap.put(key, value);
         } else if (dataMap.containsKey(key)) {
             if (appendResultData) {

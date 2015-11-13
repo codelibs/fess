@@ -40,11 +40,11 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -79,9 +79,6 @@ public class IndexUpdater extends Thread {
 
     @Resource
     protected SystemHelper systemHelper;
-
-    @Resource
-    protected FieldHelper fieldHelper;
 
     @Resource
     protected IndexingHelper indexingHelper;
@@ -405,24 +402,27 @@ public class IndexUpdater extends Thread {
             addBoostValue(map, documentBoost);
         }
 
-        if (!map.containsKey(fieldHelper.docIdField)) {
-            map.put(fieldHelper.docIdField, systemHelper.generateDocId(map));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
+            map.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(map));
         }
     }
 
     protected void addBoostValue(final Map<String, Object> map, final float documentBoost) {
-        map.put(fieldHelper.boostField, documentBoost);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        map.put(fessConfig.getIndexFieldBoost(), documentBoost);
         if (logger.isDebugEnabled()) {
             logger.debug("Set a document boost (" + documentBoost + ").");
         }
     }
 
     protected void addClickCountField(final Map<String, Object> doc) {
-        final String url = (String) doc.get(fieldHelper.urlField);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String url = (String) doc.get(fessConfig.getIndexFieldUrl());
         if (StringUtil.isNotBlank(url)) {
             final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
             final int count = searchLogHelper.getClickCount(url);
-            doc.put(fieldHelper.clickCountField, count);
+            doc.put(fessConfig.getIndexFieldClickCount(), count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Click Count: " + count + ", url: " + url);
             }
@@ -430,11 +430,12 @@ public class IndexUpdater extends Thread {
     }
 
     protected void addFavoriteCountField(final Map<String, Object> map) {
-        final String url = (String) map.get(fieldHelper.urlField);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String url = (String) map.get(fessConfig.getIndexFieldUrl());
         if (StringUtil.isNotBlank(url)) {
             final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
             final long count = searchLogHelper.getFavoriteCount(url);
-            map.put(fieldHelper.favoriteCountField, count);
+            map.put(fessConfig.getIndexFieldFavoriteCount(), count);
             if (logger.isDebugEnabled()) {
                 logger.debug("Favorite Count: " + count + ", url: " + url);
             }

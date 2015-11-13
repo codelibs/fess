@@ -51,8 +51,8 @@ public class CacheAction extends FessSearchAction {
 
         Map<String, Object> doc = null;
         try {
-            doc = fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, queryRequestBuilder -> {
-                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fieldHelper.docIdField, form.docId);
+            doc = fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryRequestBuilder -> {
+                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                 queryRequestBuilder.setQuery(termQuery);
                 queryRequestBuilder.addFields(queryHelper.getResponseFields());
                 return true;
@@ -73,8 +73,8 @@ public class CacheAction extends FessSearchAction {
             }, () -> asHtml(path_ErrorJsp));
         }
 
-        return asStream(DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class)).contentType("text/html; charset=UTF-8").data(
-                content.getBytes(Constants.CHARSET_UTF_8));
+        return asStream(DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class)).contentType("text/html; charset=UTF-8")
+                .data(content.getBytes(Constants.CHARSET_UTF_8));
     }
 
 }

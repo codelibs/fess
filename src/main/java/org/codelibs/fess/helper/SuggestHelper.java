@@ -34,6 +34,7 @@ import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.SuggestBadWord;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -41,6 +42,7 @@ import org.codelibs.fess.suggest.index.contents.document.DocumentReader;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
@@ -57,9 +59,6 @@ public class SuggestHelper {
 
     @Resource
     protected FessEsClient fessEsClient;
-
-    @Resource
-    protected FieldHelper fieldHelper;
 
     public String[] contentFieldNames = { "_default" };
 
@@ -78,8 +77,9 @@ public class SuggestHelper {
     @PostConstruct
     public void init() {
         final Thread th = new Thread(() -> {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-            suggester = Suggester.builder().build(fessEsClient, fieldHelper.docIndex);
+            suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentIndex());
             suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
             for (final String field : contentsIndex) {
                 suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
@@ -136,7 +136,10 @@ public class SuggestHelper {
             }
         }
 
-        DocumentReader reader = new ESSourceReader(fessEsClient, suggester.settings(), fieldHelper.docIndex, fieldHelper.docType);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        DocumentReader reader =
+                new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentIndex(),
+                        fessConfig.getIndexDocumentType());
 
         suggester.indexer().indexFromDocument(reader, 2, 100).done(response -> {
             suggester.refresh();

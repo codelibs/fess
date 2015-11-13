@@ -38,9 +38,9 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,9 +59,9 @@ public class FessCrawlerThread extends CrawlerThread {
             log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
             final long startTime = System.currentTimeMillis();
 
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
             final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
@@ -72,7 +72,7 @@ public class FessCrawlerThread extends CrawlerThread {
             try {
                 final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(crawlerContext.getSessionId());
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
-                dataMap.put(fieldHelper.urlField, url);
+                dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<String>();
                 for (final String roleType : crawlingConfig.getRoleTypeValues()) {
                     roleTypeList.add(roleType);
@@ -95,28 +95,32 @@ public class FessCrawlerThread extends CrawlerThread {
                         }
                     }
                 }
-                dataMap.put(fieldHelper.roleField, roleTypeList);
+                dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
                 final String id = crawlingSessionHelper.generateId(dataMap);
 
                 final Map<String, Object> document =
-                        indexingHelper.getDocument(fessEsClient, id, new String[] { fieldHelper.idField, fieldHelper.lastModifiedField,
-                                fieldHelper.anchorField, fieldHelper.segmentField, fieldHelper.expiresField, fieldHelper.clickCountField,
-                                fieldHelper.favoriteCountField });
+                        indexingHelper.getDocument(
+                                fessEsClient,
+                                id,
+                                new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldLastModified(),
+                                        fessConfig.getIndexFieldAnchor(), fessConfig.getIndexFieldSegment(),
+                                        fessConfig.getIndexFieldExpires(), fessConfig.getIndexFieldClickCount(),
+                                        fessConfig.getIndexFieldFavoriteCount() });
                 if (document == null) {
                     storeChildUrlsToQueue(urlQueue, getChildUrlSet(fessEsClient, id));
                     return true;
                 }
 
-                final Date expires = (Date) document.get(fieldHelper.expiresField);
+                final Date expires = (Date) document.get(fessConfig.getIndexFieldExpires());
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
-                    final Object idValue = document.get(fieldHelper.idField);
+                    final Object idValue = document.get(fessConfig.getIndexFieldId());
                     if (idValue != null) {
                         indexingHelper.deleteDocument(fessEsClient, idValue.toString());
                     }
                     return true;
                 }
 
-                final Date lastModified = (Date) document.get(fieldHelper.lastModifiedField);
+                final Date lastModified = (Date) document.get(fessConfig.getIndexFieldLastModified());
                 if (lastModified == null) {
                     return true;
                 }
@@ -131,7 +135,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
                 if (httpStatusCode == 404) {
-                    storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fieldHelper.anchorField)));
+                    storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     indexingHelper.deleteDocument(fessEsClient, id);
                     return false;
                 } else if (responseData.getLastModified() == null) {
@@ -146,7 +150,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     responseData.setHttpStatusCode(org.codelibs.fess.crawler.Constants.NOT_MODIFIED_STATUS);
                     processResponse(urlQueue, responseData);
 
-                    storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fieldHelper.anchorField)));
+                    storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
 
                     return false;
                 }
@@ -192,10 +196,10 @@ public class FessCrawlerThread extends CrawlerThread {
     }
 
     protected Set<RequestData> getChildUrlSet(final FessEsClient fessEsClient, final String id) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final List<Map<String, Object>> docList =
-                indexingHelper.getChildDocumentList(fessEsClient, id, new String[] { fieldHelper.urlField });
+                indexingHelper.getChildDocumentList(fessEsClient, id, new String[] { fessConfig.getIndexFieldUrl() });
         if (docList.isEmpty()) {
             return null;
         }
@@ -204,7 +208,7 @@ public class FessCrawlerThread extends CrawlerThread {
         }
         final Set<RequestData> urlSet = new HashSet<>(docList.size());
         for (final Map<String, Object> doc : docList) {
-            final Object obj = doc.get(fieldHelper.urlField);
+            final Object obj = doc.get(fessConfig.getIndexFieldUrl());
             if (obj != null) {
                 urlSet.add(RequestDataBuilder.newRequestData().get().url(obj.toString()).build());
             }

@@ -30,6 +30,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingSession;
 import org.codelibs.fess.es.config.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -52,7 +53,7 @@ public class CrawlingSessionHelper implements Serializable {
 
     protected Long documentExpires;
 
-    private final int maxSessionIdsInList = 100;
+    public int maxSessionIdsInList;
 
     protected CrawlingSessionService getCrawlingSessionService() {
         return SingletonLaContainer.getComponent(CrawlingSessionService.class);
@@ -142,30 +143,32 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public String generateId(final Map<String, Object> dataMap) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final String url = (String) dataMap.get(fieldHelper.urlField);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String url = (String) dataMap.get(fessConfig.getIndexFieldUrl());
         @SuppressWarnings("unchecked")
-        final List<String> roleTypeList = (List<String>) dataMap.get(fieldHelper.roleField);
+        final List<String> roleTypeList = (List<String>) dataMap.get(fessConfig.getIndexFieldRole());
         return generateId(url, roleTypeList);
     }
 
     public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        return fessEsClient.search(fieldHelper.docIndex, fieldHelper.docType,
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessEsClient.search(
+                fessConfig.getIndexDocumentIndex(),
+                fessConfig.getIndexDocumentType(),
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
                     final TermsBuilder termsBuilder =
-                            AggregationBuilders.terms(fieldHelper.segmentField).field(fieldHelper.segmentField).size(maxSessionIdsInList)
-                                    .order(Order.term(false));
+                            AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
+                                    .size(maxSessionIdsInList).order(Order.term(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
                     searchResponse.ifPresent(response -> {
-                        final Terms terms = response.getAggregations().get(fieldHelper.segmentField);
+                        final Terms terms = response.getAggregations().get(fessConfig.getIndexFieldSegment());
                         for (final Bucket bucket : terms.getBuckets()) {
                             final Map<String, String> map = new HashMap<String, String>(2);
-                            map.put(fieldHelper.segmentField, bucket.getKey().toString());
+                            map.put(fessConfig.getIndexFieldSegment(), bucket.getKey().toString());
                             map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
                             sessionIdList.add(map);
                         }

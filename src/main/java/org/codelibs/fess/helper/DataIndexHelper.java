@@ -32,6 +32,7 @@ import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -252,12 +253,13 @@ public class DataIndexHelper implements Serializable {
                 logger.warn("Invalid sessionId at " + dataConfig);
                 return;
             }
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.configIdField, dataConfig.getConfigId()))
-                            .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, sessionId));
+                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
+                            .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
-                ComponentUtil.getElasticsearchClient().deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, queryBuilder);
+                ComponentUtil.getElasticsearchClient().deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                        queryBuilder);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataConfig, e);
             }

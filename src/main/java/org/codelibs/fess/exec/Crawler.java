@@ -40,7 +40,6 @@ import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
@@ -321,7 +320,7 @@ public class Crawler implements Serializable {
         final long totalTime = System.currentTimeMillis();
 
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
@@ -379,10 +378,10 @@ public class Crawler implements Serializable {
 
             // clean up
             final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(fieldHelper.expiresField).to(new Date()))
-                            .mustNot(QueryBuilders.termQuery(fieldHelper.segmentField, options.sessionId));
+                    QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to(new Date()))
+                            .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), options.sessionId));
             try {
-                fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, queryBuilder);
+                fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryBuilder);
             } catch (final Exception e) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Could not delete expired sessions: " + queryBuilder.toString(), e);

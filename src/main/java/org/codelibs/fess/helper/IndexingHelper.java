@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -43,8 +44,8 @@ public class IndexingHelper {
         }
         synchronized (fessEsClient) {
             deleteOldDocuments(fessEsClient, docList);
-            final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-            fessEsClient.addAll(fieldHelper.docIndex, fieldHelper.docType, docList);
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            fessEsClient.addAll(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), docList);
         }
         if (logger.isInfoEnabled()) {
             logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
@@ -53,30 +54,32 @@ public class IndexingHelper {
     }
 
     private void deleteOldDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final List<String> docIdList = new ArrayList<>();
         for (final Map<String, Object> inputDoc : docList) {
-            final Object idValue = inputDoc.get(fieldHelper.idField);
+            final Object idValue = inputDoc.get(fessConfig.getIndexFieldId());
             if (idValue == null) {
                 continue;
             }
 
-            final Object configIdValue = inputDoc.get(fieldHelper.configIdField);
+            final Object configIdValue = inputDoc.get(fessConfig.getIndexFieldConfigId());
             if (configIdValue == null) {
                 continue;
             }
 
             final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fieldHelper.urlField, inputDoc.get(fieldHelper.urlField)))
-                            .filter(QueryBuilders.termQuery(fieldHelper.configIdField, configIdValue));
+                    QueryBuilders.boolQuery()
+                            .must(QueryBuilders.termQuery(fessConfig.getIndexFieldUrl(), inputDoc.get(fessConfig.getIndexFieldUrl())))
+                            .filter(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), configIdValue));
 
             final List<Map<String, Object>> docs =
-                    getDocumentListByQuery(fessEsClient, queryBuilder, new String[] { fieldHelper.idField, fieldHelper.docIdField });
+                    getDocumentListByQuery(fessEsClient, queryBuilder,
+                            new String[] { fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId() });
             for (final Map<String, Object> doc : docs) {
-                final Object oldIdValue = doc.get(fieldHelper.idField);
+                final Object oldIdValue = doc.get(fessConfig.getIndexFieldId());
                 if (!idValue.equals(oldIdValue) && oldIdValue != null) {
-                    final Object oldDocIdValue = doc.get(fieldHelper.docIdField);
+                    final Object oldDocIdValue = doc.get(fessConfig.getIndexFieldDocId());
                     if (oldDocIdValue != null) {
                         docIdList.add(oldDocIdValue.toString());
                     }
@@ -87,57 +90,59 @@ public class IndexingHelper {
             }
         }
         if (!docIdList.isEmpty()) {
-            fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType,
-                    QueryBuilders.idsQuery(fieldHelper.docType).ids(docIdList.stream().toArray(n -> new String[n])));
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                    QueryBuilders.idsQuery(fessConfig.getIndexDocumentType()).ids(docIdList.stream().toArray(n -> new String[n])));
 
         }
     }
 
     public void deleteDocument(final FessEsClient fessEsClient, final String id) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        fessEsClient.delete(fieldHelper.docIndex, fieldHelper.docType, id, 0);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessEsClient.delete(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id, 0);
     }
 
     public void deleteDocumentsByDocId(final FessEsClient fessEsClient, final List<String> docIdList) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType,
-                QueryBuilders.idsQuery(fieldHelper.docType).ids(docIdList.stream().toArray(n -> new String[n])));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                QueryBuilders.idsQuery(fessConfig.getIndexDocumentType()).ids(docIdList.stream().toArray(n -> new String[n])));
     }
 
     public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        return fessEsClient.getDocument(fieldHelper.docIndex, fieldHelper.docType, id, requestBuilder -> {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id, requestBuilder -> {
             return true;
         }).orElseGet(() -> null);
     }
 
     public List<Map<String, Object>> getDocumentListByPrefixId(final FessEsClient fessEsClient, final String id, final String[] fields) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final QueryBuilder queryBuilder = QueryBuilders.prefixQuery(fieldHelper.idField, id);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final QueryBuilder queryBuilder = QueryBuilders.prefixQuery(fessConfig.getIndexFieldId(), id);
         return getDocumentListByQuery(fessEsClient, queryBuilder, fields);
     }
 
     public void deleteChildDocument(final FessEsClient fessEsClient, final String id) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, QueryBuilders.termQuery(fieldHelper.parentIdField, id));
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                QueryBuilders.termQuery(fessConfig.getIndexFieldParentId(), id));
     }
 
     public List<Map<String, Object>> getChildDocumentList(final FessEsClient fessEsClient, final String id, final String[] fields) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
-        final QueryBuilder queryBuilder = QueryBuilders.termQuery(fieldHelper.parentIdField, id);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final QueryBuilder queryBuilder = QueryBuilders.termQuery(fessConfig.getIndexFieldParentId(), id);
         return getDocumentListByQuery(fessEsClient, queryBuilder, fields);
     }
 
     protected List<Map<String, Object>> getDocumentListByQuery(final FessEsClient fessEsClient, final QueryBuilder queryBuilder,
             final String[] fields) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final CountResponse countResponse =
-                fessEsClient.prepareCount(fieldHelper.docIndex).setTypes(fieldHelper.docType).setQuery(queryBuilder).execute().actionGet();
+                fessEsClient.prepareCount(fessConfig.getIndexDocumentIndex()).setTypes(fessConfig.getIndexDocumentType())
+                        .setQuery(queryBuilder).execute().actionGet();
         final long numFound = countResponse.getCount();
         // TODO max threshold
 
-        return fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType, requestBuilder -> {
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), requestBuilder -> {
             requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
             if (fields != null) {
                 requestBuilder.addFields(fields);

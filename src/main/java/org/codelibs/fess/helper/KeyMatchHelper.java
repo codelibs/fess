@@ -28,6 +28,7 @@ import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 
@@ -48,7 +49,7 @@ public class KeyMatchHelper {
     }
 
     protected void reload(final long interval) {
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final KeyMatchService keyMatchService = SingletonLaContainer.getComponent(KeyMatchService.class);
         final List<KeyMatch> list = keyMatchService.getAvailableKeyMatchList();
         final Map<String, String[]> keyMatchQueryMap = new HashMap<String, String[]>(list.size());
@@ -56,9 +57,9 @@ public class KeyMatchHelper {
             final List<Map<String, Object>> documentList = getDocumentList(keyMatch);
             final List<String> docIdList = new ArrayList<String>();
             for (final Map<String, Object> map : documentList) {
-                final String docId = (String) map.get(fieldHelper.docIdField);
+                final String docId = (String) map.get(fessConfig.getIndexFieldDocId());
                 if (StringUtil.isNotBlank(docId)) {
-                    docIdList.add(fieldHelper.docIdField + ":" + docId + "^" + keyMatch.getBoost());
+                    docIdList.add(fessConfig.getIndexFieldDocId() + ":" + docId + "^" + keyMatch.getBoost());
                 }
             }
             if (!docIdList.isEmpty()) {
@@ -78,12 +79,12 @@ public class KeyMatchHelper {
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
         final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> documentList =
-                fessEsClient.getDocumentList(fieldHelper.docIndex, fieldHelper.docType,
+                fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
-                                    .query(keyMatch.getQuery()).responseFields(new String[] { fieldHelper.docIdField }).build();
+                                    .query(keyMatch.getQuery()).responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
                         });
         return documentList;
     }

@@ -20,16 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.PostConstruct;
-
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,35 +49,42 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     final List<Map<String, Object>> docList = new ArrayList<>();
 
-    private FieldHelper fieldHelper;
-
-    @PostConstruct
-    public void init() {
-        fieldHelper = ComponentUtil.getFieldHelper();
-    }
-
     /* (non-Javadoc)
      * @see org.codelibs.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
      */
     @Override
     public synchronized boolean store(final Map<String, Object> dataMap) {
         final long startTime = System.currentTimeMillis();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Adding " + dataMap);
         }
 
         //   required check
-        final Object urlObj = dataMap.get(fieldHelper.urlField);
+        final Object urlObj = dataMap.get(fessConfig.getIndexFieldUrl());
         if (urlObj == null) {
             throw new FessSystemException("url is null. dataMap=" + dataMap);
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        dataMap.put(fieldHelper.idField, crawlingSessionHelper.generateId(dataMap));
+        dataMap.put(fessConfig.getIndexFieldId(), crawlingSessionHelper.generateId(dataMap));
 
-        updateDocument(dataMap);
+        final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
+
+        if (clickCountEnabled) {
+            addClickCountField(dataMap, url, fessConfig.getIndexFieldClickCount());
+        }
+
+        if (favoriteCountEnabled) {
+            addFavoriteCountField(dataMap, url, fessConfig.getIndexFieldFavoriteCount());
+        }
+
+        if (!dataMap.containsKey(fessConfig.getIndexFieldDocId())) {
+            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+            dataMap.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(dataMap));
+        }
 
         docList.add(dataMap);
         if (logger.isDebugEnabled()) {
@@ -100,24 +105,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         executeTime += System.currentTimeMillis() - startTime;
         return true;
-    }
-
-    protected void updateDocument(final Map<String, Object> dataMap) {
-        final String url = dataMap.get(fieldHelper.urlField).toString();
-
-        if (clickCountEnabled) {
-            addClickCountField(dataMap, url, fieldHelper.clickCountField);
-        }
-
-        if (favoriteCountEnabled) {
-            addFavoriteCountField(dataMap, url, fieldHelper.favoriteCountField);
-        }
-
-        if (!dataMap.containsKey(fieldHelper.docIdField)) {
-            final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-            dataMap.put(fieldHelper.docIdField, systemHelper.generateDocId(dataMap));
-        }
-
     }
 
     @Override

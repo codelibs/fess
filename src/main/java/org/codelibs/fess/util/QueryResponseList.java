@@ -93,7 +93,6 @@ public class QueryResponseList implements List<Map<String, Object>> {
 
             // build highlighting fields
                 final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                ComponentUtil.getFieldHelper();
                 final String hlPrefix = queryHelper.getHighlightPrefix();
                 for (final SearchHit searchHit : searchHits.getHits()) {
                     final Map<String, Object> docMap = new HashMap<String, Object>();

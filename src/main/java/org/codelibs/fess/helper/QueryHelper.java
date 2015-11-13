@@ -53,6 +53,8 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -103,9 +105,6 @@ public class QueryHelper implements Serializable {
 
     @Resource
     protected SystemHelper systemHelper;
-
-    @Resource
-    protected FieldHelper fieldHelper;
 
     @Resource
     protected KeyMatchHelper keyMatchHelper;
@@ -162,45 +161,54 @@ public class QueryHelper implements Serializable {
 
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (responseFields == null) {
             responseFields =
-                    new String[] { SCORE_FIELD, fieldHelper.idField, fieldHelper.docIdField, fieldHelper.boostField,
-                            fieldHelper.contentLengthField, fieldHelper.hostField, fieldHelper.siteField, fieldHelper.lastModifiedField,
-                            fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.createdField, fieldHelper.titleField,
-                            fieldHelper.digestField, fieldHelper.urlField, fieldHelper.clickCountField, fieldHelper.favoriteCountField,
-                            fieldHelper.configIdField, fieldHelper.langField, fieldHelper.hasCacheField };
+                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(),
+                            fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(),
+                            fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(),
+                            fessConfig.getIndexFieldHasCache() };
         }
         if (cacheResponseFields == null) {
             cacheResponseFields =
-                    new String[] { SCORE_FIELD, fieldHelper.idField, fieldHelper.docIdField, fieldHelper.boostField,
-                            fieldHelper.contentLengthField, fieldHelper.hostField, fieldHelper.siteField, fieldHelper.lastModifiedField,
-                            fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.createdField, fieldHelper.titleField,
-                            fieldHelper.digestField, fieldHelper.urlField, fieldHelper.clickCountField, fieldHelper.favoriteCountField,
-                            fieldHelper.configIdField, fieldHelper.langField, fieldHelper.cacheField };
+                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(),
+                            fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(),
+                            fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(),
+                            fessConfig.getIndexFieldCache() };
         }
         if (responseDocValuesFields == null) {
-            responseDocValuesFields = new String[] { fieldHelper.clickCountField, fieldHelper.favoriteCountField };
+            responseDocValuesFields = new String[] { fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
         }
         if (highlightedFields == null) {
-            highlightedFields = new String[] { fieldHelper.contentField };
+            highlightedFields = new String[] { fessConfig.getIndexFieldContent() };
         }
         if (searchFields == null) {
             searchFields =
-                    new String[] { INURL_FIELD, fieldHelper.urlField, fieldHelper.docIdField, fieldHelper.hostField,
-                            fieldHelper.titleField, fieldHelper.contentField, fieldHelper.contentLengthField,
-                            fieldHelper.lastModifiedField, fieldHelper.mimetypeField, fieldHelper.filetypeField, fieldHelper.labelField,
-                            fieldHelper.segmentField, fieldHelper.clickCountField, fieldHelper.favoriteCountField, fieldHelper.langField };
+                    new String[] { INURL_FIELD, fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldContent(),
+                            fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
+                            fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldLang() };
         }
         if (facetFields == null) {
             facetFields =
-                    new String[] { fieldHelper.urlField, fieldHelper.hostField, fieldHelper.titleField, fieldHelper.contentField,
-                            fieldHelper.contentLengthField, fieldHelper.lastModifiedField, fieldHelper.mimetypeField,
-                            fieldHelper.filetypeField, fieldHelper.labelField, fieldHelper.segmentField };
+                    new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(),
+                            fessConfig.getIndexFieldContent(), fessConfig.getIndexFieldContentLength(),
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
+                            fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment() };
         }
         if (supportedSortFields == null) {
             supportedSortFields =
-                    new String[] { fieldHelper.createdField, fieldHelper.contentLengthField, fieldHelper.lastModifiedField,
-                            fieldHelper.clickCountField, fieldHelper.favoriteCountField };
+                    new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldFavoriteCount() };
         }
     }
 
@@ -230,10 +238,11 @@ public class QueryHelper implements Serializable {
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();
             if (!roleSet.isEmpty()) {
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 queryContext.addQuery(boolQuery -> {
                     BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
                     roleSet.stream().forEach(name -> {
-                        roleQuery.filter(QueryBuilders.termQuery(fieldHelper.roleField, name));
+                        roleQuery.filter(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
                     });
                     boolQuery.filter(roleQuery);
                 });
@@ -447,16 +456,17 @@ public class QueryHelper implements Serializable {
     }
 
     private QueryBuilder buildDefaultQueryBuilder(final Function<String, QueryBuilder> builder) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         // TODO boost
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        final QueryBuilder titleQuery = builder.apply(fieldHelper.titleField);
+        final QueryBuilder titleQuery = builder.apply(fessConfig.getIndexFieldTitle());
         boolQuery.should(titleQuery);
-        final QueryBuilder contentQuery = builder.apply(fieldHelper.contentField);
+        final QueryBuilder contentQuery = builder.apply(fessConfig.getIndexFieldContent());
         boolQuery.should(contentQuery);
         getQueryLanguage().ifPresent(lang -> {
-            final QueryBuilder titleLangQuery = builder.apply(fieldHelper.titleField + "_" + lang);
+            final QueryBuilder titleLangQuery = builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang);
             boolQuery.should(titleLangQuery);
-            final QueryBuilder contentLangQuery = builder.apply(fieldHelper.contentField + "_" + lang);
+            final QueryBuilder contentLangQuery = builder.apply(fessConfig.getIndexFieldContent() + "_" + lang);
             boolQuery.should(contentLangQuery);
         });
         return boolQuery;

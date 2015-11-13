@@ -28,7 +28,6 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -60,9 +59,6 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Resource
     protected FessEsClient fessEsClient;
-
-    @Resource
-    protected FieldHelper fieldHelper;
 
     @Resource
     protected QueryHelper queryHelper;
@@ -196,8 +192,8 @@ public class AdminSearchlistAction extends FessAdminAction {
                     () -> asHtml(path_AdminSearchlist_IndexJsp));
         }
         try {
-            final QueryBuilder query = QueryBuilders.termQuery(fieldHelper.docIdField, docId);
-            fessEsClient.deleteByQuery(fieldHelper.docIndex, fieldHelper.docType, query);
+            final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), query);
             saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),

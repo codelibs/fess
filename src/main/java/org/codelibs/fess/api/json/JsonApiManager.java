@@ -45,13 +45,13 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
@@ -358,8 +358,8 @@ public class JsonApiManager extends BaseApiManager {
             return;
         }
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
@@ -373,8 +373,8 @@ public class JsonApiManager extends BaseApiManager {
                 throw new WebApiException(6, "No searched urls.");
             }
 
-            searchService.getDocumentByDocId(docId, new String[] { fieldHelper.urlField }).ifPresent(doc -> {
-                final String favoriteUrl = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+            searchService.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }).ifPresent(doc -> {
+                final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                 final String userCode = userInfoHelper.getUserCode();
 
                 if (StringUtil.isBlank(userCode)) {
@@ -404,12 +404,12 @@ public class JsonApiManager extends BaseApiManager {
                     throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
                 }
 
-                final String id = DocumentUtil.getValue(doc, fieldHelper.idField, String.class);
+                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                 searchService.update(id, builder -> {
-                    Script script = new Script("ctx._source." + fieldHelper.favoriteCountField + "+=1");
+                    Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
                     builder.setScript(script);
                     Map<String, Object> upsertMap = new HashMap<>();
-                    upsertMap.put(fieldHelper.favoriteCountField, 1);
+                    upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
                     builder.setUpsert(upsertMap);
                     builder.setRefresh(true);
                 });
@@ -442,7 +442,7 @@ public class JsonApiManager extends BaseApiManager {
         }
 
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
         final FavoriteLogService favoriteLogService = ComponentUtil.getComponent(FavoriteLogService.class);
 
@@ -462,11 +462,13 @@ public class JsonApiManager extends BaseApiManager {
 
             final String[] docIds = userInfoHelper.getResultDocIds(queryId);
             final List<Map<String, Object>> docList =
-                    searchService.getDocumentListByDocIds(docIds, new String[] { fieldHelper.urlField, fieldHelper.docIdField,
-                            fieldHelper.favoriteCountField });
+                    searchService.getDocumentListByDocIds(
+                            docIds,
+                            new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
+                                    fessConfig.getIndexFieldFavoriteCount() });
             List<String> urlList = new ArrayList<>(docList.size());
             for (final Map<String, Object> doc : docList) {
-                final String urlObj = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                 if (urlObj != null) {
                     urlList.add(urlObj.toString());
                 }
@@ -474,9 +476,9 @@ public class JsonApiManager extends BaseApiManager {
             urlList = favoriteLogService.getUrlList(userCode, urlList);
             final List<String> docIdList = new ArrayList<>(urlList.size());
             for (final Map<String, Object> doc : docList) {
-                final String urlObj = DocumentUtil.getValue(doc, fieldHelper.urlField, String.class);
+                final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                 if (urlObj != null && urlList.contains(urlObj)) {
-                    final String docIdObj = DocumentUtil.getValue(doc, fieldHelper.docIdField, String.class);
+                    final String docIdObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                     if (docIdObj != null) {
                         docIdList.add(docIdObj);
                     }

@@ -51,12 +51,12 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,6 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
     public boolean appendMetaContentToContent = true;
 
     public boolean appendBodyContentToContent = true;
-
-    public boolean enableCache = false;
 
     public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
@@ -157,6 +155,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final ResultData resultData = new ResultData();
         resultData.setTransformerName(getName());
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
         final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
@@ -166,7 +165,6 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
@@ -186,14 +184,14 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         // cid
         final String configId = crawlingConfig.getConfigId();
         if (configId != null) {
-            putResultDataBody(dataMap, fieldHelper.configIdField, configId);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldConfigId(), configId);
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fieldHelper.expiresField, new Date(documentExpires));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), new Date(documentExpires));
         }
         // segment
-        putResultDataBody(dataMap, fieldHelper.segmentField, sessionId);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldSegment(), sessionId);
         // content
         final StringBuilder buf = new StringBuilder(content.length() + 1000);
         if (appendBodyContentToContent) {
@@ -207,63 +205,64 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
         final String body = normalizeContent(buf.toString());
         if (StringUtil.isNotBlank(body)) {
-            putResultDataBody(dataMap, fieldHelper.contentField, body);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
         } else {
-            putResultDataBody(dataMap, fieldHelper.contentField, StringUtil.EMPTY);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), StringUtil.EMPTY);
         }
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fieldHelper.cacheField)) || enableCache) {
+        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
+                || fessConfig.isCrawlerDocumentCacheEnable()) {
             final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
             // text cache
-            putResultDataBody(dataMap, fieldHelper.cacheField, cache);
-            putResultDataBody(dataMap, fieldHelper.hasCacheField, Constants.TRUE);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), cache);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
         }
         // digest
-        putResultDataBody(dataMap, fieldHelper.digestField, Constants.DIGEST_PREFIX
-                + abbreviate(normalizeContent(content), maxDigestLength));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(),
+                Constants.DIGEST_PREFIX + abbreviate(normalizeContent(content), maxDigestLength));
         // title
-        if (!dataMap.containsKey(fieldHelper.titleField)) {
+        if (!dataMap.containsKey(fessConfig.getIndexFieldTitle())) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(dataMap, fieldHelper.titleField, abbreviate(body, maxTitleLength));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), abbreviate(body, maxTitleLength));
                 } else {
-                    putResultDataBody(dataMap, fieldHelper.titleField, noTitleLabel);
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), noTitleLabel);
                 }
             } else {
                 final String u = decodeUrlAsName(url, url.startsWith("file:"));
                 final int pos = u.lastIndexOf('/');
                 if (pos == -1) {
-                    putResultDataBody(dataMap, fieldHelper.titleField, u);
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), u);
                 } else {
-                    putResultDataBody(dataMap, fieldHelper.titleField, u.substring(pos + 1));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), u.substring(pos + 1));
                 }
             }
         }
         // host
-        putResultDataBody(dataMap, fieldHelper.hostField, getHost(url));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldHost(), getHost(url));
         // site
-        putResultDataBody(dataMap, fieldHelper.siteField, getSite(url, urlEncoding));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSite(url, urlEncoding));
         // url
-        putResultDataBody(dataMap, fieldHelper.urlField, url);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created
-        putResultDataBody(dataMap, fieldHelper.createdField, systemHelper.getCurrentTime());
+        putResultDataBody(dataMap, fessConfig.getIndexFieldCreated(), systemHelper.getCurrentTime());
         // TODO anchor
-        putResultDataBody(dataMap, fieldHelper.anchorField, StringUtil.EMPTY);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(), StringUtil.EMPTY);
         // mimetype
-        putResultDataBody(dataMap, fieldHelper.mimetypeField, mimeType);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldMimetype(), mimeType);
         if (fileTypeHelper != null) {
             // filetype
-            putResultDataBody(dataMap, fieldHelper.filetypeField, fileTypeHelper.get(mimeType));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldFiletype(), fileTypeHelper.get(mimeType));
         }
         // contentLength
-        putResultDataBody(dataMap, fieldHelper.contentLengthField, Long.toString(responseData.getContentLength()));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldContentLength(), Long.toString(responseData.getContentLength()));
         //  lastModified
         if (responseData.getLastModified() != null) {
-            putResultDataBody(dataMap, fieldHelper.lastModifiedField, responseData.getLastModified());
+            putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), responseData.getLastModified());
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
         //  boost
-        putResultDataBody(dataMap, fieldHelper.boostField, crawlingConfig.getDocumentBoost());
+        putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
         final Set<String> labelTypeSet = new HashSet<String>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
@@ -271,7 +270,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
-        putResultDataBody(dataMap, fieldHelper.labelField, labelTypeSet);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
         for (final String roleType : crawlingConfig.getRoleTypeValues()) {
@@ -289,18 +288,18 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
                 }
             }
         }
-        putResultDataBody(dataMap, fieldHelper.roleField, roleTypeList);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // TODO date
         // TODO lang
         // id
-        putResultDataBody(dataMap, fieldHelper.idField, crawlingSessionHelper.generateId(dataMap));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingSessionHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
-            putResultDataBody(dataMap, fieldHelper.urlField, parentUrl);
-            putResultDataBody(dataMap, fieldHelper.parentIdField, crawlingSessionHelper.generateId(dataMap));
-            putResultDataBody(dataMap, fieldHelper.urlField, url); // set again
+            putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), parentUrl);
+            putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingSessionHelper.generateId(dataMap));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
         }
 
         // from config

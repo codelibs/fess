@@ -78,45 +78,6 @@
 			<arg>"label"</arg>
 			<arg>"0.0"</arg>
 		</postConstruct>
-		<!-- 
-		<property name="additionalGeoQuery">"location_i_i:1"</property>
-		<property name="responseFields">new String[]{ "id", "docId", "score",
-            "boost", "contentLength", "host", "site", "lastModified",
-            "mimetype", "filetype_s", "created", "title", "digest", "url",
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv",
-            "cid_s", "lang_s", "hasCache_s_s" }</property>
-		<property name="responseDocValuesFields">new String[]{
-            "clickCount_l_x_dv", "favoriteCount_l_x_dv"}</property>
-		<property name="highlightingFields">new String[]{"digest", "cache" }</property>
-		<property name="searchFields">new String[]{"url", "docId", "host", 
-            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
-            "label", "segment", "lang_s" }</property>
-		<property name="facetFields">new String[]{"url", "host", 
-            "title", "content", "contentLength", "lastModified", "mimetype", "filetype_s",
-            "label", "segment" }</property>
-		<property name="sortPrefix">"sort:"</property>
-		<property name="supportedSortFields">new String[]{"created",
-            "contentLength", "lastModified", "clickCount_l_x_dv" }</property>
-		<property name="supportedMltFields">new String[]{"content",
-            "content_ja" }</property>
-		<property name="shards">"localhost:8983/solr,localhost:7574/solr"</property>
-		<property name="useBigram">true</property>
-		<property name="additionalQuery">""</property>
-		<property name="maxFilterQueriesForRole">3</property>
-		<property name="timeAllowed">1000</property>
-		<postConstruct name="addRequestParameter">
-			<arg>"debug.explain.structured"</arg>
-			<arg>"true"</arg>
-		</postConstruct>
-		<postConstruct name="addDefaultSortField">
-			<arg>"score"</arg>
-			<arg>"desc"</arg>
-		</postConstruct>
-		<postConstruct name="addQueryParam">
-			<arg>"word"</arg>
-			<arg>new String[]{"$query"}</arg>
-		</postConstruct>
-		-->
 	</component>
 	<component name="viewHelper" class="org.codelibs.fess.helper.ViewHelper">
 		<postConstruct name="addFacetQueryView">
@@ -200,35 +161,13 @@
 				</component>
 			</arg>
 		</postConstruct>
-		<!-- 
-		<property name="encodeUrlLink">false</property>
-		<property name="useHighlight">false</property>
-		<property name="descriptionLength">200</property>
-		<property name="titleLength">50</property>
-		<property name="urlLinkEncoding">"UTF-8"</property>
-		<property name="highlightingFields">new String[] { "hl_content", "digest" }</property>
-		<postConstruct name="addInitFacetParam">
-			<arg>"facet.field"</arg>
-			<arg>"label"</arg>
-		</postConstruct>
-		 -->
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
 	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
 		<property name="excludedWordPattern">java.util.regex.Pattern.compile(".*[a-zA-Z0-9_]+:.*")</property>
-		<!-- 
-		<property name="size">10</property>
-		 -->
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.impl.CookieUserInfoHelperImpl">
-		<!-- 
-		<property name="cookieName">"fu"</property>
-		<property name="cookieDomain">""</property>
-		<property name="cookieMaxAge">30 * 24 * 60 * 60</property>
-		<property name="cookiePath">""</property>
-		<property name="cookieSecure">false</property>
-		 -->
 	</component>
 	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>

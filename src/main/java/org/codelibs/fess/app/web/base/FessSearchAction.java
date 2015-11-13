@@ -31,7 +31,6 @@ import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.UnsupportedSearchException;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
 import org.codelibs.fess.helper.QueryHelper;
@@ -75,9 +74,6 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     @Resource
     protected SystemHelper systemHelper;
-
-    @Resource
-    protected FieldHelper fieldHelper;
 
     @Resource
     protected OpenSearchHelper openSearchHelper;

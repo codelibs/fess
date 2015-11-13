@@ -27,8 +27,8 @@ import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
-import org.codelibs.fess.helper.FieldHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
-        final FieldHelper fieldHelper = ComponentUtil.getFieldHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         initParamMap.putAll(configParamMap);
         final Map<String, String> paramMap = initParamMap;
@@ -67,32 +67,32 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // cid
         final String configId = config.getConfigId();
         if (configId != null) {
-            defaultDataMap.put(fieldHelper.configIdField, configId);
+            defaultDataMap.put(fessConfig.getIndexFieldConfigId(), configId);
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(fieldHelper.expiresField, new Date(documentExpires));
+            defaultDataMap.put(fessConfig.getIndexFieldExpires(), new Date(documentExpires));
         }
         // segment
-        defaultDataMap.put(fieldHelper.segmentField, initParamMap.get(Constants.SESSION_ID));
+        defaultDataMap.put(fessConfig.getIndexFieldSegment(), initParamMap.get(Constants.SESSION_ID));
         // created
-        defaultDataMap.put(fieldHelper.createdField, systemHelper.getCurrentTime());
+        defaultDataMap.put(fessConfig.getIndexFieldCreated(), systemHelper.getCurrentTime());
         // boost
-        defaultDataMap.put(fieldHelper.boostField, config.getBoost().toString());
+        defaultDataMap.put(fessConfig.getIndexFieldBoost(), config.getBoost().toString());
         // label: labelType
         final List<String> labelTypeList = new ArrayList<String>();
         for (final String labelType : config.getLabelTypeValues()) {
             labelTypeList.add(labelType);
         }
-        defaultDataMap.put(fieldHelper.labelField, labelTypeList);
+        defaultDataMap.put(fessConfig.getIndexFieldLabel(), labelTypeList);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
         for (final String roleType : config.getRoleTypeValues()) {
             roleTypeList.add(roleType);
         }
-        defaultDataMap.put(fieldHelper.roleField, roleTypeList);
+        defaultDataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
         // mimetype
-        defaultDataMap.put(fieldHelper.mimetypeField, mimeType);
+        defaultDataMap.put(fessConfig.getIndexFieldMimetype(), mimeType);
         // title
         // content
         // cache
