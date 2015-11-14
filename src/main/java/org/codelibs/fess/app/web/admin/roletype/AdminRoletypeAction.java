@@ -55,7 +55,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("roleType"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameRoletype()));
     }
 
     // ===================================================================================

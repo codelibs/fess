@@ -51,7 +51,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("failureUrl"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameFailureurl()));
     }
 
     // ===================================================================================

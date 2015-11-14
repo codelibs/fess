@@ -46,7 +46,7 @@ public class AdminDashboardAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("dashboard"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDashboard()));
     }
 
     // ===================================================================================

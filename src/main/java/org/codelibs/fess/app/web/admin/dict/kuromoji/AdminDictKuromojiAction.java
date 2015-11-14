@@ -66,7 +66,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("kuromoji"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictKuromoji()));
     }
 
     // ===================================================================================

@@ -69,8 +69,6 @@ public class SystemHelper implements Serializable {
 
     private boolean useOwnTmpDir = true;
 
-    private String baseHelpLink = "http://fess.codelibs.org/{lang}/" + Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION + "/admin/";
-
     private String[] supportedHelpLangs = new String[] { "ja" };
 
     private final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
@@ -170,17 +168,22 @@ public class SystemHelper implements Serializable {
     }
 
     public String getHelpLink(final String name) {
-        final Locale locale = LaRequestUtil.getRequest().getLocale();
-        if (locale != null) {
-            final String lang = locale.getLanguage();
-            for (final String l : supportedHelpLangs) {
-                if (l.equals(lang)) {
-                    final String url = baseHelpLink + name + "-guide.html";
-                    return url.replaceAll("\\{lang\\}", lang);
-                }
-            }
-        }
-        return null;
+        return LaRequestUtil
+                .getOptionalRequest()
+                .map(request -> {
+                    final Locale locale = request.getLocale();
+                    if (locale != null) {
+                        final String lang = locale.getLanguage();
+                        for (final String l : supportedHelpLangs) {
+                            if (l.equals(lang)) {
+                                final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
+                                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
+                                        Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+                            }
+                        }
+                    }
+                    return null;
+                }).orElseGet(() -> null);
     }
 
     public void addDesignJspFileName(final String key, final String value) {
@@ -256,20 +259,6 @@ public class SystemHelper implements Serializable {
      */
     public void setUseOwnTmpDir(final boolean useOwnTmpDir) {
         this.useOwnTmpDir = useOwnTmpDir;
-    }
-
-    /**
-     * @return the baseHelpLink
-     */
-    public String getBaseHelpLink() {
-        return baseHelpLink;
-    }
-
-    /**
-     * @param baseHelpLink the baseHelpLink to set
-     */
-    public void setBaseHelpLink(final String baseHelpLink) {
-        this.baseHelpLink = baseHelpLink;
     }
 
     /**

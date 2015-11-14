@@ -55,7 +55,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("duplicateHost"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDuplicatehost()));
     }
 
     // ===================================================================================

@@ -101,7 +101,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
 
-        runtime.registerData("helpLink", systemHelper.getHelpLink("searchList"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameSearchlist()));
     }
 
     // ===================================================================================

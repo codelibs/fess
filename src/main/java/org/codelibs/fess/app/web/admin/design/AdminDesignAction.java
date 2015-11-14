@@ -80,7 +80,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         super.setupHtmlData(runtime);
         runtime.registerData("editable", cannotEdit());
         runtime.registerData("fileNameItems", loadFileNameItems());
-        runtime.registerData("helpLink", systemHelper.getHelpLink("design"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDesign()));
     }
 
     private boolean cannotEdit() {

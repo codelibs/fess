@@ -56,9 +56,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dashboard/admin_dashboard.jsp */
     HtmlNext path_AdminDashboard_AdminDashboardJsp = new HtmlNext("/admin/dashboard/admin_dashboard.jsp");
 
-    /** The path of the HTML: /admin/data/admin_data.jsp */
-    HtmlNext path_AdminData_AdminDataJsp = new HtmlNext("/admin/data/admin_data.jsp");
-
     /** The path of the HTML: /admin/dataconfig/admin_dataconfig.jsp */
     HtmlNext path_AdminDataconfig_AdminDataconfigJsp = new HtmlNext("/admin/dataconfig/admin_dataconfig.jsp");
 

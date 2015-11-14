@@ -53,7 +53,7 @@ public class AdminGeneralAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink("general"));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameGeneral()));
         runtime.registerData("supportedSearchItems", getSupportedSearchItems());
         runtime.registerData("dayItems", getDayItems());
     }

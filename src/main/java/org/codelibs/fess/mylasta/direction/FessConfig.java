@@ -148,6 +148,102 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. root@localhost */
     String MAIL_FROM_ADDRESS = "mail.from.address";
 
+    /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
+    String ONLINE_HELP_BASE_LINK = "online.help.base.link";
+
+    /** The key of the configuration. e.g. failureurl */
+    String ONLINE_HELP_NAME_FAILUREURL = "online.help.name.failureurl";
+
+    /** The key of the configuration. e.g. elevateword */
+    String ONLINE_HELP_NAME_ELEVATEWORD = "online.help.name.elevateword";
+
+    /** The key of the configuration. e.g. reqheader */
+    String ONLINE_HELP_NAME_REQHEADER = "online.help.name.reqheader";
+
+    /** The key of the configuration. e.g. roletype */
+    String ONLINE_HELP_NAME_ROLETYPE = "online.help.name.roletype";
+
+    /** The key of the configuration. e.g. synonym */
+    String ONLINE_HELP_NAME_DICT_SYNONYM = "online.help.name.dict.synonym";
+
+    /** The key of the configuration. e.g. dict */
+    String ONLINE_HELP_NAME_DICT = "online.help.name.dict";
+
+    /** The key of the configuration. e.g. kuromoji */
+    String ONLINE_HELP_NAME_DICT_KUROMOJI = "online.help.name.dict.kuromoji";
+
+    /** The key of the configuration. e.g. webconfig */
+    String ONLINE_HELP_NAME_WEBCONFIG = "online.help.name.webconfig";
+
+    /** The key of the configuration. e.g. searchlist */
+    String ONLINE_HELP_NAME_SEARCHLIST = "online.help.name.searchlist";
+
+    /** The key of the configuration. e.g. log */
+    String ONLINE_HELP_NAME_LOG = "online.help.name.log";
+
+    /** The key of the configuration. e.g. general */
+    String ONLINE_HELP_NAME_GENERAL = "online.help.name.general";
+
+    /** The key of the configuration. e.g. role */
+    String ONLINE_HELP_NAME_ROLE = "online.help.name.role";
+
+    /** The key of the configuration. e.g. joblog */
+    String ONLINE_HELP_NAME_JOBLOG = "online.help.name.joblog";
+
+    /** The key of the configuration. e.g. keymatch */
+    String ONLINE_HELP_NAME_KEYMATCH = "online.help.name.keymatch";
+
+    /** The key of the configuration. e.g. wizard */
+    String ONLINE_HELP_NAME_WIZARD = "online.help.name.wizard";
+
+    /** The key of the configuration. e.g. badword */
+    String ONLINE_HELP_NAME_BADWORD = "online.help.name.badword";
+
+    /** The key of the configuration. e.g. pathmap */
+    String ONLINE_HELP_NAME_PATHMAP = "online.help.name.pathmap";
+
+    /** The key of the configuration. e.g. boostdoc */
+    String ONLINE_HELP_NAME_BOOSTDOC = "online.help.name.boostdoc";
+
+    /** The key of the configuration. e.g. dataconfig */
+    String ONLINE_HELP_NAME_DATACONFIG = "online.help.name.dataconfig";
+
+    /** The key of the configuration. e.g. systeminfo */
+    String ONLINE_HELP_NAME_SYSTEMINFO = "online.help.name.systeminfo";
+
+    /** The key of the configuration. e.g. user */
+    String ONLINE_HELP_NAME_USER = "online.help.name.user";
+
+    /** The key of the configuration. e.g. group */
+    String ONLINE_HELP_NAME_GROUP = "online.help.name.group";
+
+    /** The key of the configuration. e.g. design */
+    String ONLINE_HELP_NAME_DESIGN = "online.help.name.design";
+
+    /** The key of the configuration. e.g. dashboard */
+    String ONLINE_HELP_NAME_DASHBOARD = "online.help.name.dashboard";
+
+    /** The key of the configuration. e.g. webauth */
+    String ONLINE_HELP_NAME_WEBAUTH = "online.help.name.webauth";
+
+    /** The key of the configuration. e.g. fileconfig */
+    String ONLINE_HELP_NAME_FILECONFIG = "online.help.name.fileconfig";
+
+    /** The key of the configuration. e.g. fileauth */
+    String ONLINE_HELP_NAME_FILEAUTH = "online.help.name.fileauth";
+
+    /** The key of the configuration. e.g. labeltype */
+    String ONLINE_HELP_NAME_LABELTYPE = "online.help.name.labeltype";
+
+    /** The key of the configuration. e.g. duplicatehost */
+    String ONLINE_HELP_NAME_DUPLICATEHOST = "online.help.name.duplicatehost";
+
+    /** The key of the configuration. e.g. scheduler */
+    String ONLINE_HELP_NAME_SCHEDULER = "online.help.name.scheduler";
+
+    /** The key of the configuration. e.g. crawlinginfo */
+    String ONLINE_HELP_NAME_CRAWLINGINFO = "online.help.name.crawlinginfo";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -538,6 +634,231 @@ public interface FessConfig extends FessEnv {
     String getMailFromAddress();
 
     /**
+     * Get the value for the key 'online.help.base.link'. <br>
+     * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/admin/ <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpBaseLink();
+
+    /**
+     * Get the value for the key 'online.help.name.failureurl'. <br>
+     * The value is, e.g. failureurl <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameFailureurl();
+
+    /**
+     * Get the value for the key 'online.help.name.elevateword'. <br>
+     * The value is, e.g. elevateword <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameElevateword();
+
+    /**
+     * Get the value for the key 'online.help.name.reqheader'. <br>
+     * The value is, e.g. reqheader <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameReqheader();
+
+    /**
+     * Get the value for the key 'online.help.name.roletype'. <br>
+     * The value is, e.g. roletype <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameRoletype();
+
+    /**
+     * Get the value for the key 'online.help.name.dict.synonym'. <br>
+     * The value is, e.g. synonym <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictSynonym();
+
+    /**
+     * Get the value for the key 'online.help.name.dict'. <br>
+     * The value is, e.g. dict <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDict();
+
+    /**
+     * Get the value for the key 'online.help.name.dict.kuromoji'. <br>
+     * The value is, e.g. kuromoji <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictKuromoji();
+
+    /**
+     * Get the value for the key 'online.help.name.webconfig'. <br>
+     * The value is, e.g. webconfig <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameWebconfig();
+
+    /**
+     * Get the value for the key 'online.help.name.searchlist'. <br>
+     * The value is, e.g. searchlist <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameSearchlist();
+
+    /**
+     * Get the value for the key 'online.help.name.log'. <br>
+     * The value is, e.g. log <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameLog();
+
+    /**
+     * Get the value for the key 'online.help.name.general'. <br>
+     * The value is, e.g. general <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameGeneral();
+
+    /**
+     * Get the value for the key 'online.help.name.role'. <br>
+     * The value is, e.g. role <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameRole();
+
+    /**
+     * Get the value for the key 'online.help.name.joblog'. <br>
+     * The value is, e.g. joblog <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameJoblog();
+
+    /**
+     * Get the value for the key 'online.help.name.keymatch'. <br>
+     * The value is, e.g. keymatch <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameKeymatch();
+
+    /**
+     * Get the value for the key 'online.help.name.wizard'. <br>
+     * The value is, e.g. wizard <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameWizard();
+
+    /**
+     * Get the value for the key 'online.help.name.badword'. <br>
+     * The value is, e.g. badword <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameBadword();
+
+    /**
+     * Get the value for the key 'online.help.name.pathmap'. <br>
+     * The value is, e.g. pathmap <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNamePathmap();
+
+    /**
+     * Get the value for the key 'online.help.name.boostdoc'. <br>
+     * The value is, e.g. boostdoc <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameBoostdoc();
+
+    /**
+     * Get the value for the key 'online.help.name.dataconfig'. <br>
+     * The value is, e.g. dataconfig <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDataconfig();
+
+    /**
+     * Get the value for the key 'online.help.name.systeminfo'. <br>
+     * The value is, e.g. systeminfo <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameSysteminfo();
+
+    /**
+     * Get the value for the key 'online.help.name.user'. <br>
+     * The value is, e.g. user <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameUser();
+
+    /**
+     * Get the value for the key 'online.help.name.group'. <br>
+     * The value is, e.g. group <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameGroup();
+
+    /**
+     * Get the value for the key 'online.help.name.design'. <br>
+     * The value is, e.g. design <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDesign();
+
+    /**
+     * Get the value for the key 'online.help.name.dashboard'. <br>
+     * The value is, e.g. dashboard <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDashboard();
+
+    /**
+     * Get the value for the key 'online.help.name.webauth'. <br>
+     * The value is, e.g. webauth <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameWebauth();
+
+    /**
+     * Get the value for the key 'online.help.name.fileconfig'. <br>
+     * The value is, e.g. fileconfig <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameFileconfig();
+
+    /**
+     * Get the value for the key 'online.help.name.fileauth'. <br>
+     * The value is, e.g. fileauth <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameFileauth();
+
+    /**
+     * Get the value for the key 'online.help.name.labeltype'. <br>
+     * The value is, e.g. labeltype <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameLabeltype();
+
+    /**
+     * Get the value for the key 'online.help.name.duplicatehost'. <br>
+     * The value is, e.g. duplicatehost <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDuplicatehost();
+
+    /**
+     * Get the value for the key 'online.help.name.scheduler'. <br>
+     * The value is, e.g. scheduler <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameScheduler();
+
+    /**
+     * Get the value for the key 'online.help.name.crawlinginfo'. <br>
+     * The value is, e.g. crawlinginfo <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameCrawlinginfo();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -744,6 +1065,134 @@ public interface FessConfig extends FessEnv {
 
         public String getMailFromAddress() {
             return get(FessConfig.MAIL_FROM_ADDRESS);
+        }
+
+        public String getOnlineHelpBaseLink() {
+            return get(FessConfig.ONLINE_HELP_BASE_LINK);
+        }
+
+        public String getOnlineHelpNameFailureurl() {
+            return get(FessConfig.ONLINE_HELP_NAME_FAILUREURL);
+        }
+
+        public String getOnlineHelpNameElevateword() {
+            return get(FessConfig.ONLINE_HELP_NAME_ELEVATEWORD);
+        }
+
+        public String getOnlineHelpNameReqheader() {
+            return get(FessConfig.ONLINE_HELP_NAME_REQHEADER);
+        }
+
+        public String getOnlineHelpNameRoletype() {
+            return get(FessConfig.ONLINE_HELP_NAME_ROLETYPE);
+        }
+
+        public String getOnlineHelpNameDictSynonym() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_SYNONYM);
+        }
+
+        public String getOnlineHelpNameDict() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT);
+        }
+
+        public String getOnlineHelpNameDictKuromoji() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI);
+        }
+
+        public String getOnlineHelpNameWebconfig() {
+            return get(FessConfig.ONLINE_HELP_NAME_WEBCONFIG);
+        }
+
+        public String getOnlineHelpNameSearchlist() {
+            return get(FessConfig.ONLINE_HELP_NAME_SEARCHLIST);
+        }
+
+        public String getOnlineHelpNameLog() {
+            return get(FessConfig.ONLINE_HELP_NAME_LOG);
+        }
+
+        public String getOnlineHelpNameGeneral() {
+            return get(FessConfig.ONLINE_HELP_NAME_GENERAL);
+        }
+
+        public String getOnlineHelpNameRole() {
+            return get(FessConfig.ONLINE_HELP_NAME_ROLE);
+        }
+
+        public String getOnlineHelpNameJoblog() {
+            return get(FessConfig.ONLINE_HELP_NAME_JOBLOG);
+        }
+
+        public String getOnlineHelpNameKeymatch() {
+            return get(FessConfig.ONLINE_HELP_NAME_KEYMATCH);
+        }
+
+        public String getOnlineHelpNameWizard() {
+            return get(FessConfig.ONLINE_HELP_NAME_WIZARD);
+        }
+
+        public String getOnlineHelpNameBadword() {
+            return get(FessConfig.ONLINE_HELP_NAME_BADWORD);
+        }
+
+        public String getOnlineHelpNamePathmap() {
+            return get(FessConfig.ONLINE_HELP_NAME_PATHMAP);
+        }
+
+        public String getOnlineHelpNameBoostdoc() {
+            return get(FessConfig.ONLINE_HELP_NAME_BOOSTDOC);
+        }
+
+        public String getOnlineHelpNameDataconfig() {
+            return get(FessConfig.ONLINE_HELP_NAME_DATACONFIG);
+        }
+
+        public String getOnlineHelpNameSysteminfo() {
+            return get(FessConfig.ONLINE_HELP_NAME_SYSTEMINFO);
+        }
+
+        public String getOnlineHelpNameUser() {
+            return get(FessConfig.ONLINE_HELP_NAME_USER);
+        }
+
+        public String getOnlineHelpNameGroup() {
+            return get(FessConfig.ONLINE_HELP_NAME_GROUP);
+        }
+
+        public String getOnlineHelpNameDesign() {
+            return get(FessConfig.ONLINE_HELP_NAME_DESIGN);
+        }
+
+        public String getOnlineHelpNameDashboard() {
+            return get(FessConfig.ONLINE_HELP_NAME_DASHBOARD);
+        }
+
+        public String getOnlineHelpNameWebauth() {
+            return get(FessConfig.ONLINE_HELP_NAME_WEBAUTH);
+        }
+
+        public String getOnlineHelpNameFileconfig() {
+            return get(FessConfig.ONLINE_HELP_NAME_FILECONFIG);
+        }
+
+        public String getOnlineHelpNameFileauth() {
+            return get(FessConfig.ONLINE_HELP_NAME_FILEAUTH);
+        }
+
+        public String getOnlineHelpNameLabeltype() {
+            return get(FessConfig.ONLINE_HELP_NAME_LABELTYPE);
+        }
+
+        public String getOnlineHelpNameDuplicatehost() {
+            return get(FessConfig.ONLINE_HELP_NAME_DUPLICATEHOST);
+        }
+
+        public String getOnlineHelpNameScheduler() {
+            return get(FessConfig.ONLINE_HELP_NAME_SCHEDULER);
+        }
+
+        public String getOnlineHelpNameCrawlinginfo() {
+            return get(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO);
         }
     }
 }
