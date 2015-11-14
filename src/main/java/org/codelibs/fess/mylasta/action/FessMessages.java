@@ -158,45 +158,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: double submit might be requested. */
     public static final String ERRORS_APP_DOUBLE_SUBMIT_REQUEST = "{errors.app.double.submit.request}";
 
-    /** The key of the message: Failed to update parameters. Please contact to a site administrator. */
-    public static final String ERRORS_failed_to_update_crawler_params = "{errors.failed_to_update_crawler_params}";
-
-    /** The key of the message: Failed to update parameters. Please contact to a site administrator. */
-    public static final String ERRORS_failed_to_update_web_crawler_params = "{errors.failed_to_update_web_crawler_params}";
-
-    /** The key of the message: Failed to update parameters. Please contact to a site administrator. */
-    public static final String ERRORS_failed_to_update_solr_params = "{errors.failed_to_update_solr_params}";
-
     /** The key of the message: Username or Password is not correct. */
     public static final String ERRORS_login_error = "{errors.login_error}";
 
-    /** The key of the message: Failed to commit index. */
-    public static final String ERRORS_failed_to_commit_solr_index = "{errors.failed_to_commit_solr_index}";
-
-    /** The key of the message: Failed to optimize index. */
-    public static final String ERRORS_failed_to_optimize_solr_index = "{errors.failed_to_optimize_solr_index}";
-
-    /** The key of the message: Failed to delete index. */
-    public static final String ERRORS_failed_to_delete_solr_index = "{errors.failed_to_delete_solr_index}";
-
-    /** The key of the message: Failed to start a process because of running solr process. */
-    public static final String ERRORS_failed_to_start_solr_process_because_of_running =
-            "{errors.failed_to_start_solr_process_because_of_running}";
-
-    /** The key of the message: Failed to restore data. */
-    public static final String ERRORS_failed_to_import_data = "{errors.failed_to_import_data}";
-
-    /** The key of the message: Unknown file type. */
-    public static final String ERRORS_unknown_import_file = "{errors.unknown_import_file}";
-
-    /** The key of the message: Failed to backup data. */
-    public static final String ERRORS_failed_to_export_data = "{errors.failed_to_export_data}";
-
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
-
-    /** The key of the message: No running crawl process. */
-    public static final String ERRORS_no_running_crawl_process = "{errors.no_running_crawl_process}";
 
     /** The key of the message: Failed to start a crawl process. */
     public static final String ERRORS_failed_to_start_crawl_process = "{errors.failed_to_start_crawl_process}";
@@ -222,26 +188,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: The kind of file is unsupported. */
     public static final String ERRORS_design_file_is_unsupported_type = "{errors.design_file_is_unsupported_type}";
 
-    /** The key of the message: Failed to start a solr instance. */
-    public static final String ERRORS_failed_to_start_solr_instance = "{errors.failed_to_start_solr_instance}";
-
-    /** The key of the message: Failed to stop a solr instance. */
-    public static final String ERRORS_failed_to_stop_solr_instance = "{errors.failed_to_stop_solr_instance}";
-
-    /** The key of the message: Failed to reload a solr instance. */
-    public static final String ERRORS_failed_to_reload_solr_instance = "{errors.failed_to_reload_solr_instance}";
-
-    /** The key of the message: Failed to update a crawling schedule. */
-    public static final String ERRORS_failed_to_update_crawler_schedule = "{errors.failed_to_update_crawler_schedule}";
-
     /** The key of the message: Failed to create a crawling config. */
     public static final String ERRORS_failed_to_create_crawling_config_at_wizard = "{errors.failed_to_create_crawling_config_at_wizard}";
 
     /** The key of the message: This feature is disabled. */
     public static final String ERRORS_design_editor_disabled = "{errors.design_editor_disabled}";
-
-    /** The key of the message: Could not create a search log csv file. */
-    public static final String ERRORS_could_not_create_search_log_csv = "{errors.could_not_create_search_log_csv}";
 
     /** The key of the message: Not Found: {0} */
     public static final String ERRORS_not_found_on_file_system = "{errors.not_found_on_file_system}";
@@ -249,26 +200,14 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Could not open {0}. <br/>Please check if the file is associated with an application. */
     public static final String ERRORS_could_not_open_on_system = "{errors.could_not_open_on_system}";
 
-    /** The key of the message: The limit of a search time was exceeded. The partial result was displayed. */
-    public static final String ERRORS_process_time_is_exceeded = "{errors.process_time_is_exceeded}";
-
     /** The key of the message: No more results could be displayed. */
     public static final String ERRORS_result_size_exceeded = "{errors.result_size_exceeded}";
 
     /** The key of the message: {0} file does not exist. */
     public static final String ERRORS_target_file_does_not_exist = "{errors.target_file_does_not_exist}";
 
-    /** The key of the message: Failed to download {0} file. */
-    public static final String ERRORS_failed_to_download_file = "{errors.failed_to_download_file}";
-
     /** The key of the message: Failed to delete {0} file. */
     public static final String ERRORS_failed_to_delete_file = "{errors.failed_to_delete_file}";
-
-    /** The key of the message: Failed to redirect {0}. */
-    public static final String ERRORS_failed_to_redirect = "{errors.failed_to_redirect}";
-
-    /** The key of the message: {0} is not supported as encoding. */
-    public static final String ERRORS_unsupported_encoding = "{errors.unsupported_encoding}";
 
     /** The key of the message: Not found Doc ID:{0} */
     public static final String ERRORS_docid_not_found = "{errors.docid_not_found}";
@@ -285,23 +224,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to stop job {0}. */
     public static final String ERRORS_failed_to_stop_job = "{errors.failed_to_stop_job}";
 
-    /** The key of the message: Expired dictionary information. Please reload it. */
-    public static final String ERRORS_expired_dict_id = "{errors.expired_dict_id}";
-
-    /** The key of the message: Failed to create a cache reponse for ID:{0}. */
-    public static final String ERRORS_failed_to_create_cache = "{errors.failed_to_create_cache}";
-
-    /** The key of the message: Synonym file is not found */
-    public static final String ERRORS_synonym_file_is_not_found = "{errors.synonym_file_is_not_found}";
-
     /** The key of the message: Failed to download the Synonym file. */
     public static final String ERRORS_failed_to_download_synonym_file = "{errors.failed_to_download_synonym_file}";
 
     /** The key of the message: Failed to upload the Synonym file. */
     public static final String ERRORS_failed_to_upload_synonym_file = "{errors.failed_to_upload_synonym_file}";
-
-    /** The key of the message: Synonym file is not found */
-    public static final String ERRORS_kuromoji_file_is_not_found = "{errors.kuromoji_file_is_not_found}";
 
     /** The key of the message: Failed to download the Kuromoji file. */
     public static final String ERRORS_failed_to_download_kuromoji_file = "{errors.failed_to_download_kuromoji_file}";
@@ -312,17 +239,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: "{1}" in "{0}" is invalid. */
     public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
 
-    /** The key of the message: Failed to reload core. Check log files. */
-    public static final String ERRORS_failed_to_reload_core = "{errors.failed_to_reload_core}";
-
     /** The key of the message: Password is required. */
     public static final String ERRORS_blank_password = "{errors.blank_password}";
 
     /** The key of the message: Confirm Password does not match. */
     public static final String ERRORS_invalid_confirm_password = "{errors.invalid_confirm_password}";
-
-    /** The key of the message: Invalid password. */
-    public static final String ERRORS_password_does_not_exist_in_session = "{errors.password_does_not_exist_in_session}";
 
     /** The key of the message: Crawler is running. The document cannot be deteled. */
     public static final String ERRORS_cannot_delete_doc_because_of_running = "{errors.cannot_delete_doc_because_of_running}";
@@ -332,24 +253,6 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
-
-    /** The key of the message: An invalid quote character is used. */
-    public static final String ERRORS_invalid_query_quoted = "{errors.invalid_query_quoted}";
-
-    /** The key of the message: An invalid curly bracket character is used. */
-    public static final String ERRORS_invalid_query_curly_bracket = "{errors.invalid_query_curly_bracket}";
-
-    /** The key of the message: An invalid square bracket character is used. */
-    public static final String ERRORS_invalid_query_square_bracket = "{errors.invalid_query_square_bracket}";
-
-    /** The key of the message: An invalid parenthesis character is used. */
-    public static final String ERRORS_invalid_query_parenthesis = "{errors.invalid_query_parenthesis}";
-
-    /** The key of the message: An invalid range is used. The example of the range format is "field:[20020101 TO 20030101]". */
-    public static final String ERRORS_invalid_query_num_range = "{errors.invalid_query_num_range}";
-
-    /** The key of the message: An invalid range is used. The example of the range format is "field:'{'Aida TO Carmen'}'". */
-    public static final String ERRORS_invalid_query_str_range = "{errors.invalid_query_str_range}";
 
     /** The key of the message: The given query is invalid. */
     public static final String ERRORS_invalid_query_parse_error = "{errors.invalid_query_parse_error}";
@@ -369,35 +272,14 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to create a new data. */
     public static final String ERRORS_crud_failed_to_create_crud_table = "{errors.crud_failed_to_create_crud_table}";
 
-    /** The key of the message: Failed to update the data. */
-    public static final String ERRORS_crud_failed_to_update_crud_table = "{errors.crud_failed_to_update_crud_table}";
-
-    /** The key of the message: Failed to delete the data. */
-    public static final String ERRORS_crud_failed_to_delete_crud_table = "{errors.crud_failed_to_delete_crud_table}";
-
     /** The key of the message: Could not find the data({0}). */
     public static final String ERRORS_crud_could_not_find_crud_table = "{errors.crud_could_not_find_crud_table}";
 
     /** The key of the message: Updated parameters. */
     public static final String SUCCESS_update_crawler_params = "{success.update_crawler_params}";
 
-    /** The key of the message: Updated parameters. */
-    public static final String SUCCESS_update_web_crawler_params = "{success.update_web_crawler_params}";
-
-    /** The key of the message: Updated parameters. */
-    public static final String SUCCESS_update_solr_params = "{success.update_solr_params}";
-
-    /** The key of the message: Started a process to commit index. */
-    public static final String SUCCESS_commit_solr_index = "{success.commit_solr_index}";
-
-    /** The key of the message: Started a process to optimize index. */
-    public static final String SUCCESS_optimize_solr_index = "{success.optimize_solr_index}";
-
-    /** The key of the message: Started a process to optimize index. */
-    public static final String SUCCESS_delete_solr_index = "{success.delete_solr_index}";
-
-    /** The key of the message: Started to restore data from the uploaded file. */
-    public static final String SUCCESS_importing_data = "{success.importing_data}";
+    /** The key of the message: Started a process to delete the document from index. */
+    public static final String SUCCESS_delete_doc_from_index = "{success.delete_doc_from_index}";
 
     /** The key of the message: Deleted session data. */
     public static final String SUCCESS_crawling_session_delete_all = "{success.crawling_session_delete_all}";
@@ -405,32 +287,14 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Started a crawl process. */
     public static final String SUCCESS_start_crawl_process = "{success.start_crawl_process}";
 
-    /** The key of the message: Stopping a crawl process. */
-    public static final String SUCCESS_stopping_crawl_process = "{success.stopping_crawl_process}";
-
     /** The key of the message: Uploaded {0}. */
     public static final String SUCCESS_upload_design_file = "{success.upload_design_file}";
 
     /** The key of the message: Updated {0}. */
     public static final String SUCCESS_update_design_jsp_file = "{success.update_design_jsp_file}";
 
-    /** The key of the message: Starting a solr instance. */
-    public static final String SUCCESS_starting_solr_instance = "{success.starting_solr_instance}";
-
-    /** The key of the message: Stopping a solr instance. */
-    public static final String SUCCESS_stopping_solr_instance = "{success.stopping_solr_instance}";
-
-    /** The key of the message: Reloading a solr instance. */
-    public static final String SUCCESS_reloading_solr_instance = "{success.reloading_solr_instance}";
-
-    /** The key of the message: Updated a crawling schedule. */
-    public static final String SUCCESS_update_crawler_schedule = "{success.update_crawler_schedule}";
-
     /** The key of the message: Created a crawling config ({0}). */
     public static final String SUCCESS_create_crawling_config_at_wizard = "{success.create_crawling_config_at_wizard}";
-
-    /** The key of the message: Deleted search logs. */
-    public static final String SUCCESS_search_log_delete_all = "{success.search_log_delete_all}";
 
     /** The key of the message: Deleted failure urls. */
     public static final String SUCCESS_failure_url_delete_all = "{success.failure_url_delete_all}";
@@ -438,20 +302,11 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Deleted {0} file. */
     public static final String SUCCESS_delete_file = "{success.delete_file}";
 
-    /** The key of the message: Deleted user information. */
-    public static final String SUCCESS_user_info_delete_all = "{success.user_info_delete_all}";
-
-    /** The key of the message: Deleted popular urls */
-    public static final String SUCCESS_favorite_log_delete_all = "{success.favorite_log_delete_all}";
-
     /** The key of the message: Started job {0}. */
     public static final String SUCCESS_job_started = "{success.job_started}";
 
     /** The key of the message: Stopped job {0}. */
     public static final String SUCCESS_job_stopped = "{success.job_stopped}";
-
-    /** The key of the message: Deleted job logs. */
-    public static final String SUCCESS_joblog_delete_all = "{success.joblog_delete_all}";
 
     /** The key of the message: Uploaded Synonym file. */
     public static final String SUCCESS_upload_synonym_file = "{success.upload_synonym_file}";
@@ -1145,48 +1000,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_update_crawler_params' with parameters.
-     * <pre>
-     * message: Failed to update parameters. Please contact to a site administrator.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToUpdateCrawlerParams(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_update_crawler_params));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_update_web_crawler_params' with parameters.
-     * <pre>
-     * message: Failed to update parameters. Please contact to a site administrator.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToUpdateWebCrawlerParams(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_update_web_crawler_params));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_update_solr_params' with parameters.
-     * <pre>
-     * message: Failed to update parameters. Please contact to a site administrator.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToUpdateSolrParams(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_update_solr_params));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.login_error' with parameters.
      * <pre>
      * message: Username or Password is not correct.
@@ -1197,104 +1010,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsLoginError(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_login_error));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_commit_solr_index' with parameters.
-     * <pre>
-     * message: Failed to commit index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToCommitSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_commit_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_optimize_solr_index' with parameters.
-     * <pre>
-     * message: Failed to optimize index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToOptimizeSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_optimize_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_delete_solr_index' with parameters.
-     * <pre>
-     * message: Failed to delete index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToDeleteSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_delete_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_start_solr_process_because_of_running' with parameters.
-     * <pre>
-     * message: Failed to start a process because of running solr process.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToStartSolrProcessBecauseOfRunning(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_start_solr_process_because_of_running));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_import_data' with parameters.
-     * <pre>
-     * message: Failed to restore data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToImportData(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_import_data));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.unknown_import_file' with parameters.
-     * <pre>
-     * message: Unknown file type.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUnknownImportFile(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_unknown_import_file));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_export_data' with parameters.
-     * <pre>
-     * message: Failed to backup data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToExportData(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_export_data));
         return this;
     }
 
@@ -1310,20 +1025,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsCouldNotFindLogFile(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_could_not_find_log_file, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.no_running_crawl_process' with parameters.
-     * <pre>
-     * message: No running crawl process.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsNoRunningCrawlProcess(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_no_running_crawl_process));
         return this;
     }
 
@@ -1440,62 +1141,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_start_solr_instance' with parameters.
-     * <pre>
-     * message: Failed to start a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToStartSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_start_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_stop_solr_instance' with parameters.
-     * <pre>
-     * message: Failed to stop a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToStopSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_stop_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_reload_solr_instance' with parameters.
-     * <pre>
-     * message: Failed to reload a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToReloadSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_reload_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_update_crawler_schedule' with parameters.
-     * <pre>
-     * message: Failed to update a crawling schedule.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToUpdateCrawlerSchedule(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_update_crawler_schedule));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.failed_to_create_crawling_config_at_wizard' with parameters.
      * <pre>
      * message: Failed to create a crawling config.
@@ -1520,20 +1165,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsDesignEditorDisabled(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_design_editor_disabled));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.could_not_create_search_log_csv' with parameters.
-     * <pre>
-     * message: Could not create a search log csv file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCouldNotCreateSearchLogCsv(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_could_not_create_search_log_csv));
         return this;
     }
 
@@ -1568,20 +1199,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.process_time_is_exceeded' with parameters.
-     * <pre>
-     * message: The limit of a search time was exceeded. The partial result was displayed.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsProcessTimeIsExceeded(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_process_time_is_exceeded));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.result_size_exceeded' with parameters.
      * <pre>
      * message: No more results could be displayed.
@@ -1611,21 +1228,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_download_file' with parameters.
-     * <pre>
-     * message: Failed to download {0} file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToDownloadFile(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_file, arg0));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.failed_to_delete_file' with parameters.
      * <pre>
      * message: Failed to delete {0} file.
@@ -1637,36 +1239,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToDeleteFile(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_delete_file, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_redirect' with parameters.
-     * <pre>
-     * message: Failed to redirect {0}.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToRedirect(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_redirect, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.unsupported_encoding' with parameters.
-     * <pre>
-     * message: {0} is not supported as encoding.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsUnsupportedEncoding(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_unsupported_encoding, arg0));
         return this;
     }
 
@@ -1746,49 +1318,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.expired_dict_id' with parameters.
-     * <pre>
-     * message: Expired dictionary information. Please reload it.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsExpiredDictId(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_expired_dict_id));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.failed_to_create_cache' with parameters.
-     * <pre>
-     * message: Failed to create a cache reponse for ID:{0}.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @param arg0 The parameter arg0 for message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToCreateCache(String property, String arg0) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_create_cache, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.synonym_file_is_not_found' with parameters.
-     * <pre>
-     * message: Synonym file is not found
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsSynonymFileIsNotFound(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_synonym_file_is_not_found));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.failed_to_download_synonym_file' with parameters.
      * <pre>
      * message: Failed to download the Synonym file.
@@ -1813,20 +1342,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadSynonymFile(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_upload_synonym_file));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.kuromoji_file_is_not_found' with parameters.
-     * <pre>
-     * message: Synonym file is not found
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsKuromojiFileIsNotFound(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_kuromoji_file_is_not_found));
         return this;
     }
 
@@ -1875,20 +1390,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.failed_to_reload_core' with parameters.
-     * <pre>
-     * message: Failed to reload core. Check log files.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsFailedToReloadCore(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_reload_core));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.blank_password' with parameters.
      * <pre>
      * message: Password is required.
@@ -1913,20 +1414,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidConfirmPassword(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_invalid_confirm_password));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.password_does_not_exist_in_session' with parameters.
-     * <pre>
-     * message: Invalid password.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsPasswordDoesNotExistInSession(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_password_does_not_exist_in_session));
         return this;
     }
 
@@ -1969,90 +1456,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidQueryUnknown(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_invalid_query_unknown));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_quoted' with parameters.
-     * <pre>
-     * message: An invalid quote character is used.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQueryQuoted(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_quoted));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_curly_bracket' with parameters.
-     * <pre>
-     * message: An invalid curly bracket character is used.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQueryCurlyBracket(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_curly_bracket));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_square_bracket' with parameters.
-     * <pre>
-     * message: An invalid square bracket character is used.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQuerySquareBracket(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_square_bracket));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_parenthesis' with parameters.
-     * <pre>
-     * message: An invalid parenthesis character is used.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQueryParenthesis(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_parenthesis));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_num_range' with parameters.
-     * <pre>
-     * message: An invalid range is used. The example of the range format is "field:[20020101 TO 20030101]".
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQueryNumRange(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_num_range));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.invalid_query_str_range' with parameters.
-     * <pre>
-     * message: An invalid range is used. The example of the range format is "field:'{'Aida TO Carmen'}'".
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsInvalidQueryStrRange(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_str_range));
         return this;
     }
 
@@ -2146,34 +1549,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.crud_failed_to_update_crud_table' with parameters.
-     * <pre>
-     * message: Failed to update the data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudFailedToUpdateCrudTable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_update_crud_table));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.crud_failed_to_delete_crud_table' with parameters.
-     * <pre>
-     * message: Failed to delete the data.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsCrudFailedToDeleteCrudTable(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_delete_crud_table));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'errors.crud_could_not_find_crud_table' with parameters.
      * <pre>
      * message: Could not find the data({0}).
@@ -2203,86 +1578,16 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.update_web_crawler_params' with parameters.
+     * Add the created action message for the key 'success.delete_doc_from_index' with parameters.
      * <pre>
-     * message: Updated parameters.
+     * message: Started a process to delete the document from index.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessUpdateWebCrawlerParams(String property) {
+    public FessMessages addSuccessDeleteDocFromIndex(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_update_web_crawler_params));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.update_solr_params' with parameters.
-     * <pre>
-     * message: Updated parameters.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessUpdateSolrParams(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_update_solr_params));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.commit_solr_index' with parameters.
-     * <pre>
-     * message: Started a process to commit index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessCommitSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_commit_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.optimize_solr_index' with parameters.
-     * <pre>
-     * message: Started a process to optimize index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessOptimizeSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_optimize_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.delete_solr_index' with parameters.
-     * <pre>
-     * message: Started a process to optimize index.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessDeleteSolrIndex(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_delete_solr_index));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.importing_data' with parameters.
-     * <pre>
-     * message: Started to restore data from the uploaded file.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessImportingData(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_importing_data));
+        add(property, new ActionMessage(SUCCESS_delete_doc_from_index));
         return this;
     }
 
@@ -2311,20 +1616,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessStartCrawlProcess(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_start_crawl_process));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.stopping_crawl_process' with parameters.
-     * <pre>
-     * message: Stopping a crawl process.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessStoppingCrawlProcess(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_stopping_crawl_process));
         return this;
     }
 
@@ -2359,62 +1650,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.starting_solr_instance' with parameters.
-     * <pre>
-     * message: Starting a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessStartingSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_starting_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.stopping_solr_instance' with parameters.
-     * <pre>
-     * message: Stopping a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessStoppingSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_stopping_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.reloading_solr_instance' with parameters.
-     * <pre>
-     * message: Reloading a solr instance.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessReloadingSolrInstance(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_reloading_solr_instance));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.update_crawler_schedule' with parameters.
-     * <pre>
-     * message: Updated a crawling schedule.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessUpdateCrawlerSchedule(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_update_crawler_schedule));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'success.create_crawling_config_at_wizard' with parameters.
      * <pre>
      * message: Created a crawling config ({0}).
@@ -2426,20 +1661,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessCreateCrawlingConfigAtWizard(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_create_crawling_config_at_wizard, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.search_log_delete_all' with parameters.
-     * <pre>
-     * message: Deleted search logs.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessSearchLogDeleteAll(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_search_log_delete_all));
         return this;
     }
 
@@ -2473,34 +1694,6 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.user_info_delete_all' with parameters.
-     * <pre>
-     * message: Deleted user information.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessUserInfoDeleteAll(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_user_info_delete_all));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.favorite_log_delete_all' with parameters.
-     * <pre>
-     * message: Deleted popular urls
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessFavoriteLogDeleteAll(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_favorite_log_delete_all));
-        return this;
-    }
-
-    /**
      * Add the created action message for the key 'success.job_started' with parameters.
      * <pre>
      * message: Started job {0}.
@@ -2527,20 +1720,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessJobStopped(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_job_stopped, arg0));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'success.joblog_delete_all' with parameters.
-     * <pre>
-     * message: Deleted job logs.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addSuccessJoblogDeleteAll(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_joblog_delete_all));
         return this;
     }
 

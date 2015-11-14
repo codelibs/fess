@@ -194,7 +194,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
             fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), query);
-            saveInfo(messages -> messages.addSuccessDeleteSolrIndex(GLOBAL));
+            saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
             throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),
                     () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));

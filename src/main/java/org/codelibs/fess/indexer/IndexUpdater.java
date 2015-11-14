@@ -101,7 +101,7 @@ public class IndexUpdater extends Thread {
 
     protected int unprocessedDocumentSize = 100;
 
-    protected List<String> finishedSessionIdList = new ArrayList<String>();
+    protected List<String> finishedSessionIdList = new ArrayList<>();
 
     public long commitMarginTime = 10000; // 10ms
 
@@ -113,9 +113,9 @@ public class IndexUpdater extends Thread {
 
     public boolean favoriteCountEnabled = true;
 
-    private final List<BoostDocumentRule> boostRuleList = new ArrayList<BoostDocumentRule>();
+    private final List<DocBoostMatcher> docBoostMatcherList = new ArrayList<>();
 
-    private final Map<String, Object> docValueMap = new HashMap<String, Object>();
+    private final Map<String, Object> docValueMap = new HashMap<>();
 
     private List<Crawler> crawlerList;
 
@@ -391,9 +391,9 @@ public class IndexUpdater extends Thread {
         }
 
         float documentBoost = 0.0f;
-        for (final BoostDocumentRule rule : boostRuleList) {
-            if (rule.match(map)) {
-                documentBoost = rule.getValue(map);
+        for (final DocBoostMatcher docBoostMatcher : docBoostMatcherList) {
+            if (docBoostMatcher.match(map)) {
+                documentBoost = docBoostMatcher.getValue(map);
                 break;
             }
         }
@@ -546,8 +546,8 @@ public class IndexUpdater extends Thread {
         this.unprocessedDocumentSize = unprocessedDocumentSize;
     }
 
-    public void addBoostDocumentRule(final BoostDocumentRule rule) {
-        boostRuleList.add(rule);
+    public void addDocBoostMatcher(final DocBoostMatcher rule) {
+        docBoostMatcherList.add(rule);
     }
 
     public void addDefaultDocValue(final String fieldName, final Object value) {

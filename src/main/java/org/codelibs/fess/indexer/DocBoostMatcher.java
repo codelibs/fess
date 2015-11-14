@@ -17,24 +17,25 @@ package org.codelibs.fess.indexer;
 
 import java.util.Map;
 
+import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
-public class BoostDocumentRule {
-    private static final Logger logger = LoggerFactory.getLogger(BoostDocumentRule.class);
+public class DocBoostMatcher {
+    private static final Logger logger = LoggerFactory.getLogger(DocBoostMatcher.class);
 
     private String boostExpression = "0";
 
     private String matchExpression;
 
-    public BoostDocumentRule() {
+    public DocBoostMatcher() {
         // nothing
     }
 
-    public BoostDocumentRule(final org.codelibs.fess.es.config.exentity.BoostDocumentRule rule) {
+    public DocBoostMatcher(final BoostDocumentRule rule) {
         matchExpression = rule.getUrlExpr();
         boostExpression = rule.getBoostExpr();
     }

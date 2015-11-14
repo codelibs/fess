@@ -387,7 +387,7 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setDaemon(true);
         indexUpdater.setCrawlerList(crawlerList);
         for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
-            indexUpdater.addBoostDocumentRule(new org.codelibs.fess.indexer.BoostDocumentRule(rule));
+            indexUpdater.addDocBoostMatcher(new org.codelibs.fess.indexer.DocBoostMatcher(rule));
         }
         indexUpdater.start();
 
