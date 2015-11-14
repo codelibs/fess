@@ -77,7 +77,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
-        return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -90,7 +90,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }).orElse(() -> {
             synonymPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -99,7 +99,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public HtmlResponse search(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
         copyBeanToBean(form, synonymPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -108,7 +108,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     public HtmlResponse reset(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
         synonymPager.clear();
-        return asHtml(path_AdminDictSynonym_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -132,7 +132,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew(final String dictId) {
-        return asHtml(path_AdminDictSynonym_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -149,11 +149,11 @@ public class AdminDictSynonymAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminDictSynonym_DetailsJsp;
+            next = path_AdminDictSynonym_AdminDictSynonymDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminDictSynonym_EditJsp;
+            next = path_AdminDictSynonym_AdminDictSynonymEditJsp;
             break;
         }
         synonymService.getSynonymItem(form.dictId, form.id).ifPresent(entity -> {
@@ -171,7 +171,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminDictSynonym_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 synonymService.getSynonymItem(dictId, id).ifPresent(entity -> {
                     form.inputs = entity.getInputsValue();
@@ -199,7 +199,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         validateSynonymString(newInputs, () -> createnew(form.dictId));
         final String[] newOutputs = splitLine(form.outputs);
         validateSynonymString(newOutputs, () -> createnew(form.dictId));
-        return asHtml(path_AdminDictSynonym_DetailsJsp);
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymDetailsJsp);
     }
 
     @Execute
@@ -211,7 +211,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         validateSynonymString(newInputs, () -> edit(form));
         final String[] newOutputs = splitLine(form.outputs);
         validateSynonymString(newOutputs, () -> edit(form));
-        return asHtml(path_AdminDictSynonym_DetailsJsp);
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymDetailsJsp);
     }
 
     // -----------------------------------------------------
@@ -220,7 +220,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse downloadpage(final String dictId) {
-        return asHtml(path_AdminDictSynonym_DownloadJsp).useForm(DownloadForm.class, op -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymDownloadJsp).useForm(DownloadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
@@ -255,7 +255,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse uploadpage(final String dictId) {
-        return asHtml(path_AdminDictSynonym_UploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictSynonym_AdminDictSynonymUploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
@@ -385,7 +385,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminDictSynonym_EditJsp);
+            return asHtml(path_AdminDictSynonym_AdminDictSynonymEditJsp);
         };
     }
 

@@ -35,7 +35,7 @@
 						</div>
 						<div class="box box-primary">
 							<c:if test="${editable}">
-								<la:form>
+								<la:form action="/admin/design/">
 									<%-- Box Header --%>
 									<div class="box-header with-border">
 										<h3>

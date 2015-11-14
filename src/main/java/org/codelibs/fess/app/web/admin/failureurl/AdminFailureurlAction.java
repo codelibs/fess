@@ -59,7 +59,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -67,7 +67,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         failureUrlPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -75,7 +75,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, failureUrlPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -83,14 +83,14 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         failureUrlPager.clear();
-        return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
-        return asHtml(path_AdminFailureurl_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -108,7 +108,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminFailureurl_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminFailureurl_AdminFailureurlDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 failureUrlService.getFailureUrl(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -159,7 +159,7 @@ public class AdminFailureurlAction extends FessAdminAction {
 
     protected VaErrorHook toIndexHtml() {
         return () -> {
-            return asHtml(path_AdminJoblog_IndexJsp);
+            return asHtml(path_AdminFailureurl_AdminFailureurlJsp);
         };
     }
 }

@@ -52,10 +52,10 @@
 						</la:link></li>
 
 					<li
-						<c:if test="${param.menuType=='scheduledJob'}">class="active"</c:if>><la:link
-							href="/admin/scheduledjob/">
+						<c:if test="${param.menuType=='scheduler'}">class="active"</c:if>><la:link
+							href="/admin/scheduler/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_scheduled_job_config" /></span>
+							<span><la:message key="labels.menu_scheduler_config" /></span>
 						</la:link></li>
 
 					<li <c:if test="${param.menuType=='design'}">class="active"</c:if>><la:link
@@ -115,44 +115,44 @@
 
 					<li
 						<c:if test="${param.menuType=='boostDocumentRule'}">class="active"</c:if>><la:link
-							href="/admin/boostdocumentrule/">
+							href="/admin/boostdoc/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_boost_document_rule" /></span>
 						</la:link></li>
 
 					<li
 						<c:if test="${param.menuType=='pathMapping'}">class="active"</c:if>><la:link
-							href="/admin/pathmapping/">
+							href="/admin/pathmap/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_path_mapping" /></span>
 						</la:link></li>
 
 					<li
 						<c:if test="${param.menuType=='webAuthentication'}">class="active"</c:if>><la:link
-							href="/admin/webauthentication/">
+							href="/admin/webauth/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_web_authentication" /></span>
 						</la:link></li>
 
 					<li
 						<c:if test="${param.menuType=='fileAuthentication'}">class="active"</c:if>><la:link
-							href="/admin/fileauthentication/">
+							href="/admin/fileauth/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_file_authentication" /></span>
 						</la:link></li>
 
 					<li
 						<c:if test="${param.menuType=='requestHeader'}">class="active"</c:if>><la:link
-							href="/admin/requestheader/">
+							href="/admin/reqheader/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_request_header" /></span>
 						</la:link></li>
 
 					<li
-						<c:if test="${param.menuType=='overlappingHost'}">class="active"</c:if>><la:link
-							href="/admin/overlappinghost/">
+						<c:if test="${param.menuType=='duplicateHost'}">class="active"</c:if>><la:link
+							href="/admin/duplicatehost/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_overlapping_host" /></span>
+							<span><la:message key="labels.menu_duplicate_host" /></span>
 						</la:link></li>
 
 					<li
@@ -197,14 +197,14 @@
 
 					<li
 						<c:if test="${param.menuType=='suggestElevateWord'}">class="active"</c:if>><la:link
-							href="/admin/suggestelevateword/">
+							href="/admin/elevateword/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_suggest_elevate_word" /></span>
 						</la:link></li>
 
 					<li
 						<c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><la:link
-							href="/admin/suggestbadword/">
+							href="/admin/badword/">
 							<i class='fa fa-circle-o'></i>
 							<span><la:message key="labels.menu_suggest_bad_word" /></span>
 						</la:link></li>

@@ -324,7 +324,7 @@
           }
         }
       },
-      "overlapping_host" : {
+      "duplicate_host" : {
         "_all" : {
           "enabled" : false
         },
@@ -336,7 +336,7 @@
           "createdTime" : {
             "type" : "long"
           },
-          "overlappingName" : {
+          "duplicateHostName" : {
             "type" : "string",
             "index" : "not_analyzed"
           },

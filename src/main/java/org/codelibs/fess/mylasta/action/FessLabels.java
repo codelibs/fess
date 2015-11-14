@@ -86,8 +86,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Num of Thread */
     public static final String LABELS_NUM_OF_THREAD = "{labels.numOfThread}";
 
-    /** The key of the message: Overlapping Name */
-    public static final String LABELS_OVERLAPPING_NAME = "{labels.overlappingName}";
+    /** The key of the message: Duplicate Name */
+    public static final String LABELS_DUPLICATE_HOST_NAME = "{labels.duplicateHostName}";
 
     /** The key of the message: Page Number */
     public static final String LABELS_PAGE_NUMBER = "{labels.pageNumber}";
@@ -525,7 +525,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_menu_crawl_config = "{labels.menu_crawl_config}";
 
     /** The key of the message: Scheduler */
-    public static final String LABELS_menu_scheduled_job_config = "{labels.menu_scheduled_job_config}";
+    public static final String LABELS_menu_scheduler_config = "{labels.menu_scheduler_config}";
 
     /** The key of the message: Dashboard */
     public static final String LABELS_menu_dashboard_config = "{labels.menu_dashboard_config}";
@@ -575,8 +575,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Request Header */
     public static final String LABELS_menu_request_header = "{labels.menu_request_header}";
 
-    /** The key of the message: Overlapping Host */
-    public static final String LABELS_menu_overlapping_host = "{labels.menu_overlapping_host}";
+    /** The key of the message: Duplicate Host */
+    public static final String LABELS_menu_duplicate_host = "{labels.menu_duplicate_host}";
 
     /** The key of the message: Role */
     public static final String LABELS_menu_role_type = "{labels.menu_role_type}";
@@ -1262,8 +1262,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Regular Name */
     public static final String LABELS_regular_name = "{labels.regular_name}";
 
-    /** The key of the message: Overlapping Name */
-    public static final String LABELS_overlapping_name = "{labels.overlapping_name}";
+    /** The key of the message: Duplicate Name */
+    public static final String LABELS_duplicate_name = "{labels.duplicate_name}";
 
     /** The key of the message: Create */
     public static final String LABELS_path_mapping_button_create = "{labels.path_mapping_button_create}";
@@ -1310,62 +1310,62 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_path_mapping_link_next_page = "{labels.path_mapping_link_next_page}";
 
-    /** The key of the message: Overlapping Host */
-    public static final String LABELS_overlapping_host_configuration = "{labels.overlapping_host_configuration}";
+    /** The key of the message: Duplicate Host */
+    public static final String LABELS_duplicate_host_configuration = "{labels.duplicate_host_configuration}";
 
-    /** The key of the message: Overlapping Host */
-    public static final String LABELS_overlapping_host_title_details = "{labels.overlapping_host_title_details}";
+    /** The key of the message: Duplicate Host */
+    public static final String LABELS_duplicate_host_title_details = "{labels.duplicate_host_title_details}";
 
     /** The key of the message: Confirm */
-    public static final String LABELS_overlapping_host_button_confirm = "{labels.overlapping_host_button_confirm}";
+    public static final String LABELS_duplicate_host_button_confirm = "{labels.duplicate_host_button_confirm}";
 
-    /** The key of the message: Confirm Overlapping Host */
-    public static final String LABELS_overlapping_host_title_confirm = "{labels.overlapping_host_title_confirm}";
+    /** The key of the message: Confirm Duplicate Host */
+    public static final String LABELS_duplicate_host_title_confirm = "{labels.duplicate_host_title_confirm}";
 
     /** The key of the message: Create */
-    public static final String LABELS_overlapping_host_button_create = "{labels.overlapping_host_button_create}";
+    public static final String LABELS_duplicate_host_button_create = "{labels.duplicate_host_button_create}";
 
     /** The key of the message: Back */
-    public static final String LABELS_overlapping_host_button_back = "{labels.overlapping_host_button_back}";
+    public static final String LABELS_duplicate_host_button_back = "{labels.duplicate_host_button_back}";
 
     /** The key of the message: Update */
-    public static final String LABELS_overlapping_host_button_update = "{labels.overlapping_host_button_update}";
+    public static final String LABELS_duplicate_host_button_update = "{labels.duplicate_host_button_update}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_overlapping_host_button_delete = "{labels.overlapping_host_button_delete}";
+    public static final String LABELS_duplicate_host_button_delete = "{labels.duplicate_host_button_delete}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_overlapping_host_button_edit = "{labels.overlapping_host_button_edit}";
+    public static final String LABELS_duplicate_host_button_edit = "{labels.duplicate_host_button_edit}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_overlapping_host_link_create_new = "{labels.overlapping_host_link_create_new}";
+    public static final String LABELS_duplicate_host_link_create_new = "{labels.duplicate_host_link_create_new}";
 
     /** The key of the message: List */
-    public static final String LABELS_overlapping_host_link_list = "{labels.overlapping_host_link_list}";
+    public static final String LABELS_duplicate_host_link_list = "{labels.duplicate_host_link_list}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_overlapping_host_link_create = "{labels.overlapping_host_link_create}";
+    public static final String LABELS_duplicate_host_link_create = "{labels.duplicate_host_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_overlapping_host_link_update = "{labels.overlapping_host_link_update}";
+    public static final String LABELS_duplicate_host_link_update = "{labels.duplicate_host_link_update}";
 
     /** The key of the message: Details */
-    public static final String LABELS_overlapping_host_link_confirm = "{labels.overlapping_host_link_confirm}";
+    public static final String LABELS_duplicate_host_link_confirm = "{labels.duplicate_host_link_confirm}";
 
     /** The key of the message: Details */
-    public static final String LABELS_overlapping_host_link_details = "{labels.overlapping_host_link_details}";
+    public static final String LABELS_duplicate_host_link_details = "{labels.duplicate_host_link_details}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_overlapping_host_link_edit = "{labels.overlapping_host_link_edit}";
+    public static final String LABELS_duplicate_host_link_edit = "{labels.duplicate_host_link_edit}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_overlapping_host_link_delete = "{labels.overlapping_host_link_delete}";
+    public static final String LABELS_duplicate_host_link_delete = "{labels.duplicate_host_link_delete}";
 
     /** The key of the message: Prev */
-    public static final String LABELS_overlapping_host_link_prev_page = "{labels.overlapping_host_link_prev_page}";
+    public static final String LABELS_duplicate_host_link_prev_page = "{labels.duplicate_host_link_prev_page}";
 
     /** The key of the message: Next */
-    public static final String LABELS_overlapping_host_link_next_page = "{labels.overlapping_host_link_next_page}";
+    public static final String LABELS_duplicate_host_link_next_page = "{labels.duplicate_host_link_next_page}";
 
     /** The key of the message: System Configuration */
     public static final String LABELS_dashboard_title_configuration = "{labels.dashboard_title_configuration}";

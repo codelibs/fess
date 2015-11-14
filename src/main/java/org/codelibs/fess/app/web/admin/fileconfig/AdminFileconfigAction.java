@@ -72,7 +72,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminFileconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -84,7 +84,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         }).orElse(() -> {
             fileConfigPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminFileconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -92,7 +92,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, fileConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminFileconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -100,7 +100,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         fileConfigPager.clear();
-        return asHtml(path_AdminFileconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -121,7 +121,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminFileconfig_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -139,11 +139,11 @@ public class AdminFileconfigAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminFileconfig_DetailsJsp;
+            next = path_AdminFileconfig_AdminFileconfigDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminFileconfig_EditJsp;
+            next = path_AdminFileconfig_AdminFileconfigEditJsp;
             break;
         }
         final String id = form.id;
@@ -162,8 +162,8 @@ public class AdminFileconfigAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
-        return asHtml(path_AdminScheduledjob_EditJsp).useForm(
-                org.codelibs.fess.app.web.admin.scheduledjob.CreateForm.class,
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
+                org.codelibs.fess.app.web.admin.scheduler.CreateForm.class,
                 op -> {
                     op.setup(scheduledJobForm -> {
                         scheduledJobForm.initialize();
@@ -187,7 +187,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminFileconfig_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 fileConfigService.getFileConfig(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -300,7 +300,7 @@ public class AdminFileconfigAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminFileconfig_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
             });
         };

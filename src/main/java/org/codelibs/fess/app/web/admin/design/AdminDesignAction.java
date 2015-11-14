@@ -108,6 +108,12 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Execute
+    //(token = TxToken.SAVE)
+    public HtmlResponse back() {
+        return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
+    }
+
+    @Execute
     public HtmlResponse upload(final DesignForm form) {
         validate(form, messages -> {}, toMainHtml());
         final String uploadedFileName = form.designFile.getFileName();
@@ -252,12 +258,6 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), toMainHtml());
         }
         return redirect(getClass());
-    }
-
-    @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse back() {
-        return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     // ===================================================================================

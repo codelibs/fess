@@ -64,7 +64,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -76,7 +76,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         }).orElse(() -> {
             keyMatchPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -84,7 +84,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, keyMatchPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -92,7 +92,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         keyMatchPager.clear();
-        return asHtml(path_AdminKeymatch_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -113,7 +113,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminKeymatch_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -129,11 +129,11 @@ public class AdminKeymatchAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminKeymatch_DetailsJsp;
+            next = path_AdminKeymatch_AdminKeymatchDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminKeymatch_EditJsp;
+            next = path_AdminKeymatch_AdminKeymatchEditJsp;
             break;
         }
         final String id = form.id;
@@ -151,7 +151,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminKeymatch_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminKeymatch_AdminKeymatchDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 keyMatchService.getKeyMatch(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -261,7 +261,7 @@ public class AdminKeymatchAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminKeymatch_EditJsp);
+            return asHtml(path_AdminKeymatch_AdminKeymatchEditJsp);
         };
     }
 }

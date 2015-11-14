@@ -34,7 +34,7 @@
 					</div>
 					<div class="col-md-6">
 						<div class="box box-primary">
-							<la:form>
+							<la:form action="/admin/design/">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">

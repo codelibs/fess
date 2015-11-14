@@ -75,7 +75,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
-        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -88,7 +88,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         }).orElse(() -> {
             kuromojiPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -97,7 +97,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse search(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
         copyBeanToBean(form, kuromojiPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -106,7 +106,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse reset(final SearchForm form) {
         validate(form, messages -> {}, toIndexHtml());
         kuromojiPager.clear();
-        return asHtml(path_AdminDictKuromoji_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -130,7 +130,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew(final String dictId) {
-        return asHtml(path_AdminDictKuromoji_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -147,11 +147,11 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminDictKuromoji_DetailsJsp;
+            next = path_AdminDictKuromoji_AdminDictKuromojiDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminDictKuromoji_EditJsp;
+            next = path_AdminDictKuromoji_AdminDictKuromojiEditJsp;
             break;
         }
         kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
@@ -168,7 +168,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminDictKuromoji_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -189,7 +189,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse downloadpage(final String dictId) {
-        return asHtml(path_AdminDictKuromoji_DownloadJsp).useForm(DownloadForm.class, op -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiDownloadJsp).useForm(DownloadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
@@ -224,7 +224,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse uploadpage(final String dictId) {
-        return asHtml(path_AdminDictKuromoji_UploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictKuromoji_AdminDictKuromojiUploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
@@ -352,7 +352,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminDictKuromoji_EditJsp);
+            return asHtml(path_AdminDictKuromoji_AdminDictKuromojiEditJsp);
         };
     }
 }

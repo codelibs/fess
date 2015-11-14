@@ -106,7 +106,7 @@ public class AdminLogAction extends FessAdminAction {
     }
 
     private HtmlResponse toIndexPage() {
-        return asHtml(path_AdminLog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminLog_AdminLogJsp).renderWith(data -> {
             data.register("logFileItems", getLogFileItems());
         });
     }

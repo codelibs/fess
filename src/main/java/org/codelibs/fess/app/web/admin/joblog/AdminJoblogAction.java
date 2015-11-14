@@ -59,7 +59,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -67,7 +67,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         jobLogPager.setCurrentPageNumber(pageNumber);
-        return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -75,7 +75,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -83,14 +83,14 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         jobLogPager.clear();
-        return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
-        return asHtml(path_AdminJoblog_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -112,7 +112,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DELETE);
-        return asHtml(path_AdminJoblog_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 jobLogService.getJobLog(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -137,7 +137,7 @@ public class AdminJoblogAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
         });
-        return asHtml(path_AdminJoblog_DetailsJsp);
+        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp);
     }
 
     // -----------------------------------------------------
@@ -146,7 +146,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminJoblog_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 jobLogService.getJobLog(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -192,7 +192,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     protected VaErrorHook toIndexHtml() {
         return () -> {
-            return asHtml(path_AdminJoblog_IndexJsp);
+            return asHtml(path_AdminJoblog_AdminJoblogJsp);
         };
     }
 }

@@ -40,7 +40,7 @@ import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
-import org.codelibs.fess.helper.OverlappingHostHelper;
+import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -333,12 +333,12 @@ public class Crawler implements Serializable {
             ptList.add(Constants.PROCESS_TYPE_BOTH);
             pathMappingHelper.setPathMappingList(options.sessionId, pathMappingService.getPathMappingList(ptList));
 
-            // overlapping host
+            // duplicate host
             try {
-                final OverlappingHostHelper overlappingHostHelper = ComponentUtil.getOverlappingHostHelper();
-                overlappingHostHelper.init();
+                final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+                duplicateHostHelper.init();
             } catch (final Exception e) {
-                logger.warn("Could not initialize overlappingHostHelper.", e);
+                logger.warn("Could not initialize duplicateHostHelper.", e);
             }
 
             // delete expired sessions

@@ -55,7 +55,7 @@ public class AdminDashboardAction extends FessAdminAction {
     @Execute
     public HtmlResponse index() {
         esApiManager.saveToken();
-        return asHtml(path_AdminDashboard_DashboardJsp).renderWith(data -> {
+        return asHtml(path_AdminDashboard_AdminDashboardJsp).renderWith(data -> {
             data.register("serverPath", esApiManager.getServerPath());
         });
     }

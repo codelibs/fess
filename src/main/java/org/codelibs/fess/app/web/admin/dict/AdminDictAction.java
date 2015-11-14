@@ -53,7 +53,7 @@ public class AdminDictAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final ListForm form) {
-        return asHtml(path_AdminDict_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDict_AdminDictJsp).renderWith(data -> {
             final DictionaryFile<? extends DictionaryItem>[] dictFiles = dictionaryManager.getDictionaryFiles();
             data.register("dictFiles", dictFiles);
         });

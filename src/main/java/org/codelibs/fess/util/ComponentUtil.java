@@ -27,6 +27,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -34,7 +35,6 @@ import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
-import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
@@ -80,7 +80,7 @@ public final class ComponentUtil {
 
     private static final String JOB_HELPER = "jobHelper";
 
-    private static final String OVERLAPPING_HOST_HELPER = "overlappingHostHelper";
+    private static final String DUPLICATE_HOST_HELPER = "duplicateHostHelper";
 
     private static final String PATH_MAPPING_HELPER = "pathMappingHelper";
 
@@ -177,8 +177,8 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(PATH_MAPPING_HELPER);
     }
 
-    public static OverlappingHostHelper getOverlappingHostHelper() {
-        return SingletonLaContainer.getComponent(OVERLAPPING_HOST_HELPER);
+    public static DuplicateHostHelper getDuplicateHostHelper() {
+        return SingletonLaContainer.getComponent(DUPLICATE_HOST_HELPER);
     }
 
     public static JobHelper getJobHelper() {

@@ -78,7 +78,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         clearStoredPassword();
-        return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -91,7 +91,7 @@ public class AdminUserAction extends FessAdminAction {
         }).orElse(() -> {
             userPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -100,7 +100,7 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse search(final SearchForm form) {
         clearStoredPassword();
         copyBeanToBean(form, userPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -109,7 +109,7 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse reset(final SearchForm form) {
         clearStoredPassword();
         userPager.clear();
-        return asHtml(path_AdminUser_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -135,7 +135,7 @@ public class AdminUserAction extends FessAdminAction {
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
         clearStoredPassword();
-        return asHtml(path_AdminUser_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminUser_AdminUserEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -153,11 +153,11 @@ public class AdminUserAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminUser_DetailsJsp;
+            next = path_AdminUser_AdminUserDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminUser_EditJsp;
+            next = path_AdminUser_AdminUserEditJsp;
             break;
         }
         final String id = form.id;
@@ -179,7 +179,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminUser_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminUser_AdminUserDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 userService.getUser(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -339,7 +339,7 @@ public class AdminUserAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminUser_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminUser_AdminUserEditJsp).renderWith(data -> {
                 registerForms(data);
             });
         };

@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin;
 
-import org.codelibs.fess.app.web.admin.wizard.AdminWizardAction;
+import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -35,7 +35,7 @@ public class AdminAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index() {
-        return redirect(AdminWizardAction.class);
+        return redirect(AdminDashboardAction.class);
     }
 
 }

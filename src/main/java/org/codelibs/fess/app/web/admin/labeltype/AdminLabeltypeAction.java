@@ -67,7 +67,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -79,7 +79,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         }).orElse(() -> {
             labelTypePager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -87,7 +87,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, labelTypePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -95,7 +95,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         labelTypePager.clear();
-        return asHtml(path_AdminLabeltype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -116,7 +116,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminLabeltype_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -134,11 +134,11 @@ public class AdminLabeltypeAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminLabeltype_DetailsJsp;
+            next = path_AdminLabeltype_AdminLabeltypeDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminLabeltype_EditJsp;
+            next = path_AdminLabeltype_AdminLabeltypeEditJsp;
             break;
         }
         final String id = form.id;
@@ -158,7 +158,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminLabeltype_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 labelTypeService.getLabelType(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -271,7 +271,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminLabeltype_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminLabeltype_AdminLabeltypeEditJsp).renderWith(data -> {
                 registerRoleTypeItems(data);
             });
         };

@@ -76,7 +76,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -88,7 +88,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         }).orElse(() -> {
             webConfigPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -96,7 +96,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, webConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -104,7 +104,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         webConfigPager.clear();
-        return asHtml(path_AdminWebconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -125,7 +125,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminWebconfig_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -143,11 +143,11 @@ public class AdminWebconfigAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminWebconfig_DetailsJsp;
+            next = path_AdminWebconfig_AdminWebconfigDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminWebconfig_EditJsp;
+            next = path_AdminWebconfig_AdminWebconfigEditJsp;
             break;
         }
         final String id = form.id;
@@ -166,8 +166,8 @@ public class AdminWebconfigAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
-        return asHtml(path_AdminScheduledjob_EditJsp).useForm(
-                org.codelibs.fess.app.web.admin.scheduledjob.CreateForm.class,
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
+                org.codelibs.fess.app.web.admin.scheduler.CreateForm.class,
                 op -> {
                     op.setup(scheduledJobForm -> {
                         scheduledJobForm.initialize();
@@ -191,7 +191,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminWebconfig_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 webConfigService.getWebConfig(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -304,7 +304,7 @@ public class AdminWebconfigAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminWebconfig_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
             });
         };

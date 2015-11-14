@@ -16,7 +16,7 @@
 	</component>
 	<component name="dataIndexHelper" class="org.codelibs.fess.helper.DataIndexHelper">
 	</component>
-	<component name="overlappingHostHelper" class="org.codelibs.fess.helper.OverlappingHostHelper">
+	<component name="duplicateHostHelper" class="org.codelibs.fess.helper.DuplicateHostHelper">
 	</component>
 	<component name="intervalControlHelper" class="org.codelibs.fess.helper.IntervalControlHelper">
 		<!-- 

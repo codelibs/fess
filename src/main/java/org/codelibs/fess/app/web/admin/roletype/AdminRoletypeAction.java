@@ -63,7 +63,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -75,7 +75,7 @@ public class AdminRoletypeAction extends FessAdminAction {
         }).orElse(() -> {
             roleTypePager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -83,7 +83,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, roleTypePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -91,7 +91,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         roleTypePager.clear();
-        return asHtml(path_AdminRoletype_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -112,7 +112,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminRoletype_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -128,11 +128,11 @@ public class AdminRoletypeAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminRoletype_DetailsJsp;
+            next = path_AdminRoletype_AdminRoletypeDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminRoletype_EditJsp;
+            next = path_AdminRoletype_AdminRoletypeEditJsp;
             break;
         }
         final String id = form.id;
@@ -150,7 +150,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminRoletype_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminRoletype_AdminRoletypeDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 roleTypeService.getRoleType(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -256,7 +256,7 @@ public class AdminRoletypeAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminRoletype_EditJsp);
+            return asHtml(path_AdminRoletype_AdminRoletypeEditJsp);
         };
     }
 }

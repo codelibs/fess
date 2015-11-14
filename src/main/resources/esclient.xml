@@ -73,7 +73,7 @@
 			<arg>".fess_config/label_type"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/overlapping_host"</arg>
+			<arg>".fess_config/duplicate_host"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/path_mapping"</arg>

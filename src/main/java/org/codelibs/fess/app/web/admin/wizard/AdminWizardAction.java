@@ -87,20 +87,20 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index() {
-        return asHtml(path_AdminWizard_IndexJsp).useForm(IndexForm.class);
+        return asHtml(path_AdminWizard_AdminWizardJsp).useForm(IndexForm.class);
     }
 
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse crawlingConfigForm() {
-        return asHtml(path_AdminWizard_CrawlingConfigJsp).useForm(CrawlingConfigForm.class);
+        return asHtml(path_AdminWizard_AdminWizardConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
     @Execute
     //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminWizard_CrawlingConfigJsp);
+            return asHtml(path_AdminWizard_AdminWizardConfigJsp);
         });
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
@@ -111,7 +111,7 @@ public class AdminWizardAction extends FessAdminAction {
     //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
-            return asHtml(path_AdminWizard_CrawlingConfigJsp);
+            return asHtml(path_AdminWizard_AdminWizardConfigJsp);
         });
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
@@ -207,7 +207,7 @@ public class AdminWizardAction extends FessAdminAction {
         } catch (final Exception e) {
             logger.error("Failed to create crawling config: " + form.crawlingConfigPath, e);
             throwValidationError(messages -> messages.addErrorsFailedToCreateCrawlingConfigAtWizard(GLOBAL), () -> {
-                return asHtml(path_AdminWizard_CrawlingConfigJsp);
+                return asHtml(path_AdminWizard_AdminWizardConfigJsp);
             });
             return null;
         }
@@ -271,7 +271,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse startCrawlingForm() {
-        return asHtml(path_AdminWizard_StartCrawlingJsp).useForm(StartCrawlingForm.class);
+        return asHtml(path_AdminWizard_AdminWizardStartJsp).useForm(StartCrawlingForm.class);
     }
 
     @Execute

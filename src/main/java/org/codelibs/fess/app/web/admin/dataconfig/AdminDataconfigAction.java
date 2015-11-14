@@ -80,7 +80,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -92,7 +92,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         }).orElse(() -> {
             dataConfigPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -100,7 +100,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, dataConfigPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -108,7 +108,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         dataConfigPager.clear();
-        return asHtml(path_AdminDataconfig_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -129,7 +129,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminDataconfig_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -148,11 +148,11 @@ public class AdminDataconfigAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminDataconfig_DetailsJsp;
+            next = path_AdminDataconfig_AdminDataconfigDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminDataconfig_EditJsp;
+            next = path_AdminDataconfig_AdminDataconfigEditJsp;
             break;
         }
         form.crudMode = CrudMode.EDIT;
@@ -173,8 +173,8 @@ public class AdminDataconfigAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
-        return asHtml(path_AdminScheduledjob_EditJsp).useForm(
-                org.codelibs.fess.app.web.admin.scheduledjob.CreateForm.class,
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
+                org.codelibs.fess.app.web.admin.scheduler.CreateForm.class,
                 op -> {
                     op.setup(scheduledJobForm -> {
                         scheduledJobForm.initialize();
@@ -198,7 +198,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminDataconfig_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminDataconfig_AdminDataconfigDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 dataConfigService.getDataConfig(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -324,7 +324,7 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminDataconfig_EditJsp).renderWith(data -> {
+            return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp).renderWith(data -> {
                 registerRolesAndLabels(data);
                 registerHandlerNames(data);
             });

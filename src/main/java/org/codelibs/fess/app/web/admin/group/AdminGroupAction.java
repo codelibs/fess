@@ -65,7 +65,7 @@ public class AdminGroupAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -77,7 +77,7 @@ public class AdminGroupAction extends FessAdminAction {
         }).orElse(() -> {
             groupPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -85,7 +85,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         copyBeanToBean(form, groupPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -93,7 +93,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         groupPager.clear();
-        return asHtml(path_AdminGroup_IndexJsp).renderWith(data -> {
+        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -114,7 +114,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminGroup_EditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminGroup_AdminGroupEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -130,11 +130,11 @@ public class AdminGroupAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
             form.crudMode = CrudMode.DETAILS;
-            next = path_AdminGroup_DetailsJsp;
+            next = path_AdminGroup_AdminGroupDetailsJsp;
             break;
         default:
             form.crudMode = CrudMode.EDIT;
-            next = path_AdminGroup_EditJsp;
+            next = path_AdminGroup_AdminGroupEditJsp;
             break;
         }
         final String id = form.id;
@@ -152,7 +152,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminGroup_DetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminGroup_AdminGroupDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 groupService.getGroup(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -253,7 +253,7 @@ public class AdminGroupAction extends FessAdminAction {
 
     protected VaErrorHook toEditHtml() {
         return () -> {
-            return asHtml(path_AdminGroup_EditJsp);
+            return asHtml(path_AdminGroup_AdminGroupEditJsp);
         };
     }
 }

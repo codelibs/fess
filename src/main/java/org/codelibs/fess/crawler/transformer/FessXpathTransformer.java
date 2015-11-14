@@ -53,9 +53,9 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
-import org.codelibs.fess.helper.OverlappingHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -439,9 +439,9 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
 
     protected String replaceOverlappingHost(final String url) {
         try {
-            // remove overlapping host
-            final OverlappingHostHelper overlappingHostHelper = ComponentUtil.getOverlappingHostHelper();
-            return overlappingHostHelper.convert(url);
+            // remove duplicate host
+            final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
+            return duplicateHostHelper.convert(url);
         } catch (final Exception e) {
             return url;
         }
