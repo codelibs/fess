@@ -29,9 +29,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
@@ -61,10 +59,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -109,9 +105,9 @@ public class AdminBoostdocAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminBoostdoc_AdminBoostdocEditJsp).useForm(CreateForm.class, op -> {
+        saveToken();
+        return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -120,27 +116,23 @@ public class AdminBoostdocAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminBoostdoc_AdminBoostdocDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminBoostdoc_AdminBoostdocEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next);
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     // -----------------------------------------------------
@@ -149,7 +141,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminBoostdoc_AdminBoostdocDetailsJsp).useForm(EditForm.class, op -> {
+        saveToken();
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -157,7 +150,7 @@ public class AdminBoostdocAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         });
@@ -169,12 +162,13 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
         createBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -182,12 +176,13 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
         createBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -195,13 +190,14 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
         final String id = form.id;
         boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
             boostDocumentRuleService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -250,13 +246,30 @@ public class AdminBoostdocAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminBoostdoc_AdminBoostdocEditJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
+            data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager));
+        }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(boostDocumentRulePager, form, op -> op.include("id"));
+            });
+        });
     }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminBoostdoc_AdminBoostdocEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminBoostdoc_AdminBoostdocDetailsJsp);
+    }
+
 }
