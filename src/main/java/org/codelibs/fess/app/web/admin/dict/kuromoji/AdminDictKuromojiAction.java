@@ -140,11 +140,15 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asListHtml(form.dictId));
-        });
+        kuromojiService
+                .getKuromojiItem(form.dictId, form.id)
+                .ifPresent(entity -> {
+                    copyBeanToBean(entity, form, op -> {});
+                })
+                .orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                            () -> asListHtml(form.dictId));
+                });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -163,19 +167,26 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     public HtmlResponse details(final String dictId, final int crudMode, final long id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS, dictId);
         saveToken();
-        return asDetailsHtml().useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                kuromojiService.getKuromojiItem(dictId, id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
+        return asDetailsHtml().useForm(
+                EditForm.class,
+                op -> {
+                    op.setup(form -> {
+                        kuromojiService
+                                .getKuromojiItem(dictId, id)
+                                .ifPresent(entity -> {
+                                    copyBeanToBean(entity, form, copyOp -> {
+                                        copyOp.excludeNull();
+                                    });
+                                    form.crudMode = crudMode;
+                                })
+                                .orElse(() -> {
+                                    throwValidationError(
+                                            messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id),
+                                            () -> asListHtml(dictId));
+                                });
+                        form.dictId = dictId;
                     });
-                    form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, dictId + ":" + id), () -> asListHtml(dictId));
                 });
-                form.dictId = dictId;
-            });
-        });
     }
 
     // -----------------------------------------------------
@@ -289,12 +300,16 @@ public class AdminDictKuromojiAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
-        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
-            kuromojiService.delete(form.dictId, entity);
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asDetailsHtml());
-        });
+        kuromojiService
+                .getKuromojiItem(form.dictId, form.id)
+                .ifPresent(entity -> {
+                    kuromojiService.delete(form.dictId, entity);
+                    saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                })
+                .orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                            () -> asDetailsHtml());
+                });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -349,7 +364,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     protected HtmlResponse asDictIndexHtml() {
         return redirect(AdminDictAction.class);
     }
-    
+
     private HtmlResponse asListHtml(final String dictId) {
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
             data.register("kuromojiItemItems", kuromojiService.getKuromojiList(dictId, kuromojiPager));

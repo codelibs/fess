@@ -188,7 +188,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Parameters */
     public static final String LABELS_PARAMETERS = "{labels.parameters}";
 
-    /** The key of the message: Upaload File */
+    /** The key of the message: Upload File */
     public static final String LABELS_DESIGN_FILE = "{labels.designFile}";
 
     /** The key of the message: Access Type */
@@ -317,7 +317,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Overwrite */
     public static final String LABELS_OVERWRITE = "{labels.overwrite}";
 
-    /** The key of the message: Page Numger */
+    /** The key of the message: Page Number */
     public static final String LABELS_PN = "{labels.pn}";
 
     /** The key of the message: Scheme */
@@ -1004,7 +1004,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: User Logging */
     public static final String LABELS_user_info_enabled = "{labels.user_info_enabled}";
 
-    /** The key of the message: Favarite Logging */
+    /** The key of the message: Favorite Logging */
     public static final String LABELS_user_favorite_enabled = "{labels.user_favorite_enabled}";
 
     /** The key of the message: XML Response */
