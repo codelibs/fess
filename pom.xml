@@ -281,9 +281,9 @@
 							<url
 								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0/elasticsearch-analysis-synonym-2.0.0.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151105.213152-3.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151113.133045-4.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0-SNAPSHOT/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
+								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0-SNAPSHOT/elasticsearch-langfield-2.0.0-20151113.132901-3.zip" />
 							<url
 								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
 						</get>
@@ -294,9 +294,9 @@
 						<unzip dest="${basedir}/plugins/analysis-synonym"
 							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0.zip" />
 						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151105.213152-3.zip" />
+							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151113.133045-4.zip" />
 						<unzip dest="${basedir}/plugins/langfield"
-							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0-20151105.133031-2.zip" />
+							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0-20151113.132901-3.zip" />
 						<unzip dest="${basedir}/plugins/kopf"
 							src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
 					</tasks>
