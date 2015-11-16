@@ -18,7 +18,19 @@
 				<h1>
 					<la:message key="labels.suggest_elevate_word_title_details" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+				<ol class="breadcrumb">
+					<li class="active"><la:link href="/admin/elevateword">
+							<la:message key="labels.suggest_elevate_word_link_list" />
+						</la:link></li>
+					<c:if test="${crudMode == 1}">
+						<li class="active"><la:message
+								key="labels.suggest_elevate_word_link_create" /></li>
+					</c:if>
+					<c:if test="${crudMode == 2}">
+						<li class="active"><la:message
+								key="labels.suggest_elevate_word_link_edit" /></li>
+					</c:if>
+				</ol>
 			</section>
 			<section class="content">
 				<la:form action="/admin/elevateword/" styleClass="form-horizontal">
@@ -34,20 +46,33 @@
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
 								<div class="box-header with-border">
-									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
+									<h3 class="box-title">
+										<c:if test="${crudMode == 1}">
+											<la:message key="labels.suggest_elevate_word_link_create" />
+										</c:if>
+										<c:if test="${crudMode == 2}">
+											<la:message key="labels.suggest_elevate_word_link_edit" />
+										</c:if>
+									</h3>
 									<div class="btn-group pull-right">
 										<la:link href="/admin/elevateword"
 											styleClass="btn btn-default btn-xs">
+											<i class="fa fa-th-list"></i>
 											<la:message key="labels.suggest_elevate_word_link_list" />
 										</la:link>
-										<la:link href="createnew" styleClass="btn btn-success btn-xs">
-											<la:message key="labels.suggest_elevate_word_link_create_new" />
+										<la:link href="../createnew"
+											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-plus"></i>
+											<la:message key="labels.suggest_elevate_word_link_create" />
 										</la:link>
-										<la:link href="downloadpage"
+										<la:link href="../downloadpage"
 											styleClass="btn btn-primary btn-xs">
+											<i class="fa fa-download"></i>
 											<la:message key="labels.suggest_elevate_word_link_download" />
 										</la:link>
-										<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
+										<la:link href="../uploadpage"
+											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-upload"></i>
 											<la:message key="labels.suggest_elevate_word_link_upload" />
 										</la:link>
 									</div>

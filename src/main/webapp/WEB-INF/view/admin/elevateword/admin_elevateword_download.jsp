@@ -18,7 +18,6 @@
 				<h1>
 					<la:message key="labels.suggest_elevate_word_configuration" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/elevateword">
 							<la:message key="labels.suggest_elevate_word_link_list" />
@@ -28,50 +27,59 @@
 				</ol>
 			</section>
 			<section class="content">
-				<div class="row">
-					<div class="col-md-12">
-						<div class="box box-primary">
-							<%-- Box Header --%>
-							<div class="box-header with-border">
-								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
-								<div class="btn-group pull-right">
-									<la:link href="/admin/elevateword"
-										styleClass="btn btn-default btn-xs">
-										<la:message key="labels.suggest_elevate_word_link_list" />
-									</la:link>
-									<la:link href="createnew" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.suggest_elevate_word_link_create_new" />
-									</la:link>
-									<la:link href="downloadpage"
-										styleClass="btn btn-primary btn-xs">
+				<la:form action="/admin/elevateword/">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box box-primary">
+								<%-- Box Header --%>
+								<div class="box-header with-border">
+									<h3 class="box-title">
 										<la:message key="labels.suggest_elevate_word_link_download" />
-									</la:link>
-									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.suggest_elevate_word_link_upload" />
-									</la:link>
+									</h3>
+									<div class="btn-group pull-right">
+										<la:link href="/admin/elevateword"
+											styleClass="btn btn-default btn-xs">
+											<i class="fa fa-th-list"></i>
+											<la:message key="labels.suggest_elevate_word_link_list" />
+										</la:link>
+										<la:link href="../createnew"
+											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-plus"></i>
+											<la:message key="labels.suggest_elevate_word_link_create" />
+										</la:link>
+										<la:link href="../downloadpage"
+											styleClass="btn btn-primary btn-xs">
+											<i class="fa fa-download"></i>
+											<la:message key="labels.suggest_elevate_word_link_download" />
+										</la:link>
+										<la:link href="../uploadpage"
+											styleClass="btn btn-success btn-xs">
+											<i class="fa fa-upload"></i>
+											<la:message key="labels.suggest_elevate_word_link_upload" />
+										</la:link>
+									</div>
 								</div>
+								<!-- /.box-header -->
+								<div class="box-body">
+									<div class="form-group">
+										<label for="name" class="col-sm-12 control-label"><la:message
+												key="labels.suggest_elevate_word_file" /></label>
+									</div>
+								</div>
+								<!-- /.box-body -->
+								<div class="box-footer">
+									<button type="submit" class="btn btn-primary" name="download"
+										value="<la:message key="labels.suggest_elevate_word_button_download" />">
+										<i class="fa fa-download"></i>
+										<la:message key="labels.suggest_elevate_word_button_download" />
+									</button>
+								</div>
+								<!-- /.box-footer -->
 							</div>
-							<!-- /.box-header -->
-							<div class="box-body">
-								<la:form action="/admin/elevateword/">
-									<table class="table table-bordered">
-										<tbody>
-											<tr>
-												<th class="col-xs-2"><la:message
-														key="labels.suggest_elevate_word_file" /></th>
-												<td><input name="download"
-													value="<la:message key="labels.suggest_elevate_word_button_download"/>"
-													type="submit" /></td>
-											</tr>
-										</tbody>
-									</table>
-								</la:form>
-							</div>
-							<!-- /.box-body -->
+							<!-- /.box -->
 						</div>
-						<!-- /.box -->
 					</div>
-				</div>
+				</la:form>
 			</section>
 		</div>
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>

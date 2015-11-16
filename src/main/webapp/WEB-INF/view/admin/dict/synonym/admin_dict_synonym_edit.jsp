@@ -30,7 +30,8 @@
 								key="labels.dict_synonym_link_create" /></li>
 					</c:if>
 					<c:if test="${crudMode == 2}">
-						<li class="active"><la:message key="labels.dict_synonym_link_edit" /></li>
+						<li class="active"><la:message
+								key="labels.dict_synonym_link_edit" /></li>
 					</c:if>
 				</ol>
 			</section>
@@ -45,7 +46,6 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
@@ -56,33 +56,34 @@
 										</c:if>
 									</h3>
 									<div class="btn-group pull-right">
-										<la:link href="../" styleClass="btn btn-default btn-xs">
+										<la:link href="/admin/dict"
+											styleClass="btn btn-default btn-xs">
 											<i class="fa fa-book"></i>
 											<la:message key="labels.dict_list_link" />
 										</la:link>
-										<la:link href="list/1?dictId=${f:u(dictId)}"
+										<la:link href="../list/1?dictId=${f:u(dictId)}"
 											styleClass="btn btn-primary btn-xs">
 											<i class="fa fa-th-list"></i>
 											<la:message key="labels.dict_synonym_list_link" />
 										</la:link>
-										<la:link href="createnew/${f:u(dictId)}"
+										<la:link href="../createnew/${f:u(dictId)}"
 											styleClass="btn btn-success btn-xs">
 											<i class="fa fa-plus"></i>
 											<la:message key="labels.dict_synonym_link_create" />
 										</la:link>
-										<la:link href="downloadpage/${f:u(dictId)}"
+										<la:link href="../downloadpage/${f:u(dictId)}"
 											styleClass="btn btn-primary btn-xs">
 											<i class="fa fa-download"></i>
 											<la:message key="labels.dict_synonym_link_download" />
 										</la:link>
-										<la:link href="uploadpage/${f:u(dictId)}"
+										<la:link href="../uploadpage/${f:u(dictId)}"
 											styleClass="btn btn-success btn-xs">
 											<i class="fa fa-upload"></i>
 											<la:message key="labels.dict_synonym_link_upload" />
 										</la:link>
 									</div>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message --%>
 									<div>

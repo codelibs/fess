@@ -19,10 +19,7 @@
 					<la:message key="labels.dict_list_title" />
 				</h1>
 				<ol class="breadcrumb">
-					<li><la:link href="list">
-							<la:message key="labels.dict_list_link" />
-						</la:link></li>
-					<li><la:message key="labels.dict_synonym_list_link" /></li>
+					<li><la:message key="labels.dict_list_link" /></li>
 				</ol>
 			</section>
 			<section class="content">

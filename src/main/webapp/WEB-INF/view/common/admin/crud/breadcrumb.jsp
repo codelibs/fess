@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <ol class="breadcrumb">
-	<li><la:link href="list">
+	<li><la:link href="../list">
 			<la:message key="labels.crud_link_list" />
 		</la:link></li>
 	<c:if test="${crudMode == 1}">

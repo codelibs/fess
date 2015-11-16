@@ -18,27 +18,37 @@
 				<h1>
 					<la:message key="labels.suggest_elevate_word_configuration" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
+				<ol class="breadcrumb">
+					<li class="active"><la:link href="/admin/elevateword">
+							<la:message key="labels.suggest_elevate_word_link_list" />
+						</la:link></li>
+				</ol>
 			</section>
 			<section class="content">
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
 							<div class="box-header with-border">
-								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
+								<h3 class="box-title">
+									<la:message key="labels.suggest_elevate_word_link_list" />
+								</h3>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/elevateword"
 										styleClass="btn btn-default btn-xs">
+										<i class="fa fa-th-list"></i>
 										<la:message key="labels.suggest_elevate_word_link_list" />
 									</la:link>
 									<la:link href="createnew" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.suggest_elevate_word_link_create_new" />
+										<i class="fa fa-plus"></i>
+										<la:message key="labels.suggest_elevate_word_link_create" />
 									</la:link>
 									<la:link href="downloadpage"
 										styleClass="btn btn-primary btn-xs">
+										<i class="fa fa-download"></i>
 										<la:message key="labels.suggest_elevate_word_link_download" />
 									</la:link>
 									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
+										<i class="fa fa-upload"></i>
 										<la:message key="labels.suggest_elevate_word_link_upload" />
 									</la:link>
 								</div>

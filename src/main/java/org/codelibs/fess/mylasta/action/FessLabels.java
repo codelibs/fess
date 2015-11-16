@@ -954,9 +954,6 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_web_crawling_button_create_job = "{labels.web_crawling_button_create_job}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_web_crawling_link_create_new = "{labels.web_crawling_link_create_new}";
-
-    /** The key of the message: Create New */
     public static final String LABELS_web_crawling_link_create = "{labels.web_crawling_link_create}";
 
     /** The key of the message: Web Crawler - {0} */
@@ -1817,10 +1814,16 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_suggest_elevate_word_link_list = "{labels.suggest_elevate_word_link_list}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_suggest_elevate_word_link_create_new = "{labels.suggest_elevate_word_link_create_new}";
-
-    /** The key of the message: Create */
     public static final String LABELS_suggest_elevate_word_link_create = "{labels.suggest_elevate_word_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_suggest_elevate_word_link_edit = "{labels.suggest_elevate_word_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_suggest_elevate_word_link_delete = "{labels.suggest_elevate_word_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_suggest_elevate_word_link_details = "{labels.suggest_elevate_word_link_details}";
 
     /** The key of the message: Download */
     public static final String LABELS_suggest_elevate_word_link_download = "{labels.suggest_elevate_word_link_download}";
@@ -1865,10 +1868,16 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_suggest_bad_word_link_list = "{labels.suggest_bad_word_link_list}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_suggest_bad_word_link_create_new = "{labels.suggest_bad_word_link_create_new}";
-
-    /** The key of the message: Create */
     public static final String LABELS_suggest_bad_word_link_create = "{labels.suggest_bad_word_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_suggest_bad_word_link_edit = "{labels.suggest_bad_word_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_suggest_bad_word_link_delete = "{labels.suggest_bad_word_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_suggest_bad_word_link_details = "{labels.suggest_bad_word_link_details}";
 
     /** The key of the message: Download */
     public static final String LABELS_suggest_bad_word_link_download = "{labels.suggest_bad_word_link_download}";

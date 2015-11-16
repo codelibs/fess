@@ -13,15 +13,11 @@
 			<jsp:param name="menuCategoryType" value="suggest" />
 			<jsp:param name="menuType" value="suggestBadWord" />
 		</jsp:include>
-
 		<div class="content-wrapper">
-
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.suggest_bad_word_configuration" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/badword">
 							<la:message key="labels.suggest_bad_word_link_list" />
@@ -30,28 +26,33 @@
 								key="labels.suggest_bad_word_link_upload" /></a></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
-								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
+								<h3 class="box-title">
+									<la:message key="labels.suggest_bad_word_link_download" />
+								</h3>
 								<div class="btn-group pull-right">
 									<la:link href="/admin/badword"
 										styleClass="btn btn-default btn-xs">
+										<i class="fa fa-th-list"></i>
 										<la:message key="labels.suggest_bad_word_link_list" />
 									</la:link>
-									<la:link href="createnew" styleClass="btn btn-success btn-xs">
-										<la:message key="labels.suggest_bad_word_link_create_new" />
+									<la:link href="../createnew"
+										styleClass="btn btn-success btn-xs">
+										<i class="fa fa-plus"></i>
+										<la:message key="labels.suggest_bad_word_link_create" />
 									</la:link>
-									<la:link href="downloadpage"
+									<la:link href="../downloadpage"
 										styleClass="btn btn-primary btn-xs">
+										<i class="fa fa-download"></i>
 										<la:message key="labels.suggest_bad_word_link_download" />
 									</la:link>
-									<la:link href="uploadpage" styleClass="btn btn-success btn-xs">
+									<la:link href="../uploadpage"
+										styleClass="btn btn-success btn-xs">
+										<i class="fa fa-upload"></i>
 										<la:message key="labels.suggest_bad_word_link_upload" />
 									</la:link>
 								</div>
@@ -62,7 +63,7 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th class="col-xs-2"><la:message
+												<th class="col-sm-3"><la:message
 														key="labels.suggest_bad_word_file" /></th>
 												<td><input type="file" name="suggestBadWordFile" /></td>
 											</tr>
@@ -70,8 +71,9 @@
 										<tfoot>
 											<tr>
 												<td colspan="2">
-													<button type="submit" class="btn btn-primary" name="upload"
+													<button type="submit" class="btn btn-success" name="upload"
 														value="<la:message key="labels.suggest_bad_word_button_upload" />">
+														<i class="fa fa-upload"></i>
 														<la:message key="labels.suggest_bad_word_button_upload" />
 													</button>
 												</td>
