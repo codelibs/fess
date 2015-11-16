@@ -115,7 +115,6 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Execute
     public HtmlResponse upload(final DesignForm form) {
-        validate(form, messages -> {}, toMainHtml());
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
         if (StringUtil.isBlank(fileName)) {
@@ -166,6 +165,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             logger.error("Failed to write an image file: {}", fileName, e);
             throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), toMainHtml());
         }
+        validate(form, messages -> {}, toMainHtml());
         return redirect(getClass());
     }
 
@@ -188,7 +188,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
         }
-
+        validate(form, messages -> {}, toMainHtml());
         return asStream(file.getName()).stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
