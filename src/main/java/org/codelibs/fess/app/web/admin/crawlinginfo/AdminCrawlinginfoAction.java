@@ -28,7 +28,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
@@ -62,17 +61,15 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse deleteall(final EditForm form) {
-        validate(form, messages -> {}, toIndexHtml());
+        validate(form, messages -> {}, () -> asListHtml());
         crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
         saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -123,6 +120,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
@@ -131,7 +129,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         }).renderWith(data -> {
@@ -145,7 +143,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toIndexHtml());
+        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
         final String id = form.id;
         crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {
             crawlingSessionService.delete(entity);
@@ -165,13 +164,25 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toIndexHtml());
+            }, () -> asListHtml());
         }
     }
+    
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+    
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
+            data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
+        }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(crawlingSessionPager, form, op -> op.include("id"));
+            });
+        });
+    }
 
-    protected VaErrorHook toIndexHtml() {
-        return () -> {
-            return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp);
-        };
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp);
     }
 }

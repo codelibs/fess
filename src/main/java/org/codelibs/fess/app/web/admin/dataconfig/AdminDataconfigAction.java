@@ -39,10 +39,8 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author codelibs
@@ -79,10 +77,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -127,9 +123,9 @@ public class AdminDataconfigAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp).useForm(CreateForm.class, op -> {
+        saveToken();
+        return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -143,36 +139,30 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminDataconfig_AdminDataconfigDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminDataconfig_AdminDataconfigEditJsp;
-            break;
-        }
-        form.crudMode = CrudMode.EDIT;
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         dataConfigService.getDataConfig(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next).renderWith(data -> {
-            registerRolesAndLabels(data);
-            registerHandlerNames(data);
-        });
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     @Execute
     public HtmlResponse createnewjob(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
+        saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
                 org.codelibs.fess.app.web.admin.scheduler.CreateForm.class,
                 op -> {
@@ -198,7 +188,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminDataconfig_AdminDataconfigDetailsJsp).useForm(EditForm.class, op -> {
+        saveToken();
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 dataConfigService.getDataConfig(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -206,7 +197,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         }).renderWith(data -> {
@@ -221,12 +212,13 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
         getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -234,12 +226,13 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
         getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -247,13 +240,14 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        verifyToken(() -> asDetailsHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
         final String id = form.id;
         dataConfigService.getDataConfig(id).ifPresent(entity -> {
             dataConfigService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -318,16 +312,30 @@ public class AdminDataconfigAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp).renderWith(data -> {
-                registerRolesAndLabels(data);
-                registerHandlerNames(data);
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
+            data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager));
+        }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(dataConfigPager, form, op -> op.include("id"));
             });
-        };
+        });
     }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminDataconfig_AdminDataconfigDetailsJsp);
+    }
+
 }
