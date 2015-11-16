@@ -222,7 +222,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createDataConfig(form).ifPresent(entity -> {
+        getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -235,7 +235,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createDataConfig(form).ifPresent(entity -> {
+        getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -283,7 +283,7 @@ public class AdminDataconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<DataConfig> createDataConfig(final CreateForm form) {
+    protected OptionalEntity<DataConfig> getDataConfig(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

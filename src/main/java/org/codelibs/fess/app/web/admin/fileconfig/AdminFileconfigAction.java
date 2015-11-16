@@ -210,7 +210,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createFileConfig(form).ifPresent(entity -> {
+        getFileConfig(form).ifPresent(entity -> {
             fileConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -223,7 +223,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createFileConfig(form).ifPresent(entity -> {
+        getFileConfig(form).ifPresent(entity -> {
             fileConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -271,7 +271,7 @@ public class AdminFileconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<FileConfig> createFileConfig(final CreateForm form) {
+    protected OptionalEntity<FileConfig> getFileConfig(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

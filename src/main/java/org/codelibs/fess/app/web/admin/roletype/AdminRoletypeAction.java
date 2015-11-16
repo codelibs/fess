@@ -171,7 +171,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createRoleType(form).ifPresent(entity -> {
+        getRoleType(form).ifPresent(entity -> {
             roleTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -184,7 +184,7 @@ public class AdminRoletypeAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createRoleType(form).ifPresent(entity -> {
+        getRoleType(form).ifPresent(entity -> {
             roleTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -232,7 +232,7 @@ public class AdminRoletypeAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<RoleType> createRoleType(final CreateForm form) {
+    protected OptionalEntity<RoleType> getRoleType(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

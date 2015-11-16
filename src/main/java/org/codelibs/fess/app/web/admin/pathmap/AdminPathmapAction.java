@@ -172,7 +172,7 @@ public class AdminPathmapAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createPathMapping(form).ifPresent(entity -> {
+        getPathMapping(form).ifPresent(entity -> {
             pathMappingService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -185,7 +185,7 @@ public class AdminPathmapAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createPathMapping(form).ifPresent(entity -> {
+        getPathMapping(form).ifPresent(entity -> {
             pathMappingService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -233,7 +233,7 @@ public class AdminPathmapAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<PathMapping> createPathMapping(final CreateForm form) {
+    protected OptionalEntity<PathMapping> getPathMapping(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

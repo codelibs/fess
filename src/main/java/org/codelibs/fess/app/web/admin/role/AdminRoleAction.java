@@ -173,7 +173,7 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createRole(form).ifPresent(entity -> {
+        getRole(form).ifPresent(entity -> {
             roleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -186,7 +186,7 @@ public class AdminRoleAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createRole(form).ifPresent(entity -> {
+        getRole(form).ifPresent(entity -> {
             roleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -233,7 +233,7 @@ public class AdminRoleAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<Role> createRole(final CreateForm form) {
+    protected OptionalEntity<Role> getRole(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;

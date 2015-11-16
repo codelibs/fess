@@ -164,7 +164,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
-        createBoostDocumentRule(form).ifPresent(entity -> {
+        getBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -178,7 +178,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
-        createBoostDocumentRule(form).ifPresent(entity -> {
+        getBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -228,7 +228,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<BoostDocumentRule> createBoostDocumentRule(final CreateForm form) {
+    protected OptionalEntity<BoostDocumentRule> getBoostDocumentRule(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

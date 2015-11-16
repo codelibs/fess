@@ -214,7 +214,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createWebConfig(form).ifPresent(entity -> {
+        getWebConfig(form).ifPresent(entity -> {
             webConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -227,7 +227,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createWebConfig(form).ifPresent(entity -> {
+        getWebConfig(form).ifPresent(entity -> {
             webConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -275,7 +275,7 @@ public class AdminWebconfigAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<WebConfig> createWebConfig(final CreateForm form) {
+    protected OptionalEntity<WebConfig> getWebConfig(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

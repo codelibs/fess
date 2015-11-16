@@ -226,7 +226,7 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createSuggestBadWord(form).ifPresent(entity -> {
+        getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.addBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -240,7 +240,7 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createSuggestBadWord(form).ifPresent(entity -> {
+        getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.storeAllBadWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -347,7 +347,7 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SuggestBadWord> createSuggestBadWord(final CreateForm form) {
+    protected OptionalEntity<SuggestBadWord> getSuggestBadWord(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

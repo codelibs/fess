@@ -177,7 +177,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createScheduledJob(form).ifPresent(entity -> {
+        getScheduledJob(form).ifPresent(entity -> {
             scheduledJobService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -190,7 +190,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createScheduledJob(form).ifPresent(entity -> {
+        getScheduledJob(form).ifPresent(entity -> {
             scheduledJobService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -290,7 +290,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ScheduledJob> createScheduledJob(final CreateForm form) {
+    protected OptionalEntity<ScheduledJob> getScheduledJob(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

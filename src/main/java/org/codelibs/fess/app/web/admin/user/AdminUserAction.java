@@ -205,7 +205,7 @@ public class AdminUserAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         verifyPassword(form);
         storePassword(form);
-        createUser(form).ifPresent(entity -> {
+        getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -222,7 +222,7 @@ public class AdminUserAction extends FessAdminAction {
         if (StringUtil.isNotBlank(form.password)) {
             storePassword(form);
         }
-        createUser(form).ifPresent(entity -> {
+        getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -269,7 +269,7 @@ public class AdminUserAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<User> createUser(final CreateForm form) {
+    protected OptionalEntity<User> getUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
             sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
