@@ -194,7 +194,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createRequestHeader(form).ifPresent(entity -> {
+        getRequestHeader(form).ifPresent(entity -> {
             requestHeaderService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -207,7 +207,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createRequestHeader(form).ifPresent(entity -> {
+        getRequestHeader(form).ifPresent(entity -> {
             requestHeaderService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -255,7 +255,7 @@ public class AdminReqheaderAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<RequestHeader> createRequestHeader(final CreateForm form) {
+    protected OptionalEntity<RequestHeader> getRequestHeader(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

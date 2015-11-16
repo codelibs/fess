@@ -46,10 +46,8 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaResponseUtil;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author Keiichi Watanabe
@@ -83,10 +81,8 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -131,9 +127,9 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        return asHtml(path_AdminBadword_AdminBadwordEditJsp).useForm(CreateForm.class, op -> {
+        saveToken();
+        return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -142,27 +138,23 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminBadword_AdminBadwordDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminBadword_AdminBadwordEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next);
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     // -----------------------------------------------------
@@ -171,7 +163,8 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
-        return asHtml(path_AdminBadword_AdminBadwordDetailsJsp).useForm(EditForm.class, op -> {
+        saveToken();
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -179,7 +172,7 @@ public class AdminBadwordAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         });
@@ -189,14 +182,14 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse downloadpage(final SearchForm form) {
-        return asHtml(path_AdminBadword_AdminBadwordDownloadJsp);
+        saveToken();
+        return asDownloadHtml();
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse download(final SearchForm form) {
+        verifyTokenKeep(() -> downloadpage(form));
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
@@ -207,16 +200,16 @@ public class AdminBadwordAction extends FessAdminAction {
         } catch (final Exception e) {
             e.printStackTrace();
         }
-        return asHtml(path_AdminBadword_AdminBadwordDownloadJsp);
+        return redirect(getClass());
     }
 
     // -----------------------------------------------------
     //                                                Upload
     //                                               -------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse uploadpage(final UploadForm form) {
-        return asHtml(path_AdminBadword_AdminBadwordUploadJsp);
+        saveToken();
+        return asUploadHtml();
     }
 
     // -----------------------------------------------------
@@ -225,13 +218,14 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
-        createSuggestBadWord(form).ifPresent(entity -> {
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
+        getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.addBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -239,13 +233,14 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
-        createSuggestBadWord(form).ifPresent(entity -> {
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
+        getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.storeAllBadWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -253,21 +248,22 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
             suggestBadWordService.delete(entity);
             suggestHelper.deleteBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse upload(final UploadForm form) {
+        verifyToken(() -> uploadpage(form));
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
@@ -319,6 +315,7 @@ public class AdminBadwordAction extends FessAdminAction {
             }
         }
         saveInfo(messages -> messages.addSuccessUploadSuggestBadWord(GLOBAL));
+        saveToken();
         return redirect(getClass());
     }
 
@@ -347,7 +344,7 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SuggestBadWord> createSuggestBadWord(final CreateForm form) {
+    protected OptionalEntity<SuggestBadWord> getSuggestBadWord(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -365,13 +362,37 @@ public class AdminBadwordAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminBadword_AdminBadwordEditJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
+            data.register("suggestBadWordItems", suggestBadWordService.getSuggestBadWordList(suggestBadWordPager));
+        }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(suggestBadWordPager, form, op -> op.include("id"));
+            });
+        });
     }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminBadword_AdminBadwordEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminBadword_AdminBadwordDetailsJsp);
+    }
+
+    private HtmlResponse asUploadHtml() {
+        return asHtml(path_AdminBadword_AdminBadwordUploadJsp);
+    }
+
+    private HtmlResponse asDownloadHtml() {
+        return asHtml(path_AdminBadword_AdminBadwordDownloadJsp);
+    }
+
 }

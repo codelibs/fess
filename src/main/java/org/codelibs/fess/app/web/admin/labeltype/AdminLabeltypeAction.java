@@ -181,7 +181,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createLabelType(form).ifPresent(entity -> {
+        getLabelType(form).ifPresent(entity -> {
             labelTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -194,7 +194,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createLabelType(form).ifPresent(entity -> {
+        getLabelType(form).ifPresent(entity -> {
             labelTypeService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -243,7 +243,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<LabelType> createLabelType(final CreateForm form) {
+    protected OptionalEntity<LabelType> getLabelType(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

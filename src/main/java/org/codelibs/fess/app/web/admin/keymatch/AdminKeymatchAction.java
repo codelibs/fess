@@ -172,7 +172,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createKeyMatch(form).ifPresent(entity -> {
+        getKeyMatch(form).ifPresent(entity -> {
             keyMatchService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             ComponentUtil.getKeyMatchHelper().update();
@@ -186,7 +186,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createKeyMatch(form).ifPresent(entity -> {
+        getKeyMatch(form).ifPresent(entity -> {
             keyMatchService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             ComponentUtil.getKeyMatchHelper().update();
@@ -237,7 +237,7 @@ public class AdminKeymatchAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<KeyMatch> createKeyMatch(final CreateForm form) {
+    protected OptionalEntity<KeyMatch> getKeyMatch(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

@@ -193,7 +193,7 @@ public class AdminWebauthAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createWebAuthentication(form).ifPresent(entity -> {
+        getWebAuthentication(form).ifPresent(entity -> {
             webAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -206,7 +206,7 @@ public class AdminWebauthAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createWebAuthentication(form).ifPresent(entity -> {
+        getWebAuthentication(form).ifPresent(entity -> {
             webAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -254,7 +254,7 @@ public class AdminWebauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<WebAuthentication> createWebAuthentication(final CreateForm form) {
+    protected OptionalEntity<WebAuthentication> getWebAuthentication(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

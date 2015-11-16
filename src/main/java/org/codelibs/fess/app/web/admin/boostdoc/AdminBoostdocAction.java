@@ -162,9 +162,9 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
-        createBoostDocumentRule(form).ifPresent(entity -> {
+        verifyToken(() -> asEditHtml());
+        getBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -176,9 +176,9 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
-        createBoostDocumentRule(form).ifPresent(entity -> {
+        verifyToken(() -> asEditHtml());
+        getBoostDocumentRule(form).ifPresent(entity -> {
             boostDocumentRuleService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -190,8 +190,8 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         boostDocumentRuleService.getBoostDocumentRule(id).ifPresent(entity -> {
             boostDocumentRuleService.delete(entity);
@@ -228,7 +228,7 @@ public class AdminBoostdocAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<BoostDocumentRule> createBoostDocumentRule(final CreateForm form) {
+    protected OptionalEntity<BoostDocumentRule> getBoostDocumentRule(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {

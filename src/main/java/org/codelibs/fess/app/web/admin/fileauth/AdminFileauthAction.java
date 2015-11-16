@@ -192,7 +192,7 @@ public class AdminFileauthAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        createFileAuthentication(form).ifPresent(entity -> {
+        getFileAuthentication(form).ifPresent(entity -> {
             fileAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -205,7 +205,7 @@ public class AdminFileauthAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
-        createFileAuthentication(form).ifPresent(entity -> {
+        getFileAuthentication(form).ifPresent(entity -> {
             fileAuthenticationService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -253,7 +253,7 @@ public class AdminFileauthAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<FileAuthentication> createFileAuthentication(final CreateForm form) {
+    protected OptionalEntity<FileAuthentication> getFileAuthentication(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
