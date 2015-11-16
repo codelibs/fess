@@ -140,7 +140,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-                kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
+        kuromojiService.getKuromojiItem(form.dictId, form.id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asListHtml(form.dictId));
@@ -199,8 +199,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public ActionResponse download(final DownloadForm form) {
-        verifyTokenKeep(() -> downloadpage(form.dictId));
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
+        verifyTokenKeep(() -> downloadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).stream(out -> {
                 try (InputStream inputStream = file.getInputStream()) {
@@ -234,8 +234,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse upload(final UploadForm form) {
-        verifyToken(() -> uploadpage(form.dictId));
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
+        verifyToken(() -> uploadpage(form.dictId));
         return kuromojiService.getKuromojiFile(form.dictId).map(file -> {
             try (InputStream inputStream = form.kuromojiFile.getInputStream()) {
                 file.update(inputStream);
@@ -259,8 +259,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         createKuromojiItem(form).ifPresent(entity -> {
             kuromojiService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -273,8 +273,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         createKuromojiItem(form).ifPresent(entity -> {
             kuromojiService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -359,7 +359,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             });
         });
     }
-    
+
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiEditJsp);
     }

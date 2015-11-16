@@ -138,7 +138,6 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     @Execute
-
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -190,7 +189,7 @@ public class AdminBadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse download(final SearchForm form) {
-        verifyTokenKeep(() -> asDownloadHtml());
+        verifyTokenKeep(() -> downloadpage(form));
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
@@ -219,8 +218,8 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.addBadWord(entity.getSuggestWord());
@@ -234,8 +233,8 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getSuggestBadWord(form).ifPresent(entity -> {
             suggestBadWordService.store(entity);
             suggestHelper.storeAllBadWords();
@@ -249,8 +248,8 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
             suggestBadWordService.delete(entity);
@@ -264,7 +263,7 @@ public class AdminBadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse upload(final UploadForm form) {
-        verifyToken(() -> asUploadHtml());
+        verifyToken(() -> uploadpage(form));
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
@@ -379,7 +378,6 @@ public class AdminBadwordAction extends FessAdminAction {
             });
         });
     }
-
 
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminBadword_AdminBadwordEditJsp);

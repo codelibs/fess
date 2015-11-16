@@ -158,8 +158,8 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse createnewjob(final EditForm form) {
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
         saveToken();
@@ -212,8 +212,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -226,8 +226,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        verifyToken(() -> asEditHtml());
         validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getDataConfig(form).ifPresent(entity -> {
             dataConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -240,8 +240,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         dataConfigService.getDataConfig(id).ifPresent(entity -> {
             dataConfigService.delete(entity);

@@ -143,8 +143,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {
             crawlingSessionService.delete(entity);
@@ -167,15 +167,15 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
             }, () -> asListHtml());
         }
     }
-    
+
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
-    
+
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
-        }).useForm(SearchForm.class, setup -> {
+            }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(crawlingSessionPager, form, op -> op.include("id"));
             });
