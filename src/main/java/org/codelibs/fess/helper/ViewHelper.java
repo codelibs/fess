@@ -109,9 +109,9 @@ public class ViewHelper implements Serializable {
 
     public String originalHighlightTagPost = "</em>";
 
-    public String highlightTagPre = "<em>";
+    public String highlightTagPre = "<strong>";
 
-    public String highlightTagPost = "</em>";
+    public String highlightTagPost = "</strong>";
 
     protected boolean useSession = true;
 
