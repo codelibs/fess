@@ -17,10 +17,7 @@ package org.codelibs.fess.helper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -32,11 +29,13 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv;
 import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
+import org.codelibs.fess.suggest.entity.ElevateWord;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.index.contents.document.DocumentReader;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
@@ -66,7 +65,7 @@ public class SuggestHelper {
 
     public String[] roleFieldNames = { "role" };
 
-    public String[] contentsIndex = { "content", "title" };
+    public String[] contentsIndexFieldNames = { "content", "title" };
 
     private static final String TEXT_SEP = " ";
 
@@ -81,7 +80,7 @@ public class SuggestHelper {
             fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
             suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentIndex());
             suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-            for (final String field : contentsIndex) {
+            for (final String field : contentsIndexFieldNames) {
                 suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
             }
             suggester.createIndexIfNothing();
@@ -167,40 +166,44 @@ public class SuggestHelper {
     }
 
     public void storeAllElevateWords() {
-        // TODO
-        //        suggestService.deleteAllElevateWords();
-        //
-        //        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
-        //            cb.query().setDeletedBy_IsNull();
-        //        });
-        //        for (final SuggestElevateWord suggestElevateWord : list) {
-        //            final String word = suggestElevateWord.getSuggestWord();
-        //            final String reading = suggestElevateWord.getReading();
-        //            final String labelStr = suggestElevateWord.getTargetLabel();
-        //            final String roleStr = suggestElevateWord.getTargetRole();
-        //            final long boost = suggestElevateWord.getBoost().longValue();
-        //
-        //            addElevateWord(word, reading, labelStr, roleStr, boost, false);
-        //        }
-        //        suggestService.commit();
-    }
+        deleteAllBadWords();
 
-    public void addElevateWord(final String word, final String reading, final String labels, final String roles, final long boost) {
-        addElevateWord(word, reading, labels, roles, boost, true);
-    }
-
-    public void addElevateWord(final String word, final String reading, final String labels, final String roles, final long boost,
-            final boolean commit) {
-        final List<SuggestBadWord> badWordList = suggestBadWordBhv.selectList(badWordCB -> {
-            badWordCB.query().setSuggestWord_Equal(word);
+        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+            cb.query().matchAll();
         });
-        if (badWordList.size() > 0) {
-            return;
-        }
 
+        for (final SuggestElevateWord elevateWord : list) {
+            addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getTargetLabel(),
+                    elevateWord.getTargetRole(), elevateWord.getBoost(), false);
+        }
+        suggester.refresh();
+    }
+
+    public void deleteAllElevateWord() {
+        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+            cb.query().matchAll();
+        });
+
+        for (final SuggestElevateWord elevateWord : list) {
+            suggester.indexer().deleteElevateWord(elevateWord.getSuggestWord());
+        }
+        suggester.refresh();
+    }
+
+    public void deleteElevateWord(final String word) {
+        suggester.indexer().deleteElevateWord(word);
+        suggester.refresh();
+    }
+
+    public void addElevateWord(final String word, final String reading, final String tags, final String roles, final float boost) {
+        addElevateWord(word, reading, tags, roles, boost, true);
+    }
+
+    public void addElevateWord(final String word, final String reading, final String tags, final String roles, final float boost,
+            final boolean commit) {
         final List<String> labelList = new ArrayList<String>();
-        if (StringUtil.isNotBlank(labels)) {
-            final String[] array = labels.trim().split(",");
+        if (StringUtil.isNotBlank(tags)) {
+            final String[] array = tags.trim().split(",");
             for (final String label : array) {
                 labelList.add(label);
             }
@@ -213,23 +216,11 @@ public class SuggestHelper {
             }
         }
 
-        // TODO
-        //        suggestService.addElevateWord(word, reading, labelList, roleList, boost);
-        //
-        //        if (commit) {
-        //            suggestService.commit();
-        //        }
+        suggester.indexer().addElevateWord(
+                new ElevateWord(word, boost, Collections.singletonList(reading), Arrays.asList(contentFieldNames), labelList, roleList));
     }
 
     public void deleteAllBadWords() {
-        final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
-            cb.query().matchAll();
-        });
-        final Set<String> badWords = new HashSet<>();
-        for (final SuggestBadWord suggestBadWord : list) {
-            final String word = suggestBadWord.getSuggestWord();
-            badWords.add(word);
-        }
         suggester.settings().badword().deleteAll();
     }
 

@@ -39,6 +39,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -66,6 +67,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     private SystemHelper systemHelper;
     @Resource
     protected DynamicProperties crawlerProperties;
+    @Resource
+    protected SuggestHelper suggestHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -223,10 +226,13 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
-        getSuggestElevateWord(form).ifPresent(entity -> {
-            suggestElevateWordService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getSuggestElevateWord(form).ifPresent(
+                entity -> {
+                    suggestElevateWordService.store(entity);
+                    suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getTargetLabel(),
+                            entity.getTargetRole(), entity.getBoost());
+                    saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
         });
         return redirect(getClass());
@@ -238,6 +244,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         validate(form, messages -> {}, toEditHtml());
         getSuggestElevateWord(form).ifPresent(entity -> {
             suggestElevateWordService.store(entity);
+            suggestHelper.deleteAllElevateWord();
+            suggestHelper.storeAllElevateWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
@@ -252,6 +260,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         final String id = form.id;
         suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
             suggestElevateWordService.delete(entity);
+            suggestHelper.deleteElevateWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
