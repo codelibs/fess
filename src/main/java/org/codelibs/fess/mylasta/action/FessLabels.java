@@ -1112,8 +1112,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Reset */
     public static final String LABELS_crawling_session_reset = "{labels.crawling_session_reset}";
 
-    /** The key of the message: List */
-    public static final String LABELS_crawling_session_link_list = "{labels.crawling_session_link_list}";
+    /** The key of the message: Crawling Information */
+    public static final String LABELS_crawling_session_link_top = "{labels.crawling_session_link_top}";
 
     /** The key of the message: Details */
     public static final String LABELS_crawling_session_link_details = "{labels.crawling_session_link_details}";
@@ -1135,6 +1135,48 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Cancel */
     public static final String LABELS_crawling_session_delete_all_cancel = "{labels.crawling_session_delete_all_cancel}";
+
+    /** The key of the message: Crawler start time */
+    public static final String LABELS_crawling_session_CrawlerStartTime = "{labels.crawling_session_CrawlerStartTime}";
+
+    /** The key of the message: Crawler end time */
+    public static final String LABELS_crawling_session_CrawlerEndTime = "{labels.crawling_session_CrawlerEndTime}";
+
+    /** The key of the message: Crawler exec time */
+    public static final String LABELS_crawling_session_CrawlerExecTime = "{labels.crawling_session_CrawlerExecTime}";
+
+    /** The key of the message: Crawler status */
+    public static final String LABELS_crawling_session_CrawlerStatus = "{labels.crawling_session_CrawlerStatus}";
+
+    /** The key of the message: Crawl exec time (Web/File system) */
+    public static final String LABELS_crawling_session_WebFsCrawlExecTime = "{labels.crawling_session_WebFsCrawlExecTime}";
+
+    /** The key of the message: Crawl start time (Web/File system) */
+    public static final String LABELS_crawling_session_WebFsCrawlStartTime = "{labels.crawling_session_WebFsCrawlStartTime}";
+
+    /** The key of the message: Crawl end time (Web/File system) */
+    public static final String LABELS_crawling_session_WebFsCrawlEndTime = "{labels.crawling_session_WebFsCrawlEndTime}";
+
+    /** The key of the message: Index exec time (Web/File system) */
+    public static final String LABELS_crawling_session_WebFsIndexExecTime = "{labels.crawling_session_WebFsIndexExecTime}";
+
+    /** The key of the message: Index size (Web/File system) */
+    public static final String LABELS_crawling_session_WebFsIndexSize = "{labels.crawling_session_WebFsIndexSize}";
+
+    /** The key of the message: Crawl exec time (Data store) */
+    public static final String LABELS_crawling_session_DataCrawlExecTime = "{labels.crawling_session_DataCrawlExecTime}";
+
+    /** The key of the message: Crawl start time (Data store) */
+    public static final String LABELS_crawling_session_DataCrawlStartTime = "{labels.crawling_session_DataCrawlStartTime}";
+
+    /** The key of the message: Crawl end time (Data store) */
+    public static final String LABELS_crawling_session_DataCrawlEndTime = "{labels.crawling_session_DataCrawlEndTime}";
+
+    /** The key of the message: Index exec time (Data store) */
+    public static final String LABELS_crawling_session_DataIndexExecTime = "{labels.crawling_session_DataIndexExecTime}";
+
+    /** The key of the message: Index size (Data store) */
+    public static final String LABELS_crawling_session_DataIndexSize = "{labels.crawling_session_DataIndexSize}";
 
     /** The key of the message: Web Authentication */
     public static final String LABELS_web_authentication_configuration = "{labels.web_authentication_configuration}";
@@ -1621,7 +1663,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: - */
     public static final String LABELS_scheduledjob_nojob = "{labels.scheduledjob_nojob}";
 
-    /** The key of the message: Start */
+    /** The key of the message: Start Now */
     public static final String LABELS_scheduledjob_button_start = "{labels.scheduledjob_button_start}";
 
     /** The key of the message: Stop */
