@@ -109,10 +109,15 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="targetLabel" class="col-sm-3 control-label"><la:message
-												key="labels.suggest_elevate_word_target_label" /></label>
+										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
+												key="labels.label_type" /></label>
 										<div class="col-sm-9">
-											<la:text property="targetLabel" styleClass="form-control" />
+											<la:select property="labelTypeIds" multiple="true"
+												styleClass="form-control">
+												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
+													<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
+												</c:forEach>
+											</la:select>
 										</div>
 									</div>
 									<div class="form-group">

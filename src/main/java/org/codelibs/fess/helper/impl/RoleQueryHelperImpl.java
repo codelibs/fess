@@ -17,14 +17,14 @@ package org.codelibs.fess.helper.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Base64;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;

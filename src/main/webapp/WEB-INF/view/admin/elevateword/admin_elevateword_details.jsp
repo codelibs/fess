@@ -106,10 +106,21 @@
 												<td>${f:h(targetRole)}<la:hidden property="targetRole" /></td>
 											</tr>
 											<tr>
-												<th><la:message
-														key="labels.suggest_elevate_word_target_label" /></th>
-												<td>${f:h(targetLabel)}<la:hidden
-														property="targetLabel" /></td>
+												<th><la:message key="labels.label_type" /></th>
+												<td><c:forEach var="l" varStatus="s"
+														items="${labelTypeItems}">
+														<c:forEach var="ltid" varStatus="s"
+															items="${labelTypeIds}">
+															<c:if test="${ltid==l.id}">
+																${f:h(l.name)}<br />
+															</c:if>
+														</c:forEach>
+													</c:forEach> <la:select property="labelTypeIds" multiple="true"
+														style="display:none;">
+														<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
+															<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
+														</c:forEach>
+													</la:select></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_boost" /></th>

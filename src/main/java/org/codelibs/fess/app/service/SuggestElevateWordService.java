@@ -33,7 +33,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SuggestElevateWordPager;
 import org.codelibs.fess.es.config.cbean.SuggestElevateWordCB;
 import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
+import org.codelibs.fess.es.config.exbhv.SuggestElevateWordToLabelBhv;
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.config.exentity.SuggestElevateWordToLabel;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -48,6 +50,9 @@ public class SuggestElevateWordService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Log log = LogFactory.getLog(SuggestElevateWordService.class);
+
+    @Resource
+    protected SuggestElevateWordToLabelBhv suggestElevateWordToLabelBhv;
 
     @Resource
     protected SuggestElevateWordBhv suggestElevateWordBhv;
@@ -73,16 +78,79 @@ public class SuggestElevateWordService implements Serializable {
     }
 
     public OptionalEntity<SuggestElevateWord> getSuggestElevateWord(final String id) {
-        return suggestElevateWordBhv.selectByPK(id);
+        return suggestElevateWordBhv.selectByPK(id).map(entity -> {
+
+            final List<SuggestElevateWordToLabel> wctltmList = suggestElevateWordToLabelBhv.selectList(wctltmCb -> {
+                wctltmCb.query().setSuggestElevateWordId_Equal(entity.getId());
+            });
+            if (!wctltmList.isEmpty()) {
+                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
+                for (final SuggestElevateWordToLabel mapping : wctltmList) {
+                    labelTypeIds.add(mapping.getLabelTypeId());
+                }
+                entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
+            }
+            return entity;
+        });
     }
 
     public void store(final SuggestElevateWord suggestElevateWord) {
+        final boolean isNew = suggestElevateWord.getId() == null;
+        final String[] labelTypeIds = suggestElevateWord.getLabelTypeIds();
         setupStoreCondition(suggestElevateWord);
 
         suggestElevateWordBhv.insertOrUpdate(suggestElevateWord, op -> {
             op.setRefresh(true);
         });
-
+        final String suggestElevateWordId = suggestElevateWord.getId();
+        if (isNew) {
+            // Insert
+            if (labelTypeIds != null) {
+                final List<SuggestElevateWordToLabel> wctltmList = new ArrayList<SuggestElevateWordToLabel>();
+                for (final String id : labelTypeIds) {
+                    final SuggestElevateWordToLabel mapping = new SuggestElevateWordToLabel();
+                    mapping.setSuggestElevateWordId(suggestElevateWordId);
+                    mapping.setLabelTypeId(id);
+                    wctltmList.add(mapping);
+                }
+                suggestElevateWordToLabelBhv.batchInsert(wctltmList, op -> {
+                    op.setRefresh(true);
+                });
+            }
+        } else {
+            // Update
+            if (labelTypeIds != null) {
+                final List<SuggestElevateWordToLabel> list = suggestElevateWordToLabelBhv.selectList(wctltmCb -> {
+                    wctltmCb.query().setSuggestElevateWordId_Equal(suggestElevateWordId);
+                });
+                final List<SuggestElevateWordToLabel> newList = new ArrayList<SuggestElevateWordToLabel>();
+                final List<SuggestElevateWordToLabel> matchedList = new ArrayList<SuggestElevateWordToLabel>();
+                for (final String id : labelTypeIds) {
+                    boolean exist = false;
+                    for (final SuggestElevateWordToLabel mapping : list) {
+                        if (mapping.getLabelTypeId().equals(id)) {
+                            exist = true;
+                            matchedList.add(mapping);
+                            break;
+                        }
+                    }
+                    if (!exist) {
+                        // new
+                        final SuggestElevateWordToLabel mapping = new SuggestElevateWordToLabel();
+                        mapping.setSuggestElevateWordId(suggestElevateWordId);
+                        mapping.setLabelTypeId(id);
+                        newList.add(mapping);
+                    }
+                }
+                list.removeAll(matchedList);
+                suggestElevateWordToLabelBhv.batchInsert(newList, op -> {
+                    op.setRefresh(true);
+                });
+                suggestElevateWordToLabelBhv.batchDelete(list, op -> {
+                    op.setRefresh(true);
+                });
+            }
+        }
     }
 
     public void delete(final SuggestElevateWord suggestElevateWord) {

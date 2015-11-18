@@ -34,6 +34,7 @@ import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SuggestElevateWordPager;
+import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.SuggestElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -69,6 +70,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     protected DynamicProperties crawlerProperties;
     @Resource
     protected SuggestHelper suggestHelper;
+    @Resource
+    private LabelTypeService labelTypeService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -138,6 +141,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
             });
+        }).renderWith(data -> {
+            registerLabels(data);
         });
     }
 
@@ -162,7 +167,9 @@ public class AdminElevatewordAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
         });
-        return asHtml(next);
+        return asHtml(next).renderWith(data -> {
+            registerLabels(data);
+        });
     }
 
     // -----------------------------------------------------
@@ -182,6 +189,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
                 });
             });
+        }).renderWith(data -> {
+            registerLabels(data);
         });
     }
 
@@ -229,7 +238,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         getSuggestElevateWord(form).ifPresent(
                 entity -> {
                     suggestElevateWordService.store(entity);
-                    suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getTargetLabel(),
+                    suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
                             entity.getTargetRole(), entity.getBoost());
                     saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                 }).orElse(() -> {
@@ -358,6 +367,10 @@ public class AdminElevatewordAction extends FessAdminAction {
             copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
             return entity;
         });
+    }
+
+    protected void registerLabels(final RenderData data) {
+        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     // ===================================================================================

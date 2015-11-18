@@ -94,6 +94,9 @@
 			<arg>".fess_config/suggest_elevate_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/suggest_elevate_word_to_label"</arg>
+		</postConstruct>
+		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_authentication"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

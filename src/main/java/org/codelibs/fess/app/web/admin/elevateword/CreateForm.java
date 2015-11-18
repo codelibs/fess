@@ -31,6 +31,8 @@ public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public String[] labelTypeIds;
+
     @ValidateTypeFailure
     public Integer crudMode;
 

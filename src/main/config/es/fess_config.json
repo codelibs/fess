@@ -624,6 +624,21 @@
           }
         }
       },
+      "suggest_elevate_word_to_label" : {
+        "_all" : {
+          "enabled" : false
+        },
+        "properties" : {
+          "suggestElevateWordId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labelTypeId" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          }
+        }
+      },
       "suggest_elevate_word" : {
         "_all" : {
           "enabled" : false

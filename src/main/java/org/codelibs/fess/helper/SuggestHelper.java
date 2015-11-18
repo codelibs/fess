@@ -17,7 +17,10 @@ package org.codelibs.fess.helper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -173,7 +176,7 @@ public class SuggestHelper {
         });
 
         for (final SuggestElevateWord elevateWord : list) {
-            addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getTargetLabel(),
+            addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getLabelTypeValues(),
                     elevateWord.getTargetRole(), elevateWord.getBoost(), false);
         }
         suggester.refresh();
@@ -195,18 +198,15 @@ public class SuggestHelper {
         suggester.refresh();
     }
 
-    public void addElevateWord(final String word, final String reading, final String tags, final String roles, final float boost) {
+    public void addElevateWord(final String word, final String reading, final String[] tags, final String roles, final float boost) {
         addElevateWord(word, reading, tags, roles, boost, true);
     }
 
-    public void addElevateWord(final String word, final String reading, final String tags, final String roles, final float boost,
+    public void addElevateWord(final String word, final String reading, final String[] tags, final String roles, final float boost,
             final boolean commit) {
         final List<String> labelList = new ArrayList<String>();
-        if (StringUtil.isNotBlank(tags)) {
-            final String[] array = tags.trim().split(",");
-            for (final String label : array) {
-                labelList.add(label);
-            }
+        for (final String label : tags) {
+            labelList.add(label);
         }
         final List<String> roleList = new ArrayList<String>();
         if (StringUtil.isNotBlank(roles)) {

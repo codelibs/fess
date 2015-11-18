@@ -26,6 +26,7 @@
     <component name="roleTypeBhv" class="org.codelibs.fess.es.config.exbhv.RoleTypeBhv"/>
     <component name="scheduledJobBhv" class="org.codelibs.fess.es.config.exbhv.ScheduledJobBhv"/>
     <component name="suggestBadWordBhv" class="org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv"/>
+    <component name="suggestElevateWordToLabelBhv" class="org.codelibs.fess.es.config.exbhv.SuggestElevateWordToLabelBhv"/>
     <component name="suggestElevateWordBhv" class="org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv"/>
     <component name="webAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv"/>
     <component name="webConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv"/>
