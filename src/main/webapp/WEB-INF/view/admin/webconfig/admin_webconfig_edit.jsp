@@ -157,7 +157,7 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
+										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
 											<la:select property="labelTypeIds" multiple="true"
