@@ -82,7 +82,6 @@ public class SuggestJob {
 
         try {
             executeSuggestCreater();
-            ComponentUtil.getKeyMatchHelper().update();
         } catch (final FessSystemException e) {
             throw e;
         } catch (final Exception e) {

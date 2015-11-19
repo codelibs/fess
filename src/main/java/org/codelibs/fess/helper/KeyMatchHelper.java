@@ -15,27 +15,32 @@
  */
 package org.codelibs.fess.helper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.lastaflute.di.core.SingletonLaContainer;
 
 public class KeyMatchHelper {
-    protected volatile Map<String, String[]> keyMatchQueryMap = Collections.emptyMap();
-
-    protected ThreadLocal<List<String>> searchWordList = new ThreadLocal<>();
+    protected volatile Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = Collections.emptyMap();
 
     protected long reloadInterval = 1000L;
 
@@ -51,29 +56,32 @@ public class KeyMatchHelper {
     protected void reload(final long interval) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final KeyMatchService keyMatchService = SingletonLaContainer.getComponent(KeyMatchService.class);
-        final List<KeyMatch> list = keyMatchService.getAvailableKeyMatchList();
-        final Map<String, String[]> keyMatchQueryMap = new HashMap<String, String[]>(list.size());
-        for (final KeyMatch keyMatch : list) {
-            final List<Map<String, Object>> documentList = getDocumentList(keyMatch);
-            final List<String> docIdList = new ArrayList<String>();
-            for (final Map<String, Object> map : documentList) {
-                final String docId = (String) map.get(fessConfig.getIndexFieldDocId());
-                if (StringUtil.isNotBlank(docId)) {
-                    docIdList.add(fessConfig.getIndexFieldDocId() + ":" + docId + "^" + keyMatch.getBoost());
-                }
-            }
-            if (!docIdList.isEmpty()) {
-                keyMatchQueryMap.put(keyMatch.getTerm(), docIdList.toArray(new String[docIdList.size()]));
-            }
+        final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = new HashMap<>();
+        keyMatchService
+                .getAvailableKeyMatchList()
+                .stream()
+                .forEach(
+                        keyMatch -> {
+                            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                            getDocumentList(keyMatch).stream().map(doc -> {
+                                return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                            }).forEach(docId -> {
+                                boolQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                            });
 
-            if (reloadInterval > 0) {
-                try {
-                    Thread.sleep(reloadInterval);
-                } catch (final InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
+                            if (boolQuery.hasClauses()) {
+                                keyMatchQueryMap.put(toLowerCase(keyMatch.getTerm()),
+                                        new Pair<>(boolQuery, ScoreFunctionBuilders.weightFactorFunction(keyMatch.getBoost())));
+                            }
+
+                            if (reloadInterval > 0) {
+                                try {
+                                    Thread.sleep(reloadInterval);
+                                } catch (final InterruptedException e) {
+                                    // ignore
+                                }
+                            }
+                        });
         this.keyMatchQueryMap = keyMatchQueryMap;
     }
 
@@ -89,28 +97,6 @@ public class KeyMatchHelper {
         return documentList;
     }
 
-    public void clear() {
-        searchWordList.remove();
-    }
-
-    public void addSearchWord(final String word) {
-        final String[] values = keyMatchQueryMap.get(word);
-        if (values != null) {
-            List<String> list = searchWordList.get();
-            if (list == null) {
-                list = new ArrayList<>();
-                searchWordList.set(list);
-            }
-            for (final String value : values) {
-                list.add(value);
-            }
-        }
-    }
-
-    public List<String> getDocIdQueryList() {
-        return searchWordList.get();
-    }
-
     public long getReloadInterval() {
         return reloadInterval;
     }
@@ -118,4 +104,18 @@ public class KeyMatchHelper {
     public void setReloadInterval(final long reloadInterval) {
         this.reloadInterval = reloadInterval;
     }
+
+    public void buildQuery(List<String> keywordList, FunctionScoreQueryBuilder functionScoreQuery) {
+        keywordList.stream().forEach(keyword -> {
+            Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(keyword));
+            if (pair != null) {
+                functionScoreQuery.add(pair.getFirst(), pair.getSecond());
+            }
+        });
+    }
+
+    private String toLowerCase(String term) {
+        return term != null ? term.toLowerCase(Locale.ROOT) : term;
+    }
+
 }

@@ -760,6 +760,7 @@ public class FessEsClient implements Client {
         private int size = Constants.DEFAULT_PAGE_SIZE;
         private GeoInfo geoInfo;
         private FacetInfo facetInfo;
+        private boolean administrativeAccess = false;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
@@ -775,6 +776,7 @@ public class FessEsClient implements Client {
         }
 
         public SearchConditionBuilder administrativeAccess() {
+            administrativeAccess = true;
             return this;
         }
 
@@ -815,6 +817,9 @@ public class FessEsClient implements Client {
             }
 
             final QueryContext queryContext = queryHelper.build(query, context -> {
+                if (administrativeAccess) {
+                    context.skipRoleQuery();
+                }
                 // geo
                     if (geoInfo != null && geoInfo.isAvailable()) {
                         context.addQuery(boolQuery -> {

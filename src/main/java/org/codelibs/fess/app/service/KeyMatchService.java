@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.KeyMatchPager;
 import org.codelibs.fess.es.config.cbean.KeyMatchCB;
 import org.codelibs.fess.es.config.exbhv.KeyMatchBhv;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -37,9 +38,8 @@ public class KeyMatchService implements Serializable {
     @Resource
     protected KeyMatchBhv keyMatchBhv;
 
-    public KeyMatchService() {
-        super();
-    }
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<KeyMatch> getKeyMatchList(final KeyMatchPager keyMatchPager) {
 
@@ -113,6 +113,7 @@ public class KeyMatchService implements Serializable {
     public List<KeyMatch> getAvailableKeyMatchList() {
         return keyMatchBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.fetchFirst(fessConfig.getPageKeymatchMaxFetchSizeAsInteger());
         });
     }
 

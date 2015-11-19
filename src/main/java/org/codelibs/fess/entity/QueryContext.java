@@ -16,6 +16,7 @@
 package org.codelibs.fess.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,8 @@ public class QueryContext {
     private Set<String> highlightedQuerySet = null;
 
     private Map<String, List<String>> fieldLogMap = null;
+
+    private boolean disableRoleQuery = false;
 
     @SuppressWarnings("unchecked")
     public QueryContext(final String queryString, final boolean isQuery) {
@@ -114,6 +117,13 @@ public class QueryContext {
         list.add(text);
     }
 
+    public List<String> getDefaultKeyword() {
+        if (fieldLogMap != null) {
+            return fieldLogMap.getOrDefault(Constants.DEFAULT_FIELD, Collections.emptyList());
+        }
+        return Collections.emptyList();
+    }
+
     public void addHighlightedQuery(String text) {
         if (highlightedQuerySet != null) {
             highlightedQuerySet.add(text);
@@ -124,4 +134,11 @@ public class QueryContext {
         return queryString;
     }
 
+    public boolean roleQueryEnabled() {
+        return !disableRoleQuery;
+    }
+
+    public void skipRoleQuery() {
+        disableRoleQuery = true;
+    }
 }

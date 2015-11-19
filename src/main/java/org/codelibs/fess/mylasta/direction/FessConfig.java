@@ -140,6 +140,9 @@ public interface FessConfig extends FessEnv {
     String PAGE_DOCBOOST_MAX_FETCH_SIZE = "page.docboost.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
+    String PAGE_KEYMATCH_MAX_FETCH_SIZE = "page.keymatch.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
     String PAGE_ROLE_MAX_FETCH_SIZE = "page.role.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
@@ -609,6 +612,21 @@ public interface FessConfig extends FessEnv {
     Integer getPageDocboostMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.keymatch.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageKeymatchMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.keymatch.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageKeymatchMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'page.role.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1069,6 +1087,14 @@ public interface FessConfig extends FessEnv {
 
         public Integer getPageDocboostMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_DOCBOOST_MAX_FETCH_SIZE);
+        }
+
+        public String getPageKeymatchMaxFetchSize() {
+            return get(FessConfig.PAGE_KEYMATCH_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageKeymatchMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_KEYMATCH_MAX_FETCH_SIZE);
         }
 
         public String getPageRoleMaxFetchSize() {
