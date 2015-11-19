@@ -303,7 +303,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                                        ============
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminDesign_AdminDesignJsp);
+        return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     private HtmlResponse asEditHtml() {
