@@ -91,5 +91,6 @@
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/admin/admin.js')}"></script>
 </body>
 </html>
