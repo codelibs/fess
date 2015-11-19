@@ -1,5 +1,5 @@
 $(function() {
-	$('input[type="text"]:first', '.login-box,section.content').focus();
+	$('input[type="text"],select', '.login-box,section.content').first().focus();
 
 	$("section.content input").keypress(function(e) {
 		if (e.which == 13) {
