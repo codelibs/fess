@@ -18,7 +18,6 @@
 				<h1>
 					<la:message key="labels.joblog_title_details" />
 				</h1>
-				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 				<ol class="breadcrumb">
 					<li><la:link href="/admin/crawlinginfo">
 							<la:message key="labels.joblog_link_list" />
