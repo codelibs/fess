@@ -45,7 +45,8 @@
 								</div>
 								<div class="row">
 									<div class="col-sm-12">
-										<la:form styleClass="form-inline" action="/admin/crawlinginfo/">
+										<la:form styleClass="form-inline"
+											action="/admin/crawlinginfo/">
 											<div class="form-group">
 												<c:set var="ph_session_id">
 													<la:message key="labels.crawling_session_session_id_search" />
@@ -69,11 +70,10 @@
 								</div>
 								<%-- List --%>
 								<c:if test="${crawlingSessionPager.allRecordCount == 0}">
-									<div class="row top10">
+									<div class="row top20">
 										<div class="col-sm-12">
-											<p class="callout callout-info">
-												<la:message key="labels.list_could_not_find_crud_table" />
-											</p>
+											<i class="fa fa-info-circle text-light-blue"></i>
+											<la:message key="labels.list_could_not_find_crud_table" />
 										</div>
 									</div>
 								</c:if>

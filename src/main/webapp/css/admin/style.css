@@ -38,7 +38,7 @@
 	font-size: 13px;
 }
 
-button>i, a>i {
+.login-box i, section.content i {
 	margin-right: 0.2em;
 }
 

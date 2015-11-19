@@ -46,9 +46,12 @@
 									</div>
 									<%-- List --%>
 									<c:if test="${fileAuthenticationPager.allRecordCount == 0}">
-										<p class="callout callout-info">
-											<la:message key="labels.list_could_not_find_crud_table" />
-										</p>
+										<div class="row top10">
+											<div class="col-sm-12">
+												<i class="fa fa-info-circle text-light-blue"></i>
+												<la:message key="labels.list_could_not_find_crud_table" />
+											</div>
+										</div>
 									</c:if>
 									<c:if test="${fileAuthenticationPager.allRecordCount > 0}">
 										<table class="table table-bordered table-striped">

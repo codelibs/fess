@@ -39,9 +39,12 @@
 								</div>
 								<%-- List --%>
 								<c:if test="${dataConfigPager.allRecordCount == 0}">
-									<p class="callout callout-info">
-										<la:message key="labels.list_could_not_find_crud_table" />
-									</p>
+									<div class="row top10">
+										<div class="col-sm-12">
+											<i class="fa fa-info-circle text-light-blue"></i>
+											<la:message key="labels.list_could_not_find_crud_table" />
+										</div>
+									</div>
 								</c:if>
 								<c:if test="${dataConfigPager.allRecordCount > 0}">
 									<div class="row">
@@ -70,7 +73,8 @@
 												</tbody>
 											</table>
 											<c:set var="pager" value="${dataConfigPager}" scope="request" />
-											<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
+											<c:import
+												url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 										</div>
 									</div>
 								</c:if>
