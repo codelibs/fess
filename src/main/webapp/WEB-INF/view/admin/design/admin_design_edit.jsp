@@ -52,7 +52,7 @@
 									</div>
 									<%-- Box Footer --%>
 									<div class="box-footer">
-										<button type="submit" class="btn" name="back"
+										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.design_button_back" />">
 											<la:message key="labels.design_button_back" />
 										</button>

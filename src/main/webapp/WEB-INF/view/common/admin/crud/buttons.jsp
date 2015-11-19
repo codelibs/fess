@@ -1,6 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <c:if test="${crudMode == 1}">
-	<button type="submit" class="btn" name="list"
+	<button type="submit" class="btn btn-default" name="list"
 		value="<la:message key="labels.crud_button_back" />">
 		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
@@ -12,7 +12,7 @@
 	</button>
 </c:if>
 <c:if test="${crudMode == 2}">
-	<button type="submit" class="btn" name="edit" value="back">
+	<button type="submit" class="btn btn-default" name="edit" value="back">
 		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>
@@ -23,7 +23,7 @@
 	</button>
 </c:if>
 <c:if test="${crudMode == 4}">
-	<button type="submit" class="btn" name="list" value="back">
+	<button type="submit" class="btn btn-default" name="list" value="back">
 		<i class="fa fa-arrow-circle-left"></i>
 		<la:message key="labels.crud_button_back" />
 	</button>

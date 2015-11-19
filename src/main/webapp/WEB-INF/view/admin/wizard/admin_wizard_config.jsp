@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="wizard" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -27,22 +26,18 @@
 							key="labels.wizard_crawling_config_title" /></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<la:form action="/admin/wizard/" styleClass="form-horizontal">
 					<div class="row">
 						<div class="col-md-12">
 							<div class="box box-primary">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<la:message key="labels.wizard_crawling_setting_title" />
 									</h3>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-
 									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
@@ -51,7 +46,6 @@
 										<la:errors />
 									</div>
 									<%-- Message: END --%>
-
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="crawlingConfigName" class="col-sm-3 control-label"><la:message
@@ -84,10 +78,9 @@
 										</div>
 									</div>
 								</div>
-
-								<%-- Box Footer --%>
+								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn" name="index"
+									<button type="submit" class="btn btn-default" name="index"
 										value="<la:message key="labels.wizard_button_cancel"/>">
 										<la:message key="labels.wizard_button_cancel" />
 									</button>
@@ -104,16 +97,15 @@
 										<la:message key="labels.wizard_button_register_next" />
 									</button>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
-
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>

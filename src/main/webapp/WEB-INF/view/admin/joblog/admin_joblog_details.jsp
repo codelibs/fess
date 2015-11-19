@@ -101,7 +101,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn" name="back"
+									<button type="submit" class="btn btn-default" name="back"
 										value="<la:message key="labels.joblog_button_back" />">
 										<i class="fa fa-arrow-circle-left"></i>
 										<la:message key="labels.joblog_button_back" />

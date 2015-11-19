@@ -1,6 +1,13 @@
 $(function() {
 	$('input[type="text"]:first', '.login-box,section.content').focus();
 
+	$("section.content input").keypress(function(e) {
+		if (e.which == 13) {
+			// ignore enter key down
+			return false;
+		}
+	});
+
 	$('.table tr[data-href]').each(function() {
 		$(this).css('cursor', 'pointer').hover(function() {
 			$(this).addClass('active');

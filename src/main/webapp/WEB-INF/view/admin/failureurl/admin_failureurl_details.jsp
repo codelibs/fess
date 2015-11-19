@@ -118,7 +118,7 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn" name="list"
+										<button type="submit" class="btn btn-default" name="list"
 											value="<la:message key="labels.crud_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
@@ -130,7 +130,7 @@
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn" name="list"
+										<button type="submit" class="btn btn-default" name="list"
 											value="<la:message key="labels.crud_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />

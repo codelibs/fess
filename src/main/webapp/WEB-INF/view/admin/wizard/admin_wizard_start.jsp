@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="wizard" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -28,10 +27,7 @@
 							key="labels.wizard_start_crawling_title" /></li>
 				</ol>
 			</section>
-
-			<!-- Main content -->
 			<section class="content">
-
 				<la:form action="/admin/wizard/">
 					<div class="row">
 						<div class="col-md-12">
@@ -41,6 +37,7 @@
 										<la:message key="labels.wizard_start_crawler_title" />
 									</h3>
 								</div>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message: BEGIN --%>
 									<div>
@@ -50,11 +47,11 @@
 										<la:errors />
 									</div>
 									<%-- Message: END --%>
-
 									<p class="span8">
 										<la:message key="labels.wizard_start_crawling_desc" />
 									</p>
 								</div>
+								<!-- /.box-body -->
 								<div class="box-footer">
 									<button type="submit" class="btn btn-success"
 										name="startCrawling"
@@ -62,22 +59,21 @@
 										<i class="fa fa-play-circle"></i>
 										<la:message key="labels.wizard_button_start_crawling" />
 									</button>
-									<button type="submit" class="btn" name="index"
+									<button type="submit" class="btn btn-default" name="index"
 										value="<la:message key="labels.wizard_button_finish"/>">
 										<i class="fa fa-step-forward"></i>
 										<la:message key="labels.wizard_button_finish" />
 									</button>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
-
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>

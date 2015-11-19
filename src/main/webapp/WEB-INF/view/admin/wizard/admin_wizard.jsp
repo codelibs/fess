@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="system" />
 			<jsp:param name="menuType" value="wizard" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -25,9 +24,7 @@
 						</la:link></li>
 				</ol>
 			</section>
-
 			<section class="content">
-
 				<la:form action="/admin/wizard/">
 					<div class="row">
 						<div class="col-md-12">
@@ -37,6 +34,7 @@
 										<la:message key="labels.wizard_start_title" />
 									</h3>
 								</div>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message: BEGIN --%>
 									<div>
@@ -50,6 +48,7 @@
 										<la:message key="labels.wizard_start_desc" />
 									</p>
 								</div>
+								<!-- /.box-body -->
 								<div class="box-footer">
 									<button type="submit" class="btn btn-primary"
 										name="crawlingConfigForm"
@@ -58,16 +57,15 @@
 										<la:message key="labels.wizard_start_button" />
 									</button>
 								</div>
+								<!-- /.box-footer -->
 							</div>
+							<!-- /.box -->
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
-
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
 </body>

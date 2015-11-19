@@ -91,7 +91,7 @@
 								<!-- /.box-header -->
 								<div class="box-footer">
 									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn" name="back"
+										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.crawling_session_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crawling_session_button_back" />
