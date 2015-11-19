@@ -17,18 +17,15 @@ package org.codelibs.fess.app.web.admin.badword;
 
 import java.io.Serializable;
 
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * @author shinsuke
  */
-public class UploadForm implements Serializable {
+public class DownloadForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Required
-    public MultipartFormFile suggestBadWordFile;
-
+    public String id;
 }

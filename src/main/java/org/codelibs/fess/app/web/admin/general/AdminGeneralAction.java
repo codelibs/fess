@@ -62,8 +62,8 @@ public class AdminGeneralAction extends FessAdminAction {
     //
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse index() {
+        saveToken();
         return asHtml(path_AdminGeneral_AdminGeneralJsp).useForm(EditForm.class, setup -> {
             setup.setup(form -> {
                 updateForm(form);
@@ -72,9 +72,11 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse update(final EditForm form) {
         validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminGeneral_AdminGeneralJsp);
+        });
+        verifyToken(() -> {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);
         });
 

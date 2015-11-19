@@ -182,14 +182,16 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
-    public HtmlResponse downloadpage(final SearchForm form) {
+    public HtmlResponse downloadpage() {
         saveToken();
         return asDownloadHtml();
     }
 
+    // TODO refactoring
     @Execute
-    public HtmlResponse download(final SearchForm form) {
-        verifyTokenKeep(() -> downloadpage(form));
+    public HtmlResponse download(final DownloadForm form) {
+        validate(form, messages -> {}, () -> asDownloadHtml());
+        verifyToken(() -> asDownloadHtml());
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "badword.csv" + "\"");
@@ -198,7 +200,7 @@ public class AdminBadwordAction extends FessAdminAction {
                         Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
             suggestBadWordService.exportCsv(writer);
         } catch (final Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO
         }
         return redirect(getClass());
     }
@@ -207,7 +209,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
-    public HtmlResponse uploadpage(final UploadForm form) {
+    public HtmlResponse uploadpage() {
         saveToken();
         return asUploadHtml();
     }
@@ -263,7 +265,8 @@ public class AdminBadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse upload(final UploadForm form) {
-        verifyToken(() -> uploadpage(form));
+        validate(form, messages -> {}, () -> asUploadHtml());
+        verifyToken(() -> asUploadHtml());
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
@@ -315,7 +318,6 @@ public class AdminBadwordAction extends FessAdminAction {
             }
         }
         saveInfo(messages -> messages.addSuccessUploadSuggestBadWord(GLOBAL));
-        saveToken();
         return redirect(getClass());
     }
 
@@ -388,11 +390,11 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     private HtmlResponse asUploadHtml() {
-        return asHtml(path_AdminBadword_AdminBadwordUploadJsp);
+        return asHtml(path_AdminBadword_AdminBadwordUploadJsp).useForm(UploadForm.class);
     }
 
     private HtmlResponse asDownloadHtml() {
-        return asHtml(path_AdminBadword_AdminBadwordDownloadJsp);
+        return asHtml(path_AdminBadword_AdminBadwordDownloadJsp).useForm(DownloadForm.class);
     }
 
 }

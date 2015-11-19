@@ -23,6 +23,7 @@ import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
@@ -33,13 +34,11 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminFileconfigAction extends FessAdminAction {
@@ -71,10 +70,8 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -119,8 +116,8 @@ public class AdminFileconfigAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
+        saveToken();
         return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -132,34 +129,32 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminFileconfig_AdminFileconfigDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminFileconfig_AdminFileconfigEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         fileConfigService.getFileConfig(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next).renderWith(data -> {
-            registerRolesAndLabels(data);
-        });
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+            });
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+            });
+        }
     }
 
     @Execute
     public HtmlResponse createnewjob(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asListHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
@@ -187,6 +182,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 fileConfigService.getFileConfig(id).ifPresent(entity -> {
@@ -195,7 +191,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         }).renderWith(data -> {
@@ -209,12 +205,13 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getFileConfig(form).ifPresent(entity -> {
             fileConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -222,12 +219,13 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getFileConfig(form).ifPresent(entity -> {
             fileConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -235,13 +233,14 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         fileConfigService.getFileConfig(id).ifPresent(entity -> {
             fileConfigService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -294,15 +293,29 @@ public class AdminFileconfigAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp).renderWith(data -> {
-                registerRolesAndLabels(data);
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
+            data.register("fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(fileConfigPager, form, op -> op.include("id"));
             });
-        };
+        });
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminFileconfig_AdminFileconfigEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp);
     }
 }

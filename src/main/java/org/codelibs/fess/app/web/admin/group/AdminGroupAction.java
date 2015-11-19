@@ -23,6 +23,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.helper.SystemHelper;
@@ -31,9 +32,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
@@ -64,10 +63,8 @@ public class AdminGroupAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -112,8 +109,8 @@ public class AdminGroupAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
+        saveToken();
         return asHtml(path_AdminGroup_AdminGroupEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -123,27 +120,23 @@ public class AdminGroupAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminGroup_AdminGroupDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminGroup_AdminGroupEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         groupService.getGroup(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next);
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     // -----------------------------------------------------
@@ -152,6 +145,7 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminGroup_AdminGroupDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 groupService.getGroup(id).ifPresent(entity -> {
@@ -160,7 +154,7 @@ public class AdminGroupAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         });
@@ -172,12 +166,13 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(entity -> {
             groupService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -185,12 +180,13 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(entity -> {
             groupService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -198,13 +194,14 @@ public class AdminGroupAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         groupService.getGroup(id).ifPresent(entity -> {
             groupService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -247,13 +244,29 @@ public class AdminGroupAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminGroup_AdminGroupEditJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminGroup_AdminGroupJsp).renderWith(data -> {
+            data.register("groupItems", groupService.getGroupList(groupPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(groupPager, form, op -> op.include("id"));
+            });
+        });
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminGroup_AdminGroupEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminGroup_AdminGroupDetailsJsp);
     }
 }

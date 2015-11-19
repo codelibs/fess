@@ -37,6 +37,7 @@ import org.codelibs.fess.app.pager.SuggestElevateWordPager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.SuggestElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.badword.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
@@ -47,10 +48,8 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaResponseUtil;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author Keiichi Watanabe
@@ -86,10 +85,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -134,8 +131,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
+        saveToken();
         return asHtml(path_AdminElevateword_AdminElevatewordEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -147,29 +144,27 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminElevateword_AdminElevatewordDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminElevateword_AdminElevatewordEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next).renderWith(data -> {
-            registerLabels(data);
-        });
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml().renderWith(data -> {
+                registerLabels(data);
+            });
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml().renderWith(data -> {
+                registerLabels(data);
+            });
+        }
     }
 
     // -----------------------------------------------------
@@ -178,6 +173,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
@@ -186,7 +182,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         }).renderWith(data -> {
@@ -198,14 +194,16 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                              Download
     //                                               -------
     @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse downloadpage(final SearchForm form) {
-        return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp);
+    public HtmlResponse downloadpage() {
+        saveToken();
+        return asDownloadHtml();
     }
 
+    // TODO refactoring
     @Execute
-    //(token = TxToken.VALIDATE)
-    public HtmlResponse download(final SearchForm form) {
+    public HtmlResponse download(final DownloadForm form) {
+        validate(form, messages -> {}, () -> asDownloadHtml());
+        verifyToken(() -> asDownloadHtml());
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + "elevateword.csv" + "\"");
@@ -214,7 +212,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
             suggestElevateWordService.exportCsv(writer);
         } catch (final Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO
         }
         return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp);
     }
@@ -223,9 +221,9 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                Upload
     //                                               -------
     @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse uploadpage(final UploadForm form) {
-        return asHtml(path_AdminElevateword_AdminElevatewordUploadJsp);
+    public HtmlResponse uploadpage() {
+        saveToken();
+        return asUploadHtml();
     }
 
     // -----------------------------------------------------
@@ -234,7 +232,8 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getSuggestElevateWord(form).ifPresent(
                 entity -> {
                     suggestElevateWordService.store(entity);
@@ -242,7 +241,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                             entity.getTargetRole(), entity.getBoost());
                     saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -250,14 +249,15 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getSuggestElevateWord(form).ifPresent(entity -> {
             suggestElevateWordService.store(entity);
             suggestHelper.deleteAllElevateWord();
             suggestHelper.storeAllElevateWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -265,21 +265,23 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
             suggestElevateWordService.delete(entity);
             suggestHelper.deleteElevateWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse upload(final UploadForm form) {
+        validate(form, messages -> {}, () -> asUploadHtml());
+        verifyToken(() -> asUploadHtml());
         BufferedInputStream is = null;
         File tempFile = null;
         FileOutputStream fos = null;
@@ -380,13 +382,36 @@ public class AdminElevatewordAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminElevateword_AdminElevatewordEditJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
+            data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(suggestElevateWordPager, form, op -> op.include("id"));
+            });
+        });
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminElevateword_AdminElevatewordEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp);
+    }
+
+    private HtmlResponse asUploadHtml() {
+        return asHtml(path_AdminElevateword_AdminElevatewordUploadJsp).useForm(UploadForm.class);
+    }
+
+    private HtmlResponse asDownloadHtml() {
+        return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp);
     }
 }

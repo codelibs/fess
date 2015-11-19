@@ -27,10 +27,9 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminFailureurlAction extends FessAdminAction {
@@ -58,10 +57,8 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -116,7 +113,7 @@ public class AdminFailureurlAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         });
@@ -129,7 +126,8 @@ public class AdminFailureurlAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toIndexHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         String id = form.id;
         failureUrlService.getFailureUrl(id).alwaysPresent(entity -> {
             failureUrlService.delete(entity);
@@ -140,7 +138,7 @@ public class AdminFailureurlAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse deleteall(final EditForm form) {
-        validate(form, messages -> {}, toIndexHtml());
+        validate(form, messages -> {}, () -> asListHtml());
         failureUrlService.deleteAll(failureUrlPager);
         saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
         return redirect(getClass());
@@ -153,13 +151,25 @@ public class AdminFailureurlAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toIndexHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toIndexHtml() {
-        return () -> {
-            return asHtml(path_AdminFailureurl_AdminFailureurlJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
+            data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));
+            });
+        });
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminFailureurl_AdminFailureurlDetailsJsp);
     }
 }
