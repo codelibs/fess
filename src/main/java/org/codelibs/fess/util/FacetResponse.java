@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
 public class FacetResponse {
@@ -34,17 +34,19 @@ public class FacetResponse {
     protected List<Field> fieldList = new ArrayList<FacetResponse.Field>();
 
     public FacetResponse(final Aggregations aggregations) {
-        aggregations.forEach(aggregation -> {
-            if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
-                final Terms termFacet = (Terms) aggregation;
-                fieldList.add(new Field(termFacet));
-            } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
-                final Filter queryFacet = (Filter) aggregation;
-                final String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
-                queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), Charsets.UTF_8), queryFacet.getDocCount());
-            }
+        aggregations
+                .forEach(aggregation -> {
+                    if (aggregation.getName().startsWith(Constants.FACET_FIELD_PREFIX)) {
+                        final Terms termFacet = (Terms) aggregation;
+                        fieldList.add(new Field(termFacet));
+                    } else if (aggregation.getName().startsWith(Constants.FACET_QUERY_PREFIX)) {
+                        final Filter queryFacet = (Filter) aggregation;
+                        final String encodedQuery = queryFacet.getName().substring(Constants.FACET_QUERY_PREFIX.length());
+                        queryCountMap.put(new String(BaseEncoding.base64().decode(encodedQuery), StandardCharsets.UTF_8),
+                                queryFacet.getDocCount());
+                    }
 
-        });
+                });
     }
 
     public boolean hasFacetResponse() {
@@ -58,7 +60,7 @@ public class FacetResponse {
 
         public Field(final Terms termFacet) {
             final String encodedField = termFacet.getName().substring(Constants.FACET_FIELD_PREFIX.length());
-            name = new String(BaseEncoding.base64().decode(encodedField), Charsets.UTF_8);
+            name = new String(BaseEncoding.base64().decode(encodedField), StandardCharsets.UTF_8);
             for (final Terms.Bucket tfEntry : termFacet.getBuckets()) {
                 valueCountMap.put(tfEntry.getKeyAsString(), tfEntry.getDocCount());
             }

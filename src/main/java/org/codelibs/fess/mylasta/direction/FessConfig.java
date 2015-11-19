@@ -136,11 +136,14 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. true */
     String PAGING_PAGE_RANGE_FILL_LIMIT = "paging.page.range.fill.limit";
 
-    /** The key of the configuration. e.g. 100 */
-    String FORM_ROLE_LIST_SIZE = "form.role.list.size";
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_DOCBOOST_MAX_FETCH_SIZE = "page.docboost.max.fetch.size";
 
-    /** The key of the configuration. e.g. 100 */
-    String FORM_GROUP_LIST_SIZE = "form.group.list.size";
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_ROLE_MAX_FETCH_SIZE = "page.role.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_GROUP_MAX_FETCH_SIZE = "page.group.max.fetch.size";
 
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
@@ -589,34 +592,51 @@ public interface FessConfig extends FessEnv {
     boolean isPagingPageRangeFillLimit();
 
     /**
-     * Get the value for the key 'form.role.list.size'. <br>
-     * The value is, e.g. 100 <br>
+     * Get the value for the key 'page.docboost.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: max page size
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getFormRoleListSize();
+    String getPageDocboostMaxFetchSize();
 
     /**
-     * Get the value for the key 'form.role.list.size' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
+     * Get the value for the key 'page.docboost.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: max page size
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getFormRoleListSizeAsInteger();
+    Integer getPageDocboostMaxFetchSizeAsInteger();
 
     /**
-     * Get the value for the key 'form.group.list.size'. <br>
-     * The value is, e.g. 100 <br>
+     * Get the value for the key 'page.role.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getFormGroupListSize();
+    String getPageRoleMaxFetchSize();
 
     /**
-     * Get the value for the key 'form.group.list.size' as {@link Integer}. <br>
-     * The value is, e.g. 100 <br>
+     * Get the value for the key 'page.role.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getFormGroupListSizeAsInteger();
+    Integer getPageRoleMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.group.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageGroupMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.group.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageGroupMaxFetchSizeAsInteger();
 
     /**
      * Get the value for the key 'mail.from.name'. <br>
@@ -1043,20 +1063,28 @@ public interface FessConfig extends FessEnv {
             return is(FessConfig.PAGING_PAGE_RANGE_FILL_LIMIT);
         }
 
-        public String getFormRoleListSize() {
-            return get(FessConfig.FORM_ROLE_LIST_SIZE);
+        public String getPageDocboostMaxFetchSize() {
+            return get(FessConfig.PAGE_DOCBOOST_MAX_FETCH_SIZE);
         }
 
-        public Integer getFormRoleListSizeAsInteger() {
-            return getAsInteger(FessConfig.FORM_ROLE_LIST_SIZE);
+        public Integer getPageDocboostMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_DOCBOOST_MAX_FETCH_SIZE);
         }
 
-        public String getFormGroupListSize() {
-            return get(FessConfig.FORM_GROUP_LIST_SIZE);
+        public String getPageRoleMaxFetchSize() {
+            return get(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE);
         }
 
-        public Integer getFormGroupListSizeAsInteger() {
-            return getAsInteger(FessConfig.FORM_GROUP_LIST_SIZE);
+        public Integer getPageRoleMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE);
+        }
+
+        public String getPageGroupMaxFetchSize() {
+            return get(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageGroupMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
         }
 
         public String getMailFromName() {

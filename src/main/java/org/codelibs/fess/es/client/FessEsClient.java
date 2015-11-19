@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.codec.Charsets;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
@@ -50,8 +49,8 @@ import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.indexer.FessSearchQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
@@ -841,7 +840,7 @@ public class FessEsClient implements Client {
             if (facetInfo != null) {
                 StreamUtil.of(facetInfo.field).forEach(f -> {
                     if (queryHelper.isFacetField(f)) {
-                        final String encodedField = BaseEncoding.base64().encode(f.getBytes(Charsets.UTF_8));
+                        final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                         final TermsBuilder termsBuilder = AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
                         // TODO order
                         if (facetInfo.limit != null) {
@@ -850,7 +849,7 @@ public class FessEsClient implements Client {
                         }
                         searchRequestBuilder.addAggregation(termsBuilder);
                     } else {
-                        throw new FessSearchQueryException("Invalid facet field: " + f);
+                        throw new SearchQueryException("Invalid facet field: " + f);
                     }
                 });
                 StreamUtil.of(facetInfo.query).forEach(

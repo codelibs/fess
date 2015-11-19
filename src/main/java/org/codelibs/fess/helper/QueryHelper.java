@@ -54,7 +54,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -63,6 +62,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -99,6 +99,9 @@ public class QueryHelper implements Serializable {
 
     @Resource
     protected DynamicProperties crawlerProperties;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;
@@ -161,7 +164,6 @@ public class QueryHelper implements Serializable {
 
     @PostConstruct
     public void init() {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (responseFields == null) {
             responseFields =
                     new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
@@ -223,6 +225,8 @@ public class QueryHelper implements Serializable {
         final QueryContext queryContext = new QueryContext(q, true);
         buildBaseQuery(queryContext, context);
 
+        buildBoostQuery(queryContext);
+
         if (keyMatchHelper != null) {
             final List<String> docIdQueryList = keyMatchHelper.getDocIdQueryList();
             if (docIdQueryList != null && !docIdQueryList.isEmpty()) {
@@ -238,7 +242,6 @@ public class QueryHelper implements Serializable {
         if (roleQueryHelper != null) {
             final Set<String> roleSet = roleQueryHelper.build();
             if (!roleSet.isEmpty()) {
-                final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 queryContext.addQuery(boolQuery -> {
                     BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
                     roleSet.stream().forEach(name -> {
@@ -253,6 +256,12 @@ public class QueryHelper implements Serializable {
             queryContext.addSorts(defaultSortBuilders);
         }
         return queryContext;
+    }
+
+    private void buildBoostQuery(final QueryContext queryContext) {
+        queryContext.addFunctionScore(functionScoreQuery -> {
+            functionScoreQuery.add(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost()));
+        });
     }
 
     public void buildBaseQuery(final QueryContext queryContext, final Consumer<QueryContext> context) {
@@ -456,7 +465,6 @@ public class QueryHelper implements Serializable {
     }
 
     private QueryBuilder buildDefaultQueryBuilder(final Function<String, QueryBuilder> builder) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         // TODO boost
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         final QueryBuilder titleQuery = builder.apply(fessConfig.getIndexFieldTitle());

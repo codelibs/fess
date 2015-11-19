@@ -121,8 +121,8 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     private void registerForms(final RenderData data) {
-        data.register("roleItems", roleService.getAvailableRoleList(fessConfig.getFormRoleListSizeAsInteger()));
-        data.register("groupItems", groupService.getAvailableGroupList(fessConfig.getFormGroupListSizeAsInteger()));
+        data.register("roleItems", roleService.getAvailableRoleList(fessConfig.getPageRoleMaxFetchSizeAsInteger()));
+        data.register("groupItems", groupService.getAvailableGroupList(fessConfig.getPageGroupMaxFetchSizeAsInteger()));
     }
 
     // ===================================================================================

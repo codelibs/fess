@@ -13,23 +13,21 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.indexer;
+package org.codelibs.fess.exception;
 
-import org.codelibs.fess.exception.FessSystemException;
-
-public class FessSearchQueryException extends FessSystemException {
+public class SearchQueryException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public FessSearchQueryException(final String message, final Throwable cause) {
+    public SearchQueryException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public FessSearchQueryException(final String message) {
+    public SearchQueryException(final String message) {
         super(message);
     }
 
-    public FessSearchQueryException(final Throwable cause) {
+    public SearchQueryException(final Throwable cause) {
         super(cause);
     }
 

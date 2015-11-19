@@ -36,7 +36,6 @@ import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.crawler.service.UrlFilterService;
 import org.codelibs.fess.crawler.service.UrlQueueService;
-import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
@@ -386,9 +385,9 @@ public class WebFsIndexHelper implements Serializable {
         indexUpdater.setSessionIdList(sessionIdList);
         indexUpdater.setDaemon(true);
         indexUpdater.setCrawlerList(crawlerList);
-        for (final BoostDocumentRule rule : boostDocumentRuleService.getAvailableBoostDocumentRuleList()) {
+        boostDocumentRuleService.getAvailableBoostDocumentRuleList().forEach(rule -> {
             indexUpdater.addDocBoostMatcher(new org.codelibs.fess.indexer.DocBoostMatcher(rule));
-        }
+        });
         indexUpdater.start();
 
         int startedCrawlerNum = 0;

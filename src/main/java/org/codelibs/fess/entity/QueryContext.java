@@ -29,6 +29,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -57,6 +58,12 @@ public class QueryContext {
                 }
             });
         }
+    }
+
+    public void addFunctionScore(final Consumer<FunctionScoreQueryBuilder> functionScoreQuery) {
+        FunctionScoreQueryBuilder builder = QueryBuilders.functionScoreQuery(queryBuilder);
+        functionScoreQuery.accept(builder);
+        queryBuilder = builder;
     }
 
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {

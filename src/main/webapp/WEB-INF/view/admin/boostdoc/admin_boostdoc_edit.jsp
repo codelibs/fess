@@ -51,14 +51,14 @@
 										<label for="urlExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_url_expr" /></label>
 										<div class="col-sm-9">
-											<la:text property="urlExpr" styleClass="form-control" />
+											<la:textarea property="urlExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="boostExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_boost_expr" /></label>
 										<div class="col-sm-9">
-											<la:text property="boostExpr" styleClass="form-control" />
+											<la:textarea property="boostExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
 									<div class="form-group">

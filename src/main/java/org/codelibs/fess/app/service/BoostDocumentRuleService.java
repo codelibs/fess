@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.BoostDocumentRulePager;
 import org.codelibs.fess.es.config.cbean.BoostDocumentRuleCB;
 import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -37,9 +38,8 @@ public class BoostDocumentRuleService implements Serializable {
     @Resource
     protected BoostDocumentRuleBhv boostDocumentRuleBhv;
 
-    public BoostDocumentRuleService() {
-        super();
-    }
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocumentRulePager boostDocumentRulePager) {
 
@@ -112,7 +112,9 @@ public class BoostDocumentRuleService implements Serializable {
 
     public List<BoostDocumentRule> getAvailableBoostDocumentRuleList() {
         return boostDocumentRuleBhv.selectList(cb -> {
+            cb.query().matchAll();
             cb.query().addOrderBy_SortOrder_Asc();
+            cb.fetchFirst(fessConfig.getPageDocboostMaxFetchSizeAsInteger());
         });
     }
 

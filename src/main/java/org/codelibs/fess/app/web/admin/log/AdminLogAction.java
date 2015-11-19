@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.admin.log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,8 +41,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 
-import com.google.common.base.Charsets;
-
 /**
  * @author codelibs
  * @author Keiichi Watanabe
@@ -64,7 +63,7 @@ public class AdminLogAction extends FessAdminAction {
 
     @Execute
     public ActionResponse download(final String id) {
-        String filename = new String(Base64.getDecoder().decode(id), Charsets.UTF_8).replace("..", "").replaceAll("\\s", "");
+        String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             Path path = Paths.get(logFilePath, filename);
@@ -89,7 +88,7 @@ public class AdminLogAction extends FessAdminAction {
                 stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
                     Map<String, Object> map = new HashMap<>();
                     String name = filePath.getFileName().toString();
-                    map.put("id", Base64.getEncoder().encodeToString(name.getBytes(Charsets.UTF_8)));
+                    map.put("id", Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
                     map.put("name", name);
                     try {
                         map.put("lastModified", new Date(Files.getLastModifiedTime(filePath).toMillis()));
