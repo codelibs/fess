@@ -106,39 +106,6 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
-    // TODO remove?
-    @Execute
-    public HtmlResponse deletepage(final int crudMode, final String id) {
-        verifyCrudMode(crudMode, CrudMode.DELETE);
-        saveToken();
-        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                jobLogService.getJobLog(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
-                    });
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-                });
-                form.crudMode = crudMode;
-            });
-        });
-    }
-
-    // TODO remove?
-    @Execute
-    public HtmlResponse deletefromconfirm(final EditForm form) {
-        form.crudMode = CrudMode.DELETE;
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyTokenKeep(() -> asDetailsHtml());
-        String id = form.id;
-        jobLogService.getJobLog(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
-        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp);
-    }
 
     // -----------------------------------------------------
     //                                               Details
