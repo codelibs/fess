@@ -1663,7 +1663,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: - */
     public static final String LABELS_scheduledjob_nojob = "{labels.scheduledjob_nojob}";
 
-    /** The key of the message: Start Now */
+    /** The key of the message: Start now */
     public static final String LABELS_scheduledjob_button_start = "{labels.scheduledjob_button_start}";
 
     /** The key of the message: Stop */
