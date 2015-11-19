@@ -39,7 +39,6 @@ import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.StreamResponse;
-import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,21 +69,21 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     private void checkEditorStatus(final ActionRuntime runtime) {
-        if (cannotEdit()) {
-            throwValidationError(messages -> messages.addErrorsDesignEditorDisabled(GLOBAL), toMainHtml());
+        if (!editable()) {
+            throwValidationError(messages -> messages.addErrorsDesignEditorDisabled(GLOBAL), () -> asListHtml());
         }
     }
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("editable", cannotEdit());
+        runtime.registerData("editable", editable());
         runtime.registerData("fileNameItems", loadFileNameItems());
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDesign()));
     }
 
-    private boolean cannotEdit() {
-        return Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
+    private boolean editable() {
+        return Constants.TRUE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
     }
 
     private List<String> loadFileNameItems() {
@@ -102,19 +101,19 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                                             Execute
     //                                                                             =======
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse index() {
+        saveToken();
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse back() {
+        saveToken();
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
     @Execute
-    public HtmlResponse upload(final DesignForm form) {
+    public HtmlResponse upload(final UploadForm form) {
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
         if (StringUtil.isBlank(fileName)) {
@@ -129,11 +128,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
                     fileName = fileName.substring(pos + 1);
                 }
             } catch (final Exception e) {
-                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid(GLOBAL), toMainHtml());
+                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid(GLOBAL), () -> asListHtml());
             }
         }
         if (StringUtil.isBlank(fileName)) {
-            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound(GLOBAL), () -> asListHtml());
         }
 
         String baseDir = null;
@@ -148,7 +147,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
                 && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedJSExtentions())) {
             baseDir = "/js/";
         } else {
-            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType(GLOBAL), () -> asListHtml());
         }
 
         final File uploadFile = new File(getServletContext().getRealPath(baseDir + fileName));
@@ -163,9 +162,10 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             saveInfo(messages -> messages.addSuccessUploadDesignFile(GLOBAL, currentFileName));
         } catch (final Exception e) {
             logger.error("Failed to write an image file: {}", fileName, e);
-            throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), () -> asListHtml());
         }
-        validate(form, messages -> {}, toMainHtml());
+        validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         return redirect(getClass());
     }
 
@@ -183,12 +183,13 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Execute
-    public StreamResponse download(final DesignForm form) {
-        File file = getTargetFile(form).get();
+    public StreamResponse download(final FileAccessForm form) {
+        File file = getTargetFile(form.fileName).get();
         if (file == null) {
-            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
         }
-        validate(form, messages -> {}, toMainHtml());
+        validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         return asStream(file.getName()).stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
@@ -197,17 +198,18 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
-    public HtmlResponse delete(final DesignForm form) {
-        getTargetFile(form).ifPresent(file -> {
+    public HtmlResponse delete(final FileAccessForm form) {
+        getTargetFile(form.fileName).ifPresent(file -> {
             if (!file.delete()) {
                 logger.error("Failed to delete {}", file.getAbsolutePath());
-                throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), toMainHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDeleteFile(GLOBAL, form.fileName), () -> asListHtml());
             }
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
         });
         saveInfo(messages -> messages.addSuccessDeleteFile(GLOBAL, form.fileName));
+        validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         return redirect(getClass());
     }
 
@@ -215,8 +217,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                 Edit
     //                                                ------
     @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse edit(final DesignEditForm form) {
+    public HtmlResponse edit(final EditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
@@ -224,12 +225,12 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
-        return asHtml(path_AdminDesign_AdminDesignEditJsp);
+        saveToken();
+        return asEditHtml();
     }
 
     @Execute
-    //(token = TxToken.SAVE)
-    public HtmlResponse editAsUseDefault(final DesignEditForm form) {
+    public HtmlResponse editAsUseDefault(final EditForm form) {
         final String jspType = "orig/view";
         final File jspFile = getJspFile(form.fileName, jspType);
         try {
@@ -237,12 +238,12 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         } catch (final UnsupportedEncodingException e) {
             throw new FessSystemException("Invalid encoding", e);
         }
-        return asHtml(path_AdminDesign_AdminDesignEditJsp);
+        saveToken();
+        return asEditHtml();
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
-    public HtmlResponse update(final DesignEditForm form) {
+    public HtmlResponse update(final EditForm form) {
         final String jspType = "view";
         final File jspFile = getJspFile(form.fileName, jspType);
 
@@ -250,12 +251,14 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             form.content = StringUtil.EMPTY;
         }
 
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         try {
             write(jspFile.getAbsolutePath(), form.content.getBytes(Constants.UTF_8));
             saveInfo(messages -> messages.addSuccessUpdateDesignJspFile(GLOBAL, systemHelper.getDesignJspFileName(form.fileName)));
         } catch (final Exception e) {
             logger.error("Failed to update {}", form.fileName, e);
-            throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsFailedToUpdateJspFile(GLOBAL), () -> asListHtml());
         }
         return redirect(getClass());
     }
@@ -263,9 +266,9 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<File> getTargetFile(final DesignForm form) {
+    private OptionalEntity<File> getTargetFile(final String fileName) {
         final File baseDir = new File(getServletContext().getRealPath("/"));
-        final File targetFile = new File(getServletContext().getRealPath(form.fileName));
+        final File targetFile = new File(getServletContext().getRealPath(fileName));
         final List<File> fileList = getAccessibleFileList(baseDir);
         for (final File file : fileList) {
             if (targetFile.equals(file)) {
@@ -286,11 +289,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     private File getJspFile(final String fileName, final String jspType) {
         final String jspFileName = systemHelper.getDesignJspFileName(fileName);
         if (jspFileName == null) {
-            throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
         }
         final File jspFile = new File(getServletContext().getRealPath("/WEB-INF/" + jspType + "/" + jspFileName));
         if (jspFile == null || !jspFile.exists()) {
-            throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), toMainHtml());
+            throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
         }
         return jspFile;
     }
@@ -298,9 +301,12 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
-    private VaErrorHook toMainHtml() {
-        return () -> {
-            return asHtml(path_AdminDesign_AdminDesignJsp);
-        };
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminDesign_AdminDesignJsp);
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminDesign_AdminDesignEditJsp);
     }
 }

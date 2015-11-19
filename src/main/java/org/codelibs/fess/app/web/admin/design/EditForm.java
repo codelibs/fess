@@ -19,7 +19,7 @@ package org.codelibs.fess.app.web.admin.design;
  * @author codelibs
  * @author jflute
  */
-public class DesignEditForm {
+public class EditForm {
 
     public String fileName;
 

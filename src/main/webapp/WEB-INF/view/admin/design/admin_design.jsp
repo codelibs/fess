@@ -77,7 +77,7 @@
 							</la:form>
 						</div>
 						<div class="box box-primary">
-							<la:form>
+							<la:form action="/admin/design/">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
@@ -154,7 +154,7 @@
 					</div>
 					<div class="col-md-6">
 						<div class="box box-primary">
-							<la:form action="upload" enctype="multipart/form-data">
+							<la:form action="/admin/design/" enctype="multipart/form-data">
 								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
