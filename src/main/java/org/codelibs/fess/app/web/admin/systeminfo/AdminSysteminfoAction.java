@@ -62,7 +62,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     //                                                                              Index
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SystemInfoForm form) {
+    public HtmlResponse index() {
         return asHtml(path_AdminSysteminfo_AdminSysteminfoJsp).renderWith(data -> {
             registerEnvItems(data);
             registerPropItems(data);

@@ -24,6 +24,7 @@ import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.es.config.exentity.WebConfig;
@@ -34,10 +35,8 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
@@ -76,9 +75,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+        return asListHtml();
     }
 
     @Execute
@@ -123,8 +120,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
+        saveToken();
         return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -136,34 +133,33 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminWebconfig_AdminWebconfigDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminWebconfig_AdminWebconfigEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         webConfigService.getWebConfig(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
-        return asHtml(next).renderWith(data -> {
-            registerRolesAndLabels(data);
-        });
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+            });
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+            });
+        }
     }
 
     @Execute
     public HtmlResponse createnewjob(final EditForm form) {
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         final ScheduledJob scheduledJob = new ScheduledJob();
         scheduledJob.setCrawler(true);
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
@@ -191,6 +187,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 webConfigService.getWebConfig(id).ifPresent(entity -> {
@@ -199,7 +196,7 @@ public class AdminWebconfigAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         }).renderWith(data -> {
@@ -213,12 +210,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getWebConfig(form).ifPresent(entity -> {
             webConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -226,12 +224,13 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getWebConfig(form).ifPresent(entity -> {
             webConfigService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -239,13 +238,14 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         webConfigService.getWebConfig(id).ifPresent(entity -> {
             webConfigService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -298,15 +298,29 @@ public class AdminWebconfigAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).renderWith(data -> {
-                registerRolesAndLabels(data);
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
+            data.register("webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(webConfigPager, form, op -> op.include("id"));
             });
-        };
+        });
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp);
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp);
     }
 }

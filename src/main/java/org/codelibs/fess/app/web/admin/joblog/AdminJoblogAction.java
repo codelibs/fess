@@ -21,13 +21,13 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author shinsuke
@@ -59,9 +59,7 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+        return asListHtml();
     }
 
     @Execute
@@ -108,10 +106,11 @@ public class AdminJoblogAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+    // TODO remove?
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse deletepage(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DELETE);
+        saveToken();
         return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 jobLogService.getJobLog(id).ifPresent(entity -> {
@@ -119,23 +118,24 @@ public class AdminJoblogAction extends FessAdminAction {
                         copyOp.excludeNull();
                     });
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
                 form.crudMode = crudMode;
             });
         });
     }
 
+    // TODO remove?
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse deletefromconfirm(final EditForm form) {
         form.crudMode = CrudMode.DELETE;
-        validate(form, messages -> {}, toIndexHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyTokenKeep(() -> asDetailsHtml());
         String id = form.id;
         jobLogService.getJobLog(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp);
     }
@@ -146,6 +146,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 jobLogService.getJobLog(id).ifPresent(entity -> {
@@ -154,7 +155,7 @@ public class AdminJoblogAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toIndexHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
         });
@@ -166,7 +167,8 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toIndexHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         String id = form.id;
         jobLogService.getJobLog(id).alwaysPresent(entity -> {
             jobLogService.delete(entity);
@@ -186,13 +188,25 @@ public class AdminJoblogAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toIndexHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected VaErrorHook toIndexHtml() {
-        return () -> {
-            return asHtml(path_AdminJoblog_AdminJoblogJsp);
-        };
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
+            data.register("jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(jobLogPager, form, op -> op.include("id"));
+            });
+        });
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminJoblog_AdminJoblogDetailsJsp);
     }
 }

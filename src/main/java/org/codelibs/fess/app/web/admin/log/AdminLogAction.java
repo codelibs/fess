@@ -58,7 +58,8 @@ public class AdminLogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index() {
-        return toIndexPage();
+        saveToken();
+        return asIndexHtml();
     }
 
     @Execute
@@ -66,6 +67,7 @@ public class AdminLogAction extends FessAdminAction {
         String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
+            verifyToken(() -> asIndexHtml());
             Path path = Paths.get(logFilePath, filename);
             return asStream(filename).contentType("text/plain; charset=UTF-8").stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
@@ -74,9 +76,9 @@ public class AdminLogAction extends FessAdminAction {
             });
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindLogFile(GLOBAL, filename), () -> {
-            return toIndexPage();
+            return asIndexHtml();
         });
-        return redirect(getClass());
+        return redirect(getClass()); // no-op
     }
 
     public List<Map<String, Object>> getLogFileItems() {
@@ -104,7 +106,7 @@ public class AdminLogAction extends FessAdminAction {
         return logFileItems;
     }
 
-    private HtmlResponse toIndexPage() {
+    private HtmlResponse asIndexHtml() {
         return asHtml(path_AdminLog_AdminLogJsp).renderWith(data -> {
             data.register("logFileItems", getLogFileItems());
         });
