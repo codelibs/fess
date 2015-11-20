@@ -63,6 +63,10 @@ public class FailureUrlPager implements Serializable {
     public String lastAccessTime;
 
     public void clear() {
+        allRecordCount = 0;
+        allPageCount = 0;
+        existPrePage = false;
+        existNextPage = false;
         pageSize = getDefaultPageSize();
         currentPageNumber = getDefaultCurrentPageNumber();
 

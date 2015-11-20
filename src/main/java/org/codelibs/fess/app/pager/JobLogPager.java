@@ -55,6 +55,10 @@ public class JobLogPager implements Serializable {
     public String startTime;
 
     public void clear() {
+        allRecordCount = 0;
+        allPageCount = 0;
+        existPrePage = false;
+        existNextPage = false;
         pageSize = getDefaultPageSize();
         currentPageNumber = getDefaultCurrentPageNumber();
 

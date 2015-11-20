@@ -54,6 +54,10 @@ public class BoostDocumentRulePager implements Serializable {
     public String versionNo;
 
     public void clear() {
+        allRecordCount = 0;
+        allPageCount = 0;
+        existPrePage = false;
+        existNextPage = false;
         pageSize = getDefaultPageSize();
         currentPageNumber = getDefaultCurrentPageNumber();
 
