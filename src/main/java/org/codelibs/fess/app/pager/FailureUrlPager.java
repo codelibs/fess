@@ -77,6 +77,7 @@ public class FailureUrlPager implements Serializable {
         lastAccessTime = null;
         errorCountMin = null;
         errorCountMax = null;
+        errorName = null;
 
     }
 
