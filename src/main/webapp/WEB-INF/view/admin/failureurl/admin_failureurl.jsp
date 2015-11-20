@@ -121,47 +121,8 @@
 												</table>
 											</div>
 										</div>
-										<%-- Paging Info --%>
-										<div class="row">
-											<div class="col-sm-5">
-												<span><la:message
-														key="labels.pagination_page_guide_msg"
-														arg0="${f:h(failureUrlPager.currentPageNumber)}"
-														arg1="${f:h(failureUrlPager.allPageCount)}"
-														arg2="${f:h(failureUrlPager.allRecordCount)}" /></span>
-											</div>
-											<div class="col-sm-7">
-												<%-- Paging Navigation --%>
-												<ul class="pagination pagination-sm no-margin pull-right">
-													<c:if test="${failureUrlPager.existPrePage}">
-														<li class="prev"><la:link
-																href="list/${failureUrlPager.currentPageNumber - 1}">
-																<la:message key="labels.crud_link_prev_page" />
-															</la:link></li>
-													</c:if>
-													<c:if test="${!failureUrlPager.existPrePage}">
-														<li class="prev disabled"><a href="#"><la:message
-																	key="labels.crud_link_prev_page" /></a></li>
-													</c:if>
-													<c:forEach var="p" varStatus="s"
-														items="${failureUrlPager.pageNumberList}">
-														<li
-															<c:if test="${p == failureUrlPager.currentPageNumber}">class="active"</c:if>><la:link
-																href="list/${p}">${p}</la:link></li>
-													</c:forEach>
-													<c:if test="${failureUrlPager.existNextPage}">
-														<li class="next"><la:link
-																href="list/${failureUrlPager.currentPageNumber + 1}">
-																<la:message key="labels.crud_link_next_page" />
-															</la:link></li>
-													</c:if>
-													<c:if test="${!failureUrlPager.existNextPage}">
-														<li class="next disabled"><a href="#"><la:message
-																	key="labels.crud_link_next_page" /></a></li>
-													</c:if>
-												</ul>
-											</div>
-										</div>
+										<c:set var="pager" value="${failureUrlPager}" scope="request" />
+										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 										<div class="row">
 											<la:form action="/admin/failureurl/">
 												<div class="col-sm-12 center">
