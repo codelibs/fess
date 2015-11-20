@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.file_authentication_configuration" /></title>
+		key="labels.file_auth_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.file_authentication_title_details" />
+					<la:message key="labels.file_auth_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -51,15 +51,15 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message
-														key="labels.file_authentication_hostname" /></th>
+														key="labels.file_auth_hostname" /></th>
 												<td>${f:h(hostname)}<la:hidden property="hostname" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.file_authentication_port" /></th>
+												<th><la:message key="labels.file_auth_port" /></th>
 												<td>${f:h(port)}<la:hidden property="port" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.file_authentication_scheme" /></th>
+												<th><la:message key="labels.file_auth_scheme" /></th>
 												<td><c:forEach var="item"
 														items="${protocolSchemeItems}">
 														<c:if test="${protocolScheme==item.value}">${f:h(item.label)}</c:if>
@@ -67,24 +67,24 @@
 											</tr>
 											<tr>
 												<th><la:message
-														key="labels.file_authentication_username" /></th>
+														key="labels.file_auth_username" /></th>
 												<td>${f:h(username)}<la:hidden property="username" /></td>
 											</tr>
 											<tr>
 												<th><la:message
-														key="labels.file_authentication_password" /></th>
+														key="labels.file_auth_password" /></th>
 												<td><c:if test="${password!=''}">******</c:if> <la:hidden
 														property="password" /></td>
 											</tr>
 											<tr>
 												<th><la:message
-														key="labels.file_authentication_parameters" /></th>
+														key="labels.file_auth_parameters" /></th>
 												<td>${f:br(f:h(parameters))}<la:hidden
 														property="parameters" /></td>
 											</tr>
 											<tr>
 												<th><la:message
-														key="labels.file_authentication_file_crawling_config" /></th>
+														key="labels.file_auth_file_crawling_config" /></th>
 												<td><c:forEach var="item" items="${fileConfigItems}">
 														<c:if test="${fileConfigId==item.value}">${f:h(item.label)}</c:if>
 													</c:forEach> <la:hidden property="fileConfigId" /></td>

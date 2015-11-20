@@ -1053,22 +1053,22 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_notification_to = "{labels.notification_to}";
 
     /** The key of the message: Path Mapping */
-    public static final String LABELS_path_mapping_configuration = "{labels.path_mapping_configuration}";
+    public static final String LABELS_pathmap_configuration = "{labels.pathmap_configuration}";
 
     /** The key of the message: Path Mapping */
-    public static final String LABELS_path_mapping_title_details = "{labels.path_mapping_title_details}";
+    public static final String LABELS_pathmap_title_details = "{labels.pathmap_title_details}";
 
     /** The key of the message: Disabled */
     public static final String LABELS_DISABLED = "{labels.disabled}";
 
     /** The key of the message: Crawling */
-    public static final String LABELS_path_mapping_pt_crawling = "{labels.path_mapping_pt_crawling}";
+    public static final String LABELS_pathmap_pt_crawling = "{labels.pathmap_pt_crawling}";
 
     /** The key of the message: Displaying */
-    public static final String LABELS_path_mapping_pt_displaying = "{labels.path_mapping_pt_displaying}";
+    public static final String LABELS_pathmap_pt_displaying = "{labels.pathmap_pt_displaying}";
 
     /** The key of the message: Crawling/Displaying */
-    public static final String LABELS_path_mapping_pt_both = "{labels.path_mapping_pt_both}";
+    public static final String LABELS_pathmap_pt_both = "{labels.pathmap_pt_both}";
 
     /** The key of the message: Regular Name */
     public static final String LABELS_regular_name = "{labels.regular_name}";
@@ -1179,55 +1179,55 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_crawling_session_DataIndexSize = "{labels.crawling_session_DataIndexSize}";
 
     /** The key of the message: Web Authentication */
-    public static final String LABELS_web_authentication_configuration = "{labels.web_authentication_configuration}";
+    public static final String LABELS_webauth_configuration = "{labels.webauth_configuration}";
 
     /** The key of the message: Hostname */
-    public static final String LABELS_web_authentication_list_hostname = "{labels.web_authentication_list_hostname}";
+    public static final String LABELS_webauth_list_hostname = "{labels.webauth_list_hostname}";
 
     /** The key of the message: Config Name */
-    public static final String LABELS_web_authentication_list_web_crawling_config = "{labels.web_authentication_list_web_crawling_config}";
+    public static final String LABELS_webauth_list_web_crawling_config = "{labels.webauth_list_web_crawling_config}";
 
     /** The key of the message: Any */
-    public static final String LABELS_web_authentication_any = "{labels.web_authentication_any}";
+    public static final String LABELS_webauth_any = "{labels.webauth_any}";
 
     /** The key of the message: Create New Web Config */
-    public static final String LABELS_web_authentication_create_web_config = "{labels.web_authentication_create_web_config}";
+    public static final String LABELS_webauth_create_web_config = "{labels.webauth_create_web_config}";
 
     /** The key of the message: Web Authentication */
-    public static final String LABELS_web_authentication_title_details = "{labels.web_authentication_title_details}";
+    public static final String LABELS_webauth_title_details = "{labels.webauth_title_details}";
 
     /** The key of the message: Hostname */
-    public static final String LABELS_web_authentication_hostname = "{labels.web_authentication_hostname}";
+    public static final String LABELS_webauth_hostname = "{labels.webauth_hostname}";
 
     /** The key of the message: Port */
-    public static final String LABELS_web_authentication_port = "{labels.web_authentication_port}";
+    public static final String LABELS_webauth_port = "{labels.webauth_port}";
 
     /** The key of the message: Realm */
-    public static final String LABELS_web_authentication_realm = "{labels.web_authentication_realm}";
+    public static final String LABELS_webauth_realm = "{labels.webauth_realm}";
 
     /** The key of the message: Scheme */
-    public static final String LABELS_web_authentication_scheme = "{labels.web_authentication_scheme}";
+    public static final String LABELS_webauth_scheme = "{labels.webauth_scheme}";
 
     /** The key of the message: Username */
-    public static final String LABELS_web_authentication_username = "{labels.web_authentication_username}";
+    public static final String LABELS_webauth_username = "{labels.webauth_username}";
 
     /** The key of the message: Password */
-    public static final String LABELS_web_authentication_password = "{labels.web_authentication_password}";
+    public static final String LABELS_webauth_password = "{labels.webauth_password}";
 
     /** The key of the message: Parameters */
-    public static final String LABELS_web_authentication_parameters = "{labels.web_authentication_parameters}";
+    public static final String LABELS_webauth_parameters = "{labels.webauth_parameters}";
 
     /** The key of the message: Web Config */
-    public static final String LABELS_web_authentication_web_crawling_config = "{labels.web_authentication_web_crawling_config}";
+    public static final String LABELS_webauth_web_crawling_config = "{labels.webauth_web_crawling_config}";
 
     /** The key of the message: Basic */
-    public static final String LABELS_web_authentication_scheme_basic = "{labels.web_authentication_scheme_basic}";
+    public static final String LABELS_webauth_scheme_basic = "{labels.webauth_scheme_basic}";
 
     /** The key of the message: Digest */
-    public static final String LABELS_web_authentication_scheme_digest = "{labels.web_authentication_scheme_digest}";
+    public static final String LABELS_webauth_scheme_digest = "{labels.webauth_scheme_digest}";
 
     /** The key of the message: NTLM */
-    public static final String LABELS_web_authentication_scheme_ntlm = "{labels.web_authentication_scheme_ntlm}";
+    public static final String LABELS_webauth_scheme_ntlm = "{labels.webauth_scheme_ntlm}";
 
     /** The key of the message: Log Files */
     public static final String LABELS_log_configuration = "{labels.log_configuration}";
@@ -1576,47 +1576,46 @@ public class FessLabels extends ActionMessages {
             "{labels.system_info_crawler_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
-    public static final String LABELS_file_authentication_configuration = "{labels.file_authentication_configuration}";
+    public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";
 
     /** The key of the message: Hostname */
-    public static final String LABELS_file_authentication_list_hostname = "{labels.file_authentication_list_hostname}";
+    public static final String LABELS_file_auth_list_hostname = "{labels.file_auth_list_hostname}";
 
     /** The key of the message: Config Name */
-    public static final String LABELS_file_authentication_list_file_crawling_config =
-            "{labels.file_authentication_list_file_crawling_config}";
+    public static final String LABELS_file_auth_list_file_crawling_config = "{labels.file_auth_list_file_crawling_config}";
 
     /** The key of the message: Any */
-    public static final String LABELS_file_authentication_any = "{labels.file_authentication_any}";
+    public static final String LABELS_file_auth_any = "{labels.file_auth_any}";
 
     /** The key of the message: Create New File Config */
-    public static final String LABELS_file_authentication_create_file_config = "{labels.file_authentication_create_file_config}";
+    public static final String LABELS_file_auth_create_file_config = "{labels.file_auth_create_file_config}";
 
     /** The key of the message: File Authentication */
-    public static final String LABELS_file_authentication_title_details = "{labels.file_authentication_title_details}";
+    public static final String LABELS_file_auth_title_details = "{labels.file_auth_title_details}";
 
     /** The key of the message: Hostname */
-    public static final String LABELS_file_authentication_hostname = "{labels.file_authentication_hostname}";
+    public static final String LABELS_file_auth_hostname = "{labels.file_auth_hostname}";
 
     /** The key of the message: Port */
-    public static final String LABELS_file_authentication_port = "{labels.file_authentication_port}";
+    public static final String LABELS_file_auth_port = "{labels.file_auth_port}";
 
     /** The key of the message: Scheme */
-    public static final String LABELS_file_authentication_scheme = "{labels.file_authentication_scheme}";
+    public static final String LABELS_file_auth_scheme = "{labels.file_auth_scheme}";
 
     /** The key of the message: Username */
-    public static final String LABELS_file_authentication_username = "{labels.file_authentication_username}";
+    public static final String LABELS_file_auth_username = "{labels.file_auth_username}";
 
     /** The key of the message: Password */
-    public static final String LABELS_file_authentication_password = "{labels.file_authentication_password}";
+    public static final String LABELS_file_auth_password = "{labels.file_auth_password}";
 
     /** The key of the message: Parameters */
-    public static final String LABELS_file_authentication_parameters = "{labels.file_authentication_parameters}";
+    public static final String LABELS_file_auth_parameters = "{labels.file_auth_parameters}";
 
     /** The key of the message: FS Config */
-    public static final String LABELS_file_authentication_file_crawling_config = "{labels.file_authentication_file_crawling_config}";
+    public static final String LABELS_file_auth_file_crawling_config = "{labels.file_auth_file_crawling_config}";
 
     /** The key of the message: Samba */
-    public static final String LABELS_file_authentication_scheme_samba = "{labels.file_authentication_scheme_samba}";
+    public static final String LABELS_file_auth_scheme_samba = "{labels.file_auth_scheme_samba}";
 
     /** The key of the message: {0}/{1} ({2} items) */
     public static final String LABELS_pagination_page_guide_msg = "{labels.pagination_page_guide_msg}";

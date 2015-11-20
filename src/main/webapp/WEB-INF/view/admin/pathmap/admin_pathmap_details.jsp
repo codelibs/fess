@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.path_mapping_configuration" /></title>
+		key="labels.pathmap_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.path_mapping_title_details" />
+					<la:message key="labels.pathmap_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -61,11 +61,11 @@
 											<tr>
 												<th><la:message key="labels.processType" /></th>
 												<td><c:if test="${processType=='C'}">
-														<la:message key="labels.path_mapping_pt_crawling" />
+														<la:message key="labels.pathmap_pt_crawling" />
 													</c:if> <c:if test="${processType=='D'}">
-														<la:message key="labels.path_mapping_pt_displaying" />
+														<la:message key="labels.pathmap_pt_displaying" />
 													</c:if> <c:if test="${processType=='B'}">
-														<la:message key="labels.path_mapping_pt_both" />
+														<la:message key="labels.pathmap_pt_both" />
 													</c:if> <la:hidden property="processType" /></td>
 											</tr>
 											<tr>

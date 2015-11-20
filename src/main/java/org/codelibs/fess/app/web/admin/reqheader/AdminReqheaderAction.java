@@ -269,12 +269,9 @@ public class AdminReqheaderAction extends FessAdminAction {
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_basic"),
-                Constants.BASIC));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_digest"),
-                Constants.DIGEST));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.web_authentication_scheme_ntlm"),
-                Constants.NTLM));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_ntlm"), Constants.NTLM));
         data.register("protocolSchemeItems", itemList);
     }
 

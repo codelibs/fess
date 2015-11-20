@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.file_authentication_configuration" /></title>
+		key="labels.file_auth_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.file_authentication_configuration" />
+					<la:message key="labels.file_auth_configuration" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -26,7 +26,7 @@
 						<c:if test="${!displayCreateLink}">
 							<la:link href="/admin/fileconfig/" styleClass="btn btn-primary">
 								<i class="fa fa-arrow-circle-right"></i>
-								<la:message key="labels.file_authentication_create_file_config" />
+								<la:message key="labels.file_auth_create_file_config" />
 							</la:link>
 						</c:if>
 						<c:if test="${displayCreateLink}">
@@ -58,21 +58,21 @@
 											<thead>
 												<tr>
 													<th><la:message
-															key="labels.file_authentication_list_hostname" /></th>
+															key="labels.file_auth_list_hostname" /></th>
 													<th><la:message
-															key="labels.file_authentication_list_file_crawling_config" /></th>
+															key="labels.file_auth_list_file_crawling_config" /></th>
 												</tr>
 											</thead>
 											<tbody>
 												<c:forEach var="data" varStatus="s"
 													items="${fileAuthenticationItems}">
 													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-														data-href="${contextPath}/admin/fileauthentication/details/4/${f:u(data.id)}">
+														data-href="${contextPath}/admin/fileauth/details/4/${f:u(data.id)}">
 														<td><c:if
 																test="${data.hostname==null||data.hostname==''}">
-																<la:message key="labels.file_authentication_any" />
+																<la:message key="labels.file_auth_any" />
 															</c:if> ${f:h(data.hostname)}: <c:if test="${data.port==-1}">
-																<la:message key="labels.file_authentication_any" />
+																<la:message key="labels.file_auth_any" />
 															</c:if> <c:if test="${data.port!=-1}">
 																${f:h(data.port)}
 															</c:if></td>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.path_mapping_configuration" /></title>
+		key="labels.pathmap_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.path_mapping_configuration" />
+					<la:message key="labels.pathmap_configuration" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -60,7 +60,7 @@
 													<c:forEach var="data" varStatus="s"
 														items="${pathMappingItems}">
 														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-															data-href="${contextPath}/admin/pathmapping/details/4/${f:u(data.id)}">
+															data-href="${contextPath}/admin/pathmap/details/4/${f:u(data.id)}">
 															<td>${f:h(data.regex)}</td>
 															<td>${f:h(data.replacement)}</td>
 														</tr>

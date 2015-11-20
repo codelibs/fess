@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.path_mapping_configuration" /></title>
+		key="labels.pathmap_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -17,7 +17,7 @@
 			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.path_mapping_title_details" />
+					<la:message key="labels.pathmap_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -68,13 +68,13 @@
 										<div class="col-sm-9">
 											<la:select property="processType" styleClass="form-control">
 												<la:option value="C">
-													<la:message key="labels.path_mapping_pt_crawling" />
+													<la:message key="labels.pathmap_pt_crawling" />
 												</la:option>
 												<la:option value="D">
-													<la:message key="labels.path_mapping_pt_displaying" />
+													<la:message key="labels.pathmap_pt_displaying" />
 												</la:option>
 												<la:option value="B">
-													<la:message key="labels.path_mapping_pt_both" />
+													<la:message key="labels.pathmap_pt_both" />
 												</la:option>
 											</la:select>
 										</div>
