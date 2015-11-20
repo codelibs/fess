@@ -1,8 +1,13 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <ol class="breadcrumb">
-	<li><la:link href="../list">
-			<la:message key="labels.crud_link_list" />
-		</la:link></li>
+	<c:if test="${crudMode == null}">
+		<li class="active"><la:message key="labels.crud_link_list" /></li>
+	</c:if>
+	<c:if test="${crudMode != null}">
+		<li><la:link href="../list">
+				<la:message key="labels.crud_link_list" />
+			</la:link></li>
+	</c:if>
 	<c:if test="${crudMode == 1}">
 		<li class="active"><la:message key="labels.crud_link_create" /></li>
 	</c:if>
