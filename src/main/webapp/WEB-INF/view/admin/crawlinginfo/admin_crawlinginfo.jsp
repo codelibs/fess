@@ -146,47 +146,52 @@
 										</div>
 									</div>
 									<div class="row">
-										<div class="col-sm-12 center">
-											<button type="button" class="btn btn-danger"
-												data-toggle="modal" data-target="#confirmToDeleteAll">
-												<i class="fa fa-trash"></i>
-												<la:message key="labels.crawling_session_delete_all_link" />
-											</button>
-										</div>
-										<div class="modal modal-danger fade" id="confirmToDeleteAll"
-											tabindex="-1" role="dialog">
-											<div class="modal-dialog">
-												<div class="modal-content">
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal"
-															aria-label="Close">
-															<span aria-hidden="true">×</span>
-														</button>
-														<h4 class="modal-title">
-															<la:message key="labels.crawling_session_delete_all_link" />
-														</h4>
-													</div>
-													<div class="modal-body">
-														<p>
-															<la:message
-																key="labels.crawling_session_delete_all_confirmation" />
-														</p>
-													</div>
-													<div class="modal-footer">
-														<button type="button" class="btn btn-outline pull-left"
-															data-dismiss="modal">
-															<la:message
-																key="labels.crawling_session_delete_all_cancel" />
-														</button>
-														<la:link href="deleteall" styleClass="btn btn-outline"
-															data-dismiss="modal">
-															<i class="fa fa-trash"></i>
-															<la:message key="labels.crawling_session_delete_all_link" />
-														</la:link>
+										<la:form action="/admin/crawlinginfo/">
+											<div class="col-sm-12 center">
+												<button type="button" class="btn btn-danger"
+													data-toggle="modal" data-target="#confirmToDeleteAll">
+													<i class="fa fa-trash"></i>
+													<la:message key="labels.crawling_session_delete_all_link" />
+												</button>
+											</div>
+											<div class="modal modal-danger fade" id="confirmToDeleteAll"
+												tabindex="-1" role="dialog">
+												<div class="modal-dialog">
+													<div class="modal-content">
+														<div class="modal-header">
+															<button type="button" class="close" data-dismiss="modal"
+																aria-label="Close">
+																<span aria-hidden="true">×</span>
+															</button>
+															<h4 class="modal-title">
+																<la:message
+																	key="labels.crawling_session_delete_all_link" />
+															</h4>
+														</div>
+														<div class="modal-body">
+															<p>
+																<la:message
+																	key="labels.crawling_session_delete_all_confirmation" />
+															</p>
+														</div>
+														<div class="modal-footer">
+															<button type="button" class="btn btn-outline pull-left"
+																data-dismiss="modal">
+																<la:message
+																	key="labels.crawling_session_delete_all_cancel" />
+															</button>
+															<button type="submit" class="btn btn-outline btn-danger"
+																name="deleteall"
+																value="<la:message key="labels.crawling_session_delete_all_link" />">
+																<i class="fa fa-trash"></i>
+																<la:message
+																	key="labels.crawling_session_delete_all_link" />
+															</button>
+														</div>
 													</div>
 												</div>
 											</div>
-										</div>
+										</la:form>
 									</div>
 								</c:if>
 							</div>

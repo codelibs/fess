@@ -58,6 +58,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index() {
+        saveToken();
         return asListHtml();
     }
 
@@ -137,11 +138,16 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse deleteall(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
+    public HtmlResponse deleteall() {
+        verifyToken(() -> asListHtml());
         failureUrlService.deleteAll(failureUrlPager);
+        failureUrlPager.clear();
         saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
-        return redirect(getClass());
+        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(failureUrlPager, form, op -> {});
+            });
+        });
     }
 
     // ===================================================================================

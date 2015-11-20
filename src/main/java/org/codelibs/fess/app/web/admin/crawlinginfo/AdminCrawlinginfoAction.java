@@ -60,15 +60,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse deleteall(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
-        saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
-        return redirect(getClass());
-    }
-
-    @Execute
     public HtmlResponse index() {
+        saveToken();
         return asListHtml();
     }
 
@@ -150,6 +143,15 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
             crawlingSessionService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         });
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse deleteall() {
+        verifyToken(() -> asListHtml());
+        // FIXME:
+        crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
+        saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 
