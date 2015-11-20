@@ -146,16 +146,10 @@ public class AdminWebauthAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml().renderWith(data -> {
-                registerProtocolSchemeItems(data);
-                registerWebConfigItems(data);
-            });
+            return asDetailsHtml();
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml().renderWith(data -> {
-                registerProtocolSchemeItems(data);
-                registerWebConfigItems(data);
-            });
+            return asEditHtml();
         }
     }
 
@@ -177,9 +171,6 @@ public class AdminWebauthAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
-        }).renderWith(data -> {
-            registerProtocolSchemeItems(data);
-            registerWebConfigItems(data);
         });
     }
 
@@ -317,10 +308,16 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminWebauth_AdminWebauthEditJsp);
+        return asHtml(path_AdminWebauth_AdminWebauthEditJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminWebauth_AdminWebauthDetailsJsp);
+        return asHtml(path_AdminWebauth_AdminWebauthDetailsJsp).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
+        });
     }
 }

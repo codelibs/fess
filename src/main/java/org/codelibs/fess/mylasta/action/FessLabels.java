@@ -266,10 +266,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Failure Count */
     public static final String LABELS_FAILURE_COUNT_THRESHOLD = "{labels.failureCountThreshold}";
 
-    /** The key of the message: Config Name */
+    /** The key of the message: FS Config Name */
     public static final String LABELS_FILE_CONFIG_NAME = "{labels.fileConfigName}";
 
-    /** The key of the message: FS Config Name */
+    /** The key of the message: FS Config ID */
     public static final String LABELS_FILE_CONFIG_ID = "{labels.fileConfigId}";
 
     /** The key of the message: File name */
@@ -419,10 +419,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: XML Response */
     public static final String LABELS_WEB_API_XML = "{labels.webApiXml}";
 
-    /** The key of the message: ID */
+    /** The key of the message: Web Config ID */
     public static final String LABELS_WEB_CONFIG_ID = "{labels.webConfigId}";
 
-    /** The key of the message: Config Name */
+    /** The key of the message: Web Config Name */
     public static final String LABELS_WEB_CONFIG_NAME = "{labels.webConfigName}";
 
     /** The key of the message: All Languages */
