@@ -30,7 +30,6 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
@@ -54,7 +53,7 @@
 										</la:link>
 									</div>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
@@ -74,7 +73,7 @@
 												</c:if>
 												<tr>
 													<th><la:message key="labels.failure_url_url" /></th>
-													<td>${f:h(url)} <la:hidden property="url" />
+													<td>${f:h(url)}<la:hidden property="url" />
 													</td>
 												</tr>
 												<tr>
@@ -87,7 +86,7 @@
 												</tr>
 												<tr>
 													<th><la:message key="labels.failure_url_error_log" /></th>
-													<td>${f:br(f:nbsp(f:h(errorLog)))} <la:hidden
+													<td>${f:br(f:nbsp(f:h(errorLog)))}<la:hidden
 															property="errorLog" />
 													</td>
 												</tr>
@@ -117,20 +116,8 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<c:if test="${crudMode == 3}">
-										<button type="submit" class="btn btn-default" name="list"
-											value="<la:message key="labels.crud_button_back" />">
-											<i class="fa fa-arrow-circle-left"></i>
-											<la:message key="labels.crud_button_back" />
-										</button>
-										<button type="submit" class="btn btn-danger" name="delete"
-											value="<la:message key="labels.crud_button_delete" />">
-											<i class="fa fa-trash"></i>
-											<la:message key="labels.crud_button_delete" />
-										</button>
-									</c:if>
 									<c:if test="${crudMode == 4}">
-										<button type="submit" class="btn btn-default" name="list"
+										<button type="submit" class="btn btn-default" name="back"
 											value="<la:message key="labels.crud_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
@@ -182,10 +169,8 @@
 						</div>
 					</div>
 				</la:form>
-
 			</section>
 		</div>
-
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
