@@ -1269,28 +1269,28 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_roletype_value = "{labels.roletype_value}";
 
     /** The key of the message: Request Header */
-    public static final String LABELS_request_header_configuration = "{labels.request_header_configuration}";
+    public static final String LABELS_reqheader_configuration = "{labels.reqheader_configuration}";
 
     /** The key of the message: Name */
-    public static final String LABELS_request_header_list_name = "{labels.request_header_list_name}";
+    public static final String LABELS_reqheader_list_name = "{labels.reqheader_list_name}";
 
     /** The key of the message: Config Name */
-    public static final String LABELS_request_header_list_web_crawling_config = "{labels.request_header_list_web_crawling_config}";
+    public static final String LABELS_reqheader_list_web_crawling_config = "{labels.reqheader_list_web_crawling_config}";
 
     /** The key of the message: Create New Web Config */
-    public static final String LABELS_request_header_create_web_config = "{labels.request_header_create_web_config}";
+    public static final String LABELS_reqheader_create_web_config = "{labels.reqheader_create_web_config}";
 
     /** The key of the message: Request Header */
-    public static final String LABELS_request_header_title_details = "{labels.request_header_title_details}";
+    public static final String LABELS_reqheader_title_details = "{labels.reqheader_title_details}";
 
     /** The key of the message: Name */
-    public static final String LABELS_request_header_name = "{labels.request_header_name}";
+    public static final String LABELS_reqheader_name = "{labels.reqheader_name}";
 
     /** The key of the message: Value */
-    public static final String LABELS_request_header_value = "{labels.request_header_value}";
+    public static final String LABELS_reqheader_value = "{labels.reqheader_value}";
 
     /** The key of the message: Web Config */
-    public static final String LABELS_request_header_web_crawling_config = "{labels.request_header_web_crawling_config}";
+    public static final String LABELS_reqheader_web_crawling_config = "{labels.reqheader_web_crawling_config}";
 
     /** The key of the message: Key Match */
     public static final String LABELS_key_match_configuration = "{labels.key_match_configuration}";

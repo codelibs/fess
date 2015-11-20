@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.request_header_configuration" /></title>
+		key="labels.reqheader_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.request_header_title_details" />
+					<la:message key="labels.reqheader_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -49,21 +49,21 @@
 									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
-												key="labels.request_header_name" /></label>
+												key="labels.reqheader_name" /></label>
 										<div class="col-sm-9">
 											<la:text property="name" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="value" class="col-sm-3 control-label"><la:message
-												key="labels.request_header_value" /></label>
+												key="labels.reqheader_value" /></label>
 										<div class="col-sm-9">
 											<la:text property="value" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="webConfigId" class="col-sm-3 control-label"><la:message
-												key="labels.request_header_web_crawling_config" /></label>
+												key="labels.reqheader_web_crawling_config" /></label>
 										<div class="col-sm-9">
 											<la:select property="webConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${webConfigItems}">

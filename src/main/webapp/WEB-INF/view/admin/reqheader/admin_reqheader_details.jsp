@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.request_header_configuration" /></title>
+		key="labels.reqheader_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.request_header_title_details" />
+					<la:message key="labels.reqheader_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -51,16 +51,16 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message
-														key="labels.request_header_name" /></th>
+														key="labels.reqheader_name" /></th>
 												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.request_header_value" /></th>
+												<th><la:message key="labels.reqheader_value" /></th>
 												<td>${f:h(value)}<la:hidden property="value" /></td>
 											</tr>
 											<tr>
 												<th><la:message
-														key="labels.request_header_web_crawling_config" /></th>
+														key="labels.reqheader_web_crawling_config" /></th>
 												<td><c:forEach var="item" items="${webConfigItems}">
 														<c:if test="${webConfigId==item.value}">${f:h(item.label)}</c:if>
 													</c:forEach> <la:hidden property="webConfigId" /></td>

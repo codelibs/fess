@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.request_header_configuration" /></title>
+		key="labels.reqheader_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -16,7 +16,7 @@
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.request_header_configuration" />
+					<la:message key="labels.reqheader_configuration" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -25,7 +25,7 @@
 					<div class="col-md-12">
 						<c:if test="${!displayCreateLink}">
 							<la:link href="../webconfig/" styleClass="btn btn-primary">
-								<la:message key="labels.request_header_create_web_config" />
+								<la:message key="labels.reqheader_create_web_config" />
 							</la:link>
 						</c:if>
 						<c:if test="${displayCreateLink}">
@@ -56,16 +56,16 @@
 										<table class="table table-bordered table-striped">
 											<thead>
 												<tr>
-													<th><la:message key="labels.request_header_list_name" /></th>
+													<th><la:message key="labels.reqheader_list_name" /></th>
 													<th><la:message
-															key="labels.request_header_list_web_crawling_config" /></th>
+															key="labels.reqheader_list_web_crawling_config" /></th>
 												</tr>
 											</thead>
 											<tbody>
 												<c:forEach var="data" varStatus="s"
 													items="${requestHeaderItems}">
 													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-														data-href="${contextPath}/admin/requestheader/details/4/${f:u(data.id)}">
+														data-href="${contextPath}/admin/reqheader/details/4/${f:u(data.id)}">
 														<td>${f:h(data.name)}</td>
 														<td>${f:h(data.webConfig.name)}</td>
 													</tr>
