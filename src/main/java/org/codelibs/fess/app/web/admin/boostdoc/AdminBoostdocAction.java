@@ -27,9 +27,9 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * @author shinsuke

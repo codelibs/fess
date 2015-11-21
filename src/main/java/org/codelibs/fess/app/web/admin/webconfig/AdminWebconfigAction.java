@@ -26,17 +26,14 @@ import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * @author shinsuke
@@ -154,31 +151,6 @@ public class AdminWebconfigAction extends FessAdminAction {
                 registerRolesAndLabels(data);
             });
         }
-    }
-
-    @Execute
-    public HtmlResponse createnewjob(final EditForm form) {
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        final ScheduledJob scheduledJob = new ScheduledJob();
-        scheduledJob.setCrawler(true);
-        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
-                org.codelibs.fess.app.web.admin.scheduler.CreateForm.class,
-                op -> {
-                    op.setup(scheduledJobForm -> {
-                        scheduledJobForm.initialize();
-                        scheduledJobForm.crudMode = CrudMode.CREATE;
-                        scheduledJobForm.jobLogging = Constants.ON;
-                        scheduledJobForm.crawler = Constants.ON;
-                        scheduledJobForm.available = Constants.ON;
-                        scheduledJobForm.name =
-                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels.web_crawling_job_title", form.id);
-                        scheduledJobForm.scriptData =
-                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels.scheduledjob_script_template", "\"" + form.id + "\"", "", "");
-                    });
-                });
     }
 
     // -----------------------------------------------------

@@ -23,8 +23,8 @@ import org.codelibs.fess.dict.DictionaryItem;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * @author Keiichi Watanabe

@@ -25,11 +25,9 @@ import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
-import org.lastaflute.web.callback.ActionRuntime;
-import org.lastaflute.web.callback.TypicalEmbeddedKeySupplier;
-import org.lastaflute.web.callback.TypicalKey.TypicalSimpleEmbeddedKeySupplier;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.lastaflute.web.validation.VaMessenger;
 
@@ -100,15 +98,15 @@ public abstract class FessAdminAction extends FessBaseAction {
     // ===================================================================================
     //                                                                            Override
     //                                                                           =========
-    @Override
-    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
-        return new TypicalSimpleEmbeddedKeySupplier() {
-            @Override
-            public String getErrorMessageForwardPath() {
-                return "/admin/error/error.jsp";
-            }
-        };
-    }
+    //    @Override
+    //    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
+    //        return new TypicalSimpleEmbeddedKeySupplier() {
+    //            @Override
+    //            public String getErrorMessageForwardPath() {
+    //                return "/admin/error/error.jsp";
+    //            }
+    //        };
+    //    }
 
     // ===================================================================================
     //                                                                               Hook

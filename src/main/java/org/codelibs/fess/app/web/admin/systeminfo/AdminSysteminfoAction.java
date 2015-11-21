@@ -28,9 +28,9 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * @author Keiichi Watanabe

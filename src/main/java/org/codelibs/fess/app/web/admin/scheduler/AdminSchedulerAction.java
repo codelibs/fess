@@ -27,12 +27,13 @@ import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
@@ -111,6 +112,29 @@ public class AdminSchedulerAction extends FessAdminAction {
     // -----------------------------------------------------
     //                                            Entry Page
     //                                            ----------
+
+    @Execute
+    public HtmlResponse createnewjob(final String type, final String id) {
+        saveToken();
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
+                CreateForm.class,
+                op -> {
+                    op.setup(scheduledJobForm -> {
+                        scheduledJobForm.initialize();
+                        scheduledJobForm.crudMode = CrudMode.CREATE;
+                        scheduledJobForm.jobLogging = Constants.ON;
+                        scheduledJobForm.crawler = Constants.ON;
+                        scheduledJobForm.available = Constants.ON;
+                        scheduledJobForm.name =
+                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
+                                        "labels." + type + "_job_title", id);
+                        scheduledJobForm.scriptData =
+                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
+                                        "labels.scheduledjob_script_template", "\"" + id + "\"", "", "");
+                    });
+                });
+    }
+
     @Execute
     public HtmlResponse createnew() {
         saveToken();

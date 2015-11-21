@@ -37,9 +37,9 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.callback.ActionRuntime;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 
 /**
  * @author codelibs

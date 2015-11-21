@@ -20,7 +20,7 @@ import java.util.TimeZone;
 import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
-import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserTimeZoneProcessProvider;
 
