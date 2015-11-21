@@ -94,7 +94,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final int from;
         final int size;
         if (cb.isFetchScopeEffective()) {
-            from = cb.getFetchStartIndex();
+            from = cb.getPageStartIndex();
             size = cb.getFetchSize();
         } else {
             from = 0;
