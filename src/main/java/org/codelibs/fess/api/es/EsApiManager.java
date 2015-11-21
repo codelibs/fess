@@ -29,6 +29,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -113,6 +114,8 @@ public class EsApiManager extends BaseApiManager {
             try (InputStream in = con.getInputStream(); ServletOutputStream out = response.getOutputStream()) {
                 response.setStatus(con.getResponseCode());
                 CopyUtil.copy(in, out);
+            } catch (final ClientAbortException e) {
+                logger.debug("Client aborts this request.", e);
             } catch (final IOException e) {
                 try (InputStream err = con.getErrorStream()) {
                     logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
