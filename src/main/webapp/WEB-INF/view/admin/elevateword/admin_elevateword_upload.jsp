@@ -59,7 +59,7 @@
 							</div>
 							<!-- /.box-header -->
 							<div class="box-body">
-								<la:form action="/admin/elevateword/"
+								<la:form action="/admin/elevateword/upload/"
 									enctype="multipart/form-data">
 									<table class="table table-bordered">
 										<tbody>

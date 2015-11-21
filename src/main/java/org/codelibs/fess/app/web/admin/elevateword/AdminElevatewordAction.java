@@ -15,22 +15,18 @@
  */
 package org.codelibs.fess.app.web.admin.elevateword;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SuggestElevateWordPager;
@@ -47,9 +43,9 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.callback.ActionRuntime;
+import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
-import org.lastaflute.web.util.LaResponseUtil;
 
 /**
  * @author Keiichi Watanabe
@@ -199,22 +195,25 @@ public class AdminElevatewordAction extends FessAdminAction {
         return asDownloadHtml();
     }
 
-    // TODO refactoring
     @Execute
-    public HtmlResponse download(final DownloadForm form) {
-        validate(form, messages -> {}, () -> asDownloadHtml());
+    public ActionResponse download(final DownloadForm form) {
         verifyToken(() -> asDownloadHtml());
-        final HttpServletResponse response = LaResponseUtil.getResponse();
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + "elevateword.csv" + "\"");
-        try (Writer writer =
-                new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), crawlerProperties.getProperty(
-                        Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8)))) {
-            suggestElevateWordService.exportCsv(writer);
-        } catch (final Exception e) {
-            e.printStackTrace(); // TODO
-        }
-        return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp);
+
+        return asStream("elevate.csv").stream(out -> {
+            Path tempFile = Files.createTempFile(null, null);
+            try {
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
+                    suggestElevateWordService.exportCsv(writer);
+                } catch (final Exception e) {
+                    throwValidationError(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL), () -> asDownloadHtml());
+                }
+                try (InputStream in = Files.newInputStream(tempFile)) {
+                    out.write(in);
+                }
+            } finally {
+                Files.delete(tempFile);
+            }
+        });
     }
 
     // -----------------------------------------------------
@@ -282,55 +281,15 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
-        BufferedInputStream is = null;
-        File tempFile = null;
-        FileOutputStream fos = null;
-        final byte[] b = new byte[20];
-        try {
-            tempFile = File.createTempFile("suggestelevateword-import-", ".csv");
-            is = new BufferedInputStream(form.suggestElevateWordFile.getInputStream());
-            is.mark(20);
-            if (is.read(b, 0, 20) <= 0) {
-                // TODO
+        new Thread(() -> {
+            Reader reader = null;
+            try {
+                reader = new BufferedReader(new InputStreamReader(form.suggestElevateWordFile.getInputStream(), getCsvEncoding()));
+                suggestElevateWordService.importCsv(reader);
+            } catch (final Exception e) {
+                throw new FessSystemException("Failed to import data.", e);
             }
-            is.reset();
-            fos = new FileOutputStream(tempFile);
-            CopyUtil.copy(is, fos);
-        } catch (final Exception e) {
-            if (tempFile != null && !tempFile.delete()) {
-                // TODO
-            }
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(fos);
-        }
-
-        final File oFile = tempFile;
-        try {
-            final String head = new String(b, Constants.UTF_8);
-            if (!(head.startsWith("\"SuggestWord\"") || head.startsWith("SuggestWord"))) {
-                // TODO
-            }
-            final String enc = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-            new Thread(() -> {
-                Reader reader = null;
-                try {
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(oFile), enc));
-                    suggestElevateWordService.importCsv(reader);
-                } catch (final Exception e) {
-                    throw new FessSystemException("Failed to import data.", e);
-                } finally {
-                    if (!oFile.delete()) {
-                        // TODO
-                }
-                IOUtils.closeQuietly(reader);
-            }
-        }   ).start();
-        } catch (final Exception e) {
-            if (!oFile.delete()) {
-                // TODO
-            }
-        }
+        }).start();
         saveInfo(messages -> messages.addSuccessUploadSuggestElevateWord(GLOBAL));
         return redirect(getClass());
     }
@@ -386,6 +345,10 @@ public class AdminElevatewordAction extends FessAdminAction {
         }
     }
 
+    private String getCsvEncoding() {
+        return crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+    }
+
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
@@ -412,6 +375,6 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     private HtmlResponse asDownloadHtml() {
-        return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp);
+        return asHtml(path_AdminElevateword_AdminElevatewordDownloadJsp).useForm(DownloadForm.class);
     }
 }
