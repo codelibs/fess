@@ -43,7 +43,7 @@ import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
- * @author codelibs
+ * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminDataconfigAction extends FessAdminAction {
@@ -137,7 +137,6 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
@@ -146,13 +145,20 @@ public class AdminDataconfigAction extends FessAdminAction {
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
+        saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml();
+            return asDetailsHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+                registerHandlerNames(data);
+            });
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
+            return asEditHtml().renderWith(data -> {
+                registerRolesAndLabels(data);
+                registerHandlerNames(data);
+            });
         }
     }
 

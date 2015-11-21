@@ -52,8 +52,8 @@
 											<table class="table table-bordered table-striped">
 												<thead>
 													<tr>
-														<th><la:message key="labels.name" /></th>
-														<th><la:message key="labels.available" /></th>
+														<th class="col-md-8"><la:message key="labels.name" /></th>
+														<th class="col-md-4 text-center"><la:message key="labels.available" /></th>
 													</tr>
 												</thead>
 												<tbody>
