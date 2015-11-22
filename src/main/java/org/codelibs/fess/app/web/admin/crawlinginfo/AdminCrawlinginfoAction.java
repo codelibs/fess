@@ -67,6 +67,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+        saveToken();
         crawlingSessionPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -75,6 +76,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
+        saveToken();
         copyBeanToBean(form, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -83,6 +85,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
+        saveToken();
         crawlingSessionPager.clear();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -91,6 +94,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
+        saveToken();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -149,8 +153,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
-        // FIXME:
         crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
+        crawlingSessionPager.clear();
         saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
         return redirect(getClass());
     }

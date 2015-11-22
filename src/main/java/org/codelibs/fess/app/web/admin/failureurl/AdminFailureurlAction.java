@@ -143,11 +143,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         failureUrlService.deleteAll(failureUrlPager);
         failureUrlPager.clear();
         saveInfo(messages -> messages.addSuccessFailureUrlDeleteAll(GLOBAL));
-        return asHtml(path_AdminFailureurl_AdminFailureurlJsp).useForm(SearchForm.class, setup -> {
-            setup.setup(form -> {
-                copyBeanToBean(failureUrlPager, form, op -> {});
-            });
-        });
+        return redirect(getClass());
     }
 
     // ===================================================================================
