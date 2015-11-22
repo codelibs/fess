@@ -137,7 +137,8 @@ public class SearchService {
                         searchRequestBuilder -> {
                             return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
                                     .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
-                                    .responseFields(queryHelper.getResponseFields()).build();
+                                    .responseFields(queryHelper.getResponseFields()).administrativeAccess(params.isAdministrativeAccess())
+                                    .build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
                             final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
                             queryResponseList.init(searchResponse, pageStart, pageSize);

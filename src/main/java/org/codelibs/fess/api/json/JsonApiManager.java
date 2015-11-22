@@ -765,5 +765,10 @@ public class JsonApiManager extends BaseApiManager {
             return pageSize;
         }
 
+        @Override
+        public boolean isAdministrativeAccess() {
+            return false;
+        }
+
     }
 }

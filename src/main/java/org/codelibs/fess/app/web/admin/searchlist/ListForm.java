@@ -140,4 +140,9 @@ public class ListForm implements SearchRequestParams, Serializable {
         }
     }
 
+    @Override
+    public boolean isAdministrativeAccess() {
+        return true;
+    }
+
 }

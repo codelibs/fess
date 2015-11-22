@@ -775,8 +775,8 @@ public class FessEsClient implements Client {
             return this;
         }
 
-        public SearchConditionBuilder administrativeAccess() {
-            administrativeAccess = true;
+        public SearchConditionBuilder administrativeAccess(boolean administrativeAccess) {
+            this.administrativeAccess = administrativeAccess;
             return this;
         }
 

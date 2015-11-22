@@ -135,4 +135,9 @@ public class SearchForm implements SearchRequestParams, Serializable {
     public String getSort() {
         return sort;
     }
+
+    @Override
+    public boolean isAdministrativeAccess() {
+        return false;
+    }
 }

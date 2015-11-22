@@ -39,4 +39,6 @@ public interface SearchRequestParams {
 
     int getPageSize();
 
+    boolean isAdministrativeAccess();
+
 }

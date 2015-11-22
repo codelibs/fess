@@ -89,10 +89,13 @@ public class KeyMatchHelper {
         final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> documentList =
-                fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                fessEsClient.getDocumentList(
+                        fessConfig.getIndexDocumentIndex(),
+                        fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess().size(keyMatch.getMaxSize())
-                                    .query(keyMatch.getQuery()).responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
+                            return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess(true)
+                                    .size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
+                                    .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
                         });
         return documentList;
     }
