@@ -58,7 +58,6 @@ public class AdminLogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index() {
-        saveToken();
         return asIndexHtml();
     }
 
@@ -67,7 +66,6 @@ public class AdminLogAction extends FessAdminAction {
         String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
-            verifyToken(() -> asIndexHtml());
             Path path = Paths.get(logFilePath, filename);
             return asStream(filename).contentType("text/plain; charset=UTF-8").stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
@@ -81,7 +79,7 @@ public class AdminLogAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    public List<Map<String, Object>> getLogFileItems() {
+    private List<Map<String, Object>> getLogFileItems() {
         final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
