@@ -47,8 +47,6 @@ import org.lastaflute.web.validation.VaErrorHook;
  */
 public class AdminUserAction extends FessAdminAction {
 
-    private static final String TEMPORARY_PASSWORD = "fess.temporary_password";
-
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
@@ -77,7 +75,6 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
-        clearStoredPassword();
         return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -85,7 +82,6 @@ public class AdminUserAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
-        clearStoredPassword();
         pageNumber.ifPresent(num -> {
             userPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
@@ -98,7 +94,6 @@ public class AdminUserAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        clearStoredPassword();
         copyBeanToBean(form, userPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -107,7 +102,6 @@ public class AdminUserAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        clearStoredPassword();
         userPager.clear();
         return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -134,7 +128,6 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
-        clearStoredPassword();
         return asHtml(path_AdminUser_AdminUserEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -148,7 +141,6 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        clearStoredPassword();
         HtmlNext next;
         switch (form.crudMode) {
         case CrudMode.EDIT: // back
@@ -204,7 +196,6 @@ public class AdminUserAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, toEditHtml());
         verifyPassword(form);
-        storePassword(form);
         getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -219,9 +210,6 @@ public class AdminUserAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, toEditHtml());
         verifyPassword(form);
-        if (StringUtil.isNotBlank(form.password)) {
-            storePassword(form);
-        }
         getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -272,9 +260,10 @@ public class AdminUserAction extends FessAdminAction {
     protected OptionalEntity<User> getUser(final CreateForm form) {
         return getEntity(form).map(entity -> {
             copyBeanToBean(form, entity, op -> op.exclude(ArrayUtils.addAll(Constants.COMMON_CONVERSION_RULE, "password")));
-            sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).ifPresent(password -> {
-                entity.setPassword(password);
-            });
+            if (form.crudMode.intValue() == CrudMode.CREATE || StringUtil.isNotBlank(form.password)) {
+                final String encodedPassword = fessLoginAssist.encryptPassword(form.password);
+                entity.setPassword(encodedPassword);
+            }
             return entity;
         });
     }
@@ -300,36 +289,17 @@ public class AdminUserAction extends FessAdminAction {
 
     protected void verifyPassword(final CreateForm form) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
-            form.confirmPassword = null;
+            resetPassword(form);
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);
             }, toEditHtml());
         }
         if (form.password != null && !form.password.equals(form.confirmPassword)) {
-            form.confirmPassword = null;
+            resetPassword(form);
             throwValidationError(messages -> {
                 messages.addErrorsInvalidConfirmPassword(GLOBAL);
             }, toEditHtml());
         }
-    }
-
-    protected void verifyStoredPassword(final CreateForm form) {
-        if (!sessionManager.getAttribute(TEMPORARY_PASSWORD, String.class).isPresent()) {
-            throwValidationError(messages -> {
-                messages.addErrorsInvalidConfirmPassword(GLOBAL);
-            }, toEditHtml());
-        }
-    }
-
-    private void clearStoredPassword() {
-        sessionManager.removeAttribute(TEMPORARY_PASSWORD);
-    }
-
-    private void storePassword(final CreateForm form) {
-        final String encodedPassword = fessLoginAssist.encryptPassword(form.password);
-        sessionManager.setAttribute(TEMPORARY_PASSWORD, encodedPassword);
-        form.password = null;
-        form.confirmPassword = null;
     }
 
     private void resetPassword(final CreateForm form) {
