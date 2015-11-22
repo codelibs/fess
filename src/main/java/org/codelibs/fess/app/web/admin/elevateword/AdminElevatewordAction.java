@@ -152,14 +152,10 @@ public class AdminElevatewordAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml().renderWith(data -> {
-                registerLabels(data);
-            });
+            return asDetailsHtml();
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml().renderWith(data -> {
-                registerLabels(data);
-            });
+            return asEditHtml();
         }
     }
 
@@ -363,11 +359,15 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminElevateword_AdminElevatewordEditJsp);
+        return asHtml(path_AdminElevateword_AdminElevatewordEditJsp).renderWith(data -> {
+            registerLabels(data);
+        });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp);
+        return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).renderWith(data -> {
+            registerLabels(data);
+        });
     }
 
     private HtmlResponse asUploadHtml() {

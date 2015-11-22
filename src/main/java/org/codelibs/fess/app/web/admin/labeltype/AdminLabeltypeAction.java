@@ -136,14 +136,10 @@ public class AdminLabeltypeAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml().renderWith(data -> {
-                registerRoleTypeItems(data);
-            });
+            return asDetailsHtml();
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml().renderWith(data -> {
-                registerRoleTypeItems(data);
-            });
+            return asEditHtml();
         }
     }
 
@@ -283,10 +279,14 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminLabeltype_AdminLabeltypeEditJsp);
+        return asHtml(path_AdminLabeltype_AdminLabeltypeEditJsp).renderWith(data -> {
+            registerRoleTypeItems(data);
+        });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp);
+        return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).renderWith(data -> {
+            registerRoleTypeItems(data);
+        });
     }
 }

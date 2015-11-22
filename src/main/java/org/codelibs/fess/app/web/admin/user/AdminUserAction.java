@@ -29,6 +29,7 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
+import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
@@ -36,7 +37,6 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
-import org.lastaflute.web.response.next.HtmlNext;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
@@ -74,10 +74,8 @@ public class AdminUserAction extends FessAdminAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final SearchForm form) {
-        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
-            searchPaging(data, form);
-        });
+    public HtmlResponse index() {
+        return asListHtml();
     }
 
     @Execute
@@ -126,8 +124,8 @@ public class AdminUserAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse createnew() {
+        saveToken();
         return asHtml(path_AdminUser_AdminUserEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
@@ -139,30 +137,24 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse edit(final EditForm form) {
-        HtmlNext next;
-        switch (form.crudMode) {
-        case CrudMode.EDIT: // back
-            form.crudMode = CrudMode.DETAILS;
-            next = path_AdminUser_AdminUserDetailsJsp;
-            break;
-        default:
-            form.crudMode = CrudMode.EDIT;
-            next = path_AdminUser_AdminUserEditJsp;
-            break;
-        }
+        validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
         userService.getUser(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
         });
         resetPassword(form);
-        validate(form, messages -> {}, toEditHtml());
-        return asHtml(next).renderWith(data -> {
-            registerForms(data);
-        });
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     // -----------------------------------------------------
@@ -171,6 +163,7 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
+        saveToken();
         return asHtml(path_AdminUser_AdminUserDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 userService.getUser(id).ifPresent(entity -> {
@@ -179,7 +172,7 @@ public class AdminUserAction extends FessAdminAction {
                     });
                     form.crudMode = crudMode;
                 }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
                 resetPassword(form);
             });
@@ -194,13 +187,14 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
-        validate(form, messages -> {}, toEditHtml());
-        verifyPassword(form);
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyPassword(form, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -208,13 +202,14 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, toEditHtml());
-        verifyPassword(form);
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyPassword(form, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
         getUser(form).ifPresent(entity -> {
             userService.store(entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -222,13 +217,13 @@ public class AdminUserAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, toEditHtml());
+        validate(form, messages -> {}, () -> asDetailsHtml());
         final String id = form.id;
         userService.getUser(id).ifPresent(entity -> {
             userService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), toEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });
         return redirect(getClass());
     }
@@ -283,22 +278,22 @@ public class AdminUserAction extends FessAdminAction {
         if (crudMode != expectedMode) {
             throwValidationError(messages -> {
                 messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
-            }, toEditHtml());
+            }, () -> asListHtml());
         }
     }
 
-    protected void verifyPassword(final CreateForm form) {
+    protected void verifyPassword(final CreateForm form, VaErrorHook validationErrorLambda) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             resetPassword(form);
             throwValidationError(messages -> {
                 messages.addErrorsBlankPassword(GLOBAL);
-            }, toEditHtml());
+            }, validationErrorLambda);
         }
         if (form.password != null && !form.password.equals(form.confirmPassword)) {
             resetPassword(form);
             throwValidationError(messages -> {
                 messages.addErrorsInvalidConfirmPassword(GLOBAL);
-            }, toEditHtml());
+            }, validationErrorLambda);
         }
     }
 
@@ -307,11 +302,29 @@ public class AdminUserAction extends FessAdminAction {
         form.confirmPassword = null;
     }
 
-    protected VaErrorHook toEditHtml() {
-        return () -> {
-            return asHtml(path_AdminUser_AdminUserEditJsp).renderWith(data -> {
-                registerForms(data);
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
+            data.register("userItems", userService.getUserList(userPager)); // page navi
+            }).useForm(SearchForm.class, setup -> {
+            setup.setup(form -> {
+                copyBeanToBean(userPager, form, op -> op.include("id"));
             });
-        };
+        });
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminUser_AdminUserEditJsp).renderWith(data -> {
+            registerForms(data);
+        });
+    }
+
+    private HtmlResponse asDetailsHtml() {
+        return asHtml(path_AdminUser_AdminUserDetailsJsp).renderWith(data -> {
+            registerForms(data);
+        });
     }
 }

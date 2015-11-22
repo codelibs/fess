@@ -127,9 +127,6 @@ public class AdminDataconfigAction extends FessAdminAction {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
             });
-        }).renderWith(data -> {
-            registerRolesAndLabels(data);
-            registerHandlerNames(data);
         });
     }
 
@@ -146,16 +143,10 @@ public class AdminDataconfigAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml().renderWith(data -> {
-                registerRolesAndLabels(data);
-                registerHandlerNames(data);
-            });
+            return asDetailsHtml();
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml().renderWith(data -> {
-                registerRolesAndLabels(data);
-                registerHandlerNames(data);
-            });
+            return asEditHtml();
         }
     }
 
@@ -177,9 +168,6 @@ public class AdminDataconfigAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
-        }).renderWith(data -> {
-            registerRolesAndLabels(data);
-            registerHandlerNames(data);
         });
     }
 
@@ -308,11 +296,17 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp);
+        return asHtml(path_AdminDataconfig_AdminDataconfigEditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
+            registerHandlerNames(data);
+        });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminDataconfig_AdminDataconfigDetailsJsp);
+        return asHtml(path_AdminDataconfig_AdminDataconfigDetailsJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
+            registerHandlerNames(data);
+        });
     }
 
 }

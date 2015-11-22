@@ -87,32 +87,36 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index() {
+        return asIndexHtml();
+    }
+
+    private HtmlResponse asIndexHtml() {
         return asHtml(path_AdminWizard_AdminWizardJsp).useForm(IndexForm.class);
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse crawlingConfigForm() {
+        saveToken();
         return asHtml(path_AdminWizard_AdminWizardConfigJsp).useForm(CrawlingConfigForm.class);
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfig(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_AdminWizardConfigJsp);
         });
+        verifyTokenKeep(() -> asIndexHtml());
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
         return redirectWith(getClass(), moreUrl("crawlingConfigForm"));
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse crawlingConfigNext(final CrawlingConfigForm form) {
         validate(form, messages -> {}, () -> {
             return asHtml(path_AdminWizard_AdminWizardConfigJsp);
         });
+        verifyToken(() -> asIndexHtml());
         final String name = crawlingConfigInternal(form);
         saveInfo(messages -> messages.addSuccessCreateCrawlingConfigAtWizard(GLOBAL, name));
         return redirectWith(getClass(), moreUrl("startCrawlingForm"));
@@ -269,14 +273,14 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     @Execute
-    //(token = TxToken.SAVE)
     public HtmlResponse startCrawlingForm() {
+        saveToken();
         return asHtml(path_AdminWizard_AdminWizardStartJsp).useForm(StartCrawlingForm.class);
     }
 
     @Execute
-    //(token = TxToken.VALIDATE)
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
+        verifyToken(() -> asIndexHtml());
         if (!jobHelper.isCrawlProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {

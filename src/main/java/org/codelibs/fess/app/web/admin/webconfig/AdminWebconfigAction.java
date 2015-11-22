@@ -119,13 +119,11 @@ public class AdminWebconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse createnew() {
         saveToken();
-        return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).useForm(CreateForm.class, op -> {
+        return asEditHtml().useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
             });
-        }).renderWith(data -> {
-            registerRolesAndLabels(data);
         });
     }
 
@@ -142,14 +140,10 @@ public class AdminWebconfigAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml().renderWith(data -> {
-                registerRolesAndLabels(data);
-            });
+            return asDetailsHtml();
         } else {
             form.crudMode = CrudMode.EDIT;
-            return asEditHtml().renderWith(data -> {
-                registerRolesAndLabels(data);
-            });
+            return asEditHtml();
         }
     }
 
@@ -160,7 +154,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp).useForm(EditForm.class, op -> {
+        return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
                 webConfigService.getWebConfig(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
@@ -171,8 +165,6 @@ public class AdminWebconfigAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
-        }).renderWith(data -> {
-            registerRolesAndLabels(data);
         });
     }
 
@@ -289,10 +281,14 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp);
+        return asHtml(path_AdminWebconfig_AdminWebconfigEditJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
+        });
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp);
+        return asHtml(path_AdminWebconfig_AdminWebconfigDetailsJsp).renderWith(data -> {
+            registerRolesAndLabels(data);
+        });
     }
 }

@@ -140,10 +140,10 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} cannot convert as {propertyType}. */
     public static final String CONSTRAINTS_TypeAny_MESSAGE = "{constraints.TypeAny.message}";
 
-    /** The key of the message: could not login. */
+    /** The key of the message: Login failed. */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
 
-    /** The key of the message: retry because of illegal transition. */
+    /** The key of the message: Please retry because of illegal transition. */
     public static final String ERRORS_APP_ILLEGAL_TRANSITION = "{errors.app.illegal.transition}";
 
     /** The key of the message: others might be updated, so retry. */
@@ -155,7 +155,7 @@ public class FessMessages extends FessLabels {
     /** The key of the message: already existing data, so retry. */
     public static final String ERRORS_APP_DB_ALREADY_EXISTS = "{errors.app.db.already.exists}";
 
-    /** The key of the message: double submit might be requested. */
+    /** The key of the message: Your request might have been processed before this request. Please check and retry it. */
     public static final String ERRORS_APP_DOUBLE_SUBMIT_REQUEST = "{errors.app.double.submit.request}";
 
     /** The key of the message: Username or Password is not correct. */
@@ -929,7 +929,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.login.failure' with parameters.
      * <pre>
-     * message: could not login.
+     * message: Login failed.
      * comment: - - - - - - - - - -/
      * </pre>
      * @param property The property name for the message. (NotNull)
@@ -944,7 +944,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.app.illegal.transition' with parameters.
      * <pre>
-     * message: retry because of illegal transition.
+     * message: Please retry because of illegal transition.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -1000,7 +1000,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.app.double.submit.request' with parameters.
      * <pre>
-     * message: double submit might be requested.
+     * message: Your request might have been processed before this request. Please check and retry it.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
