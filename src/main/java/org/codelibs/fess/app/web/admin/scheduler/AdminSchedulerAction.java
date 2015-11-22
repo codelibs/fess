@@ -114,7 +114,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     //                                            ----------
 
     @Execute
-    public HtmlResponse createnewjob(final String type, final String name) {
+    public HtmlResponse createnewjob(final String type, final String id, final String name) {
         saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
                 CreateForm.class,
@@ -130,7 +130,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                                         "labels." + type + "_job_title", name);
                         scheduledJobForm.scriptData =
                                 ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels.scheduledjob_script_template", "\"" + name + "\"", "", "");
+                                        "labels.scheduledjob_script_template", "\"" + id + "\"", "", "");
                     });
                 });
     }
