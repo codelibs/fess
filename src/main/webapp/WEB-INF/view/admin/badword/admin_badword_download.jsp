@@ -60,6 +60,13 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
+									<%-- Message --%>
+									<div>
+										<la:info id="msg" message="true">
+											<div class="alert alert-info">${msg}</div>
+										</la:info>
+										<la:errors />
+									</div>
 									<div class="form-group">
 										<label for="name" class="col-sm-12 control-label"><la:message
 												key="labels.suggest_bad_word_file" /></label>

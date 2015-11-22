@@ -458,6 +458,10 @@
         "type": "date",
         "format": "date_optional_time"
       },
+      "timestamp": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
       "digest": {
         "type": "string"
       },

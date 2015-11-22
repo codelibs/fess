@@ -166,21 +166,21 @@ public class QueryHelper implements Serializable {
             responseFields =
                     new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
                             fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(),
-                            fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(),
-                            fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldClickCount(),
-                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(),
-                            fessConfig.getIndexFieldHasCache() };
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
+                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldHasCache() };
         }
         if (cacheResponseFields == null) {
             cacheResponseFields =
                     new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
                             fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(),
-                            fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(),
-                            fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldClickCount(),
-                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(),
-                            fessConfig.getIndexFieldCache() };
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
+                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldCache() };
         }
         if (responseDocValuesFields == null) {
             responseDocValuesFields = new String[] { fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
@@ -193,22 +193,31 @@ public class QueryHelper implements Serializable {
                     new String[] { INURL_FIELD, fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
                             fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldContent(),
                             fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(),
-                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
-                            fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
+                            fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(),
                             fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldLang() };
         }
         if (facetFields == null) {
             facetFields =
                     new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(),
                             fessConfig.getIndexFieldContent(), fessConfig.getIndexFieldContentLength(),
-                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
-                            fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment() };
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
+                            fessConfig.getIndexFieldSegment() };
         }
         if (supportedSortFields == null) {
             supportedSortFields =
                     new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
-                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldClickCount(),
-                            fessConfig.getIndexFieldFavoriteCount() };
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
+        }
+        if (apiResponseFieldSet == null) {
+            setApiResponseFields(new String[] { "urlLink", "contentDescription", fessConfig.getIndexFieldId(),
+                    fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(),
+                    fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(),
+                    fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
+                    fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(),
+                    fessConfig.getIndexFieldUrl() });
         }
     }
 
@@ -636,9 +645,6 @@ public class QueryHelper implements Serializable {
     }
 
     public boolean isApiResponseField(final String field) {
-        if (apiResponseFieldSet == null) {
-            return true;
-        }
         return apiResponseFieldSet.contains(field);
     }
 

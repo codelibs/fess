@@ -73,6 +73,9 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. created */
     String INDEX_FIELD_CREATED = "index.field.created";
 
+    /** The key of the configuration. e.g. timestamp */
+    String INDEX_FIELD_TIMESTAMP = "index.field.timestamp";
+
     /** The key of the configuration. e.g. label */
     String INDEX_FIELD_LABEL = "index.field.label";
 
@@ -393,6 +396,13 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldCreated();
+
+    /**
+     * Get the value for the key 'index.field.timestamp'. <br>
+     * The value is, e.g. timestamp <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldTimestamp();
 
     /**
      * Get the value for the key 'index.field.label'. <br>
@@ -975,6 +985,10 @@ public interface FessConfig extends FessEnv {
 
         public String getIndexFieldCreated() {
             return get(FessConfig.INDEX_FIELD_CREATED);
+        }
+
+        public String getIndexFieldTimestamp() {
+            return get(FessConfig.INDEX_FIELD_TIMESTAMP);
         }
 
         public String getIndexFieldLabel() {

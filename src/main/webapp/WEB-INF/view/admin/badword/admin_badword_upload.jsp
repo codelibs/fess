@@ -59,6 +59,13 @@
 							</div>
 							<!-- /.box-header -->
 							<div class="box-body">
+								<%-- Message --%>
+								<div>
+									<la:info id="msg" message="true">
+										<div class="alert alert-info">${msg}</div>
+									</la:info>
+									<la:errors />
+								</div>
 								<la:form action="/admin/badword/upload/" enctype="multipart/form-data">
 									<table class="table table-bordered">
 										<tbody>

@@ -707,20 +707,20 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Label */
     public static final String LABELS_facet_label_title = "{labels.facet_label_title}";
 
-    /** The key of the message: Term */
-    public static final String LABELS_facet_lastModified_title = "{labels.facet_lastModified_title}";
+    /** The key of the message: Date Range */
+    public static final String LABELS_facet_timestamp_title = "{labels.facet_timestamp_title}";
 
     /** The key of the message: Past 24 Hours */
-    public static final String LABELS_facet_lastModified_1day = "{labels.facet_lastModified_1day}";
+    public static final String LABELS_facet_timestamp_1day = "{labels.facet_timestamp_1day}";
 
     /** The key of the message: Past Week */
-    public static final String LABELS_facet_lastModified_1week = "{labels.facet_lastModified_1week}";
+    public static final String LABELS_facet_timestamp_1week = "{labels.facet_timestamp_1week}";
 
     /** The key of the message: Past Month */
-    public static final String LABELS_facet_lastModified_1month = "{labels.facet_lastModified_1month}";
+    public static final String LABELS_facet_timestamp_1month = "{labels.facet_timestamp_1month}";
 
     /** The key of the message: Past Year */
-    public static final String LABELS_facet_lastModified_1year = "{labels.facet_lastModified_1year}";
+    public static final String LABELS_facet_timestamp_1year = "{labels.facet_timestamp_1year}";
 
     /** The key of the message: Size */
     public static final String LABELS_facet_contentLength_title = "{labels.facet_contentLength_title}";

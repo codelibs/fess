@@ -29,10 +29,10 @@
 				<property name="minCount">1</property>
 				<property name="field">["label"]</property>
 				<property name="query">[
-					"last_modified:[now/d-1d TO now]",
-					"last_modified:[now/d-7d TO now]",
-					"last_modified:[now/d-1M TO now]",
-					"last_modified:[now/d-1y TO now]",
+					"timestamp:[now/d-1d TO now]",
+					"timestamp:[now/d-7d TO now]",
+					"timestamp:[now/d-1M TO now]",
+					"timestamp:[now/d-1y TO now]",
 					"content_length:[0 TO 9999]",
 					"content_length:[10000 TO 99999]",
 					"content_length:[100000 TO 499999]",
@@ -63,11 +63,6 @@
 			<arg>"ko"</arg>
 			<arg>"cjk"</arg>
 		</postConstruct>
-		<postConstruct name="setApiResponseFields">
-			<arg>(String[])["id", "docId", "score", "boost",
-            "contentLength", "host", "site", "lastModified", "mimetype", "filetype_s",
-            "created", "title", "digest", "url", "urlLink", "contentDescription"]</arg>
-		</postConstruct>
 		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
 		</postConstruct>
@@ -83,22 +78,22 @@
 		<postConstruct name="addFacetQueryView">
 			<arg>
 				<component class="org.codelibs.fess.entity.FacetQueryView">
-					<property name="title">"labels.facet_lastModified_title"</property>
+					<property name="title">"labels.facet_timestamp_title"</property>
 					<postConstruct name="addQuery">
-						<arg>"labels.facet_lastModified_1day"</arg>
-						<arg>"last_modified:[now/d-1d TO now]"</arg>
+						<arg>"labels.facet_timestamp_1day"</arg>
+						<arg>"timestamp:[now/d-1d TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
-						<arg>"labels.facet_lastModified_1week"</arg>
-						<arg>"last_modified:[now/d-7d TO now]"</arg>
+						<arg>"labels.facet_timestamp_1week"</arg>
+						<arg>"timestamp:[now/d-7d TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
-						<arg>"labels.facet_lastModified_1month"</arg>
-						<arg>"last_modified:[now/d-1M TO now]"</arg>
+						<arg>"labels.facet_timestamp_1month"</arg>
+						<arg>"timestamp:[now/d-1M TO now]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
-						<arg>"labels.facet_lastModified_1year"</arg>
-						<arg>"last_modified:[now/d-1y TO now]"</arg>
+						<arg>"labels.facet_timestamp_1year"</arg>
+						<arg>"timestamp:[now/d-1y TO now]"</arg>
 					</postConstruct>
 				</component>
 			</arg>

@@ -207,14 +207,11 @@ public class CrawlingSessionService implements Serializable {
     }
 
     public void deleteOldSessions(final Set<String> activeSessionId) {
-        final List<CrawlingSession> activeSessionList = crawlingSessionBhv.selectList(cb -> {
-            if (activeSessionId.isEmpty()) {
-                cb.query().matchAll();
-            } else {
-                cb.query().setSessionId_InScope(activeSessionId);
-            }
-            cb.specify().columnId();
-        });
+        final List<CrawlingSession> activeSessionList =
+                activeSessionId.isEmpty() ? Collections.emptyList() : crawlingSessionBhv.selectList(cb -> {
+                    cb.query().setSessionId_InScope(activeSessionId);
+                    cb.specify().columnId();
+                });
         final List<String> idList = activeSessionList.stream().map(session -> session.getId()).collect(Collectors.toList());
         if (!idList.isEmpty()) {
             crawlingSessionInfoBhv.queryDelete(cb1 -> {

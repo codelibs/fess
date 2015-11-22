@@ -90,7 +90,7 @@
 						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
 							<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search/search?query=${f:u(query)}&additional=label:${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
+										href="/search/search?query=${f:u(query)}&additional=label%3a${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
 									>
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>

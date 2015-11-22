@@ -244,7 +244,8 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         // url
         putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created
-        putResultDataBody(dataMap, fessConfig.getIndexFieldCreated(), systemHelper.getCurrentTime());
+        Date now = systemHelper.getCurrentTime();
+        putResultDataBody(dataMap, fessConfig.getIndexFieldCreated(), now);
         // TODO anchor
         putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(), StringUtil.EMPTY);
         // mimetype
@@ -256,8 +257,14 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         // contentLength
         putResultDataBody(dataMap, fessConfig.getIndexFieldContentLength(), Long.toString(responseData.getContentLength()));
         //  lastModified
-        if (responseData.getLastModified() != null) {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), responseData.getLastModified());
+        Date lastModified = responseData.getLastModified();
+        if (lastModified != null) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), lastModified);
+            // timestamp
+            putResultDataBody(dataMap, fessConfig.getIndexFieldTimestamp(), lastModified);
+        } else {
+            // timestamp
+            putResultDataBody(dataMap, fessConfig.getIndexFieldTimestamp(), now);
         }
         // indexingTarget
         putResultDataBody(dataMap, Constants.INDEXING_TARGET, indexingTarget);
