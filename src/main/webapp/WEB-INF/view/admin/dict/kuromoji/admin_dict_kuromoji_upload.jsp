@@ -30,7 +30,7 @@
 				</ol>
 			</section>
 			<section class="content">
-				<la:form action="/admin/dict/kuromoji/"
+				<la:form action="/admin/dict/kuromoji/upload"
 					enctype="multipart/form-data">
 					<la:hidden property="dictId" />
 					<div class="row">
@@ -87,7 +87,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-success" name="upload"
+									<button type="submit" class="btn btn-success"
 										value="<la:message key="labels.dict_kuromoji_button_upload" />">
 										<i class="fa fa-upload"></i>
 										<la:message key="labels.dict_kuromoji_button_upload" />
