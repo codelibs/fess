@@ -86,19 +86,6 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     protected boolean favoriteSupport;
 
-    // ===================================================================================
-    //                                                                            Override
-    //                                                                           =========
-    //    @Override
-    //    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
-    //        return new TypicalSimpleEmbeddedKeySupplier() {
-    //            @Override
-    //            public String getErrorMessageForwardPath() {
-    //                return "/error/system.jsp";
-    //            }
-    //        };
-    //    }
-
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
         searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));

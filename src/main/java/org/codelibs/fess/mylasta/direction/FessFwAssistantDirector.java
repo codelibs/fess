@@ -17,6 +17,7 @@ package org.codelibs.fess.mylasta.direction;
 
 import javax.annotation.Resource;
 
+import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.sponsor.FessActionAdjustmentProvider;
 import org.codelibs.fess.mylasta.direction.sponsor.FessApiFailureHook;
 import org.codelibs.fess.mylasta.direction.sponsor.FessCookieResourceProvider;
@@ -37,6 +38,8 @@ import org.lastaflute.core.security.OneWayCryptographer;
 import org.lastaflute.db.dbflute.classification.ListedClassificationProvider;
 import org.lastaflute.db.direction.FwDbDirection;
 import org.lastaflute.web.direction.FwWebDirection;
+import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.ruts.renderer.JspHtmlRenderingProvider;
 
 /**
  * @author jflute
@@ -126,6 +129,15 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directMessage(nameList -> nameList.add("fess_message"), "fess_label");
         direction.directApiCall(createApiFailureHook());
         direction.directMultipart(() -> new FessMultipartRequestHandler());
+        direction.directHtmlRendering(new JspHtmlRenderingProvider() {
+            protected String getShowErrorsForwardPath(ActionRuntime runtime) {
+                if (FessAdminAction.class.isAssignableFrom(runtime.getActionType())) {
+                    return "/admin/error/error.jsp";
+                } else {
+                    return "/error/system.jsp";
+                }
+            };
+        });
     }
 
     protected FessUserLocaleProcessProvider createUserLocaleProcessProvider() {

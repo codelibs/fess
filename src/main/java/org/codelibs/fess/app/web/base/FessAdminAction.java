@@ -96,19 +96,6 @@ public abstract class FessAdminAction extends FessBaseAction {
     }
 
     // ===================================================================================
-    //                                                                            Override
-    //                                                                           =========
-    //    @Override
-    //    protected TypicalEmbeddedKeySupplier newTypicalEmbeddedKeySupplier() {
-    //        return new TypicalSimpleEmbeddedKeySupplier() {
-    //            @Override
-    //            public String getErrorMessageForwardPath() {
-    //                return "/admin/error/error.jsp";
-    //            }
-    //        };
-    //    }
-
-    // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
     @Override
