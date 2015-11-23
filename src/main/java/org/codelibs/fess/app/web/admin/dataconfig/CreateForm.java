@@ -21,8 +21,10 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -83,5 +85,9 @@ public class CreateForm implements Serializable {
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
+        if (StringUtil.isNotBlank(roles)) {
+            roleTypeIds = StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]);
+        }
     }
 }

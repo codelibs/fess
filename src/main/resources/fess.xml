@@ -130,9 +130,6 @@
 				<property name="key">"1234567890123456"</property>
 			</component>
 		</property>
-		<property name="defaultRoleList">
-			{"guest"}
-		</property>
 		<property name="valueSeparator">"\\n"</property>
 		<property name="roleSeparator">","</property>
 		 -->

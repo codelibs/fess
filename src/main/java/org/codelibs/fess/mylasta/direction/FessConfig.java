@@ -118,6 +118,9 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
+    /** The key of the configuration. e.g. guest */
+    String SEARCH_DEFAULT_ROLES = "search.default.roles";
+
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
 
@@ -503,6 +506,13 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminRoles();
+
+    /**
+     * Get the value for the key 'search.default.roles'. <br>
+     * The value is, e.g. guest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSearchDefaultRoles();
 
     /**
      * Get the value for the key 'cookie.default.path'. <br>
@@ -1045,6 +1055,10 @@ public interface FessConfig extends FessEnv {
 
         public String getAuthenticationAdminRoles() {
             return get(FessConfig.AUTHENTICATION_ADMIN_ROLES);
+        }
+
+        public String getSearchDefaultRoles() {
+            return get(FessConfig.SEARCH_DEFAULT_ROLES);
         }
 
         public String getCookieDefaultPath() {

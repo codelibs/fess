@@ -17,6 +17,7 @@ package org.codelibs.fess.helper.impl;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,7 +36,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.RoleQueryHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -75,9 +76,15 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
 
     protected Map<String, String> cookieNameMap;
 
-    public List<String> defaultRoleList;
+    private List<String> defaultRoleList = new ArrayList<>();
 
-    public SystemHelper systemHelper;
+    @PostConstruct
+    public void init() {
+        StreamUtil.of(ComponentUtil.getFessConfig().getSearchDefaultRoles().split(",")).filter(name -> StringUtil.isNotBlank(name))
+                .forEach(name -> {
+                    defaultRoleList.add(name);
+                });
+    }
 
     /* (non-Javadoc)
      * @see org.codelibs.fess.helper.impl.RoleQueryHelper#build()

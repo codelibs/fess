@@ -623,7 +623,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search */
     public static final String LABELS_SEARCH = "{labels.search}";
 
-    /** The key of the message: Results <b>{2}</b><span class="br-phone"></span><span class="hidden-phone"> -</span> <b>{3}</b> of <b>{1}</b> pages for <b>{0}</b> */
+    /** The key of the message: Results <b>{2}</b><span class="br-phone"></span><span class="hidden-phone"> -</span> <b>{3}</b> of <b>{1}</b> for <b>{0}</b> */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
     /** The key of the message: ({0} sec) */
