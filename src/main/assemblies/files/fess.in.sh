@@ -78,7 +78,7 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webxml.path=$FESS_HOME/app/WEB-INF/web.xm
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_HOME/temp"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_HOME/logs"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=info"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=warn"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=production"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
 
