@@ -69,7 +69,7 @@ public class SystemHelper implements Serializable {
 
     private boolean useOwnTmpDir = true;
 
-    private String[] supportedHelpLangs = new String[] { "ja" };
+    private String[] supportedHelpLangs = new String[] {};
 
     private final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
 
@@ -168,6 +168,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String getHelpLink(final String name) {
+        final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
         return LaRequestUtil
                 .getOptionalRequest()
                 .map(request -> {
@@ -176,14 +177,17 @@ public class SystemHelper implements Serializable {
                         final String lang = locale.getLanguage();
                         for (final String l : supportedHelpLangs) {
                             if (l.equals(lang)) {
-                                final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
                                 return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
                                         Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
                             }
                         }
                     }
-                    return null;
-                }).orElseGet(() -> null);
+                    return getDefaultHelpLink(url);
+                }).orElseGet(() -> getDefaultHelpLink(url));
+    }
+
+    private String getDefaultHelpLink(final String url) {
+        return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
     }
 
     public void addDesignJspFileName(final String key, final String value) {
