@@ -193,10 +193,10 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
-        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
@@ -220,7 +220,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), new Date(documentExpires));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
         final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, langXpath, true));

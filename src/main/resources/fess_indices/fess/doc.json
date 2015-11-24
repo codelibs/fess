@@ -462,6 +462,10 @@
         "type": "date",
         "format": "date_optional_time"
       },
+      "expires": {
+        "type": "date",
+        "format": "date_optional_time"
+      },
       "digest": {
         "type": "string"
       },

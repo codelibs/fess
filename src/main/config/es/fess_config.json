@@ -227,6 +227,9 @@
           "intervalTime" : {
             "type" : "integer"
           },
+          "timeToLive" : {
+            "type" : "integer"
+          },
           "maxAccessCount" : {
             "type" : "long"
           },
@@ -736,6 +739,9 @@
             "index" : "not_analyzed"
           },
           "intervalTime" : {
+            "type" : "integer"
+          },
+          "timeToLive" : {
             "type" : "integer"
           },
           "maxAccessCount" : {

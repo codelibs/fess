@@ -393,4 +393,20 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public Integer getTimeToLive() {
+        String value = getHandlerParameterMap().get("timeToLive");
+        if (StringUtil.isBlank(value)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Invalid format: " + value, e);
+            }
+        }
+        return null;
+    }
 }

@@ -16,4 +16,6 @@
 	</component>
 	<component name="updateHotWordJob" class="org.codelibs.fess.job.UpdateHotWordJob" instance="prototype">
 	</component>
+	<component name="purgeDocJob" class="org.codelibs.fess.job.PurgeDocJob" instance="prototype">
+	</component>
 </components>

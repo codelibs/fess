@@ -47,6 +47,9 @@
       "intervalTime": {
         "type": "integer"
       },
+      "timeToLive": {
+        "type": "integer"
+      },
       "boost": {
         "type": "float"
       },

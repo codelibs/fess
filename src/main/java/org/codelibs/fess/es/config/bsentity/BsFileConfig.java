@@ -70,6 +70,9 @@ public class BsFileConfig extends EsAbstractEntity {
     /** intervalTime */
     protected Integer intervalTime;
 
+    /** timeToLive */
+    protected Integer timeToLive;
+
     /** maxAccessCount */
     protected Long maxAccessCount;
 
@@ -145,6 +148,9 @@ public class BsFileConfig extends EsAbstractEntity {
         if (intervalTime != null) {
             sourceMap.put("intervalTime", intervalTime);
         }
+        if (timeToLive != null) {
+            sourceMap.put("timeToLive", timeToLive);
+        }
         if (maxAccessCount != null) {
             sourceMap.put("maxAccessCount", maxAccessCount);
         }
@@ -186,6 +192,7 @@ public class BsFileConfig extends EsAbstractEntity {
         sb.append(dm).append(includedDocPaths);
         sb.append(dm).append(includedPaths);
         sb.append(dm).append(intervalTime);
+        sb.append(dm).append(timeToLive);
         sb.append(dm).append(maxAccessCount);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
@@ -311,6 +318,16 @@ public class BsFileConfig extends EsAbstractEntity {
     public void setIntervalTime(Integer value) {
         registerModifiedProperty("intervalTime");
         this.intervalTime = value;
+    }
+
+    public Integer getTimeToLive() {
+        checkSpecifiedProperty("timeToLive");
+        return timeToLive;
+    }
+
+    public void setTimeToLive(Integer value) {
+        registerModifiedProperty("timeToLive");
+        this.timeToLive = value;
     }
 
     public Long getMaxAccessCount() {

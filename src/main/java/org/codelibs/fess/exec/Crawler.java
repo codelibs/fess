@@ -47,8 +47,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -320,7 +318,6 @@ public class Crawler implements Serializable {
         final long totalTime = System.currentTimeMillis();
 
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         boolean completed = false;
         int exitCode = Constants.EXIT_OK;
@@ -375,19 +372,6 @@ public class Crawler implements Serializable {
 
             joinCrawlerThread(webFsCrawlerThread);
             joinCrawlerThread(dataCrawlerThread);
-
-            // clean up
-            final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to(new Date()))
-                            .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), options.sessionId));
-            try {
-                fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryBuilder);
-            } catch (final Exception e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("Could not delete expired sessions: " + queryBuilder.toString(), e);
-                }
-                exitCode = Constants.EXIT_FAIL;
-            }
 
             if (logger.isInfoEnabled()) {
                 logger.info("Finished Crawler");

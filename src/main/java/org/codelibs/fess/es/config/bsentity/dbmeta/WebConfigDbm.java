@@ -99,6 +99,8 @@ public class WebConfigDbm extends AbstractDBMeta {
                 "includedUrls");
         setupEpg(_epgMap, et -> ((WebConfig) et).getIntervalTime(), (et, vl) -> ((WebConfig) et).setIntervalTime(DfTypeUtil.toInteger(vl)),
                 "intervalTime");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getTimeToLive(), (et, vl) -> ((WebConfig) et).setTimeToLive(DfTypeUtil.toInteger(vl)),
+                "timeToLive");
         setupEpg(_epgMap, et -> ((WebConfig) et).getMaxAccessCount(),
                 (et, vl) -> ((WebConfig) et).setMaxAccessCount(DfTypeUtil.toLong(vl)), "maxAccessCount");
         setupEpg(_epgMap, et -> ((WebConfig) et).getName(), (et, vl) -> ((WebConfig) et).setName(DfTypeUtil.toString(vl)), "name");
@@ -171,6 +173,8 @@ public class WebConfigDbm extends AbstractDBMeta {
             false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIntervalTime = cci("intervalTime", "intervalTime", null, null, Integer.class, "intervalTime", null,
             false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTimeToLive = cci("timeToLive", "timeToLive", null, null, Integer.class, "timeToLive", null, false,
+            false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMaxAccessCount = cci("maxAccessCount", "maxAccessCount", null, null, Long.class, "maxAccessCount",
             null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
@@ -232,6 +236,10 @@ public class WebConfigDbm extends AbstractDBMeta {
         return _columnIntervalTime;
     }
 
+    public ColumnInfo columnTimeToLive() {
+        return _columnTimeToLive;
+    }
+
     public ColumnInfo columnMaxAccessCount() {
         return _columnMaxAccessCount;
     }
@@ -277,6 +285,7 @@ public class WebConfigDbm extends AbstractDBMeta {
         ls.add(columnIncludedDocUrls());
         ls.add(columnIncludedUrls());
         ls.add(columnIntervalTime());
+        ls.add(columnTimeToLive());
         ls.add(columnMaxAccessCount());
         ls.add(columnName());
         ls.add(columnNumOfThread());

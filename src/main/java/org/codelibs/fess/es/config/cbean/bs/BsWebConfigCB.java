@@ -202,6 +202,10 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
             doColumn("intervalTime");
         }
 
+        public void columnTimeToLive() {
+            doColumn("timeToLive");
+        }
+
         public void columnMaxAccessCount() {
             doColumn("maxAccessCount");
         }

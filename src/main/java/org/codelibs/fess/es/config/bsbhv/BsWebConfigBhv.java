@@ -85,6 +85,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
             result.setIncludedDocUrls(DfTypeUtil.toString(source.get("includedDocUrls")));
             result.setIncludedUrls(DfTypeUtil.toString(source.get("includedUrls")));
             result.setIntervalTime(DfTypeUtil.toInteger(source.get("intervalTime")));
+            result.setTimeToLive(DfTypeUtil.toInteger(source.get("timeToLive")));
             result.setMaxAccessCount(DfTypeUtil.toLong(source.get("maxAccessCount")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));

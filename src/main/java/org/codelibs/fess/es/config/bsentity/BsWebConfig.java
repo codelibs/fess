@@ -70,6 +70,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** intervalTime */
     protected Integer intervalTime;
 
+    /** timeToLive */
+    protected Integer timeToLive;
+
     /** maxAccessCount */
     protected Long maxAccessCount;
 
@@ -148,6 +151,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (intervalTime != null) {
             sourceMap.put("intervalTime", intervalTime);
         }
+        if (timeToLive != null) {
+            sourceMap.put("timeToLive", timeToLive);
+        }
         if (maxAccessCount != null) {
             sourceMap.put("maxAccessCount", maxAccessCount);
         }
@@ -192,6 +198,7 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(includedDocUrls);
         sb.append(dm).append(includedUrls);
         sb.append(dm).append(intervalTime);
+        sb.append(dm).append(timeToLive);
         sb.append(dm).append(maxAccessCount);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
@@ -318,6 +325,16 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setIntervalTime(Integer value) {
         registerModifiedProperty("intervalTime");
         this.intervalTime = value;
+    }
+
+    public Integer getTimeToLive() {
+        checkSpecifiedProperty("timeToLive");
+        return timeToLive;
+    }
+
+    public void setTimeToLive(Integer value) {
+        registerModifiedProperty("timeToLive");
+        this.timeToLive = value;
     }
 
     public Long getMaxAccessCount() {

@@ -158,13 +158,13 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
-        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
@@ -188,7 +188,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
         //  expires
         if (documentExpires != null) {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), new Date(documentExpires));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // segment
         putResultDataBody(dataMap, fessConfig.getIndexFieldSegment(), sessionId);

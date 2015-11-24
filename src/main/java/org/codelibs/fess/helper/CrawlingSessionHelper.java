@@ -18,6 +18,7 @@ package org.codelibs.fess.helper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingSessionService;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingSession;
 import org.codelibs.fess.es.config.exentity.CrawlingSessionInfo;
 import org.codelibs.fess.exception.FessSystemException;
@@ -124,8 +126,14 @@ public class CrawlingSessionHelper implements Serializable {
 
     }
 
-    public Long getDocumentExpires() {
-        return documentExpires;
+    public Date getDocumentExpires(CrawlingConfig config) {
+        Integer timeToLive = config.getTimeToLive();
+        if (timeToLive != null) {
+            // timeToLive minutes
+            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+            return new Date(now + timeToLive.longValue() * 1000 * 60);
+        }
+        return documentExpires != null ? new Date(documentExpires) : null;
     }
 
     protected long getExpiredTime(final int days) {

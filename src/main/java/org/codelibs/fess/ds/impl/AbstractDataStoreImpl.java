@@ -55,7 +55,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final Long documentExpires = crawlingSessionHelper.getDocumentExpires();
+        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(config);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         initParamMap.putAll(configParamMap);
@@ -71,7 +71,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         }
         //  expires
         if (documentExpires != null) {
-            defaultDataMap.put(fessConfig.getIndexFieldExpires(), new Date(documentExpires));
+            defaultDataMap.put(fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // segment
         defaultDataMap.put(fessConfig.getIndexFieldSegment(), initParamMap.get(Constants.SESSION_ID));

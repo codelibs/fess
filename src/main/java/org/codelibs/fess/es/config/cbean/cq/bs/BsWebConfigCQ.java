@@ -1946,6 +1946,161 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setTimeToLive_Equal(Integer timeToLive) {
+        setTimeToLive_Term(timeToLive, null);
+    }
+
+    public void setTimeToLive_Equal(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTimeToLive_Term(timeToLive, opLambda);
+    }
+
+    public void setTimeToLive_Term(Integer timeToLive) {
+        setTimeToLive_Term(timeToLive, null);
+    }
+
+    public void setTimeToLive_Term(Integer timeToLive, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_NotEqual(Integer timeToLive) {
+        setTimeToLive_NotTerm(timeToLive, null);
+    }
+
+    public void setTimeToLive_NotEqual(Integer timeToLive, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setTimeToLive_NotTerm(timeToLive, opLambda);
+    }
+
+    public void setTimeToLive_NotTerm(Integer timeToLive) {
+        setTimeToLive_NotTerm(timeToLive, null);
+    }
+
+    public void setTimeToLive_NotTerm(Integer timeToLive, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("timeToLive", timeToLive));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList) {
+        setTimeToLive_Terms(timeToLiveList, null);
+    }
+
+    public void setTimeToLive_Terms(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("timeToLive", timeToLiveList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList) {
+        setTimeToLive_Terms(timeToLiveList, null);
+    }
+
+    public void setTimeToLive_InScope(Collection<Integer> timeToLiveList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setTimeToLive_Terms(timeToLiveList, opLambda);
+    }
+
+    public void setTimeToLive_Match(Integer timeToLive) {
+        setTimeToLive_Match(timeToLive, null);
+    }
+
+    public void setTimeToLive_Match(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_MatchPhrase(Integer timeToLive) {
+        setTimeToLive_MatchPhrase(timeToLive, null);
+    }
+
+    public void setTimeToLive_MatchPhrase(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive) {
+        setTimeToLive_MatchPhrasePrefix(timeToLive, null);
+    }
+
+    public void setTimeToLive_MatchPhrasePrefix(Integer timeToLive, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Fuzzy(Integer timeToLive) {
+        setTimeToLive_Fuzzy(timeToLive, null);
+    }
+
+    public void setTimeToLive_Fuzzy(Integer timeToLive, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("timeToLive", timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_GreaterThan(Integer timeToLive) {
+        setTimeToLive_GreaterThan(timeToLive, null);
+    }
+
+    public void setTimeToLive_GreaterThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_THAN, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_LessThan(Integer timeToLive) {
+        setTimeToLive_LessThan(timeToLive, null);
+    }
+
+    public void setTimeToLive_LessThan(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_THAN, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_GreaterEqual(Integer timeToLive) {
+        setTimeToLive_GreaterEqual(timeToLive, null);
+    }
+
+    public void setTimeToLive_GreaterEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_GREATER_EQUAL, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_LessEqual(Integer timeToLive) {
+        setTimeToLive_LessEqual(timeToLive, null);
+    }
+
+    public void setTimeToLive_LessEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_EQUAL, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsWebConfigCQ addOrderBy_TimeToLive_Asc() {
+        regOBA("timeToLive");
+        return this;
+    }
+
+    public BsWebConfigCQ addOrderBy_TimeToLive_Desc() {
+        regOBD("timeToLive");
+        return this;
+    }
+
     public void setMaxAccessCount_Equal(Long maxAccessCount) {
         setMaxAccessCount_Term(maxAccessCount, null);
     }
