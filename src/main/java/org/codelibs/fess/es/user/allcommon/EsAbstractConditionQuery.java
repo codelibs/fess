@@ -164,7 +164,6 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         filterList.forEach(query -> {
             boolQuery.filter(query);
         });
-        regQ(boolQuery);
         return boolQuery;
     }
 

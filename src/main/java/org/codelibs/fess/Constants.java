@@ -296,6 +296,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String FACET_QUERY_PREFIX = "query:";
 
+    public static final String MATCHES_ALL_QUERY = "*:*";
+
     public static final String FESS_ES_TRANSPORT_ADDRESSES = "fess.es.transport_addresses";
 
     public static final String FESS_ES_CLUSTER_NAME = "fess.es.cluster_name";

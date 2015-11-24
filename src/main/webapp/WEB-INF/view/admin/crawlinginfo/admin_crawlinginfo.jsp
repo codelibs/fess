@@ -55,7 +55,8 @@
 													styleClass="form-control" placeholder="${ph_session_id}"></la:text>
 											</div>
 											<div class="form-group">
-												<button type="submit" class="btn btn-primary" name="search"
+												<button type="submit" class="btn btn-primary" id="submit"
+													name="search"
 													value="<la:message key="labels.crawling_session_search" />">
 													<i class="fa fa-search"></i>
 													<la:message key="labels.crawling_session_search" />

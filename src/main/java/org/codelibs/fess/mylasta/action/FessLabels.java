@@ -1488,13 +1488,19 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_search_list_configuration = "{labels.search_list_configuration}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_search_list_delete_link = "{labels.search_list_delete_link}";
+    public static final String LABELS_search_list_button_delete = "{labels.search_list_button_delete}";
+
+    /** The key of the message: Do you really want to delete? */
+    public static final String LABELS_search_list_delete_confirmation = "{labels.search_list_delete_confirmation}";
+
+    /** The key of the message: Delete all with this query */
+    public static final String LABELS_search_list_button_delete_all = "{labels.search_list_button_delete_all}";
+
+    /** The key of the message: Do you really want to delete all with this query? */
+    public static final String LABELS_search_list_delete_all_confirmation = "{labels.search_list_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
-    public static final String LABELS_search_list_delete_cancel = "{labels.search_list_delete_cancel}";
-
-    /** The key of the message: Do you really want to delete? ({0}) */
-    public static final String LABELS_search_list_delete_confirmation = "{labels.search_list_delete_confirmation}";
+    public static final String LABELS_search_list_button_cancel = "{labels.search_list_button_cancel}";
 
     /** The key of the message: Failure URL */
     public static final String LABELS_failure_url_configuration = "{labels.failure_url_configuration}";

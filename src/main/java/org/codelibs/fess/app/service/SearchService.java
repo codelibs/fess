@@ -36,6 +36,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -193,6 +194,41 @@ public class SearchService {
         if (searchLogSupport) {
             storeSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart, pageSize, queryResponseList);
         }
+    }
+
+    public int deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
+        if (StringUtil.isNotBlank(params.getOperator())) {
+            request.setAttribute(Constants.DEFAULT_OPERATOR, params.getOperator());
+        }
+
+        final StringBuilder queryBuf = new StringBuilder(255);
+        if (StringUtil.isNotBlank(params.getQuery())) {
+            if (params.getQuery().indexOf(" OR ") >= 0) {
+                queryBuf.append('(').append(params.getQuery()).append(')');
+            } else {
+                queryBuf.append(params.getQuery());
+            }
+        }
+        if (params.getAdditional() != null) {
+            appendAdditionalQuery(params.getAdditional(), additional -> {
+                queryBuf.append(' ').append(additional);
+            });
+        }
+        params.getFields().entrySet().stream().forEach(entry -> {
+            appendQueries(queryBuf, entry.getKey(), entry.getValue());
+        });
+
+        if (params.getLanguages() != null) {
+            appendQueries(queryBuf, fessConfig.getIndexFieldLang(), params.getLanguages());
+        }
+
+        final String query = queryBuf.toString().trim();
+
+        final QueryContext queryContext = queryHelper.build(query, context -> {
+            context.skipRoleQuery();
+        });
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                queryContext.getQueryBuilder());
     }
 
     protected void storeSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String queryId,

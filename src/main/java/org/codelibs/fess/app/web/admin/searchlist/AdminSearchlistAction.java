@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -109,19 +110,19 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ==============
     @Execute
     public HtmlResponse index(final ListForm form) {
+        saveToken();
         validate(form, messages -> {}, () -> asHtml(path_AdminError_AdminErrorJsp));
-        return asHtml(path_AdminSearchlist_AdminSearchlistJsp);
+        return asListHtml();
     }
 
     protected HtmlResponse doSearch(final ListForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));
+        validate(form, messages -> {}, () -> asListHtml());
 
         if (StringUtil.isBlank(form.query)) {
-            // redirect to index page
-            form.query = null;
-            return redirect(getClass());
+            // query matches on all documents.
+            form.query = Constants.MATCHES_ALL_QUERY;
         }
-        return asHtml(path_AdminSearchlist_AdminSearchlistJsp).renderWith(data -> {
+        return asListHtml().renderWith(data -> {
             doSearchInternal(data, form);
         });
     }
@@ -135,7 +136,7 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(e.getMessageCode(), () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));
+            throwValidationError(e.getMessageCode(), () -> asListHtml());
         } catch (final ResultOffsetExceededException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -148,21 +149,25 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final ListForm form) {
+        saveToken();
         return doSearch(form);
     }
 
     @Execute
     public HtmlResponse prev(final ListForm form) {
+        saveToken();
         return doMove(form, -1);
     }
 
     @Execute
     public HtmlResponse next(final ListForm form) {
+        saveToken();
         return doMove(form, 1);
     }
 
     @Execute
     public HtmlResponse move(final ListForm form) {
+        saveToken();
         return doMove(form, 0);
     }
 
@@ -185,25 +190,51 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final DeleteForm form) {
-        validate(form, messages -> {}, () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));
+        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, () -> asListHtml());
         final String docId = form.docId;
         if (jobHelper.isCrawlProcessRunning()) {
-            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL),
-                    () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));
+            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
         }
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
             fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), query);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
         } catch (final Exception e) {
-            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL),
-                    () -> asHtml(path_AdminSearchlist_AdminSearchlistJsp));
+            throwValidationError(messages -> messages.addErrorsFailedToDeleteDocInAdmin(GLOBAL), () -> asListHtml());
         }
-        return redirectWith(getClass(), moreUrl("search").params("query", form.query));
+        return asListHtml();
+    }
+
+    @Execute
+    public HtmlResponse deleteall(final ListForm form) {
+        verifyToken(() -> asListHtml());
+        validate(form, messages -> {}, () -> asListHtml());
+        if (jobHelper.isCrawlProcessRunning()) {
+            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
+        }
+        try {
+            searchService.deleteByQuery(request, form);
+            saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
+        } catch (final InvalidQueryException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
+            throwValidationError(e.getMessageCode(), () -> asListHtml());
+        }
+        return asListHtml();
     }
 
     public boolean isSolrProcessRunning() {
         return jobHelper.isCrawlProcessRunning();
+    }
+
+    // ===================================================================================
+    //                                                                              JSP
+    //                                                                           =========
+
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminSearchlist_AdminSearchlistJsp);
     }
 
     protected static class WebRenderData extends SearchRenderData {

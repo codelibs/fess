@@ -1,8 +1,13 @@
 $(function() {
-	$('input[type="text"],select', '.login-box,section.content').first().focus();
+	$('input[type="text"],select', '.login-box,section.content').first()
+			.focus();
 
 	$("section.content input").keypress(function(e) {
 		if (e.which == 13) {
+			var $submitButton = $('input#submit, button#submit');
+			if ($submitButton.size() > 0) {
+				$submitButton[0].submit();
+			}
 			// ignore enter key down
 			return false;
 		}
@@ -17,4 +22,15 @@ $(function() {
 			document.location = $(this).attr('data-href');
 		});
 	});
+
+	$('#confirmToDelete').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var docId = button.data('docid');
+		var title = button.data('title');
+		var url = button.data('url');
+
+		$(this).find('.modal-body #delete-doc-title').text(title);
+		$(this).find('.modal-body #delete-doc-url').text(url);
+		$(this).find('.modal-footer input#docId').val(docId);
+	})
 });

@@ -40,6 +40,7 @@ import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -299,6 +300,8 @@ public class QueryHelper implements Serializable {
         } else if (query instanceof BooleanQuery) {
             final BooleanQuery booleanQuery = (BooleanQuery) query;
             return convertBooleanQuery(context, booleanQuery);
+        } else if (query instanceof MatchAllDocsQuery) {
+            return QueryBuilders.matchAllQuery();
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(ActionMessages.GLOBAL_PROPERTY_KEY),
                 "Unknown query: " + query.getClass() + " => " + query);

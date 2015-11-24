@@ -70,7 +70,8 @@
 									</div>
 									<div class="form-group">
 										<div class="col-sm-offset-2 col-sm-10">
-											<button type="submit" class="btn btn-primary" name="search"
+											<button type="submit" class="btn btn-primary" id="submit"
+												name="search"
 												value="<la:message key="labels.crud_button_search" />">
 												<i class="fa fa-search"></i>
 												<la:message key="labels.crud_button_search" />
