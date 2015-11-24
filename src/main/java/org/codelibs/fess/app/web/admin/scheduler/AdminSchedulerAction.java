@@ -128,9 +128,17 @@ public class AdminSchedulerAction extends FessAdminAction {
                         scheduledJobForm.name =
                                 ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
                                         "labels." + type + "_job_title", name);
+                        String[] ids = new String[] { "", "", "" };
+                        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+                            ids[0] = "\"" + id + "\"";
+                        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+                            ids[1] = "\"" + id + "\"";
+                        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+                            ids[2] = "\"" + id + "\"";
+                        }
                         scheduledJobForm.scriptData =
                                 ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels.scheduledjob_script_template", "\"" + id + "\"", "", "");
+                                        "labels.scheduledjob_script_template", ids[0], ids[1], ids[2]);
                     });
                 });
     }

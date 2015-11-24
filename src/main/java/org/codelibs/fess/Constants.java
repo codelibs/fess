@@ -317,6 +317,13 @@ public class Constants extends CoreLibConstants {
     public static final String[] PAGER_CONVERSION_RULE = { "allRecordCount", "pageSize", "currentPageNumber", "allPageCount",
             "existPrePage", "existNextPage" };
 
+    // crawler types
+    public static final String WEB_CRAWLER_TYPE = "web_crawling";
+
+    public static final String FILE_CRAWLER_TYPE = "file_crawling";
+
+    public static final String DATA_CRAWLER_TYPE = "data_crawling";
+
     // TODO remove searchParams
     public static final String[] COMMON_CONVERSION_RULE = new String[] { "searchParams", "crudMode", "createdBy", "createdTime",
             "updatedBy", "updatedTime" };
