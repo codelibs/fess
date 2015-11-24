@@ -28,7 +28,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.exec.SuggestCreater;
+import org.codelibs.fess.exec.SuggestCreator;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -81,7 +81,7 @@ public class SuggestJob {
         }
 
         try {
-            executeSuggestCreater();
+            executeSuggestCreator();
         } catch (final FessSystemException e) {
             throw e;
         } catch (final Exception e) {
@@ -92,17 +92,17 @@ public class SuggestJob {
 
     }
 
-    protected void executeSuggestCreater() {
-        final List<String> suggestCreaterCmdList = new ArrayList<>();
+    protected void executeSuggestCreator() {
+        final List<String> suggestCreatorCmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
 
-        suggestCreaterCmdList.add(systemHelper.getJavaCommandPath());
+        suggestCreatorCmdList.add(systemHelper.getJavaCommandPath());
 
         // -cp
-        suggestCreaterCmdList.add("-cp");
+        suggestCreatorCmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
         // WEB-INF/suggest/resources
         buf.append("WEB-INF");
@@ -132,31 +132,31 @@ public class SuggestJob {
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
         }
-        suggestCreaterCmdList.add(buf.toString());
+        suggestCreatorCmdList.add(buf.toString());
 
         if (useLocaleElasticsearch) {
             final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
             if (StringUtil.isNotBlank(transportAddresses)) {
-                suggestCreaterCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+                suggestCreatorCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
             }
             final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
             if (StringUtil.isNotBlank(clusterName)) {
-                suggestCreaterCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+                suggestCreatorCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
             }
         }
 
-        suggestCreaterCmdList.add("-Dfess.suggest.process=true");
+        suggestCreatorCmdList.add("-Dfess.suggest.process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
-        suggestCreaterCmdList.add("-Dfess.log.path=" + logFilePath);
-        addSystemProperty(suggestCreaterCmdList, "lasta.env", null, null);
-        addSystemProperty(suggestCreaterCmdList, "fess.log.name", "fess-suggest", "-suggest");
-        addSystemProperty(suggestCreaterCmdList, "fess.log.level", null, null);
+        suggestCreatorCmdList.add("-Dfess.log.path=" + logFilePath);
+        addSystemProperty(suggestCreatorCmdList, "lasta.env", null, null);
+        addSystemProperty(suggestCreatorCmdList, "fess.log.name", "fess-suggest", "-suggest");
+        addSystemProperty(suggestCreatorCmdList, "fess.log.level", null, null);
         if (systemHelper.getCrawlerJavaOptions() != null) {
             for (final String value : systemHelper.getCrawlerJavaOptions()) {
-                suggestCreaterCmdList.add(value);
+                suggestCreatorCmdList.add(value);
             }
         }
 
@@ -166,25 +166,25 @@ public class SuggestJob {
             if (StringUtil.isNotBlank(tmpDir)) {
                 ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
                 if (ownTmpDir.mkdirs()) {
-                    suggestCreaterCmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
+                    suggestCreatorCmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
                 } else {
                     ownTmpDir = null;
                 }
             }
         }
 
-        suggestCreaterCmdList.add(SuggestCreater.class.getCanonicalName());
+        suggestCreatorCmdList.add(SuggestCreator.class.getCanonicalName());
 
-        suggestCreaterCmdList.add("--sessionId");
-        suggestCreaterCmdList.add(sessionId);
+        suggestCreatorCmdList.add("--sessionId");
+        suggestCreatorCmdList.add(sessionId);
 
         final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
         if (logger.isInfoEnabled()) {
-            logger.info("SuggestCreater: \nDirectory=" + baseDir + "\nOptions=" + suggestCreaterCmdList);
+            logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + suggestCreatorCmdList);
         }
 
-        final ProcessBuilder pb = new ProcessBuilder(suggestCreaterCmdList);
+        final ProcessBuilder pb = new ProcessBuilder(suggestCreatorCmdList);
         pb.directory(baseDir);
         pb.redirectErrorStream(true);
 
@@ -201,7 +201,7 @@ public class SuggestJob {
             final int exitValue = currentProcess.exitValue();
 
             if (logger.isInfoEnabled()) {
-                logger.info("SuggestCreater: Exit Code=" + exitValue + " - SuggestCreater Process Output:\n" + it.getOutput());
+                logger.info("SuggestCreator: Exit Code=" + exitValue + " - SuggestCreator Process Output:\n" + it.getOutput());
             }
             if (exitValue != 0) {
                 throw new FessSystemException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
@@ -209,9 +209,9 @@ public class SuggestJob {
         } catch (final FessSystemException e) {
             throw e;
         } catch (final InterruptedException e) {
-            logger.warn("SuggestCreater Process interrupted.");
+            logger.warn("SuggestCreator Process interrupted.");
         } catch (final Exception e) {
-            throw new FessSystemException("SuggestCreater Process terminated.", e);
+            throw new FessSystemException("SuggestCreator Process terminated.", e);
         } finally {
             try {
                 jobHelper.destroyCrawlerProcess(sessionId);

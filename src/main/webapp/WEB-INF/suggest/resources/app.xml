@@ -6,7 +6,7 @@
 	<include path="lastaflute_director.xml"/>
 	<include path="fess.xml" />
 
-	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreater"
+	<component name="fessSuggest" class="org.codelibs.fess.exec.SuggestCreator"
 			   instance="prototype">
 	</component>
 

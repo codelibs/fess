@@ -36,7 +36,7 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SuggestCreater implements Serializable {
+public class SuggestCreator implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
@@ -96,22 +96,22 @@ public class SuggestCreater implements Serializable {
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
             exitCode = process(options);
         } catch (final Throwable t) { // NOPMD
-            logger.error("Suggest creater does not work correctly.", t);
+            logger.error("Suggest creator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
             SingletonLaContainerFactory.destroy();
         }
 
-        logger.info("Finished suggestCreater.");
+        logger.info("Finished suggestCreator.");
         System.exit(exitCode);
     }
 
     private static int process(final Options options) {
-        final SuggestCreater creater = SingletonLaContainer.getComponent(SuggestCreater.class);
+        final SuggestCreator creator = SingletonLaContainer.getComponent(SuggestCreator.class);
         final LocalDateTime startTime = LocalDateTime.now();
-        int ret = creater.create();
+        int ret = creator.create();
         if (ret == 0) {
-            ret = creater.purge(startTime);
+            ret = creator.purge(startTime);
         }
         return ret;
     }
