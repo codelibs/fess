@@ -3,215 +3,225 @@
 <html>
 <head profile="http://a9.com/-/spec/opensearch/1.1/">
 <meta charset="utf-8">
-<meta http-equiv="content-style-type" content="text/css" />
-<meta http-equiv="content-script-type" content="text/javascript" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><bean:message key="labels.search_title" /></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title><la:message key="labels.search_title" /></title>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
 		href="${f:url('/osdd')}"
-		title="<bean:message key="labels.index_osdd_title" />" />
+		title="<la:message key="labels.index_osdd_title" />" />
 </c:if>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${f:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
 </head>
 <body>
-	<div class="navbar navbar-inverse navbar-fixed-top">
-		<div class="navbar-inner">
-			<div class="container">
-				<p class="navbar-text pull-right">
-					<c:if test="${!empty username}">
-					<s:link href="/login/logout" styleClass="logout-link">
-						<bean:message key="labels.logout" />
-					</s:link>
-					</c:if>
-					<s:link href="/help" styleClass="help-link">
-						<bean:message key="labels.index_help" />
-					</s:link>
-				</p>
-			</div>
+	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
+		<div class="container">
+			<ul class="nav navbar-nav pull-right">
+				<c:if test="${!empty username && username != 'guest'}">
+					<li class="nav-item">
+						<div class="dropdown">
+							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+								href="#" role="button" aria-haspopup="true"
+								aria-expanded="false"> <i class="fa fa-user"></i>${username}
+							</a>
+							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/logout" styleClass="dropdown-item">
+									<la:message key="labels.logout" />
+								</la:link>
+							</div>
+						</div>
+					</li>
+				</c:if>
+				<li class="nav-item"><la:link href="/help"
+						styleClass="nav-link help-link">
+						<i class="fa fa-question-circle"></i>
+						<la:message key="labels.index_help" />
+					</la:link></li>
+			</ul>
 		</div>
-	</div>
+	</nav>
 	<div class="container">
-		<div class="row">
-			<div class="center searchFormBox">
+		<div class="row content">
+			<div class="center-block searchFormBox">
 				<h1 class="mainLogo">
 					<img src="${f:url('/images/logo.png')}"
-						alt="<bean:message key="labels.index_title" />" />
+						alt="<la:message key="labels.index_title" />" />
 				</h1>
 				<div>
-					<html:messages id="msg" message="true">
-						<div class="alert-message info">
-							<bean:write name="msg" ignore="true" />
-						</div>
-					</html:messages>
-					<html:errors header="errors.front_header"
+					<la:info id="msg" message="true">
+						<div class="alert-message info">${msg}</div>
+					</la:info>
+					<la:errors header="errors.front_header"
 						footer="errors.front_footer" prefix="errors.front_prefix"
 						suffix="errors.front_suffix" />
 				</div>
-				<s:form styleClass="form-stacked" action="search" method="get"
+				<la:form styleClass="form-stacked" action="search" method="get"
 					styleId="searchForm">
 					${fe:facetForm()}${fe:geoForm()}
 					<fieldset>
 						<div class="clearfix">
 							<div class="input">
-								<html:text styleClass="query" property="query" size="50"
-									maxlength="1000" styleId="contentQuery" autocomplete="off" />
+								<la:text styleClass="query form-control center-block"
+									property="query" size="50" maxlength="1000"
+									styleId="contentQuery" autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${fe:hswsize(null) != 0}">
 							<div>
 								<p class="hotSearchWordBody ellipsis">
-									<bean:message key="labels.search_hot_search_word" />
+									<la:message key="labels.search_hot_search_word" />
 									<c:forEach var="item" items="${fe:hsw(null, 5)}">
-										<html:link href="search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</html:link>
+										<la:link
+											href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 									</c:forEach>
 								</p>
 							</div>
 						</c:if>
-						<div class="clearfix searchButtonBox">
+						<div class="clearfix searchButtonBox btn-group">
 							<button type="submit" name="search" id="searchButton"
 								class="btn btn-primary">
-								<bean:message key="labels.index_form_search_btn" />
+								<i class="fa fa-search"></i>
+								<la:message key="labels.index_form_search_btn" />
 							</button>
-							<a href="#searchOptions" role="button" class="btn"
-								data-toggle="modal"><bean:message
-									key="labels.index_form_option_btn" /></a>
+							<button type="button" class="btn btn-secondary"
+								data-toggle="modal" data-target="#searchOptions">
+								<i class="fa fa-cog"></i>
+								<la:message key="labels.index_form_option_btn" />
+							</button>
 						</div>
 					</fieldset>
-					<div class="modal hide fade" id="searchOptions">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal"
-								aria-hidden="true">&times;</button>
-							<h3>
-								<bean:message key="labels.search_options" />
-							</h3>
-						</div>
-						<div class="modal-body">
-							<fieldset>
-								<div class="clearfix">
-									<label for="contentNum"><bean:message
-											key="labels.index_num" /></label>
-									<div class="input">
-										<html:select property="num" styleId="numSearchOption"
-											styleClass="span4" style="display:block;">
-											<option value="">
-												<bean:message key="labels.search_result_select_num" />
-											</option>
-											<html:option value="10">10</html:option>
-											<html:option value="20">20</html:option>
-											<html:option value="30">30</html:option>
-											<html:option value="40">40</html:option>
-											<html:option value="50">50</html:option>
-											<html:option value="100">100</html:option>
-										</html:select>
-									</div>
+					<div class="modal fade" id="searchOptions" tabindex="-1"
+						role="dialog" aria-labelledby="searchOptionsLabel"
+						aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"
+										aria-label="Close">
+										<span aria-hidden="true">&times;</span> <span class="sr-only">Close</span>
+									</button>
+									<h4 class="modal-title" id="searchOptionsLabel">
+										<la:message key="labels.search_options" />
+									</h4>
 								</div>
-								<div class="clearfix">
-									<label for="contentSort"><bean:message
-											key="labels.index_sort" /></label>
-									<div class="input">
-										<html:select property="sort" styleId="sortSearchOption"
-											styleClass="span4" style="display:block;">
+								<div class="modal-body">
+									<fieldset class="form-group">
+										<label for="contentNum"><la:message
+												key="labels.index_num" /></label>
+										<la:select property="num" styleId="numSearchOption"
+											styleClass="form-control" style="display:block;">
 											<option value="">
-												<bean:message key="labels.search_result_select_sort" />
+												<la:message key="labels.search_result_select_num" />
 											</option>
-											<html:option value="created.asc">
-												<bean:message key="labels.search_result_sort_created_asc" />
-											</html:option>
-											<html:option value="created.desc">
-												<bean:message key="labels.search_result_sort_created_desc" />
-											</html:option>
-											<html:option value="contentLength.asc">
-												<bean:message
+											<la:option value="10">10</la:option>
+											<la:option value="20">20</la:option>
+											<la:option value="30">30</la:option>
+											<la:option value="40">40</la:option>
+											<la:option value="50">50</la:option>
+											<la:option value="100">100</la:option>
+										</la:select>
+									</fieldset>
+									<fieldset class="form-group">
+										<label for="contentSort"><la:message
+												key="labels.index_sort" /></label>
+										<la:select property="sort" styleId="sortSearchOption"
+											styleClass="form-control" style="display:block;">
+											<option value="">
+												<la:message key="labels.search_result_select_sort" />
+											</option>
+											<la:option value="created.asc">
+												<la:message key="labels.search_result_sort_created_asc" />
+											</la:option>
+											<la:option value="created.desc">
+												<la:message key="labels.search_result_sort_created_desc" />
+											</la:option>
+											<la:option value="contentLength.asc">
+												<la:message
 													key="labels.search_result_sort_contentLength_asc" />
-											</html:option>
-											<html:option value="contentLength.desc">
-												<bean:message
+											</la:option>
+											<la:option value="contentLength.desc">
+												<la:message
 													key="labels.search_result_sort_contentLength_desc" />
-											</html:option>
-											<html:option value="lastModified.asc">
-												<bean:message
-													key="labels.search_result_sort_lastModified_asc" />
-											</html:option>
-											<html:option value="lastModified.desc">
-												<bean:message
+											</la:option>
+											<la:option value="lastModified.asc">
+												<la:message key="labels.search_result_sort_lastModified_asc" />
+											</la:option>
+											<la:option value="lastModified.desc">
+												<la:message
 													key="labels.search_result_sort_lastModified_desc" />
-											</html:option>
+											</la:option>
 											<c:if test="${searchLogSupport}">
-											<html:option value="clickCount_l_x_dv.asc">
-												<bean:message
-													key="labels.search_result_sort_clickCount_asc" />
-											</html:option>
-											<html:option value="clickCount_l_x_dv.desc">
-												<bean:message
-													key="labels.search_result_sort_clickCount_desc" />
-											</html:option>
-											</c:if><c:if test="${favoriteSupport}">
-											<html:option value="favoriteCount_l_x_dv.asc">
-												<bean:message
-													key="labels.search_result_sort_favoriteCount_asc" />
-											</html:option>
-											<html:option value="favoriteCount_l_x_dv.desc">
-												<bean:message
-													key="labels.search_result_sort_favoriteCount_desc" />
-											</html:option>
+												<la:option value="clickCount_l_x_dv.asc">
+													<la:message key="labels.search_result_sort_clickCount_asc" />
+												</la:option>
+												<la:option value="clickCount_l_x_dv.desc">
+													<la:message key="labels.search_result_sort_clickCount_desc" />
+												</la:option>
 											</c:if>
-										</html:select>
-									</div>
-								</div>
-								<div class="clearfix">
-									<label for="contentLang"><bean:message
-											key="labels.index_lang" /></label>
-									<div class="input">
-										<html:select property="lang"
-											styleId="langSearchOption" multiple="true"
-											styleClass="span4">
+											<c:if test="${favoriteSupport}">
+												<la:option value="favoriteCount_l_x_dv.asc">
+													<la:message
+														key="labels.search_result_sort_favoriteCount_asc" />
+												</la:option>
+												<la:option value="favoriteCount_l_x_dv.desc">
+													<la:message
+														key="labels.search_result_sort_favoriteCount_desc" />
+												</la:option>
+											</c:if>
+										</la:select>
+									</fieldset>
+									<fieldset class="form-group">
+										<label for="contentLang"><la:message
+												key="labels.index_lang" /></label>
+										<la:select property="lang" styleId="langSearchOption"
+											multiple="true" styleClass="form-control">
 											<c:forEach var="item" items="${langItems}">
-												<html:option value="${f:u(item.value)}">
+												<la:option value="${f:u(item.value)}">
 																	${f:h(item.label)}
-																</html:option>
+																</la:option>
 											</c:forEach>
-										</html:select>
-									</div>
-								</div>
-								<c:if test="${displayLabelTypeItems}">
-									<div class="clearfix">
-										<label for="contentLabelType"><bean:message
-												key="labels.index_label" /></label>
-										<div class="input">
-											<html:select property="fields.label"
+										</la:select>
+									</fieldset>
+									<c:if test="${displayLabelTypeItems}">
+										<fieldset class="form-group">
+											<label for="contentLabelType"><la:message
+													key="labels.index_label" /></label>
+											<la:select property="fields.label"
 												styleId="labelTypeSearchOption" multiple="true"
-												styleClass="span4">
+												styleClass="form-control">
 												<c:forEach var="item" items="${labelTypeItems}">
-													<html:option value="${f:u(item.value)}">
+													<la:option value="${f:u(item.value)}">
 														${f:h(item.label)}
-													</html:option>
+													</la:option>
 												</c:forEach>
-											</html:select>
-										</div>
-									</div>
-								</c:if>
-							</fieldset>
-						</div>
-						<div class="modal-footer">
-							<button class="btn" id="searchOptionsClearButton">
-								<bean:message key="labels.search_options_clear" />
-							</button>
-							<button class="btn" data-dismiss="modal" aria-hidden="true">
-								<bean:message key="labels.search_options_close" />
-							</button>
+											</la:select>
+										</fieldset>
+									</c:if>
+								</div>
+								<div class="modal-footer">
+									<button class="btn btn-secondary" id="searchOptionsClearButton">
+										<la:message key="labels.search_options_clear" />
+									</button>
+									<button class="btn btn-secondary" data-dismiss="modal">
+										<la:message key="labels.search_options_close" />
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
-				</s:form>
+				</la:form>
 			</div>
 		</div>
 		<jsp:include page="footer.jsp" />
 	</div>
-	<input type="hidden" id="contextPath" value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="contextPath"
+		value="<%=request.getContextPath()%>" />
 	<script type="text/javascript"
-		src="${f:url('/js/jquery-1.11.0.min.js')}"></script>
+		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/index.js')}"></script>
