@@ -654,7 +654,7 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
             if (searchType != null) {
                 builder.setSearchType(searchType);
             }
-            if (timeoutInMillis == -1) {
+            if (timeoutInMillis != -1) {
                 builder.setTimeout(new TimeValue(timeoutInMillis));
             }
             if (version != null) {
