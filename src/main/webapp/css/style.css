@@ -50,14 +50,20 @@ h1.mainLogo {
 
 #result ol {
 	list-style: none;
+	padding-left: 0;
 }
 
 #result ol li {
 	margin-bottom: 20px;
 }
 
+#result .title a:visited {
+	color: #014c8c;
+}
+
 #result .body cite {
 	color: #093;
+	font-style: normal;
 }
 
 #result .body a.cache {
@@ -112,21 +118,39 @@ h1.mainLogo {
 	margin: 0;
 }
 
-#searchOptionMenu span {
-	margin-right: 10px;
+.username {
+	margin-left: 2.0rem;
+	margin-right: 1.0rem;
 }
 
-.username {
-	text-align: right;
+button>i, a>i {
+	margin-right: 0.2em;
 }
+
+nav.navbar .form-inline {
+	margin-left: 20px;
+}
+
+#searchOptionsButton {
+	border-left:1px solid #2e6da4;
+}
+
+ul.searchOptionLabels {
+	list-style-type: none;
+	padding: 0;
+}
+
+ul.searchOptionLabels li {
+	display: inline-block;
+	margin-right: 10px;
+	vertical-align: middle;
+}
+
 
 /* Large desktop */
 @media ( min-width : 74.9em) {
 	.visible-phone {
 		display: none !important;
-	}
-	#query {
-		width: 500px;
 	}
 	#contentQuery {
 		width: 500px;
@@ -141,9 +165,6 @@ h1.mainLogo {
 	.br-tablet {
 		display: block;
 	}
-	#query {
-		width: 200px;
-	}
 	#contentQuery {
 		width: 500px;
 	}
@@ -151,9 +172,6 @@ h1.mainLogo {
 
 /* Medium devices (tablets, less than 62em) */
 @media ( max-width : 61.9em) {
-	#query {
-		width: 300px;
-	}
 	#contentQuery {
 		width: 500px;
 	}
@@ -163,9 +181,6 @@ h1.mainLogo {
 @media ( max-width : 47.9em) {
 	.br-phone {
 		display: block;
-	}
-	#query {
-		width: 150px;
 	}
 	#contentQuery {
 		width: 200px;
@@ -195,11 +210,8 @@ h1.mainLogo {
 	.mainLogo img {
 		width: 200px;
 	}
-	.brand img {
+	.navbar-brand img {
 		width: 80px;
-	}
-	#query {
-		width: 100px;
 	}
 	.searchFormBox {
 		margin-top: 80px;
@@ -212,6 +224,20 @@ h1.mainLogo {
 	}
 	#result .info {
 		display: none;
+	}
+	#subheader {
+		font-size: 90%;
+	}
+	#searchButton {
+		padding-left: 0.8rem;
+		padding-right: 0.8rem;
+	}
+	#searchOptionsButton {
+		padding-left: 0.6rem;
+		padding-right: 0.6rem;
+	}
+	#footer {
+		font-size: 65%;
 	}
 }
 
@@ -230,12 +256,4 @@ h1.mainLogo {
 		max-height: 300px;
 		overflow-y: scroll;
 	}
-}
-
-button>i, a>i {
-	margin-right: 0.2em;
-}
-
-nav.navbar .form-inline {
-	margin-left: 20px;
 }

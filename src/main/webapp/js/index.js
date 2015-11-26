@@ -1,4 +1,6 @@
-$(function(){
+$(function() {
+	$('#contentQuery').focus();
+
 	var $searchButton = $('#searchButton');
 	var contextPath = $('#contextPath').val();
 
@@ -18,29 +20,31 @@ $(function(){
 		return false;
 	});
 
-    $('#contentQuery').suggestor( {
-        ajaxinfo: {
-            url: contextPath + '/suggest',
-            fn: '_default,content,title',
-            num: 10
-        },
-        boxCssInfo: {
-            border: '1px solid rgba(82, 168, 236, 0.5)',
-            '-webkit-box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
-            '-moz-box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
-            'box-shadow': '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
-            'background-color': '#fff',
-            'z-index': '10000'
-        },
-        listSelectedCssInfo: {
-            'background-color': 'rgba(82, 168, 236, 0.1)'
-        },
-        listDeselectedCssInfo: {
-            'background-color': '#ffffff'
-        },
-        minturm: 1,
-        adjustWidthVal: 11,
-        searchForm: $('#searchForm')
-    });
+	$('#contentQuery')
+			.suggestor(
+					{
+						ajaxinfo : {
+							url : contextPath + '/suggest',
+							fn : '_default,content,title',
+							num : 10
+						},
+						boxCssInfo : {
+							border : '1px solid rgba(82, 168, 236, 0.5)',
+							'-webkit-box-shadow' : '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
+							'-moz-box-shadow' : '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
+							'box-shadow' : '0 1px 1px 0px rgba(0, 0, 0, 0.1), 0 3px 2px 0px rgba(82, 168, 236, 0.2)',
+							'background-color' : '#fff',
+							'z-index' : '10000'
+						},
+						listSelectedCssInfo : {
+							'background-color' : 'rgba(82, 168, 236, 0.1)'
+						},
+						listDeselectedCssInfo : {
+							'background-color' : '#ffffff'
+						},
+						minturm : 1,
+						adjustWidthVal : 11,
+						searchForm : $('#searchForm')
+					});
 
 });

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.taglib;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -152,6 +154,27 @@ public class FessFunctions {
 
     public static String formatDate(final LocalDateTime date) {
         return date.format(DateTimeFormatter.ofPattern(Constants.ISO_DATETIME_FORMAT, Locale.ROOT));
+    }
+
+    public static String formatNumber(final long value) {
+        int ratio = 1;
+        String unit = "";
+        String format = "0.#";
+        if (value < 1024) {
+            format = "0";
+        } else if (value < (1024 * 1024)) {
+            ratio = 1024;
+            unit = "K";
+        } else if (value < (1024 * 1024 * 1024)) {
+            ratio = 1024 * 1024;
+            unit = "M";
+        } else {
+            ratio = 1024 * 1024 * 1024;
+            unit = "G";
+        }
+        final DecimalFormat df = new DecimalFormat(format + unit);
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        return df.format((double) value / ratio);
     }
 
     public static String facetQuery() {

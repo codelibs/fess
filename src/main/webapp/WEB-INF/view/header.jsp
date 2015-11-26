@@ -1,50 +1,50 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="search" method="get" styleId="searchForm"
-	styleClass="searchResultForm">
+<la:form action="search" method="get" styleId="searchForm" role="search">
 ${fe:facetForm()}${fe:geoForm()}
-	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
-		<div class="container">
-			<la:link styleClass="navbar-brand" href="/">
-				<img src="${f:url('/images/logo-head.png')}"
-					alt="<la:message key="labels.header_brand_name" />" />
-			</la:link>
-			<div class="form-inline navbar-form pull-right">
-				<la:text property="query" maxlength="1000" styleId="query"
-					styleClass="form-control" autocomplete="off" />
-				<div class="btn-group">
+<nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
+		<la:link styleClass="navbar-brand" href="/">
+			<img src="${f:url('/images/logo-head.png')}"
+				alt="<la:message key="labels.header_brand_name" />" />
+		</la:link>
+		<ul class="nav navbar-nav hidden-xs-down">
+			<c:if test="${!empty username && username != 'guest'}">
+				<li class="nav-item username">
+					<div class="dropdown">
+						<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+							href="#" role="button" aria-haspopup="true" aria-expanded="false">
+							<i class="fa fa-user"></i>${username}
+						</a>
+						<div class="dropdown-menu" aria-labelledby="userMenu">
+							<la:link href="/logout" styleClass="dropdown-item">
+								<la:message key="labels.logout" />
+							</la:link>
+						</div>
+					</div>
+				</li>
+			</c:if>
+		</ul>
+		<div class="navbar-form navbar-right" role="search">
+			<div class="input-group">
+				<la:text property="query" styleId="query" styleClass="form-control"
+					autocomplete="off" />
+				<div class="input-group-btn">
 					<button type="submit" name="search" id="searchButton"
 						class="btn btn-primary">
-						<i class="fa fa-search"></i>
-						<la:message key="labels.search" />
+						<i class="fa fa-search"></i> <span class="hidden-xs-down"><la:message
+								key="labels.search" /></span>
 					</button>
 					<button type="button" class="btn btn-primary dropdown-toggle"
-						data-toggle="dropdown" aria-expanded="false">
-						<span class="caret"></span> <span class="sr-only"><la:message
+						id="searchOptionsButton" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false">
+						<span class="sr-only"><la:message
 								key="labels.header_form_option_btn" /></span>
 					</button>
-					<div class="dropdown-menu" aria-labelledby="optionMenu">
+					<div class="dropdown-menu dropdown-menu-right">
 						<a href="#searchOptions" class="dropdown-item" data-toggle="modal"><la:message
 								key="labels.header_form_option_btn" /></a>
 					</div>
 				</div>
 			</div>
-			<ul class="nav navbar-nav pull-right">
-				<c:if test="${!empty username && username != 'guest'}">
-					<li class="nav-item">
-						<div class="dropdown">
-							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
-								href="#" role="button" aria-haspopup="true"
-								aria-expanded="false"> <i class="fa fa-user"></i>${username}
-							</a>
-							<div class="dropdown-menu" aria-labelledby="userMenu">
-								<la:link href="/logout" styleClass="dropdown-item">
-									<la:message key="labels.logout" />
-								</la:link>
-							</div>
-						</div>
-					</li>
-				</c:if>
-			</ul>
 		</div>
 	</nav>
 	<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog"

@@ -623,7 +623,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search */
     public static final String LABELS_SEARCH = "{labels.search}";
 
-    /** The key of the message: Results <b>{2}</b><span class="br-phone"></span><span class="hidden-phone"> -</span> <b>{3}</b> of <b>{1}</b> for <b>{0}</b> */
+    /** The key of the message: Results <b>{2}</b><span class="hidden-phone"> -</span> <b>{3}</b> of <b>{1}</b> for <b>{0}</b> */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
     /** The key of the message: ({0} sec) */
@@ -695,7 +695,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Liked */
     public static final String LABELS_search_result_favorited = "{labels.search_result_favorited}";
 
-    /** The key of the message: Clicked ({0}) */
+    /** The key of the message: Viewed ({0}) */
     public static final String LABELS_search_click_count = "{labels.search_click_count}";
 
     /** The key of the message: more.. */
@@ -770,19 +770,19 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Score */
     public static final String LABELS_searchoptions_score = "{labels.searchoptions_score}";
 
-    /** The key of the message: Sort:  */
+    /** The key of the message: Sort */
     public static final String LABELS_searchoptions_menu_sort = "{labels.searchoptions_menu_sort}";
 
-    /** The key of the message: Result:  */
+    /** The key of the message: Result */
     public static final String LABELS_searchoptions_menu_num = "{labels.searchoptions_menu_num}";
 
     /** The key of the message: {0} results */
     public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
 
-    /** The key of the message: Languages:  */
+    /** The key of the message: Languages */
     public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
 
-    /** The key of the message: Labels:  */
+    /** The key of the message: Labels */
     public static final String LABELS_searchoptions_menu_labels = "{labels.searchoptions_menu_labels}";
 
     /** The key of the message: Error */

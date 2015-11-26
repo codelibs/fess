@@ -85,6 +85,18 @@
 
   <function>
     <description>
+      Returns formatted number from a given value.
+    </description>
+    <name>formatNumber</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String formatNumber(long)</function-signature>
+    <example>
+      ${fe:formatNumber(doc.content_length)}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns query parameters for Facet.
     </description>
     <name>facetQuery</name>
