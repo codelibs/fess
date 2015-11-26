@@ -23,6 +23,10 @@ h3 {
 	font-size: 18px;
 }
 
+.navbar .search-box {
+	padding: 0;
+}
+
 .navbar .logout-link {
 	margin-right: 10px;
 }
