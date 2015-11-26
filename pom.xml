@@ -38,8 +38,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Main Framework -->
-		<dbflute.version>1.1.0-sp8</dbflute.version>
-		<lastaflute.version>0.6.7-RC1</lastaflute.version>
+		<dbflute.version>1.1.0-sp9</dbflute.version>
+		<lastaflute.version>0.6.7-RC3</lastaflute.version>
 		<lasta.taglib.version>0.6.1</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
