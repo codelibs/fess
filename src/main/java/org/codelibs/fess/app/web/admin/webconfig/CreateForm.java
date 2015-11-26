@@ -122,7 +122,7 @@ public class CreateForm implements Serializable {
         crudMode = CrudMode.CREATE;
         boost = 1.0f;
         if (StringUtil.isBlank(userAgent)) {
-            userAgent = "FessCrawler/" + Constants.FESS_VERSION;
+            userAgent = ComponentUtil.getUserAgentName();
         }
         numOfThread = Constants.DEFAULT_NUM_OF_THREAD_FOR_WEB;
         intervalTime = Constants.DEFAULT_INTERVAL_TIME_FOR_WEB;
