@@ -406,9 +406,9 @@ public class JsonApiManager extends BaseApiManager {
 
                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                 searchService.update(id, builder -> {
-                    Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
+                    final Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
                     builder.setScript(script);
-                    Map<String, Object> upsertMap = new HashMap<>();
+                    final Map<String, Object> upsertMap = new HashMap<>();
                     upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
                     builder.setUpsert(upsertMap);
                     builder.setRefresh(true);

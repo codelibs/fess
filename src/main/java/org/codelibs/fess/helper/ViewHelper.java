@@ -161,7 +161,7 @@ public class ViewHelper implements Serializable {
         final Set<String> queries = new HashSet<>();
         LaRequestUtil.getOptionalRequest().ifPresent(request -> {
             @SuppressWarnings("unchecked")
-            Set<String> set = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+            final Set<String> set = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
             if (set != null) {
                 queries.addAll(set);
             }

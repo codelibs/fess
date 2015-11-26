@@ -246,7 +246,7 @@ public class QueryHelper implements Serializable {
             final Set<String> roleSet = roleQueryHelper.build();
             if (!roleSet.isEmpty()) {
                 queryContext.addQuery(boolQuery -> {
-                    BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+                    final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
                     roleSet.stream().forEach(name -> {
                         roleQuery.should(QueryBuilders.termQuery(fessConfig.getIndexFieldRole(), name));
                     });

@@ -36,7 +36,7 @@ public class PurgeLogJob {
         final JobLogService jobLogService = ComponentUtil.getComponent(JobLogService.class);
         final UserInfoService userInfoService = ComponentUtil.getComponent(UserInfoService.class);
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
-        SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
 

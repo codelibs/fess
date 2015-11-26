@@ -320,7 +320,7 @@ public class Crawler implements Serializable {
         final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
 
         boolean completed = false;
-        int exitCode = Constants.EXIT_OK;
+        final int exitCode = Constants.EXIT_OK;
         try {
             writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_START_TIME);
 

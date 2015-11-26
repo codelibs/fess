@@ -227,7 +227,7 @@ public class FessEsClient implements Client {
     public void addTransportAddress(final String host, final int port) {
         try {
             transportAddressList.add(new InetSocketTransportAddress(InetAddress.getByName(host), port));
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             throw new FessSystemException("Failed to resolve the hostname: " + host, e);
         }
     }
@@ -399,12 +399,12 @@ public class FessEsClient implements Client {
                 if (ResourceUtil.isExist(dataPath)) {
                     try {
                         final BulkRequestBuilder builder = client.prepareBulk();
-                        ObjectMapper mapper = new ObjectMapper();
+                        final ObjectMapper mapper = new ObjectMapper();
                         Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).reduce(
                                 (prev, line) -> {
                                     try {
                                         if (StringUtil.isBlank(prev)) {
-                                            Map<String, Map<String, String>> result =
+                                            final Map<String, Map<String, String>> result =
                                                     mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
                                                     });
                                             if (result.keySet().contains("index")) {
@@ -415,7 +415,7 @@ public class FessEsClient implements Client {
                                                 return StringUtil.EMPTY;
                                             }
                                         } else {
-                                            Map<String, Map<String, String>> result =
+                                            final Map<String, Map<String, String>> result =
                                                     mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
                                                     });
                                             if (result.keySet().contains("index")) {
@@ -425,7 +425,7 @@ public class FessEsClient implements Client {
                                                 builder.add(requestBuilder);
                                             }
                                         }
-                                    } catch (Exception e) {
+                                    } catch (final Exception e) {
                                         logger.warn("Failed to parse " + dataPath.toString());
                                     }
                                     return StringUtil.EMPTY;
@@ -567,13 +567,13 @@ public class FessEsClient implements Client {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = hit.getSource();
                     if (source != null) {
-                        Map<String, Object> docMap = new HashMap<>(source);
+                        final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     final Map<String, SearchHitField> fields = hit.getFields();
                     if (fields != null) {
-                        Map<String, Object> docMap =
+                        final Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
@@ -607,13 +607,13 @@ public class FessEsClient implements Client {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = response.getSource();
                     if (source != null) {
-                        Map<String, Object> docMap = new HashMap<>(source);
+                        final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), response.getId());
                         return docMap;
                     }
                     final Map<String, GetField> fields = response.getFields();
                     if (fields != null) {
-                        Map<String, Object> docMap =
+                        final Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
                         docMap.put(fessConfig.getIndexFieldId(), response.getId());
@@ -643,13 +643,13 @@ public class FessEsClient implements Client {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final Map<String, Object> source = hit.getSource();
                     if (source != null) {
-                        Map<String, Object> docMap = new HashMap<>(source);
+                        final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
                         return docMap;
                     }
                     final Map<String, SearchHitField> fields = hit.getFields();
                     if (fields != null) {
-                        Map<String, Object> docMap =
+                        final Map<String, Object> docMap =
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
@@ -745,20 +745,20 @@ public class FessEsClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
-            Object id = doc.remove(fessConfig.getIndexFieldId());
+            final Object id = doc.remove(fessConfig.getIndexFieldId());
             bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(doc));
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet();
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
-                List<ActionRequest> requests = bulkRequestBuilder.request().requests();
-                BulkItemResponse[] items = response.getItems();
+                final List<ActionRequest> requests = bulkRequestBuilder.request().requests();
+                final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {
                     for (int i = 0; i < requests.size(); i++) {
-                        BulkItemResponse resp = items[i];
+                        final BulkItemResponse resp = items[i];
                         if (resp.isFailed() && resp.getFailure() != null) {
-                            ActionRequest req = requests.get(i);
-                            Failure failure = resp.getFailure();
+                            final ActionRequest req = requests.get(i);
+                            final Failure failure = resp.getFailure();
                             logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
                         }
                     }
@@ -791,7 +791,7 @@ public class FessEsClient implements Client {
             return this;
         }
 
-        public SearchConditionBuilder administrativeAccess(boolean administrativeAccess) {
+        public SearchConditionBuilder administrativeAccess(final boolean administrativeAccess) {
             this.administrativeAccess = administrativeAccess;
             return this;
         }
@@ -1309,29 +1309,29 @@ public class FessEsClient implements Client {
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
-            Action<Request, Response, RequestBuilder> action, Request request) {
+            final Action<Request, Response, RequestBuilder> action, final Request request) {
         return client.execute(action, request);
     }
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
-            Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
+            final Action<Request, Response, RequestBuilder> action, final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
-            Action<Request, Response, RequestBuilder> action) {
+            final Action<Request, Response, RequestBuilder> action) {
         return client.prepareExecute(action);
     }
 
     @Override
-    public ActionFuture<TermVectorsResponse> termVectors(TermVectorsRequest request) {
+    public ActionFuture<TermVectorsResponse> termVectors(final TermVectorsRequest request) {
         return client.termVectors(request);
     }
 
     @Override
-    public void termVectors(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
+    public void termVectors(final TermVectorsRequest request, final ActionListener<TermVectorsResponse> listener) {
         client.termVectors(request, listener);
     }
 
@@ -1341,19 +1341,19 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public TermVectorsRequestBuilder prepareTermVectors(String index, String type, String id) {
+    public TermVectorsRequestBuilder prepareTermVectors(final String index, final String type, final String id) {
         return client.prepareTermVectors(index, type, id);
     }
 
     @Override
     @Deprecated
-    public ActionFuture<TermVectorsResponse> termVector(TermVectorsRequest request) {
+    public ActionFuture<TermVectorsResponse> termVector(final TermVectorsRequest request) {
         return client.termVector(request);
     }
 
     @Override
     @Deprecated
-    public void termVector(TermVectorsRequest request, ActionListener<TermVectorsResponse> listener) {
+    public void termVector(final TermVectorsRequest request, final ActionListener<TermVectorsResponse> listener) {
         client.termVector(request, listener);
     }
 
@@ -1365,17 +1365,17 @@ public class FessEsClient implements Client {
 
     @Override
     @Deprecated
-    public TermVectorsRequestBuilder prepareTermVector(String index, String type, String id) {
+    public TermVectorsRequestBuilder prepareTermVector(final String index, final String type, final String id) {
         return client.prepareTermVector(index, type, id);
     }
 
     @Override
-    public ActionFuture<MultiTermVectorsResponse> multiTermVectors(MultiTermVectorsRequest request) {
+    public ActionFuture<MultiTermVectorsResponse> multiTermVectors(final MultiTermVectorsRequest request) {
         return client.multiTermVectors(request);
     }
 
     @Override
-    public void multiTermVectors(MultiTermVectorsRequest request, ActionListener<MultiTermVectorsResponse> listener) {
+    public void multiTermVectors(final MultiTermVectorsRequest request, final ActionListener<MultiTermVectorsResponse> listener) {
         client.multiTermVectors(request, listener);
     }
 
@@ -1389,11 +1389,11 @@ public class FessEsClient implements Client {
         return client.headers();
     }
 
-    public void setSizeForDelete(int sizeForDelete) {
+    public void setSizeForDelete(final int sizeForDelete) {
         this.sizeForDelete = sizeForDelete;
     }
 
-    public void setScrollForDelete(String scrollForDelete) {
+    public void setScrollForDelete(final String scrollForDelete) {
         this.scrollForDelete = scrollForDelete;
     }
 

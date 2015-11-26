@@ -76,7 +76,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
 
     protected Map<String, String> cookieNameMap;
 
-    private List<String> defaultRoleList = new ArrayList<>();
+    private final List<String> defaultRoleList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -119,7 +119,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
                 fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).map(role -> Base64.getDecoder().decode(role)).map(role -> {
                     try {
                         return Optional.of(new String(role, Constants.UTF_8));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         return null;
                     }
                 }).forEach(role -> role.ifPresent(roleList::add)));

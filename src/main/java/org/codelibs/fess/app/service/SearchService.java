@@ -173,7 +173,7 @@ public class SearchService {
         }
         data.setExecTime(execTime);
 
-        String queryId = QueryUtil.generateId();
+        final String queryId = QueryUtil.generateId();
 
         data.setPageSize(queryResponseList.getPageSize());
         data.setCurrentPageNumber(queryResponseList.getCurrentPageNumber());
@@ -238,7 +238,7 @@ public class SearchService {
         final SearchLog searchLog = new SearchLog();
 
         if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
-            String userCode = userInfoHelper.getUserCode();
+            final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
             }
@@ -384,12 +384,12 @@ public class SearchService {
         return fessEsClient.update(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id, field, value);
     }
 
-    public boolean update(final String id, Consumer<UpdateRequestBuilder> builderLambda) {
+    public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
-            UpdateRequestBuilder builder =
+            final UpdateRequestBuilder builder =
                     fessEsClient.prepareUpdate(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
-            UpdateResponse response = builder.execute().actionGet();
+            final UpdateResponse response = builder.execute().actionGet();
             return response.isCreated();
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to update doc  " + id, e);

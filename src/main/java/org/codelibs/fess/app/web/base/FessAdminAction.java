@@ -102,7 +102,7 @@ public abstract class FessAdminAction extends FessBaseAction {
     public ActionResponse godHandPrologue(final ActionRuntime runtime) {
         try {
             return super.godHandPrologue(runtime);
-        } catch (UserRoleLoginException e) {
+        } catch (final UserRoleLoginException e) {
             return redirect(e.getActionClass());
         }
     }

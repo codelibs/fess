@@ -73,13 +73,13 @@ public class EsApiManager extends BaseApiManager {
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
         getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
-            String servletPath = request.getServletPath();
-            String pathPrefix = ADMIN_SERVER + token;
+            final String servletPath = request.getServletPath();
+            final String pathPrefix = ADMIN_SERVER + token;
             if (!servletPath.startsWith(pathPrefix)) {
                 throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid access token.");
             }
             final String path;
-            String value = servletPath.substring(pathPrefix.length());
+            final String value = servletPath.substring(pathPrefix.length());
             if (!value.startsWith("/")) {
                 path = "/" + value;
             } else {
@@ -91,7 +91,7 @@ public class EsApiManager extends BaseApiManager {
         });
     }
 
-    protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, String path) {
+    protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
         final CurlRequest curlRequest = new CurlRequest(httpMethod, getUrl() + path);
         request.getParameterMap().entrySet().stream().forEach(entry -> {

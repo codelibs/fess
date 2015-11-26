@@ -62,7 +62,7 @@ public class KeyMatchHelper {
                 .stream()
                 .forEach(
                         keyMatch -> {
-                            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                             getDocumentList(keyMatch).stream().map(doc -> {
                                 return DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                             }).forEach(docId -> {
@@ -108,16 +108,16 @@ public class KeyMatchHelper {
         this.reloadInterval = reloadInterval;
     }
 
-    public void buildQuery(List<String> keywordList, FunctionScoreQueryBuilder functionScoreQuery) {
+    public void buildQuery(final List<String> keywordList, final FunctionScoreQueryBuilder functionScoreQuery) {
         keywordList.stream().forEach(keyword -> {
-            Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(keyword));
+            final Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(keyword));
             if (pair != null) {
                 functionScoreQuery.add(pair.getFirst(), pair.getSecond());
             }
         });
     }
 
-    private String toLowerCase(String term) {
+    private String toLowerCase(final String term) {
         return term != null ? term.toLowerCase(Locale.ROOT) : term;
     }
 

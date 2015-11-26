@@ -129,7 +129,7 @@ public class AdminFailureurlAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
-        String id = form.id;
+        final String id = form.id;
         failureUrlService.getFailureUrl(id).alwaysPresent(entity -> {
             failureUrlService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));

@@ -59,7 +59,7 @@ public class LoginAction extends FessSearchAction {
         form.clearSecurityInfo();
         try {
             return fessLoginAssist.loginRedirect(email, password, op -> {}, () -> getHtmlResponse());
-        } catch (LoginFailureException lfe) {
+        } catch (final LoginFailureException lfe) {
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> {
                 return asHtml(path_Login_IndexJsp);
             });

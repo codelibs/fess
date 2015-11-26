@@ -63,10 +63,10 @@ public class AdminLogAction extends FessAdminAction {
 
     @Execute
     public ActionResponse download(final String id) {
-        String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
+        final String filename = new String(Base64.getDecoder().decode(id), StandardCharsets.UTF_8).replace("..", "").replaceAll("\\s", "");
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
-            Path path = Paths.get(logFilePath, filename);
+            final Path path = Paths.get(logFilePath, filename);
             return asStream(filename).contentType("text/plain; charset=UTF-8").stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
                     out.write(in);
@@ -83,21 +83,21 @@ public class AdminLogAction extends FessAdminAction {
         final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
-            Path logDirPath = Paths.get(logFilePath);
+            final Path logDirPath = Paths.get(logFilePath);
             try (Stream<Path> stream = Files.list(logDirPath)) {
                 stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
-                    Map<String, Object> map = new HashMap<>();
-                    String name = filePath.getFileName().toString();
+                    final Map<String, Object> map = new HashMap<>();
+                    final String name = filePath.getFileName().toString();
                     map.put("id", Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
                     map.put("name", name);
                     try {
                         map.put("lastModified", new Date(Files.getLastModifiedTime(filePath).toMillis()));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         throw new IORuntimeException(e);
                     }
                     logFileItems.add(map);
                 });
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new FessSystemException("Failed to access log files.", e);
             }
         }

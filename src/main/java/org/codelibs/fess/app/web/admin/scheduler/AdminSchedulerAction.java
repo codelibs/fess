@@ -128,7 +128,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                         scheduledJobForm.name =
                                 ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
                                         "labels." + type + "_job_title", name);
-                        String[] ids = new String[] { "", "", "" };
+                        final String[] ids = new String[] { "", "", "" };
                         if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
                             ids[0] = "\"" + id + "\"";
                         } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
@@ -292,7 +292,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    protected void loadScheduledJob(final EditForm form, ScheduledJob entity) {
+    protected void loadScheduledJob(final EditForm form, final ScheduledJob entity) {
         copyBeanToBean(entity, form, op -> op.exclude("crudMode").excludeNull());
         form.jobLogging = entity.isLoggingEnabled() ? Constants.ON : null;
         form.crawler = entity.isCrawlerJob() ? Constants.ON : null;

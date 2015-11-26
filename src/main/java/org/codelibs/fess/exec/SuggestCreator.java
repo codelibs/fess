@@ -134,17 +134,17 @@ public class SuggestCreator implements Serializable {
 
         try {
             latch.await();
-        } catch (InterruptedException ignore) {}
+        } catch (final InterruptedException ignore) {}
 
         return result.get();
     }
 
-    private int purge(LocalDateTime time) {
+    private int purge(final LocalDateTime time) {
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
         try {
             suggestHelper.purge(time);
             return 0;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.info("Purge error.", e);
             return 1;
         }

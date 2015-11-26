@@ -372,7 +372,7 @@ public class SearchAction extends FessSearchAction {
         }
 
         @Override
-        public void setRequestedTime(long requestedTime) {
+        public void setRequestedTime(final long requestedTime) {
             data.register("requestedTime", requestedTime);
             super.setRequestedTime(requestedTime);
         }

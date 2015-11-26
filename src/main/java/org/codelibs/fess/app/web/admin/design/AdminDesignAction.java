@@ -184,7 +184,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Execute
     public StreamResponse download(final FileAccessForm form) {
-        File file = getTargetFile(form.fileName).get();
+        final File file = getTargetFile(form.fileName).get();
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
         }

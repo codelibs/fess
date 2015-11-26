@@ -130,7 +130,8 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directApiCall(createApiFailureHook());
         direction.directMultipart(() -> new FessMultipartRequestHandler());
         direction.directHtmlRendering(new JspHtmlRenderingProvider() {
-            protected String getShowErrorsForwardPath(ActionRuntime runtime) {
+            @Override
+            protected String getShowErrorsForwardPath(final ActionRuntime runtime) {
                 if (FessAdminAction.class.isAssignableFrom(runtime.getActionType())) {
                     return "/admin/error/error.jsp";
                 } else {

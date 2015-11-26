@@ -121,7 +121,7 @@ public class SearchLogHelper {
                     userInfoBhv.insertOrUpdate(userInfo);
                 }).start();
             }).orElse(() -> {
-                UserInfo userInfo = new UserInfo();
+                final UserInfo userInfo = new UserInfo();
                 userInfo.setId(userCode);
                 userInfo.setCreatedAt(now);
                 userInfo.setUpdatedAt(now);
@@ -247,14 +247,14 @@ public class SearchLogHelper {
                             new String[] { fessConfig.getIndexFieldDocId() })
                             .forEach(
                                     doc -> {
-                                        String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-                                        String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                        final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                        final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                                         if (id != null && docId != null && clickCountMap.containsKey(docId)) {
-                                            Integer count = clickCountMap.get(docId);
-                                            Script script =
+                                            final Integer count = clickCountMap.get(docId);
+                                            final Script script =
                                                     new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+="
                                                             + count.toString());
-                                            Map<String, Object> upsertMap = new HashMap<>();
+                                            final Map<String, Object> upsertMap = new HashMap<>();
                                             upsertMap.put(fessConfig.getIndexFieldClickCount(), 1);
                                             builder.add(new UpdateRequest(fessConfig.getIndexDocumentIndex(), fessConfig
                                                     .getIndexDocumentType(), id).script(script).upsert(upsertMap));

@@ -40,7 +40,7 @@ public class User extends BsUser {
         return asDocMeta().id();
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 

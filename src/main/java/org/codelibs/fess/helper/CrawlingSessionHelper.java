@@ -126,8 +126,8 @@ public class CrawlingSessionHelper implements Serializable {
 
     }
 
-    public Date getDocumentExpires(CrawlingConfig config) {
-        Integer timeToLive = config.getTimeToLive();
+    public Date getDocumentExpires(final CrawlingConfig config) {
+        final Integer timeToLive = config.getTimeToLive();
         if (timeToLive != null) {
             // timeToLive minutes
             final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();

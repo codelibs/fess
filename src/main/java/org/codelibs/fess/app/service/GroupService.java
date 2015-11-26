@@ -106,7 +106,7 @@ public class GroupService implements Serializable {
 
     }
 
-    public List<Group> getAvailableGroupList(Integer size) {
+    public List<Group> getAvailableGroupList(final Integer size) {
         return groupBhv.selectList(cb -> {
             cb.query().matchAll();
             cb.paging(size, 1);

@@ -33,8 +33,6 @@ public class SearchLog extends BsSearchLog {
 
     private static final long serialVersionUID = 1L;
 
-    private List<ClickLog> clickLogList;
-
     private List<SearchFieldLog> searchFieldLogList;
 
     private OptionalEntity<UserInfo> userInfo;
@@ -56,7 +54,6 @@ public class SearchLog extends BsSearchLog {
     }
 
     public void setClickLogList(final List<ClickLog> clickLogList) {
-        this.clickLogList = clickLogList;
 
     }
 
@@ -101,7 +98,7 @@ public class SearchLog extends BsSearchLog {
     }
 
     @Override
-    public void setUserInfoId(String value) {
+    public void setUserInfoId(final String value) {
         userInfo = null;
         super.setUserInfoId(value);
     }

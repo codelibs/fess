@@ -36,7 +36,7 @@ public class Role extends BsRole {
         return asDocMeta().id();
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         asDocMeta().id(id);
     }
 }

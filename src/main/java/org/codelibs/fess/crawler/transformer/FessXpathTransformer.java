@@ -256,7 +256,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // url
         putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created
-        Date now = systemHelper.getCurrentTime();
+        final Date now = systemHelper.getCurrentTime();
         putResultDataBody(dataMap, fessConfig.getIndexFieldCreated(), now);
         // anchor
         putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(), getAnchorList(document, responseData));
@@ -270,7 +270,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // contentLength
         putResultDataBody(dataMap, fessConfig.getIndexFieldContentLength(), Long.toString(responseData.getContentLength()));
         //  lastModified
-        Date lastModified = responseData.getLastModified();
+        final Date lastModified = responseData.getLastModified();
         if (lastModified != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), lastModified);
             // timestamp

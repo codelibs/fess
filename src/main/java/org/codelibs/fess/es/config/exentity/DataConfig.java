@@ -396,13 +396,13 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     @Override
     public Integer getTimeToLive() {
-        String value = getHandlerParameterMap().get("timeToLive");
+        final String value = getHandlerParameterMap().get("timeToLive");
         if (StringUtil.isBlank(value)) {
             return null;
         }
         try {
             return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Invalid format: " + value, e);
             }

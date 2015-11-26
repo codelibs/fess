@@ -39,7 +39,7 @@ public class FavoriteLogService {
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
 
-    public boolean addUrl(String userCode, BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
+    public boolean addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
         return userInfoBhv.selectByPK(userCode).map(userInfo -> {
             final FavoriteLog favoriteLog = new FavoriteLog();
             favoriteLogLambda.accept(userInfo, favoriteLog);

@@ -21,9 +21,9 @@ public class UserRoleLoginException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private Class<?> actionClass;
+    private final Class<?> actionClass;
 
-    public UserRoleLoginException(Class<RootAction> actionClass) {
+    public UserRoleLoginException(final Class<RootAction> actionClass) {
         this.actionClass = actionClass;
     }
 

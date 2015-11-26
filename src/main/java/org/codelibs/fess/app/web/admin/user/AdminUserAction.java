@@ -282,7 +282,7 @@ public class AdminUserAction extends FessAdminAction {
         }
     }
 
-    protected void verifyPassword(final CreateForm form, VaErrorHook validationErrorLambda) {
+    protected void verifyPassword(final CreateForm form, final VaErrorHook validationErrorLambda) {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             resetPassword(form);
             throwValidationError(messages -> {

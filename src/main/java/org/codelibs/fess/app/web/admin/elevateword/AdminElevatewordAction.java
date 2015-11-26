@@ -196,7 +196,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyToken(() -> asDownloadHtml());
 
         return asStream("elevate.csv").stream(out -> {
-            Path tempFile = Files.createTempFile(null, null);
+            final Path tempFile = Files.createTempFile(null, null);
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
                     suggestElevateWordService.exportCsv(writer);

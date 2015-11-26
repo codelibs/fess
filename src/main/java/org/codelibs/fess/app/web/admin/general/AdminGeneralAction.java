@@ -149,7 +149,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.esHttpUrl = crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
     }
 
-    private void updateProperty(String key, String value) {
+    private void updateProperty(final String key, final String value) {
         crawlerProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
     }
 

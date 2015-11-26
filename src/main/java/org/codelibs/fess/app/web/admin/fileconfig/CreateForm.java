@@ -121,7 +121,7 @@ public class CreateForm implements Serializable {
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
+        final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
         if (StringUtil.isNotBlank(roles)) {
             roleTypeIds = StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]);
         }

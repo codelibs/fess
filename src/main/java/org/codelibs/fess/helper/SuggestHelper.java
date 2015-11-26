@@ -132,14 +132,14 @@ public class SuggestHelper {
         while (!initialized.get()) {
             try {
                 Thread.sleep(100);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 error.accept(e);
                 return;
             }
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        DocumentReader reader =
+        final DocumentReader reader =
                 new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentIndex(),
                         fessConfig.getIndexDocumentType());
 
@@ -152,8 +152,8 @@ public class SuggestHelper {
             }).error(t -> error.accept(t));
     }
 
-    public void purge(LocalDateTime time) {
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+    public void purge(final LocalDateTime time) {
+        final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.BASIC_ISO_DATE)));
 
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));

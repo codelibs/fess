@@ -64,7 +64,7 @@ public class QueryContext {
     }
 
     public void addFunctionScore(final Consumer<FunctionScoreQueryBuilder> functionScoreQuery) {
-        FunctionScoreQueryBuilder builder = QueryBuilders.functionScoreQuery(queryBuilder);
+        final FunctionScoreQueryBuilder builder = QueryBuilders.functionScoreQuery(queryBuilder);
         functionScoreQuery.accept(builder);
         queryBuilder = builder;
     }
@@ -104,7 +104,7 @@ public class QueryContext {
         return queryBuilder;
     }
 
-    public void addFieldLog(String field, String text) {
+    public void addFieldLog(final String field, final String text) {
         if (fieldLogMap == null) {
             return;
         }
@@ -124,7 +124,7 @@ public class QueryContext {
         return Collections.emptyList();
     }
 
-    public void addHighlightedQuery(String text) {
+    public void addHighlightedQuery(final String text) {
         if (highlightedQuerySet != null) {
             highlightedQuerySet.add(text);
         }

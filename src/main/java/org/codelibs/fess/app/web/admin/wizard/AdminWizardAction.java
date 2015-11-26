@@ -178,7 +178,7 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setUpdatedTime(now);
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
-                String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
+                final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
                 if (StringUtil.isNotBlank(roles)) {
                     wConfig.setRoleTypeIds(StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]));
                 }
@@ -209,7 +209,7 @@ public class AdminWizardAction extends FessAdminAction {
                 fConfig.setUpdatedBy(username);
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
-                String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
+                final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
                 if (StringUtil.isNotBlank(roles)) {
                     fConfig.setRoleTypeIds(StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]));
                 }
