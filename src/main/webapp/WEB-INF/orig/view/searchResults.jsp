@@ -44,20 +44,21 @@
 							<a href="#result${s.index}"><la:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
+							<small>
 							<c:if test="${doc.created!=null && doc.created!=''}">
 								<c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_created" />
-								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" />
+								<fmt:formatDate value="${fe:parseDate(doc.created)}" type="BOTH" pattern="yyyy-MM-dd HH:mm" />
 							</c:if>
 							<c:if test="${doc.last_modified!=null && doc.last_modified!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_last_modified" />
-								<fmt:formatDate value="${fe:parseDate(doc.last_modified)}" type="BOTH" />
+								<fmt:formatDate value="${fe:parseDate(doc.last_modified)}" type="BOTH" pattern="yyyy-MM-dd HH:mm" />
 							</c:if>
 							<c:if test="${doc.content_length!=null && doc.content_length!=''}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
 								<la:message key="labels.search_result_size"
-									arg0="${f:h(doc.content_length)}" />
+									arg0="${fe:formatNumber(doc.content_length)}" />
 							</c:if>
 							<c:if test="${searchLogSupport}">
 								<c:if test="${hasInfo}"><span class="br-phone"></span><span class="hidden-phone">-</span></c:if><c:set var="hasInfo" value="true"/>
@@ -71,6 +72,7 @@
 								<span class="favorited"><la:message
 										key="labels.search_result_favorited"/> <span class="favorited-count">(${f:h(doc.favorite_count)})</span></span>
 							</c:if>
+							</small>
 						</div>
 					</div>
 				</li>

@@ -22,11 +22,11 @@
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">
-			<div class="col-md-9">
-				<p id="searchOptionMenu">
-					<span> <la:message key="labels.searchoptions_menu_sort" />
-						<a href="#searchOptions" data-toggle="modal"> <c:if
-								test="${empty sort}">
+			<div class="col-md-12">
+				<ul class="searchOptionLabels">
+					<li><la:message key="labels.searchoptions_menu_sort" /> <a
+						href="#searchOptions" class="label label-primary"
+						data-toggle="modal"> <c:if test="${empty sort}">
 								<la:message key="labels.searchoptions_score" />
 							</c:if> <c:if test="${sort=='created.asc'}">
 								<la:message key="labels.search_result_sort_created_asc" />
@@ -49,14 +49,15 @@
 							</c:if> <c:if test="${sort=='favoriteCount_l_x_dv.desc'}">
 								<la:message key="labels.search_result_sort_favoriteCount_desc" />
 							</c:if>
-					</a>
-					</span> <span> <la:message key="labels.searchoptions_menu_num" />
-						<a href="#searchOptions" data-toggle="modal"> <la:message
+					</a></li>
+					<li><la:message key="labels.searchoptions_menu_num" /> <a
+						href="#searchOptions" class="label label-primary"
+						data-toggle="modal"> <la:message
 								key="labels.searchoptions_num" arg0="${f:h(num)}" />
-					</a>
-					</span> <span> <la:message key="labels.searchoptions_menu_lang" />
-						<a href="#searchOptions" data-toggle="modal"> <c:if
-								test="${empty lang}">
+					</a></li>
+					<li><la:message key="labels.searchoptions_menu_lang" /> <a
+						href="#searchOptions" class="label label-primary"
+						data-toggle="modal"> <c:if test="${empty lang}">
 								<la:message key="labels.searchoptions_all" />
 							</c:if> <c:if test="${!empty lang}">
 								<c:forEach var="sLang" items="${lang}">
@@ -65,12 +66,11 @@
 									</c:forEach>
 								</c:forEach>
 							</c:if>
-					</a>
-					</span>
+					</a></li>
 					<c:if test="${displayLabelTypeItems}">
-						<span> <la:message key="labels.searchoptions_menu_labels" />
-							<a href="#searchOptions" data-toggle="modal"> <c:if
-									test="${empty fields.label}">
+						<li><la:message key="labels.searchoptions_menu_labels" /> <a
+							href="#searchOptions" class="label label-primary"
+							data-toggle="modal"> <c:if test="${empty fields.label}">
 									<la:message key="labels.searchoptions_all" />
 								</c:if> <c:if test="${!empty fields.label}">
 									<c:forEach var="sLabel" items="${fields.label}">
@@ -79,10 +79,9 @@
 										</c:forEach>
 									</c:forEach>
 								</c:if>
-						</a>
-						</span>
+						</a></li>
 					</c:if>
-				</p>
+				</ul>
 			</div>
 		</div>
 		<c:if test="${fe:hswsize(null) != 0}">
