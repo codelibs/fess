@@ -21,7 +21,9 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 
 ### Download
 
-Fess 10 is under development.
+Fess 10.0 beta1 is available.
+The release page is [HERE](https://github.com/codelibs/fess/releases "download").
+
 Fess 9.x (Solr based) is [HERE](http://fess.codelibs.org/downloads.html "download").
 
 ### Run Fess
