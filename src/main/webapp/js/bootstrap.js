@@ -1756,8 +1756,8 @@ var Modal = (function ($) {
 
         this._isShown = true;
 
-        this._checkScrollbar();
-        this._setScrollbar();
+//        this._checkScrollbar();
+//        this._setScrollbar();
 
         $(document.body).addClass(ClassName.OPEN);
 

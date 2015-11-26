@@ -44,6 +44,10 @@ h3 {
 	text-align: center;
 }
 
+.modal-open {
+	overflow: auto;
+}
+
 h1.mainLogo {
 	margin-bottom: 1em;
 }
