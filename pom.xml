@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
-	<version>10.0.0-SNAPSHOT</version>
+	<version>10.0.0-beta1</version>
 	<packaging>war</packaging>
 	<name>Fess</name>
 	<description>Fess is Full tExt Search System.</description>
@@ -279,29 +278,19 @@
 					<tasks>
 						<mkdir dir="${basedir}/target/plugins" />
 						<get dest="${basedir}/target/plugins">
-							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/2.0.0/elasticsearch-analysis-kuromoji-neologd-2.0.0.zip" />
-							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0/elasticsearch-analysis-synonym-2.0.0.zip" />
-							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0/elasticsearch-configsync-2.0.0.zip" />
-							<url
-								url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0/elasticsearch-langfield-2.0.0.zip" />
-							<url
-								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
+							<url url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/2.0.0/elasticsearch-analysis-kuromoji-neologd-2.0.0.zip" />
+							<url url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0/elasticsearch-analysis-synonym-2.0.0.zip" />
+							<url url="${maven.release.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0/elasticsearch-configsync-2.0.0.zip" />
+							<url url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0/elasticsearch-langfield-2.0.0.zip" />
+							<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
 						</get>
 						<delete dir="${basedir}/plugins" />
 						<mkdir dir="${basedir}/plugins" />
-						<unzip dest="${basedir}/plugins/analysis-kuromoji-neologd"
-							src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-2.0.0.zip" />
-						<unzip dest="${basedir}/plugins/analysis-synonym"
-							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0.zip" />
-						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0.zip" />
-						<unzip dest="${basedir}/plugins/langfield"
-							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0.zip" />
-						<unzip dest="${basedir}/plugins/kopf"
-							src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
+						<unzip dest="${basedir}/plugins/analysis-kuromoji-neologd" src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-2.0.0.zip" />
+						<unzip dest="${basedir}/plugins/analysis-synonym" src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0.zip" />
+						<unzip dest="${basedir}/plugins/configsync" src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0.zip" />
+						<unzip dest="${basedir}/plugins/langfield" src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0.zip" />
+						<unzip dest="${basedir}/plugins/kopf" src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
 					</tasks>
 				</configuration>
 				<goals>
