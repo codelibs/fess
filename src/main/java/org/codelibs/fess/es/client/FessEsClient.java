@@ -70,6 +70,8 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -748,6 +750,20 @@ public class FessEsClient implements Client {
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet();
         if (response.hasFailures()) {
+            if (logger.isDebugEnabled()) {
+                List<ActionRequest> requests = bulkRequestBuilder.request().requests();
+                BulkItemResponse[] items = response.getItems();
+                if (requests.size() == items.length) {
+                    for (int i = 0; i < requests.size(); i++) {
+                        BulkItemResponse resp = items[i];
+                        if (resp.isFailed() && resp.getFailure() != null) {
+                            ActionRequest req = requests.get(i);
+                            Failure failure = resp.getFailure();
+                            logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
+                        }
+                    }
+                }
+            }
             throw new FessEsClientException(response.buildFailureMessage());
         }
     }

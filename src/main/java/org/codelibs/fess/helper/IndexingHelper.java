@@ -42,15 +42,18 @@ public class IndexingHelper {
         if (logger.isDebugEnabled()) {
             logger.debug("Sending " + docList.size() + " documents to a server.");
         }
-        synchronized (fessEsClient) {
-            deleteOldDocuments(fessEsClient, docList);
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            fessEsClient.addAll(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), docList);
+        try {
+            synchronized (fessEsClient) {
+                deleteOldDocuments(fessEsClient, docList);
+                final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                fessEsClient.addAll(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), docList);
+            }
+            if (logger.isInfoEnabled()) {
+                logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+            }
+        } finally {
+            docList.clear();
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
-        }
-        docList.clear();
     }
 
     private void deleteOldDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
