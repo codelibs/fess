@@ -116,11 +116,15 @@ public class EsApiManager extends BaseApiManager {
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
-            } catch (final IOException e) {
-                try (InputStream err = con.getErrorStream()) {
-                    logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
-                } catch (final IOException e1) {}
-                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            } catch (final Exception e) {
+                if (e.getCause() instanceof ClientAbortException) {
+                    logger.debug("Client aborts this request.", e);
+                } else {
+                    try (InputStream err = con.getErrorStream()) {
+                        logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
+                    } catch (final IOException e1) {}
+                    throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+                }
             }
         });
     }
