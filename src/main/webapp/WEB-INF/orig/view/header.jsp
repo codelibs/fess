@@ -23,14 +23,14 @@ ${fe:facetForm()}${fe:geoForm()}
 				</li>
 			</c:if>
 		</ul>
-		<div class="navbar-form navbar-right" role="search">
+		<div class="search-box navbar-form col-lg-5 col-md-6 col-sm-6 col-xs-8 pull-right" role="search">
 			<div class="input-group">
-				<la:text property="query" styleId="query" styleClass="form-control"
+				<la:text property="query" maxlength="1000" styleId="query" styleClass="form-control"
 					autocomplete="off" />
 				<div class="input-group-btn">
 					<button type="submit" name="search" id="searchButton"
 						class="btn btn-primary">
-						<i class="fa fa-search"></i> <span class="hidden-xs-down"><la:message
+						<i class="fa fa-search"></i> <span class="hidden-sm-down"><la:message
 								key="labels.search" /></span>
 					</button>
 					<button type="button" class="btn btn-primary dropdown-toggle"
@@ -165,4 +165,3 @@ ${fe:facetForm()}${fe:geoForm()}
 	</div>
 	<!--  /.modal -->
 </la:form>
-
