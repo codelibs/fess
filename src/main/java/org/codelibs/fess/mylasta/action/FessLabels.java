@@ -758,7 +758,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: PDF */
     public static final String LABELS_facet_filetype_pdf = "{labels.facet_filetype_pdf}";
 
-    /** The key of the message: PDF */
+    /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 
     /** The key of the message: Reset */
