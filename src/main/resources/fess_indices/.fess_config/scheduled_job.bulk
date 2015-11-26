@@ -1,5 +1,5 @@
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"1"}}
-{"name":"Default Crawler","target":"all","cronExpression":"0 0 0 * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"crawlJob\").execute(executor);","jobLogging":true,"crawler":true,"available":true,"sortOrder":1,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
+{"name":"Default Crawler","target":"all","cronExpression":"0 0 0 * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"crawlJob\").logLevel(\"info\").execute(executor);","jobLogging":true,"crawler":true,"available":true,"sortOrder":1,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"2"}}
 {"name":"Suggest Indexer","target":"all","cronExpression":"0 0 0 * * ?","scriptType":"groovy","scriptData":"return container.getComponent(\"suggestJob\").execute(executor);","jobLogging":true,"crawler":false,"available":true,"sortOrder":2,"createdBy":"system","createdTime":0,"updatedBy":"system","updatedTime":0}
 {"index":{"_index":".fess_config","_type":"scheduled_job","_id":"3"}}

@@ -58,6 +58,8 @@ public class CrawlJob {
 
     protected String logFilePath;
 
+    protected String logLevel;
+
     protected int documentExpires = -2;
 
     protected int retryCountToDeleteTempDir = 10;
@@ -88,6 +90,11 @@ public class CrawlJob {
 
     public CrawlJob logFilePath(final String logFilePath) {
         this.logFilePath = logFilePath;
+        return this;
+    }
+
+    public CrawlJob logLevel(final String logLevel) {
+        this.logLevel = logLevel;
         return this;
     }
 
@@ -272,7 +279,11 @@ public class CrawlJob {
         crawlerCmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(crawlerCmdList, "lasta.env", null, null);
         addSystemProperty(crawlerCmdList, "fess.log.name", "fess-crawler", "-crawler");
-        addSystemProperty(crawlerCmdList, "fess.log.level", null, null);
+        if (logLevel == null) {
+            addSystemProperty(crawlerCmdList, "fess.log.level", null, null);
+        } else {
+            crawlerCmdList.add("-Dfess.log.level=" + logLevel);
+        }
         if (systemHelper.getCrawlerJavaOptions() != null) {
             for (final String value : systemHelper.getCrawlerJavaOptions()) {
                 crawlerCmdList.add(value);

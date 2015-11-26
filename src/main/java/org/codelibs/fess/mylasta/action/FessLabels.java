@@ -617,12 +617,13 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
+    /** The key of the message: Copyright(C) 2009-2015 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. &lt;span class="br-phone"&gt;&lt;/span&gt;All Rights Reserved. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 
     /** The key of the message: Search */
     public static final String LABELS_SEARCH = "{labels.search}";
 
-    /** The key of the message: Results <b>{2}</b><span class="hidden-phone"> -</span> <b>{3}</b> of <b>{1}</b> for <b>{0}</b> */
+    /** The key of the message: Results &lt;b&gt;{2}&lt;/b&gt;&lt;span class="hidden-phone"&gt; -&lt;/span&gt; &lt;b&gt;{3}&lt;/b&gt; of &lt;b&gt;{1}&lt;/b&gt; for &lt;b&gt;{0}&lt;/b&gt; */
     public static final String LABELS_search_result_status = "{labels.search_result_status}";
 
     /** The key of the message: ({0} sec) */
@@ -634,7 +635,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Next */
     public static final String LABELS_next_page = "{labels.next_page}";
 
-    /** The key of the message: Your search - <b>{0}</b> - did not match any documents. */
+    /** The key of the message: Your search - &lt;b&gt;{0}&lt;/b&gt; - did not match any documents. */
     public static final String LABELS_did_not_match = "{labels.did_not_match}";
 
     /** The key of the message: Fess */
@@ -1673,7 +1674,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Stop */
     public static final String LABELS_scheduledjob_button_stop = "{labels.scheduledjob_button_stop}";
 
-    /** The key of the message: return container.getComponent("crawlJob").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); */
+    /** The key of the message: return container.getComponent("crawlJob").logLevel("info").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); */
     public static final String LABELS_scheduledjob_script_template = "{labels.scheduledjob_script_template}";
 
     /** The key of the message: Back */
