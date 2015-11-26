@@ -26,16 +26,12 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
-    /** The key of the message: <ul> */
     public static final String ERRORS_HEADER = "{errors.header}";
 
-    /** The key of the message: </ul> */
     public static final String ERRORS_FOOTER = "{errors.footer}";
 
-    /** The key of the message: <li> */
     public static final String ERRORS_PREFIX = "{errors.prefix}";
 
-    /** The key of the message: </li> */
     public static final String ERRORS_SUFFIX = "{errors.suffix}";
 
     /** The key of the message: {item} must be false. */
@@ -50,7 +46,6 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} must be greater than ${inclusive == true ? 'or equal to ' : ''}{value}. */
     public static final String CONSTRAINTS_DecimalMin_MESSAGE = "{constraints.DecimalMin.message}";
 
-    /** The key of the message: {item} is numeric value out of bounds (<{integer} digits>.<{fraction} digits> expected). */
     public static final String CONSTRAINTS_Digits_MESSAGE = "{constraints.Digits.message}";
 
     /** The key of the message: {item} must be in the future. */
@@ -197,7 +192,6 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Not Found: {0} */
     public static final String ERRORS_not_found_on_file_system = "{errors.not_found_on_file_system}";
 
-    /** The key of the message: Could not open {0}. <br/>Please check if the file is associated with an application. */
     public static final String ERRORS_could_not_open_on_system = "{errors.could_not_open_on_system}";
 
     /** The key of the message: No more results could be displayed. */
@@ -344,7 +338,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.header' with parameters.
      * <pre>
-     * message: <ul>
      * comment: ------------
      * </pre>
      * @param property The property name for the message. (NotNull)
@@ -359,7 +352,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.footer' with parameters.
      * <pre>
-     * message: </ul>
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -373,7 +365,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.prefix' with parameters.
      * <pre>
-     * message: <li>
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -387,7 +378,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.suffix' with parameters.
      * <pre>
-     * message: </li>
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -464,7 +454,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'constraints.Digits.message' with parameters.
      * <pre>
-     * message: {item} is numeric value out of bounds (<{integer} digits>.<{fraction} digits> expected).
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param item The parameter item for message. (NotNull)
@@ -1198,7 +1187,6 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.could_not_open_on_system' with parameters.
      * <pre>
-     * message: Could not open {0}. <br/>Please check if the file is associated with an application.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
