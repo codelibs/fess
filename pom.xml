@@ -57,7 +57,10 @@
 		<utflute.version>0.5.2</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.0-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.0</crawler.version>
+
+		<!-- Suggest -->
+		<suggest.version>2.0.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.0.0</elasticsearch.version>
@@ -281,9 +284,9 @@
 							<url
 								url="${maven.release.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.0.0/elasticsearch-analysis-synonym-2.0.0.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0-SNAPSHOT/elasticsearch-configsync-2.0.0-20151113.133045-4.zip" />
+								url="${maven.release.repo.url}/org/codelibs/elasticsearch-configsync/2.0.0/elasticsearch-configsync-2.0.0.zip" />
 							<url
-								url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0-SNAPSHOT/elasticsearch-langfield-2.0.0-20151126.010100-4.zip" />
+								url="${maven.release.repo.url}/org/codelibs/elasticsearch-langfield/2.0.0/elasticsearch-langfield-2.0.0.zip" />
 							<url
 								url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
 						</get>
@@ -294,9 +297,9 @@
 						<unzip dest="${basedir}/plugins/analysis-synonym"
 							src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.0.0.zip" />
 						<unzip dest="${basedir}/plugins/configsync"
-							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0-20151113.133045-4.zip" />
+							src="${basedir}/target/plugins/elasticsearch-configsync-2.0.0.zip" />
 						<unzip dest="${basedir}/plugins/langfield"
-							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0-20151126.010100-4.zip" />
+							src="${basedir}/target/plugins/elasticsearch-langfield-2.0.0.zip" />
 						<unzip dest="${basedir}/plugins/kopf"
 							src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
 					</tasks>
@@ -421,7 +424,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.1-SNAPSHOT</version>
+			<version>0.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -438,7 +441,7 @@
 		<dependency>
 			<groupId>org.codelibs.fess</groupId>
 			<artifactId>fess-suggest</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>${suggest.version}</version>
 		</dependency>
 
 		<!-- fileupload -->
