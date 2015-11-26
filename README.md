@@ -24,12 +24,10 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 Fess 10.0 beta1 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
-Fess 9.x (Solr based) is [HERE](http://fess.codelibs.org/downloads.html "download").
-
 ### Run Fess
 
-    $ unzip fess-x.x.x.zip
-    $ cd fess-x.x.x
+    $ unzip fess-10.0.x.zip
+    $ cd fess-10.0.x
     $ ./bin/fess
 
 ### Access Fess
@@ -37,7 +35,9 @@ Fess 9.x (Solr based) is [HERE](http://fess.codelibs.org/downloads.html "downloa
 - Search UI: http://localhost:8080/
 - Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
 
-## Development
+You can register crawling targets on Web/File System/Data Store of admin pages, and then start Fess Crawler on Scheduler page manually.
+
+## Development Information
 
 ### Get Source Code
 
