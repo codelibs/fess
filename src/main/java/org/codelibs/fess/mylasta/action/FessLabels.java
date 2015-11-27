@@ -1977,6 +1977,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Role */
     public static final String LABELS_role_title_details = "{labels.role_title_details}";
 
+    /** The key of the message: Create new crawler role */
+    public static final String LABELS_role_button_create_crawler_role = "{labels.role_button_create_crawler_role}";
+
     /** The key of the message: group */
     public static final String LABELS_group_configuration = "{labels.group_configuration}";
 

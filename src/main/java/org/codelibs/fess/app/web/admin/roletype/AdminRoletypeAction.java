@@ -107,12 +107,15 @@ public class AdminRoletypeAction extends FessAdminAction {
     //                                            Entry Page
     //                                            ----------
     @Execute
-    public HtmlResponse createnew() {
+    public HtmlResponse createnew(final OptionalThing<String> value) {
         saveToken();
         return asHtml(path_AdminRoletype_AdminRoletypeEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
+                value.ifPresent(v -> {
+                    form.value = v;
+                });
             });
         });
     }

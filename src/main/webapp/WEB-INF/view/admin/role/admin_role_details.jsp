@@ -57,6 +57,10 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+									<la:link styleClass="btn btn-success" href="/admin/roletype/createnew/${f:u(name)}">
+										<i class="fa fa-plus-circle"></i>
+										<la:message key="labels.role_button_create_crawler_role" />
+									</la:link>
 								</div>
 								<!-- /.box-footer -->
 							</div>
