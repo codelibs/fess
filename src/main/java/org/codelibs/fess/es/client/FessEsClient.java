@@ -68,7 +68,6 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
-import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
@@ -713,23 +712,6 @@ public class FessEsClient implements Client {
             }
         });
 
-    }
-
-    public void optimize(final String index) {
-        client.admin().indices().prepareOptimize(index).execute(new ActionListener<OptimizeResponse>() {
-
-            @Override
-            public void onResponse(final OptimizeResponse response) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Optimzed " + index + ".");
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable e) {
-                logger.error("Failed to optimze " + index + ".", e);
-            }
-        });
     }
 
     public PingResponse ping() {
