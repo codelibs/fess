@@ -84,9 +84,9 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${suggestBadWordItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/badword/details/4/${f:u(data.id)}">
-															<td style="overflow-x: auto;">${f:h(data.suggestWord)}</td>
+															<td>${f:h(data.suggestWord)}</td>
 														</tr>
 													</c:forEach>
 												</tbody>

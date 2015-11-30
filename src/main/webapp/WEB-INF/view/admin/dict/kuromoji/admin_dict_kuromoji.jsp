@@ -29,7 +29,6 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.dict_kuromoji_list_link" />
@@ -61,7 +60,7 @@
 									</la:link>
 								</div>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -92,7 +91,7 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${kuromojiItemItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/dict/kuromoji/details/${f:u(dictId)}/4/${f:u(data.id)}">
 															<td>${f:h(data.token)}</td>
 															<td>${f:h(data.reading)}</td>

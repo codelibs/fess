@@ -28,13 +28,12 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.joblog_link_list" />
 								</h3>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -66,7 +65,7 @@
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s" items="${jobLogItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/joblog/details/4/${f:u(data.id)}">
 															<td>${f:h(data.jobName)}</td>
 															<td>${f:h(data.jobStatus)}</td>

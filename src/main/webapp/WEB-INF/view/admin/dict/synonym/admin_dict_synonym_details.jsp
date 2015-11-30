@@ -97,7 +97,7 @@
 									<table class="table table-bordered">
 										<tbody>
 											<tr>
-												<th style=""><la:message
+												<th><la:message
 														key="labels.dict_synonym_source" /></th>
 												<td>${f:br(f:h(inputs))}<la:hidden property="inputs" /></td>
 											</tr>

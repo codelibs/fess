@@ -24,13 +24,12 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.failure_url_configuration" />
 								</h3>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -109,8 +108,7 @@
 													<tbody>
 														<c:forEach var="data" varStatus="s"
 															items="${failureUrlItems}">
-															<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
-																data-href="details/4/${f:u(data.id)}">
+															<tr data-href="details/4/${f:u(data.id)}">
 																<td>${f:h(data.url)}</td>
 																<td>${f:h(data.errorName)}</td>
 																<td><fmt:formatDate

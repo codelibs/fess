@@ -59,7 +59,7 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
-												<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
+												<tr>
 													<td>${f:h(data.type)}</td>
 													<td><la:link
 															href="${f:h(data.type)}/?dictId=${f:h(data.id)}">${f:h(data.path)}</la:link></td>

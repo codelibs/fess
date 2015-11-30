@@ -31,11 +31,10 @@
 						</c:if>
 						<c:if test="${displayCreateLink}">
 							<div class="box box-primary">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
@@ -57,8 +56,7 @@
 										<table class="table table-bordered table-striped">
 											<thead>
 												<tr>
-													<th><la:message
-															key="labels.webauth_list_hostname" /></th>
+													<th><la:message key="labels.webauth_list_hostname" /></th>
 													<th><la:message
 															key="labels.webauth_list_web_crawling_config" /></th>
 												</tr>
@@ -66,7 +64,7 @@
 											<tbody>
 												<c:forEach var="data" varStatus="s"
 													items="${webAuthenticationItems}">
-													<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+													<tr
 														data-href="${contextPath}/admin/webauth/details/4/${f:u(data.id)}">
 														<td><c:if
 																test="${data.hostname==null||data.hostname==''}">

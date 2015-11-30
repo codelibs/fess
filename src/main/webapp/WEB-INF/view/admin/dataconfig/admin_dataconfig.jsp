@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="dataConfig" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -53,16 +52,17 @@
 												<thead>
 													<tr>
 														<th class="col-md-8"><la:message key="labels.name" /></th>
-														<th class="col-md-4 text-center"><la:message key="labels.available" /></th>
+														<th class="col-md-4 text-center"><la:message
+																key="labels.available" /></th>
 													</tr>
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${dataConfigItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/dataconfig/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
-															<td style="text-align: center;"><c:if
+															<td class="text-center"><c:if
 																	test="${data.available=='true'}">
 																	<la:message key="labels.enabled" />
 																</c:if> <c:if test="${data.available=='false'}">

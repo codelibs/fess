@@ -61,3 +61,20 @@
 	font-size: 120%;
 	font-weight: 600;
 }
+
+section.content table {
+	display: table;
+	table-layout: fixed;
+	width
+}
+
+section.content table td {
+	display: table-cell;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+textarea.systemInfoData {
+	height: 22em;
+	line-height: 1.5em;
+}

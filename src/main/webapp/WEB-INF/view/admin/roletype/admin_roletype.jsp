@@ -24,11 +24,10 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -58,7 +57,7 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${roleTypeItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/roletype/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
 														</tr>

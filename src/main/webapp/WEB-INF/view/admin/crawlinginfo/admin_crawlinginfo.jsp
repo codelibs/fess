@@ -28,13 +28,12 @@
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="box box-primary">
-							<%-- Box Header --%>
 							<div class="box-header with-border">
 								<h3 class="box-title">
 									<la:message key="labels.crawling_session_title" />
 								</h3>
 							</div>
-							<%-- Box Body --%>
+							<!-- /.box-header -->
 							<div class="box-body">
 								<%-- Message --%>
 								<div>
@@ -93,7 +92,7 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${crawlingSessionItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/crawlinginfo/details/4/${f:u(data.id)}">
 															<td>${f:h(data.sessionId)}</td>
 															<td><fmt:formatDate

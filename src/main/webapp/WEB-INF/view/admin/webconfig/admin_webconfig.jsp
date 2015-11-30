@@ -52,16 +52,17 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.name" /></th>
-														<th><la:message key="labels.available" /></th>
+														<th class="text-center"><la:message
+																key="labels.available" /></th>
 													</tr>
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${webConfigItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/webconfig/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
-															<td style="text-align: center;"><c:if
+															<td class="text-center"><c:if
 																	test="${data.available=='true'}">
 																	<la:message key="labels.enabled" />
 																</c:if> <c:if test="${data.available=='false'}">

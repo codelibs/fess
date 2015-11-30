@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="keyMatch" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -59,10 +58,10 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${keyMatchItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/keymatch/details/4/${f:u(data.id)}">
 															<td>${f:h(data.term)}</td>
-															<td style="overflow-x: auto;">${f:h(data.query)}</td>
+															<td>${f:h(data.query)}</td>
 														</tr>
 													</c:forEach>
 												</tbody>

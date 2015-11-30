@@ -13,7 +13,6 @@
 			<jsp:param name="menuCategoryType" value="crawl" />
 			<jsp:param name="menuType" value="labelType" />
 		</jsp:include>
-
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
@@ -58,7 +57,7 @@
 												<tbody>
 													<c:forEach var="data" varStatus="s"
 														items="${labelTypeItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}"
+														<tr
 															data-href="${contextPath}/admin/labeltype/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
 														</tr>

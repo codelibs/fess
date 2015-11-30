@@ -46,17 +46,15 @@
 												<tbody>
 													<tr>
 														<th><la:message key="labels.log_file_name" /></th>
-														<th><la:message
-																key="labels.log_file_date" /></th>
+														<th><la:message key="labels.log_file_date" /></th>
 													</tr>
 													<c:forEach var="logFile" varStatus="s"
 														items="${logFileItems}">
-														<tr class="${s.index % 2 == 0 ? 'row1' : 'row2'}">
+														<tr>
 															<td><la:link href="download/${f:u(logFile.id)}"
 																	target="_blank">${f:h(logFile.name)}</la:link></td>
-															<td ><fmt:formatDate
-																	value="${logFile.lastModified}" type="BOTH"
-																	dateStyle="MEDIUM" /></td>
+															<td><fmt:formatDate value="${logFile.lastModified}"
+																	type="BOTH" dateStyle="MEDIUM" /></td>
 														</tr>
 													</c:forEach>
 												</tbody>
