@@ -48,7 +48,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Resource
     private ScheduledJobService scheduledJobService;
     @Resource
-    private SchedulerPager scheduledJobPager;
+    private SchedulerPager schedulerPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -74,9 +74,9 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            scheduledJobPager.setCurrentPageNumber(pageNumber.get());
+            schedulerPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            scheduledJobPager.setCurrentPageNumber(0);
+            schedulerPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -85,7 +85,7 @@ public class AdminSchedulerAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, scheduledJobPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, schedulerPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -93,17 +93,17 @@ public class AdminSchedulerAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        scheduledJobPager.clear();
+        schedulerPager.clear();
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(scheduledJobPager)); // page navi
+        data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(scheduledJobPager, form, op -> op.include("id"));
+        copyBeanToBean(schedulerPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -353,10 +353,10 @@ public class AdminSchedulerAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
-            data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(scheduledJobPager)); // page navi
+            data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(scheduledJobPager, form, op -> op.include("id"));
+                copyBeanToBean(schedulerPager, form, op -> op.include("id"));
             });
         });
     }

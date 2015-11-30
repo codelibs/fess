@@ -37,7 +37,7 @@
 									<la:errors />
 								</div>
 								<%-- List --%>
-								<c:if test="${scheduledJobPager.allRecordCount == 0}">
+								<c:if test="${schedulerPager.allRecordCount == 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
 											<i class="fa fa-info-circle text-light-blue"></i>
@@ -45,7 +45,7 @@
 										</div>
 									</div>
 								</c:if>
-								<c:if test="${scheduledJobPager.allRecordCount > 0}">
+								<c:if test="${schedulerPager.allRecordCount > 0}">
 									<div class="row">
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped">
@@ -82,7 +82,7 @@
 											</table>
 										</div>
 									</div>
-									<c:set var="pager" value="${scheduledJobPager}" scope="request" />
+									<c:set var="pager" value="${schedulerPager}" scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 								</c:if>
 							</div>
