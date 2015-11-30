@@ -74,15 +74,10 @@
 														items="${roleTypeItems}">
 														<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
 															<c:if test="${rtid==rt.id}">
-																	${f:h(rt.name)}<br />
+																${f:h(rt.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="roleTypeIds" multiple="true"
-														style="display:none;">
-														<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-															<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.sortOrder" /></th>

@@ -31,11 +31,10 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if><c:if test="${crudMode == 3}">box-danger</c:if><c:if test="${crudMode == 4}">box-primary</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
 									<%-- Message --%>
 									<div>
@@ -57,15 +56,10 @@
 														items="${roleItems}">
 														<c:forEach var="rtid" varStatus="s" items="${roles}">
 															<c:if test="${rtid==rt.id}">
-																					${f:h(rt.name)}<br />
+																${f:h(rt.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="roles" multiple="true"
-														style="display:none;">
-														<c:forEach var="rt" varStatus="s" items="${roleItems}">
-															<la:option value="${rt.id}">${f:h(rt.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.groups" /></th>
@@ -73,15 +67,10 @@
 														items="${groupItems}">
 														<c:forEach var="rtid" varStatus="s" items="${groups}">
 															<c:if test="${rtid==rt.id}">
-																					${f:h(rt.name)}<br />
+																${f:h(rt.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="groups" multiple="true"
-														style="display:none;">
-														<c:forEach var="rt" varStatus="s" items="${groupItems}">
-															<la:option value="${rt.id}">${f:h(rt.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 										</tbody>
 									</table>

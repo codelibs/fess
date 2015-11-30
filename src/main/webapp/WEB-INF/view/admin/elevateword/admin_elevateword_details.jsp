@@ -115,12 +115,7 @@
 																${f:h(l.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="labelTypeIds" multiple="true"
-														style="display:none;">
-														<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-															<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.suggest_elevate_word_boost" /></th>

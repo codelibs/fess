@@ -122,15 +122,10 @@
 														items="${roleTypeItems}">
 														<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
 															<c:if test="${rtid==rt.id}">
-																					${f:h(rt.name)}<br />
+																${f:h(rt.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="roleTypeIds" multiple="true"
-														style="display:none;">
-														<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-															<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.label_type" /></th>
@@ -142,12 +137,7 @@
 																${f:h(l.name)}<br />
 															</c:if>
 														</c:forEach>
-													</c:forEach> <la:select property="labelTypeIds" multiple="true"
-														style="display:none;">
-														<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
-															<la:option value="${f:u(l.id)}">${f:h(l.name)}</la:option>
-														</c:forEach>
-													</la:select></td>
+													</c:forEach></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.available" /></th>
@@ -164,7 +154,8 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
-									<la:link styleClass="btn btn-success" href="/admin/scheduler/createnewjob/web_crawling/${f:u(id)}/${f:u(name)}">
+									<la:link styleClass="btn btn-success"
+										href="/admin/scheduler/createnewjob/web_crawling/${f:u(id)}/${f:u(name)}">
 										<i class="fa fa-plus-circle"></i>
 										<la:message key="labels.web_crawling_button_create_job" />
 									</la:link>
