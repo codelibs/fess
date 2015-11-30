@@ -47,6 +47,15 @@
 	width: 100%;
 }
 
+label.has-error {
+	color: #dd4b39 !important;
+}
+
+.form-group .has-error + .form-control {
+	border-color: #dd4b39 !important;
+	box-shadow: none;
+}
+
 #result ol {
 	list-style: none !important;
 	padding-left: 0;

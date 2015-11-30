@@ -25,7 +25,7 @@
 						<la:info id="msg" message="true">
 							<div class="alert alert-info">${msg}</div>
 						</la:info>
-						<la:errors />
+						<la:errors property="_global" />
 					</div>
 					<div class="col-md-6">
 						<div class="box box-primary">
@@ -38,6 +38,7 @@
 								<!-- /.box-header -->
 								<div class="box-body">
 									<div class="form-group">
+										<la:errors property="fileName" />
 										<la:select property="fileName" styleClass="form-control">
 											<c:forEach var="item" varStatus="s" items="${fileNameItems}">
 												<la:option value="${item}">${f:h(item)}</la:option>
@@ -49,6 +50,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-primary" name="download"
 										value="<la:message key="labels.design_download_button" />">
+										<i class="fa fa-download"></i>
 										<la:message key="labels.design_download_button" />
 									</button>
 									<button type="button" class="btn btn-danger" name="delete"
@@ -105,6 +107,7 @@
 								<!-- /.box-header -->
 								<div class="box-body">
 									<div class="form-group">
+										<la:errors property="fileName" />
 										<la:select property="fileName" styleClass="form-control">
 											<la:option value="index">
 												<la:message key="labels.design_file_index" />
@@ -159,11 +162,13 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-warning" name="edit"
 										value="<la:message key="labels.design_edit_button" />">
+										<i class="fa fa-pencil"></i>
 										<la:message key="labels.design_edit_button" />
 									</button>
 									<button type="submit" class="btn btn-danger"
 										name="editAsUseDefault"
 										value="<la:message key="labels.design_use_default_button" />">
+										<i class="fa fa-recycle"></i>
 										<la:message key="labels.design_use_default_button" />
 									</button>
 								</div>
@@ -188,6 +193,7 @@
 											class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file" /></label>
 										<div class="col-sm-9">
+											<la:errors property="designFile" />
 											<input type="file" name="designFile" class="form-control" />
 										</div>
 									</div>
@@ -196,6 +202,7 @@
 											class="col-sm-3 form-control-label"><la:message
 												key="labels.design_file_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="designFileName" />
 											<la:text property="designFileName" styleClass="form-control" />
 										</div>
 									</div>
@@ -204,6 +211,7 @@
 								<div class="box-footer">
 									<button type="submit" class="btn btn-success" name="upload"
 										value="<la:message key="labels.design_button_upload" />">
+										<i class="fa fa-upload"></i>
 										<la:message key="labels.design_button_upload" />
 									</button>
 								</div>

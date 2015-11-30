@@ -33,24 +33,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="name" />
 											<la:text property="name" styleClass="form-control" />
 										</div>
 									</div>
@@ -58,6 +56,7 @@
 										<label for="target" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_target" /></label>
 										<div class="col-sm-9">
+											<la:errors property="target" />
 											<la:text property="target" styleClass="form-control" />
 										</div>
 									</div>
@@ -65,6 +64,7 @@
 										<label for="cronExpression" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_cronExpression" /></label>
 										<div class="col-sm-9">
+											<la:errors property="cronExpression" />
 											<la:text property="cronExpression" styleClass="form-control" />
 										</div>
 									</div>
@@ -72,6 +72,7 @@
 										<label for="scriptType" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_scriptType" /></label>
 										<div class="col-sm-9">
+											<la:errors property="scriptType" />
 											<la:text property="scriptType" styleClass="form-control" />
 										</div>
 									</div>
@@ -79,6 +80,7 @@
 										<label for="scriptData" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_scriptData" /></label>
 										<div class="col-sm-9">
+											<la:errors property="scriptData" />
 											<la:textarea property="scriptData" styleClass="form-control"
 												rows="5" />
 										</div>
@@ -87,6 +89,7 @@
 										<label for="jobLogging" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_jobLogging" /></label>
 										<div class="col-sm-9">
+											<la:errors property="jobLogging" />
 											<div class="checkbox">
 												<label> <la:checkbox property="jobLogging" /> <la:message
 														key="labels.enabled" />
@@ -98,6 +101,7 @@
 										<label for="crawler" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_crawler" /></label>
 										<div class="col-sm-9">
+											<la:errors property="crawler" />
 											<div class="checkbox">
 												<label> <la:checkbox property="crawler" /> <la:message
 														key="labels.enabled" />
@@ -109,6 +113,7 @@
 										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.scheduledjob_status" /></label>
 										<div class="col-sm-9">
+											<la:errors property="available" />
 											<div class="checkbox">
 												<label> <la:checkbox property="available" /> <la:message
 														key="labels.enabled" />
@@ -120,6 +125,7 @@
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
 										<div class="col-sm-9">
+											<la:errors property="sortOrder" />
 											<la:text property="sortOrder" styleClass="form-control" />
 										</div>
 									</div>

@@ -33,24 +33,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="urlExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_url_expr" /></label>
 										<div class="col-sm-9">
+											<la:errors property="urlExpr" />
 											<la:textarea property="urlExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
@@ -58,6 +56,7 @@
 										<label for="boostExpr" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_boost_expr" /></label>
 										<div class="col-sm-9">
+											<la:errors property="boostExpr" />
 											<la:textarea property="boostExpr" styleClass="form-control" rows="5"/>
 										</div>
 									</div>
@@ -65,6 +64,7 @@
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_sort_order" /></label>
 										<div class="col-sm-9">
+											<la:errors property="sortOrder" />
 											<la:text property="sortOrder" styleClass="form-control" />
 										</div>
 									</div>

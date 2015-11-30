@@ -38,18 +38,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="term" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_term" /></label>
 										<div class="col-sm-9">
+											<la:errors property="term" />
 											<la:text property="term" styleClass="form-control" />
 										</div>
 									</div>
@@ -57,6 +56,7 @@
 										<label for="query" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_query" /></label>
 										<div class="col-sm-9">
+											<la:errors property="query" />
 											<la:text property="query" styleClass="form-control" />
 										</div>
 									</div>
@@ -64,6 +64,7 @@
 										<label for="maxSize" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_size" /></label>
 										<div class="col-sm-9">
+											<la:errors property="maxSize" />
 											<la:text property="maxSize" styleClass="form-control" />
 										</div>
 									</div>
@@ -71,6 +72,7 @@
 										<label for="boost" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_boost" /></label>
 										<div class="col-sm-9">
+											<la:errors property="boost" />
 											<la:text property="boost" styleClass="form-control" />
 										</div>
 									</div>

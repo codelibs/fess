@@ -1,6 +1,7 @@
 $(function() {
-	$('input[type="text"],select', '.login-box,section.content').first()
+	$('input[type="text"],select,textarea', '.login-box,section.content').first()
 			.focus();
+	$('.form-group .has-error').first().next('input,select,textarea').focus();
 
 	$("section.content input").keypress(function(e) {
 		if (e.which == 13) {

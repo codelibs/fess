@@ -39,18 +39,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="name" />
 											<la:text property="name" styleClass="form-control" />
 										</div>
 									</div>
@@ -58,6 +57,7 @@
 										<label for="handlerName" class="col-sm-3 control-label"><la:message
 												key="labels.handler_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="handlerName" />
 											<la:select property="handlerName" size="1"
 												styleClass="form-control">
 												<c:forEach var="hn" varStatus="s"
@@ -71,6 +71,7 @@
 										<label for="handlerParameter" class="col-sm-3 control-label"><la:message
 												key="labels.handler_parameter" /></label>
 										<div class="col-sm-9">
+											<la:errors property="handlerParameter" />
 											<la:textarea property="handlerParameter"
 												styleClass="form-control" rows="5" />
 										</div>
@@ -79,6 +80,7 @@
 										<label for="handlerScript" class="col-sm-3 control-label"><la:message
 												key="labels.handler_script" /></label>
 										<div class="col-sm-9">
+											<la:errors property="handlerScript" />
 											<la:textarea property="handlerScript"
 												styleClass="form-control" rows="5" />
 										</div>
@@ -87,6 +89,7 @@
 										<label for="boost" class="col-sm-3 control-label"><la:message
 												key="labels.boost" /></label>
 										<div class="col-sm-9">
+											<la:errors property="boost" />
 											<la:text property="boost" styleClass="form-control" />
 										</div>
 									</div>
@@ -94,6 +97,7 @@
 										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
 										<div class="col-sm-9">
+											<la:errors property="roleTypeIds" />
 											<la:select property="roleTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
@@ -106,6 +110,7 @@
 										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
+											<la:errors property="labelTypeIds" />
 											<la:select property="labelTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
@@ -118,6 +123,7 @@
 										<label for="available" class="col-sm-3 control-label"><la:message
 												key="labels.available" /></label>
 										<div class="col-sm-9">
+											<la:errors property="available" />
 											<la:select property="available" styleClass="form-control">
 												<la:option value="true">
 													<la:message key="labels.enabled" />

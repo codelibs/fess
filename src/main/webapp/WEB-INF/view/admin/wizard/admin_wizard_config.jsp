@@ -38,19 +38,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert-message info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Message: END --%>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="crawlingConfigName" class="col-sm-3 control-label"><la:message
 												key="labels.wizard_crawling_config_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="crawlingConfigName" />
 											<la:text property="crawlingConfigName"
 												styleClass="form-control" />
 										</div>
@@ -59,6 +57,7 @@
 										<label for="crawlingConfigPath" class="col-sm-3 control-label"><la:message
 												key="labels.wizard_crawling_config_path" /></label>
 										<div class="col-sm-9">
+											<la:errors property="crawlingConfigPath" />
 											<la:text property="crawlingConfigPath"
 												styleClass="form-control" />
 										</div>
@@ -67,6 +66,7 @@
 										<label for="maxAccessCount" class="col-sm-3 control-label"><la:message
 												key="labels.maxAccessCount" /></label>
 										<div class="col-sm-9">
+											<la:errors property="maxAccessCount" />
 											<la:text property="maxAccessCount" styleClass="form-control" />
 										</div>
 									</div>
@@ -74,6 +74,7 @@
 										<label for="depth" class="col-sm-3 control-label"><la:message
 												key="labels.depth" /></label>
 										<div class="col-sm-9">
+											<la:errors property="depth" />
 											<la:text property="depth" styleClass="form-control" />
 										</div>
 									</div>

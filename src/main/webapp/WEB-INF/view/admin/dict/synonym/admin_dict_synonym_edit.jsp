@@ -85,18 +85,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="term" class="col-sm-3 control-label"><la:message
 												key="labels.dict_synonym_source" /></label>
 										<div class="col-sm-9">
+											<la:errors property="inputs" />
 											<la:textarea property="inputs" rows="5"
 												styleClass="form-control" />
 										</div>
@@ -105,6 +104,7 @@
 										<label for="outputs" class="col-sm-3 control-label"><la:message
 												key="labels.dict_synonym_target" /></label>
 										<div class="col-sm-9">
+											<la:errors property="outputs" />
 											<la:textarea property="outputs" rows="5"
 												styleClass="form-control" />
 										</div>

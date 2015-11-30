@@ -31,24 +31,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.user_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="name" />
 											<c:if test="${crudMode==1}">
 												<la:text property="name" styleClass="form-control" />
 											</c:if>
@@ -62,6 +60,7 @@
 										<label for="password" class="col-sm-3 control-label"><la:message
 												key="labels.user_password" /></label>
 										<div class="col-sm-9">
+											<la:errors property="password" />
 											<la:password property="password" styleClass="form-control" />
 										</div>
 									</div>
@@ -69,6 +68,7 @@
 										<label for="confirm_password" class="col-sm-3 control-label"><la:message
 												key="labels.user_confirm_password" /></label>
 										<div class="col-sm-9">
+											<la:errors property="confirmPassword" />
 											<la:password property="confirmPassword"
 												styleClass="form-control" />
 										</div>
@@ -77,6 +77,7 @@
 										<label for="roles" class="col-sm-3 control-label"><la:message
 												key="labels.roles" /></label>
 										<div class="col-sm-9">
+											<la:errors property="roles" />
 											<la:select property="roles" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${roleItems}">
@@ -89,6 +90,7 @@
 										<label for="groups" class="col-sm-3 control-label"><la:message
 												key="labels.groups" /></label>
 										<div class="col-sm-9">
+											<la:errors property="groups" />
 											<la:select property="groups" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${groupItems}">

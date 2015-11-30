@@ -79,18 +79,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="word" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_suggest_word" /></label>
 										<div class="col-sm-9">
+											<la:errors property="suggestWord" />
 											<la:text property="suggestWord" styleClass="form-control" />
 										</div>
 									</div>
@@ -98,6 +97,7 @@
 										<label for="reading" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_reading" /></label>
 										<div class="col-sm-9">
+											<la:errors property="reading" />
 											<la:text property="reading" styleClass="form-control" />
 										</div>
 									</div>
@@ -105,6 +105,7 @@
 										<label for="targetRole" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_target_role" /></label>
 										<div class="col-sm-9">
+											<la:errors property="targetRole" />
 											<la:text property="targetRole" styleClass="form-control" />
 										</div>
 									</div>
@@ -112,6 +113,7 @@
 										<label for="labelTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.label_type" /></label>
 										<div class="col-sm-9">
+											<la:errors property="labelTypeIds" />
 											<la:select property="labelTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="l" varStatus="s" items="${labelTypeItems}">
@@ -124,6 +126,7 @@
 										<label for="boost" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_elevate_word_boost" /></label>
 										<div class="col-sm-9">
+											<la:errors property="boost" />
 											<la:text property="boost" styleClass="form-control" />
 										</div>
 									</div>

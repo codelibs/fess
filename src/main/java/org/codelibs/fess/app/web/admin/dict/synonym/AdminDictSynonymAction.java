@@ -343,10 +343,10 @@ public class AdminDictSynonymAction extends FessAdminAction {
     protected OptionalEntity<SynonymItem> createSynonymItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
             final String[] newInputs = splitLine(form.inputs);
-            validateSynonymString(newInputs, hook);
+            validateSynonymString(newInputs, "inputs", hook);
             entity.setNewInputs(newInputs);
             final String[] newOutputs = splitLine(form.outputs);
-            validateSynonymString(newOutputs, hook);
+            validateSynonymString(newOutputs, "outputs", hook);
             entity.setNewOutputs(newOutputs);
             return entity;
         });
@@ -363,19 +363,19 @@ public class AdminDictSynonymAction extends FessAdminAction {
         }
     }
 
-    private void validateSynonymString(final String[] values, final VaErrorHook hook) {
+    private void validateSynonymString(final String[] values, final String propertyName, final VaErrorHook hook) {
         if (values.length == 0) {
             return;
         }
         for (final String value : values) {
             if (value.indexOf(',') >= 0) {
                 throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(GLOBAL, value, ",");
+                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
                 }, hook);
             }
             if (value.indexOf("=>") >= 0) {
                 throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(GLOBAL, value, "=>");
+                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
                 }, hook);
             }
         }

@@ -26,16 +26,16 @@ public class FessMessages extends FessLabels {
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
 
-    /** The key of the message: &lt;ul&gt; */
+    /** The key of the message: &lt;label class="has-error"&gt; */
     public static final String ERRORS_HEADER = "{errors.header}";
 
-    /** The key of the message: &lt;/ul&gt; */
+    /** The key of the message: &lt;/label&gt; */
     public static final String ERRORS_FOOTER = "{errors.footer}";
 
-    /** The key of the message: &lt;li&gt; */
+    /** The key of the message: &lt;i class="fa fa-times-circle-o"&gt;&lt;/i&gt; */
     public static final String ERRORS_PREFIX = "{errors.prefix}";
 
-    /** The key of the message: &lt;/li&gt; */
+    /** The key of the message:  */
     public static final String ERRORS_SUFFIX = "{errors.suffix}";
 
     /** The key of the message: {item} must be false. */
@@ -344,7 +344,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.header' with parameters.
      * <pre>
-     * message: &lt;ul&gt;
+     * message: &lt;label class="has-error"&gt;
      * comment: ------------
      * </pre>
      * @param property The property name for the message. (NotNull)
@@ -359,7 +359,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.footer' with parameters.
      * <pre>
-     * message: &lt;/ul&gt;
+     * message: &lt;/label&gt;
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -373,7 +373,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.prefix' with parameters.
      * <pre>
-     * message: &lt;li&gt;
+     * message: &lt;i class="fa fa-times-circle-o"&gt;&lt;/i&gt;
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
@@ -387,7 +387,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.suffix' with parameters.
      * <pre>
-     * message: &lt;/li&gt;
+     * message: 
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)

@@ -34,24 +34,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="regularName" class="col-sm-3 control-label"><la:message
 												key="labels.regular_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="regularName" />
 											<la:text property="regularName" styleClass="form-control" />
 										</div>
 									</div>
@@ -59,6 +57,7 @@
 										<label for="duplicateHostName" class="col-sm-3 control-label"><la:message
 												key="labels.duplicate_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="duplicateHostName" />
 											<la:text property="duplicateHostName" styleClass="form-control" />
 										</div>
 									</div>

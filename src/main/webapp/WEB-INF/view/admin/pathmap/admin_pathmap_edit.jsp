@@ -14,7 +14,6 @@
 			<jsp:param name="menuType" value="pathMapping" />
 		</jsp:include>
 		<div class="content-wrapper">
-			<%-- Content Header --%>
 			<section class="content-header">
 				<h1>
 					<la:message key="labels.pathmap_title_details" />
@@ -34,24 +33,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="regex" class="col-sm-3 control-label"><la:message
 												key="labels.regex" /></label>
 										<div class="col-sm-9">
+											<la:errors property="regex" />
 											<la:text property="regex" styleClass="form-control" />
 										</div>
 									</div>
@@ -59,6 +56,7 @@
 										<label for="replacement" class="col-sm-3 control-label"><la:message
 												key="labels.replacement" /></label>
 										<div class="col-sm-9">
+											<la:errors property="replacement" />
 											<la:text property="replacement" styleClass="form-control" />
 										</div>
 									</div>
@@ -66,6 +64,7 @@
 										<label for="processType" class="col-sm-3 control-label"><la:message
 												key="labels.processType" /></label>
 										<div class="col-sm-9">
+											<la:errors property="processType" />
 											<la:select property="processType" styleClass="form-control">
 												<la:option value="C">
 													<la:message key="labels.pathmap_pt_crawling" />
@@ -83,6 +82,7 @@
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
 										<div class="col-sm-9">
+											<la:errors property="sortOrder" />
 											<la:text property="sortOrder" styleClass="form-control" />
 										</div>
 									</div>

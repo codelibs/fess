@@ -45,7 +45,6 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
@@ -84,18 +83,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="word" class="col-sm-3 control-label"><la:message
 												key="labels.suggest_bad_word_suggest_word" /></label>
 										<div class="col-sm-9">
+											<la:errors property="suggestWord" />
 											<la:text property="suggestWord" styleClass="form-control" />
 										</div>
 									</div>

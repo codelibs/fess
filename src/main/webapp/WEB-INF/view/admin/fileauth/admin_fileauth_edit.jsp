@@ -33,24 +33,22 @@
 						<div class="col-md-12">
 							<div
 								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
-								<%-- Box Header --%>
 								<div class="box-header with-border">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
 								</div>
-								<%-- Box Body --%>
+								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="hostname" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_hostname" /></label>
 										<div class="col-sm-9">
+											<la:errors property="hostname" />
 											<la:text property="hostname" styleClass="form-control" />
 										</div>
 									</div>
@@ -58,6 +56,7 @@
 										<label for="port" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_port" /></label>
 										<div class="col-sm-9">
+											<la:errors property="port" />
 											<la:text property="port" styleClass="form-control" />
 										</div>
 									</div>
@@ -65,6 +64,7 @@
 										<label for="protocolScheme" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_scheme" /></label>
 										<div class="col-sm-9">
+											<la:errors property="protocolScheme" />
 											<la:select property="protocolScheme"
 												styleClass="form-control">
 												<c:forEach var="item" items="${protocolSchemeItems}">
@@ -77,6 +77,7 @@
 										<label for="username" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_username" /></label>
 										<div class="col-sm-9">
+											<la:errors property="username" />
 											<la:text property="username" styleClass="form-control" />
 										</div>
 									</div>
@@ -84,6 +85,7 @@
 										<label for="password" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_password" /></label>
 										<div class="col-sm-9">
+											<la:errors property="password" />
 											<la:password property="password" styleClass="form-control" />
 										</div>
 									</div>
@@ -91,6 +93,7 @@
 										<label for="parameters" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_parameters" /></label>
 										<div class="col-sm-9">
+											<la:errors property="parameters" />
 											<la:textarea property="parameters" styleClass="form-control"
 												rows="5" />
 										</div>
@@ -99,6 +102,7 @@
 										<label for="fileConfigId" class="col-sm-3 control-label"><la:message
 												key="labels.file_auth_file_crawling_config" /></label>
 										<div class="col-sm-9">
+											<la:errors property="fileConfigId" />
 											<la:select property="fileConfigId" styleClass="form-control">
 												<c:forEach var="item" items="${fileConfigItems}">
 													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>

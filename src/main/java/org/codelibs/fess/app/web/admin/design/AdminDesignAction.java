@@ -114,6 +114,8 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     @Execute
     public HtmlResponse upload(final UploadForm form) {
+        validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         final String uploadedFileName = form.designFile.getFileName();
         String fileName = form.designFileName;
         if (StringUtil.isBlank(fileName)) {
@@ -128,11 +130,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
                     fileName = fileName.substring(pos + 1);
                 }
             } catch (final Exception e) {
-                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid(GLOBAL), () -> asListHtml());
+                throwValidationError(messages -> messages.addErrorsDesignFileNameIsInvalid("designFile"), () -> asListHtml());
             }
         }
         if (StringUtil.isBlank(fileName)) {
-            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), () -> asListHtml());
         }
 
         String baseDir = null;
@@ -147,7 +149,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
                 && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedJSExtentions())) {
             baseDir = "/js/";
         } else {
-            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType(GLOBAL), () -> asListHtml());
+            throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), () -> asListHtml());
         }
 
         final File uploadFile = new File(getServletContext().getRealPath(baseDir + fileName));
@@ -164,8 +166,6 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             logger.error("Failed to write an image file: {}", fileName, e);
             throwValidationError(messages -> messages.addErrorsFailedToWriteDesignImageFile(GLOBAL), () -> asListHtml());
         }
-        validate(form, messages -> {}, () -> asListHtml());
-        verifyToken(() -> asListHtml());
         return redirect(getClass());
     }
 

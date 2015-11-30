@@ -286,13 +286,13 @@ public class AdminUserAction extends FessAdminAction {
         if (form.crudMode == CrudMode.CREATE && StringUtil.isBlank(form.password)) {
             resetPassword(form);
             throwValidationError(messages -> {
-                messages.addErrorsBlankPassword(GLOBAL);
+                messages.addErrorsBlankPassword("password");
             }, validationErrorLambda);
         }
         if (form.password != null && !form.password.equals(form.confirmPassword)) {
             resetPassword(form);
             throwValidationError(messages -> {
-                messages.addErrorsInvalidConfirmPassword(GLOBAL);
+                messages.addErrorsInvalidConfirmPassword("confirmPassword");
             }, validationErrorLambda);
         }
     }

@@ -17,9 +17,12 @@ package org.codelibs.fess.app.web.admin.wizard;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
+import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class CrawlingConfigForm implements Serializable {
 
@@ -33,8 +36,14 @@ public class CrawlingConfigForm implements Serializable {
     @Size(max = 1000)
     public String crawlingConfigPath;
 
+    @Min(value = 0)
+    @Max(value = 2147483647)
+    @ValidateTypeFailure
     public Integer depth;
 
+    @Min(value = 0)
+    @Max(value = 9223372036854775807l)
+    @ValidateTypeFailure
     public Long maxAccessCount;
 
 }

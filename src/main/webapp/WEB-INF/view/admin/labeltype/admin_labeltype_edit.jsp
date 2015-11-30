@@ -38,18 +38,17 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Form Fields --%>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_name" /></label>
 										<div class="col-sm-9">
+											<la:errors property="name" />
 											<la:text property="name" styleClass="form-control" />
 										</div>
 									</div>
@@ -57,6 +56,7 @@
 										<label for="paths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_value" /></label>
 										<div class="col-sm-9">
+											<la:errors property="value" />
 											<la:text property="value" styleClass="form-control" />
 										</div>
 									</div>
@@ -64,6 +64,7 @@
 										<label for="includedPaths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_included_paths" /></label>
 										<div class="col-sm-9">
+											<la:errors property="includedPaths" />
 											<la:textarea property="includedPaths"
 												styleClass="form-control" rows="5" />
 										</div>
@@ -72,6 +73,7 @@
 										<label for="excludedPaths" class="col-sm-3 control-label"><la:message
 												key="labels.labeltype_excluded_paths" /></label>
 										<div class="col-sm-9">
+											<la:errors property="excludedPaths" />
 											<la:textarea property="excludedPaths"
 												styleClass="form-control" rows="5" />
 										</div>
@@ -80,6 +82,7 @@
 										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
 										<div class="col-sm-9">
+											<la:errors property="roleTypeIds" />
 											<la:select property="roleTypeIds" multiple="true"
 												styleClass="form-control">
 												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
@@ -92,6 +95,7 @@
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.sortOrder" /></label>
 										<div class="col-sm-9">
+											<la:errors property="sortOrder" />
 											<la:text property="sortOrder" styleClass="form-control" />
 										</div>
 									</div>

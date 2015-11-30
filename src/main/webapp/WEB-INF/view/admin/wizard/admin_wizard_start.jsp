@@ -39,14 +39,12 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<%-- Message: BEGIN --%>
 									<div>
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
-										<la:errors />
+										<la:errors property="_global" />
 									</div>
-									<%-- Message: END --%>
 									<p class="span8">
 										<la:message key="labels.wizard_start_crawling_desc" />
 									</p>
