@@ -1,5 +1,5 @@
 $(function() {
-	var $result = $('#result')
+	var $result = $('#result');
 	var $queryId = $('#queryId');
 	var $favorites = $('.favorite', $result);
 	var $screenshot = $('#screenshot', $result);
@@ -77,7 +77,7 @@ $(function() {
 
 			var content = '<a href="' + buf.join('')
 					+ '"><img src="screenshot?queryId=' + queryId + '&docId='
-					+ docId + '"></a>'
+					+ docId + '"></a>';
 			$screenshot.append(content);
 			$('img', $screenshot).error(function() {
 				$screenshot.children().remove();
@@ -118,7 +118,7 @@ $(function() {
 									$favorited);
 							$favoritedCount.css('display', 'none');
 							$favorite.fadeOut(1000, function() {
-								$favorited.fadeIn(1000)
+								$favorited.fadeIn(1000);
 							});
 						}
 					}).fail(function(data) {
@@ -164,7 +164,7 @@ $(function() {
 								var $favorited = $favorite
 										.siblings('.favorited');
 								$favorite.fadeOut(1000, function() {
-									$favorited.fadeIn(1000)
+									$favorited.fadeIn(1000);
 								});
 							}
 						});
