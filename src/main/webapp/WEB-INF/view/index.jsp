@@ -113,7 +113,7 @@
 										<label for="contentNum"><la:message
 												key="labels.index_num" /></label>
 										<la:select property="num" styleId="numSearchOption"
-											styleClass="form-control" style="display:block;">
+											styleClass="form-control">
 											<option value="">
 												<la:message key="labels.search_result_select_num" />
 											</option>
@@ -129,7 +129,7 @@
 										<label for="contentSort"><la:message
 												key="labels.index_sort" /></label>
 										<la:select property="sort" styleId="sortSearchOption"
-											styleClass="form-control" style="display:block;">
+											styleClass="form-control">
 											<option value="">
 												<la:message key="labels.search_result_select_sort" />
 											</option>

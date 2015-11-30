@@ -23,10 +23,12 @@ ${fe:facetForm()}${fe:geoForm()}
 				</li>
 			</c:if>
 		</ul>
-		<div class="search-box navbar-form col-lg-5 col-md-6 col-sm-6 col-xs-8 pull-right" role="search">
+		<div
+			class="search-box navbar-form col-lg-5 col-md-6 col-sm-6 col-xs-8 pull-right"
+			role="search">
 			<div class="input-group">
-				<la:text property="query" maxlength="1000" styleId="query" styleClass="form-control"
-					autocomplete="off" />
+				<la:text property="query" maxlength="1000" styleId="query"
+					styleClass="form-control" autocomplete="off" />
 				<div class="input-group-btn">
 					<button type="submit" name="search" id="searchButton"
 						class="btn btn-primary">
@@ -64,7 +66,7 @@ ${fe:facetForm()}${fe:geoForm()}
 					<fieldset class="form-group">
 						<label for="contentNum"><la:message key="labels.index_num" /></label>
 						<la:select property="num" styleId="numSearchOption"
-							styleClass="form-control" style="display:block;">
+							styleClass="form-control">
 							<option value="">
 								<la:message key="labels.search_result_select_num" />
 							</option>
@@ -80,7 +82,7 @@ ${fe:facetForm()}${fe:geoForm()}
 						<label for="contentSort"><la:message
 								key="labels.index_sort" /></label>
 						<la:select property="sort" styleId="sortSearchOption"
-							styleClass="form-control" style="display:block;">
+							styleClass="form-control">
 							<option value="">
 								<la:message key="labels.search_result_select_sort" />
 							</option>
