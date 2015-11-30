@@ -120,17 +120,18 @@ public class JobScheduler {
         jobDataMap.put(Constants.JOB_EXECUTOR_TYPE, scriptType);
         final JobDetail jobDetail = newJob(jobClass).withIdentity(jobId).usingJobData(jobDataMap).build();
 
-        final Trigger trigger =
-                newTrigger().withIdentity(triggerId).withSchedule(cronSchedule(scheduledJob.getCronExpression())).startNow().build();
+        if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
+            final Trigger trigger =
+                    newTrigger().withIdentity(triggerId).withSchedule(cronSchedule(scheduledJob.getCronExpression())).startNow().build();
 
-        try {
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (final SchedulerException e) {
-            throw new ScheduledJobException("Failed to add Job: " + scheduledJob, e);
+            try {
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (final SchedulerException e) {
+                throw new ScheduledJobException("Failed to add Job: " + scheduledJob, e);
+            }
+
+            logger.info("Starting Job " + scheduledJob.getId() + ":" + scheduledJob.getName());
         }
-
-        logger.info("Starting Job " + scheduledJob.getId() + ":" + scheduledJob.getName());
-
     }
 
     public void unregister(final ScheduledJob scheduledJob) {

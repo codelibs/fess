@@ -45,7 +45,6 @@ public class CreateForm implements Serializable {
     @Size(max = 100)
     public String target;
 
-    @Required
     @Size(max = 100)
     @CronExpression
     public String cronExpression;

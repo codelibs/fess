@@ -125,6 +125,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                         scheduledJobForm.jobLogging = Constants.ON;
                         scheduledJobForm.crawler = Constants.ON;
                         scheduledJobForm.available = Constants.ON;
+                        scheduledJobForm.cronExpression = null;
                         scheduledJobForm.name =
                                 ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
                                         "labels." + type + "_job_title", name);
