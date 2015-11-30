@@ -62,29 +62,28 @@ public class ResourceUtil {
 
         try {
             final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
-            final String webinfoPath = servletContext.getRealPath("/WEB-INF/" + base);
-            if (webinfoPath != null) {
-                final Path path = Paths.get(webinfoPath, names);
-                if (Files.exists(path)) {
-                    return path;
+            final String webinfPath = servletContext.getRealPath("/WEB-INF/" + base);
+            if (webinfPath != null) {
+                if (Files.exists(Paths.get(webinfPath))) {
+                    return Paths.get(webinfPath, names);
                 }
             }
         } catch (final Throwable e) { // NOSONAR
             // ignore
         }
-        final Path defaultPath = Paths.get("WEB-INF/" + base, names);
-        if (Files.exists(defaultPath)) {
-            return defaultPath;
+        final String webinfBase = "WEB-INF/" + base;
+        if (Files.exists(Paths.get(webinfBase))) {
+            return Paths.get(webinfBase, names);
         }
-        final Path srcBasePath = Paths.get("src/main/webapps/WEB-INF/" + base, names);
-        if (Files.exists(srcBasePath)) {
-            return srcBasePath;
+        final String srcWebInfBase = "src/main/webapps/WEB-INF/" + base;
+        if (Files.exists(Paths.get(srcWebInfBase))) {
+            return Paths.get(srcWebInfBase, names);
         }
-        final Path targetBasePath = Paths.get("target/fess/WEB-INF/" + base, names);
-        if (Files.exists(targetBasePath)) {
-            return targetBasePath;
+        final String targetWebInfBase = "target/fess/WEB-INF/" + base;
+        if (Files.exists(Paths.get(targetWebInfBase))) {
+            return Paths.get(targetWebInfBase, names);
         }
-        return defaultPath;
+        return Paths.get(webinfBase, names);
     }
 
     public static File[] getJarFiles(final String namePrefix) {
