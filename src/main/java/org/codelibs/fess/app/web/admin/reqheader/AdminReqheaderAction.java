@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.RequestHeaderPager;
+import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.app.service.RequestHeaderService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -55,7 +55,7 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Resource
     private RequestHeaderService requestHeaderService;
     @Resource
-    private RequestHeaderPager requestHeaderPager;
+    private ReqHeaderPager reqHeaderPager;
     @Resource
     protected WebConfigService webConfigService;
     @Resource
@@ -81,9 +81,9 @@ public class AdminReqheaderAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            requestHeaderPager.setCurrentPageNumber(pageNumber.get());
+            reqHeaderPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            requestHeaderPager.setCurrentPageNumber(0);
+            reqHeaderPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -92,7 +92,7 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, requestHeaderPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, reqHeaderPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -100,18 +100,18 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        requestHeaderPager.clear();
+        reqHeaderPager.clear();
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(requestHeaderPager)); // page navi
+        data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
         data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
 
         // restore from pager
-        copyBeanToBean(requestHeaderPager, form, op -> op.include("id"));
+        copyBeanToBean(reqHeaderPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -299,11 +299,11 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminReqheader_AdminReqheaderJsp).renderWith(data -> {
-            data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(requestHeaderPager)); // page navi
+            data.register("requestHeaderItems", requestHeaderService.getRequestHeaderList(reqHeaderPager)); // page navi
                 data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(requestHeaderPager, form, op -> op.include("id"));
+                copyBeanToBean(reqHeaderPager, form, op -> op.include("id"));
             });
         });
     }

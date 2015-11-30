@@ -15,11 +15,11 @@
  */
 package org.codelibs.fess.es.config.cbean.cq.bs;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.CrawlingSessionCQ;
+import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -33,10 +33,11 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 
+
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
+public abstract class BsCrawlingInfoCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -45,33 +46,34 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "crawling_session";
+        return "crawling_info";
     }
 
     @Override
     public String xgetAliasName() {
-        return "crawling_session";
+        return "crawling_info";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<CrawlingSessionCQ, CrawlingSessionCQ> filteredLambda) {
+    public void filtered(FilteredCall<CrawlingInfoCQ, CrawlingInfoCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<CrawlingSessionCQ, CrawlingSessionCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        bool((must, should, mustNot, filter) -> {
+    public void filtered(FilteredCall<CrawlingInfoCQ, CrawlingInfoCQ> filteredLambda,
+            ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter)->{
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<CrawlingSessionCQ> notLambda) {
+    public void not(OperatorCall<CrawlingInfoCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<CrawlingSessionCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        CrawlingSessionCQ notQuery = new CrawlingSessionCQ();
+    public void not(OperatorCall<CrawlingInfoCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        CrawlingInfoCQ notQuery = new CrawlingInfoCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
             if (notQuery.getQueryBuilderList().size() > 1) {
@@ -85,20 +87,18 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public void bool(BoolCall<CrawlingSessionCQ> boolLambda) {
+    public void bool(BoolCall<CrawlingInfoCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<CrawlingSessionCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        CrawlingSessionCQ mustQuery = new CrawlingSessionCQ();
-        CrawlingSessionCQ shouldQuery = new CrawlingSessionCQ();
-        CrawlingSessionCQ mustNotQuery = new CrawlingSessionCQ();
-        CrawlingSessionCQ filterQuery = new CrawlingSessionCQ();
+    public void bool(BoolCall<CrawlingInfoCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        CrawlingInfoCQ mustQuery = new CrawlingInfoCQ();
+        CrawlingInfoCQ shouldQuery = new CrawlingInfoCQ();
+        CrawlingInfoCQ mustNotQuery = new CrawlingInfoCQ();
+        CrawlingInfoCQ filterQuery = new CrawlingInfoCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
@@ -165,12 +165,12 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
-    public BsCrawlingSessionCQ addOrderBy_Id_Asc() {
+    public BsCrawlingInfoCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsCrawlingSessionCQ addOrderBy_Id_Desc() {
+    public BsCrawlingInfoCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
@@ -320,12 +320,12 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionCQ addOrderBy_CreatedTime_Asc() {
+    public BsCrawlingInfoCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
     }
 
-    public BsCrawlingSessionCQ addOrderBy_CreatedTime_Desc() {
+    public BsCrawlingInfoCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
     }
@@ -475,12 +475,12 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionCQ addOrderBy_ExpiredTime_Asc() {
+    public BsCrawlingInfoCQ addOrderBy_ExpiredTime_Asc() {
         regOBA("expiredTime");
         return this;
     }
 
-    public BsCrawlingSessionCQ addOrderBy_ExpiredTime_Desc() {
+    public BsCrawlingInfoCQ addOrderBy_ExpiredTime_Desc() {
         regOBD("expiredTime");
         return this;
     }
@@ -641,12 +641,12 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionCQ addOrderBy_Name_Asc() {
+    public BsCrawlingInfoCQ addOrderBy_Name_Asc() {
         regOBA("name");
         return this;
     }
 
-    public BsCrawlingSessionCQ addOrderBy_Name_Desc() {
+    public BsCrawlingInfoCQ addOrderBy_Name_Desc() {
         regOBD("name");
         return this;
     }
@@ -807,12 +807,12 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionCQ addOrderBy_SessionId_Asc() {
+    public BsCrawlingInfoCQ addOrderBy_SessionId_Asc() {
         regOBA("sessionId");
         return this;
     }
 
-    public BsCrawlingSessionCQ addOrderBy_SessionId_Desc() {
+    public BsCrawlingInfoCQ addOrderBy_SessionId_Desc() {
         regOBD("sessionId");
         return this;
     }

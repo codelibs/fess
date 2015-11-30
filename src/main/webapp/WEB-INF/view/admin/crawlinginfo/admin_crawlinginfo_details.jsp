@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.crawling_session_configuration" /></title>
+		key="labels.crawling_info_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -11,20 +11,20 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="log" />
-			<jsp:param name="menuType" value="crawlingSession" />
+			<jsp:param name="menuType" value="crawlingInfo" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.crawling_session_title_confirm" />
+					<la:message key="labels.crawling_info_title_confirm" />
 				</h1>
 				<ol class="breadcrumb">
 					<li><la:link href="/admin/crawlinginfo">
-							<la:message key="labels.crawling_session_link_top" />
+							<la:message key="labels.crawling_info_link_top" />
 						</la:link></li>
 					<c:if test="${crudMode == 4}">
 						<li class="active"><la:message
-								key="labels.crawling_session_link_details" /></li>
+								key="labels.crawling_info_link_details" /></li>
 					</c:if>
 				</ol>
 			</section>
@@ -41,22 +41,22 @@
 								<div class="box-header with-border">
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
-											<la:message key="labels.crawling_session_link_create" />
+											<la:message key="labels.crawling_info_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<la:message key="labels.crawling_session_link_update" />
+											<la:message key="labels.crawling_info_link_update" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
-											<la:message key="labels.crawling_session_link_delete" />
+											<la:message key="labels.crawling_info_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
-											<la:message key="labels.crawling_session_link_details" />
+											<la:message key="labels.crawling_info_link_details" />
 										</c:if>
 									</h3>
 									<div class="btn-group pull-right">
 										<la:link href="/admin/crawlinginfo"
 											styleClass="btn btn-primary btn-xs">
-											<la:message key="labels.crawling_session_link_top" />
+											<la:message key="labels.crawling_info_link_top" />
 										</la:link>
 									</div>
 								</div>
@@ -74,12 +74,12 @@
 										<tbody>
 											<tr>
 												<th><la:message
-														key="labels.crawling_session_session_id" /></th>
+														key="labels.crawling_info_session_id" /></th>
 												<td><a
 													href="${f:url('/admin/searchlist/search')}?query=segment:${f:u(sessionId)}">${f:h(sessionId)}</a>
 													<la:hidden property="sessionId" /></td>
 											</tr>
-											<c:forEach var="info" items="${crawlingSessionInfoItems}">
+											<c:forEach var="info" items="${crawlingInfoParamItems}">
 												<tr>
 													<th>${f:h(info.keyMsg)}</th>
 													<td>${f:h(info.value)}</td>
@@ -92,15 +92,15 @@
 								<div class="box-footer">
 									<c:if test="${crudMode == 4}">
 										<button type="submit" class="btn btn-default" name="back"
-											value="<la:message key="labels.crawling_session_button_back" />">
+											value="<la:message key="labels.crawling_info_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
-											<la:message key="labels.crawling_session_button_back" />
+											<la:message key="labels.crawling_info_button_back" />
 										</button>
 										<button type="button" class="btn btn-danger" name="delete"
 											data-toggle="modal" data-target="#confirmToDelete"
-											value="<la:message key="labels.crawling_session_button_delete" />">
+											value="<la:message key="labels.crawling_info_button_delete" />">
 											<i class="fa fa-trash"></i>
-											<la:message key="labels.crawling_session_button_delete" />
+											<la:message key="labels.crawling_info_button_delete" />
 										</button>
 										<div class="modal modal-danger fade" id="confirmToDelete"
 											tabindex="-1" role="dialog">

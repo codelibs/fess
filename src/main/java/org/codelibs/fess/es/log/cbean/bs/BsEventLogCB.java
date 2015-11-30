@@ -75,7 +75,7 @@ public class BsEventLogCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,19 +161,15 @@ public class BsEventLogCB extends EsAbstractConditionBean {
         public void columnCreatedAt() {
             doColumn("createdAt");
         }
-
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
-
         public void columnEventType() {
             doColumn("eventType");
         }
-
         public void columnMessage() {
             doColumn("message");
         }
-
         public void columnPath() {
             doColumn("path");
         }

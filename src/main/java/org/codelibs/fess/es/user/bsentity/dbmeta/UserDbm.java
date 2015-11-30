@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.user.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.user.exentity.User;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,10 +80,10 @@ public class UserDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((User) et).getGroups(), (et, vl) -> ((User) et).setGroups((String[]) vl), "groups");
-        setupEpg(_epgMap, et -> ((User) et).getName(), (et, vl) -> ((User) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((User) et).getPassword(), (et, vl) -> ((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
-        setupEpg(_epgMap, et -> ((User) et).getRoles(), (et, vl) -> ((User) et).setRoles((String[]) vl), "roles");
+        setupEpg(_epgMap, et-> ((User)et).getGroups(),(et,vl)->((User) et).setGroups((String[])vl), "groups");
+        setupEpg(_epgMap, et-> ((User)et).getName(),(et,vl)->((User) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et-> ((User)et).getPassword(),(et,vl)->((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et-> ((User)et).getRoles(),(et,vl)->((User) et).setRoles((String[])vl), "roles");
     }
 
     @Override
@@ -96,53 +97,26 @@ public class UserDbm extends AbstractDBMeta {
     protected final String _tableDbName = "user";
     protected final String _tableDispName = "user";
     protected final String _tablePropertyName = "User";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String[].class, "groups", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnGroups = cci("groups", "groups", null, null, String[].class, "groups", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnGroups() {
-        return _columnGroups;
-    }
-
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnPassword() {
-        return _columnPassword;
-    }
-
-    public ColumnInfo columnRoles() {
-        return _columnRoles;
-    }
+    public ColumnInfo columnGroups() { return _columnGroups; }
+    public ColumnInfo columnName() { return _columnName; }
+    public ColumnInfo columnPassword() { return _columnPassword; }
+    public ColumnInfo columnRoles() { return _columnRoles; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -226,3 +200,4 @@ public class UserDbm extends AbstractDBMeta {
         return null;
     }
 }
+

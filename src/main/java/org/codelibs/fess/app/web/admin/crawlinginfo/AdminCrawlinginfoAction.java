@@ -18,8 +18,8 @@ package org.codelibs.fess.app.web.admin.crawlinginfo;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.CrawlingSessionPager;
-import org.codelibs.fess.app.service.CrawlingSessionService;
+import org.codelibs.fess.app.pager.CrawlingInfoPager;
+import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.JobHelper;
@@ -39,9 +39,9 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private CrawlingSessionService crawlingSessionService;
+    private CrawlingInfoService crawlingInfoService;
     @Resource
-    private CrawlingSessionPager crawlingSessionPager;
+    private CrawlingInfoPager crawlingInfoPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -68,7 +68,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
         saveToken();
-        crawlingSessionPager.setCurrentPageNumber(pageNumber);
+        crawlingInfoPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -77,7 +77,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         saveToken();
-        copyBeanToBean(form, crawlingSessionPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, crawlingInfoPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -86,7 +86,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         saveToken();
-        crawlingSessionPager.clear();
+        crawlingInfoPager.clear();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -101,10 +101,10 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
+        data.register("crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(crawlingSessionPager, form, op -> op.include("sessionId"));
+        copyBeanToBean(crawlingInfoPager, form, op -> op.include("sessionId"));
     }
 
     // ===================================================================================
@@ -120,7 +120,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         saveToken();
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                crawlingSessionService.getCrawlingSession(id).ifPresent(entity -> {
+                crawlingInfoService.getCrawlingInfo(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -130,7 +130,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                 });
             });
         }).renderWith(data -> {
-            data.register("crawlingSessionInfoItems", crawlingSessionService.getCrawlingSessionInfoList(id));
+            data.register("crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
         });
     }
 
@@ -143,8 +143,8 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        crawlingSessionService.getCrawlingSession(id).alwaysPresent(entity -> {
-            crawlingSessionService.delete(entity);
+        crawlingInfoService.getCrawlingInfo(id).alwaysPresent(entity -> {
+            crawlingInfoService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         });
         return redirect(getClass());
@@ -153,9 +153,9 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
-        crawlingSessionService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
-        crawlingSessionPager.clear();
-        saveInfo(messages -> messages.addSuccessCrawlingSessionDeleteAll(GLOBAL));
+        crawlingInfoService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
+        crawlingInfoPager.clear();
+        saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 
@@ -180,10 +180,10 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
-            data.register("crawlingSessionItems", crawlingSessionService.getCrawlingSessionList(crawlingSessionPager)); // page navi
+            data.register("crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(crawlingSessionPager, form, op -> op.include("id"));
+                copyBeanToBean(crawlingInfoPager, form, op -> op.include("id"));
             });
         });
     }

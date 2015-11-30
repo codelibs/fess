@@ -172,7 +172,7 @@ public abstract class BsBoostDocumentRuleBhv extends EsAbstractBehavior<BoostDoc
     }
 
     public void selectBulk(CBCall<BoostDocumentRuleCB> cbLambda, EntityRowHandler<List<BoostDocumentRule>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -252,3 +252,4 @@ public abstract class BsBoostDocumentRuleBhv extends EsAbstractBehavior<BoostDoc
 
     // #pending create, modify, remove
 }
+

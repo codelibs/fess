@@ -26,7 +26,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -53,9 +53,9 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     public void store(final DataConfig config, final IndexUpdateCallback callback, final Map<String, String> initParamMap) {
         final Map<String, String> configParamMap = config.getHandlerParameterMap();
         final Map<String, String> configScriptMap = config.getHandlerScriptMap();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(config);
+        final Date documentExpires = crawlingInfoHelper.getDocumentExpires(config);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         initParamMap.putAll(configParamMap);

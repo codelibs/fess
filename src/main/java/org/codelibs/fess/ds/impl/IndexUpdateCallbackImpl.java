@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -68,8 +68,8 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        dataMap.put(fessConfig.getIndexFieldId(), crawlingSessionHelper.generateId(dataMap));
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
+        dataMap.put(fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
 
         final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
 

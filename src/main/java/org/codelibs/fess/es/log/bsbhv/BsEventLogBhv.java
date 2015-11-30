@@ -101,7 +101,8 @@ public abstract class BsEventLogBhv extends EsAbstractBehavior<EventLog, EventLo
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends EventLog> OptionalEntity<ENTITY> doSelectOptionalEntity(EventLogCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends EventLog> OptionalEntity<ENTITY> doSelectOptionalEntity(EventLogCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -169,7 +170,7 @@ public abstract class BsEventLogBhv extends EsAbstractBehavior<EventLog, EventLo
     }
 
     public void selectBulk(CBCall<EventLogCB> cbLambda, EntityRowHandler<List<EventLog>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -249,3 +250,4 @@ public abstract class BsEventLogBhv extends EsAbstractBehavior<EventLog, EventLo
 
     // #pending create, modify, remove
 }
+

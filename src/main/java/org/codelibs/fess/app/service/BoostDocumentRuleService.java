@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.BoostDocumentRulePager;
+import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.es.config.cbean.BoostDocumentRuleCB;
 import org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
@@ -41,7 +41,7 @@ public class BoostDocumentRuleService implements Serializable {
     @Resource
     protected FessConfig fessConfig;
 
-    public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocumentRulePager boostDocumentRulePager) {
+    public List<BoostDocumentRule> getBoostDocumentRuleList(final BoostDocPager boostDocumentRulePager) {
 
         final PagingResultBean<BoostDocumentRule> boostDocumentRuleList = boostDocumentRuleBhv.selectPage(cb -> {
             cb.paging(boostDocumentRulePager.getPageSize(), boostDocumentRulePager.getCurrentPageNumber());
@@ -79,7 +79,7 @@ public class BoostDocumentRuleService implements Serializable {
 
     }
 
-    protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocumentRulePager boostDocumentRulePager) {
+    protected void setupListCondition(final BoostDocumentRuleCB cb, final BoostDocPager boostDocumentRulePager) {
         if (boostDocumentRulePager.id != null) {
             cb.query().docMeta().setId_Equal(boostDocumentRulePager.id);
         }

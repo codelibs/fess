@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.FileAuthenticationPager;
+import org.codelibs.fess.app.pager.FileAuthPager;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -54,7 +54,7 @@ public class AdminFileauthAction extends FessAdminAction {
     @Resource
     private FileAuthenticationService fileAuthenticationService;
     @Resource
-    private FileAuthenticationPager fileAuthenticationPager;
+    private FileAuthPager fileAuthenticationPager;
     @Resource
     private SystemHelper systemHelper;
 

@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class CrawlingSessionPager implements Serializable {
+public class WebAuthPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,13 +44,17 @@ public class CrawlingSessionPager implements Serializable {
 
     public String id;
 
-    public String sessionId;
+    public String port;
+
+    public String username;
+
+    public String webConfigId;
+
+    public String createdBy;
 
     public String createdTime;
 
-    public CrawlingSessionPager() {
-        super();
-    }
+    public String versionNo;
 
     public void clear() {
         allRecordCount = 0;
@@ -61,8 +65,12 @@ public class CrawlingSessionPager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        sessionId = null;
+        port = null;
+        username = null;
+        webConfigId = null;
+        createdBy = null;
         createdTime = null;
+        versionNo = null;
 
     }
 
@@ -130,6 +138,10 @@ public class CrawlingSessionPager implements Serializable {
 
     public void setPageNumberList(final List<Integer> pageNumberList) {
         this.pageNumberList = pageNumberList;
+    }
+
+    public WebAuthPager() {
+        super();
     }
 
     protected int getDefaultPageSize() {

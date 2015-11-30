@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class FileAuthenticationPager implements Serializable {
+public class FileAuthPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -140,7 +140,7 @@ public class FileAuthenticationPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public FileAuthenticationPager() {
+    public FileAuthPager() {
         super();
     }
 

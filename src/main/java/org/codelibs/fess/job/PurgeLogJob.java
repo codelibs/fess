@@ -17,7 +17,7 @@ package org.codelibs.fess.job;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.CrawlingSessionService;
+import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.service.SearchLogService;
 import org.codelibs.fess.app.service.UserInfoService;
@@ -31,7 +31,7 @@ public class PurgeLogJob {
     private static final Logger logger = LoggerFactory.getLogger(PurgeLogJob.class);
 
     public String execute() {
-        final CrawlingSessionService crawlingSessionService = ComponentUtil.getComponent(CrawlingSessionService.class);
+        final CrawlingInfoService crawlingInfoService = ComponentUtil.getComponent(CrawlingInfoService.class);
         final SearchLogService searchLogService = ComponentUtil.getComponent(SearchLogService.class);
         final JobLogService jobLogService = ComponentUtil.getComponent(JobLogService.class);
         final UserInfoService userInfoService = ComponentUtil.getComponent(UserInfoService.class);
@@ -42,7 +42,7 @@ public class PurgeLogJob {
 
         // purge crawling sessions
         try {
-            crawlingSessionService.deleteBefore(systemHelper.getCurrentTimeAsLong());
+            crawlingInfoService.deleteBefore(systemHelper.getCurrentTimeAsLong());
         } catch (final Exception e) {
             logger.error("Failed to purge crawling sessions.", e);
             resultBuf.append(e.getMessage()).append("\n");

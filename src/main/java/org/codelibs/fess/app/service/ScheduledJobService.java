@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.ScheduledJobPager;
+import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.es.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
@@ -42,7 +42,7 @@ public class ScheduledJobService implements Serializable {
         super();
     }
 
-    public List<ScheduledJob> getScheduledJobList(final ScheduledJobPager scheduledJobPager) {
+    public List<ScheduledJob> getScheduledJobList(final SchedulerPager scheduledJobPager) {
 
         final PagingResultBean<ScheduledJob> scheduledJobList = scheduledJobBhv.selectPage(cb -> {
             cb.paging(scheduledJobPager.getPageSize(), scheduledJobPager.getCurrentPageNumber());
@@ -74,7 +74,7 @@ public class ScheduledJobService implements Serializable {
     @Resource
     protected JobScheduler jobScheduler;
 
-    protected void setupListCondition(final ScheduledJobCB cb, final ScheduledJobPager scheduledJobPager) {
+    protected void setupListCondition(final ScheduledJobCB cb, final SchedulerPager scheduledJobPager) {
         if (scheduledJobPager.id != null) {
             cb.query().docMeta().setId_Equal(scheduledJobPager.id);
         }

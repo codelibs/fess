@@ -50,7 +50,7 @@ import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
@@ -156,15 +156,15 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         resultData.setTransformerName(getName());
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
+        final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(crawlingConfig);
+        final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
@@ -299,13 +299,13 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         // TODO date
         // TODO lang
         // id
-        putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingSessionHelper.generateId(dataMap));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), parentUrl);
-            putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingSessionHelper.generateId(dataMap));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingInfoHelper.generateId(dataMap));
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
         }
 

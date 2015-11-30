@@ -40,7 +40,7 @@ import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.DataConfig;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -72,7 +72,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
     protected CrawlerClientFactory crawlerClientFactory;
 
-    protected CrawlingSessionHelper crawlingSessionHelper;
+    protected CrawlingInfoHelper crawlingInfoHelper;
 
     public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<>(1000));
 
@@ -236,7 +236,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             }
 
             synchronized (indexUpdateCallback) {
-                deleteIdList.add(crawlingSessionHelper.generateId(dataMap));
+                deleteIdList.add(crawlingInfoHelper.generateId(dataMap));
 
                 if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
                     final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();

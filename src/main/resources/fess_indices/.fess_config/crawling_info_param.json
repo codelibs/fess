@@ -1,5 +1,5 @@
 {
-  "crawling_session_info": {
+  "crawling_info_param": {
     "_source": {
       "enabled": true
     },
@@ -7,7 +7,7 @@
       "enabled": false
     },
     "properties": {
-      "crawlingSessionId": {
+      "crawlingInfoId": {
         "type": "string",
         "index": "not_analyzed"
       },

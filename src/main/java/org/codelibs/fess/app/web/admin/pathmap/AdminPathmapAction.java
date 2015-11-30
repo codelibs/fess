@@ -18,7 +18,7 @@ package org.codelibs.fess.app.web.admin.pathmap;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.PathMappingPager;
+import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
@@ -45,7 +45,7 @@ public class AdminPathmapAction extends FessAdminAction {
     @Resource
     private PathMappingService pathMappingService;
     @Resource
-    private PathMappingPager pathMappingPager;
+    private PathMapPager pathMapPager;
     @Resource
     private SystemHelper systemHelper;
 
@@ -69,9 +69,9 @@ public class AdminPathmapAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            pathMappingPager.setCurrentPageNumber(pageNumber.get());
+            pathMapPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            pathMappingPager.setCurrentPageNumber(0);
+            pathMapPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -80,7 +80,7 @@ public class AdminPathmapAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, pathMappingPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, pathMapPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -88,17 +88,17 @@ public class AdminPathmapAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        pathMappingPager.clear();
+        pathMapPager.clear();
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMappingPager)); // page navi
+        data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(pathMappingPager, form, op -> op.include("id"));
+        copyBeanToBean(pathMapPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -258,10 +258,10 @@ public class AdminPathmapAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
-            data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMappingPager)); // page navi
+            data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(pathMappingPager, form, op -> op.include("id"));
+                copyBeanToBean(pathMapPager, form, op -> op.include("id"));
             });
         });
     }

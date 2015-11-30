@@ -97,7 +97,8 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends Role> OptionalEntity<ENTITY> doSelectOptionalEntity(RoleCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends Role> OptionalEntity<ENTITY> doSelectOptionalEntity(RoleCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -165,7 +166,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     }
 
     public void selectBulk(CBCall<RoleCB> cbLambda, EntityRowHandler<List<Role>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -245,3 +246,4 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
 
     // #pending create, modify, remove
 }
+

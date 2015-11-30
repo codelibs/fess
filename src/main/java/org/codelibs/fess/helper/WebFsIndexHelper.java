@@ -451,10 +451,10 @@ public class WebFsIndexHelper implements Serializable {
         crawlerStatusList.clear();
 
         // put cralwing info
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
         final long execTime = System.currentTimeMillis() - startTime;
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME, Long.toString(execTime));
+        crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] crawling time: " + execTime + "ms");
         }
@@ -466,8 +466,8 @@ public class WebFsIndexHelper implements Serializable {
             logger.warn("Interrupted index update.", e);
         }
 
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME, Long.toString(indexUpdater.getExecuteTime()));
-        crawlingSessionHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE, Long.toString(indexUpdater.getDocumentSize()));
+        crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME, Long.toString(indexUpdater.getExecuteTime()));
+        crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE, Long.toString(indexUpdater.getDocumentSize()));
 
         for (final String sid : sessionIdList) {
             // remove config

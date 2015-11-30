@@ -26,11 +26,11 @@ import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.CrawlingSessionService;
+import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
-import org.codelibs.fess.es.config.exentity.CrawlingSession;
-import org.codelibs.fess.es.config.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.es.config.exentity.CrawlingInfo;
+import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -44,8 +44,8 @@ import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrawlingSessionHelper implements Serializable {
-    private static final Logger logger = LoggerFactory.getLogger(CrawlingSessionHelper.class);
+public class CrawlingInfoHelper implements Serializable {
+    private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
 
@@ -57,8 +57,8 @@ public class CrawlingSessionHelper implements Serializable {
 
     public int maxSessionIdsInList;
 
-    protected CrawlingSessionService getCrawlingSessionService() {
-        return SingletonLaContainer.getComponent(CrawlingSessionService.class);
+    protected CrawlingInfoService getCrawlingInfoService() {
+        return SingletonLaContainer.getComponent(CrawlingInfoService.class);
     }
 
     public String getCanonicalSessionId(final String sessionId) {
@@ -70,26 +70,26 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public synchronized void store(final String sessionId, final boolean create) {
-        CrawlingSession crawlingSession = create ? null : getCrawlingSessionService().getLast(sessionId);
-        if (crawlingSession == null) {
-            crawlingSession = new CrawlingSession(sessionId);
+        CrawlingInfo crawlingInfo = create ? null : getCrawlingInfoService().getLast(sessionId);
+        if (crawlingInfo == null) {
+            crawlingInfo = new CrawlingInfo(sessionId);
             try {
-                getCrawlingSessionService().store(crawlingSession);
+                getCrawlingInfoService().store(crawlingInfo);
             } catch (final Exception e) {
                 throw new FessSystemException("No crawling session.", e);
             }
         }
 
         if (infoMap != null) {
-            final List<CrawlingSessionInfo> crawlingSessionInfoList = new ArrayList<CrawlingSessionInfo>();
+            final List<CrawlingInfoParam> crawlingInfoParamList = new ArrayList<CrawlingInfoParam>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
-                final CrawlingSessionInfo crawlingSessionInfo = new CrawlingSessionInfo();
-                crawlingSessionInfo.setCrawlingSessionId(crawlingSession.getId());
-                crawlingSessionInfo.setKey(entry.getKey());
-                crawlingSessionInfo.setValue(entry.getValue());
-                crawlingSessionInfoList.add(crawlingSessionInfo);
+                final CrawlingInfoParam crawlingInfoParam = new CrawlingInfoParam();
+                crawlingInfoParam.setCrawlingInfoId(crawlingInfo.getId());
+                crawlingInfoParam.setKey(entry.getKey());
+                crawlingInfoParam.setValue(entry.getValue());
+                crawlingInfoParamList.add(crawlingInfoParam);
             }
-            getCrawlingSessionService().storeInfo(crawlingSessionInfoList);
+            getCrawlingInfoService().storeInfo(crawlingInfoParamList);
         }
 
         infoMap = null;
@@ -103,23 +103,23 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public void updateParams(final String sessionId, final String name, final int dayForCleanup) {
-        final CrawlingSession crawlingSession = getCrawlingSessionService().getLast(sessionId);
-        if (crawlingSession == null) {
+        final CrawlingInfo crawlingInfo = getCrawlingInfoService().getLast(sessionId);
+        if (crawlingInfo == null) {
             logger.warn("No crawling session: " + sessionId);
             return;
         }
         if (StringUtil.isNotBlank(name)) {
-            crawlingSession.setName(name);
+            crawlingInfo.setName(name);
         } else {
-            crawlingSession.setName(Constants.CRAWLING_SESSION_SYSTEM_NAME);
+            crawlingInfo.setName(Constants.CRAWLING_INFO_SYSTEM_NAME);
         }
         if (dayForCleanup >= 0) {
             final long expires = getExpiredTime(dayForCleanup);
-            crawlingSession.setExpiredTime(expires);
+            crawlingInfo.setExpiredTime(expires);
             documentExpires = expires;
         }
         try {
-            getCrawlingSessionService().store(crawlingSession);
+            getCrawlingInfoService().store(crawlingInfo);
         } catch (final Exception e) {
             throw new FessSystemException("No crawling session.", e);
         }
@@ -142,10 +142,10 @@ public class CrawlingSessionHelper implements Serializable {
     }
 
     public Map<String, String> getInfoMap(final String sessionId) {
-        final List<CrawlingSessionInfo> crawlingSessionInfoList = getCrawlingSessionService().getLastCrawlingSessionInfoList(sessionId);
+        final List<CrawlingInfoParam> crawlingInfoParamList = getCrawlingInfoService().getLastCrawlingInfoParamList(sessionId);
         final Map<String, String> map = new HashMap<String, String>();
-        for (final CrawlingSessionInfo crawlingSessionInfo : crawlingSessionInfoList) {
-            map.put(crawlingSessionInfo.getKey(), crawlingSessionInfo.getValue());
+        for (final CrawlingInfoParam crawlingInfoParam : crawlingInfoParamList) {
+            map.put(crawlingInfoParam.getKey(), crawlingInfoParam.getValue());
         }
         return map;
     }

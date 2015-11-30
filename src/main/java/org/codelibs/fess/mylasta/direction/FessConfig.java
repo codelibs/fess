@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import org.codelibs.fess.mylasta.direction.FessEnv;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**

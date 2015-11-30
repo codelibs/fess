@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.RequestHeader;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,19 +80,13 @@ public class RequestHeaderDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedBy(),
-                (et, vl) -> ((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getCreatedTime(),
-                (et, vl) -> ((RequestHeader) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getName(), (et, vl) -> ((RequestHeader) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedBy(),
-                (et, vl) -> ((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getUpdatedTime(),
-                (et, vl) -> ((RequestHeader) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getValue(), (et, vl) -> ((RequestHeader) et).setValue(DfTypeUtil.toString(vl)),
-                "value");
-        setupEpg(_epgMap, et -> ((RequestHeader) et).getWebConfigId(),
-                (et, vl) -> ((RequestHeader) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getCreatedBy(),(et,vl)->((RequestHeader) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getCreatedTime(),(et,vl)->((RequestHeader) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getName(),(et,vl)->((RequestHeader) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getUpdatedBy(),(et,vl)->((RequestHeader) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getUpdatedTime(),(et,vl)->((RequestHeader) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getValue(),(et,vl)->((RequestHeader) et).setValue(DfTypeUtil.toString(vl)), "value");
+        setupEpg(_epgMap, et-> ((RequestHeader)et).getWebConfigId(),(et,vl)->((RequestHeader) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
     }
 
     @Override
@@ -105,71 +100,32 @@ public class RequestHeaderDbm extends AbstractDBMeta {
     protected final String _tableDbName = "request_header";
     protected final String _tableDispName = "request_header";
     protected final String _tablePropertyName = "RequestHeader";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
-            0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedBy() {
-        return _columnCreatedBy;
-    }
-
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnUpdatedBy() {
-        return _columnUpdatedBy;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
-    }
-
-    public ColumnInfo columnValue() {
-        return _columnValue;
-    }
-
-    public ColumnInfo columnWebConfigId() {
-        return _columnWebConfigId;
-    }
+    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
+    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
+    public ColumnInfo columnName() { return _columnName; }
+    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
+    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
+    public ColumnInfo columnValue() { return _columnValue; }
+    public ColumnInfo columnWebConfigId() { return _columnWebConfigId; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -256,3 +212,4 @@ public class RequestHeaderDbm extends AbstractDBMeta {
         return null;
     }
 }
+

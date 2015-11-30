@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.crawling_session_configuration" /></title>
+		key="labels.crawling_info_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -11,16 +11,16 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="log" />
-			<jsp:param name="menuType" value="crawlingSession" />
+			<jsp:param name="menuType" value="crawlingInfo" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.crawling_session_configuration" />
+					<la:message key="labels.crawling_info_configuration" />
 				</h1>
 				<ol class="breadcrumb">
 					<li class="active"><la:link href="/admin/crawlinginfo">
-							<la:message key="labels.crawling_session_title" />
+							<la:message key="labels.crawling_info_title" />
 						</la:link></li>
 				</ol>
 			</section>
@@ -30,7 +30,7 @@
 						<div class="box box-primary">
 							<div class="box-header with-border">
 								<h3 class="box-title">
-									<la:message key="labels.crawling_session_title" />
+									<la:message key="labels.crawling_info_title" />
 								</h3>
 							</div>
 							<!-- /.box-header -->
@@ -48,7 +48,7 @@
 											action="/admin/crawlinginfo/">
 											<div class="form-group">
 												<c:set var="ph_session_id">
-													<la:message key="labels.crawling_session_session_id_search" />
+													<la:message key="labels.crawling_info_session_id_search" />
 												</c:set>
 												<la:text styleId="sessionIdSearchBtn" property="sessionId"
 													styleClass="form-control" placeholder="${ph_session_id}"></la:text>
@@ -56,20 +56,20 @@
 											<div class="form-group">
 												<button type="submit" class="btn btn-primary" id="submit"
 													name="search"
-													value="<la:message key="labels.crawling_session_search" />">
+													value="<la:message key="labels.crawling_info_search" />">
 													<i class="fa fa-search"></i>
-													<la:message key="labels.crawling_session_search" />
+													<la:message key="labels.crawling_info_search" />
 												</button>
 												<button type="submit" class="btn btn-secondary" name="reset"
-													value="<la:message key="labels.crawling_session_reset" />">
-													<la:message key="labels.crawling_session_reset" />
+													value="<la:message key="labels.crawling_info_reset" />">
+													<la:message key="labels.crawling_info_reset" />
 												</button>
 											</div>
 										</la:form>
 									</div>
 								</div>
 								<%-- List --%>
-								<c:if test="${crawlingSessionPager.allRecordCount == 0}">
+								<c:if test="${crawlingInfoPager.allRecordCount == 0}">
 									<div class="row top20">
 										<div class="col-sm-12">
 											<i class="fa fa-info-circle text-light-blue"></i>
@@ -77,21 +77,21 @@
 										</div>
 									</div>
 								</c:if>
-								<c:if test="${crawlingSessionPager.allRecordCount > 0}">
+								<c:if test="${crawlingInfoPager.allRecordCount > 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped dataTable">
 												<thead>
 													<tr>
 														<th><la:message
-																key="labels.crawling_session_session_id" /></th>
+																key="labels.crawling_info_session_id" /></th>
 														<th><la:message
-																key="labels.crawling_session_created_time" /></th>
+																key="labels.crawling_info_created_time" /></th>
 													</tr>
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s"
-														items="${crawlingSessionItems}">
+														items="${crawlingInfoItems}">
 														<tr
 															data-href="${contextPath}/admin/crawlinginfo/details/4/${f:u(data.id)}">
 															<td>${f:h(data.sessionId)}</td>
@@ -104,7 +104,7 @@
 											</table>
 										</div>
 									</div>
-									<c:set var="pager" value="${crawlingSessionPager}"
+									<c:set var="pager" value="${crawlingInfoPager}"
 										scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 									<div class="row">
@@ -113,7 +113,7 @@
 												<button type="button" class="btn btn-danger"
 													data-toggle="modal" data-target="#confirmToDeleteAll">
 													<i class="fa fa-trash"></i>
-													<la:message key="labels.crawling_session_delete_all_link" />
+													<la:message key="labels.crawling_info_delete_all_link" />
 												</button>
 											</div>
 											<div class="modal modal-danger fade" id="confirmToDeleteAll"
@@ -127,27 +127,27 @@
 															</button>
 															<h4 class="modal-title">
 																<la:message
-																	key="labels.crawling_session_delete_all_link" />
+																	key="labels.crawling_info_delete_all_link" />
 															</h4>
 														</div>
 														<div class="modal-body">
 															<p>
 																<la:message
-																	key="labels.crawling_session_delete_all_confirmation" />
+																	key="labels.crawling_info_delete_all_confirmation" />
 															</p>
 														</div>
 														<div class="modal-footer">
 															<button type="button" class="btn btn-outline pull-left"
 																data-dismiss="modal">
 																<la:message
-																	key="labels.crawling_session_delete_all_cancel" />
+																	key="labels.crawling_info_delete_all_cancel" />
 															</button>
 															<button type="submit" class="btn btn-outline btn-danger"
 																name="deleteall"
-																value="<la:message key="labels.crawling_session_delete_all_link" />">
+																value="<la:message key="labels.crawling_info_delete_all_link" />">
 																<i class="fa fa-trash"></i>
 																<la:message
-																	key="labels.crawling_session_delete_all_link" />
+																	key="labels.crawling_info_delete_all_link" />
 															</button>
 														</div>
 													</div>

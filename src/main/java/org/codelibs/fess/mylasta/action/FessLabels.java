@@ -1092,91 +1092,91 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_purge_suggest_search_log_day = "{labels.purge_suggest_search_log_day}";
 
     /** The key of the message: Crawling Information */
-    public static final String LABELS_crawling_session_title = "{labels.crawling_session_title}";
+    public static final String LABELS_crawling_info_title = "{labels.crawling_info_title}";
 
     /** The key of the message: Crawling Information */
-    public static final String LABELS_crawling_session_title_confirm = "{labels.crawling_session_title_confirm}";
+    public static final String LABELS_crawling_info_title_confirm = "{labels.crawling_info_title_confirm}";
 
     /** The key of the message: Back */
-    public static final String LABELS_crawling_session_button_back = "{labels.crawling_session_button_back}";
+    public static final String LABELS_crawling_info_button_back = "{labels.crawling_info_button_back}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_crawling_session_button_delete = "{labels.crawling_session_button_delete}";
+    public static final String LABELS_crawling_info_button_delete = "{labels.crawling_info_button_delete}";
 
     /** The key of the message: Crawling Info */
-    public static final String LABELS_crawling_session_configuration = "{labels.crawling_session_configuration}";
+    public static final String LABELS_crawling_info_configuration = "{labels.crawling_info_configuration}";
 
     /** The key of the message: Search */
-    public static final String LABELS_crawling_session_search = "{labels.crawling_session_search}";
+    public static final String LABELS_crawling_info_search = "{labels.crawling_info_search}";
 
     /** The key of the message: Reset */
-    public static final String LABELS_crawling_session_reset = "{labels.crawling_session_reset}";
+    public static final String LABELS_crawling_info_reset = "{labels.crawling_info_reset}";
 
     /** The key of the message: Crawling Information */
-    public static final String LABELS_crawling_session_link_top = "{labels.crawling_session_link_top}";
+    public static final String LABELS_crawling_info_link_top = "{labels.crawling_info_link_top}";
 
     /** The key of the message: Details */
-    public static final String LABELS_crawling_session_link_details = "{labels.crawling_session_link_details}";
+    public static final String LABELS_crawling_info_link_details = "{labels.crawling_info_link_details}";
 
     /** The key of the message: Session ID */
-    public static final String LABELS_crawling_session_session_id_search = "{labels.crawling_session_session_id_search}";
+    public static final String LABELS_crawling_info_session_id_search = "{labels.crawling_info_session_id_search}";
 
     /** The key of the message: Session ID */
-    public static final String LABELS_crawling_session_session_id = "{labels.crawling_session_session_id}";
+    public static final String LABELS_crawling_info_session_id = "{labels.crawling_info_session_id}";
 
     /** The key of the message: Created */
-    public static final String LABELS_crawling_session_created_time = "{labels.crawling_session_created_time}";
+    public static final String LABELS_crawling_info_created_time = "{labels.crawling_info_created_time}";
 
     /** The key of the message: Delete All */
-    public static final String LABELS_crawling_session_delete_all_link = "{labels.crawling_session_delete_all_link}";
+    public static final String LABELS_crawling_info_delete_all_link = "{labels.crawling_info_delete_all_link}";
 
     /** The key of the message: Do you really want to delete all? */
-    public static final String LABELS_crawling_session_delete_all_confirmation = "{labels.crawling_session_delete_all_confirmation}";
+    public static final String LABELS_crawling_info_delete_all_confirmation = "{labels.crawling_info_delete_all_confirmation}";
 
     /** The key of the message: Cancel */
-    public static final String LABELS_crawling_session_delete_all_cancel = "{labels.crawling_session_delete_all_cancel}";
+    public static final String LABELS_crawling_info_delete_all_cancel = "{labels.crawling_info_delete_all_cancel}";
 
     /** The key of the message: Crawler start time */
-    public static final String LABELS_crawling_session_CrawlerStartTime = "{labels.crawling_session_CrawlerStartTime}";
+    public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
 
     /** The key of the message: Crawler end time */
-    public static final String LABELS_crawling_session_CrawlerEndTime = "{labels.crawling_session_CrawlerEndTime}";
+    public static final String LABELS_crawling_info_CrawlerEndTime = "{labels.crawling_info_CrawlerEndTime}";
 
     /** The key of the message: Crawler exec time */
-    public static final String LABELS_crawling_session_CrawlerExecTime = "{labels.crawling_session_CrawlerExecTime}";
+    public static final String LABELS_crawling_info_CrawlerExecTime = "{labels.crawling_info_CrawlerExecTime}";
 
     /** The key of the message: Crawler status */
-    public static final String LABELS_crawling_session_CrawlerStatus = "{labels.crawling_session_CrawlerStatus}";
+    public static final String LABELS_crawling_info_CrawlerStatus = "{labels.crawling_info_CrawlerStatus}";
 
     /** The key of the message: Crawl exec time (Web/File system) */
-    public static final String LABELS_crawling_session_WebFsCrawlExecTime = "{labels.crawling_session_WebFsCrawlExecTime}";
+    public static final String LABELS_crawling_info_WebFsCrawlExecTime = "{labels.crawling_info_WebFsCrawlExecTime}";
 
     /** The key of the message: Crawl start time (Web/File system) */
-    public static final String LABELS_crawling_session_WebFsCrawlStartTime = "{labels.crawling_session_WebFsCrawlStartTime}";
+    public static final String LABELS_crawling_info_WebFsCrawlStartTime = "{labels.crawling_info_WebFsCrawlStartTime}";
 
     /** The key of the message: Crawl end time (Web/File system) */
-    public static final String LABELS_crawling_session_WebFsCrawlEndTime = "{labels.crawling_session_WebFsCrawlEndTime}";
+    public static final String LABELS_crawling_info_WebFsCrawlEndTime = "{labels.crawling_info_WebFsCrawlEndTime}";
 
     /** The key of the message: Index exec time (Web/File system) */
-    public static final String LABELS_crawling_session_WebFsIndexExecTime = "{labels.crawling_session_WebFsIndexExecTime}";
+    public static final String LABELS_crawling_info_WebFsIndexExecTime = "{labels.crawling_info_WebFsIndexExecTime}";
 
     /** The key of the message: Index size (Web/File system) */
-    public static final String LABELS_crawling_session_WebFsIndexSize = "{labels.crawling_session_WebFsIndexSize}";
+    public static final String LABELS_crawling_info_WebFsIndexSize = "{labels.crawling_info_WebFsIndexSize}";
 
     /** The key of the message: Crawl exec time (Data store) */
-    public static final String LABELS_crawling_session_DataCrawlExecTime = "{labels.crawling_session_DataCrawlExecTime}";
+    public static final String LABELS_crawling_info_DataCrawlExecTime = "{labels.crawling_info_DataCrawlExecTime}";
 
     /** The key of the message: Crawl start time (Data store) */
-    public static final String LABELS_crawling_session_DataCrawlStartTime = "{labels.crawling_session_DataCrawlStartTime}";
+    public static final String LABELS_crawling_info_DataCrawlStartTime = "{labels.crawling_info_DataCrawlStartTime}";
 
     /** The key of the message: Crawl end time (Data store) */
-    public static final String LABELS_crawling_session_DataCrawlEndTime = "{labels.crawling_session_DataCrawlEndTime}";
+    public static final String LABELS_crawling_info_DataCrawlEndTime = "{labels.crawling_info_DataCrawlEndTime}";
 
     /** The key of the message: Index exec time (Data store) */
-    public static final String LABELS_crawling_session_DataIndexExecTime = "{labels.crawling_session_DataIndexExecTime}";
+    public static final String LABELS_crawling_info_DataIndexExecTime = "{labels.crawling_info_DataIndexExecTime}";
 
     /** The key of the message: Index size (Data store) */
-    public static final String LABELS_crawling_session_DataIndexSize = "{labels.crawling_session_DataIndexSize}";
+    public static final String LABELS_crawling_info_DataIndexSize = "{labels.crawling_info_DataIndexSize}";
 
     /** The key of the message: Web Authentication */
     public static final String LABELS_webauth_configuration = "{labels.webauth_configuration}";
@@ -1578,8 +1578,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: crawler.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_crawler_properties_does_not_exist =
-            "{labels.system_info_crawler_properties_does_not_exist}";
+    public static final String LABELS_system_info_crawler_properties_does_not_exist = "{labels.system_info_crawler_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";

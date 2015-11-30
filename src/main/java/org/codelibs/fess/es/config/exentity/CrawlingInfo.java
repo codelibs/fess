@@ -17,21 +17,21 @@ package org.codelibs.fess.es.config.exentity;
 
 import java.util.List;
 
-import org.codelibs.fess.es.config.bsentity.BsCrawlingSession;
+import org.codelibs.fess.es.config.bsentity.BsCrawlingInfo;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class CrawlingSession extends BsCrawlingSession {
+public class CrawlingInfo extends BsCrawlingInfo {
 
     private static final long serialVersionUID = 1L;
 
-    private List<CrawlingSessionInfo> crawlingSessionInfoList;
+    private List<CrawlingInfoParam> crawlingInfoParamList;
 
-    public CrawlingSession() {
+    public CrawlingInfo() {
     }
 
-    public CrawlingSession(final String sessionId) {
+    public CrawlingInfo(final String sessionId) {
         setSessionId(sessionId);
     }
 
@@ -51,11 +51,11 @@ public class CrawlingSession extends BsCrawlingSession {
         asDocMeta().version(version);
     }
 
-    public void setCrawlingSessionInfoList(final List<CrawlingSessionInfo> crawlingSessionInfoList) {
-        this.crawlingSessionInfoList = crawlingSessionInfoList;
+    public void setCrawlingInfoInfoList(final List<CrawlingInfoParam> crawlingInfoParamList) {
+        this.crawlingInfoParamList = crawlingInfoParamList;
     }
 
-    public List<CrawlingSessionInfo> getCrawlingSessionInfoList() {
-        return crawlingSessionInfoList;
+    public List<CrawlingInfoParam> getCrawlingInfoParamList() {
+        return crawlingInfoParamList;
     }
 }

@@ -471,12 +471,12 @@
           }
         }
       },
-      "crawling_session_info" : {
+      "crawling_info_param" : {
         "_all" : {
           "enabled" : false
         },
         "properties" : {
-          "crawlingSessionId" : {
+          "crawlingInfoId" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -556,7 +556,7 @@
           }
         }
       },
-      "crawling_session" : {
+      "crawling_info" : {
         "_all" : {
           "enabled" : false
         },
