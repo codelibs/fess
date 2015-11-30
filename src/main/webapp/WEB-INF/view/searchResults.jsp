@@ -40,7 +40,7 @@
 										key="labels.search_result_cache" /></la:link>
 							</c:if>
 						</div>
-						<div class="more visible-phone">
+						<div class="more hidden-md-up">
 							<a href="#result${s.index}"><la:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
@@ -79,7 +79,7 @@
 			</c:forEach>
 		</ol>
 	</div>
-	<div class="col-md-4 visible-desktop visible-tablet">
+	<aside class="col-md-4 hidden-sm-down">
 		<%-- Side Content --%>
 		<c:if test="${screenShotSupport}">
 			<div id="screenshot"></div>
@@ -125,7 +125,7 @@
 				</div>
 			</c:if>
 		</c:if>
-	</div>
+	</aside>
 </div>
 <div class="row center">
 	<nav id="subfooter">

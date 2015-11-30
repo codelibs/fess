@@ -18,7 +18,7 @@
 <link href="${f:url('/css/admin/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
-<body>
+<body class="search">
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">
@@ -26,7 +26,7 @@
 				<ul class="searchOptionLabels">
 					<li><la:message key="labels.searchoptions_menu_sort" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <c:if test="${empty sort}">
+						data-toggle="control-options"> <c:if test="${empty sort}">
 								<la:message key="labels.searchoptions_score" />
 							</c:if> <c:if test="${sort=='created.asc'}">
 								<la:message key="labels.search_result_sort_created_asc" />
@@ -52,12 +52,12 @@
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_num" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <la:message
+						data-toggle="control-options"> <la:message
 								key="labels.searchoptions_num" arg0="${f:h(num)}" />
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_lang" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <c:if test="${empty lang}">
+						data-toggle="control-options"> <c:if test="${empty lang}">
 								<la:message key="labels.searchoptions_all" />
 							</c:if> <c:if test="${!empty lang}">
 								<c:forEach var="sLang" items="${lang}">
@@ -70,7 +70,8 @@
 					<c:if test="${displayLabelTypeItems}">
 						<li><la:message key="labels.searchoptions_menu_labels" /> <a
 							href="#searchOptions" class="label label-primary"
-							data-toggle="modal"> <c:if test="${empty fields.label}">
+							data-toggle="control-options"> <c:if
+									test="${empty fields.label}">
 									<la:message key="labels.searchoptions_all" />
 								</c:if> <c:if test="${!empty fields.label}">
 									<c:forEach var="sLabel" items="${fields.label}">

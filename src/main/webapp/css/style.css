@@ -140,7 +140,8 @@ nav.navbar .form-inline {
 }
 
 #searchOptionsButton {
-	border-left:1px solid #2e6da4;
+	padding-left: 1.0rem;
+	padding-right: 0.8rem;
 }
 
 ul.searchOptionLabels {
@@ -154,6 +155,20 @@ ul.searchOptionLabels li {
 	vertical-align: middle;
 }
 
+body.search #searchOptions {
+	position: fixed;
+	top: 0;
+	padding-top: 72px;
+	padding-bottom: 20px;
+	z-index: 1000;
+	right: -500px;
+	background: #eceeef;
+	width: 500px;
+	transition: all .4s ease 0s;
+}
+body.search #searchOptions.active {
+	right: 0;
+}
 
 /* Large desktop */
 @media ( min-width : 74.9em) {
@@ -208,6 +223,12 @@ ul.searchOptionLabels li {
 	#result .info {
 		display: none;
 	}
+	body.search #searchOptions {
+		width: 100%;
+	}
+	body.search #searchOptions active {
+		left: 0;
+	}
 }
 
 /* Extra small devices (portrait phones, less than 34em) */
@@ -241,7 +262,7 @@ ul.searchOptionLabels li {
 		padding-right: 0.8rem;
 	}
 	#searchOptionsButton {
-		padding-left: 0.6rem;
+		padding-left: 0.7rem;
 		padding-right: 0.6rem;
 	}
 	#footer {
