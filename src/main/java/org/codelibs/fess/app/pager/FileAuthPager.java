@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class RequestHeaderPager implements Serializable {
+public class FileAuthPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,11 +44,11 @@ public class RequestHeaderPager implements Serializable {
 
     public String id;
 
-    public String name;
+    public String port;
 
-    public String value;
+    public String username;
 
-    public String webConfigId;
+    public String fileConfigId;
 
     public String createdBy;
 
@@ -65,9 +65,9 @@ public class RequestHeaderPager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        name = null;
-        value = null;
-        webConfigId = null;
+        port = null;
+        username = null;
+        fileConfigId = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
@@ -140,7 +140,7 @@ public class RequestHeaderPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public RequestHeaderPager() {
+    public FileAuthPager() {
         super();
     }
 

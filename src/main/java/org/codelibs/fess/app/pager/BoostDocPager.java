@@ -20,11 +20,8 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class PathMappingPager implements Serializable {
-
+public class BoostDocPager implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    public static final int DEFAULT_PAGE_SIZE = 20;
 
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
@@ -44,11 +41,9 @@ public class PathMappingPager implements Serializable {
 
     public String id;
 
-    public String regex;
+    public String urlExpr;
 
-    public String replacement;
-
-    public String processType;
+    public String boostExpr;
 
     public String sortOrder;
 
@@ -67,18 +62,13 @@ public class PathMappingPager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        regex = null;
-        replacement = null;
-        processType = null;
+        urlExpr = null;
+        boostExpr = null;
         sortOrder = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
 
-    }
-
-    protected int getDefaultCurrentPageNumber() {
-        return DEFAULT_CURRENT_PAGE_NUMBER;
     }
 
     public int getAllRecordCount() {
@@ -143,8 +133,8 @@ public class PathMappingPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public PathMappingPager() {
-        super();
+    protected int getDefaultCurrentPageNumber() {
+        return Constants.DEFAULT_ADMIN_PAGE_NUMBER;
     }
 
     protected int getDefaultPageSize() {

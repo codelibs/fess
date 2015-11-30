@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.PathMappingPager;
+import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.es.config.cbean.PathMappingCB;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
@@ -38,7 +38,7 @@ public class PathMappingService implements Serializable {
     @Resource
     protected PathMappingBhv pathMappingBhv;
 
-    public List<PathMapping> getPathMappingList(final PathMappingPager pathMappingPager) {
+    public List<PathMapping> getPathMappingList(final PathMapPager pathMappingPager) {
 
         final PagingResultBean<PathMapping> pathMappingList = pathMappingBhv.selectPage(cb -> {
             cb.paging(pathMappingPager.getPageSize(), pathMappingPager.getCurrentPageNumber());
@@ -84,7 +84,7 @@ public class PathMappingService implements Serializable {
         });
     }
 
-    protected void setupListCondition(final PathMappingCB cb, final PathMappingPager pathMappingPager) {
+    protected void setupListCondition(final PathMappingCB cb, final PathMapPager pathMappingPager) {
         if (pathMappingPager.id != null) {
             cb.query().docMeta().setId_Equal(pathMappingPager.id);
         }

@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.WebAuthenticationPager;
+import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.es.config.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
@@ -41,7 +41,7 @@ public class WebAuthenticationService implements Serializable {
         super();
     }
 
-    public List<WebAuthentication> getWebAuthenticationList(final WebAuthenticationPager webAuthenticationPager) {
+    public List<WebAuthentication> getWebAuthenticationList(final WebAuthPager webAuthenticationPager) {
 
         final PagingResultBean<WebAuthentication> webAuthenticationList = webAuthenticationBhv.selectPage(cb -> {
             cb.paging(webAuthenticationPager.getPageSize(), webAuthenticationPager.getCurrentPageNumber());
@@ -79,7 +79,7 @@ public class WebAuthenticationService implements Serializable {
 
     }
 
-    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthenticationPager webAuthenticationPager) {
+    protected void setupListCondition(final WebAuthenticationCB cb, final WebAuthPager webAuthenticationPager) {
         if (webAuthenticationPager.id != null) {
             cb.query().docMeta().setId_Equal(webAuthenticationPager.id);
         }

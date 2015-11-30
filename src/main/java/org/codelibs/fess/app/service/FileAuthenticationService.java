@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.FileAuthenticationPager;
+import org.codelibs.fess.app.pager.FileAuthPager;
 import org.codelibs.fess.es.config.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
@@ -41,7 +41,7 @@ public class FileAuthenticationService implements Serializable {
         super();
     }
 
-    public List<FileAuthentication> getFileAuthenticationList(final FileAuthenticationPager fileAuthenticationPager) {
+    public List<FileAuthentication> getFileAuthenticationList(final FileAuthPager fileAuthenticationPager) {
 
         final PagingResultBean<FileAuthentication> fileAuthenticationList = fileAuthenticationBhv.selectPage(cb -> {
             cb.paging(fileAuthenticationPager.getPageSize(), fileAuthenticationPager.getCurrentPageNumber());
@@ -79,7 +79,7 @@ public class FileAuthenticationService implements Serializable {
 
     }
 
-    protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthenticationPager fileAuthenticationPager) {
+    protected void setupListCondition(final FileAuthenticationCB cb, final FileAuthPager fileAuthenticationPager) {
         if (fileAuthenticationPager.id != null) {
             cb.query().docMeta().setId_Equal(fileAuthenticationPager.id);
         }

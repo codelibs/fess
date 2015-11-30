@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.RequestHeaderPager;
+import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.es.config.cbean.RequestHeaderCB;
 import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
@@ -41,7 +41,7 @@ public class RequestHeaderService implements Serializable {
         super();
     }
 
-    public List<RequestHeader> getRequestHeaderList(final RequestHeaderPager requestHeaderPager) {
+    public List<RequestHeader> getRequestHeaderList(final ReqHeaderPager requestHeaderPager) {
 
         final PagingResultBean<RequestHeader> requestHeaderList = requestHeaderBhv.selectPage(cb -> {
             cb.paging(requestHeaderPager.getPageSize(), requestHeaderPager.getCurrentPageNumber());
@@ -79,7 +79,7 @@ public class RequestHeaderService implements Serializable {
 
     }
 
-    protected void setupListCondition(final RequestHeaderCB cb, final RequestHeaderPager requestHeaderPager) {
+    protected void setupListCondition(final RequestHeaderCB cb, final ReqHeaderPager requestHeaderPager) {
         if (requestHeaderPager.id != null) {
             cb.query().docMeta().setId_Equal(requestHeaderPager.id);
         }

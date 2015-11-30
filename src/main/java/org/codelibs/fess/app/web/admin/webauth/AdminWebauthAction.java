@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.WebAuthenticationPager;
+import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.app.service.WebAuthenticationService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -54,7 +54,7 @@ public class AdminWebauthAction extends FessAdminAction {
     @Resource
     private WebAuthenticationService webAuthenticationService;
     @Resource
-    private WebAuthenticationPager webAuthenticationPager;
+    private WebAuthPager webAuthPager;
     @Resource
     private SystemHelper systemHelper;
 
@@ -81,9 +81,9 @@ public class AdminWebauthAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            webAuthenticationPager.setCurrentPageNumber(pageNumber.get());
+            webAuthPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            webAuthenticationPager.setCurrentPageNumber(0);
+            webAuthPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -92,7 +92,7 @@ public class AdminWebauthAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, webAuthenticationPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, webAuthPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -100,17 +100,17 @@ public class AdminWebauthAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        webAuthenticationPager.clear();
+        webAuthPager.clear();
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthenticationPager)); // page navi
+        data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
         data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
         // restore from pager
-        copyBeanToBean(webAuthenticationPager, form, op -> op.include("id"));
+        copyBeanToBean(webAuthPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -298,11 +298,11 @@ public class AdminWebauthAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
-            data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthenticationPager)); // page navi
+            data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
                 data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(webAuthenticationPager, form, op -> op.include("id"));
+                copyBeanToBean(webAuthPager, form, op -> op.include("id"));
             });
         });
     }

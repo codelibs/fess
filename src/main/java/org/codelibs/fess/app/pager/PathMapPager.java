@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class FileAuthenticationPager implements Serializable {
+public class PathMapPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,11 +44,13 @@ public class FileAuthenticationPager implements Serializable {
 
     public String id;
 
-    public String port;
+    public String regex;
 
-    public String username;
+    public String replacement;
 
-    public String fileConfigId;
+    public String processType;
+
+    public String sortOrder;
 
     public String createdBy;
 
@@ -65,9 +67,10 @@ public class FileAuthenticationPager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        port = null;
-        username = null;
-        fileConfigId = null;
+        regex = null;
+        replacement = null;
+        processType = null;
+        sortOrder = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
@@ -140,7 +143,7 @@ public class FileAuthenticationPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public FileAuthenticationPager() {
+    public PathMapPager() {
         super();
     }
 

@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class ScheduledJobPager implements Serializable {
+public class ReqHeaderPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,19 +46,9 @@ public class ScheduledJobPager implements Serializable {
 
     public String name;
 
-    public String target;
+    public String value;
 
-    public String cronExpression;
-
-    public String scriptType;
-
-    public String crawler;
-
-    public String jobLogging;
-
-    public String available;
-
-    public String sortOrder;
+    public String webConfigId;
 
     public String createdBy;
 
@@ -76,13 +66,8 @@ public class ScheduledJobPager implements Serializable {
 
         id = null;
         name = null;
-        target = null;
-        cronExpression = null;
-        scriptType = null;
-        crawler = null;
-        jobLogging = null;
-        available = null;
-        sortOrder = null;
+        value = null;
+        webConfigId = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
@@ -155,7 +140,7 @@ public class ScheduledJobPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public ScheduledJobPager() {
+    public ReqHeaderPager() {
         super();
     }
 

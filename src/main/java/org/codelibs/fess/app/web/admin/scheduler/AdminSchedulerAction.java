@@ -18,7 +18,7 @@ package org.codelibs.fess.app.web.admin.scheduler;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.ScheduledJobPager;
+import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
@@ -48,7 +48,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Resource
     private ScheduledJobService scheduledJobService;
     @Resource
-    private ScheduledJobPager scheduledJobPager;
+    private SchedulerPager scheduledJobPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource

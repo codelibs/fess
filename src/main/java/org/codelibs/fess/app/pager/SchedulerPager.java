@@ -20,8 +20,11 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class BoostDocumentRulePager implements Serializable {
+public class SchedulerPager implements Serializable {
+
     private static final long serialVersionUID = 1L;
+
+    public static final int DEFAULT_PAGE_SIZE = 20;
 
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;
 
@@ -41,9 +44,19 @@ public class BoostDocumentRulePager implements Serializable {
 
     public String id;
 
-    public String urlExpr;
+    public String name;
 
-    public String boostExpr;
+    public String target;
+
+    public String cronExpression;
+
+    public String scriptType;
+
+    public String crawler;
+
+    public String jobLogging;
+
+    public String available;
 
     public String sortOrder;
 
@@ -62,13 +75,22 @@ public class BoostDocumentRulePager implements Serializable {
         currentPageNumber = getDefaultCurrentPageNumber();
 
         id = null;
-        urlExpr = null;
-        boostExpr = null;
+        name = null;
+        target = null;
+        cronExpression = null;
+        scriptType = null;
+        crawler = null;
+        jobLogging = null;
+        available = null;
         sortOrder = null;
         createdBy = null;
         createdTime = null;
         versionNo = null;
 
+    }
+
+    protected int getDefaultCurrentPageNumber() {
+        return DEFAULT_CURRENT_PAGE_NUMBER;
     }
 
     public int getAllRecordCount() {
@@ -133,8 +155,8 @@ public class BoostDocumentRulePager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    protected int getDefaultCurrentPageNumber() {
-        return Constants.DEFAULT_ADMIN_PAGE_NUMBER;
+    public SchedulerPager() {
+        super();
     }
 
     protected int getDefaultPageSize() {

@@ -18,7 +18,7 @@ package org.codelibs.fess.app.web.admin.boostdoc;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.BoostDocumentRulePager;
+import org.codelibs.fess.app.pager.BoostDocPager;
 import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -42,7 +42,7 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Resource
     private BoostDocumentRuleService boostDocumentRuleService;
     @Resource
-    private BoostDocumentRulePager boostDocumentRulePager;
+    private BoostDocPager boostDocPager;
     @Resource
     private SystemHelper systemHelper;
 
@@ -66,9 +66,9 @@ public class AdminBoostdocAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            boostDocumentRulePager.setCurrentPageNumber(pageNumber.get());
+            boostDocPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            boostDocumentRulePager.setCurrentPageNumber(0);
+            boostDocPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -77,7 +77,7 @@ public class AdminBoostdocAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, boostDocumentRulePager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, boostDocPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -85,17 +85,17 @@ public class AdminBoostdocAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        boostDocumentRulePager.clear();
+        boostDocPager.clear();
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager)); // page navi
+        data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(boostDocumentRulePager, form, op -> op.include("id"));
+        copyBeanToBean(boostDocPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -256,10 +256,10 @@ public class AdminBoostdocAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
-            data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocumentRulePager));
+            data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(boostDocumentRulePager, form, op -> op.include("id"));
+                copyBeanToBean(boostDocPager, form, op -> op.include("id"));
             });
         });
     }
