@@ -176,7 +176,7 @@ public abstract class BsFileAuthenticationBhv extends EsAbstractBehavior<FileAut
     }
 
     public void selectBulk(CBCall<FileAuthenticationCB> cbLambda, EntityRowHandler<List<FileAuthentication>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -256,4 +256,3 @@ public abstract class BsFileAuthenticationBhv extends EsAbstractBehavior<FileAut
 
     // #pending create, modify, remove
 }
-

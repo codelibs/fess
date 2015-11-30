@@ -103,8 +103,7 @@ public abstract class BsDuplicateHostBhv extends EsAbstractBehavior<DuplicateHos
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends DuplicateHost> OptionalEntity<ENTITY> doSelectOptionalEntity(DuplicateHostCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends DuplicateHost> OptionalEntity<ENTITY> doSelectOptionalEntity(DuplicateHostCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -172,7 +171,7 @@ public abstract class BsDuplicateHostBhv extends EsAbstractBehavior<DuplicateHos
     }
 
     public void selectBulk(CBCall<DuplicateHostCB> cbLambda, EntityRowHandler<List<DuplicateHost>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -252,4 +251,3 @@ public abstract class BsDuplicateHostBhv extends EsAbstractBehavior<DuplicateHos
 
     // #pending create, modify, remove
 }
-

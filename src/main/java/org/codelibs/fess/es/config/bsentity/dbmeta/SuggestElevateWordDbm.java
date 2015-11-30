@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,15 +79,24 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getBoost(),(et,vl)->((SuggestElevateWord) et).setBoost(DfTypeUtil.toFloat(vl)), "boost");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getCreatedBy(),(et,vl)->((SuggestElevateWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getCreatedTime(),(et,vl)->((SuggestElevateWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getReading(),(et,vl)->((SuggestElevateWord) et).setReading(DfTypeUtil.toString(vl)), "reading");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getSuggestWord(),(et,vl)->((SuggestElevateWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getTargetLabel(),(et,vl)->((SuggestElevateWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getTargetRole(),(et,vl)->((SuggestElevateWord) et).setTargetRole(DfTypeUtil.toString(vl)), "targetRole");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getUpdatedBy(),(et,vl)->((SuggestElevateWord) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et-> ((SuggestElevateWord)et).getUpdatedTime(),(et,vl)->((SuggestElevateWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getBoost(),
+                (et, vl) -> ((SuggestElevateWord) et).setBoost(DfTypeUtil.toFloat(vl)), "boost");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getCreatedBy(),
+                (et, vl) -> ((SuggestElevateWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getCreatedTime(),
+                (et, vl) -> ((SuggestElevateWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getReading(),
+                (et, vl) -> ((SuggestElevateWord) et).setReading(DfTypeUtil.toString(vl)), "reading");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getSuggestWord(),
+                (et, vl) -> ((SuggestElevateWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getTargetLabel(),
+                (et, vl) -> ((SuggestElevateWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getTargetRole(),
+                (et, vl) -> ((SuggestElevateWord) et).setTargetRole(DfTypeUtil.toString(vl)), "targetRole");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getUpdatedBy(),
+                (et, vl) -> ((SuggestElevateWord) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et -> ((SuggestElevateWord) et).getUpdatedTime(),
+                (et, vl) -> ((SuggestElevateWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
     }
 
     @Override
@@ -102,36 +110,83 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
     protected final String _tableDbName = "suggest_elevate_word";
     protected final String _tableDispName = "suggest_elevate_word";
     protected final String _tablePropertyName = "SuggestElevateWord";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
+            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnReading = cci("reading", "reading", null, null, String.class, "reading", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnBoost() { return _columnBoost; }
-    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
-    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
-    public ColumnInfo columnReading() { return _columnReading; }
-    public ColumnInfo columnSuggestWord() { return _columnSuggestWord; }
-    public ColumnInfo columnTargetLabel() { return _columnTargetLabel; }
-    public ColumnInfo columnTargetRole() { return _columnTargetRole; }
-    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
-    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
+    public ColumnInfo columnBoost() {
+        return _columnBoost;
+    }
+
+    public ColumnInfo columnCreatedBy() {
+        return _columnCreatedBy;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnReading() {
+        return _columnReading;
+    }
+
+    public ColumnInfo columnSuggestWord() {
+        return _columnSuggestWord;
+    }
+
+    public ColumnInfo columnTargetLabel() {
+        return _columnTargetLabel;
+    }
+
+    public ColumnInfo columnTargetRole() {
+        return _columnTargetRole;
+    }
+
+    public ColumnInfo columnUpdatedBy() {
+        return _columnUpdatedBy;
+    }
+
+    public ColumnInfo columnUpdatedTime() {
+        return _columnUpdatedTime;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -220,4 +275,3 @@ public class SuggestElevateWordDbm extends AbstractDBMeta {
         return null;
     }
 }
-

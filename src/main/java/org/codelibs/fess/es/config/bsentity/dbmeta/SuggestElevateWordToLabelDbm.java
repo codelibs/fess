@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.SuggestElevateWordToLabel;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,8 +79,10 @@ public class SuggestElevateWordToLabelDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((SuggestElevateWordToLabel)et).getSuggestElevateWordId(),(et,vl)->((SuggestElevateWordToLabel) et).setSuggestElevateWordId(DfTypeUtil.toString(vl)), "suggestElevateWordId");
-        setupEpg(_epgMap, et-> ((SuggestElevateWordToLabel)et).getLabelTypeId(),(et,vl)->((SuggestElevateWordToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
+        setupEpg(_epgMap, et -> ((SuggestElevateWordToLabel) et).getSuggestElevateWordId(),
+                (et, vl) -> ((SuggestElevateWordToLabel) et).setSuggestElevateWordId(DfTypeUtil.toString(vl)), "suggestElevateWordId");
+        setupEpg(_epgMap, et -> ((SuggestElevateWordToLabel) et).getLabelTypeId(),
+                (et, vl) -> ((SuggestElevateWordToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
     }
 
     @Override
@@ -95,22 +96,41 @@ public class SuggestElevateWordToLabelDbm extends AbstractDBMeta {
     protected final String _tableDbName = "suggest_elevate_word_to_label";
     protected final String _tableDispName = "suggest_elevate_word_to_label";
     protected final String _tablePropertyName = "SuggestElevateWordToLabel";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnSuggestElevateWordId = cci("suggestElevateWordId", "suggestElevateWordId", null, null, String.class, "suggestElevateWordId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSuggestElevateWordId = cci("suggestElevateWordId", "suggestElevateWordId", null, null, String.class,
+            "suggestElevateWordId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnSuggestElevateWordId() { return _columnSuggestElevateWordId; }
-    public ColumnInfo columnLabelTypeId() { return _columnLabelTypeId; }
+    public ColumnInfo columnSuggestElevateWordId() {
+        return _columnSuggestElevateWordId;
+    }
+
+    public ColumnInfo columnLabelTypeId() {
+        return _columnLabelTypeId;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -192,4 +212,3 @@ public class SuggestElevateWordToLabelDbm extends AbstractDBMeta {
         return null;
     }
 }
-

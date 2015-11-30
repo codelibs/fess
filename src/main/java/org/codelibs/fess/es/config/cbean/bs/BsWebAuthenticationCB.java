@@ -75,7 +75,7 @@ public class BsWebAuthenticationCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,36 +161,47 @@ public class BsWebAuthenticationCB extends EsAbstractConditionBean {
         public void columnAuthRealm() {
             doColumn("authRealm");
         }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
+
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
+
         public void columnHostname() {
             doColumn("hostname");
         }
+
         public void columnParameters() {
             doColumn("parameters");
         }
+
         public void columnPassword() {
             doColumn("password");
         }
+
         public void columnPort() {
             doColumn("port");
         }
+
         public void columnProtocolScheme() {
             doColumn("protocolScheme");
         }
+
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
+
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }
+
         public void columnUsername() {
             doColumn("username");
         }
+
         public void columnWebConfigId() {
             doColumn("webConfigId");
         }

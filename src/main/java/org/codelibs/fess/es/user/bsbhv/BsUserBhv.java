@@ -100,8 +100,7 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends User> OptionalEntity<ENTITY> doSelectOptionalEntity(UserCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends User> OptionalEntity<ENTITY> doSelectOptionalEntity(UserCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -169,7 +168,7 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
     }
 
     public void selectBulk(CBCall<UserCB> cbLambda, EntityRowHandler<List<User>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -249,4 +248,3 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
 
     // #pending create, modify, remove
 }
-

@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.es.user.allcommon;
 
-import org.codelibs.fess.es.user.allcommon.EsSqlClause;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.chelper.HpCBPurpose;
 import org.dbflute.cbean.chelper.HpColumnSpHandler;
@@ -58,6 +57,7 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
     //                                                                             Builder
     //                                                                             =======
     public abstract CountRequestBuilder build(CountRequestBuilder builder);
+
     public abstract SearchRequestBuilder build(SearchRequestBuilder builder);
 
     // ===================================================================================
@@ -698,4 +698,3 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
         }
     }
 }
-

@@ -75,7 +75,7 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,15 +161,19 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
         public void columnCreatedAt() {
             doColumn("createdAt");
         }
+
         public void columnUrl() {
             doColumn("url");
         }
+
         public void columnDocId() {
             doColumn("docId");
         }
+
         public void columnQueryId() {
             doColumn("queryId");
         }
+
         public void columnUserInfoId() {
             doColumn("userInfoId");
         }

@@ -75,7 +75,7 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,21 +161,27 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
+
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
+
         public void columnDuplicateHostName() {
             doColumn("duplicateHostName");
         }
+
         public void columnRegularName() {
             doColumn("regularName");
         }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
+
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
+
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }

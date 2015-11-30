@@ -174,7 +174,7 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
     }
 
     public void selectBulk(CBCall<SuggestElevateWordCB> cbLambda, EntityRowHandler<List<SuggestElevateWord>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -254,4 +254,3 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
 
     // #pending create, modify, remove
 }
-

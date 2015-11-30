@@ -75,7 +75,7 @@ public class BsUserCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,12 +161,15 @@ public class BsUserCB extends EsAbstractConditionBean {
         public void columnGroups() {
             doColumn("groups");
         }
+
         public void columnName() {
             doColumn("name");
         }
+
         public void columnPassword() {
             doColumn("password");
         }
+
         public void columnRoles() {
             doColumn("roles");
         }

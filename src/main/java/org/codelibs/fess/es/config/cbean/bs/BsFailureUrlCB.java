@@ -75,7 +75,7 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,21 +161,27 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
         public void columnConfigId() {
             doColumn("configId");
         }
+
         public void columnErrorCount() {
             doColumn("errorCount");
         }
+
         public void columnErrorLog() {
             doColumn("errorLog");
         }
+
         public void columnErrorName() {
             doColumn("errorName");
         }
+
         public void columnLastAccessTime() {
             doColumn("lastAccessTime");
         }
+
         public void columnThreadName() {
             doColumn("threadName");
         }
+
         public void columnUrl() {
             doColumn("url");
         }

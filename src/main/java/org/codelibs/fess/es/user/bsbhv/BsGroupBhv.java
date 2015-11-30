@@ -97,8 +97,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends Group> OptionalEntity<ENTITY> doSelectOptionalEntity(GroupCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends Group> OptionalEntity<ENTITY> doSelectOptionalEntity(GroupCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -166,7 +165,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public void selectBulk(CBCall<GroupCB> cbLambda, EntityRowHandler<List<Group>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -246,4 +245,3 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
 
     // #pending create, modify, remove
 }
-

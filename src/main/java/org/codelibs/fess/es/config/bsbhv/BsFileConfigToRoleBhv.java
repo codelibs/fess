@@ -167,7 +167,7 @@ public abstract class BsFileConfigToRoleBhv extends EsAbstractBehavior<FileConfi
     }
 
     public void selectBulk(CBCall<FileConfigToRoleCB> cbLambda, EntityRowHandler<List<FileConfigToRole>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -247,4 +247,3 @@ public abstract class BsFileConfigToRoleBhv extends EsAbstractBehavior<FileConfi
 
     // #pending create, modify, remove
 }
-

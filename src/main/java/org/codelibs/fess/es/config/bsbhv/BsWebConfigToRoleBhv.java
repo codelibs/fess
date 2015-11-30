@@ -167,7 +167,7 @@ public abstract class BsWebConfigToRoleBhv extends EsAbstractBehavior<WebConfigT
     }
 
     public void selectBulk(CBCall<WebConfigToRoleCB> cbLambda, EntityRowHandler<List<WebConfigToRole>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -247,4 +247,3 @@ public abstract class BsWebConfigToRoleBhv extends EsAbstractBehavior<WebConfigT
 
     // #pending create, modify, remove
 }
-

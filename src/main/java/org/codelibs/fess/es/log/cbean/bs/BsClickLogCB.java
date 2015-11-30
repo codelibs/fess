@@ -75,7 +75,7 @@ public class BsClickLogCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,21 +161,27 @@ public class BsClickLogCB extends EsAbstractConditionBean {
         public void columnQueryRequestedAt() {
             doColumn("queryRequestedAt");
         }
+
         public void columnRequestedAt() {
             doColumn("requestedAt");
         }
+
         public void columnQueryId() {
             doColumn("queryId");
         }
+
         public void columnDocId() {
             doColumn("docId");
         }
+
         public void columnUserSessionId() {
             doColumn("userSessionId");
         }
+
         public void columnUrl() {
             doColumn("url");
         }
+
         public void columnOrder() {
             doColumn("order");
         }

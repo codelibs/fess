@@ -75,7 +75,7 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,60 +161,79 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
         public void columnAvailable() {
             doColumn("available");
         }
+
         public void columnBoost() {
             doColumn("boost");
         }
+
         public void columnConfigParameter() {
             doColumn("configParameter");
         }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
+
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
+
         public void columnDepth() {
             doColumn("depth");
         }
+
         public void columnExcludedDocUrls() {
             doColumn("excludedDocUrls");
         }
+
         public void columnExcludedUrls() {
             doColumn("excludedUrls");
         }
+
         public void columnIncludedDocUrls() {
             doColumn("includedDocUrls");
         }
+
         public void columnIncludedUrls() {
             doColumn("includedUrls");
         }
+
         public void columnIntervalTime() {
             doColumn("intervalTime");
         }
+
         public void columnTimeToLive() {
             doColumn("timeToLive");
         }
+
         public void columnMaxAccessCount() {
             doColumn("maxAccessCount");
         }
+
         public void columnName() {
             doColumn("name");
         }
+
         public void columnNumOfThread() {
             doColumn("numOfThread");
         }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
+
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
+
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }
+
         public void columnUrls() {
             doColumn("urls");
         }
+
         public void columnUserAgent() {
             doColumn("userAgent");
         }

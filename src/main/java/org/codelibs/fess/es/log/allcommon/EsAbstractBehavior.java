@@ -25,11 +25,8 @@ import java.util.function.Function;
 
 import javax.annotation.Resource;
 
-import org.codelibs.fess.es.log.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.log.allcommon.EsAbstractEntity.DocMeta;
 import org.codelibs.fess.es.log.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.log.allcommon.EsPagingResultBean;
 import org.dbflute.Entity;
 import org.dbflute.bhv.AbstractBehaviorWritable;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -73,8 +70,11 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected String scrollForCursor = "1m";
 
     protected abstract String asEsIndex();
+
     protected abstract String asEsIndexType();
+
     protected abstract String asEsSearchType();
+
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
 
     // ===================================================================================
@@ -178,8 +178,9 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected void delegateBulkRequest(final ConditionBean cb, Function<SearchHits, Boolean> handler) {
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setSearchType(SearchType.SCAN)
-                .setScroll(scrollForCursor).setSize(sizeForCursor);
+        final SearchRequestBuilder builder =
+                client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setSearchType(SearchType.SCAN).setScroll(scrollForCursor)
+                        .setSize(sizeForCursor);
         ((EsAbstractConditionBean) cb).request().build(builder);
         final SearchResponse response = ((EsAbstractConditionBean) cb).build(builder).execute().actionGet();
 
@@ -287,8 +288,9 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     @Override
     protected int delegateQueryDelete(final ConditionBean cb, final DeleteOption<? extends ConditionBean> option) {
-        final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setSearchType(SearchType.SCAN)
-                .setScroll(scrollForDelete).setSize(sizeForDelete);
+        final SearchRequestBuilder builder =
+                client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setSearchType(SearchType.SCAN).setScroll(scrollForDelete)
+                        .setSize(sizeForDelete);
         ((EsAbstractConditionBean) cb).request().build(builder);
         final SearchResponse response = ((EsAbstractConditionBean) cb).build(builder).execute().actionGet();
 
@@ -387,6 +389,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         updateOption.xtoBeCompatibleBatchUpdateDefaultEveryColumn();
         return updateOption;
     }
+
     protected boolean isCompatibleBatchInsertDefaultEveryColumn() {
         return true;
     }
@@ -523,4 +526,3 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         }
     }
 }
-

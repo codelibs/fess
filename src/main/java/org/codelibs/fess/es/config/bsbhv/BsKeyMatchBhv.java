@@ -104,8 +104,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends KeyMatch> OptionalEntity<ENTITY> doSelectOptionalEntity(KeyMatchCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends KeyMatch> OptionalEntity<ENTITY> doSelectOptionalEntity(KeyMatchCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -173,7 +172,7 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
     }
 
     public void selectBulk(CBCall<KeyMatchCB> cbLambda, EntityRowHandler<List<KeyMatch>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -253,4 +252,3 @@ public abstract class BsKeyMatchBhv extends EsAbstractBehavior<KeyMatch, KeyMatc
 
     // #pending create, modify, remove
 }
-

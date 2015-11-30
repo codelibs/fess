@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,10 +79,14 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getCrawlingInfoId(),(et,vl)->((CrawlingInfoParam) et).setCrawlingInfoId(DfTypeUtil.toString(vl)), "crawlingInfoId");
-        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getCreatedTime(),(et,vl)->((CrawlingInfoParam) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getKey(),(et,vl)->((CrawlingInfoParam) et).setKey(DfTypeUtil.toString(vl)), "key");
-        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getValue(),(et,vl)->((CrawlingInfoParam) et).setValue(DfTypeUtil.toString(vl)), "value");
+        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getCrawlingInfoId(),
+                (et, vl) -> ((CrawlingInfoParam) et).setCrawlingInfoId(DfTypeUtil.toString(vl)), "crawlingInfoId");
+        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getCreatedTime(),
+                (et, vl) -> ((CrawlingInfoParam) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getKey(), (et, vl) -> ((CrawlingInfoParam) et).setKey(DfTypeUtil.toString(vl)),
+                "key");
+        setupEpg(_epgMap, et -> ((CrawlingInfoParam) et).getValue(),
+                (et, vl) -> ((CrawlingInfoParam) et).setValue(DfTypeUtil.toString(vl)), "value");
     }
 
     @Override
@@ -97,26 +100,53 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
     protected final String _tableDbName = "crawling_info_param";
     protected final String _tableDispName = "crawling_info_param";
     protected final String _tablePropertyName = "CrawlingInfoParam";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCrawlingInfoId = cci("crawlingInfoId", "crawlingInfoId", null, null, String.class, "crawlingInfoId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCrawlingInfoId = cci("crawlingInfoId", "crawlingInfoId", null, null, String.class, "crawlingInfoId",
+            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "String", 0, 0,
+            null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCrawlingInfoId() { return _columnCrawlingInfoId; }
-    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
-    public ColumnInfo columnKey() { return _columnKey; }
-    public ColumnInfo columnValue() { return _columnValue; }
+    public ColumnInfo columnCrawlingInfoId() {
+        return _columnCrawlingInfoId;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnKey() {
+        return _columnKey;
+    }
+
+    public ColumnInfo columnValue() {
+        return _columnValue;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -200,4 +230,3 @@ public class CrawlingInfoParamDbm extends AbstractDBMeta {
         return null;
     }
 }
-
