@@ -444,7 +444,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         return buf.toString();
     }
 
-    protected String replaceOverlappingHost(final String url) {
+    protected String replaceDuplicateHost(final String url) {
         try {
             // remove duplicate host
             final DuplicateHostHelper duplicateHostHelper = ComponentUtil.getDuplicateHostHelper();
@@ -486,7 +486,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
                 for (final Map.Entry<String, String> entry : convertUrlMap.entrySet()) {
                     url = url.replaceAll(entry.getKey(), entry.getValue());
                 }
-                requestData.setUrl(replaceOverlappingHost(url));
+                requestData.setUrl(replaceDuplicateHost(url));
             }
         }
         return urlList;
