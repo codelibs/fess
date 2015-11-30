@@ -145,6 +145,7 @@ ${fe:facetForm()}${fe:geoForm()}
 					<la:message key="labels.search" />
 				</button>
 				<button class="btn btn-secondary pull-right"
+					data-toggle="control-options" data-target="#searchOptions"
 					id="searchOptionsCloseButton">
 					<i class="fa fa-angle-double-right"></i>
 					<la:message key="labels.search_options_close" />
