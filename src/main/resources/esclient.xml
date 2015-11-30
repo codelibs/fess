@@ -31,10 +31,10 @@
 			<arg>".fess_config/boost_document_rule"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/crawling_session"</arg>
+			<arg>".fess_config/crawling_info"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/crawling_session_info"</arg>
+			<arg>".fess_config/crawling_info_param"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/data_config"</arg>

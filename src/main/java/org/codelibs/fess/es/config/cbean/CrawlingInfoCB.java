@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.es.config.cbean;
 
-import org.codelibs.fess.es.config.cbean.bs.BsCrawlingSessionCB;
+import org.codelibs.fess.es.config.cbean.bs.BsCrawlingInfoCB;
 
 /**
  * @author ESFlute (using FreeGen)
  */
-public class CrawlingSessionCB extends BsCrawlingSessionCB {
+public class CrawlingInfoCB extends BsCrawlingInfoCB {
 }

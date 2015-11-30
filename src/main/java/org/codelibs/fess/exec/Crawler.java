@@ -34,11 +34,11 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.CrawlingSessionService;
+import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
@@ -79,7 +79,7 @@ public class Crawler implements Serializable {
     protected PathMappingService pathMappingService;
 
     @Resource
-    protected CrawlingSessionService crawlingSessionService;
+    protected CrawlingInfoService crawlingInfoService;
 
     @Resource
     protected DynamicProperties crawlerProperties;
@@ -206,7 +206,7 @@ public class Crawler implements Serializable {
             options.sessionId = sdf.format(new Date());
         }
 
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
@@ -225,7 +225,7 @@ public class Crawler implements Serializable {
         }
 
         try {
-            crawlingSessionHelper.store(options.sessionId, true);
+            crawlingInfoHelper.store(options.sessionId, true);
             final String dayForCleanupStr;
             if (StringUtil.isNotBlank(options.expires)) {
                 dayForCleanupStr = options.expires;
@@ -236,7 +236,7 @@ public class Crawler implements Serializable {
             try {
                 dayForCleanup = Integer.parseInt(dayForCleanupStr);
             } catch (final NumberFormatException e) {}
-            crawlingSessionHelper.updateParams(options.sessionId, options.name, dayForCleanup);
+            crawlingInfoHelper.updateParams(options.sessionId, options.name, dayForCleanup);
         } catch (final Exception e) {
             logger.warn("Failed to store crawling information.", e);
         }
@@ -245,12 +245,12 @@ public class Crawler implements Serializable {
             return crawler.doCrawl(options);
         } finally {
             try {
-                crawlingSessionHelper.store(options.sessionId, false);
+                crawlingInfoHelper.store(options.sessionId, false);
             } catch (final Exception e) {
                 logger.warn("Failed to store crawling information.", e);
             }
 
-            final Map<String, String> infoMap = crawlingSessionHelper.getInfoMap(options.sessionId);
+            final Map<String, String> infoMap = crawlingInfoHelper.getInfoMap(options.sessionId);
 
             final StringBuilder buf = new StringBuilder(500);
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
@@ -317,12 +317,12 @@ public class Crawler implements Serializable {
 
         final long totalTime = System.currentTimeMillis();
 
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
         boolean completed = false;
         final int exitCode = Constants.EXIT_OK;
         try {
-            writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_START_TIME);
+            writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_START_TIME);
 
             // setup path mapping
             final List<String> ptList = new ArrayList<>();
@@ -339,7 +339,7 @@ public class Crawler implements Serializable {
             }
 
             // delete expired sessions
-            crawlingSessionService.deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper()
+            crawlingInfoService.deleteSessionIdsBefore(options.sessionId, options.name, ComponentUtil.getSystemHelper()
                     .getCurrentTimeAsLong());
 
             final List<String> webConfigIdList = options.getWebConfigIdList();
@@ -353,9 +353,9 @@ public class Crawler implements Serializable {
             if (runAll || webConfigIdList != null || fileConfigIdList != null) {
                 webFsCrawlerThread = new Thread((Runnable) () -> {
                     // crawl web
-                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_START_TIME);
+                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_START_TIME);
                         webFsIndexHelper.crawl(options.sessionId, webConfigIdList, fileConfigIdList);
-                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.WEB_FS_CRAWLER_END_TIME);
+                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.WEB_FS_CRAWLER_END_TIME);
                     }, WEB_FS_CRAWLING_PROCESS);
                 webFsCrawlerThread.start();
             }
@@ -363,9 +363,9 @@ public class Crawler implements Serializable {
             if (runAll || dataConfigIdList != null) {
                 dataCrawlerThread = new Thread((Runnable) () -> {
                     // crawl data system
-                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_START_TIME);
+                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_START_TIME);
                         dataIndexHelper.crawl(options.sessionId, dataConfigIdList);
-                        writeTimeToSessionInfo(crawlingSessionHelper, Constants.DATA_CRAWLER_END_TIME);
+                        writeTimeToSessionInfo(crawlingInfoHelper, Constants.DATA_CRAWLER_END_TIME);
                     }, DATA_CRAWLING_PROCESS);
                 dataCrawlerThread.start();
             }
@@ -384,17 +384,17 @@ public class Crawler implements Serializable {
             return Constants.EXIT_FAIL;
         } finally {
             pathMappingHelper.removePathMappingList(options.sessionId);
-            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T.toString() : Constants.F.toString());
-            writeTimeToSessionInfo(crawlingSessionHelper, Constants.CRAWLER_END_TIME);
-            crawlingSessionHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
+            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_STATUS, completed ? Constants.T.toString() : Constants.F.toString());
+            writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_END_TIME);
+            crawlingInfoHelper.putToInfoMap(Constants.CRAWLER_EXEC_TIME, Long.toString(System.currentTimeMillis() - totalTime));
 
         }
     }
 
-    private void writeTimeToSessionInfo(final CrawlingSessionHelper crawlingSessionHelper, final String key) {
-        if (crawlingSessionHelper != null) {
+    private void writeTimeToSessionInfo(final CrawlingInfoHelper crawlingInfoHelper, final String key) {
+        if (crawlingInfoHelper != null) {
             final SimpleDateFormat dateFormat = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            crawlingSessionHelper.putToInfoMap(key, dateFormat.format(new Date()));
+            crawlingInfoHelper.putToInfoMap(key, dateFormat.format(new Date()));
         }
     }
 

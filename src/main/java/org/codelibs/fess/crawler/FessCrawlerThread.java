@@ -37,7 +37,7 @@ import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -61,7 +61,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-            final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+            final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
@@ -96,7 +96,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     }
                 }
                 dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
-                final String id = crawlingSessionHelper.generateId(dataMap);
+                final String id = crawlingInfoHelper.generateId(dataMap);
 
                 final Map<String, Object> document =
                         indexingHelper.getDocument(

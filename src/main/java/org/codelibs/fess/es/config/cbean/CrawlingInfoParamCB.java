@@ -13,13 +13,12 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.config.exbhv;
+package org.codelibs.fess.es.config.cbean;
 
-import org.codelibs.fess.es.config.bsbhv.BsCrawlingSessionInfoBhv;
+import org.codelibs.fess.es.config.cbean.bs.BsCrawlingInfoParamCB;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class CrawlingSessionInfoBhv extends BsCrawlingSessionInfoBhv {
-
+public class CrawlingInfoParamCB extends BsCrawlingInfoParamCB {
 }

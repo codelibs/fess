@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
-import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingSessionDbm;
+import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingInfoParamDbm;
 
 /**
  * ${table.comment}
  * @author ESFlute (using FreeGen)
  */
-public class BsCrawlingSession extends EsAbstractEntity {
+public class BsCrawlingInfoParam extends EsAbstractEntity {
 
     // ===================================================================================
     //                                                                          Definition
@@ -37,17 +37,17 @@ public class BsCrawlingSession extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
+    /** crawlingInfoId */
+    protected String crawlingInfoId;
+
     /** createdTime */
     protected Long createdTime;
 
-    /** expiredTime */
-    protected Long expiredTime;
+    /** key */
+    protected String key;
 
-    /** name */
-    protected String name;
-
-    /** sessionId */
-    protected String sessionId;
+    /** value */
+    protected String value;
 
     // [Referrers] *comment only
 
@@ -55,13 +55,13 @@ public class BsCrawlingSession extends EsAbstractEntity {
     //                                                                             DB Meta
     //                                                                             =======
     @Override
-    public CrawlingSessionDbm asDBMeta() {
-        return CrawlingSessionDbm.getInstance();
+    public CrawlingInfoParamDbm asDBMeta() {
+        return CrawlingInfoParamDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "crawling_session";
+        return "crawling_info_param";
     }
 
     // ===================================================================================
@@ -70,17 +70,17 @@ public class BsCrawlingSession extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
+        if (crawlingInfoId != null) {
+            sourceMap.put("crawlingInfoId", crawlingInfoId);
+        }
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
-        if (expiredTime != null) {
-            sourceMap.put("expiredTime", expiredTime);
+        if (key != null) {
+            sourceMap.put("key", key);
         }
-        if (name != null) {
-            sourceMap.put("name", name);
-        }
-        if (sessionId != null) {
-            sourceMap.put("sessionId", sessionId);
+        if (value != null) {
+            sourceMap.put("value", value);
         }
         return sourceMap;
     }
@@ -91,10 +91,10 @@ public class BsCrawlingSession extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
+        sb.append(dm).append(crawlingInfoId);
         sb.append(dm).append(createdTime);
-        sb.append(dm).append(expiredTime);
-        sb.append(dm).append(name);
-        sb.append(dm).append(sessionId);
+        sb.append(dm).append(key);
+        sb.append(dm).append(value);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -105,6 +105,16 @@ public class BsCrawlingSession extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String getCrawlingInfoId() {
+        checkSpecifiedProperty("crawlingInfoId");
+        return convertEmptyToNull(crawlingInfoId);
+    }
+
+    public void setCrawlingInfoId(String value) {
+        registerModifiedProperty("crawlingInfoId");
+        this.crawlingInfoId = value;
+    }
+
     public Long getCreatedTime() {
         checkSpecifiedProperty("createdTime");
         return createdTime;
@@ -115,33 +125,23 @@ public class BsCrawlingSession extends EsAbstractEntity {
         this.createdTime = value;
     }
 
-    public Long getExpiredTime() {
-        checkSpecifiedProperty("expiredTime");
-        return expiredTime;
+    public String getKey() {
+        checkSpecifiedProperty("key");
+        return convertEmptyToNull(key);
     }
 
-    public void setExpiredTime(Long value) {
-        registerModifiedProperty("expiredTime");
-        this.expiredTime = value;
+    public void setKey(String value) {
+        registerModifiedProperty("key");
+        this.key = value;
     }
 
-    public String getName() {
-        checkSpecifiedProperty("name");
-        return convertEmptyToNull(name);
+    public String getValue() {
+        checkSpecifiedProperty("value");
+        return convertEmptyToNull(value);
     }
 
-    public void setName(String value) {
-        registerModifiedProperty("name");
-        this.name = value;
-    }
-
-    public String getSessionId() {
-        checkSpecifiedProperty("sessionId");
-        return convertEmptyToNull(sessionId);
-    }
-
-    public void setSessionId(String value) {
-        registerModifiedProperty("sessionId");
-        this.sessionId = value;
+    public void setValue(String value) {
+        registerModifiedProperty("value");
+        this.value = value;
     }
 }

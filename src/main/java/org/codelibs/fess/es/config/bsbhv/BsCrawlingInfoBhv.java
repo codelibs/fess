@@ -21,9 +21,9 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingSessionDbm;
-import org.codelibs.fess.es.config.cbean.CrawlingSessionCB;
-import org.codelibs.fess.es.config.exentity.CrawlingSession;
+import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingInfoDbm;
+import org.codelibs.fess.es.config.cbean.CrawlingInfoCB;
+import org.codelibs.fess.es.config.exentity.CrawlingInfo;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -40,7 +40,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSession, CrawlingSessionCB> {
+public abstract class BsCrawlingInfoBhv extends EsAbstractBehavior<CrawlingInfo, CrawlingInfoCB> {
 
     // ===================================================================================
     //                                                                    Control Override
@@ -57,21 +57,21 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
 
     @Override
     public String asEsIndexType() {
-        return "crawling_session";
+        return "crawling_info";
     }
 
     @Override
     public String asEsSearchType() {
-        return "crawling_session";
+        return "crawling_info";
     }
 
     @Override
-    public CrawlingSessionDbm asDBMeta() {
-        return CrawlingSessionDbm.getInstance();
+    public CrawlingInfoDbm asDBMeta() {
+        return CrawlingInfoDbm.getInstance();
     }
 
     @Override
-    protected <RESULT extends CrawlingSession> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends CrawlingInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
@@ -88,26 +88,26 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
     // ===================================================================================
     //                                                                              Select
     //                                                                              ======
-    public int selectCount(CBCall<CrawlingSessionCB> cbLambda) {
+    public int selectCount(CBCall<CrawlingInfoCB> cbLambda) {
         return facadeSelectCount(createCB(cbLambda));
     }
 
-    public OptionalEntity<CrawlingSession> selectEntity(CBCall<CrawlingSessionCB> cbLambda) {
+    public OptionalEntity<CrawlingInfo> selectEntity(CBCall<CrawlingInfoCB> cbLambda) {
         return facadeSelectEntity(createCB(cbLambda));
     }
 
-    protected OptionalEntity<CrawlingSession> facadeSelectEntity(CrawlingSessionCB cb) {
+    protected OptionalEntity<CrawlingInfo> facadeSelectEntity(CrawlingInfoCB cb) {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends CrawlingSession> OptionalEntity<ENTITY> doSelectOptionalEntity(CrawlingSessionCB cb,
+    protected <ENTITY extends CrawlingInfo> OptionalEntity<ENTITY> doSelectOptionalEntity(CrawlingInfoCB cb,
             Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
-    public CrawlingSessionCB newConditionBean() {
-        return new CrawlingSessionCB();
+    public CrawlingInfoCB newConditionBean() {
+        return new CrawlingInfoCB();
     }
 
     @Override
@@ -115,135 +115,135 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
         return facadeSelectEntity(downcast(cb)).orElse(null);
     }
 
-    public CrawlingSession selectEntityWithDeletedCheck(CBCall<CrawlingSessionCB> cbLambda) {
+    public CrawlingInfo selectEntityWithDeletedCheck(CBCall<CrawlingInfoCB> cbLambda) {
         return facadeSelectEntityWithDeletedCheck(createCB(cbLambda));
     }
 
-    public OptionalEntity<CrawlingSession> selectByPK(String id) {
+    public OptionalEntity<CrawlingInfo> selectByPK(String id) {
         return facadeSelectByPK(id);
     }
 
-    protected OptionalEntity<CrawlingSession> facadeSelectByPK(String id) {
+    protected OptionalEntity<CrawlingInfo> facadeSelectByPK(String id) {
         return doSelectOptionalByPK(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends CrawlingSession> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends CrawlingInfo> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
-    protected CrawlingSessionCB xprepareCBAsPK(String id) {
+    protected CrawlingInfoCB xprepareCBAsPK(String id) {
         assertObjectNotNull("id", id);
         return newConditionBean().acceptPK(id);
     }
 
-    protected <ENTITY extends CrawlingSession> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends CrawlingInfo> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     @Override
-    protected Class<? extends CrawlingSession> typeOfSelectedEntity() {
-        return CrawlingSession.class;
+    protected Class<? extends CrawlingInfo> typeOfSelectedEntity() {
+        return CrawlingInfo.class;
     }
 
     @Override
-    protected Class<CrawlingSession> typeOfHandlingEntity() {
-        return CrawlingSession.class;
+    protected Class<CrawlingInfo> typeOfHandlingEntity() {
+        return CrawlingInfo.class;
     }
 
     @Override
-    protected Class<CrawlingSessionCB> typeOfHandlingConditionBean() {
-        return CrawlingSessionCB.class;
+    protected Class<CrawlingInfoCB> typeOfHandlingConditionBean() {
+        return CrawlingInfoCB.class;
     }
 
-    public ListResultBean<CrawlingSession> selectList(CBCall<CrawlingSessionCB> cbLambda) {
+    public ListResultBean<CrawlingInfo> selectList(CBCall<CrawlingInfoCB> cbLambda) {
         return facadeSelectList(createCB(cbLambda));
     }
 
-    public PagingResultBean<CrawlingSession> selectPage(CBCall<CrawlingSessionCB> cbLambda) {
+    public PagingResultBean<CrawlingInfo> selectPage(CBCall<CrawlingInfoCB> cbLambda) {
         // #pending same?
-        return (PagingResultBean<CrawlingSession>) facadeSelectList(createCB(cbLambda));
+        return (PagingResultBean<CrawlingInfo>) facadeSelectList(createCB(cbLambda));
     }
 
-    public void selectCursor(CBCall<CrawlingSessionCB> cbLambda, EntityRowHandler<CrawlingSession> entityLambda) {
+    public void selectCursor(CBCall<CrawlingInfoCB> cbLambda, EntityRowHandler<CrawlingInfo> entityLambda) {
         facadeSelectCursor(createCB(cbLambda), entityLambda);
     }
 
-    public void selectBulk(CBCall<CrawlingSessionCB> cbLambda, EntityRowHandler<List<CrawlingSession>> entityLambda) {
+    public void selectBulk(CBCall<CrawlingInfoCB> cbLambda, EntityRowHandler<List<CrawlingInfo>> entityLambda) {
         delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
     //                                                                              Update
     //                                                                              ======
-    public void insert(CrawlingSession entity) {
+    public void insert(CrawlingInfo entity) {
         doInsert(entity, null);
     }
 
-    public void insert(CrawlingSession entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insert(CrawlingInfo entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsert(entity, null);
     }
 
-    public void update(CrawlingSession entity) {
+    public void update(CrawlingInfo entity) {
         doUpdate(entity, null);
     }
 
-    public void update(CrawlingSession entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void update(CrawlingInfo entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doUpdate(entity, null);
     }
 
-    public void insertOrUpdate(CrawlingSession entity) {
+    public void insertOrUpdate(CrawlingInfo entity) {
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void insertOrUpdate(CrawlingSession entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insertOrUpdate(CrawlingInfo entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void delete(CrawlingSession entity) {
+    public void delete(CrawlingInfo entity) {
         doDelete(entity, null);
     }
 
-    public void delete(CrawlingSession entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
+    public void delete(CrawlingInfo entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
     }
 
-    public int queryDelete(CBCall<CrawlingSessionCB> cbLambda) {
+    public int queryDelete(CBCall<CrawlingInfoCB> cbLambda) {
         return doQueryDelete(createCB(cbLambda), null);
     }
 
-    public int[] batchInsert(List<CrawlingSession> list) {
+    public int[] batchInsert(List<CrawlingInfo> list) {
         return batchInsert(list, null);
     }
 
-    public int[] batchInsert(List<CrawlingSession> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchInsert(List<CrawlingInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchInsert(new BulkList<>(list, call), null);
     }
 
-    public int[] batchUpdate(List<CrawlingSession> list) {
+    public int[] batchUpdate(List<CrawlingInfo> list) {
         return batchUpdate(list, null);
     }
 
-    public int[] batchUpdate(List<CrawlingSession> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchUpdate(List<CrawlingInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchUpdate(new BulkList<>(list, call), null);
     }
 
-    public int[] batchDelete(List<CrawlingSession> list) {
+    public int[] batchDelete(List<CrawlingInfo> list) {
         return batchDelete(list, null);
     }
 
-    public int[] batchDelete(List<CrawlingSession> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchDelete(List<CrawlingInfo> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchDelete(new BulkList<>(list, call), null);
     }
 

@@ -52,7 +52,7 @@ import org.codelibs.fess.crawler.util.ResponseDataUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
@@ -191,12 +191,12 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
-        final String sessionId = crawlingSessionHelper.getCanonicalSessionId(responseData.getSessionId());
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
+        final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
-        final Date documentExpires = crawlingSessionHelper.getDocumentExpires(crawlingConfig);
+        final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         String url = responseData.getUrl();
@@ -298,13 +298,13 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         }
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // id
-        putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingSessionHelper.generateId(dataMap));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId
         String parentUrl = responseData.getParentUrl();
         if (StringUtil.isNotBlank(parentUrl)) {
             parentUrl = pathMappingHelper.replaceUrl(sessionId, parentUrl);
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), parentUrl);
-            putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingSessionHelper.generateId(dataMap));
+            putResultDataBody(dataMap, fessConfig.getIndexFieldParentId(), crawlingInfoHelper.generateId(dataMap));
             putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url); // set again
         }
 

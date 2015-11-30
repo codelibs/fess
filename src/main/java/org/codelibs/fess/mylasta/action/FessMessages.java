@@ -295,7 +295,7 @@ public class FessMessages extends FessLabels {
     public static final String SUCCESS_delete_doc_from_index = "{success.delete_doc_from_index}";
 
     /** The key of the message: Deleted session data. */
-    public static final String SUCCESS_crawling_session_delete_all = "{success.crawling_session_delete_all}";
+    public static final String SUCCESS_crawling_info_delete_all = "{success.crawling_info_delete_all}";
 
     /** The key of the message: Started a crawl process. */
     public static final String SUCCESS_start_crawl_process = "{success.start_crawl_process}";
@@ -1661,16 +1661,16 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.crawling_session_delete_all' with parameters.
+     * Add the created action message for the key 'success.crawling_info_delete_all' with parameters.
      * <pre>
      * message: Deleted session data.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessCrawlingSessionDeleteAll(String property) {
+    public FessMessages addSuccessCrawlingInfoDeleteAll(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_crawling_session_delete_all));
+        add(property, new ActionMessage(SUCCESS_crawling_info_delete_all));
         return this;
     }
 

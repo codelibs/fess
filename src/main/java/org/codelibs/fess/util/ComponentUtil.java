@@ -26,7 +26,7 @@ import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
-import org.codelibs.fess.helper.CrawlingSessionHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper;
@@ -86,7 +86,7 @@ public final class ComponentUtil {
 
     private static final String HOT_SEARCH_WORD_HELPER = "hotSearchWordHelper";
 
-    private static final String CRAWLING_SESSION_HELPER = "crawlingSessionHelper";
+    private static final String CRAWLING_INFO_HELPER = "crawlingInfoHelper";
 
     private static final String CRAWLING_CONFIG_HELPER = "crawlingConfigHelper";
 
@@ -165,8 +165,8 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(CRAWLING_CONFIG_HELPER);
     }
 
-    public static CrawlingSessionHelper getCrawlingSessionHelper() {
-        return SingletonLaContainer.getComponent(CRAWLING_SESSION_HELPER);
+    public static CrawlingInfoHelper getCrawlingInfoHelper() {
+        return SingletonLaContainer.getComponent(CRAWLING_INFO_HELPER);
     }
 
     public static HotSearchWordHelper getHotSearchWordHelper() {

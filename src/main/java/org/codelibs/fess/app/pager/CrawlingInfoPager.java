@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class CrawlingSessionPager implements Serializable {
+public class CrawlingInfoPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,7 @@ public class CrawlingSessionPager implements Serializable {
 
     public String createdTime;
 
-    public CrawlingSessionPager() {
+    public CrawlingInfoPager() {
         super();
     }
 

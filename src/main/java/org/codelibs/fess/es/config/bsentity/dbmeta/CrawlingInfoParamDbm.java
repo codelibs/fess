@@ -19,7 +19,7 @@ import java.time.*;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.es.config.exentity.CrawlingSessionInfo;
+import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
 
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
@@ -33,19 +33,19 @@ import org.dbflute.util.DfTypeUtil;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class CrawlingSessionInfoDbm extends AbstractDBMeta {
+public class CrawlingInfoParamDbm extends AbstractDBMeta {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
     // ===================================================================================
     //                                                                           Singleton
     //                                                                           =========
-    private static final CrawlingSessionInfoDbm _instance = new CrawlingSessionInfoDbm();
+    private static final CrawlingInfoParamDbm _instance = new CrawlingInfoParamDbm();
 
-    private CrawlingSessionInfoDbm() {
+    private CrawlingInfoParamDbm() {
     }
 
-    public static CrawlingSessionInfoDbm getInstance() {
+    public static CrawlingInfoParamDbm getInstance() {
         return _instance;
     }
 
@@ -80,10 +80,10 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((CrawlingSessionInfo)et).getCrawlingSessionId(),(et,vl)->((CrawlingSessionInfo) et).setCrawlingSessionId(DfTypeUtil.toString(vl)), "crawlingSessionId");
-        setupEpg(_epgMap, et-> ((CrawlingSessionInfo)et).getCreatedTime(),(et,vl)->((CrawlingSessionInfo) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et-> ((CrawlingSessionInfo)et).getKey(),(et,vl)->((CrawlingSessionInfo) et).setKey(DfTypeUtil.toString(vl)), "key");
-        setupEpg(_epgMap, et-> ((CrawlingSessionInfo)et).getValue(),(et,vl)->((CrawlingSessionInfo) et).setValue(DfTypeUtil.toString(vl)), "value");
+        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getCrawlingInfoId(),(et,vl)->((CrawlingInfoParam) et).setCrawlingInfoId(DfTypeUtil.toString(vl)), "crawlingInfoId");
+        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getCreatedTime(),(et,vl)->((CrawlingInfoParam) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getKey(),(et,vl)->((CrawlingInfoParam) et).setKey(DfTypeUtil.toString(vl)), "key");
+        setupEpg(_epgMap, et-> ((CrawlingInfoParam)et).getValue(),(et,vl)->((CrawlingInfoParam) et).setValue(DfTypeUtil.toString(vl)), "value");
     }
 
     @Override
@@ -94,9 +94,9 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                          Table Info
     //                                                                          ==========
-    protected final String _tableDbName = "crawling_session_info";
-    protected final String _tableDispName = "crawling_session_info";
-    protected final String _tablePropertyName = "CrawlingSessionInfo";
+    protected final String _tableDbName = "crawling_info_param";
+    protected final String _tableDispName = "crawling_info_param";
+    protected final String _tablePropertyName = "CrawlingInfoParam";
     public String getTableDbName() { return _tableDbName; }
     @Override
     public String getTableDispName() { return _tableDispName; }
@@ -108,19 +108,19 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCrawlingSessionId = cci("crawlingSessionId", "crawlingSessionId", null, null, String.class, "crawlingSessionId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCrawlingInfoId = cci("crawlingInfoId", "crawlingInfoId", null, null, String.class, "crawlingInfoId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnKey = cci("key", "key", null, null, String.class, "key", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCrawlingSessionId() { return _columnCrawlingSessionId; }
+    public ColumnInfo columnCrawlingInfoId() { return _columnCrawlingInfoId; }
     public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
     public ColumnInfo columnKey() { return _columnKey; }
     public ColumnInfo columnValue() { return _columnValue; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
-        ls.add(columnCrawlingSessionId());
+        ls.add(columnCrawlingInfoId());
         ls.add(columnCreatedTime());
         ls.add(columnKey());
         ls.add(columnValue());
@@ -150,17 +150,17 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     //                                                                           =========
     @Override
     public String getEntityTypeName() {
-        return "org.codelibs.fess.es.config.exentity.CrawlingSessionInfo";
+        return "org.codelibs.fess.es.config.exentity.CrawlingInfoParam";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        return "org.codelibs.fess.es.config.cbean.CrawlingSessionInfoCB";
+        return "org.codelibs.fess.es.config.cbean.CrawlingInfoParamCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        return "org.codelibs.fess.es.config.exbhv.CrawlingSessionInfoBhv";
+        return "org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv";
     }
 
     // ===================================================================================
@@ -168,7 +168,7 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     //                                                                         ===========
     @Override
     public Class<? extends Entity> getEntityType() {
-        return CrawlingSessionInfo.class;
+        return CrawlingInfoParam.class;
     }
 
     // ===================================================================================
@@ -176,7 +176,7 @@ public class CrawlingSessionInfoDbm extends AbstractDBMeta {
     //                                                                     ===============
     @Override
     public Entity newEntity() {
-        return new CrawlingSessionInfo();
+        return new CrawlingInfoParam();
     }
 
     // ===================================================================================

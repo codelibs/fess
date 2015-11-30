@@ -1,5 +1,5 @@
 {
-  "crawling_session": {
+  "crawling_info": {
     "_source": {
       "enabled": true
     },

@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingSessionInfoDbm;
-import org.codelibs.fess.es.config.cbean.CrawlingSessionInfoCB;
-import org.codelibs.fess.es.config.cbean.cq.CrawlingSessionInfoCQ;
-import org.codelibs.fess.es.config.cbean.cq.bs.BsCrawlingSessionInfoCQ;
+import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingInfoDbm;
+import org.codelibs.fess.es.config.cbean.CrawlingInfoCB;
+import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsCrawlingInfoCQ;
 import org.dbflute.cbean.ConditionQuery;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -32,25 +32,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
+public class BsCrawlingInfoCB extends EsAbstractConditionBean {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected BsCrawlingSessionInfoCQ _conditionQuery;
+    protected BsCrawlingInfoCQ _conditionQuery;
     protected HpSpecification _specification;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
     @Override
-    public CrawlingSessionInfoDbm asDBMeta() {
-        return CrawlingSessionInfoDbm.getInstance();
+    public CrawlingInfoDbm asDBMeta() {
+        return CrawlingInfoDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "crawling_session_info";
+        return "crawling_info";
     }
 
     @Override
@@ -66,11 +66,11 @@ public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                         Primary Key
     //                                                                         ===========
-    public CrawlingSessionInfoCB acceptPK(String id) {
+    public CrawlingInfoCB acceptPK(String id) {
         assertObjectNotNull("id", id);
-        BsCrawlingSessionInfoCB cb = this;
+        BsCrawlingInfoCB cb = this;
         cb.query().docMeta().setId_Equal(id);
-        return (CrawlingSessionInfoCB) this;
+        return (CrawlingInfoCB) this;
     }
 
     @Override
@@ -114,20 +114,20 @@ public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-    public BsCrawlingSessionInfoCQ query() {
+    public BsCrawlingInfoCQ query() {
         assertQueryPurpose();
         return doGetConditionQuery();
     }
 
-    protected BsCrawlingSessionInfoCQ doGetConditionQuery() {
+    protected BsCrawlingInfoCQ doGetConditionQuery() {
         if (_conditionQuery == null) {
             _conditionQuery = createLocalCQ();
         }
         return _conditionQuery;
     }
 
-    protected BsCrawlingSessionInfoCQ createLocalCQ() {
-        return new CrawlingSessionInfoCQ();
+    protected BsCrawlingInfoCQ createLocalCQ() {
+        return new CrawlingInfoCQ();
     }
 
     // ===================================================================================
@@ -158,17 +158,17 @@ public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnCrawlingSessionId() {
-            doColumn("crawlingSessionId");
-        }
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-        public void columnKey() {
-            doColumn("key");
+        public void columnExpiredTime() {
+            doColumn("expiredTime");
         }
-        public void columnValue() {
-            doColumn("value");
+        public void columnName() {
+            doColumn("name");
+        }
+        public void columnSessionId() {
+            doColumn("sessionId");
         }
     }
 }

@@ -19,7 +19,7 @@ import java.time.*;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.CrawlingSessionInfoCQ;
+import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoParamCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -37,7 +37,7 @@ import org.elasticsearch.index.query.TermsQueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
+public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -46,34 +46,34 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "crawling_session_info";
+        return "crawling_info_param";
     }
 
     @Override
     public String xgetAliasName() {
-        return "crawling_session_info";
+        return "crawling_info_param";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<CrawlingSessionInfoCQ, CrawlingSessionInfoCQ> filteredLambda) {
+    public void filtered(FilteredCall<CrawlingInfoParamCQ, CrawlingInfoParamCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<CrawlingSessionInfoCQ, CrawlingSessionInfoCQ> filteredLambda,
+    public void filtered(FilteredCall<CrawlingInfoParamCQ, CrawlingInfoParamCQ> filteredLambda,
             ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter)->{
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<CrawlingSessionInfoCQ> notLambda) {
+    public void not(OperatorCall<CrawlingInfoParamCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<CrawlingSessionInfoCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        CrawlingSessionInfoCQ notQuery = new CrawlingSessionInfoCQ();
+    public void not(OperatorCall<CrawlingInfoParamCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        CrawlingInfoParamCQ notQuery = new CrawlingInfoParamCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
             if (notQuery.getQueryBuilderList().size() > 1) {
@@ -87,15 +87,15 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public void bool(BoolCall<CrawlingSessionInfoCQ> boolLambda) {
+    public void bool(BoolCall<CrawlingInfoParamCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<CrawlingSessionInfoCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        CrawlingSessionInfoCQ mustQuery = new CrawlingSessionInfoCQ();
-        CrawlingSessionInfoCQ shouldQuery = new CrawlingSessionInfoCQ();
-        CrawlingSessionInfoCQ mustNotQuery = new CrawlingSessionInfoCQ();
-        CrawlingSessionInfoCQ filterQuery = new CrawlingSessionInfoCQ();
+    public void bool(BoolCall<CrawlingInfoParamCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        CrawlingInfoParamCQ mustQuery = new CrawlingInfoParamCQ();
+        CrawlingInfoParamCQ shouldQuery = new CrawlingInfoParamCQ();
+        CrawlingInfoParamCQ mustNotQuery = new CrawlingInfoParamCQ();
+        CrawlingInfoParamCQ filterQuery = new CrawlingInfoParamCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
@@ -165,179 +165,179 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Id_Asc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Id_Desc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
 
-    public void setCrawlingSessionId_Equal(String crawlingSessionId) {
-        setCrawlingSessionId_Term(crawlingSessionId, null);
+    public void setCrawlingInfoId_Equal(String crawlingInfoId) {
+        setCrawlingInfoId_Term(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_Equal(String crawlingSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setCrawlingSessionId_Term(crawlingSessionId, opLambda);
+    public void setCrawlingInfoId_Equal(String crawlingInfoId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setCrawlingInfoId_Term(crawlingInfoId, opLambda);
     }
 
-    public void setCrawlingSessionId_Term(String crawlingSessionId) {
-        setCrawlingSessionId_Term(crawlingSessionId, null);
+    public void setCrawlingInfoId_Term(String crawlingInfoId) {
+        setCrawlingInfoId_Term(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_Term(String crawlingSessionId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_Term(String crawlingInfoId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_NotEqual(String crawlingSessionId) {
-        setCrawlingSessionId_NotTerm(crawlingSessionId, null);
+    public void setCrawlingInfoId_NotEqual(String crawlingInfoId) {
+        setCrawlingInfoId_NotTerm(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_NotEqual(String crawlingSessionId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCrawlingSessionId_NotTerm(crawlingSessionId, opLambda);
+    public void setCrawlingInfoId_NotEqual(String crawlingInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setCrawlingInfoId_NotTerm(crawlingInfoId, opLambda);
     }
 
-    public void setCrawlingSessionId_NotTerm(String crawlingSessionId) {
-        setCrawlingSessionId_NotTerm(crawlingSessionId, null);
+    public void setCrawlingInfoId_NotTerm(String crawlingInfoId) {
+        setCrawlingInfoId_NotTerm(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_NotTerm(String crawlingSessionId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("crawlingSessionId", crawlingSessionId));
+    public void setCrawlingInfoId_NotTerm(String crawlingInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("crawlingInfoId", crawlingInfoId));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_Terms(Collection<String> crawlingSessionIdList) {
-        setCrawlingSessionId_Terms(crawlingSessionIdList, null);
+    public void setCrawlingInfoId_Terms(Collection<String> crawlingInfoIdList) {
+        setCrawlingInfoId_Terms(crawlingInfoIdList, null);
     }
 
-    public void setCrawlingSessionId_Terms(Collection<String> crawlingSessionIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("crawlingSessionId", crawlingSessionIdList);
+    public void setCrawlingInfoId_Terms(Collection<String> crawlingInfoIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("crawlingInfoId", crawlingInfoIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_InScope(Collection<String> crawlingSessionIdList) {
-        setCrawlingSessionId_Terms(crawlingSessionIdList, null);
+    public void setCrawlingInfoId_InScope(Collection<String> crawlingInfoIdList) {
+        setCrawlingInfoId_Terms(crawlingInfoIdList, null);
     }
 
-    public void setCrawlingSessionId_InScope(Collection<String> crawlingSessionIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setCrawlingSessionId_Terms(crawlingSessionIdList, opLambda);
+    public void setCrawlingInfoId_InScope(Collection<String> crawlingInfoIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setCrawlingInfoId_Terms(crawlingInfoIdList, opLambda);
     }
 
-    public void setCrawlingSessionId_Match(String crawlingSessionId) {
-        setCrawlingSessionId_Match(crawlingSessionId, null);
+    public void setCrawlingInfoId_Match(String crawlingInfoId) {
+        setCrawlingInfoId_Match(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_Match(String crawlingSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_Match(String crawlingInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_MatchPhrase(String crawlingSessionId) {
-        setCrawlingSessionId_MatchPhrase(crawlingSessionId, null);
+    public void setCrawlingInfoId_MatchPhrase(String crawlingInfoId) {
+        setCrawlingInfoId_MatchPhrase(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_MatchPhrase(String crawlingSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_MatchPhrase(String crawlingInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_MatchPhrasePrefix(String crawlingSessionId) {
-        setCrawlingSessionId_MatchPhrasePrefix(crawlingSessionId, null);
+    public void setCrawlingInfoId_MatchPhrasePrefix(String crawlingInfoId) {
+        setCrawlingInfoId_MatchPhrasePrefix(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_MatchPhrasePrefix(String crawlingSessionId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_MatchPhrasePrefix(String crawlingInfoId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_Fuzzy(String crawlingSessionId) {
-        setCrawlingSessionId_Fuzzy(crawlingSessionId, null);
+    public void setCrawlingInfoId_Fuzzy(String crawlingInfoId) {
+        setCrawlingInfoId_Fuzzy(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_Fuzzy(String crawlingSessionId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_Fuzzy(String crawlingInfoId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_Prefix(String crawlingSessionId) {
-        setCrawlingSessionId_Prefix(crawlingSessionId, null);
+    public void setCrawlingInfoId_Prefix(String crawlingInfoId) {
+        setCrawlingInfoId_Prefix(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_Prefix(String crawlingSessionId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("crawlingSessionId", crawlingSessionId);
+    public void setCrawlingInfoId_Prefix(String crawlingInfoId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_GreaterThan(String crawlingSessionId) {
-        setCrawlingSessionId_GreaterThan(crawlingSessionId, null);
+    public void setCrawlingInfoId_GreaterThan(String crawlingInfoId) {
+        setCrawlingInfoId_GreaterThan(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_GreaterThan(String crawlingSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("crawlingSessionId", ConditionKey.CK_GREATER_THAN, crawlingSessionId);
+    public void setCrawlingInfoId_GreaterThan(String crawlingInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("crawlingInfoId", ConditionKey.CK_GREATER_THAN, crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_LessThan(String crawlingSessionId) {
-        setCrawlingSessionId_LessThan(crawlingSessionId, null);
+    public void setCrawlingInfoId_LessThan(String crawlingInfoId) {
+        setCrawlingInfoId_LessThan(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_LessThan(String crawlingSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("crawlingSessionId", ConditionKey.CK_LESS_THAN, crawlingSessionId);
+    public void setCrawlingInfoId_LessThan(String crawlingInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("crawlingInfoId", ConditionKey.CK_LESS_THAN, crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_GreaterEqual(String crawlingSessionId) {
-        setCrawlingSessionId_GreaterEqual(crawlingSessionId, null);
+    public void setCrawlingInfoId_GreaterEqual(String crawlingInfoId) {
+        setCrawlingInfoId_GreaterEqual(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_GreaterEqual(String crawlingSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("crawlingSessionId", ConditionKey.CK_GREATER_EQUAL, crawlingSessionId);
+    public void setCrawlingInfoId_GreaterEqual(String crawlingInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("crawlingInfoId", ConditionKey.CK_GREATER_EQUAL, crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setCrawlingSessionId_LessEqual(String crawlingSessionId) {
-        setCrawlingSessionId_LessEqual(crawlingSessionId, null);
+    public void setCrawlingInfoId_LessEqual(String crawlingInfoId) {
+        setCrawlingInfoId_LessEqual(crawlingInfoId, null);
     }
 
-    public void setCrawlingSessionId_LessEqual(String crawlingSessionId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("crawlingSessionId", ConditionKey.CK_LESS_EQUAL, crawlingSessionId);
+    public void setCrawlingInfoId_LessEqual(String crawlingInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("crawlingInfoId", ConditionKey.CK_LESS_EQUAL, crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_CrawlingSessionId_Asc() {
-        regOBA("crawlingSessionId");
+    public BsCrawlingInfoParamCQ addOrderBy_CrawlingInfoId_Asc() {
+        regOBA("crawlingInfoId");
         return this;
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_CrawlingSessionId_Desc() {
-        regOBD("crawlingSessionId");
+    public BsCrawlingInfoParamCQ addOrderBy_CrawlingInfoId_Desc() {
+        regOBD("crawlingInfoId");
         return this;
     }
 
@@ -486,12 +486,12 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_CreatedTime_Asc() {
+    public BsCrawlingInfoParamCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_CreatedTime_Desc() {
+    public BsCrawlingInfoParamCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
     }
@@ -652,12 +652,12 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Key_Asc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Key_Asc() {
         regOBA("key");
         return this;
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Key_Desc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Key_Desc() {
         regOBD("key");
         return this;
     }
@@ -818,12 +818,12 @@ public abstract class BsCrawlingSessionInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Value_Asc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Value_Asc() {
         regOBA("value");
         return this;
     }
 
-    public BsCrawlingSessionInfoCQ addOrderBy_Value_Desc() {
+    public BsCrawlingInfoParamCQ addOrderBy_Value_Desc() {
         regOBD("value");
         return this;
     }

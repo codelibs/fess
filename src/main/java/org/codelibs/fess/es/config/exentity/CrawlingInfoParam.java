@@ -17,20 +17,20 @@ package org.codelibs.fess.es.config.exentity;
 
 import java.util.Locale;
 
-import org.codelibs.fess.es.config.bsentity.BsCrawlingSessionInfo;
-import org.codelibs.fess.es.config.exbhv.CrawlingSessionBhv;
+import org.codelibs.fess.es.config.bsentity.BsCrawlingInfoParam;
+import org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.util.LaRequestUtil;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class CrawlingSessionInfo extends BsCrawlingSessionInfo {
+public class CrawlingInfoParam extends BsCrawlingInfoParam {
 
     private static final long serialVersionUID = 1L;
 
-    private OptionalEntity<CrawlingSession> crawlingSession;
+    private OptionalEntity<CrawlingInfo> crawlingInfo;
 
     public String getId() {
         return asDocMeta().id();
@@ -48,14 +48,14 @@ public class CrawlingSessionInfo extends BsCrawlingSessionInfo {
         asDocMeta().version(version);
     }
 
-    public OptionalEntity<CrawlingSession> getCrawlingSession() {
-        if (crawlingSession != null) {
-            final CrawlingSessionBhv crawlingSessionBhv = ComponentUtil.getComponent(CrawlingSessionBhv.class);
-            crawlingSession = crawlingSessionBhv.selectEntity(cb -> {
-                cb.query().docMeta().setId_Equal(getCrawlingSessionId());
+    public OptionalEntity<CrawlingInfo> getCrawlingInfo() {
+        if (crawlingInfo != null) {
+            final CrawlingInfoBhv crawlingInfoBhv = ComponentUtil.getComponent(CrawlingInfoBhv.class);
+            crawlingInfo = crawlingInfoBhv.selectEntity(cb -> {
+                cb.query().docMeta().setId_Equal(getCrawlingInfoId());
             });
         }
-        return crawlingSession;
+        return crawlingInfo;
     }
 
     public String getKeyMsg() {

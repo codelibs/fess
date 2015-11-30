@@ -46,7 +46,7 @@ public class CrawlJob {
 
     protected String sessionId;
 
-    protected String namespace = Constants.CRAWLING_SESSION_SYSTEM_NAME;
+    protected String namespace = Constants.CRAWLING_INFO_SYSTEM_NAME;
 
     protected String[] webConfigIds;
 

@@ -6,8 +6,8 @@
 
     <!-- The components of Behavior. -->
     <component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
-    <component name="crawlingSessionBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingSessionBhv"/>
-    <component name="crawlingSessionInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingSessionInfoBhv"/>
+    <component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
+    <component name="crawlingInfoParamBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv"/>
     <component name="dataConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv"/>
     <component name="dataConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv"/>
     <component name="dataConfigBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigBhv"/>

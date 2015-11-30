@@ -204,7 +204,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String SESSION_ID = "sessionId";
 
-    public static final String CRAWLING_SESSION_ID = "crawlingSessionId";
+    public static final String CRAWLING_INFO_ID = "crawlingInfoId";
 
     public static final String INDEXING_TARGET = "indexingTarget";
 
@@ -247,7 +247,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String SCREEN_SHOT_PATH_CACHE = "screenShotPaths";
 
-    public static final String CRAWLING_SESSION_SYSTEM_NAME = "system";
+    public static final String CRAWLING_INFO_SYSTEM_NAME = "system";
 
     // view parameters
 

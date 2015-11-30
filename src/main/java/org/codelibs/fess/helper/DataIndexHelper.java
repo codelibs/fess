@@ -113,7 +113,7 @@ public class DataIndexHelper implements Serializable {
             sessionIdList.add(sid);
 
             initParamMap.put(Constants.SESSION_ID, sessionId);
-            initParamMap.put(Constants.CRAWLING_SESSION_ID, sid);
+            initParamMap.put(Constants.CRAWLING_INFO_ID, sid);
 
             final DataCrawlingThread dataCrawlingThread = new DataCrawlingThread(dataConfig, indexUpdateCallback, initParamMap);
             dataCrawlingThread.setPriority(crawlerPriority);
@@ -184,16 +184,16 @@ public class DataIndexHelper implements Serializable {
         dataCrawlingThreadStatusList.clear();
 
         // put cralwing info
-        final CrawlingSessionHelper crawlingSessionHelper = ComponentUtil.getCrawlingSessionHelper();
+        final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
         final long execTime = System.currentTimeMillis() - startTime;
-        crawlingSessionHelper.putToInfoMap(Constants.DATA_CRAWLING_EXEC_TIME, Long.toString(execTime));
+        crawlingInfoHelper.putToInfoMap(Constants.DATA_CRAWLING_EXEC_TIME, Long.toString(execTime));
         if (logger.isInfoEnabled()) {
             logger.info("[EXEC TIME] crawling time: " + execTime + "ms");
         }
 
-        crawlingSessionHelper.putToInfoMap(Constants.DATA_INDEX_EXEC_TIME, Long.toString(indexUpdateCallback.getExecuteTime()));
-        crawlingSessionHelper.putToInfoMap(Constants.DATA_INDEX_SIZE, Long.toString(indexUpdateCallback.getDocumentSize()));
+        crawlingInfoHelper.putToInfoMap(Constants.DATA_INDEX_EXEC_TIME, Long.toString(indexUpdateCallback.getExecuteTime()));
+        crawlingInfoHelper.putToInfoMap(Constants.DATA_INDEX_SIZE, Long.toString(indexUpdateCallback.getDocumentSize()));
 
         for (final String sid : sessionIdList) {
             // remove config
@@ -275,8 +275,8 @@ public class DataIndexHelper implements Serializable {
             }
         }
 
-        public String getCrawlingSessionId() {
-            return initParamMap.get(Constants.CRAWLING_SESSION_ID);
+        public String getCrawlingInfoId() {
+            return initParamMap.get(Constants.CRAWLING_INFO_ID);
         }
 
         public boolean isRunning() {
