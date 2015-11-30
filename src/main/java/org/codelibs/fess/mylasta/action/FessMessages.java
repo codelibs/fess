@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import org.codelibs.fess.mylasta.action.FessLabels;
 import org.lastaflute.web.ruts.message.ActionMessage;
 
 /**

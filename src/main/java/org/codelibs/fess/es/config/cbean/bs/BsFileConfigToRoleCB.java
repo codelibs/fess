@@ -75,7 +75,7 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,7 +161,6 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
         public void columnFileConfigId() {
             doColumn("fileConfigId");
         }
-
         public void columnRoleTypeId() {
             doColumn("roleTypeId");
         }

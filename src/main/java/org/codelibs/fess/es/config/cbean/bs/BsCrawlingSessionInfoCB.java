@@ -75,7 +75,7 @@ public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,15 +161,12 @@ public class BsCrawlingSessionInfoCB extends EsAbstractConditionBean {
         public void columnCrawlingSessionId() {
             doColumn("crawlingSessionId");
         }
-
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-
         public void columnKey() {
             doColumn("key");
         }
-
         public void columnValue() {
             doColumn("value");
         }

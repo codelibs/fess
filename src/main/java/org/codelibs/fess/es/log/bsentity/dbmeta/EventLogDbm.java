@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.log.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.exentity.EventLog;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,14 +80,11 @@ public class EventLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((EventLog) et).getCreatedAt(), (et, vl) -> ((EventLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)),
-                "createdAt");
-        setupEpg(_epgMap, et -> ((EventLog) et).getCreatedBy(), (et, vl) -> ((EventLog) et).setCreatedBy(DfTypeUtil.toString(vl)),
-                "createdBy");
-        setupEpg(_epgMap, et -> ((EventLog) et).getEventType(), (et, vl) -> ((EventLog) et).setEventType(DfTypeUtil.toString(vl)),
-                "eventType");
-        setupEpg(_epgMap, et -> ((EventLog) et).getMessage(), (et, vl) -> ((EventLog) et).setMessage(DfTypeUtil.toString(vl)), "message");
-        setupEpg(_epgMap, et -> ((EventLog) et).getPath(), (et, vl) -> ((EventLog) et).setPath(DfTypeUtil.toString(vl)), "path");
+        setupEpg(_epgMap, et-> ((EventLog)et).getCreatedAt(),(et,vl)->((EventLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
+        setupEpg(_epgMap, et-> ((EventLog)et).getCreatedBy(),(et,vl)->((EventLog) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et-> ((EventLog)et).getEventType(),(et,vl)->((EventLog) et).setEventType(DfTypeUtil.toString(vl)), "eventType");
+        setupEpg(_epgMap, et-> ((EventLog)et).getMessage(),(et,vl)->((EventLog) et).setMessage(DfTypeUtil.toString(vl)), "message");
+        setupEpg(_epgMap, et-> ((EventLog)et).getPath(),(et,vl)->((EventLog) et).setPath(DfTypeUtil.toString(vl)), "path");
     }
 
     @Override
@@ -100,59 +98,28 @@ public class EventLogDbm extends AbstractDBMeta {
     protected final String _tableDbName = "event_log";
     protected final String _tableDispName = "event_log";
     protected final String _tablePropertyName = "EventLog";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
-            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnEventType = cci("eventType", "eventType", null, null, String.class, "eventType", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnMessage = cci("message", "message", null, null, String.class, "message", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnEventType = cci("eventType", "eventType", null, null, String.class, "eventType", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnMessage = cci("message", "message", null, null, String.class, "message", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedAt() {
-        return _columnCreatedAt;
-    }
-
-    public ColumnInfo columnCreatedBy() {
-        return _columnCreatedBy;
-    }
-
-    public ColumnInfo columnEventType() {
-        return _columnEventType;
-    }
-
-    public ColumnInfo columnMessage() {
-        return _columnMessage;
-    }
-
-    public ColumnInfo columnPath() {
-        return _columnPath;
-    }
+    public ColumnInfo columnCreatedAt() { return _columnCreatedAt; }
+    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
+    public ColumnInfo columnEventType() { return _columnEventType; }
+    public ColumnInfo columnMessage() { return _columnMessage; }
+    public ColumnInfo columnPath() { return _columnPath; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -237,3 +204,4 @@ public class EventLogDbm extends AbstractDBMeta {
         return null;
     }
 }
+

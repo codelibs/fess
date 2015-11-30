@@ -169,7 +169,7 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
     }
 
     public void selectBulk(CBCall<CrawlingSessionCB> cbLambda, EntityRowHandler<List<CrawlingSession>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -249,3 +249,4 @@ public abstract class BsCrawlingSessionBhv extends EsAbstractBehavior<CrawlingSe
 
     // #pending create, modify, remove
 }
+

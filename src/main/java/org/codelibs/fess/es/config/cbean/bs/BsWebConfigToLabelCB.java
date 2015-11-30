@@ -75,7 +75,7 @@ public class BsWebConfigToLabelCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,7 +161,6 @@ public class BsWebConfigToLabelCB extends EsAbstractConditionBean {
         public void columnLabelTypeId() {
             doColumn("labelTypeId");
         }
-
         public void columnWebConfigId() {
             doColumn("webConfigId");
         }

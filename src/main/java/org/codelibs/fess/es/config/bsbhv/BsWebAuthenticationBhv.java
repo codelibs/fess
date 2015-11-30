@@ -177,7 +177,7 @@ public abstract class BsWebAuthenticationBhv extends EsAbstractBehavior<WebAuthe
     }
 
     public void selectBulk(CBCall<WebAuthenticationCB> cbLambda, EntityRowHandler<List<WebAuthentication>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -257,3 +257,4 @@ public abstract class BsWebAuthenticationBhv extends EsAbstractBehavior<WebAuthe
 
     // #pending create, modify, remove
 }
+

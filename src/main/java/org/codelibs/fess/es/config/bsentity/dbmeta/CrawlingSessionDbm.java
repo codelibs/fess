@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.CrawlingSession;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,14 +80,10 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((CrawlingSession) et).getCreatedTime(),
-                (et, vl) -> ((CrawlingSession) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((CrawlingSession) et).getExpiredTime(),
-                (et, vl) -> ((CrawlingSession) et).setExpiredTime(DfTypeUtil.toLong(vl)), "expiredTime");
-        setupEpg(_epgMap, et -> ((CrawlingSession) et).getName(), (et, vl) -> ((CrawlingSession) et).setName(DfTypeUtil.toString(vl)),
-                "name");
-        setupEpg(_epgMap, et -> ((CrawlingSession) et).getSessionId(),
-                (et, vl) -> ((CrawlingSession) et).setSessionId(DfTypeUtil.toString(vl)), "sessionId");
+        setupEpg(_epgMap, et-> ((CrawlingSession)et).getCreatedTime(),(et,vl)->((CrawlingSession) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((CrawlingSession)et).getExpiredTime(),(et,vl)->((CrawlingSession) et).setExpiredTime(DfTypeUtil.toLong(vl)), "expiredTime");
+        setupEpg(_epgMap, et-> ((CrawlingSession)et).getName(),(et,vl)->((CrawlingSession) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et-> ((CrawlingSession)et).getSessionId(),(et,vl)->((CrawlingSession) et).setSessionId(DfTypeUtil.toString(vl)), "sessionId");
     }
 
     @Override
@@ -100,53 +97,26 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
     protected final String _tableDbName = "crawling_session";
     protected final String _tableDispName = "crawling_session";
     protected final String _tablePropertyName = "CrawlingSession";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSessionId = cci("sessionId", "sessionId", null, null, String.class, "sessionId", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSessionId = cci("sessionId", "sessionId", null, null, String.class, "sessionId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnExpiredTime() {
-        return _columnExpiredTime;
-    }
-
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnSessionId() {
-        return _columnSessionId;
-    }
+    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
+    public ColumnInfo columnExpiredTime() { return _columnExpiredTime; }
+    public ColumnInfo columnName() { return _columnName; }
+    public ColumnInfo columnSessionId() { return _columnSessionId; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -230,3 +200,4 @@ public class CrawlingSessionDbm extends AbstractDBMeta {
         return null;
     }
 }
+

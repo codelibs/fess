@@ -99,7 +99,8 @@ public abstract class BsSearchFieldLogBhv extends EsAbstractBehavior<SearchField
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SearchFieldLog> OptionalEntity<ENTITY> doSelectOptionalEntity(SearchFieldLogCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends SearchFieldLog> OptionalEntity<ENTITY> doSelectOptionalEntity(SearchFieldLogCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -167,7 +168,7 @@ public abstract class BsSearchFieldLogBhv extends EsAbstractBehavior<SearchField
     }
 
     public void selectBulk(CBCall<SearchFieldLogCB> cbLambda, EntityRowHandler<List<SearchFieldLog>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -247,3 +248,4 @@ public abstract class BsSearchFieldLogBhv extends EsAbstractBehavior<SearchField
 
     // #pending create, modify, remove
 }
+

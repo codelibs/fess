@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.es.config.cbean.cq.bs;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
@@ -32,6 +32,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+
 
 /**
  * @author ESFlute (using FreeGen)
@@ -60,8 +61,9 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<CrawlingSessionCQ, CrawlingSessionCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        bool((must, should, mustNot, filter) -> {
+    public void filtered(FilteredCall<CrawlingSessionCQ, CrawlingSessionCQ> filteredLambda,
+            ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter)->{
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
@@ -96,9 +98,7 @@ public abstract class BsCrawlingSessionCQ extends EsAbstractConditionQuery {
         CrawlingSessionCQ filterQuery = new CrawlingSessionCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
-            BoolQueryBuilder builder =
-                    regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(),
-                            filterQuery.getQueryBuilderList());
+            BoolQueryBuilder builder = regBoolCQ(mustQuery.getQueryBuilderList(), shouldQuery.getQueryBuilderList(), mustNotQuery.getQueryBuilderList(), filterQuery.getQueryBuilderList());
             if (opLambda != null) {
                 opLambda.callback(builder);
             }
