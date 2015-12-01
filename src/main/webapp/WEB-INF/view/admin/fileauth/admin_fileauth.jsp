@@ -44,7 +44,7 @@
 										<la:errors />
 									</div>
 									<%-- List --%>
-									<c:if test="${fileAuthenticationPager.allRecordCount == 0}">
+									<c:if test="${fileAuthPager.allRecordCount == 0}">
 										<div class="row top10">
 											<div class="col-sm-12">
 												<i class="fa fa-info-circle text-light-blue"></i>
@@ -52,7 +52,7 @@
 											</div>
 										</div>
 									</c:if>
-									<c:if test="${fileAuthenticationPager.allRecordCount > 0}">
+									<c:if test="${fileAuthPager.allRecordCount > 0}">
 										<table class="table table-bordered table-striped">
 											<thead>
 												<tr>
@@ -79,7 +79,7 @@
 												</c:forEach>
 											</tbody>
 										</table>
-										<c:set var="pager" value="${fileAuthenticationPager}"
+										<c:set var="pager" value="${fileAuthPager}"
 											scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 									</c:if>

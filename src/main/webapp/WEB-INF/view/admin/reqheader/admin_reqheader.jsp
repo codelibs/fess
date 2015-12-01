@@ -43,7 +43,7 @@
 										<la:errors />
 									</div>
 									<%-- List --%>
-									<c:if test="${requestHeaderPager.allRecordCount == 0}">
+									<c:if test="${reqHeaderPager.allRecordCount == 0}">
 										<div class="row top10">
 											<div class="col-sm-12">
 												<i class="fa fa-info-circle text-light-blue"></i>
@@ -51,7 +51,7 @@
 											</div>
 										</div>
 									</c:if>
-									<c:if test="${requestHeaderPager.allRecordCount > 0}">
+									<c:if test="${reqHeaderPager.allRecordCount > 0}">
 										<table class="table table-bordered table-striped">
 											<thead>
 												<tr>
@@ -71,7 +71,7 @@
 												</c:forEach>
 											</tbody>
 										</table>
-										<c:set var="pager" value="${requestHeaderPager}"
+										<c:set var="pager" value="${reqHeaderPager}"
 											scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 									</c:if>
