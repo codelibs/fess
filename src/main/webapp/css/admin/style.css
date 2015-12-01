@@ -47,8 +47,10 @@
 	width: 100%;
 }
 
-label.has-error {
+ul.has-error {
 	color: #dd4b39 !important;
+	list-style-type: none;
+	padding: 0;
 }
 
 .form-group .has-error + .form-control {
