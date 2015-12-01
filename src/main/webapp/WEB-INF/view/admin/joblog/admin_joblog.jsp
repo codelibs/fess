@@ -58,7 +58,8 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.joblog_jobName" /></th>
-														<th><la:message key="labels.joblog_jobStatus" /></th>
+														<th class="text-center"><la:message
+																key="labels.joblog_jobStatus" /></th>
 														<th><la:message key="labels.joblog_startTime" /></th>
 														<th><la:message key="labels.joblog_endTime" /></th>
 													</tr>
@@ -68,7 +69,23 @@
 														<tr
 															data-href="${contextPath}/admin/joblog/details/4/${f:u(data.id)}">
 															<td>${f:h(data.jobName)}</td>
-															<td>${f:h(data.jobStatus)}</td>
+															<td class="text-center"><c:choose>
+																	<c:when test="${data.jobStatus == 'ok'}">
+																		<span class="label label-primary"><la:message
+																				key="labels.joblog_status_ok" /></span>
+																	</c:when>
+																	<c:when test="${data.jobStatus == 'fail'}">
+																		<span class="label label-danger"><la:message
+																				key="labels.joblog_status_fail" /></span>
+																	</c:when>
+																	<c:when test="${data.jobStatus == 'running'}">
+																		<span class="label label-danger"><la:message
+																				key="labels.joblog_status_running" /></span>
+																	</c:when>
+																	<c:otherwise>
+																		<span class="label label-default">${f:h(data.jobStatus)}</span>
+																	</c:otherwise>
+																</c:choose></td>
 															<td><fmt:formatDate
 																	value="${fe:date(data.startTime)}"
 																	pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>

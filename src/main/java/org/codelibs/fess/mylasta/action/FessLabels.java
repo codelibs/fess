@@ -1665,7 +1665,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Active */
     public static final String LABELS_scheduledjob_active = "{labels.scheduledjob_active}";
 
-    /** The key of the message: - */
+    /** The key of the message: Inactive */
     public static final String LABELS_scheduledjob_nojob = "{labels.scheduledjob_nojob}";
 
     /** The key of the message: Start now */
@@ -1694,6 +1694,15 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Status */
     public static final String LABELS_joblog_jobStatus = "{labels.joblog_jobStatus}";
+
+    /** The key of the message: Ok */
+    public static final String LABELS_joblog_status_ok = "{labels.joblog_status_ok}";
+
+    /** The key of the message: Failed */
+    public static final String LABELS_joblog_status_fail = "{labels.joblog_status_fail}";
+
+    /** The key of the message: Running */
+    public static final String LABELS_joblog_status_running = "{labels.joblog_status_running}";
 
     /** The key of the message: Create New */
     public static final String LABELS_joblog_link_create = "{labels.joblog_link_create}";

@@ -64,9 +64,11 @@
 															<td>${f:h(data.name)}</td>
 															<td class="text-center"><c:if
 																	test="${data.available=='true'}">
-																	<la:message key="labels.enabled" />
+																	<span class="label label-primary"><la:message
+																			key="labels.enabled" /></span>
 																</c:if> <c:if test="${data.available=='false'}">
-																	<la:message key="labels.disabled" />
+																	<span class="label label-default"><la:message
+																			key="labels.disabled" /></span>
 																</c:if></td>
 														</tr>
 													</c:forEach>

@@ -52,7 +52,8 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.scheduledjob_name" /></th>
-														<th><la:message key="labels.scheduledjob_status" /></th>
+														<th class="text-center"><la:message
+																key="labels.scheduledjob_status" /></th>
 														<th><la:message key="labels.scheduledjob_target" /></th>
 														<th><la:message
 																key="labels.scheduledjob_cronExpression" /></th>
@@ -64,14 +65,17 @@
 														<tr
 															data-href="${contextPath}/admin/scheduler/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
-															<td><c:if test="${data.running}">
-																	<la:message key="labels.scheduledjob_running" />
+															<td class="text-center"><c:if test="${data.running}">
+																	<span class="label label-success"><la:message
+																			key="labels.scheduledjob_running" /></span>
 																</c:if> <c:if test="${!data.running}">
 																	<c:if test="${data.available}">
-																		<la:message key="labels.scheduledjob_active" />
+																		<span class="label label-primary"><la:message
+																				key="labels.scheduledjob_active" /></span>
 																	</c:if>
 																	<c:if test="${!data.available}">
-																		<la:message key="labels.scheduledjob_nojob" />
+																		<span class="label label-default"><la:message
+																				key="labels.scheduledjob_nojob" /></span>
 																	</c:if>
 																</c:if></td>
 															<td>${f:h(data.target)}</td>

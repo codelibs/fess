@@ -83,6 +83,10 @@ section.content table td {
 	overflow-wrap: break-word;
 }
 
+section.content table .label {
+	color: #fff;
+}
+
 textarea.systemInfoData {
 	height: 22em;
 	line-height: 1.5em;
