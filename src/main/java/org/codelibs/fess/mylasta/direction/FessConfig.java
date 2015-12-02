@@ -115,6 +115,18 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. doc */
     String INDEX_DOCUMENT_TYPE = "index.document.type";
 
+    /** The key of the configuration. e.g. 1.6 */
+    String QUERY_BOOST_TITLE = "query.boost.title";
+
+    /** The key of the configuration. e.g. 2.0 */
+    String QUERY_BOOST_TITLE_LANG = "query.boost.title.lang";
+
+    /** The key of the configuration. e.g. 1.0 */
+    String QUERY_BOOST_CONTENT = "query.boost.content";
+
+    /** The key of the configuration. e.g. 1.3 */
+    String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
@@ -498,6 +510,68 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentType();
+
+    /**
+     * Get the value for the key 'query.boost.title'. <br>
+     * The value is, e.g. 1.6 <br>
+     * comment: boost
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostTitle();
+
+    /**
+     * Get the value for the key 'query.boost.title' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 1.6 <br>
+     * comment: boost
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostTitleAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.title.lang'. <br>
+     * The value is, e.g. 2.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostTitleLang();
+
+    /**
+     * Get the value for the key 'query.boost.title.lang' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 2.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostTitleLangAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.content'. <br>
+     * The value is, e.g. 1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostContent();
+
+    /**
+     * Get the value for the key 'query.boost.content' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 1.0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostContentAsDecimal();
+
+    /**
+     * Get the value for the key 'query.boost.content.lang'. <br>
+     * The value is, e.g. 1.3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBoostContentLang();
+
+    /**
+     * Get the value for the key 'query.boost.content.lang' as {@link java.math.BigDecimal}. <br>
+     * The value is, e.g. 1.3 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not decimal.
+     */
+    java.math.BigDecimal getQueryBoostContentLangAsDecimal();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -1051,6 +1125,38 @@ public interface FessConfig extends FessEnv {
 
         public String getIndexDocumentType() {
             return get(FessConfig.INDEX_DOCUMENT_TYPE);
+        }
+
+        public String getQueryBoostTitle() {
+            return get(FessConfig.QUERY_BOOST_TITLE);
+        }
+
+        public java.math.BigDecimal getQueryBoostTitleAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_TITLE);
+        }
+
+        public String getQueryBoostTitleLang() {
+            return get(FessConfig.QUERY_BOOST_TITLE_LANG);
+        }
+
+        public java.math.BigDecimal getQueryBoostTitleLangAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_TITLE_LANG);
+        }
+
+        public String getQueryBoostContent() {
+            return get(FessConfig.QUERY_BOOST_CONTENT);
+        }
+
+        public java.math.BigDecimal getQueryBoostContentAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT);
+        }
+
+        public String getQueryBoostContentLang() {
+            return get(FessConfig.QUERY_BOOST_CONTENT_LANG);
+        }
+
+        public java.math.BigDecimal getQueryBoostContentLangAsDecimal() {
+            return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT_LANG);
         }
 
         public String getAuthenticationAdminRoles() {

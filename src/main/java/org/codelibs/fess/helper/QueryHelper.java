@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -309,7 +308,7 @@ public class QueryHelper implements Serializable {
 
     protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        for (final BooleanClause clause : booleanQuery.getClauses()) {
+        for (final BooleanClause clause : booleanQuery.clauses()) {
             final QueryBuilder queryBuilder = convertQuery(context, clause.getQuery());
             if (queryBuilder != null) {
                 switch (clause.getOccur()) {
@@ -334,7 +333,7 @@ public class QueryHelper implements Serializable {
         final String field = wildcardQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder(f -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(b));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(wildcardQuery.getBoost());
@@ -342,7 +341,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = wildcardQuery.getTerm().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.wildcardQuery(f, origQuery));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b));
         }
     }
 
@@ -350,7 +349,7 @@ public class QueryHelper implements Serializable {
         final String field = prefixQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder(f -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(b));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(prefixQuery.getBoost());
@@ -358,7 +357,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = prefixQuery.getPrefix().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.prefixQuery(f, origQuery));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b));
         }
     }
 
@@ -368,8 +367,8 @@ public class QueryHelper implements Serializable {
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
-            return buildDefaultQueryBuilder(f -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(
-                    Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
             return QueryBuilders.fuzzyQuery(field, term.text()).boost(fuzzyQuery.getBoost())
@@ -378,8 +377,8 @@ public class QueryHelper implements Serializable {
             final String origQuery = fuzzyQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(
-                    Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
         }
     }
 
@@ -410,7 +409,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = termRangeQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, origQuery));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
     }
 
@@ -420,7 +419,7 @@ public class QueryHelper implements Serializable {
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, text));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b));
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
@@ -454,7 +453,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(f -> QueryBuilders.matchPhraseQuery(f, origQuery));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
     }
 
@@ -467,20 +466,30 @@ public class QueryHelper implements Serializable {
         return false;
     }
 
-    private QueryBuilder buildDefaultQueryBuilder(final Function<String, QueryBuilder> builder) {
-        // TODO boost
+    private QueryBuilder buildDefaultQueryBuilder(final DefaultQueryBuilderFunction builder) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        final QueryBuilder titleQuery = builder.apply(fessConfig.getIndexFieldTitle());
+        final QueryBuilder titleQuery =
+                builder.apply(fessConfig.getIndexFieldTitle(), fessConfig.getQueryBoostTitleAsDecimal().floatValue());
         boolQuery.should(titleQuery);
-        final QueryBuilder contentQuery = builder.apply(fessConfig.getIndexFieldContent());
+        final QueryBuilder contentQuery =
+                builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
-        getQueryLanguage().ifPresent(lang -> {
-            final QueryBuilder titleLangQuery = builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang);
-            boolQuery.should(titleLangQuery);
-            final QueryBuilder contentLangQuery = builder.apply(fessConfig.getIndexFieldContent() + "_" + lang);
-            boolQuery.should(contentLangQuery);
-        });
+        getQueryLanguage().ifPresent(
+                lang -> {
+                    final QueryBuilder titleLangQuery =
+                            builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal()
+                                    .floatValue());
+                    boolQuery.should(titleLangQuery);
+                    final QueryBuilder contentLangQuery =
+                            builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig.getQueryBoostContentLangAsDecimal()
+                                    .floatValue());
+                    boolQuery.should(contentLangQuery);
+                });
         return boolQuery;
+    }
+
+    interface DefaultQueryBuilderFunction {
+        QueryBuilder apply(String field, float boost);
     }
 
     protected OptionalThing<String> getQueryLanguage() {
