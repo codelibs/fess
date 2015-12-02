@@ -35,11 +35,13 @@
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp9</dbflute.version>
-		<lastaflute.version>0.6.7-RC3</lastaflute.version>
-		<lasta.taglib.version>0.6.1</lasta.taglib.version>
+		<lastaflute.version>0.6.9-RC2</lastaflute.version>
+		<lasta.taglib.version>0.6.5-RC2</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
 		<mailflute.version>0.4.3-RC2</mailflute.version>
@@ -63,10 +65,10 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.1.0</elasticsearch.version>
-		<cluster.runner.version>2.1.0.0-SNAPSHOT</cluster.runner.version>
+		<cluster.runner.version>2.1.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.3.8-RC9</tomcat.boot.version>
+		<tomcat.boot.version>0.3.9</tomcat.boot.version>
 
 		<!-- Maven Repository -->
 		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
@@ -112,8 +114,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
