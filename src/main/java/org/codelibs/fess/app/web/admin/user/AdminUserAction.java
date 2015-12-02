@@ -290,7 +290,7 @@ public class AdminUserAction extends FessAdminAction {
             }, validationErrorLambda);
         }
         if (form.password != null && !form.password.equals(form.confirmPassword)) {
-            resetPassword(form);
+            form.confirmPassword = null;
             throwValidationError(messages -> {
                 messages.addErrorsInvalidConfirmPassword("confirmPassword");
             }, validationErrorLambda);
