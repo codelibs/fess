@@ -69,18 +69,16 @@
 														<td><c:if
 																test="${data.hostname==null||data.hostname==''}">
 																<la:message key="labels.file_auth_any" />
-															</c:if> ${f:h(data.hostname)}: <c:if test="${data.port==-1}">
+															</c:if> ${f:h(data.hostname)}: <c:if
+																test="${data.port==null||data.port==''}">
 																<la:message key="labels.file_auth_any" />
-															</c:if> <c:if test="${data.port!=-1}">
-																${f:h(data.port)}
-															</c:if></td>
+															</c:if> ${f:h(data.port)}</td>
 														<td>${f:h(data.fileConfig.name)}</td>
 													</tr>
 												</c:forEach>
 											</tbody>
 										</table>
-										<c:set var="pager" value="${fileAuthPager}"
-											scope="request" />
+										<c:set var="pager" value="${fileAuthPager}" scope="request" />
 										<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 									</c:if>
 								</div>
