@@ -39,7 +39,7 @@
 								</div>
 								<!-- /.box-header -->
 								<div class="box-body">
-									<div class="form-group has-error">
+									<div class="form-group">
 										<la:info id="msg" message="true">
 											<div class="alert alert-info">${msg}</div>
 										</la:info>
