@@ -115,6 +115,9 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. doc */
     String INDEX_DOCUMENT_TYPE = "index.document.type";
 
+    /** The key of the configuration. e.g. 1000 */
+    String QUERY_MAX_LENGTH = "query.max.length";
+
     /** The key of the configuration. e.g. 1.6 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
@@ -165,6 +168,15 @@ public interface FessConfig extends FessEnv {
 
     /** The key of the configuration. e.g. 1000 */
     String PAGE_GROUP_MAX_FETCH_SIZE = "page.group.max.fetch.size";
+
+    /** The key of the configuration. e.g. 0 */
+    String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
+
+    /** The key of the configuration. e.g. 20 */
+    String PAGING_SEARCH_PAGE_SIZE = "paging.search.page.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
 
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
@@ -512,6 +524,23 @@ public interface FessConfig extends FessEnv {
     String getIndexDocumentType();
 
     /**
+     * Get the value for the key 'query.max.length'. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: query
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryMaxLength();
+
+    /**
+     * Get the value for the key 'query.max.length' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * comment: query
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryMaxLengthAsInteger();
+
+    /**
      * Get the value for the key 'query.boost.title'. <br>
      * The value is, e.g. 1.6 <br>
      * comment: boost
@@ -749,6 +778,53 @@ public interface FessConfig extends FessEnv {
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPageGroupMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'paging.search.page.start'. <br>
+     * The value is, e.g. 0 <br>
+     * comment: search page
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPagingSearchPageStart();
+
+    /**
+     * Get the value for the key 'paging.search.page.start' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * comment: search page
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPagingSearchPageStartAsInteger();
+
+    /**
+     * Get the value for the key 'paging.search.page.size'. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPagingSearchPageSize();
+
+    /**
+     * Get the value for the key 'paging.search.page.size' as {@link Integer}. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPagingSearchPageSizeAsInteger();
+
+    /**
+     * Get the value for the key 'paging.search.page.max.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPagingSearchPageMaxSize();
+
+    /**
+     * Get the value for the key 'paging.search.page.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPagingSearchPageMaxSizeAsInteger();
 
     /**
      * Get the value for the key 'mail.from.name'. <br>
@@ -1127,6 +1203,14 @@ public interface FessConfig extends FessEnv {
             return get(FessConfig.INDEX_DOCUMENT_TYPE);
         }
 
+        public String getQueryMaxLength() {
+            return get(FessConfig.QUERY_MAX_LENGTH);
+        }
+
+        public Integer getQueryMaxLengthAsInteger() {
+            return getAsInteger(FessConfig.QUERY_MAX_LENGTH);
+        }
+
         public String getQueryBoostTitle() {
             return get(FessConfig.QUERY_BOOST_TITLE);
         }
@@ -1245,6 +1329,30 @@ public interface FessConfig extends FessEnv {
 
         public Integer getPageGroupMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
+        }
+
+        public String getPagingSearchPageStart() {
+            return get(FessConfig.PAGING_SEARCH_PAGE_START);
+        }
+
+        public Integer getPagingSearchPageStartAsInteger() {
+            return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_START);
+        }
+
+        public String getPagingSearchPageSize() {
+            return get(FessConfig.PAGING_SEARCH_PAGE_SIZE);
+        }
+
+        public Integer getPagingSearchPageSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_SIZE);
+        }
+
+        public String getPagingSearchPageMaxSize() {
+            return get(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
+        }
+
+        public Integer getPagingSearchPageMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
         }
 
         public String getMailFromName() {

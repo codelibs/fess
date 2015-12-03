@@ -17,9 +17,11 @@ package org.codelibs.fess.util;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class StreamUtil {
+    @SafeVarargs
     public static <T> Stream<T> of(final T... values) {
         if (values != null) {
             return Arrays.stream(values);
@@ -27,4 +29,13 @@ public class StreamUtil {
             return Collections.<T> emptyList().stream();
         }
     }
+
+    public static <K, V> Stream<Map.Entry<K, V>> of(final Map<K, V> map) {
+        if (map != null) {
+            return map.entrySet().stream();
+        } else {
+            return Collections.<K, V> emptyMap().entrySet().stream();
+        }
+    }
+
 }

@@ -21,10 +21,6 @@ public interface SearchRequestParams {
 
     String getQuery();
 
-    String getOperator();
-
-    String[] getAdditional();
-
     Map<String, String[]> getFields();
 
     String[] getLanguages();
@@ -40,5 +36,7 @@ public interface SearchRequestParams {
     int getPageSize();
 
     boolean isAdministrativeAccess();
+
+    String[] getExtraQueries();
 
 }

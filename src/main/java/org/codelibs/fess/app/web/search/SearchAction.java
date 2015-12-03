@@ -33,6 +33,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.util.FacetResponse;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -109,21 +110,9 @@ public class SearchAction extends FessSearchAction {
             }
         }
 
-        if (StringUtil.isBlank(form.query)) {
-            try {
-                final String optionQuery = queryHelper.buildOptionQuery(form.options);
-                form.query = optionQuery;
-            } catch (final InvalidQueryException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(e.getMessage(), e);
-                }
-                throwValidationError(e.getMessageCode(), () -> asHtml(path_ErrorJsp));
-            }
-        }
-
-        if (StringUtil.isBlank(form.query) && form.fields.isEmpty()) {
+        if (StringUtil.isBlank(form.q) && form.fields.isEmpty()) {
             // redirect to index page
-            form.query = null;
+            form.q = null;
             return redirect(RootAction.class);
         }
 
@@ -163,7 +152,7 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected HtmlResponse doMove(final SearchForm form, final int move) {
-        int start = queryHelper.getDefaultStart();
+        int start = fessConfig.getPagingSearchPageStartAsInteger();
         if (form.pn != null) {
             int pageNumber = form.pn;
             if (pageNumber > 0) {
@@ -191,7 +180,7 @@ public class SearchAction extends FessSearchAction {
 
     protected String getDisplayQuery(final SearchForm form, final List<Map<String, String>> labelTypeItems) {
         final StringBuilder buf = new StringBuilder(100);
-        buf.append(form.query);
+        buf.append(form.q);
         if (!form.fields.isEmpty() && form.fields.containsKey(LABEL_FIELD)) {
             final String[] values = form.fields.get(LABEL_FIELD);
             final List<String> labelList = new ArrayList<String>();
@@ -215,16 +204,11 @@ public class SearchAction extends FessSearchAction {
 
     protected String getPagingQuery(final SearchForm form) {
         final StringBuilder buf = new StringBuilder(200);
-        if (form.additional != null) {
-            searchService.appendAdditionalQuery(form.additional, additional -> {
-                buf.append("&additional=").append(LaFunctions.u(additional));
-            });
+        if (form.ex_q != null) {
+            StreamUtil.of(form.ex_q).filter(q -> StringUtil.isNotBlank(q)).forEach(q -> buf.append("&ex_q=").append(LaFunctions.u(q)));
         }
         if (StringUtil.isNotBlank(form.sort)) {
             buf.append("&sort=").append(LaFunctions.u(form.sort));
-        }
-        if (StringUtil.isNotBlank(form.op)) {
-            buf.append("&op=").append(LaFunctions.u(form.op));
         }
         if (form.lang != null) {
             final Set<String> langSet = new HashSet<String>();

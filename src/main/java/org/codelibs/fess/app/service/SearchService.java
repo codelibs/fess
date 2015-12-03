@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +48,7 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
-import org.codelibs.fess.util.QueryUtil;
+import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.ElasticsearchException;
@@ -65,8 +63,6 @@ public class SearchService {
     // ===================================================================================
     //                                                                            Constant
     //
-
-    protected static final Pattern FIELD_EXTRACTION_PATTERN = Pattern.compile("^([a-zA-Z0-9_]+):.*");
 
     // ===================================================================================
     //                                                                           Attribute
@@ -100,34 +96,8 @@ public class SearchService {
         final boolean searchLogSupport =
                 Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
 
-        if (StringUtil.isNotBlank(params.getOperator())) {
-            request.setAttribute(Constants.DEFAULT_OPERATOR, params.getOperator());
-        }
-
-        final StringBuilder queryBuf = new StringBuilder(255);
-        if (StringUtil.isNotBlank(params.getQuery())) {
-            if (params.getQuery().indexOf(" OR ") >= 0) {
-                queryBuf.append('(').append(params.getQuery()).append(')');
-            } else {
-                queryBuf.append(params.getQuery());
-            }
-        }
-        if (params.getAdditional() != null) {
-            appendAdditionalQuery(params.getAdditional(), additional -> {
-                queryBuf.append(' ').append(additional);
-            });
-        }
-        params.getFields().entrySet().stream().forEach(entry -> {
-            appendQueries(queryBuf, entry.getKey(), entry.getValue());
-        });
-        if (StringUtil.isNotBlank(params.getSort())) {
-            queryBuf.append(" sort:").append(params.getSort());
-        }
-        if (params.getLanguages() != null) {
-            appendQueries(queryBuf, fessConfig.getIndexFieldLang(), params.getLanguages());
-        }
-
-        final String query = queryBuf.toString().trim();
+        final String query =
+                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
 
         final int pageStart = params.getStartPosition();
         final int pageSize = params.getPageSize();
@@ -173,7 +143,7 @@ public class SearchService {
         }
         data.setExecTime(execTime);
 
-        final String queryId = QueryUtil.generateId();
+        final String queryId = queryHelper.generateId();
 
         data.setPageSize(queryResponseList.getPageSize());
         data.setCurrentPageNumber(queryResponseList.getCurrentPageNumber());
@@ -197,32 +167,9 @@ public class SearchService {
     }
 
     public int deleteByQuery(final HttpServletRequest request, final SearchRequestParams params) {
-        if (StringUtil.isNotBlank(params.getOperator())) {
-            request.setAttribute(Constants.DEFAULT_OPERATOR, params.getOperator());
-        }
 
-        final StringBuilder queryBuf = new StringBuilder(255);
-        if (StringUtil.isNotBlank(params.getQuery())) {
-            if (params.getQuery().indexOf(" OR ") >= 0) {
-                queryBuf.append('(').append(params.getQuery()).append(')');
-            } else {
-                queryBuf.append(params.getQuery());
-            }
-        }
-        if (params.getAdditional() != null) {
-            appendAdditionalQuery(params.getAdditional(), additional -> {
-                queryBuf.append(' ').append(additional);
-            });
-        }
-        params.getFields().entrySet().stream().forEach(entry -> {
-            appendQueries(queryBuf, entry.getKey(), entry.getValue());
-        });
-
-        if (params.getLanguages() != null) {
-            appendQueries(queryBuf, fessConfig.getIndexFieldLang(), params.getLanguages());
-        }
-
-        final String query = queryBuf.toString().trim();
+        final String query =
+                QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
 
         final QueryContext queryContext = queryHelper.build(query, context -> {
             context.skipRoleQuery();
@@ -324,45 +271,6 @@ public class SearchService {
         return StringUtil.EMPTY_STRINGS;
     }
 
-    protected void appendQueries(final StringBuilder queryBuf, final String key, final String[] values) {
-        if (values.length == 1) {
-            queryBuf.append(' ').append(key).append(":\"").append(values[0]).append('\"');
-        } else if (values.length > 1) {
-            boolean first = true;
-            queryBuf.append(" (");
-            for (final String value : values) {
-                if (first) {
-                    first = false;
-                } else {
-                    queryBuf.append(" OR ");
-                }
-                queryBuf.append(key).append(":\"").append(value).append('\"');
-            }
-            queryBuf.append(')');
-        }
-    }
-
-    public void appendAdditionalQuery(final String[] additionalQueries, final Consumer<String> consumer) {
-        final Set<String> fieldSet = new HashSet<>();
-        for (final String additional : additionalQueries) {
-            if (StringUtil.isNotBlank(additional) && additional.length() < 1000 && !hasFieldInQuery(fieldSet, additional)) {
-                consumer.accept(additional);
-            }
-        }
-    }
-
-    protected boolean hasFieldInQuery(final Set<String> fieldSet, final String query) {
-        final Matcher matcher = FIELD_EXTRACTION_PATTERN.matcher(query);
-        if (matcher.matches()) {
-            final String field = matcher.replaceFirst("$1");
-            if (fieldSet.contains(field)) {
-                return true;
-            }
-            fieldSet.add(field);
-        }
-        return false;
-    }
-
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields) {
         return fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
@@ -374,7 +282,7 @@ public class SearchService {
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields) {
         return fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
-            builder.setSize(queryHelper.getMaxPageSize());
+            builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
             builder.addFields(fields);
             return true;
         });

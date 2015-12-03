@@ -24,7 +24,7 @@ import javax.validation.constraints.Size;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
-import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -35,7 +35,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
     public Map<String, String[]> fields = new HashMap<>();
 
     @Size(max = 1000)
-    public String query;
+    public String q;
 
     @Size(max = 1000)
     public String sort;
@@ -45,10 +45,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     public String[] lang;
 
-    public String additional[];
-
-    @Size(max = 10)
-    public String op;
+    public String ex_q[];
 
     @ValidateTypeFailure
     public Integer start;
@@ -68,29 +65,27 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     // advance
 
-    public Map<String, String[]> options = new HashMap<>();
-
     @Override
     public int getStartPosition() {
-        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (start == null) {
-            start = queryHelper.getDefaultStart();
+            start = fessConfig.getPagingSearchPageStartAsInteger();
         }
         return start;
     }
 
     @Override
     public int getPageSize() {
-        final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (num == null) {
-            num = queryHelper.getDefaultPageSize();
+            num = fessConfig.getPagingSearchPageSizeAsInteger();
         } else {
             try {
-                if (num.intValue() > queryHelper.getMaxPageSize() || num.intValue() <= 0) {
-                    num = queryHelper.getMaxPageSize();
+                if (num.intValue() > fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue() || num.intValue() <= 0) {
+                    num = fessConfig.getPagingSearchPageMaxSizeAsInteger();
                 }
             } catch (final NumberFormatException e) {
-                num = queryHelper.getDefaultPageSize();
+                num = fessConfig.getPagingSearchPageSizeAsInteger();
             }
         }
         return num;
@@ -98,17 +93,12 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public String getQuery() {
-        return query;
+        return q;
     }
 
     @Override
-    public String getOperator() {
-        return op;
-    }
-
-    @Override
-    public String[] getAdditional() {
-        return additional;
+    public String[] getExtraQueries() {
+        return ex_q;
     }
 
     @Override
@@ -140,4 +130,5 @@ public class SearchForm implements SearchRequestParams, Serializable {
     public boolean isAdministrativeAccess() {
         return false;
     }
+
 }

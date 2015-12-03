@@ -27,7 +27,7 @@ ${fe:facetForm()}${fe:geoForm()}
 			class="search-box navbar-form col-lg-5 col-md-6 col-sm-6 col-xs-8 pull-right"
 			role="search">
 			<div class="input-group">
-				<la:text property="query" maxlength="1000" styleId="query"
+				<la:text property="q" maxlength="1000" styleId="query"
 					styleClass="form-control" autocomplete="off" />
 				<span class="input-group-btn">
 					<button type="submit" name="search" id="searchButton"

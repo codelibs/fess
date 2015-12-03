@@ -147,7 +147,7 @@ public class SuggestApiManager extends BaseApiManager {
         }
 
         protected static RequestParameter parse(final HttpServletRequest request) {
-            final String query = request.getParameter("query");
+            final String query = request.getParameter("q");
             final String fieldsStr = request.getParameter("fields");
             final String[] fields;
             if (StringUtils.isNotBlank(fieldsStr)) {

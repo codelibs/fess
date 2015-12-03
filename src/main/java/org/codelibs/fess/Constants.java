@@ -134,8 +134,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_DESKTOP_PROPERTY = "search.desktop";
 
-    public static final String SEARCH_RESULT_MAX_PAGE_SIZE = "search.result.max_page_size";
-
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";
@@ -239,7 +237,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String USER_CODE = "userCode";
 
-    public static final String SEARCH_FIELD_LOG_SEARCH_QUERY = "query";
+    public static final String SEARCH_FIELD_LOG_SEARCH_QUERY = "q";
 
     public static final String STATS_REPORT_TYPE = "reportType";
 
@@ -287,8 +285,6 @@ public class Constants extends CoreLibConstants {
     public static final String DCF = "dcf";
 
     public static final String ALL_LANGUAGES = "all";
-
-    public static final String DEFAULT_OPERATOR = "defaultOperator";
 
     public static final String INVALID_NUMERIC_PARAMETER = "-1";
 

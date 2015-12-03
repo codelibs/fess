@@ -46,7 +46,7 @@
 								<la:form action="/admin/searchlist" styleClass="form-inline">
 									<div class="form-group">
 										<label class="sr-only" for="sessionIdSearchBtn"></label>
-										<la:text styleClass="query form-control" property="query"
+										<la:text styleClass="query form-control" property="q"
 											title="Search" size="50" maxlength="1000"
 											placeholder="Type a search query" />
 									</div>
@@ -66,7 +66,7 @@
 										<div id="subheader" class="row top10">
 											<div class="col-xs-12">
 												<la:message key="labels.search_result_status"
-													arg0="${f:h(query)}" arg1="${f:h(allRecordCount)}"
+													arg0="${f:h(q)}" arg1="${f:h(allRecordCount)}"
 													arg2="${f:h(currentStartRecordNumber)}"
 													arg3="${f:h(currentEndRecordNumber)}" />
 												<c:if test="${execTime!=null}">
@@ -103,7 +103,7 @@
 												<ul class="pagination pagination-sm">
 													<c:if test="${existPrePage}">
 														<li class="prev"><la:link
-																href="prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
+																href="prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
 																<la:message key="labels.prev_page" />
 															</la:link></li>
 													</c:if>
@@ -116,14 +116,14 @@
 														<li
 															<c:if test="${pageNumber == currentPageNumber}">class="active"</c:if>>
 															<la:link
-																href="move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</la:link>
+																href="move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">${f:h(pageNumber)}</la:link>
 														</li>
 													</c:forEach>
 													<c:if test="${existNextPage}">
 														<li
 															class="next<c:if test="${!existNextPage}"> disabled</c:if>">
 															<la:link
-																href="next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
+																href="next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}&labelTypeValue=${f:u(labelTypeValue)}">
 																<la:message key="labels.next_page" />
 															</la:link>
 														</li>
@@ -140,7 +140,7 @@
 										<div id="result" class="row top10">
 											<div class="col-sm-12">
 												<p class="callout callout-info">
-													<la:message key="labels.did_not_match" arg0="${f:h(query)}" />
+													<la:message key="labels.did_not_match" arg0="${f:h(q)}" />
 												</p>
 											</div>
 										</div>
@@ -219,7 +219,7 @@
 													</div>
 													<div class="modal-footer">
 														<la:form action="/admin/searchlist/deleteall">
-															<la:hidden property="query" />
+															<la:hidden property="q" />
 															<button type="button" class="btn btn-outline pull-left"
 																data-dismiss="modal">
 																<la:message key="labels.search_list_button_cancel" />

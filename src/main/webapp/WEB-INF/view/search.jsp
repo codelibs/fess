@@ -92,7 +92,7 @@
 						<la:message key="labels.search_hot_search_word" />
 						<c:forEach var="item" items="${fe:hsw(null, 5)}">
 							<la:link
-								href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+								href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 						</c:forEach>
 					</p>
 				</div>

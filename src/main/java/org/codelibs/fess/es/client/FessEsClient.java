@@ -504,7 +504,7 @@ public class FessEsClient implements Client {
 
             if (ComponentUtil.hasQueryHelper()) {
                 final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
-                for (final Map.Entry<String, String[]> entry : queryHelper.getQueryParamMap().entrySet()) {
+                for (final Map.Entry<String, String[]> entry : queryHelper.getQueryRequestHeaderMap().entrySet()) {
                     requestBuilder.putHeader(entry.getKey(), entry.getValue());
                 }
 
@@ -537,7 +537,7 @@ public class FessEsClient implements Client {
                     searchRequestBuilder.setTimeout(TimeValue.timeValueMillis(queryHelper.getTimeAllowed()));
                 }
 
-                for (final Map.Entry<String, String[]> entry : queryHelper.getQueryParamMap().entrySet()) {
+                for (final Map.Entry<String, String[]> entry : queryHelper.getQueryRequestHeaderMap().entrySet()) {
                     searchRequestBuilder.putHeader(entry.getKey(), entry.getValue());
                 }
 
@@ -873,6 +873,9 @@ public class FessEsClient implements Client {
             }
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Query: {0}", searchRequestBuilder);
+            }
 
             return true;
         }

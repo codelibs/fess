@@ -41,7 +41,7 @@ public class FacetInfo {
 
     @Override
     public String toString() {
-        return "FacetInfo [field=" + Arrays.toString(field) + ", query=" + Arrays.toString(query) + ", prefix=" + prefix + ", limit="
-                + limit + ", minCount=" + minCount + ", sort=" + sort + ", missing=" + missing + "]";
+        return "FacetInfo [field=" + Arrays.toString(field) + ", q=" + Arrays.toString(query) + ", prefix=" + prefix + ", limit=" + limit
+                + ", minCount=" + minCount + ", sort=" + sort + ", missing=" + missing + "]";
     }
 }

@@ -9,7 +9,7 @@
 		<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="post"
 			class="sidebar-form">
 			<div class="input-group">
-				<input type="text" name="query" id="query" class="form-control"
+				<input type="text" name="q" id="query" class="form-control"
 					maxlength="1000"
 					placeholder="<la:message key="labels.sidebar.placeholder_search" />">
 				<span class="input-group-btn">

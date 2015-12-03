@@ -118,9 +118,9 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected HtmlResponse doSearch(final ListForm form) {
         validate(form, messages -> {}, () -> asListHtml());
 
-        if (StringUtil.isBlank(form.query)) {
+        if (StringUtil.isBlank(form.q)) {
             // query matches on all documents.
-            form.query = Constants.MATCHES_ALL_QUERY;
+            form.q = Constants.MATCHES_ALL_QUERY;
         }
         return asListHtml().renderWith(data -> {
             doSearchInternal(data, form);

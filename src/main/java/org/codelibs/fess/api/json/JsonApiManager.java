@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,6 @@ import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.LabelTypeHelper;
-import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -134,6 +134,7 @@ public class JsonApiManager extends BaseApiManager {
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
         final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
@@ -142,7 +143,7 @@ public class JsonApiManager extends BaseApiManager {
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
         try {
             final SearchRenderData data = new SearchRenderData();
-            final SearchApiRequestParams params = new SearchApiRequestParams(request);
+            final SearchApiRequestParams params = new SearchApiRequestParams(request, fessConfig);
             searchService.search(request, params, data);
             query = params.getQuery();
             final String execTime = data.getExecTime();
@@ -154,7 +155,7 @@ public class JsonApiManager extends BaseApiManager {
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
 
-            buf.append("\"query\":");
+            buf.append("\"q\":");
             buf.append(escapeJson(query));
             buf.append(",\"execTime\":");
             buf.append(execTime);
@@ -235,7 +236,7 @@ public class JsonApiManager extends BaseApiManager {
                     }
                     buf.append(']');
                 }
-                // facet query
+                // facet q
                 if (facetResponse.getQueryCountMap() != null) {
                     buf.append(',');
                     buf.append("\"facetQuery\":[");
@@ -671,33 +672,31 @@ public class JsonApiManager extends BaseApiManager {
 
         private final HttpServletRequest request;
 
+        private FessConfig fessConfig;
+
         private int startPosition = -1;
 
         private int pageSize = -1;
 
-        protected SearchApiRequestParams(final HttpServletRequest request) {
+        protected SearchApiRequestParams(final HttpServletRequest request, FessConfig fessConfig) {
             this.request = request;
+            this.fessConfig = fessConfig;
         }
 
         @Override
         public String getQuery() {
-            return request.getParameter("query");
+            return request.getParameter("q");
         }
 
         @Override
-        public String getOperator() {
-            return request.getParameter("op");
-        }
-
-        @Override
-        public String[] getAdditional() {
-            return request.getParameterValues("additional");
+        public String[] getExtraQueries() {
+            return request.getParameterValues("ex_q");
         }
 
         @Override
         public Map<String, String[]> getFields() {
             // TODO Auto-generated method stub
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
 
         @Override
@@ -729,14 +728,13 @@ public class JsonApiManager extends BaseApiManager {
             }
 
             final String start = request.getParameter("start");
-            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
             if (StringUtil.isBlank(start)) {
-                startPosition = queryHelper.getDefaultStart();
+                startPosition = fessConfig.getPagingSearchPageStartAsInteger();
             } else {
                 try {
                     startPosition = Integer.parseInt(start);
                 } catch (final NumberFormatException e) {
-                    startPosition = queryHelper.getDefaultStart();
+                    startPosition = fessConfig.getPagingSearchPageStartAsInteger();
                 }
             }
             return startPosition;
@@ -749,17 +747,16 @@ public class JsonApiManager extends BaseApiManager {
             }
 
             final String num = request.getParameter("num");
-            final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
             if (StringUtil.isBlank(num)) {
-                pageSize = queryHelper.getDefaultPageSize();
+                pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
             } else {
                 try {
                     pageSize = Integer.parseInt(num);
-                    if (pageSize > queryHelper.getMaxPageSize() || pageSize <= 0) {
-                        pageSize = queryHelper.getMaxPageSize();
+                    if (pageSize > fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue() || pageSize <= 0) {
+                        pageSize = fessConfig.getPagingSearchPageMaxSizeAsInteger();
                     }
                 } catch (final NumberFormatException e) {
-                    pageSize = queryHelper.getDefaultPageSize();
+                    pageSize = fessConfig.getPagingSearchPageSizeAsInteger();
                 }
             }
             return pageSize;

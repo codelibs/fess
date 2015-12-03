@@ -8,7 +8,7 @@ ${fe:facetForm()}${fe:geoForm()}
 				alt="<la:message key="labels.header_brand_name" />" />
 		</la:link>
 		<div class="form-inline navbar-form pull-right">
-			<la:text property="query" maxlength="1000" styleId="query"
+			<la:text property="q" maxlength="1000" styleId="query"
 				styleClass="form-control" autocomplete="off" />
 			<button class="btn medium btn-primary" type="submit" name="search"
 				id="searchButton">
