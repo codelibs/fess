@@ -142,22 +142,24 @@ public class QueryHelper implements Serializable {
     @PostConstruct
     public void init() {
         if (responseFields == null) {
-            responseFields = new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
-                    fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                    fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                    fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
-                    fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
-                    fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(),
-                    fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldHasCache() };
+            responseFields =
+                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
+                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldHasCache() };
         }
         if (cacheResponseFields == null) {
-            cacheResponseFields = new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
-                    fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                    fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                    fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
-                    fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
-                    fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldConfigId(),
-                    fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldCache() };
+            cacheResponseFields =
+                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
+                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
+                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
+                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldCache() };
         }
         if (responseDocValuesFields == null) {
             responseDocValuesFields = new String[] { fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
@@ -166,31 +168,35 @@ public class QueryHelper implements Serializable {
             highlightedFields = new String[] { fessConfig.getIndexFieldContent() };
         }
         if (searchFields == null) {
-            searchFields = new String[] { INURL_FIELD, fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
-                    fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldContent(),
-                    fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                    fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
-                    fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
-                    fessConfig.getIndexFieldLang() };
+            searchFields =
+                    new String[] { INURL_FIELD, fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
+                            fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldContent(),
+                            fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(),
+                            fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
+                            fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(),
+                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldLang() };
         }
         if (facetFields == null) {
-            facetFields = new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(),
-                    fessConfig.getIndexFieldContent(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(),
-                    fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
-                    fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment() };
+            facetFields =
+                    new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(),
+                            fessConfig.getIndexFieldContent(), fessConfig.getIndexFieldContentLength(),
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
+                            fessConfig.getIndexFieldSegment() };
         }
         if (supportedSortFields == null) {
-            supportedSortFields = new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
-                    fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldClickCount(),
-                    fessConfig.getIndexFieldFavoriteCount() };
+            supportedSortFields =
+                    new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
+                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
+                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
         }
         if (apiResponseFieldSet == null) {
-            setApiResponseFields(
-                    new String[] { "urlLink", "contentDescription", fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
-                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
-                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl() });
+            setApiResponseFields(new String[] { "urlLink", "contentDescription", fessConfig.getIndexFieldId(),
+                    fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(),
+                    fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(),
+                    fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
+                    fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(),
+                    fessConfig.getIndexFieldUrl() });
         }
     }
 
@@ -341,8 +347,8 @@ public class QueryHelper implements Serializable {
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
-            return buildDefaultQueryBuilder(
-                    (f, b) -> QueryBuilders.fuzzyQuery(f, term.text()).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
             return QueryBuilders.fuzzyQuery(field, term.text()).boost(fuzzyQuery.getBoost())
@@ -351,8 +357,8 @@ public class QueryHelper implements Serializable {
             final String origQuery = fuzzyQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder(
-                    (f, b) -> QueryBuilders.fuzzyQuery(f, origQuery).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
         }
     }
 
@@ -397,23 +403,20 @@ public class QueryHelper implements Serializable {
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
-                throw new InvalidQueryException(
-                        messages -> messages.addErrorsInvalidQuerySortValue(ActionMessages.GLOBAL_PROPERTY_KEY, text),
-                        "Invalid sort field: " + termQuery);
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(ActionMessages.GLOBAL_PROPERTY_KEY,
+                        text), "Invalid sort field: " + termQuery);
             }
             final String sortField = values[0];
             if (!isSortField(sortField)) {
-                throw new InvalidQueryException(
-                        messages -> messages.addErrorsInvalidQueryUnsupportedSortField(ActionMessages.GLOBAL_PROPERTY_KEY, sortField),
-                        "Unsupported sort field: " + termQuery);
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
+                        ActionMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
             }
             SortOrder sortOrder;
             if (values.length == 2) {
                 sortOrder = SortOrder.valueOf(values[1]);
                 if (sortOrder == null) {
-                    throw new InvalidQueryException(
-                            messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(ActionMessages.GLOBAL_PROPERTY_KEY, values[1]),
-                            "Invalid sort order: " + termQuery);
+                    throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
+                            ActionMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
                 }
             } else {
                 sortOrder = SortOrder.ASC;
@@ -451,14 +454,17 @@ public class QueryHelper implements Serializable {
         final QueryBuilder contentQuery =
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
-        getQueryLanguage().ifPresent(lang -> {
-            final QueryBuilder titleLangQuery =
-                    builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal().floatValue());
-            boolQuery.should(titleLangQuery);
-            final QueryBuilder contentLangQuery = builder.apply(fessConfig.getIndexFieldContent() + "_" + lang,
-                    fessConfig.getQueryBoostContentLangAsDecimal().floatValue());
-            boolQuery.should(contentLangQuery);
-        });
+        getQueryLanguage().ifPresent(
+                lang -> {
+                    final QueryBuilder titleLangQuery =
+                            builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal()
+                                    .floatValue());
+                    boolQuery.should(titleLangQuery);
+                    final QueryBuilder contentLangQuery =
+                            builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig.getQueryBoostContentLangAsDecimal()
+                                    .floatValue());
+                    boolQuery.should(contentLangQuery);
+                });
         return boolQuery;
     }
 
@@ -711,8 +717,7 @@ public class QueryHelper implements Serializable {
         if (defaultSortBuilders != null) {
             StreamUtil.of(defaultSortBuilders).forEach(builder -> list.add(builder));
         }
-        list.add(
-                SortBuilders.fieldSort(fieldName).order(SortOrder.ASC.toString().equalsIgnoreCase(order) ? SortOrder.ASC : SortOrder.DESC));
+        list.add(SortBuilders.fieldSort(fieldName).order(SortOrder.ASC.toString().equalsIgnoreCase(order) ? SortOrder.ASC : SortOrder.DESC));
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
     }
 
