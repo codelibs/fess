@@ -69,10 +69,6 @@
 
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.3.9</tomcat.boot.version>
-
-		<!-- Maven Repository -->
-		<maven.snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</maven.snapshot.repo.url>
-		<maven.release.repo.url>http://central.maven.org/maven2</maven.release.repo.url>
 	</properties>
 	<build>
 		<finalName>fess</finalName>
@@ -278,21 +274,7 @@
 				</dependencies>
 				<configuration>
 					<tasks>
-						<mkdir dir="${basedir}/target/plugins" />
-						<get dest="${basedir}/target/plugins">
-							<url url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-analysis-kuromoji-neologd/2.1.0-SNAPSHOT/elasticsearch-analysis-kuromoji-neologd-2.1.0-20151127.223316-1.zip" />
-							<url url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-analysis-synonym/2.1.0-SNAPSHOT/elasticsearch-analysis-synonym-2.1.0-20151127.081411-1.zip" />
-							<url url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-configsync/2.1.0-SNAPSHOT/elasticsearch-configsync-2.1.0-20151127.054727-1.zip" />
-							<url url="${maven.snapshot.repo.url}/org/codelibs/elasticsearch-langfield/2.1.0-SNAPSHOT/elasticsearch-langfield-2.1.0-20151129.210553-1.zip" />
-							<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
-						</get>
-						<delete dir="${basedir}/plugins" />
-						<mkdir dir="${basedir}/plugins" />
-						<unzip dest="${basedir}/plugins/analysis-kuromoji-neologd" src="${basedir}/target/plugins/elasticsearch-analysis-kuromoji-neologd-2.1.0-20151127.223316-1.zip" />
-						<unzip dest="${basedir}/plugins/analysis-synonym" src="${basedir}/target/plugins/elasticsearch-analysis-synonym-2.1.0-20151127.081411-1.zip" />
-						<unzip dest="${basedir}/plugins/configsync" src="${basedir}/target/plugins/elasticsearch-configsync-2.1.0-20151127.054727-1.zip" />
-						<unzip dest="${basedir}/plugins/langfield" src="${basedir}/target/plugins/elasticsearch-langfield-2.1.0-20151129.210553-1.zip" />
-						<unzip dest="${basedir}/plugins/kopf" src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
+						<ant antfile="${basedir}/plugin.xml" target="install.plugins"/>
 					</tasks>
 				</configuration>
 				<goals>
