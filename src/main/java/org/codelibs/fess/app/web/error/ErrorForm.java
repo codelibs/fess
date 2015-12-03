@@ -25,7 +25,7 @@ public class ErrorForm implements Serializable {
 
     public Map<String, String[]> fields = new HashMap<>();
 
-    public String query;
+    public String q;
 
     public String url;
 
