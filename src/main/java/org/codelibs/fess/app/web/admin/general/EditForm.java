@@ -42,15 +42,16 @@ public class EditForm implements Serializable {
     public String serverRotation;
 
     @Required
-    @Max(1000)
     @Min(-1)
+    @Max(1000)
     @ValidateTypeFailure
     public Integer dayForCleanup;
 
     @Required
-    @Max(100)
     @Min(0)
-    public String crawlingThreadCount;
+    @Max(100)
+    @ValidateTypeFailure
+    public Integer crawlingThreadCount;
 
     @Size(max = 10)
     public String searchLog;
@@ -80,8 +81,8 @@ public class EditForm implements Serializable {
     public String ignoreFailureType;
 
     @Required
-    @Max(10000)
     @Min(-1)
+    @Max(10000)
     @ValidateTypeFailure
     public Integer failureCountThreshold;
 
@@ -92,17 +93,20 @@ public class EditForm implements Serializable {
     @Size(max = 20)
     public String csvFileEncoding;
 
-    @Max(100000)
     @Min(0)
-    public String purgeSearchLogDay;
+    @Max(100000)
+    @ValidateTypeFailure
+    public Integer purgeSearchLogDay;
 
-    @Max(100000)
     @Min(0)
-    public String purgeJobLogDay;
+    @Max(100000)
+    @ValidateTypeFailure
+    public Integer purgeJobLogDay;
 
-    @Max(100000)
     @Min(0)
-    public String purgeUserInfoDay;
+    @Max(100000)
+    @ValidateTypeFailure
+    public Integer purgeUserInfoDay;
 
     @Size(max = 1000)
     public String purgeByBots;
@@ -113,9 +117,10 @@ public class EditForm implements Serializable {
     @Size(max = 10)
     public String suggestSearchLog;
 
-    @Max(100000)
     @Min(0)
-    public String purgeSuggestSearchLogDay;
+    @Max(100000)
+    @ValidateTypeFailure
+    public Integer purgeSuggestSearchLogDay;
 
     @Size(max = 1000)
     public String esHttpUrl;
