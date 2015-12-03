@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="plugin" basedir=".">
+	<property name="plugins.dir" value="${basedir}/plugins" />
+	<property name="target.dir" value="${basedir}/target/plugins" />
+
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
 	<property name="maven.release.repo.url" value="http://central.maven.org/maven2" />
 
 	<target name="install.plugins">
-		<mkdir dir="${basedir}/target/plugins" />
-		<delete dir="${basedir}/plugins" />
-		<mkdir dir="${basedir}/plugins" />
+		<mkdir dir="${target.dir}" />
+		<delete dir="${plugins.dir}" />
+		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-kuromoji-neologd -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.snapshot.repo.url}" />
@@ -33,15 +36,13 @@
 			<param name="plugin.zip.version" value="2.1.0-20151127.054727-1" />
 		</antcall>
 		<!-- dataformat -->
-<!--
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="dataformat" />
 			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151203.124649-3" />
+			<param name="plugin.zip.version" value="2.1.0-20151203.132121-4" />
 		</antcall>
--->
 		<!-- langfield -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.snapshot.repo.url}" />
@@ -51,16 +52,28 @@
 			<param name="plugin.zip.version" value="2.1.0-20151129.210553-1" />
 		</antcall>
 		<!-- kopf -->
-		<get dest="${basedir}/target/plugins">
+		<get dest="${target.dir}">
 			<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
 		</get>
-		<unzip dest="${basedir}/plugins/kopf" src="${basedir}/target/plugins/elasticsearch-kopf-2.0.0.0.zip" />
+		<unzip dest="${plugins.dir}/kopf" src="${target.dir}/elasticsearch-kopf-2.0.0.0.zip" />
+
+		<antcall target="remove.jars" />
 	</target>
 
 	<target name="install.plugin">
-		<get dest="${basedir}/target/plugins">
+		<get dest="${target.dir}">
 			<url url="${repo.url}/${plugin.groupId}/elasticsearch-${plugin.name}/${plugin.version}/elasticsearch-${plugin.name}-${plugin.zip.version}.zip" />
 		</get>
-		<unzip dest="${basedir}/plugins/${plugin.name}" src="${basedir}/target/plugins/elasticsearch-${plugin.name}-${plugin.zip.version}.zip" />
+		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/elasticsearch-${plugin.name}-${plugin.zip.version}.zip" />
+	</target>
+
+	<target name="remove.jars" if="with.fess">
+		<delete>
+			<fileset dir="${plugins.dir}">
+				<include name="dataformat/poi-*" />
+				<include name="dataformat/xmlbeans-*" />
+				<include name="dataformat/stax-api-*" />
+			</fileset>
+		</delete>
 	</target>
 </project>

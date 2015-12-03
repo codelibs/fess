@@ -274,7 +274,9 @@
 				</dependencies>
 				<configuration>
 					<tasks>
-						<ant antfile="${basedir}/plugin.xml" target="install.plugins"/>
+						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
+							<property name="with.fess" value="true" />
+						</ant>
 					</tasks>
 				</configuration>
 				<goals>
