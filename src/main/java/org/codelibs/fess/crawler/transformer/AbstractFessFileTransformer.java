@@ -34,7 +34,6 @@ import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.AccessResult;
@@ -160,8 +159,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
-        final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
+        final boolean useAclAsRole = Constants.TRUE.equals(fessConfig.getAclAsRole());
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);

@@ -92,15 +92,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String APPEND_QUERY_PARAMETER_PROPERTY = "append.query.parameter";
 
-    public static final String DIFF_CRAWLING_PROPERTY = "crawling.diff";
-
-    public static final String USE_ACL_AS_ROLE = "use.acl.as.role";
+    public static final String INCREMENTAL_CRAWLING_PROPERTY = "crawling.incremental";
 
     public static final String CRAWLING_THREAD_COUNT_PROPERTY = "crawling.thread.count";
 
     public static final String DAY_FOR_CLEANUP_PROPERTY = "day.for.cleanup";
-
-    public static final String WEB_API_XML_PROPERTY = "web.api.xml";
 
     public static final String WEB_API_JSON_PROPERTY = "web.api.json";
 
@@ -328,13 +324,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String USER_INFO = "LoginInfo";
 
-    public static final String ELASTICSEARCH_WEB_URL_PROPERTY = "es.http.url";
-
-    public static final String ELASTICSEARCH_WEB_URL = "http://localhost:9201";
-
     public static final String ES_API_ACCESS_TOKEN = "esApiAccessToken";
 
     public static final String ADMIN_PACKAGE = "org.codelibs.fess.app.web.admin";
 
     public static final String DEFAULT_FIELD = "_default";
+
+    public static final Integer DEFAULT_DAY_FOR_CLEANUP = 3;
 }

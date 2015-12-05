@@ -25,6 +25,9 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
+    /** The key of the configuration. e.g. http://localhost:9201 */
+    String ELASTICSEARCH_URL = "elasticsearch.url";
+
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
 
@@ -129,6 +132,9 @@ public interface FessConfig extends FessEnv {
 
     /** The key of the configuration. e.g. 1.3 */
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
+
+    /** The key of the configuration. e.g. false */
+    String ACL_AS_ROLE = "acl.as.role";
 
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
@@ -303,6 +309,14 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getDomainTitle();
+
+    /**
+     * Get the value for the key 'elasticsearch.url'. <br>
+     * The value is, e.g. http://localhost:9201 <br>
+     * comment: elasticsearch
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchUrl();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -601,6 +615,22 @@ public interface FessConfig extends FessEnv {
      * @throws NumberFormatException When the property is not decimal.
      */
     java.math.BigDecimal getQueryBoostContentLangAsDecimal();
+
+    /**
+     * Get the value for the key 'acl.as.role'. <br>
+     * The value is, e.g. false <br>
+     * comment: acl
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAclAsRole();
+
+    /**
+     * Is the property for the key 'acl.as.role' true? <br>
+     * The value is, e.g. false <br>
+     * comment: acl
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isAclAsRole();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -1079,6 +1109,10 @@ public interface FessConfig extends FessEnv {
             return get(FessConfig.DOMAIN_TITLE);
         }
 
+        public String getElasticsearchUrl() {
+            return get(FessConfig.ELASTICSEARCH_URL);
+        }
+
         public String getCrawlerDocumentCacheEnable() {
             return get(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLE);
         }
@@ -1241,6 +1275,14 @@ public interface FessConfig extends FessEnv {
 
         public java.math.BigDecimal getQueryBoostContentLangAsDecimal() {
             return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT_LANG);
+        }
+
+        public String getAclAsRole() {
+            return get(FessConfig.ACL_AS_ROLE);
+        }
+
+        public boolean isAclAsRole() {
+            return is(FessConfig.ACL_AS_ROLE);
         }
 
         public String getAuthenticationAdminRoles() {

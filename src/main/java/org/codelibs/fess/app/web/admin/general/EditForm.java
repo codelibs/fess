@@ -33,13 +33,7 @@ public class EditForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Size(max = 10)
-    public String diffCrawling;
-
-    @Size(max = 10)
-    public String useAclAsRole;
-
-    @Size(max = 10)
-    public String serverRotation;
+    public String incrementalCrawling;
 
     @Required
     @Min(-1)
@@ -61,9 +55,6 @@ public class EditForm implements Serializable {
 
     @Size(max = 10)
     public String userFavorite;
-
-    @Size(max = 10)
-    public String webApiXml;
 
     @Size(max = 10)
     public String webApiJson;
@@ -122,6 +113,4 @@ public class EditForm implements Serializable {
     @ValidateTypeFailure
     public Integer purgeSuggestSearchLogDay;
 
-    @Size(max = 1000)
-    public String esHttpUrl;
 }

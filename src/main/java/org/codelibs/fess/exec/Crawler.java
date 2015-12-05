@@ -230,7 +230,8 @@ public class Crawler implements Serializable {
             if (StringUtil.isNotBlank(options.expires)) {
                 dayForCleanupStr = options.expires;
             } else {
-                dayForCleanupStr = crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, "1");
+                dayForCleanupStr =
+                        crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP.toString());
             }
             int dayForCleanup = -1;
             try {

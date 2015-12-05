@@ -143,10 +143,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Schedule */
     public static final String LABELS_CRON_EXPRESSION = "{labels.cronExpression}";
 
-    /** The key of the message: Remove Index Before Days */
+    /** The key of the message: Remove Documents Before Days */
     public static final String LABELS_DAY_FOR_CLEANUP = "{labels.dayForCleanup}";
 
-    /** The key of the message: Num of Simultaneous Crawler Config */
+    /** The key of the message: Simultaneous Crawler Config */
     public static final String LABELS_CRAWLING_THREAD_COUNT = "{labels.crawlingThreadCount}";
 
     /** The key of the message: Snapshot Path */
@@ -243,7 +243,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_DESIGN_FILE_NAME = "{labels.designFileName}";
 
     /** The key of the message: Check Last Modified */
-    public static final String LABELS_DIFF_CRAWLING = "{labels.diffCrawling}";
+    public static final String LABELS_INCREMENTAL_CRAWLING = "{labels.incrementalCrawling}";
 
     /** The key of the message: Distance */
     public static final String LABELS_DISTANCE = "{labels.distance}";
@@ -368,9 +368,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search Word */
     public static final String LABELS_SEARCH_WORD = "{labels.searchWord}";
 
-    /** The key of the message: Server Rotation */
-    public static final String LABELS_SERVER_ROTATION = "{labels.serverRotation}";
-
     /** The key of the message: Index Replication */
     public static final String LABELS_SNAPSHOT_REPLICATION = "{labels.snapshotReplication}";
 
@@ -455,6 +452,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Status */
     public static final String LABELS_JOB_STATUS = "{labels.jobStatus}";
 
+    /** The key of the message: Labels */
+    public static final String LABELS_LABEL_TYPE_IDS = "{labels.labelTypeIds}";
+
     /** The key of the message: lang */
     public static final String LABELS_LANG = "{labels.lang}";
 
@@ -496,9 +496,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Token */
     public static final String LABELS_TOKEN = "{labels.token}";
-
-    /** The key of the message: Use ACL as Role */
-    public static final String LABELS_USE_ACL_AS_ROLE = "{labels.useAclAsRole}";
 
     /** The key of the message: Synonym File */
     public static final String LABELS_SYNONYM_FILE = "{labels.synonymFile}";
@@ -971,10 +968,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Enabled */
     public static final String LABELS_ENABLED = "{labels.enabled}";
 
-    /** The key of the message: Server Rotation */
-    public static final String LABELS_server_rotation = "{labels.server_rotation}";
-
-    /** The key of the message: Remove Index Before */
+    /** The key of the message: Remove Documents Before */
     public static final String LABELS_day_for_cleanup = "{labels.day_for_cleanup}";
 
     /** The key of the message: Day(s) */
@@ -986,14 +980,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: None */
     public static final String LABELS_NONE = "{labels.none}";
 
-    /** The key of the message: Num of Simultaneous Crawler Config */
+    /** The key of the message: Simultaneous Crawler Config */
     public static final String LABELS_crawling_thread_count = "{labels.crawling_thread_count}";
 
     /** The key of the message: Check Last Modified */
-    public static final String LABELS_diff_crawling = "{labels.diff_crawling}";
-
-    /** The key of the message: Use ACL as Role */
-    public static final String LABELS_use_acl_as_role = "{labels.use_acl_as_role}";
+    public static final String LABELS_incremental_crawling = "{labels.incremental_crawling}";
 
     /** The key of the message: Search Logging */
     public static final String LABELS_search_log_enabled = "{labels.search_log_enabled}";
@@ -1088,7 +1079,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Suggest by Search Words */
     public static final String LABELS_suggest_search_log_enabled = "{labels.suggest_search_log_enabled}";
 
-    /** The key of the message: Purge Suggest Docs by Search Words */
+    /** The key of the message: Purge Suggest Documents Before */
     public static final String LABELS_purge_suggest_search_log_day = "{labels.purge_suggest_search_log_day}";
 
     /** The key of the message: Crawling Information */
@@ -2079,11 +2070,17 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Toggle navigation */
     public static final String LABELS_admin_toggle_navi = "{labels.admin_toggle_navi}";
 
-    /** The key of the message: Search Server URL */
-    public static final String LABELS_es_http_url = "{labels.es_http_url}";
+    /** The key of the message: System */
+    public static final String LABELS_general_menu_system = "{labels.general_menu_system}";
 
-    /** The key of the message:  */
-    public static final String LABELS_LABEL_TYPE_IDS = "{labels.labelTypeIds}";
+    /** The key of the message: Crawler */
+    public static final String LABELS_general_menu_crawler = "{labels.general_menu_crawler}";
+
+    /** The key of the message: Logging */
+    public static final String LABELS_general_menu_logging = "{labels.general_menu_logging}";
+
+    /** The key of the message: Suggest */
+    public static final String LABELS_general_menu_suggest = "{labels.general_menu_suggest}";
 
     /**
      * Assert the property is not null.

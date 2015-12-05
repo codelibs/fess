@@ -32,6 +32,8 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,9 @@ public class DictionaryManager {
     }
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
-        try (CurlResponse response = Curl.get(getUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        try (CurlResponse response =
+                Curl.get(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
             final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -90,32 +94,34 @@ public class DictionaryManager {
     }
 
     public void store(final DictionaryFile<? extends DictionaryItem> dictFile, final File file) {
-        getDictionaryFile(dictFile.getId())
-                .ifPresent(currentFile -> {
-                    if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
-                        throw new DictionaryException(dictFile.getPath() + " was updated.");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        getDictionaryFile(dictFile.getId()).ifPresent(currentFile -> {
+            if (currentFile.getTimestamp().getTime() > dictFile.getTimestamp().getTime()) {
+                throw new DictionaryException(dictFile.getPath() + " was updated.");
+            }
+
+            // TODO use stream
+                try (CurlResponse response =
+                        Curl.post(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("path", dictFile.getPath())
+                                .body(FileUtil.readUTF8(file)).execute()) {
+                    final Map<String, Object> contentMap = response.getContentAsMap();
+                    if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
+                        throw new DictionaryException("Failed to update " + dictFile.getPath());
                     }
+                } catch (final IOException e) {
+                    throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
+                }
 
-                    // TODO use stream
-                        try (CurlResponse response =
-                                Curl.post(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).body(FileUtil.readUTF8(file))
-                                        .execute()) {
-                            final Map<String, Object> contentMap = response.getContentAsMap();
-                            if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
-                                throw new DictionaryException("Failed to update " + dictFile.getPath());
-                            }
-                        } catch (final IOException e) {
-                            throw new DictionaryException("Failed to update " + dictFile.getPath(), e);
-                        }
-
-                    }).orElse(() -> {
-                    throw new DictionaryException(dictFile.getPath() + " does not exist.");
-                });
+            }).orElse(() -> {
+            throw new DictionaryException(dictFile.getPath() + " does not exist.");
+        });
     }
 
     public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
-            return Curl.get(getUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute().getContentAsStream();
+            return Curl.get(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute()
+                    .getContentAsStream();
         } catch (final IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);
         }
@@ -125,7 +131,4 @@ public class DictionaryManager {
         creatorList.add(creator);
     }
 
-    protected String getUrl() {
-        return crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
-    }
 }

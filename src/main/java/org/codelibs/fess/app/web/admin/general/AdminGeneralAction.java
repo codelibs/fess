@@ -80,10 +80,9 @@ public class AdminGeneralAction extends FessAdminAction {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);
         });
 
-        updateProperty(Constants.DIFF_CRAWLING_PROPERTY,
-                form.diffCrawling != null && Constants.ON.equalsIgnoreCase(form.diffCrawling) ? Constants.TRUE : Constants.FALSE);
-        updateProperty(Constants.USE_ACL_AS_ROLE,
-                form.useAclAsRole != null && Constants.ON.equalsIgnoreCase(form.useAclAsRole) ? Constants.TRUE : Constants.FALSE);
+        updateProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY,
+                form.incrementalCrawling != null && Constants.ON.equalsIgnoreCase(form.incrementalCrawling) ? Constants.TRUE
+                        : Constants.FALSE);
         updateProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
         updateProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount.toString());
         updateProperty(Constants.SEARCH_LOG_PROPERTY,
@@ -92,8 +91,6 @@ public class AdminGeneralAction extends FessAdminAction {
                 : Constants.FALSE);
         updateProperty(Constants.USER_FAVORITE_PROPERTY,
                 form.userFavorite != null && Constants.ON.equalsIgnoreCase(form.userFavorite) ? Constants.TRUE : Constants.FALSE);
-        updateProperty(Constants.WEB_API_XML_PROPERTY,
-                form.webApiXml != null && Constants.ON.equalsIgnoreCase(form.webApiXml) ? Constants.TRUE : Constants.FALSE);
         updateProperty(Constants.WEB_API_JSON_PROPERTY,
                 form.webApiJson != null && Constants.ON.equalsIgnoreCase(form.webApiJson) ? Constants.TRUE : Constants.FALSE);
         updateProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, form.defaultLabelValue);
@@ -114,7 +111,6 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
                 form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
         updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay.toString());
-        updateProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, form.esHttpUrl);
 
         crawlerProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -122,14 +118,12 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     protected void updateForm(final EditForm form) {
-        form.diffCrawling = crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE);
-        form.useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE);
-        form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, 1);
+        form.incrementalCrawling = crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
+        form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
         form.crawlingThreadCount = Integer.parseInt(crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
         form.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.userInfo = crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
         form.userFavorite = crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-        form.webApiXml = crawlerProperties.getProperty(Constants.WEB_API_XML_PROPERTY, Constants.TRUE);
         form.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
         form.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
         form.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
@@ -150,7 +144,6 @@ public class AdminGeneralAction extends FessAdminAction {
         form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay =
                 Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30"));
-        form.esHttpUrl = crawlerProperties.getProperty(Constants.ELASTICSEARCH_WEB_URL_PROPERTY, Constants.ELASTICSEARCH_WEB_URL);
     }
 
     private void updateProperty(final String key, final String value) {

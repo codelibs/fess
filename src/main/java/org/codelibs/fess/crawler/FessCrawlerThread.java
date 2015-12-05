@@ -54,7 +54,7 @@ public class FessCrawlerThread extends CrawlerThread {
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue urlQueue) {
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
-        if (crawlerProperties.getProperty(Constants.DIFF_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
+        if (crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
             log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
             final long startTime = System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class FessCrawlerThread extends CrawlerThread {
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
-            final boolean useAclAsRole = crawlerProperties.getProperty(Constants.USE_ACL_AS_ROLE, Constants.FALSE).equals(Constants.TRUE);
+            final boolean useAclAsRole = Constants.TRUE.equals(fessConfig.getAclAsRole());
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
