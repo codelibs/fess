@@ -19,6 +19,14 @@
 		</dependencySet>
 	</dependencySets>
 	<fileSets>
+		<!-- LICENSE -->
+		<fileSet>
+			<directory>${project.basedir}</directory>
+			<includes>
+				<include>LICENSE</include>
+			</includes>
+			<outputDirectory>fess-${project.version}</outputDirectory>
+		</fileSet>
 		<!-- lib -->
 		<fileSet>
 			<directory>${project.build.directory}/tomcat-lib</directory>
