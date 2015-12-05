@@ -17,6 +17,7 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.path.ActionAdjustmentProvider;
+import org.lastaflute.web.path.FormMappingOption;
 
 /**
  * @author jflute
@@ -27,6 +28,13 @@ public class FessActionAdjustmentProvider implements ActionAdjustmentProvider {
     // you can adjust your actions by overriding
     // default methods defined at the interface
     // _/_/_/_/_/_/_/_/_/_/
+
+    @Override
+    public FormMappingOption adjustFormMapping() {
+        return new FormMappingOption().filterSimpleTextParameter((parameter, meta) -> {
+            return parameter.trim();
+        });
+    }
 
     @Override
     public String toString() {
