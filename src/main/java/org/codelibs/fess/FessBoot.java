@@ -29,8 +29,6 @@ public class FessBoot extends TomcatBoot {
 
     private static final String FESS_TEMP_PATH = "fess.temp.path";
 
-    private static final String FESS_WEBXML_PATH = "fess.webxml.path";
-
     private static final String FESS_WEBAPP_PATH = "fess.webapp.path";
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
@@ -48,15 +46,6 @@ public class FessBoot extends TomcatBoot {
             return value;
         }
         return super.prepareWebappPath();
-    }
-
-    @Override
-    protected String prepareWebXmlPath() {
-        final String value = System.getProperty(FESS_WEBXML_PATH);
-        if (value != null) {
-            return value;
-        }
-        return super.prepareWebXmlPath();
     }
 
     @Override
