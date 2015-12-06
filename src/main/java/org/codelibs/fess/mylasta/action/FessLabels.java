@@ -920,9 +920,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Create new job */
     public static final String LABELS_file_crawling_button_create_job = "{labels.file_crawling_button_create_job}";
 
-    /** The key of the message: File Crawler - {0} */
-    public static final String LABELS_file_crawling_job_title = "{labels.file_crawling_job_title}";
-
     /** The key of the message: Web Crawling */
     public static final String LABELS_web_crawling_configuration = "{labels.web_crawling_configuration}";
 
@@ -949,12 +946,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Create new job */
     public static final String LABELS_web_crawling_button_create_job = "{labels.web_crawling_button_create_job}";
-
-    /** The key of the message: Create New */
-    public static final String LABELS_web_crawling_link_create = "{labels.web_crawling_link_create}";
-
-    /** The key of the message: Web Crawler - {0} */
-    public static final String LABELS_web_crawling_job_title = "{labels.web_crawling_job_title}";
 
     /** The key of the message: General Configuration */
     public static final String LABELS_crawler_configuration = "{labels.crawler_configuration}";
@@ -994,9 +985,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Favorite Logging */
     public static final String LABELS_user_favorite_enabled = "{labels.user_favorite_enabled}";
-
-    /** The key of the message: XML Response */
-    public static final String LABELS_web_api_xml_enabled = "{labels.web_api_xml_enabled}";
 
     /** The key of the message: JSON Response */
     public static final String LABELS_web_api_json_enabled = "{labels.web_api_json_enabled}";
@@ -1126,48 +1114,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Cancel */
     public static final String LABELS_crawling_info_delete_all_cancel = "{labels.crawling_info_delete_all_cancel}";
-
-    /** The key of the message: Crawler start time */
-    public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
-
-    /** The key of the message: Crawler end time */
-    public static final String LABELS_crawling_info_CrawlerEndTime = "{labels.crawling_info_CrawlerEndTime}";
-
-    /** The key of the message: Crawler exec time */
-    public static final String LABELS_crawling_info_CrawlerExecTime = "{labels.crawling_info_CrawlerExecTime}";
-
-    /** The key of the message: Crawler status */
-    public static final String LABELS_crawling_info_CrawlerStatus = "{labels.crawling_info_CrawlerStatus}";
-
-    /** The key of the message: Crawl exec time (Web/File system) */
-    public static final String LABELS_crawling_info_WebFsCrawlExecTime = "{labels.crawling_info_WebFsCrawlExecTime}";
-
-    /** The key of the message: Crawl start time (Web/File system) */
-    public static final String LABELS_crawling_info_WebFsCrawlStartTime = "{labels.crawling_info_WebFsCrawlStartTime}";
-
-    /** The key of the message: Crawl end time (Web/File system) */
-    public static final String LABELS_crawling_info_WebFsCrawlEndTime = "{labels.crawling_info_WebFsCrawlEndTime}";
-
-    /** The key of the message: Index exec time (Web/File system) */
-    public static final String LABELS_crawling_info_WebFsIndexExecTime = "{labels.crawling_info_WebFsIndexExecTime}";
-
-    /** The key of the message: Index size (Web/File system) */
-    public static final String LABELS_crawling_info_WebFsIndexSize = "{labels.crawling_info_WebFsIndexSize}";
-
-    /** The key of the message: Crawl exec time (Data store) */
-    public static final String LABELS_crawling_info_DataCrawlExecTime = "{labels.crawling_info_DataCrawlExecTime}";
-
-    /** The key of the message: Crawl start time (Data store) */
-    public static final String LABELS_crawling_info_DataCrawlStartTime = "{labels.crawling_info_DataCrawlStartTime}";
-
-    /** The key of the message: Crawl end time (Data store) */
-    public static final String LABELS_crawling_info_DataCrawlEndTime = "{labels.crawling_info_DataCrawlEndTime}";
-
-    /** The key of the message: Index exec time (Data store) */
-    public static final String LABELS_crawling_info_DataIndexExecTime = "{labels.crawling_info_DataIndexExecTime}";
-
-    /** The key of the message: Index size (Data store) */
-    public static final String LABELS_crawling_info_DataIndexSize = "{labels.crawling_info_DataIndexSize}";
 
     /** The key of the message: Web Authentication */
     public static final String LABELS_webauth_configuration = "{labels.webauth_configuration}";
@@ -1385,9 +1331,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Error Page (BadRequest) */
     public static final String LABELS_design_file_errorBadRequest = "{labels.design_file_errorBadRequest}";
 
-    /** The key of the message: Do you really want to delete it? */
-    public static final String LABELS_design_delete_confirmation = "{labels.design_delete_confirmation}";
-
     /** The key of the message: Edit Page View File */
     public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";
 
@@ -1423,9 +1366,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Create new job */
     public static final String LABELS_data_crawling_button_create_job = "{labels.data_crawling_button_create_job}";
-
-    /** The key of the message: Data Crawler - {0} */
-    public static final String LABELS_data_crawling_job_title = "{labels.data_crawling_job_title}";
 
     /** The key of the message: Configuration Wizard */
     public static final String LABELS_wizard_title_configuration = "{labels.wizard_title_configuration}";
@@ -1695,20 +1635,11 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Running */
     public static final String LABELS_joblog_status_running = "{labels.joblog_status_running}";
 
-    /** The key of the message: Create New */
-    public static final String LABELS_joblog_link_create = "{labels.joblog_link_create}";
-
-    /** The key of the message: Delete */
-    public static final String LABELS_joblog_link_delete = "{labels.joblog_link_delete}";
-
     /** The key of the message: Details */
     public static final String LABELS_joblog_link_details = "{labels.joblog_link_details}";
 
     /** The key of the message: List */
     public static final String LABELS_joblog_link_list = "{labels.joblog_link_list}";
-
-    /** The key of the message: Edit */
-    public static final String LABELS_joblog_link_update = "{labels.joblog_link_update}";
 
     /** The key of the message: Script */
     public static final String LABELS_joblog_scriptData = "{labels.joblog_scriptData}";
@@ -1896,9 +1827,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Role */
     public static final String LABELS_suggest_elevate_word_target_role = "{labels.suggest_elevate_word_target_role}";
 
-    /** The key of the message: Label */
-    public static final String LABELS_suggest_elevate_word_target_label = "{labels.suggest_elevate_word_target_label}";
-
     /** The key of the message: Boost */
     public static final String LABELS_suggest_elevate_word_boost = "{labels.suggest_elevate_word_boost}";
 
@@ -2036,12 +1964,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: List */
     public static final String LABELS_crud_link_list = "{labels.crud_link_list}";
-
-    /** The key of the message: Next */
-    public static final String LABELS_crud_link_next_page = "{labels.crud_link_next_page}";
-
-    /** The key of the message: Prev */
-    public static final String LABELS_crud_link_prev_page = "{labels.crud_link_prev_page}";
 
     /** The key of the message: List */
     public static final String LABELS_crud_title_list = "{labels.crud_title_list}";
