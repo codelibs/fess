@@ -15,10 +15,10 @@
  */
 package org.codelibs.fess.es.config.cbean.cq;
 
-import org.codelibs.fess.es.config.cbean.cq.bs.BsSuggestElevateWordToLabelCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordCQ;
 
 /**
  * @author ESFlute (using FreeGen)
  */
-public class SuggestElevateWordToLabelCQ extends BsSuggestElevateWordToLabelCQ {
+public class ElevateWordCQ extends BsElevateWordCQ {
 }

@@ -13,13 +13,30 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.config.exbhv;
+package org.codelibs.fess.es.config.exentity;
 
-import org.codelibs.fess.es.config.bsbhv.BsSuggestElevateWordBhv;
+import org.codelibs.fess.es.config.bsentity.BsElevateWordToLabel;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class SuggestElevateWordBhv extends BsSuggestElevateWordBhv {
+public class ElevateWordToLabel extends BsElevateWordToLabel {
 
+    private static final long serialVersionUID = 1L;
+
+    public String getId() {
+        return asDocMeta().id();
+    }
+
+    public void setId(final String id) {
+        asDocMeta().id(id);
+    }
+
+    public Long getVersionNo() {
+        return asDocMeta().version();
+    }
+
+    public void setVersionNo(final Long version) {
+        asDocMeta().version(version);
+    }
 }

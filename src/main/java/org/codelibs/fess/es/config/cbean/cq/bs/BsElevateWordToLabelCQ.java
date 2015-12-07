@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.SuggestElevateWordToLabelCQ;
+import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -36,7 +36,7 @@ import org.elasticsearch.index.query.TermsQueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestElevateWordToLabelCQ extends EsAbstractConditionQuery {
+public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -45,34 +45,34 @@ public abstract class BsSuggestElevateWordToLabelCQ extends EsAbstractConditionQ
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     @Override
     public String xgetAliasName() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<SuggestElevateWordToLabelCQ, SuggestElevateWordToLabelCQ> filteredLambda) {
+    public void filtered(FilteredCall<ElevateWordToLabelCQ, ElevateWordToLabelCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<SuggestElevateWordToLabelCQ, SuggestElevateWordToLabelCQ> filteredLambda,
+    public void filtered(FilteredCall<ElevateWordToLabelCQ, ElevateWordToLabelCQ> filteredLambda,
             ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter) -> {
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<SuggestElevateWordToLabelCQ> notLambda) {
+    public void not(OperatorCall<ElevateWordToLabelCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<SuggestElevateWordToLabelCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        SuggestElevateWordToLabelCQ notQuery = new SuggestElevateWordToLabelCQ();
+    public void not(OperatorCall<ElevateWordToLabelCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        ElevateWordToLabelCQ notQuery = new ElevateWordToLabelCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
             if (notQuery.getQueryBuilderList().size() > 1) {
@@ -86,15 +86,15 @@ public abstract class BsSuggestElevateWordToLabelCQ extends EsAbstractConditionQ
         }
     }
 
-    public void bool(BoolCall<SuggestElevateWordToLabelCQ> boolLambda) {
+    public void bool(BoolCall<ElevateWordToLabelCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<SuggestElevateWordToLabelCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        SuggestElevateWordToLabelCQ mustQuery = new SuggestElevateWordToLabelCQ();
-        SuggestElevateWordToLabelCQ shouldQuery = new SuggestElevateWordToLabelCQ();
-        SuggestElevateWordToLabelCQ mustNotQuery = new SuggestElevateWordToLabelCQ();
-        SuggestElevateWordToLabelCQ filterQuery = new SuggestElevateWordToLabelCQ();
+    public void bool(BoolCall<ElevateWordToLabelCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        ElevateWordToLabelCQ mustQuery = new ElevateWordToLabelCQ();
+        ElevateWordToLabelCQ shouldQuery = new ElevateWordToLabelCQ();
+        ElevateWordToLabelCQ mustNotQuery = new ElevateWordToLabelCQ();
+        ElevateWordToLabelCQ filterQuery = new ElevateWordToLabelCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder =
@@ -166,179 +166,179 @@ public abstract class BsSuggestElevateWordToLabelCQ extends EsAbstractConditionQ
         setId_Terms(idList, opLambda);
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_Id_Asc() {
+    public BsElevateWordToLabelCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_Id_Desc() {
+    public BsElevateWordToLabelCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
 
-    public void setSuggestElevateWordId_Equal(String suggestElevateWordId) {
-        setSuggestElevateWordId_Term(suggestElevateWordId, null);
+    public void setElevateWordId_Equal(String elevateWordId) {
+        setElevateWordId_Term(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_Equal(String suggestElevateWordId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setSuggestElevateWordId_Term(suggestElevateWordId, opLambda);
+    public void setElevateWordId_Equal(String elevateWordId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setElevateWordId_Term(elevateWordId, opLambda);
     }
 
-    public void setSuggestElevateWordId_Term(String suggestElevateWordId) {
-        setSuggestElevateWordId_Term(suggestElevateWordId, null);
+    public void setElevateWordId_Term(String elevateWordId) {
+        setElevateWordId_Term(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_Term(String suggestElevateWordId, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_Term(String elevateWordId, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_NotEqual(String suggestElevateWordId) {
-        setSuggestElevateWordId_NotTerm(suggestElevateWordId, null);
+    public void setElevateWordId_NotEqual(String elevateWordId) {
+        setElevateWordId_NotTerm(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_NotEqual(String suggestElevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSuggestElevateWordId_NotTerm(suggestElevateWordId, opLambda);
+    public void setElevateWordId_NotEqual(String elevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setElevateWordId_NotTerm(elevateWordId, opLambda);
     }
 
-    public void setSuggestElevateWordId_NotTerm(String suggestElevateWordId) {
-        setSuggestElevateWordId_NotTerm(suggestElevateWordId, null);
+    public void setElevateWordId_NotTerm(String elevateWordId) {
+        setElevateWordId_NotTerm(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_NotTerm(String suggestElevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("suggestElevateWordId", suggestElevateWordId));
+    public void setElevateWordId_NotTerm(String elevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("elevateWordId", elevateWordId));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_Terms(Collection<String> suggestElevateWordIdList) {
-        setSuggestElevateWordId_Terms(suggestElevateWordIdList, null);
+    public void setElevateWordId_Terms(Collection<String> elevateWordIdList) {
+        setElevateWordId_Terms(elevateWordIdList, null);
     }
 
-    public void setSuggestElevateWordId_Terms(Collection<String> suggestElevateWordIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("suggestElevateWordId", suggestElevateWordIdList);
+    public void setElevateWordId_Terms(Collection<String> elevateWordIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("elevateWordId", elevateWordIdList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_InScope(Collection<String> suggestElevateWordIdList) {
-        setSuggestElevateWordId_Terms(suggestElevateWordIdList, null);
+    public void setElevateWordId_InScope(Collection<String> elevateWordIdList) {
+        setElevateWordId_Terms(elevateWordIdList, null);
     }
 
-    public void setSuggestElevateWordId_InScope(Collection<String> suggestElevateWordIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setSuggestElevateWordId_Terms(suggestElevateWordIdList, opLambda);
+    public void setElevateWordId_InScope(Collection<String> elevateWordIdList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setElevateWordId_Terms(elevateWordIdList, opLambda);
     }
 
-    public void setSuggestElevateWordId_Match(String suggestElevateWordId) {
-        setSuggestElevateWordId_Match(suggestElevateWordId, null);
+    public void setElevateWordId_Match(String elevateWordId) {
+        setElevateWordId_Match(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_Match(String suggestElevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_Match(String elevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_MatchPhrase(String suggestElevateWordId) {
-        setSuggestElevateWordId_MatchPhrase(suggestElevateWordId, null);
+    public void setElevateWordId_MatchPhrase(String elevateWordId) {
+        setElevateWordId_MatchPhrase(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_MatchPhrase(String suggestElevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_MatchPhrase(String elevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_MatchPhrasePrefix(String suggestElevateWordId) {
-        setSuggestElevateWordId_MatchPhrasePrefix(suggestElevateWordId, null);
+    public void setElevateWordId_MatchPhrasePrefix(String elevateWordId) {
+        setElevateWordId_MatchPhrasePrefix(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_MatchPhrasePrefix(String suggestElevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_MatchPhrasePrefix(String elevateWordId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_Fuzzy(String suggestElevateWordId) {
-        setSuggestElevateWordId_Fuzzy(suggestElevateWordId, null);
+    public void setElevateWordId_Fuzzy(String elevateWordId) {
+        setElevateWordId_Fuzzy(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_Fuzzy(String suggestElevateWordId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_Fuzzy(String elevateWordId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_Prefix(String suggestElevateWordId) {
-        setSuggestElevateWordId_Prefix(suggestElevateWordId, null);
+    public void setElevateWordId_Prefix(String elevateWordId) {
+        setElevateWordId_Prefix(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_Prefix(String suggestElevateWordId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("suggestElevateWordId", suggestElevateWordId);
+    public void setElevateWordId_Prefix(String elevateWordId, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("elevateWordId", elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_GreaterThan(String suggestElevateWordId) {
-        setSuggestElevateWordId_GreaterThan(suggestElevateWordId, null);
+    public void setElevateWordId_GreaterThan(String elevateWordId) {
+        setElevateWordId_GreaterThan(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_GreaterThan(String suggestElevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("suggestElevateWordId", ConditionKey.CK_GREATER_THAN, suggestElevateWordId);
+    public void setElevateWordId_GreaterThan(String elevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("elevateWordId", ConditionKey.CK_GREATER_THAN, elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_LessThan(String suggestElevateWordId) {
-        setSuggestElevateWordId_LessThan(suggestElevateWordId, null);
+    public void setElevateWordId_LessThan(String elevateWordId) {
+        setElevateWordId_LessThan(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_LessThan(String suggestElevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("suggestElevateWordId", ConditionKey.CK_LESS_THAN, suggestElevateWordId);
+    public void setElevateWordId_LessThan(String elevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("elevateWordId", ConditionKey.CK_LESS_THAN, elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_GreaterEqual(String suggestElevateWordId) {
-        setSuggestElevateWordId_GreaterEqual(suggestElevateWordId, null);
+    public void setElevateWordId_GreaterEqual(String elevateWordId) {
+        setElevateWordId_GreaterEqual(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_GreaterEqual(String suggestElevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("suggestElevateWordId", ConditionKey.CK_GREATER_EQUAL, suggestElevateWordId);
+    public void setElevateWordId_GreaterEqual(String elevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("elevateWordId", ConditionKey.CK_GREATER_EQUAL, elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setSuggestElevateWordId_LessEqual(String suggestElevateWordId) {
-        setSuggestElevateWordId_LessEqual(suggestElevateWordId, null);
+    public void setElevateWordId_LessEqual(String elevateWordId) {
+        setElevateWordId_LessEqual(elevateWordId, null);
     }
 
-    public void setSuggestElevateWordId_LessEqual(String suggestElevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("suggestElevateWordId", ConditionKey.CK_LESS_EQUAL, suggestElevateWordId);
+    public void setElevateWordId_LessEqual(String elevateWordId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("elevateWordId", ConditionKey.CK_LESS_EQUAL, elevateWordId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_SuggestElevateWordId_Asc() {
-        regOBA("suggestElevateWordId");
+    public BsElevateWordToLabelCQ addOrderBy_ElevateWordId_Asc() {
+        regOBA("elevateWordId");
         return this;
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_SuggestElevateWordId_Desc() {
-        regOBD("suggestElevateWordId");
+    public BsElevateWordToLabelCQ addOrderBy_ElevateWordId_Desc() {
+        regOBD("elevateWordId");
         return this;
     }
 
@@ -498,12 +498,12 @@ public abstract class BsSuggestElevateWordToLabelCQ extends EsAbstractConditionQ
         }
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_LabelTypeId_Asc() {
+    public BsElevateWordToLabelCQ addOrderBy_LabelTypeId_Asc() {
         regOBA("labelTypeId");
         return this;
     }
 
-    public BsSuggestElevateWordToLabelCQ addOrderBy_LabelTypeId_Desc() {
+    public BsElevateWordToLabelCQ addOrderBy_LabelTypeId_Desc() {
         regOBD("labelTypeId");
         return this;
     }

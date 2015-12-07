@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class SuggestElevateWordPager implements Serializable {
+public class ElevateWordPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -137,7 +137,7 @@ public class SuggestElevateWordPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public SuggestElevateWordPager() {
+    public ElevateWordPager() {
         super();
     }
 

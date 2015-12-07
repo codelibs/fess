@@ -1,5 +1,5 @@
 {
-  "suggest_elevate_word": {
+  "elevate_word": {
     "_source": {
       "enabled": true
     },

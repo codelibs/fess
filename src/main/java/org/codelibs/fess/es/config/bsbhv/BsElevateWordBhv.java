@@ -21,9 +21,9 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordDbm;
-import org.codelibs.fess.es.config.cbean.SuggestElevateWordCB;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordDbm;
+import org.codelibs.fess.es.config.cbean.ElevateWordCB;
+import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -40,7 +40,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<SuggestElevateWord, SuggestElevateWordCB> {
+public abstract class BsElevateWordBhv extends EsAbstractBehavior<ElevateWord, ElevateWordCB> {
 
     // ===================================================================================
     //                                                                    Control Override
@@ -57,21 +57,21 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
 
     @Override
     public String asEsIndexType() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     @Override
     public String asEsSearchType() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     @Override
-    public SuggestElevateWordDbm asDBMeta() {
-        return SuggestElevateWordDbm.getInstance();
+    public ElevateWordDbm asDBMeta() {
+        return ElevateWordDbm.getInstance();
     }
 
     @Override
-    protected <RESULT extends SuggestElevateWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends ElevateWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
@@ -93,26 +93,25 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
     // ===================================================================================
     //                                                                              Select
     //                                                                              ======
-    public int selectCount(CBCall<SuggestElevateWordCB> cbLambda) {
+    public int selectCount(CBCall<ElevateWordCB> cbLambda) {
         return facadeSelectCount(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestElevateWord> selectEntity(CBCall<SuggestElevateWordCB> cbLambda) {
+    public OptionalEntity<ElevateWord> selectEntity(CBCall<ElevateWordCB> cbLambda) {
         return facadeSelectEntity(createCB(cbLambda));
     }
 
-    protected OptionalEntity<SuggestElevateWord> facadeSelectEntity(SuggestElevateWordCB cb) {
+    protected OptionalEntity<ElevateWord> facadeSelectEntity(ElevateWordCB cb) {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestElevateWord> OptionalEntity<ENTITY> doSelectOptionalEntity(SuggestElevateWordCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ElevateWord> OptionalEntity<ENTITY> doSelectOptionalEntity(ElevateWordCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
-    public SuggestElevateWordCB newConditionBean() {
-        return new SuggestElevateWordCB();
+    public ElevateWordCB newConditionBean() {
+        return new ElevateWordCB();
     }
 
     @Override
@@ -120,135 +119,135 @@ public abstract class BsSuggestElevateWordBhv extends EsAbstractBehavior<Suggest
         return facadeSelectEntity(downcast(cb)).orElse(null);
     }
 
-    public SuggestElevateWord selectEntityWithDeletedCheck(CBCall<SuggestElevateWordCB> cbLambda) {
+    public ElevateWord selectEntityWithDeletedCheck(CBCall<ElevateWordCB> cbLambda) {
         return facadeSelectEntityWithDeletedCheck(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestElevateWord> selectByPK(String id) {
+    public OptionalEntity<ElevateWord> selectByPK(String id) {
         return facadeSelectByPK(id);
     }
 
-    protected OptionalEntity<SuggestElevateWord> facadeSelectByPK(String id) {
+    protected OptionalEntity<ElevateWord> facadeSelectByPK(String id) {
         return doSelectOptionalByPK(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestElevateWord> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ElevateWord> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
-    protected SuggestElevateWordCB xprepareCBAsPK(String id) {
+    protected ElevateWordCB xprepareCBAsPK(String id) {
         assertObjectNotNull("id", id);
         return newConditionBean().acceptPK(id);
     }
 
-    protected <ENTITY extends SuggestElevateWord> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ElevateWord> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     @Override
-    protected Class<? extends SuggestElevateWord> typeOfSelectedEntity() {
-        return SuggestElevateWord.class;
+    protected Class<? extends ElevateWord> typeOfSelectedEntity() {
+        return ElevateWord.class;
     }
 
     @Override
-    protected Class<SuggestElevateWord> typeOfHandlingEntity() {
-        return SuggestElevateWord.class;
+    protected Class<ElevateWord> typeOfHandlingEntity() {
+        return ElevateWord.class;
     }
 
     @Override
-    protected Class<SuggestElevateWordCB> typeOfHandlingConditionBean() {
-        return SuggestElevateWordCB.class;
+    protected Class<ElevateWordCB> typeOfHandlingConditionBean() {
+        return ElevateWordCB.class;
     }
 
-    public ListResultBean<SuggestElevateWord> selectList(CBCall<SuggestElevateWordCB> cbLambda) {
+    public ListResultBean<ElevateWord> selectList(CBCall<ElevateWordCB> cbLambda) {
         return facadeSelectList(createCB(cbLambda));
     }
 
-    public PagingResultBean<SuggestElevateWord> selectPage(CBCall<SuggestElevateWordCB> cbLambda) {
+    public PagingResultBean<ElevateWord> selectPage(CBCall<ElevateWordCB> cbLambda) {
         // #pending same?
-        return (PagingResultBean<SuggestElevateWord>) facadeSelectList(createCB(cbLambda));
+        return (PagingResultBean<ElevateWord>) facadeSelectList(createCB(cbLambda));
     }
 
-    public void selectCursor(CBCall<SuggestElevateWordCB> cbLambda, EntityRowHandler<SuggestElevateWord> entityLambda) {
+    public void selectCursor(CBCall<ElevateWordCB> cbLambda, EntityRowHandler<ElevateWord> entityLambda) {
         facadeSelectCursor(createCB(cbLambda), entityLambda);
     }
 
-    public void selectBulk(CBCall<SuggestElevateWordCB> cbLambda, EntityRowHandler<List<SuggestElevateWord>> entityLambda) {
+    public void selectBulk(CBCall<ElevateWordCB> cbLambda, EntityRowHandler<List<ElevateWord>> entityLambda) {
         delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
     //                                                                              Update
     //                                                                              ======
-    public void insert(SuggestElevateWord entity) {
+    public void insert(ElevateWord entity) {
         doInsert(entity, null);
     }
 
-    public void insert(SuggestElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insert(ElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsert(entity, null);
     }
 
-    public void update(SuggestElevateWord entity) {
+    public void update(ElevateWord entity) {
         doUpdate(entity, null);
     }
 
-    public void update(SuggestElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void update(ElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doUpdate(entity, null);
     }
 
-    public void insertOrUpdate(SuggestElevateWord entity) {
+    public void insertOrUpdate(ElevateWord entity) {
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void insertOrUpdate(SuggestElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insertOrUpdate(ElevateWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void delete(SuggestElevateWord entity) {
+    public void delete(ElevateWord entity) {
         doDelete(entity, null);
     }
 
-    public void delete(SuggestElevateWord entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
+    public void delete(ElevateWord entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
     }
 
-    public int queryDelete(CBCall<SuggestElevateWordCB> cbLambda) {
+    public int queryDelete(CBCall<ElevateWordCB> cbLambda) {
         return doQueryDelete(createCB(cbLambda), null);
     }
 
-    public int[] batchInsert(List<SuggestElevateWord> list) {
+    public int[] batchInsert(List<ElevateWord> list) {
         return batchInsert(list, null);
     }
 
-    public int[] batchInsert(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchInsert(List<ElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchInsert(new BulkList<>(list, call), null);
     }
 
-    public int[] batchUpdate(List<SuggestElevateWord> list) {
+    public int[] batchUpdate(List<ElevateWord> list) {
         return batchUpdate(list, null);
     }
 
-    public int[] batchUpdate(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchUpdate(List<ElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchUpdate(new BulkList<>(list, call), null);
     }
 
-    public int[] batchDelete(List<SuggestElevateWord> list) {
+    public int[] batchDelete(List<ElevateWord> list) {
         return batchDelete(list, null);
     }
 
-    public int[] batchDelete(List<SuggestElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchDelete(List<ElevateWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchDelete(new BulkList<>(list, call), null);
     }
 

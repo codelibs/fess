@@ -30,15 +30,14 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
-import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
+import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
-import org.codelibs.fess.suggest.entity.ElevateWord;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.index.contents.document.DocumentReader;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
@@ -54,7 +53,7 @@ public class SuggestHelper {
     private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
 
     @Resource
-    protected SuggestElevateWordBhv suggestElevateWordBhv;
+    protected ElevateWordBhv elevateWordBhv;
 
     @Resource
     protected BadWordBhv badWordBhv;
@@ -171,11 +170,11 @@ public class SuggestHelper {
     public void storeAllElevateWords() {
         deleteAllBadWords();
 
-        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+        final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
         });
 
-        for (final SuggestElevateWord elevateWord : list) {
+        for (final ElevateWord elevateWord : list) {
             addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getLabelTypeValues(),
                     elevateWord.getTargetRole(), elevateWord.getBoost(), false);
         }
@@ -183,11 +182,11 @@ public class SuggestHelper {
     }
 
     public void deleteAllElevateWord() {
-        final List<SuggestElevateWord> list = suggestElevateWordBhv.selectList(cb -> {
+        final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
         });
 
-        for (final SuggestElevateWord elevateWord : list) {
+        for (final ElevateWord elevateWord : list) {
             suggester.indexer().deleteElevateWord(elevateWord.getSuggestWord());
         }
         suggester.refresh();
@@ -217,7 +216,8 @@ public class SuggestHelper {
         }
 
         suggester.indexer().addElevateWord(
-                new ElevateWord(word, boost, Collections.singletonList(reading), Arrays.asList(contentFieldNames), labelList, roleList));
+                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Collections.singletonList(reading), Arrays
+                        .asList(contentFieldNames), labelList, roleList));
     }
 
     public void deleteAllBadWords() {

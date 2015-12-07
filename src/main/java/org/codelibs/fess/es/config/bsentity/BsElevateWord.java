@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordDbm;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordDbm;
 
 /**
  * ${table.comment}
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestElevateWord extends EsAbstractEntity {
+public class BsElevateWord extends EsAbstractEntity {
 
     // ===================================================================================
     //                                                                          Definition
@@ -70,13 +70,13 @@ public class BsSuggestElevateWord extends EsAbstractEntity {
     //                                                                             DB Meta
     //                                                                             =======
     @Override
-    public SuggestElevateWordDbm asDBMeta() {
-        return SuggestElevateWordDbm.getInstance();
+    public ElevateWordDbm asDBMeta() {
+        return ElevateWordDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     // ===================================================================================

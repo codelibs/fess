@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordToLabelDbm;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordToLabelDbm;
 
 /**
  * ${table.comment}
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
+public class BsElevateWordToLabel extends EsAbstractEntity {
 
     // ===================================================================================
     //                                                                          Definition
@@ -37,8 +37,8 @@ public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    /** suggestElevateWordId */
-    protected String suggestElevateWordId;
+    /** elevateWordId */
+    protected String elevateWordId;
 
     /** labelTypeId */
     protected String labelTypeId;
@@ -49,13 +49,13 @@ public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
     //                                                                             DB Meta
     //                                                                             =======
     @Override
-    public SuggestElevateWordToLabelDbm asDBMeta() {
-        return SuggestElevateWordToLabelDbm.getInstance();
+    public ElevateWordToLabelDbm asDBMeta() {
+        return ElevateWordToLabelDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     // ===================================================================================
@@ -64,8 +64,8 @@ public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
     @Override
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
-        if (suggestElevateWordId != null) {
-            sourceMap.put("suggestElevateWordId", suggestElevateWordId);
+        if (elevateWordId != null) {
+            sourceMap.put("elevateWordId", elevateWordId);
         }
         if (labelTypeId != null) {
             sourceMap.put("labelTypeId", labelTypeId);
@@ -79,7 +79,7 @@ public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
     @Override
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
-        sb.append(dm).append(suggestElevateWordId);
+        sb.append(dm).append(elevateWordId);
         sb.append(dm).append(labelTypeId);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -91,14 +91,14 @@ public class BsSuggestElevateWordToLabel extends EsAbstractEntity {
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
-    public String getSuggestElevateWordId() {
-        checkSpecifiedProperty("suggestElevateWordId");
-        return convertEmptyToNull(suggestElevateWordId);
+    public String getElevateWordId() {
+        checkSpecifiedProperty("elevateWordId");
+        return convertEmptyToNull(elevateWordId);
     }
 
-    public void setSuggestElevateWordId(String value) {
-        registerModifiedProperty("suggestElevateWordId");
-        this.suggestElevateWordId = value;
+    public void setElevateWordId(String value) {
+        registerModifiedProperty("elevateWordId");
+        this.elevateWordId = value;
     }
 
     public String getLabelTypeId() {

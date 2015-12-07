@@ -196,10 +196,10 @@
 				<ul class="treeview-menu">
 
 					<li
-						<c:if test="${param.menuType=='suggestElevateWord'}">class="active"</c:if>><la:link
+						<c:if test="${param.menuType=='elevateWord'}">class="active"</c:if>><la:link
 							href="/admin/elevateword/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_suggest_elevate_word" /></span>
+							<span><la:message key="labels.menu_elevate_word" /></span>
 						</la:link></li>
 
 					<li

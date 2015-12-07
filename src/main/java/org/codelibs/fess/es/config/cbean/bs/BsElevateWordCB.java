@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordDbm;
-import org.codelibs.fess.es.config.cbean.SuggestElevateWordCB;
-import org.codelibs.fess.es.config.cbean.cq.SuggestElevateWordCQ;
-import org.codelibs.fess.es.config.cbean.cq.bs.BsSuggestElevateWordCQ;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordDbm;
+import org.codelibs.fess.es.config.cbean.ElevateWordCB;
+import org.codelibs.fess.es.config.cbean.cq.ElevateWordCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordCQ;
 import org.dbflute.cbean.ConditionQuery;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -32,25 +32,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestElevateWordCB extends EsAbstractConditionBean {
+public class BsElevateWordCB extends EsAbstractConditionBean {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected BsSuggestElevateWordCQ _conditionQuery;
+    protected BsElevateWordCQ _conditionQuery;
     protected HpSpecification _specification;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
     @Override
-    public SuggestElevateWordDbm asDBMeta() {
-        return SuggestElevateWordDbm.getInstance();
+    public ElevateWordDbm asDBMeta() {
+        return ElevateWordDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     @Override
@@ -66,11 +66,11 @@ public class BsSuggestElevateWordCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                         Primary Key
     //                                                                         ===========
-    public SuggestElevateWordCB acceptPK(String id) {
+    public ElevateWordCB acceptPK(String id) {
         assertObjectNotNull("id", id);
-        BsSuggestElevateWordCB cb = this;
+        BsElevateWordCB cb = this;
         cb.query().docMeta().setId_Equal(id);
-        return (SuggestElevateWordCB) this;
+        return (ElevateWordCB) this;
     }
 
     @Override
@@ -114,20 +114,20 @@ public class BsSuggestElevateWordCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-    public BsSuggestElevateWordCQ query() {
+    public BsElevateWordCQ query() {
         assertQueryPurpose();
         return doGetConditionQuery();
     }
 
-    protected BsSuggestElevateWordCQ doGetConditionQuery() {
+    protected BsElevateWordCQ doGetConditionQuery() {
         if (_conditionQuery == null) {
             _conditionQuery = createLocalCQ();
         }
         return _conditionQuery;
     }
 
-    protected BsSuggestElevateWordCQ createLocalCQ() {
-        return new SuggestElevateWordCQ();
+    protected BsElevateWordCQ createLocalCQ() {
+        return new ElevateWordCQ();
     }
 
     // ===================================================================================

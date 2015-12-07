@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordToLabelDbm;
-import org.codelibs.fess.es.config.cbean.SuggestElevateWordToLabelCB;
-import org.codelibs.fess.es.config.cbean.cq.SuggestElevateWordToLabelCQ;
-import org.codelibs.fess.es.config.cbean.cq.bs.BsSuggestElevateWordToLabelCQ;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordToLabelDbm;
+import org.codelibs.fess.es.config.cbean.ElevateWordToLabelCB;
+import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordToLabelCQ;
 import org.dbflute.cbean.ConditionQuery;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -32,25 +32,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestElevateWordToLabelCB extends EsAbstractConditionBean {
+public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected BsSuggestElevateWordToLabelCQ _conditionQuery;
+    protected BsElevateWordToLabelCQ _conditionQuery;
     protected HpSpecification _specification;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
     @Override
-    public SuggestElevateWordToLabelDbm asDBMeta() {
-        return SuggestElevateWordToLabelDbm.getInstance();
+    public ElevateWordToLabelDbm asDBMeta() {
+        return ElevateWordToLabelDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     @Override
@@ -66,11 +66,11 @@ public class BsSuggestElevateWordToLabelCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                         Primary Key
     //                                                                         ===========
-    public SuggestElevateWordToLabelCB acceptPK(String id) {
+    public ElevateWordToLabelCB acceptPK(String id) {
         assertObjectNotNull("id", id);
-        BsSuggestElevateWordToLabelCB cb = this;
+        BsElevateWordToLabelCB cb = this;
         cb.query().docMeta().setId_Equal(id);
-        return (SuggestElevateWordToLabelCB) this;
+        return (ElevateWordToLabelCB) this;
     }
 
     @Override
@@ -114,20 +114,20 @@ public class BsSuggestElevateWordToLabelCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-    public BsSuggestElevateWordToLabelCQ query() {
+    public BsElevateWordToLabelCQ query() {
         assertQueryPurpose();
         return doGetConditionQuery();
     }
 
-    protected BsSuggestElevateWordToLabelCQ doGetConditionQuery() {
+    protected BsElevateWordToLabelCQ doGetConditionQuery() {
         if (_conditionQuery == null) {
             _conditionQuery = createLocalCQ();
         }
         return _conditionQuery;
     }
 
-    protected BsSuggestElevateWordToLabelCQ createLocalCQ() {
-        return new SuggestElevateWordToLabelCQ();
+    protected BsElevateWordToLabelCQ createLocalCQ() {
+        return new ElevateWordToLabelCQ();
     }
 
     // ===================================================================================
@@ -158,8 +158,8 @@ public class BsSuggestElevateWordToLabelCB extends EsAbstractConditionBean {
             doColumn("_id");
         }
 
-        public void columnSuggestElevateWordId() {
-            doColumn("suggestElevateWordId");
+        public void columnElevateWordId() {
+            doColumn("elevateWordId");
         }
 
         public void columnLabelTypeId() {

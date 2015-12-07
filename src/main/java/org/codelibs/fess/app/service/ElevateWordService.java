@@ -30,12 +30,12 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.SuggestElevateWordPager;
-import org.codelibs.fess.es.config.cbean.SuggestElevateWordCB;
-import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
-import org.codelibs.fess.es.config.exbhv.SuggestElevateWordToLabelBhv;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWordToLabel;
+import org.codelibs.fess.app.pager.ElevateWordPager;
+import org.codelibs.fess.es.config.cbean.ElevateWordCB;
+import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
+import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
+import org.codelibs.fess.es.config.exentity.ElevateWord;
+import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -45,47 +45,47 @@ import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
 
-public class SuggestElevateWordService implements Serializable {
+public class ElevateWordService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory.getLog(SuggestElevateWordService.class);
+    private static final Log log = LogFactory.getLog(ElevateWordService.class);
 
     @Resource
-    protected SuggestElevateWordToLabelBhv suggestElevateWordToLabelBhv;
+    protected ElevateWordToLabelBhv elevateWordToLabelBhv;
 
     @Resource
-    protected SuggestElevateWordBhv suggestElevateWordBhv;
+    protected ElevateWordBhv elevateWordBhv;
 
-    public SuggestElevateWordService() {
+    public ElevateWordService() {
         super();
     }
 
-    public List<SuggestElevateWord> getSuggestElevateWordList(final SuggestElevateWordPager suggestElevateWordPager) {
+    public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 
-        final PagingResultBean<SuggestElevateWord> suggestElevateWordList = suggestElevateWordBhv.selectPage(cb -> {
-            cb.paging(suggestElevateWordPager.getPageSize(), suggestElevateWordPager.getCurrentPageNumber());
-            setupListCondition(cb, suggestElevateWordPager);
+        final PagingResultBean<ElevateWord> elevateWordList = elevateWordBhv.selectPage(cb -> {
+            cb.paging(elevateWordPager.getPageSize(), elevateWordPager.getCurrentPageNumber());
+            setupListCondition(cb, elevateWordPager);
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(suggestElevateWordList, suggestElevateWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        suggestElevateWordPager.setPageNumberList(suggestElevateWordList.pageRange(op -> {
+        BeanUtil.copyBeanToBean(elevateWordList, elevateWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+        elevateWordPager.setPageNumberList(elevateWordList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
 
-        return suggestElevateWordList;
+        return elevateWordList;
     }
 
-    public OptionalEntity<SuggestElevateWord> getSuggestElevateWord(final String id) {
-        return suggestElevateWordBhv.selectByPK(id).map(entity -> {
+    public OptionalEntity<ElevateWord> getElevateWord(final String id) {
+        return elevateWordBhv.selectByPK(id).map(entity -> {
 
-            final List<SuggestElevateWordToLabel> wctltmList = suggestElevateWordToLabelBhv.selectList(wctltmCb -> {
-                wctltmCb.query().setSuggestElevateWordId_Equal(entity.getId());
+            final List<ElevateWordToLabel> wctltmList = elevateWordToLabelBhv.selectList(wctltmCb -> {
+                wctltmCb.query().setElevateWordId_Equal(entity.getId());
             });
             if (!wctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
-                for (final SuggestElevateWordToLabel mapping : wctltmList) {
+                for (final ElevateWordToLabel mapping : wctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
                 entity.setLabelTypeIds(labelTypeIds.toArray(new String[labelTypeIds.size()]));
@@ -94,40 +94,40 @@ public class SuggestElevateWordService implements Serializable {
         });
     }
 
-    public void store(final SuggestElevateWord suggestElevateWord) {
-        final boolean isNew = suggestElevateWord.getId() == null;
-        final String[] labelTypeIds = suggestElevateWord.getLabelTypeIds();
-        setupStoreCondition(suggestElevateWord);
+    public void store(final ElevateWord elevateWord) {
+        final boolean isNew = elevateWord.getId() == null;
+        final String[] labelTypeIds = elevateWord.getLabelTypeIds();
+        setupStoreCondition(elevateWord);
 
-        suggestElevateWordBhv.insertOrUpdate(suggestElevateWord, op -> {
+        elevateWordBhv.insertOrUpdate(elevateWord, op -> {
             op.setRefresh(true);
         });
-        final String suggestElevateWordId = suggestElevateWord.getId();
+        final String elevateWordId = elevateWord.getId();
         if (isNew) {
             // Insert
             if (labelTypeIds != null) {
-                final List<SuggestElevateWordToLabel> wctltmList = new ArrayList<SuggestElevateWordToLabel>();
+                final List<ElevateWordToLabel> wctltmList = new ArrayList<ElevateWordToLabel>();
                 for (final String id : labelTypeIds) {
-                    final SuggestElevateWordToLabel mapping = new SuggestElevateWordToLabel();
-                    mapping.setSuggestElevateWordId(suggestElevateWordId);
+                    final ElevateWordToLabel mapping = new ElevateWordToLabel();
+                    mapping.setElevateWordId(elevateWordId);
                     mapping.setLabelTypeId(id);
                     wctltmList.add(mapping);
                 }
-                suggestElevateWordToLabelBhv.batchInsert(wctltmList, op -> {
+                elevateWordToLabelBhv.batchInsert(wctltmList, op -> {
                     op.setRefresh(true);
                 });
             }
         } else {
             // Update
             if (labelTypeIds != null) {
-                final List<SuggestElevateWordToLabel> list = suggestElevateWordToLabelBhv.selectList(wctltmCb -> {
-                    wctltmCb.query().setSuggestElevateWordId_Equal(suggestElevateWordId);
+                final List<ElevateWordToLabel> list = elevateWordToLabelBhv.selectList(wctltmCb -> {
+                    wctltmCb.query().setElevateWordId_Equal(elevateWordId);
                 });
-                final List<SuggestElevateWordToLabel> newList = new ArrayList<SuggestElevateWordToLabel>();
-                final List<SuggestElevateWordToLabel> matchedList = new ArrayList<SuggestElevateWordToLabel>();
+                final List<ElevateWordToLabel> newList = new ArrayList<ElevateWordToLabel>();
+                final List<ElevateWordToLabel> matchedList = new ArrayList<ElevateWordToLabel>();
                 for (final String id : labelTypeIds) {
                     boolean exist = false;
-                    for (final SuggestElevateWordToLabel mapping : list) {
+                    for (final ElevateWordToLabel mapping : list) {
                         if (mapping.getLabelTypeId().equals(id)) {
                             exist = true;
                             matchedList.add(mapping);
@@ -136,35 +136,35 @@ public class SuggestElevateWordService implements Serializable {
                     }
                     if (!exist) {
                         // new
-                        final SuggestElevateWordToLabel mapping = new SuggestElevateWordToLabel();
-                        mapping.setSuggestElevateWordId(suggestElevateWordId);
+                        final ElevateWordToLabel mapping = new ElevateWordToLabel();
+                        mapping.setElevateWordId(elevateWordId);
                         mapping.setLabelTypeId(id);
                         newList.add(mapping);
                     }
                 }
                 list.removeAll(matchedList);
-                suggestElevateWordToLabelBhv.batchInsert(newList, op -> {
+                elevateWordToLabelBhv.batchInsert(newList, op -> {
                     op.setRefresh(true);
                 });
-                suggestElevateWordToLabelBhv.batchDelete(list, op -> {
+                elevateWordToLabelBhv.batchDelete(list, op -> {
                     op.setRefresh(true);
                 });
             }
         }
     }
 
-    public void delete(final SuggestElevateWord suggestElevateWord) {
-        setupDeleteCondition(suggestElevateWord);
+    public void delete(final ElevateWord elevateWord) {
+        setupDeleteCondition(elevateWord);
 
-        suggestElevateWordBhv.delete(suggestElevateWord, op -> {
+        elevateWordBhv.delete(elevateWord, op -> {
             op.setRefresh(true);
         });
 
     }
 
-    protected void setupListCondition(final SuggestElevateWordCB cb, final SuggestElevateWordPager suggestElevateWordPager) {
-        if (suggestElevateWordPager.id != null) {
-            cb.query().docMeta().setId_Equal(suggestElevateWordPager.id);
+    protected void setupListCondition(final ElevateWordCB cb, final ElevateWordPager elevateWordPager) {
+        if (elevateWordPager.id != null) {
+            cb.query().docMeta().setId_Equal(elevateWordPager.id);
         }
         // TODO Long, Integer, String supported only.
 
@@ -175,19 +175,19 @@ public class SuggestElevateWordService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final SuggestElevateWordCB cb, final Map<String, String> keys) {
+    protected void setupEntityCondition(final ElevateWordCB cb, final Map<String, String> keys) {
 
         // setup condition
 
     }
 
-    protected void setupStoreCondition(final SuggestElevateWord suggestElevateWord) {
+    protected void setupStoreCondition(final ElevateWord elevateWord) {
 
         // setup condition
 
     }
 
-    protected void setupDeleteCondition(final SuggestElevateWord suggestElevateWord) {
+    protected void setupDeleteCondition(final ElevateWord elevateWord) {
 
         // setup condition
 
@@ -207,7 +207,7 @@ public class SuggestElevateWordService implements Serializable {
                 try {
                     final String role = getValue(list, 2);
                     final String label = getValue(list, 3);
-                    SuggestElevateWord suggestElevateWord = suggestElevateWordBhv.selectEntity(cb -> {
+                    ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(suggestWord);
                         if (StringUtil.isNotBlank(role)) {
                             cb.query().setTargetRole_Equal(role);
@@ -219,24 +219,24 @@ public class SuggestElevateWordService implements Serializable {
                     final String reading = getValue(list, 1);
                     final String boost = getValue(list, 4);
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-                    if (suggestElevateWord == null) {
-                        suggestElevateWord = new SuggestElevateWord();
-                        suggestElevateWord.setSuggestWord(suggestWord);
-                        suggestElevateWord.setReading(reading);
-                        suggestElevateWord.setTargetRole(role);
-                        suggestElevateWord.setTargetLabel(label);
-                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
-                        suggestElevateWord.setCreatedBy("system");
-                        suggestElevateWord.setCreatedTime(now);
-                        suggestElevateWordBhv.insert(suggestElevateWord);
+                    if (elevateWord == null) {
+                        elevateWord = new ElevateWord();
+                        elevateWord.setSuggestWord(suggestWord);
+                        elevateWord.setReading(reading);
+                        elevateWord.setTargetRole(role);
+                        elevateWord.setTargetLabel(label);
+                        elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
+                        elevateWord.setCreatedBy("system");
+                        elevateWord.setCreatedTime(now);
+                        elevateWordBhv.insert(elevateWord);
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
-                        suggestElevateWordBhv.delete(suggestElevateWord);
+                        elevateWordBhv.delete(elevateWord);
                     } else {
-                        suggestElevateWord.setReading(reading);
-                        suggestElevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
-                        suggestElevateWord.setUpdatedBy("system");
-                        suggestElevateWord.setUpdatedTime(now);
-                        suggestElevateWordBhv.update(suggestElevateWord);
+                        elevateWord.setReading(reading);
+                        elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
+                        elevateWord.setUpdatedBy("system");
+                        elevateWord.setUpdatedTime(now);
+                        elevateWordBhv.update(elevateWord);
                     }
                 } catch (final Exception e) {
                     log.warn("Failed to read a sugget elevate word: " + list, e);
@@ -262,11 +262,11 @@ public class SuggestElevateWordService implements Serializable {
             list.add("Boost");
             csvWriter.writeValues(list);
 
-            suggestElevateWordBhv.selectCursor(cb -> {
+            elevateWordBhv.selectCursor(cb -> {
                 cb.query().matchAll();
-            }, new EntityRowHandler<SuggestElevateWord>() {
+            }, new EntityRowHandler<ElevateWord>() {
                 @Override
-                public void handle(final SuggestElevateWord entity) {
+                public void handle(final ElevateWord entity) {
                     final List<String> list = new ArrayList<String>();
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());

@@ -20,16 +20,16 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.es.config.bsentity.BsSuggestElevateWord;
+import org.codelibs.fess.es.config.bsentity.BsElevateWord;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class SuggestElevateWord extends BsSuggestElevateWord {
+public class ElevateWord extends BsElevateWord {
 
     private static final long serialVersionUID = 1L;
 

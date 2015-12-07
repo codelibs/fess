@@ -29,13 +29,13 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.SuggestElevateWordPager;
+import org.codelibs.fess.app.pager.ElevateWordPager;
+import org.codelibs.fess.app.service.ElevateWordService;
 import org.codelibs.fess.app.service.LabelTypeService;
-import org.codelibs.fess.app.service.SuggestElevateWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.badword.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
+import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -56,9 +56,9 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private SuggestElevateWordService suggestElevateWordService;
+    private ElevateWordService elevateWordService;
     @Resource
-    private SuggestElevateWordPager suggestElevateWordPager;
+    private ElevateWordPager elevateWordPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -88,9 +88,9 @@ public class AdminElevatewordAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            suggestElevateWordPager.setCurrentPageNumber(pageNumber.get());
+            elevateWordPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            suggestElevateWordPager.setCurrentPageNumber(0);
+            elevateWordPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -99,7 +99,7 @@ public class AdminElevatewordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, suggestElevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, elevateWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -107,17 +107,17 @@ public class AdminElevatewordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        suggestElevateWordPager.clear();
+        elevateWordPager.clear();
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
+        data.register("elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(suggestElevateWordPager, form, op -> op.include("id"));
+        copyBeanToBean(elevateWordPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -143,7 +143,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
-        suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+        elevateWordService.getElevateWord(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
@@ -168,7 +168,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         saveToken();
         return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(EditForm.class, op -> {
             op.setup(form -> {
-                suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
+                elevateWordService.getElevateWord(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -199,7 +199,7 @@ public class AdminElevatewordAction extends FessAdminAction {
             final Path tempFile = Files.createTempFile(null, null);
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
-                    suggestElevateWordService.exportCsv(writer);
+                    elevateWordService.exportCsv(writer);
                 } catch (final Exception e) {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadElevateFile(GLOBAL), () -> asDownloadHtml());
                 }
@@ -229,9 +229,9 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getSuggestElevateWord(form).ifPresent(
+        getElevateWord(form).ifPresent(
                 entity -> {
-                    suggestElevateWordService.store(entity);
+                    elevateWordService.store(entity);
                     suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
                             entity.getTargetRole(), entity.getBoost());
                     saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
@@ -246,8 +246,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getSuggestElevateWord(form).ifPresent(entity -> {
-            suggestElevateWordService.store(entity);
+        getElevateWord(form).ifPresent(entity -> {
+            elevateWordService.store(entity);
             suggestHelper.deleteAllElevateWord();
             suggestHelper.storeAllElevateWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
@@ -263,8 +263,8 @@ public class AdminElevatewordAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        suggestElevateWordService.getSuggestElevateWord(id).ifPresent(entity -> {
-            suggestElevateWordService.delete(entity);
+        elevateWordService.getElevateWord(id).ifPresent(entity -> {
+            elevateWordService.delete(entity);
             suggestHelper.deleteElevateWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -280,24 +280,24 @@ public class AdminElevatewordAction extends FessAdminAction {
         new Thread(() -> {
             Reader reader = null;
             try {
-                reader = new BufferedReader(new InputStreamReader(form.suggestElevateWordFile.getInputStream(), getCsvEncoding()));
-                suggestElevateWordService.importCsv(reader);
+                reader = new BufferedReader(new InputStreamReader(form.elevateWordFile.getInputStream(), getCsvEncoding()));
+                elevateWordService.importCsv(reader);
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
         }).start();
-        saveInfo(messages -> messages.addSuccessUploadSuggestElevateWord(GLOBAL));
+        saveInfo(messages -> messages.addSuccessUploadElevateWord(GLOBAL));
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<SuggestElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new SuggestElevateWord()).map(entity -> {
+                return OptionalEntity.of(new ElevateWord()).map(entity -> {
                     entity.setCreatedBy(username);
                     entity.setCreatedTime(currentTime);
                     return entity;
@@ -306,7 +306,7 @@ public class AdminElevatewordAction extends FessAdminAction {
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return suggestElevateWordService.getSuggestElevateWord(((EditForm) form).id);
+                return elevateWordService.getElevateWord(((EditForm) form).id);
             }
             break;
         default:
@@ -315,7 +315,7 @@ public class AdminElevatewordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SuggestElevateWord> getSuggestElevateWord(final CreateForm form) {
+    protected OptionalEntity<ElevateWord> getElevateWord(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -350,10 +350,10 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                                           =========
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
-            data.register("suggestElevateWordItems", suggestElevateWordService.getSuggestElevateWordList(suggestElevateWordPager)); // page navi
+            data.register("elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(suggestElevateWordPager, form, op -> op.include("id"));
+                copyBeanToBean(elevateWordPager, form, op -> op.include("id"));
             });
         });
     }

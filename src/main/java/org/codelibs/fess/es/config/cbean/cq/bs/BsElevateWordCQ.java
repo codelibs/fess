@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.SuggestElevateWordCQ;
+import org.codelibs.fess.es.config.cbean.cq.ElevateWordCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -36,7 +36,7 @@ import org.elasticsearch.index.query.TermsQueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
+public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -45,34 +45,33 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     @Override
     public String xgetAliasName() {
-        return "suggest_elevate_word";
+        return "elevate_word";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<SuggestElevateWordCQ, SuggestElevateWordCQ> filteredLambda) {
+    public void filtered(FilteredCall<ElevateWordCQ, ElevateWordCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<SuggestElevateWordCQ, SuggestElevateWordCQ> filteredLambda,
-            ConditionOptionCall<BoolQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<ElevateWordCQ, ElevateWordCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter) -> {
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<SuggestElevateWordCQ> notLambda) {
+    public void not(OperatorCall<ElevateWordCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<SuggestElevateWordCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        SuggestElevateWordCQ notQuery = new SuggestElevateWordCQ();
+    public void not(OperatorCall<ElevateWordCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        ElevateWordCQ notQuery = new ElevateWordCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
             if (notQuery.getQueryBuilderList().size() > 1) {
@@ -86,15 +85,15 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public void bool(BoolCall<SuggestElevateWordCQ> boolLambda) {
+    public void bool(BoolCall<ElevateWordCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<SuggestElevateWordCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        SuggestElevateWordCQ mustQuery = new SuggestElevateWordCQ();
-        SuggestElevateWordCQ shouldQuery = new SuggestElevateWordCQ();
-        SuggestElevateWordCQ mustNotQuery = new SuggestElevateWordCQ();
-        SuggestElevateWordCQ filterQuery = new SuggestElevateWordCQ();
+    public void bool(BoolCall<ElevateWordCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        ElevateWordCQ mustQuery = new ElevateWordCQ();
+        ElevateWordCQ shouldQuery = new ElevateWordCQ();
+        ElevateWordCQ mustNotQuery = new ElevateWordCQ();
+        ElevateWordCQ filterQuery = new ElevateWordCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder =
@@ -166,12 +165,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Id_Asc() {
+    public BsElevateWordCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Id_Desc() {
+    public BsElevateWordCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
@@ -321,12 +320,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Boost_Asc() {
+    public BsElevateWordCQ addOrderBy_Boost_Asc() {
         regOBA("boost");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Boost_Desc() {
+    public BsElevateWordCQ addOrderBy_Boost_Desc() {
         regOBD("boost");
         return this;
     }
@@ -487,12 +486,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_CreatedBy_Asc() {
+    public BsElevateWordCQ addOrderBy_CreatedBy_Asc() {
         regOBA("createdBy");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_CreatedBy_Desc() {
+    public BsElevateWordCQ addOrderBy_CreatedBy_Desc() {
         regOBD("createdBy");
         return this;
     }
@@ -642,12 +641,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_CreatedTime_Asc() {
+    public BsElevateWordCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_CreatedTime_Desc() {
+    public BsElevateWordCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
     }
@@ -808,12 +807,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Reading_Asc() {
+    public BsElevateWordCQ addOrderBy_Reading_Asc() {
         regOBA("reading");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_Reading_Desc() {
+    public BsElevateWordCQ addOrderBy_Reading_Desc() {
         regOBD("reading");
         return this;
     }
@@ -974,12 +973,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_SuggestWord_Asc() {
+    public BsElevateWordCQ addOrderBy_SuggestWord_Asc() {
         regOBA("suggestWord");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_SuggestWord_Desc() {
+    public BsElevateWordCQ addOrderBy_SuggestWord_Desc() {
         regOBD("suggestWord");
         return this;
     }
@@ -1140,12 +1139,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_TargetLabel_Asc() {
+    public BsElevateWordCQ addOrderBy_TargetLabel_Asc() {
         regOBA("targetLabel");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_TargetLabel_Desc() {
+    public BsElevateWordCQ addOrderBy_TargetLabel_Desc() {
         regOBD("targetLabel");
         return this;
     }
@@ -1306,12 +1305,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_TargetRole_Asc() {
+    public BsElevateWordCQ addOrderBy_TargetRole_Asc() {
         regOBA("targetRole");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_TargetRole_Desc() {
+    public BsElevateWordCQ addOrderBy_TargetRole_Desc() {
         regOBD("targetRole");
         return this;
     }
@@ -1472,12 +1471,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_UpdatedBy_Asc() {
+    public BsElevateWordCQ addOrderBy_UpdatedBy_Asc() {
         regOBA("updatedBy");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_UpdatedBy_Desc() {
+    public BsElevateWordCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
     }
@@ -1627,12 +1626,12 @@ public abstract class BsSuggestElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_UpdatedTime_Asc() {
+    public BsElevateWordCQ addOrderBy_UpdatedTime_Asc() {
         regOBA("updatedTime");
         return this;
     }
 
-    public BsSuggestElevateWordCQ addOrderBy_UpdatedTime_Desc() {
+    public BsElevateWordCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
         return this;
     }

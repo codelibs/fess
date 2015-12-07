@@ -13,13 +13,12 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.config.exbhv;
+package org.codelibs.fess.es.config.cbean.cq;
 
-import org.codelibs.fess.es.config.bsbhv.BsSuggestElevateWordToLabelBhv;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordToLabelCQ;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class SuggestElevateWordToLabelBhv extends BsSuggestElevateWordToLabelBhv {
-
+public class ElevateWordToLabelCQ extends BsElevateWordToLabelCQ {
 }

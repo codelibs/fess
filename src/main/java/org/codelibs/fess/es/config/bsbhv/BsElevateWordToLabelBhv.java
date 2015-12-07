@@ -21,9 +21,9 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestElevateWordToLabelDbm;
-import org.codelibs.fess.es.config.cbean.SuggestElevateWordToLabelCB;
-import org.codelibs.fess.es.config.exentity.SuggestElevateWordToLabel;
+import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordToLabelDbm;
+import org.codelibs.fess.es.config.cbean.ElevateWordToLabelCB;
+import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -40,7 +40,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestElevateWordToLabelBhv extends EsAbstractBehavior<SuggestElevateWordToLabel, SuggestElevateWordToLabelCB> {
+public abstract class BsElevateWordToLabelBhv extends EsAbstractBehavior<ElevateWordToLabel, ElevateWordToLabelCB> {
 
     // ===================================================================================
     //                                                                    Control Override
@@ -57,24 +57,24 @@ public abstract class BsSuggestElevateWordToLabelBhv extends EsAbstractBehavior<
 
     @Override
     public String asEsIndexType() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     @Override
     public String asEsSearchType() {
-        return "suggest_elevate_word_to_label";
+        return "elevate_word_to_label";
     }
 
     @Override
-    public SuggestElevateWordToLabelDbm asDBMeta() {
-        return SuggestElevateWordToLabelDbm.getInstance();
+    public ElevateWordToLabelDbm asDBMeta() {
+        return ElevateWordToLabelDbm.getInstance();
     }
 
     @Override
-    protected <RESULT extends SuggestElevateWordToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends ElevateWordToLabel> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setSuggestElevateWordId(DfTypeUtil.toString(source.get("suggestElevateWordId")));
+            result.setElevateWordId(DfTypeUtil.toString(source.get("elevateWordId")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -86,26 +86,26 @@ public abstract class BsSuggestElevateWordToLabelBhv extends EsAbstractBehavior<
     // ===================================================================================
     //                                                                              Select
     //                                                                              ======
-    public int selectCount(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public int selectCount(CBCall<ElevateWordToLabelCB> cbLambda) {
         return facadeSelectCount(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestElevateWordToLabel> selectEntity(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public OptionalEntity<ElevateWordToLabel> selectEntity(CBCall<ElevateWordToLabelCB> cbLambda) {
         return facadeSelectEntity(createCB(cbLambda));
     }
 
-    protected OptionalEntity<SuggestElevateWordToLabel> facadeSelectEntity(SuggestElevateWordToLabelCB cb) {
+    protected OptionalEntity<ElevateWordToLabel> facadeSelectEntity(ElevateWordToLabelCB cb) {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestElevateWordToLabel> OptionalEntity<ENTITY> doSelectOptionalEntity(SuggestElevateWordToLabelCB cb,
+    protected <ENTITY extends ElevateWordToLabel> OptionalEntity<ENTITY> doSelectOptionalEntity(ElevateWordToLabelCB cb,
             Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
-    public SuggestElevateWordToLabelCB newConditionBean() {
-        return new SuggestElevateWordToLabelCB();
+    public ElevateWordToLabelCB newConditionBean() {
+        return new ElevateWordToLabelCB();
     }
 
     @Override
@@ -113,135 +113,135 @@ public abstract class BsSuggestElevateWordToLabelBhv extends EsAbstractBehavior<
         return facadeSelectEntity(downcast(cb)).orElse(null);
     }
 
-    public SuggestElevateWordToLabel selectEntityWithDeletedCheck(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public ElevateWordToLabel selectEntityWithDeletedCheck(CBCall<ElevateWordToLabelCB> cbLambda) {
         return facadeSelectEntityWithDeletedCheck(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestElevateWordToLabel> selectByPK(String id) {
+    public OptionalEntity<ElevateWordToLabel> selectByPK(String id) {
         return facadeSelectByPK(id);
     }
 
-    protected OptionalEntity<SuggestElevateWordToLabel> facadeSelectByPK(String id) {
+    protected OptionalEntity<ElevateWordToLabel> facadeSelectByPK(String id) {
         return doSelectOptionalByPK(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestElevateWordToLabel> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ElevateWordToLabel> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
-    protected SuggestElevateWordToLabelCB xprepareCBAsPK(String id) {
+    protected ElevateWordToLabelCB xprepareCBAsPK(String id) {
         assertObjectNotNull("id", id);
         return newConditionBean().acceptPK(id);
     }
 
-    protected <ENTITY extends SuggestElevateWordToLabel> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ElevateWordToLabel> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     @Override
-    protected Class<? extends SuggestElevateWordToLabel> typeOfSelectedEntity() {
-        return SuggestElevateWordToLabel.class;
+    protected Class<? extends ElevateWordToLabel> typeOfSelectedEntity() {
+        return ElevateWordToLabel.class;
     }
 
     @Override
-    protected Class<SuggestElevateWordToLabel> typeOfHandlingEntity() {
-        return SuggestElevateWordToLabel.class;
+    protected Class<ElevateWordToLabel> typeOfHandlingEntity() {
+        return ElevateWordToLabel.class;
     }
 
     @Override
-    protected Class<SuggestElevateWordToLabelCB> typeOfHandlingConditionBean() {
-        return SuggestElevateWordToLabelCB.class;
+    protected Class<ElevateWordToLabelCB> typeOfHandlingConditionBean() {
+        return ElevateWordToLabelCB.class;
     }
 
-    public ListResultBean<SuggestElevateWordToLabel> selectList(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public ListResultBean<ElevateWordToLabel> selectList(CBCall<ElevateWordToLabelCB> cbLambda) {
         return facadeSelectList(createCB(cbLambda));
     }
 
-    public PagingResultBean<SuggestElevateWordToLabel> selectPage(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public PagingResultBean<ElevateWordToLabel> selectPage(CBCall<ElevateWordToLabelCB> cbLambda) {
         // #pending same?
-        return (PagingResultBean<SuggestElevateWordToLabel>) facadeSelectList(createCB(cbLambda));
+        return (PagingResultBean<ElevateWordToLabel>) facadeSelectList(createCB(cbLambda));
     }
 
-    public void selectCursor(CBCall<SuggestElevateWordToLabelCB> cbLambda, EntityRowHandler<SuggestElevateWordToLabel> entityLambda) {
+    public void selectCursor(CBCall<ElevateWordToLabelCB> cbLambda, EntityRowHandler<ElevateWordToLabel> entityLambda) {
         facadeSelectCursor(createCB(cbLambda), entityLambda);
     }
 
-    public void selectBulk(CBCall<SuggestElevateWordToLabelCB> cbLambda, EntityRowHandler<List<SuggestElevateWordToLabel>> entityLambda) {
+    public void selectBulk(CBCall<ElevateWordToLabelCB> cbLambda, EntityRowHandler<List<ElevateWordToLabel>> entityLambda) {
         delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
     //                                                                              Update
     //                                                                              ======
-    public void insert(SuggestElevateWordToLabel entity) {
+    public void insert(ElevateWordToLabel entity) {
         doInsert(entity, null);
     }
 
-    public void insert(SuggestElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insert(ElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsert(entity, null);
     }
 
-    public void update(SuggestElevateWordToLabel entity) {
+    public void update(ElevateWordToLabel entity) {
         doUpdate(entity, null);
     }
 
-    public void update(SuggestElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void update(ElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doUpdate(entity, null);
     }
 
-    public void insertOrUpdate(SuggestElevateWordToLabel entity) {
+    public void insertOrUpdate(ElevateWordToLabel entity) {
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void insertOrUpdate(SuggestElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insertOrUpdate(ElevateWordToLabel entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void delete(SuggestElevateWordToLabel entity) {
+    public void delete(ElevateWordToLabel entity) {
         doDelete(entity, null);
     }
 
-    public void delete(SuggestElevateWordToLabel entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
+    public void delete(ElevateWordToLabel entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
     }
 
-    public int queryDelete(CBCall<SuggestElevateWordToLabelCB> cbLambda) {
+    public int queryDelete(CBCall<ElevateWordToLabelCB> cbLambda) {
         return doQueryDelete(createCB(cbLambda), null);
     }
 
-    public int[] batchInsert(List<SuggestElevateWordToLabel> list) {
+    public int[] batchInsert(List<ElevateWordToLabel> list) {
         return batchInsert(list, null);
     }
 
-    public int[] batchInsert(List<SuggestElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchInsert(List<ElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchInsert(new BulkList<>(list, call), null);
     }
 
-    public int[] batchUpdate(List<SuggestElevateWordToLabel> list) {
+    public int[] batchUpdate(List<ElevateWordToLabel> list) {
         return batchUpdate(list, null);
     }
 
-    public int[] batchUpdate(List<SuggestElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchUpdate(List<ElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchUpdate(new BulkList<>(list, call), null);
     }
 
-    public int[] batchDelete(List<SuggestElevateWordToLabel> list) {
+    public int[] batchDelete(List<ElevateWordToLabel> list) {
         return batchDelete(list, null);
     }
 
-    public int[] batchDelete(List<SuggestElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchDelete(List<ElevateWordToLabel> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchDelete(new BulkList<>(list, call), null);
     }
 
