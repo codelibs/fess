@@ -29,9 +29,9 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv;
+import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exbhv.SuggestElevateWordBhv;
-import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.es.config.exentity.SuggestElevateWord;
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
 import org.codelibs.fess.es.log.exentity.SearchLog;
@@ -57,7 +57,7 @@ public class SuggestHelper {
     protected SuggestElevateWordBhv suggestElevateWordBhv;
 
     @Resource
-    protected SuggestBadWordBhv suggestBadWordBhv;
+    protected BadWordBhv badWordBhv;
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -226,11 +226,11 @@ public class SuggestHelper {
 
     public void storeAllBadWords() {
         deleteAllBadWords();
-        final List<SuggestBadWord> list = suggestBadWordBhv.selectList(cb -> {
+        final List<BadWord> list = badWordBhv.selectList(cb -> {
             cb.query().matchAll();
         });
-        for (final SuggestBadWord suggestBadWord : list) {
-            final String word = suggestBadWord.getSuggestWord();
+        for (final BadWord badWord : list) {
+            final String word = badWord.getSuggestWord();
             suggester.indexer().addBadWord(word);
         }
     }

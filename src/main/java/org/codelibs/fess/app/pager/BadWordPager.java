@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class SuggestBadWordPager implements Serializable {
+public class BadWordPager implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -134,7 +134,7 @@ public class SuggestBadWordPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public SuggestBadWordPager() {
+    public BadWordPager() {
         super();
     }
 

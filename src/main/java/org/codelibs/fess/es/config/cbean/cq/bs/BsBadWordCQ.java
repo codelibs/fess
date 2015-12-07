@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.SuggestBadWordCQ;
+import org.codelibs.fess.es.config.cbean.cq.BadWordCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -36,7 +36,7 @@ import org.elasticsearch.index.query.TermsQueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
+public abstract class BsBadWordCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -45,33 +45,33 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     @Override
     public String xgetAliasName() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<SuggestBadWordCQ, SuggestBadWordCQ> filteredLambda) {
+    public void filtered(FilteredCall<BadWordCQ, BadWordCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<SuggestBadWordCQ, SuggestBadWordCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<BadWordCQ, BadWordCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter) -> {
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<SuggestBadWordCQ> notLambda) {
+    public void not(OperatorCall<BadWordCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<SuggestBadWordCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        SuggestBadWordCQ notQuery = new SuggestBadWordCQ();
+    public void not(OperatorCall<BadWordCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        BadWordCQ notQuery = new BadWordCQ();
         notLambda.callback(notQuery);
         if (notQuery.hasQueries()) {
             if (notQuery.getQueryBuilderList().size() > 1) {
@@ -85,15 +85,15 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public void bool(BoolCall<SuggestBadWordCQ> boolLambda) {
+    public void bool(BoolCall<BadWordCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<SuggestBadWordCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        SuggestBadWordCQ mustQuery = new SuggestBadWordCQ();
-        SuggestBadWordCQ shouldQuery = new SuggestBadWordCQ();
-        SuggestBadWordCQ mustNotQuery = new SuggestBadWordCQ();
-        SuggestBadWordCQ filterQuery = new SuggestBadWordCQ();
+    public void bool(BoolCall<BadWordCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        BadWordCQ mustQuery = new BadWordCQ();
+        BadWordCQ shouldQuery = new BadWordCQ();
+        BadWordCQ mustNotQuery = new BadWordCQ();
+        BadWordCQ filterQuery = new BadWordCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder =
@@ -165,12 +165,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
-    public BsSuggestBadWordCQ addOrderBy_Id_Asc() {
+    public BsBadWordCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_Id_Desc() {
+    public BsBadWordCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
@@ -331,12 +331,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_CreatedBy_Asc() {
+    public BsBadWordCQ addOrderBy_CreatedBy_Asc() {
         regOBA("createdBy");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_CreatedBy_Desc() {
+    public BsBadWordCQ addOrderBy_CreatedBy_Desc() {
         regOBD("createdBy");
         return this;
     }
@@ -486,12 +486,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_CreatedTime_Asc() {
+    public BsBadWordCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_CreatedTime_Desc() {
+    public BsBadWordCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
     }
@@ -652,12 +652,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_SuggestWord_Asc() {
+    public BsBadWordCQ addOrderBy_SuggestWord_Asc() {
         regOBA("suggestWord");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_SuggestWord_Desc() {
+    public BsBadWordCQ addOrderBy_SuggestWord_Desc() {
         regOBD("suggestWord");
         return this;
     }
@@ -818,12 +818,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_TargetLabel_Asc() {
+    public BsBadWordCQ addOrderBy_TargetLabel_Asc() {
         regOBA("targetLabel");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_TargetLabel_Desc() {
+    public BsBadWordCQ addOrderBy_TargetLabel_Desc() {
         regOBD("targetLabel");
         return this;
     }
@@ -984,12 +984,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_TargetRole_Asc() {
+    public BsBadWordCQ addOrderBy_TargetRole_Asc() {
         regOBA("targetRole");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_TargetRole_Desc() {
+    public BsBadWordCQ addOrderBy_TargetRole_Desc() {
         regOBD("targetRole");
         return this;
     }
@@ -1150,12 +1150,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_UpdatedBy_Asc() {
+    public BsBadWordCQ addOrderBy_UpdatedBy_Asc() {
         regOBA("updatedBy");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_UpdatedBy_Desc() {
+    public BsBadWordCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
     }
@@ -1305,12 +1305,12 @@ public abstract class BsSuggestBadWordCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsSuggestBadWordCQ addOrderBy_UpdatedTime_Asc() {
+    public BsBadWordCQ addOrderBy_UpdatedTime_Asc() {
         regOBA("updatedTime");
         return this;
     }
 
-    public BsSuggestBadWordCQ addOrderBy_UpdatedTime_Desc() {
+    public BsBadWordCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
         return this;
     }

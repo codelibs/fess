@@ -1,5 +1,5 @@
 {
-  "suggest_bad_word": {
+  "bad_word": {
     "_source": {
       "enabled": true
     },

@@ -13,12 +13,12 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.config.cbean.cq;
+package org.codelibs.fess.es.config.cbean;
 
-import org.codelibs.fess.es.config.cbean.cq.bs.BsSuggestBadWordCQ;
+import org.codelibs.fess.es.config.cbean.bs.BsBadWordCB;
 
 /**
  * @author ESFlute (using FreeGen)
  */
-public class SuggestBadWordCQ extends BsSuggestBadWordCQ {
+public class BadWordCB extends BsBadWordCB {
 }

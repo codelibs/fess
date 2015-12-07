@@ -203,10 +203,10 @@
 						</la:link></li>
 
 					<li
-						<c:if test="${param.menuType=='suggestBadWord'}">class="active"</c:if>><la:link
+						<c:if test="${param.menuType=='badWord'}">class="active"</c:if>><la:link
 							href="/admin/badword/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_suggest_bad_word" /></span>
+							<span><la:message key="labels.menu_bad_word" /></span>
 						</la:link></li>
 
 				</ul></li>

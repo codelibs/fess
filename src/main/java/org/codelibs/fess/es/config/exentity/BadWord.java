@@ -15,12 +15,12 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
-import org.codelibs.fess.es.config.bsentity.BsSuggestBadWord;
+import org.codelibs.fess.es.config.bsentity.BsBadWord;
 
 /**
- * @author FreeGen
+ * @author ESFlute (using FreeGen)
  */
-public class SuggestBadWord extends BsSuggestBadWord {
+public class BadWord extends BsBadWord {
 
     private static final long serialVersionUID = 1L;
 

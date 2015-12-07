@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestBadWordDbm;
-import org.codelibs.fess.es.config.cbean.SuggestBadWordCB;
-import org.codelibs.fess.es.config.cbean.cq.SuggestBadWordCQ;
-import org.codelibs.fess.es.config.cbean.cq.bs.BsSuggestBadWordCQ;
+import org.codelibs.fess.es.config.bsentity.dbmeta.BadWordDbm;
+import org.codelibs.fess.es.config.cbean.BadWordCB;
+import org.codelibs.fess.es.config.cbean.cq.BadWordCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsBadWordCQ;
 import org.dbflute.cbean.ConditionQuery;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -32,25 +32,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestBadWordCB extends EsAbstractConditionBean {
+public class BsBadWordCB extends EsAbstractConditionBean {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected BsSuggestBadWordCQ _conditionQuery;
+    protected BsBadWordCQ _conditionQuery;
     protected HpSpecification _specification;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
     @Override
-    public SuggestBadWordDbm asDBMeta() {
-        return SuggestBadWordDbm.getInstance();
+    public BadWordDbm asDBMeta() {
+        return BadWordDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     @Override
@@ -66,11 +66,11 @@ public class BsSuggestBadWordCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                         Primary Key
     //                                                                         ===========
-    public SuggestBadWordCB acceptPK(String id) {
+    public BadWordCB acceptPK(String id) {
         assertObjectNotNull("id", id);
-        BsSuggestBadWordCB cb = this;
+        BsBadWordCB cb = this;
         cb.query().docMeta().setId_Equal(id);
-        return (SuggestBadWordCB) this;
+        return (BadWordCB) this;
     }
 
     @Override
@@ -114,20 +114,20 @@ public class BsSuggestBadWordCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-    public BsSuggestBadWordCQ query() {
+    public BsBadWordCQ query() {
         assertQueryPurpose();
         return doGetConditionQuery();
     }
 
-    protected BsSuggestBadWordCQ doGetConditionQuery() {
+    protected BsBadWordCQ doGetConditionQuery() {
         if (_conditionQuery == null) {
             _conditionQuery = createLocalCQ();
         }
         return _conditionQuery;
     }
 
-    protected BsSuggestBadWordCQ createLocalCQ() {
-        return new SuggestBadWordCQ();
+    protected BsBadWordCQ createLocalCQ() {
+        return new BadWordCQ();
     }
 
     // ===================================================================================

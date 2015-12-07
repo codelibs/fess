@@ -21,9 +21,9 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestBadWordDbm;
-import org.codelibs.fess.es.config.cbean.SuggestBadWordCB;
-import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.config.bsentity.dbmeta.BadWordDbm;
+import org.codelibs.fess.es.config.cbean.BadWordCB;
+import org.codelibs.fess.es.config.exentity.BadWord;
 import org.dbflute.Entity;
 import org.dbflute.bhv.readable.CBCall;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -40,7 +40,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsSuggestBadWordBhv extends EsAbstractBehavior<SuggestBadWord, SuggestBadWordCB> {
+public abstract class BsBadWordBhv extends EsAbstractBehavior<BadWord, BadWordCB> {
 
     // ===================================================================================
     //                                                                    Control Override
@@ -57,21 +57,21 @@ public abstract class BsSuggestBadWordBhv extends EsAbstractBehavior<SuggestBadW
 
     @Override
     public String asEsIndexType() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     @Override
     public String asEsSearchType() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     @Override
-    public SuggestBadWordDbm asDBMeta() {
-        return SuggestBadWordDbm.getInstance();
+    public BadWordDbm asDBMeta() {
+        return BadWordDbm.getInstance();
     }
 
     @Override
-    protected <RESULT extends SuggestBadWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+    protected <RESULT extends BadWord> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
@@ -91,25 +91,25 @@ public abstract class BsSuggestBadWordBhv extends EsAbstractBehavior<SuggestBadW
     // ===================================================================================
     //                                                                              Select
     //                                                                              ======
-    public int selectCount(CBCall<SuggestBadWordCB> cbLambda) {
+    public int selectCount(CBCall<BadWordCB> cbLambda) {
         return facadeSelectCount(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestBadWord> selectEntity(CBCall<SuggestBadWordCB> cbLambda) {
+    public OptionalEntity<BadWord> selectEntity(CBCall<BadWordCB> cbLambda) {
         return facadeSelectEntity(createCB(cbLambda));
     }
 
-    protected OptionalEntity<SuggestBadWord> facadeSelectEntity(SuggestBadWordCB cb) {
+    protected OptionalEntity<BadWord> facadeSelectEntity(BadWordCB cb) {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestBadWord> OptionalEntity<ENTITY> doSelectOptionalEntity(SuggestBadWordCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends BadWord> OptionalEntity<ENTITY> doSelectOptionalEntity(BadWordCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
     @Override
-    public SuggestBadWordCB newConditionBean() {
-        return new SuggestBadWordCB();
+    public BadWordCB newConditionBean() {
+        return new BadWordCB();
     }
 
     @Override
@@ -117,135 +117,135 @@ public abstract class BsSuggestBadWordBhv extends EsAbstractBehavior<SuggestBadW
         return facadeSelectEntity(downcast(cb)).orElse(null);
     }
 
-    public SuggestBadWord selectEntityWithDeletedCheck(CBCall<SuggestBadWordCB> cbLambda) {
+    public BadWord selectEntityWithDeletedCheck(CBCall<BadWordCB> cbLambda) {
         return facadeSelectEntityWithDeletedCheck(createCB(cbLambda));
     }
 
-    public OptionalEntity<SuggestBadWord> selectByPK(String id) {
+    public OptionalEntity<BadWord> selectByPK(String id) {
         return facadeSelectByPK(id);
     }
 
-    protected OptionalEntity<SuggestBadWord> facadeSelectByPK(String id) {
+    protected OptionalEntity<BadWord> facadeSelectByPK(String id) {
         return doSelectOptionalByPK(id, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends SuggestBadWord> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends BadWord> ENTITY doSelectByPK(String id, Class<? extends ENTITY> tp) {
         return doSelectEntity(xprepareCBAsPK(id), tp);
     }
 
-    protected SuggestBadWordCB xprepareCBAsPK(String id) {
+    protected BadWordCB xprepareCBAsPK(String id) {
         assertObjectNotNull("id", id);
         return newConditionBean().acceptPK(id);
     }
 
-    protected <ENTITY extends SuggestBadWord> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends BadWord> OptionalEntity<ENTITY> doSelectOptionalByPK(String id, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectByPK(id, tp), id);
     }
 
     @Override
-    protected Class<? extends SuggestBadWord> typeOfSelectedEntity() {
-        return SuggestBadWord.class;
+    protected Class<? extends BadWord> typeOfSelectedEntity() {
+        return BadWord.class;
     }
 
     @Override
-    protected Class<SuggestBadWord> typeOfHandlingEntity() {
-        return SuggestBadWord.class;
+    protected Class<BadWord> typeOfHandlingEntity() {
+        return BadWord.class;
     }
 
     @Override
-    protected Class<SuggestBadWordCB> typeOfHandlingConditionBean() {
-        return SuggestBadWordCB.class;
+    protected Class<BadWordCB> typeOfHandlingConditionBean() {
+        return BadWordCB.class;
     }
 
-    public ListResultBean<SuggestBadWord> selectList(CBCall<SuggestBadWordCB> cbLambda) {
+    public ListResultBean<BadWord> selectList(CBCall<BadWordCB> cbLambda) {
         return facadeSelectList(createCB(cbLambda));
     }
 
-    public PagingResultBean<SuggestBadWord> selectPage(CBCall<SuggestBadWordCB> cbLambda) {
+    public PagingResultBean<BadWord> selectPage(CBCall<BadWordCB> cbLambda) {
         // #pending same?
-        return (PagingResultBean<SuggestBadWord>) facadeSelectList(createCB(cbLambda));
+        return (PagingResultBean<BadWord>) facadeSelectList(createCB(cbLambda));
     }
 
-    public void selectCursor(CBCall<SuggestBadWordCB> cbLambda, EntityRowHandler<SuggestBadWord> entityLambda) {
+    public void selectCursor(CBCall<BadWordCB> cbLambda, EntityRowHandler<BadWord> entityLambda) {
         facadeSelectCursor(createCB(cbLambda), entityLambda);
     }
 
-    public void selectBulk(CBCall<SuggestBadWordCB> cbLambda, EntityRowHandler<List<SuggestBadWord>> entityLambda) {
+    public void selectBulk(CBCall<BadWordCB> cbLambda, EntityRowHandler<List<BadWord>> entityLambda) {
         delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
     //                                                                              Update
     //                                                                              ======
-    public void insert(SuggestBadWord entity) {
+    public void insert(BadWord entity) {
         doInsert(entity, null);
     }
 
-    public void insert(SuggestBadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insert(BadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsert(entity, null);
     }
 
-    public void update(SuggestBadWord entity) {
+    public void update(BadWord entity) {
         doUpdate(entity, null);
     }
 
-    public void update(SuggestBadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void update(BadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doUpdate(entity, null);
     }
 
-    public void insertOrUpdate(SuggestBadWord entity) {
+    public void insertOrUpdate(BadWord entity) {
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void insertOrUpdate(SuggestBadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
+    public void insertOrUpdate(BadWord entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().indexOption(opLambda);
         }
         doInsertOrUpdate(entity, null, null);
     }
 
-    public void delete(SuggestBadWord entity) {
+    public void delete(BadWord entity) {
         doDelete(entity, null);
     }
 
-    public void delete(SuggestBadWord entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
+    public void delete(BadWord entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
         if (entity instanceof EsAbstractEntity) {
             entity.asDocMeta().deleteOption(opLambda);
         }
         doDelete(entity, null);
     }
 
-    public int queryDelete(CBCall<SuggestBadWordCB> cbLambda) {
+    public int queryDelete(CBCall<BadWordCB> cbLambda) {
         return doQueryDelete(createCB(cbLambda), null);
     }
 
-    public int[] batchInsert(List<SuggestBadWord> list) {
+    public int[] batchInsert(List<BadWord> list) {
         return batchInsert(list, null);
     }
 
-    public int[] batchInsert(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchInsert(List<BadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchInsert(new BulkList<>(list, call), null);
     }
 
-    public int[] batchUpdate(List<SuggestBadWord> list) {
+    public int[] batchUpdate(List<BadWord> list) {
         return batchUpdate(list, null);
     }
 
-    public int[] batchUpdate(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchUpdate(List<BadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchUpdate(new BulkList<>(list, call), null);
     }
 
-    public int[] batchDelete(List<SuggestBadWord> list) {
+    public int[] batchDelete(List<BadWord> list) {
         return batchDelete(list, null);
     }
 
-    public int[] batchDelete(List<SuggestBadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
+    public int[] batchDelete(List<BadWord> list, RequestOptionCall<BulkRequestBuilder> call) {
         return doBatchDelete(new BulkList<>(list, call), null);
     }
 

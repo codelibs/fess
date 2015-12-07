@@ -30,10 +30,10 @@ import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.SuggestBadWordPager;
-import org.codelibs.fess.es.config.cbean.SuggestBadWordCB;
-import org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv;
-import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.app.pager.BadWordPager;
+import org.codelibs.fess.es.config.cbean.BadWordCB;
+import org.codelibs.fess.es.config.exbhv.BadWordBhv;
+import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -43,62 +43,62 @@ import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
 
-public class SuggestBadWordService implements Serializable {
+public class BadWordService implements Serializable {
 
     private static final String DELETE_PREFIX = "--";
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory.getLog(SuggestBadWordService.class);
+    private static final Log log = LogFactory.getLog(BadWordService.class);
 
     @Resource
-    protected SuggestBadWordBhv suggestBadWordBhv;
+    protected BadWordBhv badWordBhv;
 
-    public SuggestBadWordService() {
+    public BadWordService() {
         super();
     }
 
-    public List<SuggestBadWord> getSuggestBadWordList(final SuggestBadWordPager suggestBadWordPager) {
+    public List<BadWord> getBadWordList(final BadWordPager badWordPager) {
 
-        final PagingResultBean<SuggestBadWord> suggestBadWordList = suggestBadWordBhv.selectPage(cb -> {
-            cb.paging(suggestBadWordPager.getPageSize(), suggestBadWordPager.getCurrentPageNumber());
-            setupListCondition(cb, suggestBadWordPager);
+        final PagingResultBean<BadWord> badWordList = badWordBhv.selectPage(cb -> {
+            cb.paging(badWordPager.getPageSize(), badWordPager.getCurrentPageNumber());
+            setupListCondition(cb, badWordPager);
         });
 
         // update pager
-        BeanUtil.copyBeanToBean(suggestBadWordList, suggestBadWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        suggestBadWordPager.setPageNumberList(suggestBadWordList.pageRange(op -> {
+        BeanUtil.copyBeanToBean(badWordList, badWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+        badWordPager.setPageNumberList(badWordList.pageRange(op -> {
             op.rangeSize(5);
         }).createPageNumberList());
 
-        return suggestBadWordList;
+        return badWordList;
     }
 
-    public OptionalEntity<SuggestBadWord> getSuggestBadWord(final String id) {
-        return suggestBadWordBhv.selectByPK(id);
+    public OptionalEntity<BadWord> getBadWord(final String id) {
+        return badWordBhv.selectByPK(id);
     }
 
-    public void store(final SuggestBadWord suggestBadWord) {
-        setupStoreCondition(suggestBadWord);
+    public void store(final BadWord badWord) {
+        setupStoreCondition(badWord);
 
-        suggestBadWordBhv.insertOrUpdate(suggestBadWord, op -> {
+        badWordBhv.insertOrUpdate(badWord, op -> {
             op.setRefresh(true);
         });
 
     }
 
-    public void delete(final SuggestBadWord suggestBadWord) {
-        setupDeleteCondition(suggestBadWord);
+    public void delete(final BadWord badWord) {
+        setupDeleteCondition(badWord);
 
-        suggestBadWordBhv.delete(suggestBadWord, op -> {
+        badWordBhv.delete(badWord, op -> {
             op.setRefresh(true);
         });
 
     }
 
-    protected void setupListCondition(final SuggestBadWordCB cb, final SuggestBadWordPager suggestBadWordPager) {
-        if (suggestBadWordPager.id != null) {
-            cb.query().docMeta().setId_Equal(suggestBadWordPager.id);
+    protected void setupListCondition(final BadWordCB cb, final BadWordPager badWordPager) {
+        if (badWordPager.id != null) {
+            cb.query().docMeta().setId_Equal(badWordPager.id);
         }
         // TODO Long, Integer, String supported only.
 
@@ -109,19 +109,19 @@ public class SuggestBadWordService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final SuggestBadWordCB cb, final Map<String, String> keys) {
+    protected void setupEntityCondition(final BadWordCB cb, final Map<String, String> keys) {
 
         // setup condition
 
     }
 
-    protected void setupStoreCondition(final SuggestBadWord suggestBadWord) {
+    protected void setupStoreCondition(final BadWord badWord) {
 
         // setup condition
 
     }
 
-    protected void setupDeleteCondition(final SuggestBadWord suggestBadWord) {
+    protected void setupDeleteCondition(final BadWord badWord) {
 
         // setup condition
 
@@ -133,34 +133,34 @@ public class SuggestBadWordService implements Serializable {
             List<String> list;
             csvReader.readValues(); // ignore header
             while ((list = csvReader.readValues()) != null) {
-                String badWord = getValue(list, 0);
-                if (StringUtil.isBlank(badWord)) {
+                String targetWord = getValue(list, 0);
+                if (StringUtil.isBlank(targetWord)) {
                     // skip
                     continue;
                 }
                 try {
                     boolean isDelete = false;
-                    if (badWord.startsWith(DELETE_PREFIX)) {
+                    if (targetWord.startsWith(DELETE_PREFIX)) {
                         isDelete = true;
-                        badWord = badWord.substring(2);
+                        targetWord = targetWord.substring(2);
                     }
-                    final String target = badWord;
-                    SuggestBadWord suggestBadWord = suggestBadWordBhv.selectEntity(cb -> {
+                    final String target = targetWord;
+                    BadWord badWord = badWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(target);
                     }).orElse(null);//TODO
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                     if (isDelete) {
-                        suggestBadWordBhv.delete(suggestBadWord);
-                    } else if (suggestBadWord == null) {
-                        suggestBadWord = new SuggestBadWord();
-                        suggestBadWord.setSuggestWord(badWord);
-                        suggestBadWord.setCreatedBy("system");
-                        suggestBadWord.setCreatedTime(now);
-                        suggestBadWordBhv.insert(suggestBadWord);
+                        badWordBhv.delete(badWord);
+                    } else if (badWord == null) {
+                        badWord = new BadWord();
+                        badWord.setSuggestWord(targetWord);
+                        badWord.setCreatedBy("system");
+                        badWord.setCreatedTime(now);
+                        badWordBhv.insert(badWord);
                     } else {
-                        suggestBadWord.setUpdatedBy("system");
-                        suggestBadWord.setUpdatedTime(now);
-                        suggestBadWordBhv.update(suggestBadWord);
+                        badWord.setUpdatedBy("system");
+                        badWord.setUpdatedTime(now);
+                        badWordBhv.update(badWord);
                     }
                 } catch (final Exception e) {
                     log.warn("Failed to read a sugget elevate word: " + list, e);
@@ -182,11 +182,11 @@ public class SuggestBadWordService implements Serializable {
             list.add("BadWord");
             csvWriter.writeValues(list);
 
-            suggestBadWordBhv.selectCursor(cb -> {
+            badWordBhv.selectCursor(cb -> {
                 cb.query().matchAll();
-            }, new EntityRowHandler<SuggestBadWord>() {
+            }, new EntityRowHandler<BadWord>() {
                 @Override
-                public void handle(final SuggestBadWord entity) {
+                public void handle(final BadWord entity) {
                     final List<String> list = new ArrayList<String>();
                     addToList(list, entity.getSuggestWord());
                     try {

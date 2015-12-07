@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.suggest_bad_word_configuration" /></title>
+		key="labels.bad_word_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="skin-blue sidebar-mini">
@@ -11,19 +11,19 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="suggest" />
-			<jsp:param name="menuType" value="suggestBadWord" />
+			<jsp:param name="menuType" value="badWord" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.suggest_bad_word_title_details" />
+					<la:message key="labels.bad_word_title_details" />
 				</h1>
 				<ol class="breadcrumb">
 					<li><la:link href="list">
-							<la:message key="labels.suggest_bad_word_link_list" />
+							<la:message key="labels.bad_word_link_list" />
 						</la:link></li>
 					<li class="active"><la:message
-							key="labels.suggest_bad_word_link_details" /></li>
+							key="labels.bad_word_link_details" /></li>
 				</ol>
 			</section>
 			<section class="content">
@@ -43,43 +43,43 @@
 									<h3 class="box-title">
 										<c:if test="${crudMode == 1}">
 											<la:message
-												key="labels.suggest_bad_word_link_create" />
+												key="labels.bad_word_link_create" />
 										</c:if>
 										<c:if test="${crudMode == 2}">
-											<la:message key="labels.suggest_bad_word_link_edit" />
+											<la:message key="labels.bad_word_link_edit" />
 										</c:if>
 										<c:if test="${crudMode == 3}">
 											<la:message
-												key="labels.suggest_bad_word_link_delete" />
+												key="labels.bad_word_link_delete" />
 										</c:if>
 										<c:if test="${crudMode == 4}">
 											<la:message
-												key="labels.suggest_bad_word_link_details" />
+												key="labels.bad_word_link_details" />
 										</c:if>
 									</h3>
 									<div class="btn-group pull-right">
 										<la:link href="/admin/badword"
 											styleClass="btn btn-default btn-xs">
 											<i class="fa fa-th-list"></i>
-											<la:message key="labels.suggest_bad_word_link_list" />
+											<la:message key="labels.bad_word_link_list" />
 										</la:link>
 										<la:link href="../createnew"
 											styleClass="btn btn-success btn-xs">
 											<i class="fa fa-plus"></i>
 											<la:message
-												key="labels.suggest_bad_word_link_create" />
+												key="labels.bad_word_link_create" />
 										</la:link>
 										<la:link href="../downloadpage"
 											styleClass="btn btn-primary btn-xs">
 											<i class="fa fa-download"></i>
 											<la:message
-												key="labels.suggest_bad_word_link_download" />
+												key="labels.bad_word_link_download" />
 										</la:link>
 										<la:link href="../uploadpage"
 											styleClass="btn btn-success btn-xs">
 											<i class="fa fa-upload"></i>
 											<la:message
-												key="labels.suggest_bad_word_link_upload" />
+												key="labels.bad_word_link_upload" />
 										</la:link>
 									</div>
 								</div>
@@ -97,7 +97,7 @@
 										<tbody>
 											<tr>
 												<th class="col-xs-2"><la:message
-														key="labels.suggest_bad_word_suggest_word" /></th>
+														key="labels.bad_word_suggest_word" /></th>
 												<td>${f:h(suggestWord)}<la:hidden
 														property="suggestWord" /></td>
 											</tr>

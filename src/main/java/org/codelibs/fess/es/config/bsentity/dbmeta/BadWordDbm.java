@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.config.exentity.BadWord;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -32,19 +32,19 @@ import org.dbflute.util.DfTypeUtil;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class SuggestBadWordDbm extends AbstractDBMeta {
+public class BadWordDbm extends AbstractDBMeta {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
     // ===================================================================================
     //                                                                           Singleton
     //                                                                           =========
-    private static final SuggestBadWordDbm _instance = new SuggestBadWordDbm();
+    private static final BadWordDbm _instance = new BadWordDbm();
 
-    private SuggestBadWordDbm() {
+    private BadWordDbm() {
     }
 
-    public static SuggestBadWordDbm getInstance() {
+    public static BadWordDbm getInstance() {
         return _instance;
     }
 
@@ -79,20 +79,20 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getCreatedBy(),
-                (et, vl) -> ((SuggestBadWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getCreatedTime(),
-                (et, vl) -> ((SuggestBadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getSuggestWord(),
-                (et, vl) -> ((SuggestBadWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getTargetLabel(),
-                (et, vl) -> ((SuggestBadWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getTargetRole(),
-                (et, vl) -> ((SuggestBadWord) et).setTargetRole(DfTypeUtil.toString(vl)), "targetRole");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getUpdatedBy(),
-                (et, vl) -> ((SuggestBadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et -> ((SuggestBadWord) et).getUpdatedTime(),
-                (et, vl) -> ((SuggestBadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((BadWord) et).getCreatedBy(), (et, vl) -> ((BadWord) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((BadWord) et).getCreatedTime(), (et, vl) -> ((BadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((BadWord) et).getSuggestWord(), (et, vl) -> ((BadWord) et).setSuggestWord(DfTypeUtil.toString(vl)),
+                "suggestWord");
+        setupEpg(_epgMap, et -> ((BadWord) et).getTargetLabel(), (et, vl) -> ((BadWord) et).setTargetLabel(DfTypeUtil.toString(vl)),
+                "targetLabel");
+        setupEpg(_epgMap, et -> ((BadWord) et).getTargetRole(), (et, vl) -> ((BadWord) et).setTargetRole(DfTypeUtil.toString(vl)),
+                "targetRole");
+        setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedBy(), (et, vl) -> ((BadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedTime(), (et, vl) -> ((BadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
     }
 
     @Override
@@ -103,9 +103,9 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                          Table Info
     //                                                                          ==========
-    protected final String _tableDbName = "suggest_bad_word";
-    protected final String _tableDispName = "suggest_bad_word";
-    protected final String _tablePropertyName = "SuggestBadWord";
+    protected final String _tableDbName = "bad_word";
+    protected final String _tableDispName = "bad_word";
+    protected final String _tablePropertyName = "BadWord";
 
     public String getTableDbName() {
         return _tableDbName;
@@ -207,17 +207,17 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     //                                                                           =========
     @Override
     public String getEntityTypeName() {
-        return "org.codelibs.fess.es.config.exentity.SuggestBadWord";
+        return "org.codelibs.fess.es.config.exentity.BadWord";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        return "org.codelibs.fess.es.config.cbean.SuggestBadWordCB";
+        return "org.codelibs.fess.es.config.cbean.BadWordCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        return "org.codelibs.fess.es.config.exbhv.SuggestBadWordBhv";
+        return "org.codelibs.fess.es.config.exbhv.BadWordBhv";
     }
 
     // ===================================================================================
@@ -225,7 +225,7 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     //                                                                         ===========
     @Override
     public Class<? extends Entity> getEntityType() {
-        return SuggestBadWord.class;
+        return BadWord.class;
     }
 
     // ===================================================================================
@@ -233,7 +233,7 @@ public class SuggestBadWordDbm extends AbstractDBMeta {
     //                                                                     ===============
     @Override
     public Entity newEntity() {
-        return new SuggestBadWord();
+        return new BadWord();
     }
 
     // ===================================================================================

@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
-import org.codelibs.fess.es.config.bsentity.dbmeta.SuggestBadWordDbm;
+import org.codelibs.fess.es.config.bsentity.dbmeta.BadWordDbm;
 
 /**
  * ${table.comment}
  * @author ESFlute (using FreeGen)
  */
-public class BsSuggestBadWord extends EsAbstractEntity {
+public class BsBadWord extends EsAbstractEntity {
 
     // ===================================================================================
     //                                                                          Definition
@@ -64,13 +64,13 @@ public class BsSuggestBadWord extends EsAbstractEntity {
     //                                                                             DB Meta
     //                                                                             =======
     @Override
-    public SuggestBadWordDbm asDBMeta() {
-        return SuggestBadWordDbm.getInstance();
+    public BadWordDbm asDBMeta() {
+        return BadWordDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "suggest_bad_word";
+        return "bad_word";
     }
 
     // ===================================================================================
