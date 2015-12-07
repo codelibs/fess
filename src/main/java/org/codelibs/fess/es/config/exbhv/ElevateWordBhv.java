@@ -13,22 +13,13 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.elevateword;
+package org.codelibs.fess.es.config.exbhv;
 
-import java.io.Serializable;
-
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
-import org.lastaflute.web.validation.Required;
+import org.codelibs.fess.es.config.bsbhv.BsElevateWordBhv;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * @author FreeGen
  */
-public class UploadForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Required
-    public MultipartFormFile elevateWordFile;
+public class ElevateWordBhv extends BsElevateWordBhv {
 
 }

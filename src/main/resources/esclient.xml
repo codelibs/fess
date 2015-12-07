@@ -88,13 +88,13 @@
 			<arg>".fess_config/scheduled_job"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/suggest_bad_word"</arg>
+			<arg>".fess_config/bad_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/suggest_elevate_word"</arg>
+			<arg>".fess_config/elevate_word"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
-			<arg>".fess_config/suggest_elevate_word_to_label"</arg>
+			<arg>".fess_config/elevate_word_to_label"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_authentication"</arg>

@@ -13,22 +13,30 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.elevateword;
+package org.codelibs.fess.es.config.exentity;
 
-import java.io.Serializable;
-
-import org.lastaflute.web.ruts.multipart.MultipartFormFile;
-import org.lastaflute.web.validation.Required;
+import org.codelibs.fess.es.config.bsentity.BsBadWord;
 
 /**
- * @author codelibs
- * @author Keiichi Watanabe
+ * @author ESFlute (using FreeGen)
  */
-public class UploadForm implements Serializable {
+public class BadWord extends BsBadWord {
 
     private static final long serialVersionUID = 1L;
 
-    @Required
-    public MultipartFormFile elevateWordFile;
+    public String getId() {
+        return asDocMeta().id();
+    }
 
+    public void setId(final String id) {
+        asDocMeta().id(id);
+    }
+
+    public Long getVersionNo() {
+        return asDocMeta().version();
+    }
+
+    public void setVersionNo(final Long version) {
+        asDocMeta().version(version);
+    }
 }

@@ -1,0 +1,20 @@
+{
+  "elevate_word_to_label": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "elevateWordId": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "labelTypeId": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}

@@ -504,10 +504,10 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_USER_DICT_FILE = "{labels.userDictFile}";
 
     /** The key of the message: Additional Word File */
-    public static final String LABELS_SUGGEST_ELEVATE_WORD_FILE = "{labels.suggestElevateWordFile}";
+    public static final String LABELS_SUGGEST_ELEVATE_WORD_FILE = "{labels.elevateWordFile}";
 
     /** The key of the message: Bad Word File */
-    public static final String LABELS_SUGGEST_BAD_WORD_FILE = "{labels.suggestBadWordFile}";
+    public static final String LABELS_BAD_WORD_FILE = "{labels.badWordFile}";
 
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
@@ -585,10 +585,10 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_menu_suggest = "{labels.menu_suggest}";
 
     /** The key of the message: Additional Word */
-    public static final String LABELS_menu_suggest_elevate_word = "{labels.menu_suggest_elevate_word}";
+    public static final String LABELS_menu_elevate_word = "{labels.menu_elevate_word}";
 
     /** The key of the message: Bad Word */
-    public static final String LABELS_menu_suggest_bad_word = "{labels.menu_suggest_bad_word}";
+    public static final String LABELS_menu_bad_word = "{labels.menu_bad_word}";
 
     /** The key of the message: System Info */
     public static final String LABELS_menu_system_log = "{labels.menu_system_log}";
@@ -1783,97 +1783,97 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_boost_document_rule_sort_order = "{labels.boost_document_rule_sort_order}";
 
     /** The key of the message: Additional Word */
-    public static final String LABELS_suggest_elevate_word_configuration = "{labels.suggest_elevate_word_configuration}";
+    public static final String LABELS_elevate_word_configuration = "{labels.elevate_word_configuration}";
 
     /** The key of the message: Additional Word */
-    public static final String LABELS_suggest_elevate_word_title_details = "{labels.suggest_elevate_word_title_details}";
+    public static final String LABELS_elevate_word_title_details = "{labels.elevate_word_title_details}";
 
     /** The key of the message: List */
-    public static final String LABELS_suggest_elevate_word_link_list = "{labels.suggest_elevate_word_link_list}";
+    public static final String LABELS_elevate_word_link_list = "{labels.elevate_word_link_list}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_suggest_elevate_word_link_create = "{labels.suggest_elevate_word_link_create}";
+    public static final String LABELS_elevate_word_link_create = "{labels.elevate_word_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_suggest_elevate_word_link_edit = "{labels.suggest_elevate_word_link_edit}";
+    public static final String LABELS_elevate_word_link_edit = "{labels.elevate_word_link_edit}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_suggest_elevate_word_link_delete = "{labels.suggest_elevate_word_link_delete}";
+    public static final String LABELS_elevate_word_link_delete = "{labels.elevate_word_link_delete}";
 
     /** The key of the message: Details */
-    public static final String LABELS_suggest_elevate_word_link_details = "{labels.suggest_elevate_word_link_details}";
+    public static final String LABELS_elevate_word_link_details = "{labels.elevate_word_link_details}";
 
     /** The key of the message: Download */
-    public static final String LABELS_suggest_elevate_word_link_download = "{labels.suggest_elevate_word_link_download}";
+    public static final String LABELS_elevate_word_link_download = "{labels.elevate_word_link_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_suggest_elevate_word_link_upload = "{labels.suggest_elevate_word_link_upload}";
+    public static final String LABELS_elevate_word_link_upload = "{labels.elevate_word_link_upload}";
 
     /** The key of the message: Download */
-    public static final String LABELS_suggest_elevate_word_button_download = "{labels.suggest_elevate_word_button_download}";
+    public static final String LABELS_elevate_word_button_download = "{labels.elevate_word_button_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_suggest_elevate_word_button_upload = "{labels.suggest_elevate_word_button_upload}";
+    public static final String LABELS_elevate_word_button_upload = "{labels.elevate_word_button_upload}";
 
     /** The key of the message: Word */
-    public static final String LABELS_suggest_elevate_word_list_suggest_word = "{labels.suggest_elevate_word_list_suggest_word}";
+    public static final String LABELS_elevate_word_list_suggest_word = "{labels.elevate_word_list_suggest_word}";
 
     /** The key of the message: Word */
-    public static final String LABELS_suggest_elevate_word_suggest_word = "{labels.suggest_elevate_word_suggest_word}";
+    public static final String LABELS_elevate_word_suggest_word = "{labels.elevate_word_suggest_word}";
 
     /** The key of the message: Reading */
-    public static final String LABELS_suggest_elevate_word_reading = "{labels.suggest_elevate_word_reading}";
+    public static final String LABELS_elevate_word_reading = "{labels.elevate_word_reading}";
 
     /** The key of the message: Role */
-    public static final String LABELS_suggest_elevate_word_target_role = "{labels.suggest_elevate_word_target_role}";
+    public static final String LABELS_elevate_word_target_role = "{labels.elevate_word_target_role}";
 
     /** The key of the message: Boost */
-    public static final String LABELS_suggest_elevate_word_boost = "{labels.suggest_elevate_word_boost}";
+    public static final String LABELS_elevate_word_boost = "{labels.elevate_word_boost}";
 
     /** The key of the message: Additional Word File */
-    public static final String LABELS_suggest_elevate_word_file = "{labels.suggest_elevate_word_file}";
+    public static final String LABELS_elevate_word_file = "{labels.elevate_word_file}";
 
     /** The key of the message: Bad Word */
-    public static final String LABELS_suggest_bad_word_configuration = "{labels.suggest_bad_word_configuration}";
+    public static final String LABELS_bad_word_configuration = "{labels.bad_word_configuration}";
 
     /** The key of the message: Bad Word */
-    public static final String LABELS_suggest_bad_word_title_details = "{labels.suggest_bad_word_title_details}";
+    public static final String LABELS_bad_word_title_details = "{labels.bad_word_title_details}";
 
     /** The key of the message: List */
-    public static final String LABELS_suggest_bad_word_link_list = "{labels.suggest_bad_word_link_list}";
+    public static final String LABELS_bad_word_link_list = "{labels.bad_word_link_list}";
 
     /** The key of the message: Create New */
-    public static final String LABELS_suggest_bad_word_link_create = "{labels.suggest_bad_word_link_create}";
+    public static final String LABELS_bad_word_link_create = "{labels.bad_word_link_create}";
 
     /** The key of the message: Edit */
-    public static final String LABELS_suggest_bad_word_link_edit = "{labels.suggest_bad_word_link_edit}";
+    public static final String LABELS_bad_word_link_edit = "{labels.bad_word_link_edit}";
 
     /** The key of the message: Delete */
-    public static final String LABELS_suggest_bad_word_link_delete = "{labels.suggest_bad_word_link_delete}";
+    public static final String LABELS_bad_word_link_delete = "{labels.bad_word_link_delete}";
 
     /** The key of the message: Details */
-    public static final String LABELS_suggest_bad_word_link_details = "{labels.suggest_bad_word_link_details}";
+    public static final String LABELS_bad_word_link_details = "{labels.bad_word_link_details}";
 
     /** The key of the message: Download */
-    public static final String LABELS_suggest_bad_word_link_download = "{labels.suggest_bad_word_link_download}";
+    public static final String LABELS_bad_word_link_download = "{labels.bad_word_link_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_suggest_bad_word_link_upload = "{labels.suggest_bad_word_link_upload}";
+    public static final String LABELS_bad_word_link_upload = "{labels.bad_word_link_upload}";
 
     /** The key of the message: Download */
-    public static final String LABELS_suggest_bad_word_button_download = "{labels.suggest_bad_word_button_download}";
+    public static final String LABELS_bad_word_button_download = "{labels.bad_word_button_download}";
 
     /** The key of the message: Upload */
-    public static final String LABELS_suggest_bad_word_button_upload = "{labels.suggest_bad_word_button_upload}";
+    public static final String LABELS_bad_word_button_upload = "{labels.bad_word_button_upload}";
 
     /** The key of the message: Bad Word */
-    public static final String LABELS_suggest_bad_word_list_suggest_word = "{labels.suggest_bad_word_list_suggest_word}";
+    public static final String LABELS_bad_word_list_suggest_word = "{labels.bad_word_list_suggest_word}";
 
     /** The key of the message: Bad Word */
-    public static final String LABELS_suggest_bad_word_suggest_word = "{labels.suggest_bad_word_suggest_word}";
+    public static final String LABELS_bad_word_suggest_word = "{labels.bad_word_suggest_word}";
 
     /** The key of the message: Bad Word File */
-    public static final String LABELS_suggest_bad_word_file = "{labels.suggest_bad_word_file}";
+    public static final String LABELS_bad_word_file = "{labels.bad_word_file}";
 
     /** The key of the message: User */
     public static final String LABELS_user_configuration = "{labels.user_configuration}";

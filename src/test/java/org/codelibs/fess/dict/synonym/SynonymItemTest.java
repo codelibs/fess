@@ -1,0 +1,86 @@
+package org.codelibs.fess.dict.synonym;
+
+import org.codelibs.fess.unit.UnitFessTestCase;
+
+public class SynonymItemTest extends UnitFessTestCase {
+
+    public void test_new1() {
+        final SynonymItem synonymItem = new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" });
+        assertEquals(1, synonymItem.getId());
+        assertEquals(2, synonymItem.getInputs().length);
+        assertEquals("A", synonymItem.getInputs()[0]);
+        assertEquals("a", synonymItem.getInputs()[1]);
+        assertEquals(2, synonymItem.getOutputs().length);
+        assertEquals("B", synonymItem.getOutputs()[0]);
+        assertEquals("b", synonymItem.getOutputs()[1]);
+        assertNull(synonymItem.getNewInputs());
+        assertNull(synonymItem.getNewOutputs());
+        assertFalse(synonymItem.isUpdated());
+        assertFalse(synonymItem.isDeleted());
+
+        synonymItem.setNewInputs(new String[] { "1", "2" });
+        synonymItem.setNewOutputs(new String[] { "3", "4" });
+        assertTrue(synonymItem.isUpdated());
+        assertFalse(synonymItem.isDeleted());
+
+        synonymItem.setNewInputs(new String[0]);
+        synonymItem.setNewOutputs(new String[0]);
+        assertTrue(synonymItem.isUpdated());
+        assertTrue(synonymItem.isDeleted());
+    }
+
+    public void test_new2() {
+        final SynonymItem synonymItem = new SynonymItem(1, new String[] { "A", "a" }, new String[] { "B", "b" });
+        assertEquals(1, synonymItem.getId());
+        assertEquals(2, synonymItem.getInputs().length);
+        assertEquals("A", synonymItem.getInputs()[0]);
+        assertEquals("a", synonymItem.getInputs()[1]);
+        assertEquals(2, synonymItem.getOutputs().length);
+        assertEquals("B", synonymItem.getOutputs()[0]);
+        assertEquals("b", synonymItem.getOutputs()[1]);
+        assertNull(synonymItem.getNewInputs());
+        assertNull(synonymItem.getNewOutputs());
+        assertFalse(synonymItem.isUpdated());
+        assertFalse(synonymItem.isDeleted());
+
+        synonymItem.setNewInputs(new String[] { "2", "1" });
+        synonymItem.setNewOutputs(new String[] { "4", "3" });
+        assertTrue(synonymItem.isUpdated());
+        assertFalse(synonymItem.isDeleted());
+
+        synonymItem.setNewInputs(new String[0]);
+        synonymItem.setNewOutputs(new String[0]);
+        assertTrue(synonymItem.isUpdated());
+        assertTrue(synonymItem.isDeleted());
+    }
+
+    public void test_equals1() {
+        final SynonymItem synonymItem1 = new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" });
+
+        assertTrue(synonymItem1.equals(synonymItem1));
+        assertTrue(synonymItem1.equals(new SynonymItem(1, new String[] { "A", "a" }, new String[] { "B", "b" })));
+        assertTrue(synonymItem1.equals(new SynonymItem(2, new String[] { "A", "a" }, new String[] { "B", "b" })));
+        assertFalse(synonymItem1.equals(new SynonymItem(2, new String[] { "A", "a" }, new String[] { "B", })));
+        assertFalse(synonymItem1.equals(new SynonymItem(2, new String[] { "A" }, new String[] { "B", "b" })));
+        assertFalse(synonymItem1.equals(new SynonymItem(1, new String[] { "A", "a" }, new String[] { "B", "c" })));
+        assertFalse(synonymItem1.equals(new SynonymItem(1, new String[] { "A", "c" }, new String[] { "B", "b" })));
+    }
+
+    public void test_equals2() {
+        final SynonymItem synonymItem1 = new SynonymItem(1, new String[] { "a" }, new String[] { "b" });
+
+        assertTrue(synonymItem1.equals(synonymItem1));
+        assertTrue(synonymItem1.equals(new SynonymItem(1, new String[] { "a" }, new String[] { "b" })));
+        assertFalse(synonymItem1.equals(new SynonymItem(2, new String[] { "a" }, new String[] { "B", })));
+        assertFalse(synonymItem1.equals(new SynonymItem(2, new String[] { "A" }, new String[] { "b" })));
+    }
+
+    public void test_toLineString() {
+        assertEquals("a1,a2,a3=>b1,b2,b3",
+                new SynonymItem(1, new String[] { "a1", "a2", "a3" }, new String[] { "b1", "b2", "b3" }).toLineString());
+        assertEquals("a=>b", new SynonymItem(1, new String[] { "a" }, new String[] { "b" }).toLineString());
+        assertEquals("A,a=>B,b", new SynonymItem(1, new String[] { "a", "A" }, new String[] { "b", "B" }).toLineString());
+        assertEquals("A,a", new SynonymItem(1, new String[] { "a", "A" }, new String[] { "a", "A" }).toLineString());
+        assertEquals("a", new SynonymItem(1, new String[] { "a" }, new String[] { "a" }).toLineString());
+    }
+}

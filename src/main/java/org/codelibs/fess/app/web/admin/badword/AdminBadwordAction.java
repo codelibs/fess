@@ -29,11 +29,11 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.SuggestBadWordPager;
-import org.codelibs.fess.app.service.SuggestBadWordService;
+import org.codelibs.fess.app.pager.BadWordPager;
+import org.codelibs.fess.app.service.BadWordService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.SuggestBadWord;
+import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -54,9 +54,9 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private SuggestBadWordService suggestBadWordService;
+    private BadWordService badWordService;
     @Resource
-    private SuggestBadWordPager suggestBadWordPager;
+    private BadWordPager badWordPager;
     @Resource
     private SystemHelper systemHelper;
     @Resource
@@ -84,9 +84,9 @@ public class AdminBadwordAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            suggestBadWordPager.setCurrentPageNumber(pageNumber.get());
+            badWordPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            suggestBadWordPager.setCurrentPageNumber(0);
+            badWordPager.setCurrentPageNumber(0);
         });
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -95,7 +95,7 @@ public class AdminBadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, suggestBadWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        copyBeanToBean(form, badWordPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
             searchPaging(data, form);
         });
@@ -103,17 +103,17 @@ public class AdminBadwordAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        suggestBadWordPager.clear();
+        badWordPager.clear();
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("suggestBadWordItems", suggestBadWordService.getSuggestBadWordList(suggestBadWordPager)); // page navi
+        data.register("badWordItems", badWordService.getBadWordList(badWordPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(suggestBadWordPager, form, op -> op.include("id"));
+        copyBeanToBean(badWordPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -137,7 +137,7 @@ public class AdminBadwordAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
-        suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
+        badWordService.getBadWord(id).ifPresent(entity -> {
             copyBeanToBean(entity, form, op -> {});
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
@@ -162,7 +162,7 @@ public class AdminBadwordAction extends FessAdminAction {
         saveToken();
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
+                badWordService.getBadWord(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -191,7 +191,7 @@ public class AdminBadwordAction extends FessAdminAction {
             final Path tempFile = Files.createTempFile(null, null);
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {
-                    suggestBadWordService.exportCsv(writer);
+                    badWordService.exportCsv(writer);
                 } catch (final Exception e) {
                     throwValidationError(messages -> messages.addErrorsFailedToDownloadBadwordFile(GLOBAL), () -> asDownloadHtml());
                 }
@@ -221,8 +221,8 @@ public class AdminBadwordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getSuggestBadWord(form).ifPresent(entity -> {
-            suggestBadWordService.store(entity);
+        getBadWord(form).ifPresent(entity -> {
+            badWordService.store(entity);
             suggestHelper.addBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -236,8 +236,8 @@ public class AdminBadwordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getSuggestBadWord(form).ifPresent(entity -> {
-            suggestBadWordService.store(entity);
+        getBadWord(form).ifPresent(entity -> {
+            badWordService.store(entity);
             suggestHelper.storeAllBadWords();
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -252,8 +252,8 @@ public class AdminBadwordAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        suggestBadWordService.getSuggestBadWord(id).ifPresent(entity -> {
-            suggestBadWordService.delete(entity);
+        badWordService.getBadWord(id).ifPresent(entity -> {
+            badWordService.delete(entity);
             suggestHelper.deleteBadWord(entity.getSuggestWord());
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
@@ -267,25 +267,25 @@ public class AdminBadwordAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asUploadHtml());
         verifyToken(() -> asUploadHtml());
         new Thread(() -> {
-            try (Reader reader = new BufferedReader(new InputStreamReader(form.suggestBadWordFile.getInputStream(), getCsvEncoding()))) {
-                suggestBadWordService.importCsv(reader);
+            try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
+                badWordService.importCsv(reader);
                 suggestHelper.storeAllBadWords();
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
             }
         }).start();
-        saveInfo(messages -> messages.addSuccessUploadSuggestBadWord(GLOBAL));
+        saveInfo(messages -> messages.addSuccessUploadBadWord(GLOBAL));
         return redirect(getClass());
     }
 
     // ===================================================================================
     //                                                                        Assist Logic
     //                                                                        ============
-    private OptionalEntity<SuggestBadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private OptionalEntity<BadWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             if (form instanceof CreateForm) {
-                return OptionalEntity.of(new SuggestBadWord()).map(entity -> {
+                return OptionalEntity.of(new BadWord()).map(entity -> {
                     entity.setCreatedBy(username);
                     entity.setCreatedTime(currentTime);
                     return entity;
@@ -294,7 +294,7 @@ public class AdminBadwordAction extends FessAdminAction {
             break;
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return suggestBadWordService.getSuggestBadWord(((EditForm) form).id);
+                return badWordService.getBadWord(((EditForm) form).id);
             }
             break;
         default:
@@ -303,7 +303,7 @@ public class AdminBadwordAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<SuggestBadWord> getSuggestBadWord(final CreateForm form) {
+    protected OptionalEntity<BadWord> getBadWord(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -334,10 +334,10 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                                           =========
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
-            data.register("suggestBadWordItems", suggestBadWordService.getSuggestBadWordList(suggestBadWordPager));
+            data.register("badWordItems", badWordService.getBadWordList(badWordPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(suggestBadWordPager, form, op -> op.include("id"));
+                copyBeanToBean(badWordPager, form, op -> op.include("id"));
             });
         });
     }

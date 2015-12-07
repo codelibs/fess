@@ -327,10 +327,10 @@ public class FessMessages extends FessLabels {
     public static final String SUCCESS_upload_kuromoji_file = "{success.upload_kuromoji_file}";
 
     /** The key of the message: Uploaded Additional Word file. */
-    public static final String SUCCESS_upload_suggest_elevate_word = "{success.upload_suggest_elevate_word}";
+    public static final String SUCCESS_upload_elevate_word = "{success.upload_elevate_word}";
 
     /** The key of the message: Uploaded Bad Word file. */
-    public static final String SUCCESS_upload_suggest_bad_word = "{success.upload_suggest_bad_word}";
+    public static final String SUCCESS_upload_bad_word = "{success.upload_bad_word}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -1820,30 +1820,30 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'success.upload_suggest_elevate_word' with parameters.
+     * Add the created action message for the key 'success.upload_elevate_word' with parameters.
      * <pre>
      * message: Uploaded Additional Word file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessUploadSuggestElevateWord(String property) {
+    public FessMessages addSuccessUploadElevateWord(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_suggest_elevate_word));
+        add(property, new ActionMessage(SUCCESS_upload_elevate_word));
         return this;
     }
 
     /**
-     * Add the created action message for the key 'success.upload_suggest_bad_word' with parameters.
+     * Add the created action message for the key 'success.upload_bad_word' with parameters.
      * <pre>
      * message: Uploaded Bad Word file.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addSuccessUploadSuggestBadWord(String property) {
+    public FessMessages addSuccessUploadBadWord(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_suggest_bad_word));
+        add(property, new ActionMessage(SUCCESS_upload_bad_word));
         return this;
     }
 

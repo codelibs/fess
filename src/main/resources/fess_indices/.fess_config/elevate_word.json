@@ -1,0 +1,45 @@
+{
+  "elevate_word": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "suggestWord": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "reading": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "targetRole": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "targetLabel": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "createdBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+  }
+}
