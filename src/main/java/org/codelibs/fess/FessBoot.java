@@ -97,7 +97,7 @@ public class FessBoot extends TomcatBoot {
         if (value != null) {
             return value;
         }
-        return "/fess";
+        return "/";
     }
 
     protected static String getTomcatConfigPath() {

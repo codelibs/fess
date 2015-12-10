@@ -176,8 +176,6 @@ public class FessEsClient implements Client {
 
     protected Client client;
 
-    protected String clusterName = "fess";
-
     protected Map<String, String> settings;
 
     protected String indexConfigPath = "fess_indices";
@@ -207,14 +205,6 @@ public class FessEsClient implements Client {
         this.settings = settings;
     }
 
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(final String clusterName) {
-        this.clusterName = clusterName;
-    }
-
     public String getStatus() {
         return admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
     }
@@ -233,10 +223,8 @@ public class FessEsClient implements Client {
 
     @PostConstruct
     public void open() {
-        final String clusterNameValue = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
-        if (StringUtil.isNotBlank(clusterNameValue)) {
-            clusterName = clusterNameValue;
-        }
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
+
         final String transportAddressesValue = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
         if (StringUtil.isNotBlank(transportAddressesValue)) {
             for (final String transportAddressValue : transportAddressesValue.split(",")) {
@@ -257,7 +245,7 @@ public class FessEsClient implements Client {
         if (transportAddressList.isEmpty()) {
             if (runner == null) {
                 runner = new ElasticsearchClusterRunner();
-                final Configs config = newConfigs().clusterName(clusterName).numOfNode(1).useLogger();
+                final Configs config = newConfigs().clusterName(fessConfig.getElasticsearchClusterName()).numOfNode(1).useLogger();
                 final String esDir = System.getProperty("fess.es.dir");
                 if (esDir != null) {
                     config.basePath(esDir);
@@ -279,17 +267,13 @@ public class FessEsClient implements Client {
             addTransportAddress("localhost", runner.node().settings().getAsInt("transport.tcp.port", 9300));
         } else {
             final Builder settingsBuilder = Settings.settingsBuilder();
-            settingsBuilder.put("cluster.name", clusterName);
+            settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
             final Settings settings = settingsBuilder.build();
             final TransportClient transportClient = TransportClient.builder().settings(settings).build();
             for (final TransportAddress address : transportAddressList) {
                 transportClient.addTransportAddress(address);
             }
             client = transportClient;
-        }
-
-        if (StringUtil.isBlank(clusterNameValue)) {
-            System.setProperty(Constants.FESS_ES_CLUSTER_NAME, clusterName);
         }
 
         if (StringUtil.isBlank(transportAddressesValue)) {

@@ -25,8 +25,11 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
 
+    /** The key of the configuration. e.g. elasticsearch */
+    String ELASTICSEARCH_CLUSTER_NAME = "elasticsearch.cluster.name";
+
     /** The key of the configuration. e.g. http://localhost:9201 */
-    String ELASTICSEARCH_URL = "elasticsearch.url";
+    String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
 
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
@@ -311,12 +314,19 @@ public interface FessConfig extends FessEnv {
     String getDomainTitle();
 
     /**
-     * Get the value for the key 'elasticsearch.url'. <br>
-     * The value is, e.g. http://localhost:9201 <br>
+     * Get the value for the key 'elasticsearch.cluster.name'. <br>
+     * The value is, e.g. elasticsearch <br>
      * comment: elasticsearch
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getElasticsearchUrl();
+    String getElasticsearchClusterName();
+
+    /**
+     * Get the value for the key 'elasticsearch.http.url'. <br>
+     * The value is, e.g. http://localhost:9201 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchHttpUrl();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -1109,8 +1119,12 @@ public interface FessConfig extends FessEnv {
             return get(FessConfig.DOMAIN_TITLE);
         }
 
-        public String getElasticsearchUrl() {
-            return get(FessConfig.ELASTICSEARCH_URL);
+        public String getElasticsearchClusterName() {
+            return get(FessConfig.ELASTICSEARCH_CLUSTER_NAME);
+        }
+
+        public String getElasticsearchHttpUrl() {
+            return get(FessConfig.ELASTICSEARCH_HTTP_URL);
         }
 
         public String getCrawlerDocumentCacheEnable() {

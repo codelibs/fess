@@ -56,7 +56,7 @@ public class DictionaryManager {
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try (CurlResponse response =
-                Curl.get(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
+                Curl.get(fessConfig.getElasticsearchHttpUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
             final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");
@@ -102,7 +102,7 @@ public class DictionaryManager {
 
             // TODO use stream
                 try (CurlResponse response =
-                        Curl.post(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("path", dictFile.getPath())
+                        Curl.post(fessConfig.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath())
                                 .body(FileUtil.readUTF8(file)).execute()) {
                     final Map<String, Object> contentMap = response.getContentAsMap();
                     if (!Constants.TRUE.equalsIgnoreCase(contentMap.get("acknowledged").toString())) {
@@ -120,7 +120,7 @@ public class DictionaryManager {
     public InputStream getContentInputStream(final DictionaryFile<? extends DictionaryItem> dictFile) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try {
-            return Curl.get(fessConfig.getElasticsearchUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute()
+            return Curl.get(fessConfig.getElasticsearchHttpUrl() + "/_configsync/file").param("path", dictFile.getPath()).execute()
                     .getContentAsStream();
         } catch (final IOException e) {
             throw new DictionaryException("Failed to access " + dictFile.getPath(), e);

@@ -95,7 +95,7 @@ public class EsApiManager extends BaseApiManager {
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        final CurlRequest curlRequest = new CurlRequest(httpMethod, fessConfig.getElasticsearchUrl() + path);
+        final CurlRequest curlRequest = new CurlRequest(httpMethod, fessConfig.getElasticsearchHttpUrl() + path);
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
                 curlRequest.param(entry.getKey(), String.join(",", entry.getValue()));
