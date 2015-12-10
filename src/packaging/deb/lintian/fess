@@ -1,0 +1,8 @@
+# Ignore arch dependent warnings, we chose the right libs on start
+fess binary: arch-independent-package-contains-binary-or-object
+# Not stripping external libraries
+fess binary: unstripped-binary-or-object
+# Ignore arch dependent warnings, we chose the right libs on start
+fess binary: arch-dependent-file-in-usr-share
+# Please check our changelog at https://github.com/codelibs/fess
+fess binary: changelog-file-missing-in-native-package

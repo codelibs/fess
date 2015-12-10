@@ -29,7 +29,7 @@ done
 # determine fess home
 FESS_HOME=`dirname "$SCRIPT"`/..
 
-# make ELASTICSEARCH_HOME absolute
+# make FESS_HOME absolute
 FESS_HOME=`cd "$FESS_HOME"; pwd`
 
 
@@ -93,6 +93,8 @@ launch_service()
     LC_ALL=en_US.UTF-8
 
     export HOSTNAME=`hostname -s`
+
+    cd "$FESS_HOME"
 
     if [ "x$daemonized" = "x" ]; then
         fess_parms="$fess_parms -Dfess.foreground=yes"

@@ -1,0 +1,10 @@
+Package: fess
+Version: [[version]]
+Architecture: all
+Maintainer: Fess Team
+Depends: libc6, adduser
+Section: web
+Priority: optional
+Homepage: https://github.com/codelibs/fess
+Description: Enterprise Search Server: Fess
+ Fess is very powerful and easily deployable Enterprise Search Server. You can install and run Fess quickly on any platforms, which have Java runtime environment. Fess is provided under Apache license.

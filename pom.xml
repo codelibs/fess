@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
@@ -69,6 +70,22 @@
 
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.4.0-RC2</tomcat.boot.version>
+
+		<!-- TODO: RPM build -->
+		<packaging.fess.home.dir>/opt/fess</packaging.fess.home.dir>
+		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
+		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
+		<packaging.fess.es.dir>${packaging.fess.home.dir}/es</packaging.fess.es.dir>
+		<packaging.fess.lib.dir>${packaging.fess.home.dir}/es</packaging.fess.lib.dir>
+		<packaging.fess.logs.dir>${packaging.fess.home.dir}/es</packaging.fess.logs.dir>
+		<packaging.fess.temp.dir>${packaging.fess.home.dir}/es</packaging.fess.temp.dir>
+		<packaging.fess.user>fess</packaging.fess.user>
+		<packaging.fess.group>fess</packaging.fess.group>
+		<packaging.fess.pid.dir>/var/run/fess</packaging.fess.pid.dir>
+		<packaging.fess.systemd.dir>/usr/lib/systemd/system</packaging.fess.systemd.dir>
+		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
+		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
+
 	</properties>
 	<build>
 		<finalName>fess</finalName>
@@ -170,27 +187,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<finalName>${project.artifactId}-${project.version}</finalName>
-					<appendAssemblyId>false</appendAssemblyId>
-					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
-					<descriptors>
-						<descriptor>${basedir}/src/main/assemblies/package.xml</descriptor>
-					</descriptors>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>2.11</version>
@@ -282,6 +278,322 @@
 				<goals>
 					<goal>run</goal>
 				</goals>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<id>copy-resources-rpm</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-packaging/rpm/</outputDirectory>
+							<filters>
+								<filter>${project.basedir}/src/packaging/common/packaging.properties</filter>
+								<filter>${project.basedir}/src/packaging/rpm/packaging.properties</filter>
+							</filters>
+							<resources>
+								<resource>
+									<directory>src/packaging/common/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>packaging.properties</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>src/packaging/rpm/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>packaging.properties</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>${project.basedir}</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>bin/fess</include>
+										<include>bin/fess.in.sh</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- zip -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
+					<descriptors>
+						<descriptor>${basedir}/src/main/assemblies/package.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- rpm -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rpm-maven-plugin</artifactId>
+				<version>2.1.4</version>
+				<executions>
+					<execution>
+						<id>generate-rpm</id>
+						<phase>package</phase>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<distribution>Fess</distribution>
+					<group>Application/Internet</group>
+					<packager>Fess</packager>
+					<prefix>/opt</prefix>
+					<needarch>noarch</needarch>
+					<targetOS>linux</targetOS>
+					<changelogFile>src/changelog</changelogFile>
+					<defineStatements>
+						<defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+						<defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
+					</defineStatements>
+					<defaultFilemode>644</defaultFilemode>
+					<defaultDirmode>755</defaultDirmode>
+					<defaultUsername>${packaging.fess.user}</defaultUsername>
+					<defaultGroupname>${packaging.fess.group}</defaultGroupname>
+					<!--
+					<keyname>${gpg.key}</keyname>
+					<keypath>${gpg.keyring}</keypath>
+					<keyPassphrase>
+						<passphrase>${gpg.passphrase}</passphrase>
+					</keyPassphrase>
+					-->
+					<mappings>
+						<!-- fess home -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}</directory>
+							<directoryIncluded>true</directoryIncluded>
+							<recurseDirectories>true</recurseDirectories>
+						</mapping>
+						<!-- app -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/app</directory>
+							<filemode>755</filemode>
+							<sources>
+								<source>
+									<location>${project.build.directory}/fess</location>
+								</source>
+							</sources>
+						</mapping>
+						<!-- lib -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/lib/classes</directory>
+							<sources>
+								<source>
+									<location>${project.build.directory}/tomcat-lib</location>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+							<directory>${packaging.fess.home.dir}/lib/classes/org/codelibs/fess</directory>
+							<sources>
+								<source>
+									<location>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess</location>
+									<includes>
+										<include>FessBoot**</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+							<directory>${packaging.fess.home.dir}/lib/classes</directory>
+							<sources>
+								<source>
+									<location>${project.basedir}/src/main/assemblies/files</location>
+									<includes>
+										<include>logging.properties</include>
+										<include>tomcat_config.properties</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- bin -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/bin</directory>
+							<filemode>755</filemode>
+							<sources>
+								<source>
+									<location>${project.basedir}/src/main/assemblies/files</location>
+									<includes>
+										<include>fess</include>
+										<include>fess.in.sh</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- logs (empty) -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/logs</directory>
+						</mapping>
+						<!-- temp (empty) -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/temp</directory>
+						</mapping>
+						<!-- es/plugins -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/es/plugins</directory>
+							<sources>
+								<source>
+									<location>${project.basedir}/plugins</location>
+								</source>
+							</sources>
+						</mapping>
+						<!-- es/data (empty) -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}/es/data</directory>
+						</mapping>
+						<!-- Add environment vars file -->
+						<mapping>
+							<directory>/etc/sysconfig/</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<username>root</username>
+							<groupname>root</groupname>
+							<configuration>noreplace</configuration>
+							<sources>
+								<source>
+									<location>${project.build.directory}/generated-packaging/rpm/env/</location>
+									<includes>
+										<include>fess</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Add init.d files -->
+						<mapping>
+							<directory>/etc/init.d</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<filemode>755</filemode>
+							<username>root</username>
+							<groupname>root</groupname>
+							<configuration>true</configuration>
+							<sources>
+								<source>
+									<location>${project.build.directory}/generated-packaging/rpm/init.d</location>
+									<includes>
+										<include>fess</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Adds systemd file -->
+						<mapping>
+							<directory>${packaging.fess.systemd.dir}</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<username>root</username>
+							<groupname>root</groupname>
+							<configuration>true</configuration>
+							<sources>
+								<source>
+									<location>${project.build.directory}/generated-packaging/rpm/systemd</location>
+									<includes>
+										<include>fess.service</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Adds systemd/sysctl.d configuration file -->
+						<mapping>
+							<directory>${packaging.fess.systemd.sysctl.dir}</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<username>root</username>
+							<groupname>root</groupname>
+							<configuration>true</configuration>
+							<sources>
+								<source>
+									<location>${project.build.directory}/generated-packaging/rpm/systemd/sysctl</location>
+									<includes>
+										<include>fess.conf</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Adds systemd/tmpfiles.d configuration file -->
+						<mapping>
+							<directory>${packaging.fess.tmpfilesd.dir}</directory>
+							<directoryIncluded>false</directoryIncluded>
+							<username>root</username>
+							<groupname>root</groupname>
+							<configuration>true</configuration>
+							<sources>
+								<source>
+									<location>${project.build.directory}/generated-packaging/rpm/systemd/</location>
+									<includes>
+										<include>fess.conf</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Add readme files -->
+						<mapping>
+							<directory>${packaging.fess.home.dir}</directory>
+							<sources>
+								<source>
+									<location>.</location>
+									<includes>
+										<include>LICENSE</include>
+										<include>README.md</include>
+									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<!-- Add and sets permission on default directories -->
+						<mapping>
+							<directory>${packaging.fess.pid.dir}</directory>
+							<filemode>755</filemode>
+							<username>${packaging.fess.user}</username>
+							<groupname>${packaging.fess.group}</groupname>
+						</mapping>
+					</mappings>
+					<preinstallScriptlet>
+						<scriptFile>${project.build.directory}/generated-packaging/rpm/scripts/preinst</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</preinstallScriptlet>
+					<postinstallScriptlet>
+						<scriptFile>${project.build.directory}/generated-packaging/rpm/scripts/postinst</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</postinstallScriptlet>
+					<preremoveScriptlet>
+						<scriptFile>${project.build.directory}/generated-packaging/rpm/scripts/prerm</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</preremoveScriptlet>
+					<postremoveScriptlet>
+						<scriptFile>${project.build.directory}/generated-packaging/rpm/scripts/postrm</scriptFile>
+						<fileEncoding>utf-8</fileEncoding>
+					</postremoveScriptlet>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
