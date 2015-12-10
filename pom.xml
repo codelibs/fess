@@ -359,15 +359,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>rpm-maven-plugin</artifactId>
 				<version>2.1.4</version>
-				<executions>
-					<execution>
-						<id>generate-rpm</id>
-						<phase>package</phase>
-						<goals>
-							<goal>rpm</goal>
-						</goals>
-					</execution>
-				</executions>
 				<configuration>
 					<distribution>Fess</distribution>
 					<group>Application/Internet</group>
