@@ -23,6 +23,49 @@ h3 {
 	font-size: 18px;
 }
 
+.btn-ghost {
+	background: transparent;
+}
+
+.btn-ghost.btn-default {
+	color: #777;
+}
+
+.btn-ghost.btn-primary {
+	color: #337ab7;
+}
+
+.btn-ghost.btn-success {
+	color: #5cb85c;
+}
+
+.btn-ghost.btn-info {
+	color: #5bc0de;
+}
+
+.btn-ghost.btn-warning {
+	color: #f0ad4e;
+}
+
+.btn-ghost.btn-danger {
+	color: #d9534f;
+}
+
+.btn-ghost.btn-primary:hover, .btn-ghost.btn-success:hover, .btn-ghost.btn-info:hover,
+	.btn-ghost.btn-warning:hover, .btn-ghost.btn-danger:hover {
+	color: #fff;
+}
+
+.btn-ghost.btn-white {
+	color: #fff;
+	border: 1px solid #fff;
+}
+
+.btn-ghost.btn-white:hover {
+	color: #333;
+	background: #fff;
+}
+
 .navbar .search-box {
 	padding: 0;
 }
@@ -142,6 +185,7 @@ nav.navbar .form-inline {
 #searchOptionsButton {
 	padding-left: 1.0rem;
 	padding-right: 0.8rem;
+	color: #000;
 }
 
 ul.searchOptionLabels {
