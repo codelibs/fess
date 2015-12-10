@@ -80,4 +80,5 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_HOME/logs"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=warn"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=production"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
+# __RPM__ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.transport_addresses=localhost:9300"
 
