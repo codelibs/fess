@@ -142,7 +142,7 @@ public class SuggestHelper {
                 new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentIndex(),
                         fessConfig.getIndexDocumentType());
 
-        suggester.indexer().indexFromDocument(reader, 2, 100).done(response -> {
+        suggester.indexer().indexFromDocument(reader, 2, 100).then(response -> {
             suggester.refresh();
 
             //TODO delete old doc
@@ -151,13 +151,24 @@ public class SuggestHelper {
             }).error(t -> error.accept(t));
     }
 
-    public void purge(final LocalDateTime time) {
+    public void purgeDocumentSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.BASIC_ISO_DATE)));
+        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.ISO_DATE)));
 
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
-        boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
+        boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
+
+        SuggestUtil.deleteByQuery(fessEsClient, suggester.getIndex(), suggester.getType(), boolQueryBuilder);
+    }
+
+    public void purgeSearchlogSuggest(final LocalDateTime time) {
+        final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.ISO_DATE)));
+
+        boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
+        boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
+        boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
         SuggestUtil.deleteByQuery(fessEsClient, suggester.getIndex(), suggester.getType(), boolQueryBuilder);
     }

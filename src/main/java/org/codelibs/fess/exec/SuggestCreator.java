@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -123,6 +124,7 @@ public class SuggestCreator implements Serializable {
         final CountDownLatch latch = new CountDownLatch(1);
 
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
+
         suggestHelper.indexFromDocuments(ret -> {
             logger.info("Success index from documents.");
             result.set(0);
@@ -141,8 +143,14 @@ public class SuggestCreator implements Serializable {
 
     private int purge(final LocalDateTime time) {
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+
         try {
-            suggestHelper.purge(time);
+            suggestHelper.purgeDocumentSuggest(time);
+            final long cleanupDay = Long.parseLong(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "-1"));
+            if (cleanupDay > 0) {
+                suggestHelper.purgeSearchlogSuggest(time.minusDays(cleanupDay));
+            }
             return 0;
         } catch (final Exception e) {
             logger.info("Purge error.", e);

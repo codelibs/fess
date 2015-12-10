@@ -108,6 +108,9 @@ public class EditForm implements Serializable {
     @Size(max = 10)
     public String suggestSearchLog;
 
+    @Size(max = 10)
+    public String suggestDocuments;
+
     @Min(0)
     @Max(100000)
     @ValidateTypeFailure

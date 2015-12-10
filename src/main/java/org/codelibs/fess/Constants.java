@@ -136,6 +136,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String SUGGEST_SEARCH_LOG_PROPERTY = "suggest.searchlog";
 
+    public static final String SUGGEST_DOCUMENTS_PROPERTY = "suggest.document";
+
     public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
 
     public static final String AUTH_CIPHER = "authenticationCipher";

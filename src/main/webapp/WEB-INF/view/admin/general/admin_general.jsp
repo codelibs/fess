@@ -254,6 +254,18 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="suggestSearchLog" class="col-sm-3 control-label"><la:message
+												key="labels.suggest_documents_enabled" /></label>
+										<div class="col-sm-9">
+											<la:errors property="suggestDocuments" />
+											<div class="checkbox">
+												<label> <la:checkbox property="suggestDocuments" />
+													<la:message key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="purgeSuggestSearchLogDay"
 											class="col-sm-3 control-label"><la:message
 												key="labels.purge_suggest_search_log_day" /></label>

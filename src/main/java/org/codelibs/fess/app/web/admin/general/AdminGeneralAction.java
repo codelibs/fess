@@ -110,6 +110,8 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
         updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
                 form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
+        updateProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY,
+                form.suggestDocuments != null && Constants.ON.equalsIgnoreCase(form.suggestDocuments) ? Constants.TRUE : Constants.FALSE);
         updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay.toString());
 
         crawlerProperties.store();
@@ -142,8 +144,9 @@ public class AdminGeneralAction extends FessAdminAction {
         form.purgeByBots = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
         form.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
         form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
+        form.suggestDocuments = crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay =
-                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "30"));
+                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, "-1"));
     }
 
     private void updateProperty(final String key, final String value) {
