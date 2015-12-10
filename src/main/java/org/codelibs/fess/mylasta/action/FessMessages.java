@@ -257,7 +257,7 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Confirm Password does not match. */
     public static final String ERRORS_invalid_confirm_password = "{errors.invalid_confirm_password}";
 
-    /** The key of the message: Crawler is running. The document cannot be deteled. */
+    /** The key of the message: Crawler is running. The document cannot be deleted. */
     public static final String ERRORS_cannot_delete_doc_because_of_running = "{errors.cannot_delete_doc_because_of_running}";
 
     /** The key of the message: Failed to delete document. */
@@ -1488,7 +1488,7 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.cannot_delete_doc_because_of_running' with parameters.
      * <pre>
-     * message: Crawler is running. The document cannot be deteled.
+     * message: Crawler is running. The document cannot be deleted.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
