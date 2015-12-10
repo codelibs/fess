@@ -72,8 +72,6 @@ public class SuggestApiManager extends BaseApiManager {
             }
             builder.setSize(parameter.getNum());
 
-            final SuggestResponse suggestResponse = builder.execute().getResponse();
-
             builder.addKind(SuggestItem.Kind.USER.toString());
             if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE))) {
                 builder.addKind(SuggestItem.Kind.QUERY.toString());
@@ -81,6 +79,8 @@ public class SuggestApiManager extends BaseApiManager {
             if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
                 builder.addKind(SuggestItem.Kind.DOCUMENT.toString());
             }
+
+            final SuggestResponse suggestResponse = builder.execute().getResponse();
 
             buf.append("\"result\":{");
             buf.append("\"took\":\"").append(suggestResponse.getTookMs()).append('\"');
