@@ -101,8 +101,8 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // site
         // url
         // anchor
-        // contentLength
-        // lastModified
+        // content_length
+        // last_modified
         // id
 
         storeData(config, callback, paramMap, configScriptMap, defaultDataMap);

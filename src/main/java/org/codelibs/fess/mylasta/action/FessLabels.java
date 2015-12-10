@@ -570,28 +570,28 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_search_result_sort_created_desc = "{labels.search_result_sort_created_desc}";
 
     /** The key of the message: Size (ascending) */
-    public static final String LABELS_search_result_sort_contentLength_asc = "{labels.search_result_sort_contentLength_asc}";
+    public static final String LABELS_search_result_sort_content_length_asc = "{labels.search_result_sort_content_length_asc}";
 
     /** The key of the message: Size (descending) */
-    public static final String LABELS_search_result_sort_contentLength_desc = "{labels.search_result_sort_contentLength_desc}";
+    public static final String LABELS_search_result_sort_content_length_desc = "{labels.search_result_sort_content_length_desc}";
 
     /** The key of the message: Last Modified (ascending) */
-    public static final String LABELS_search_result_sort_lastModified_asc = "{labels.search_result_sort_lastModified_asc}";
+    public static final String LABELS_search_result_sort_last_modified_asc = "{labels.search_result_sort_last_modified_asc}";
 
     /** The key of the message: Last Modified (descending) */
-    public static final String LABELS_search_result_sort_lastModified_desc = "{labels.search_result_sort_lastModified_desc}";
+    public static final String LABELS_search_result_sort_last_modified_desc = "{labels.search_result_sort_last_modified_desc}";
 
     /** The key of the message: Click (ascending) */
-    public static final String LABELS_search_result_sort_clickCount_asc = "{labels.search_result_sort_clickCount_asc}";
+    public static final String LABELS_search_result_sort_click_count_asc = "{labels.search_result_sort_click_count_asc}";
 
     /** The key of the message: Click (descending) */
-    public static final String LABELS_search_result_sort_clickCount_desc = "{labels.search_result_sort_clickCount_desc}";
+    public static final String LABELS_search_result_sort_click_count_desc = "{labels.search_result_sort_click_count_desc}";
 
     /** The key of the message: Favorite (ascending) */
-    public static final String LABELS_search_result_sort_favoriteCount_asc = "{labels.search_result_sort_favoriteCount_asc}";
+    public static final String LABELS_search_result_sort_favorite_count_asc = "{labels.search_result_sort_favorite_count_asc}";
 
     /** The key of the message: Favorite (descending) */
-    public static final String LABELS_search_result_sort_favoriteCount_desc = "{labels.search_result_sort_favoriteCount_desc}";
+    public static final String LABELS_search_result_sort_favorite_count_desc = "{labels.search_result_sort_favorite_count_desc}";
 
     /** The key of the message: {0} bytes */
     public static final String LABELS_search_result_size = "{labels.search_result_size}";
@@ -988,6 +988,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Suggest by Search Words */
     public static final String LABELS_suggest_search_log_enabled = "{labels.suggest_search_log_enabled}";
+
+    /** The key of the message: Suggest by Documents */
+    public static final String LABELS_suggest_documents_enabled = "{labels.suggest_documents_enabled}";
 
     /** The key of the message: Purge Suggest Documents Before */
     public static final String LABELS_purge_suggest_search_log_day = "{labels.purge_suggest_search_log_day}";

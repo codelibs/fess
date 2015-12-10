@@ -79,32 +79,32 @@ ${fe:facetForm()}${fe:geoForm()}
 						<la:option value="created.desc">
 							<la:message key="labels.search_result_sort_created_desc" />
 						</la:option>
-						<la:option value="contentLength.asc">
-							<la:message key="labels.search_result_sort_contentLength_asc" />
+						<la:option value="content_length.asc">
+							<la:message key="labels.search_result_sort_content_length_asc" />
 						</la:option>
-						<la:option value="contentLength.desc">
-							<la:message key="labels.search_result_sort_contentLength_desc" />
+						<la:option value="content_length.desc">
+							<la:message key="labels.search_result_sort_content_length_desc" />
 						</la:option>
-						<la:option value="lastModified.asc">
-							<la:message key="labels.search_result_sort_lastModified_asc" />
+						<la:option value="last_modified.asc">
+							<la:message key="labels.search_result_sort_last_modified_asc" />
 						</la:option>
-						<la:option value="lastModified.desc">
-							<la:message key="labels.search_result_sort_lastModified_desc" />
+						<la:option value="last_modified.desc">
+							<la:message key="labels.search_result_sort_last_modified_desc" />
 						</la:option>
 						<c:if test="${searchLogSupport}">
-							<la:option value="clickCount_l_x_dv.asc">
-								<la:message key="labels.search_result_sort_clickCount_asc" />
+							<la:option value="click_count.asc">
+								<la:message key="labels.search_result_sort_click_count_asc" />
 							</la:option>
-							<la:option value="clickCount_l_x_dv.desc">
-								<la:message key="labels.search_result_sort_clickCount_desc" />
+							<la:option value="click_count.desc">
+								<la:message key="labels.search_result_sort_click_count_desc" />
 							</la:option>
 						</c:if>
 						<c:if test="${favoriteSupport}">
-							<la:option value="favoriteCount_l_x_dv.asc">
-								<la:message key="labels.search_result_sort_favoriteCount_asc" />
+							<la:option value="favorite_count.asc">
+								<la:message key="labels.search_result_sort_favorite_count_asc" />
 							</la:option>
-							<la:option value="favoriteCount_l_x_dv.desc">
-								<la:message key="labels.search_result_sort_favoriteCount_desc" />
+							<la:option value="favorite_count.desc">
+								<la:message key="labels.search_result_sort_favorite_count_desc" />
 							</la:option>
 						</c:if>
 					</la:select>

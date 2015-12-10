@@ -69,7 +69,6 @@ public class SearchAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        final HtmlResponse response = doSearch(form);
         if (viewHelper.isUseSession()) {
             LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                 final HttpSession session = request.getSession(false);
@@ -78,7 +77,7 @@ public class SearchAction extends FessSearchAction {
                 }
             });
         }
-        return response;
+        return doSearch(form);
     }
 
     @Execute

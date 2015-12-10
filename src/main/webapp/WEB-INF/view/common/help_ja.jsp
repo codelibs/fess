@@ -7,7 +7,7 @@
 		たとえば、ドキュメントの title フィールドで Fess を含むドキュメントを検索する場合は次のように入力します。
 		<pre>title:Fess</pre>
 		標準で利用可能なフィールドは url, host, site, title, content,
-		contentLength, lastModified および mimetype になります。
+		content_length, last_modified および mimetype になります。
 		設定で指定するフィールドは変更することができます。
 	</dd>
 	<dt>ソート</dt>
@@ -16,8 +16,8 @@
 		sort 演算子の利用方法は sort:&lt;field&gt;.&lt;order&gt; になります。
 		&lt;order&gt; は asc または desc で昇順・降順を指定できます。
 		たとえば、Fess を含むドキュメントでサイズの降順にソートしたい場合、次のように入力します。
-		<pre>Fess sort:contentLength.desc</pre>
-		標準で利用可能なフィールドは created, contentLength および lastModified になります。
+		<pre>Fess sort:content_length.desc</pre>
+		標準で利用可能なフィールドは created, content_length および last_modified になります。
 		設定で指定するフィールドは変更することができます。
 	</dd>
 	<dt>AND検索</dt>
@@ -47,8 +47,8 @@
 	<dd>
 		範囲検索はフィールド値の範囲を指定することでその条件にマッチするドキュメントを検索します。
 		範囲の境界値を含める場合は [] を利用して、含めない場合は {} を利用します。 
-		たとえば、contentLength フィールドが 1000 から 10000 の値を持つドキュメントを検索する場合は次のように入力します。
-		<pre>contentLength:[1000 TO 10000]</pre>
+		たとえば、content_length フィールドが 1000 から 10000 の値を持つドキュメントを検索する場合は次のように入力します。
+		<pre>content_length:[1000 TO 10000]</pre>
 	</dd>
 	<dt>ブースト検索</dt>
 	<dd>

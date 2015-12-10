@@ -267,9 +267,9 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             // filetype
             putResultDataBody(dataMap, fessConfig.getIndexFieldFiletype(), fileTypeHelper.get(mimeType));
         }
-        // contentLength
+        // content_length
         putResultDataBody(dataMap, fessConfig.getIndexFieldContentLength(), Long.toString(responseData.getContentLength()));
-        //  lastModified
+        // last_modified
         final Date lastModified = responseData.getLastModified();
         if (lastModified != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLastModified(), lastModified);

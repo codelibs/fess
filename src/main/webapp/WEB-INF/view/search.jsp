@@ -32,22 +32,22 @@
 								<la:message key="labels.search_result_sort_created_asc" />
 							</c:if> <c:if test="${sort=='created.desc'}">
 								<la:message key="labels.search_result_sort_created_desc" />
-							</c:if> <c:if test="${sort=='contentLength.asc'}">
-								<la:message key="labels.search_result_sort_contentLength_asc" />
-							</c:if> <c:if test="${sort=='contentLength.desc'}">
-								<la:message key="labels.search_result_sort_contentLength_desc" />
-							</c:if> <c:if test="${sort=='lastModified.asc'}">
-								<la:message key="labels.search_result_sort_lastModified_asc" />
-							</c:if> <c:if test="${sort=='lastModified.desc'}">
-								<la:message key="labels.search_result_sort_lastModified_desc" />
-							</c:if> <c:if test="${sort=='clickCount_l_x_dv.asc'}">
-								<la:message key="labels.search_result_sort_clickCount_asc" />
-							</c:if> <c:if test="${sort=='clickCount_l_x_dv.desc'}">
-								<la:message key="labels.search_result_sort_clickCount_desc" />
-							</c:if> <c:if test="${sort=='favoriteCount_l_x_dv.asc'}">
-								<la:message key="labels.search_result_sort_favoriteCount_asc" />
-							</c:if> <c:if test="${sort=='favoriteCount_l_x_dv.desc'}">
-								<la:message key="labels.search_result_sort_favoriteCount_desc" />
+							</c:if> <c:if test="${sort=='content_length.asc'}">
+								<la:message key="labels.search_result_sort_content_length_asc" />
+							</c:if> <c:if test="${sort=='content_length.desc'}">
+								<la:message key="labels.search_result_sort_content_length_desc" />
+							</c:if> <c:if test="${sort=='last_modified.asc'}">
+								<la:message key="labels.search_result_sort_last_modified_asc" />
+							</c:if> <c:if test="${sort=='last_modified.desc'}">
+								<la:message key="labels.search_result_sort_last_modified_desc" />
+							</c:if> <c:if test="${sort=='click_count.asc'}">
+								<la:message key="labels.search_result_sort_click_count_asc" />
+							</c:if> <c:if test="${sort=='click_count.desc'}">
+								<la:message key="labels.search_result_sort_click_count_desc" />
+							</c:if> <c:if test="${sort=='favorite_count.asc'}">
+								<la:message key="labels.search_result_sort_favorite_count_asc" />
+							</c:if> <c:if test="${sort=='favorite_count.desc'}">
+								<la:message key="labels.search_result_sort_favorite_count_desc" />
 							</c:if>
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_num" /> <a
