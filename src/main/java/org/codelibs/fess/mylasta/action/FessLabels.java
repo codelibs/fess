@@ -836,6 +836,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Create new job */
     public static final String LABELS_file_crawling_button_create_job = "{labels.file_crawling_button_create_job}";
 
+    /** The key of the message: File Crawler - {0} */
+    public static final String LABELS_file_crawling_job_title = "{labels.file_crawling_job_title}";
+
     /** The key of the message: Web Crawling */
     public static final String LABELS_web_crawling_configuration = "{labels.web_crawling_configuration}";
 
@@ -862,6 +865,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Create new job */
     public static final String LABELS_web_crawling_button_create_job = "{labels.web_crawling_button_create_job}";
+
+    /** The key of the message: Web Crawler - {0} */
+    public static final String LABELS_web_crawling_job_title = "{labels.web_crawling_job_title}";
 
     /** The key of the message: General Configuration */
     public static final String LABELS_crawler_configuration = "{labels.crawler_configuration}";
@@ -1288,6 +1294,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Quick Setup */
     public static final String LABELS_wizard_start_title = "{labels.wizard_start_title}";
+
+    /** The key of the message: Data Crawler - {0} */
+    public static final String LABELS_data_crawling_job_title = "{labels.data_crawling_job_title}";
 
     /** The key of the message: Using Configuration Wizard, you can create crawling settings easily. */
     public static final String LABELS_wizard_start_desc = "{labels.wizard_start_desc}";
