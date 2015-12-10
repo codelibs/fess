@@ -32,9 +32,11 @@ if [ -f /etc/rc.d/init.d/functions ]; then
 fi
 
 # Sets the default values for fess variables used in this script
+PROC_NAME=org.codelibs.fess.FessBoot
 FESS_USER="${packaging.fess.user}"
 FESS_GROUP="${packaging.fess.group}"
 FESS_HOME="${packaging.fess.home.dir}"
+PID_DIR="${packaging.fess.pid.dir}"
 
 # Source the default env file
 FESS_ENV_FILE="${packaging.env.file}"
@@ -86,8 +88,12 @@ start() {
 
     echo -n $"Starting $prog: "
     # if not running, start it up here, usually something like "daemon $exec"
-    daemon --user $FESS_USER --pidfile $pidfile $exec -p $pidfile -d
+    daemon --user $FESS_USER --pidfile="$pidfile" $exec -d
     retval=$?
+    pid=`ps aux | grep "^${FESS_USER}" | grep "${PROC_NAME}" | sed 's/[\t ]\+/\t/g' | cut -f2`
+    if [ -n "$pid" ]; then
+        echo $pid > "$pidfile"
+    fi
     echo
     [ $retval -eq 0 ] && touch $lockfile
     return $retval
