@@ -173,6 +173,12 @@ public interface FessConfig extends FessEnv {
     String PAGE_KEYMATCH_MAX_FETCH_SIZE = "page.keymatch.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
+    String PAGE_LABELTYPE_MAX_FETCH_SIZE = "page.labeltype.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_ROLETYPE_MAX_FETCH_SIZE = "page.roletype.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
     String PAGE_ROLE_MAX_FETCH_SIZE = "page.role.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
@@ -790,6 +796,36 @@ public interface FessConfig extends FessEnv {
     Integer getPageKeymatchMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.labeltype.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageLabeltypeMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.labeltype.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageLabeltypeMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.roletype.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageRoletypeMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.roletype.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageRoletypeMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'page.role.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1369,6 +1405,22 @@ public interface FessConfig extends FessEnv {
 
         public Integer getPageKeymatchMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_KEYMATCH_MAX_FETCH_SIZE);
+        }
+
+        public String getPageLabeltypeMaxFetchSize() {
+            return get(FessConfig.PAGE_LABELTYPE_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageLabeltypeMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_LABELTYPE_MAX_FETCH_SIZE);
+        }
+
+        public String getPageRoletypeMaxFetchSize() {
+            return get(FessConfig.PAGE_ROLETYPE_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageRoletypeMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_ROLETYPE_MAX_FETCH_SIZE);
         }
 
         public String getPageRoleMaxFetchSize() {

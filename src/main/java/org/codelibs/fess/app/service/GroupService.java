@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.GroupPager;
 import org.codelibs.fess.es.user.cbean.GroupCB;
 import org.codelibs.fess.es.user.exbhv.GroupBhv;
 import org.codelibs.fess.es.user.exentity.Group;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -36,6 +37,9 @@ public class GroupService implements Serializable {
 
     @Resource
     protected GroupBhv groupBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<Group> getGroupList(final GroupPager groupPager) {
 
@@ -106,10 +110,10 @@ public class GroupService implements Serializable {
 
     }
 
-    public List<Group> getAvailableGroupList(final Integer size) {
+    public List<Group> getAvailableGroupList() {
         return groupBhv.selectList(cb -> {
             cb.query().matchAll();
-            cb.paging(size, 1);
+            cb.paging(fessConfig.getPageGroupMaxFetchSizeAsInteger(), 1);
         });
     }
 

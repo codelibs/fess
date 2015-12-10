@@ -31,6 +31,7 @@ import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exentity.LabelToRole;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -45,6 +46,9 @@ public class LabelTypeService implements Serializable {
 
     @Resource
     protected LabelTypeBhv labelTypeBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public LabelTypeService() {
         super();
@@ -113,6 +117,7 @@ public class LabelTypeService implements Serializable {
         return labelTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
+            cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
         });
     }
 
@@ -120,6 +125,7 @@ public class LabelTypeService implements Serializable {
         final ListResultBean<LabelType> labelTypeList = labelTypeBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
+            cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
         });
 
         return labelTypeList;
