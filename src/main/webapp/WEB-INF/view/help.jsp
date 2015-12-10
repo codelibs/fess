@@ -10,8 +10,10 @@
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
+<link href="${f:url('/css/admin/font-awesome.min.css')}"
+	rel="stylesheet" type="text/css" />
 </head>
-<body>
+<body class="help">
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">

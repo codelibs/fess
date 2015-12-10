@@ -155,7 +155,7 @@ ul.searchOptionLabels li {
 	vertical-align: middle;
 }
 
-body.search #searchOptions {
+body.search #searchOptions, body.help #searchOptions {
 	position: fixed;
 	top: 0;
 	padding-top: 72px;
@@ -166,7 +166,8 @@ body.search #searchOptions {
 	width: 500px;
 	transition: all .4s ease 0s;
 }
-body.search #searchOptions.active {
+
+body.search #searchOptions.active, body.help #searchOptions.active {
 	right: 0;
 }
 

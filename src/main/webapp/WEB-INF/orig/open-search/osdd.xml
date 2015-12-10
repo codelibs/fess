@@ -5,7 +5,7 @@
   <Tags>Full Text Search</Tags>
   <Contact>fess-user@lists.sourceforge.jp</Contact>
   <SearchForm>http://localhost:8080/fess/</SearchForm>
-  <Url type="text/html" template="http://localhost:8080/fess/search?query={searchTerms}"/>
+  <Url type="text/html" template="http://localhost:8080/fess/search?q={searchTerms}"/>
   <InputEncoding>UTF-8</InputEncoding>
   <OutputEncoding>UTF-8</OutputEncoding>
 </OpenSearchDescription>
