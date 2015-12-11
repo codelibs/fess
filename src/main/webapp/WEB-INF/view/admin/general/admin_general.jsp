@@ -134,10 +134,11 @@
 										<label for="crawlingThreadCount"
 											class="col-sm-3 control-label"><la:message
 												key="labels.crawling_thread_count" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="crawlingThreadCount" />
-											<la:text property="crawlingThreadCount"
-												styleClass="form-control" />
+											<input type="number" name="crawlingThreadCount"
+												value="${f:h(crawlingThreadCount)}" class="form-control"
+												min="1" max="1000">
 										</div>
 									</div>
 									<div class="form-group">
@@ -145,14 +146,9 @@
 												key="labels.day_for_cleanup" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="dayForCleanup" />
-											<la:select property="dayForCleanup" styleClass="form-control">
-												<la:option value="-1">
-													<la:message key="labels.none" />
-												</la:option>
-												<c:forEach var="d" items="${dayItems}">
-													<la:option value="${f:h(d)}">${f:h(d)}</la:option>
-												</c:forEach>
-											</la:select>
+											<input type="number" name="dayForCleanup"
+												value="${f:h(dayForCleanup)}" class="form-control"
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>
@@ -169,10 +165,11 @@
 										<label for="failureCountThreshold"
 											class="col-sm-3 control-label"><la:message
 												key="labels.failure_count_threshold" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="failureCountThreshold" />
-											<la:text property="failureCountThreshold"
-												styleClass="form-control" />
+											<input type="number" name="failureCountThreshold"
+												value="${f:h(failureCountThreshold)}" class="form-control"
+												min="-1" max="1000">
 										</div>
 									</div>
 									<%-- Logging --%>
@@ -216,27 +213,34 @@
 									<div class="form-group">
 										<label for="purgeSearchLogDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_search_log_day" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="purgeSearchLogDay" />
-											<la:text property="purgeSearchLogDay"
-												styleClass="form-control" />
+											<input type="number" name="purgeSearchLogDay"
+												value="${f:h(purgeSearchLogDay)}" class="form-control"
+												min="-1" max="3650">
+											<la:message key="labels.day" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="purgeJobLogDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_job_log_day" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="purgeJobLogDay" />
-											<la:text property="purgeJobLogDay" styleClass="form-control" />
+											<input type="number" name="purgeJobLogDay"
+												value="${f:h(purgeJobLogDay)}" class="form-control"
+												min="-1" max="3650">
+											<la:message key="labels.day" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="purgeUserInfoDay" class="col-sm-3 control-label"><la:message
 												key="labels.purge_user_info_day" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="purgeUserInfoDay" />
-											<la:text property="purgeUserInfoDay"
-												styleClass="form-control" />
+											<input type="number" name="purgeUserInfoDay"
+												value="${f:h(purgeUserInfoDay)}" class="form-control"
+												min="-1" max="3650">
+											<la:message key="labels.day" />
 										</div>
 									</div>
 									<%-- Suggest --%>
@@ -269,10 +273,12 @@
 										<label for="purgeSuggestSearchLogDay"
 											class="col-sm-3 control-label"><la:message
 												key="labels.purge_suggest_search_log_day" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="purgeSuggestSearchLogDay" />
-											<la:text property="purgeSuggestSearchLogDay"
-												styleClass="form-control" />
+											<input type="number" name="purgeSuggestSearchLogDay"
+												value="${f:h(purgeSuggestSearchLogDay)}" class="form-control"
+												min="-1" max="3650">
+											<la:message key="labels.day" />
 										</div>
 									</div>
 								</div>

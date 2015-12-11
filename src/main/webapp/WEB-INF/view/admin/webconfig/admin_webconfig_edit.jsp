@@ -110,17 +110,21 @@
 									<div class="form-group">
 										<label for="depth" class="col-sm-3 control-label"><la:message
 												key="labels.depth" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="depth" />
-											<la:text property="depth" styleClass="form-control" />
+											<input type="number" name="depth"
+												value="${f:h(depth)}" class="form-control"
+												min="0" max="10000">
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="maxAccessCount" class="col-sm-3 control-label"><la:message
 												key="labels.max_access_count" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="maxAccessCount" />
-											<la:text property="maxAccessCount" styleClass="form-control" />
+											<input type="number" name="maxAccessCount"
+												value="${f:h(maxAccessCount)}" class="form-control"
+												min="0" max="1000000000">
 										</div>
 									</div>
 									<div class="form-group">
@@ -134,9 +138,11 @@
 									<div class="form-group">
 										<label for="numOfThread" class="col-sm-3 control-label"><la:message
 												key="labels.number_of_thread" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="numOfThread" />
-											<la:text property="numOfThread" styleClass="form-control" />
+											<input type="number" name="numOfThread"
+												value="${f:h(numOfThread)}" class="form-control"
+												min="0" max="1000">
 										</div>
 									</div>
 									<div class="form-group">
@@ -144,7 +150,9 @@
 												key="labels.interval_time" /></label>
 										<div class="form-inline col-sm-9">
 											<la:errors property="intervalTime" />
-											<la:text property="intervalTime" styleClass="form-control" />
+											<input type="number" name="intervalTime"
+												value="${f:h(intervalTime)}" class="form-control"
+												min="0" step="1000">
 											<la:message key="labels.millisec" />
 										</div>
 									</div>

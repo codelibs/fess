@@ -63,9 +63,11 @@
 									<div class="form-group">
 										<label for="maxSize" class="col-sm-3 control-label"><la:message
 												key="labels.key_match_size" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="maxSize" />
-											<la:text property="maxSize" styleClass="form-control" />
+											<input type="number" name="maxSize"
+												value="${f:h(maxSize)}" class="form-control"
+												min="0" max="10000000" step="10">
 										</div>
 									</div>
 									<div class="form-group">

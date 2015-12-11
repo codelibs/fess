@@ -63,9 +63,11 @@
 									<div class="form-group">
 										<label for="sortOrder" class="col-sm-3 control-label"><la:message
 												key="labels.boost_document_rule_sort_order" /></label>
-										<div class="col-sm-9">
+										<div class="form-inline col-sm-9">
 											<la:errors property="sortOrder" />
-											<la:text property="sortOrder" styleClass="form-control" />
+											<input type="number" name="sortOrder"
+												value="${f:h(sortOrder)}" class="form-control"
+												min="0" max="100000">
 										</div>
 									</div>
 								</div>
