@@ -58,10 +58,12 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.joblog_jobName" /></th>
-														<th class="text-center"><la:message
+														<th class="col-md-2 text-center"><la:message
 																key="labels.joblog_jobStatus" /></th>
-														<th><la:message key="labels.joblog_startTime" /></th>
-														<th><la:message key="labels.joblog_endTime" /></th>
+														<th class="col-md-3"><la:message
+																key="labels.joblog_startTime" /></th>
+														<th class="col-md-3"><la:message
+																key="labels.joblog_endTime" /></th>
 													</tr>
 												</thead>
 												<tbody>

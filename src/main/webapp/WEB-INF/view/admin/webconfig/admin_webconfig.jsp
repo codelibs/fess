@@ -52,7 +52,7 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.name" /></th>
-														<th class="text-center"><la:message
+														<th class="col-md-4 text-center"><la:message
 																key="labels.available" /></th>
 													</tr>
 												</thead>
@@ -64,7 +64,8 @@
 															<td>${f:h(data.name)}</td>
 															<td class="text-center"><c:if
 																	test="${data.available=='true'}">
-																	<span class="label label-primary"><la:message key="labels.enabled" /></span>
+																	<span class="label label-primary"><la:message
+																			key="labels.enabled" /></span>
 																</c:if> <c:if test="${data.available=='false'}">
 																	<span class="label label-default"><la:message
 																			key="labels.disabled" /></span>

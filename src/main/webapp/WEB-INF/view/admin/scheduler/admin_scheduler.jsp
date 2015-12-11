@@ -52,9 +52,10 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.scheduledjob_name" /></th>
-														<th class="text-center"><la:message
+														<th class="col-md-2 text-center"><la:message
 																key="labels.scheduledjob_status" /></th>
-														<th><la:message key="labels.scheduledjob_target" /></th>
+														<th class="col-md-2 text-center"><la:message
+																key="labels.scheduledjob_target" /></th>
 														<th><la:message
 																key="labels.scheduledjob_cronExpression" /></th>
 													</tr>
@@ -78,7 +79,7 @@
 																				key="labels.scheduledjob_nojob" /></span>
 																	</c:if>
 																</c:if></td>
-															<td>${f:h(data.target)}</td>
+															<td class="text-center">${f:h(data.target)}</td>
 															<td>${f:h(data.cronExpression)}</td>
 														</tr>
 													</c:forEach>
