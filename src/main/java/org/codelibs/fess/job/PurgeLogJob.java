@@ -52,7 +52,11 @@ public class PurgeLogJob {
         try {
             final String value = crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
-            searchLogService.deleteBefore(days);
+            if (days >= 0) {
+                searchLogService.deleteBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge search logs.\n");
+            }
         } catch (final Exception e) {
             logger.error("Failed to purge search logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
@@ -62,7 +66,11 @@ public class PurgeLogJob {
         try {
             final String value = crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
-            jobLogService.deleteBefore(days);
+            if (days >= 0) {
+                jobLogService.deleteBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge job logs.\n");
+            }
         } catch (final Exception e) {
             logger.error("Failed to purge job logs.", e);
             resultBuf.append(e.getMessage()).append("\n");
@@ -72,7 +80,11 @@ public class PurgeLogJob {
         try {
             final String value = crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
             final int days = Integer.parseInt(value);
-            userInfoService.deleteBefore(days);
+            if (days >= 0) {
+                userInfoService.deleteBefore(days);
+            } else {
+                resultBuf.append("Skipped to purge user info logs.\n");
+            }
         } catch (final Exception e) {
             logger.error("Failed to purge user info.", e);
             resultBuf.append(e.getMessage()).append("\n");

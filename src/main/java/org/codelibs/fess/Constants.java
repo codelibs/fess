@@ -161,7 +161,9 @@ public class Constants extends CoreLibConstants {
 
     public static final Integer DEFAULT_FAILURE_COUNT = -1;
 
-    public static final String DEFAULT_PURGE_DAY = "30";
+    public static final String DEFAULT_PURGE_DAY = "-1";
+
+    public static final String DEFAULT_SUGGEST_PURGE_DAY = "30";
 
     public static final String DEFAULT_PURGE_BY_BOTS = "Crawler"//
             + ",crawler"//

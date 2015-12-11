@@ -149,7 +149,7 @@ public class SuggestCreator implements Serializable {
             suggestHelper.purgeDocumentSuggest(time);
             final long cleanupDay =
                     Long.parseLong(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
-                            Constants.DEFAULT_PURGE_DAY));
+                            Constants.DEFAULT_SUGGEST_PURGE_DAY));
             if (cleanupDay > 0) {
                 suggestHelper.purgeSearchlogSuggest(time.minusDays(cleanupDay));
             }

@@ -84,22 +84,22 @@ public class EditForm implements Serializable {
     @Size(max = 20)
     public String csvFileEncoding;
 
-    @Min(0)
+    @Min(-1)
     @Max(100000)
     @ValidateTypeFailure
     public Integer purgeSearchLogDay;
 
-    @Min(0)
+    @Min(-1)
     @Max(100000)
     @ValidateTypeFailure
     public Integer purgeJobLogDay;
 
-    @Min(0)
+    @Min(-1)
     @Max(100000)
     @ValidateTypeFailure
     public Integer purgeUserInfoDay;
 
-    @Size(max = 1000)
+    @Size(max = 10000)
     public String purgeByBots;
 
     @Size(max = 1000)

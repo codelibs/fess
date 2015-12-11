@@ -146,8 +146,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.suggestDocuments = crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay =
-                Integer.parseInt(crawlerProperties
-                        .getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
+                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
+                        Constants.DEFAULT_SUGGEST_PURGE_DAY));
     }
 
     private void updateProperty(final String key, final String value) {
