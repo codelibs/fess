@@ -103,7 +103,8 @@
 												key="labels.config_parameter" /></label>
 										<div class="col-sm-9">
 											<la:errors property="configParameter" />
-											<la:text property="configParameter" styleClass="form-control" />
+											<la:textarea property="configParameter"
+												styleClass="form-control" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
