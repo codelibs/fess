@@ -44,7 +44,7 @@ IF ERRORLEVEL 1 (
 )
 
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.home=%FESS_HOME%
-set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.context.path=%APP_NAME%
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.context.path=/
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.port=8080
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.webapp.path=%FESS_HOME%\app
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.temp.path=%FESS_HOME%\temp

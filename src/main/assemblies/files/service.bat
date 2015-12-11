@@ -125,7 +125,7 @@ CALL "%FESS_HOME%\bin\fess.in.bat"
 rem thread stack size
 set JVM_SS=256
 
-set FESS_PARAMS=-Dfess;-Dfess.home="%FESS_HOME%";-Dfess.es.dir="%ES_HOME%";-Dfess.home="%FESS_HOME%";-Dfess.context.path="%APP_NAME%";-Dfess.port=8080;-Dfess.webapp.path="%FESS_HOME%\app";-Dfess.temp.path="%FESS_HOME%\temp";-Dfess.log.name="%APP_NAME%";-Dfess.log.path="%FESS_HOME%\logs";-Dfess.log.level=warn;-Dlasta.env=production;-Dtomcat.config.path=tomcat_config.properties
+set FESS_PARAMS=-Dfess;-Dfess.home="%FESS_HOME%";-Dfess.es.dir="%ES_HOME%";-Dfess.home="%FESS_HOME%";-Dfess.context.path="/";-Dfess.port=8080;-Dfess.webapp.path="%FESS_HOME%\app";-Dfess.temp.path="%FESS_HOME%\temp";-Dfess.log.name="%APP_NAME%";-Dfess.log.path="%FESS_HOME%\logs";-Dfess.log.level=warn;-Dlasta.env=production;-Dtomcat.config.path=tomcat_config.properties
 
 set JVM_OPTS=%JAVA_OPTS: =;%
 
