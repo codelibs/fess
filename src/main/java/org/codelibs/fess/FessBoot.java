@@ -80,6 +80,10 @@ public class FessBoot extends TomcatBoot {
                 .asDevelopment(isNoneEnv()).bootAwait();
     }
 
+    public static void shutdown(String[] args) {
+        System.exit(0);
+    }
+
     private static boolean isNoneEnv() {
         return System.getProperty("lasta.env") == null;
     }

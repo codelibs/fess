@@ -1,16 +1,7 @@
-<?xml version="1.0"?>
-<assembly
-	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
-	<id>package</id>
-	<formats>
-		<format>zip</format>
-	</formats>
-	<includeBaseDirectory>false</includeBaseDirectory>
+<component>
 	<dependencySets>
 		<dependencySet>
-			<outputDirectory>fess-${project.version}/app</outputDirectory>
+			<outputDirectory>/app</outputDirectory>
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>true</unpack>
 			<includes>
@@ -19,25 +10,49 @@
 		</dependencySet>
 	</dependencySets>
 	<fileSets>
-		<!-- LICENSE -->
 		<fileSet>
-			<directory>${project.basedir}</directory>
+			<filtered>true</filtered>
+			<directory>src/main/assemblies/files</directory>
+			<outputDirectory>bin</outputDirectory>
+			<lineEnding>dos</lineEnding>
 			<includes>
-				<include>LICENSE</include>
+				<include>fess.in.bat</include>
+				<include>fess.bat</include>
+				<include>service.bat</include>
 			</includes>
-			<outputDirectory>fess-${project.version}</outputDirectory>
 		</fileSet>
+		<fileSet>
+			<filtered>false</filtered>
+			<directory>src/main/assemblies/files</directory>
+			<outputDirectory>bin</outputDirectory>
+			<includes>
+				<include>*.exe</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<filtered>true</filtered>
+			<directory>src/main/assemblies/files</directory>
+			<outputDirectory>bin</outputDirectory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+			<lineEnding>unix</lineEnding>
+			<includes>
+				<include>fess.in.sh</include>
+				<include>fess</include>
+			</includes>
+		</fileSet>
+
 		<!-- lib -->
 		<fileSet>
 			<directory>${project.build.directory}/tomcat-lib</directory>
-			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
+			<outputDirectory>/lib/classes</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/</directory>
 			<includes>
 				<include>FessBoot**</include>
 			</includes>
-			<outputDirectory>fess-${project.version}/lib/classes/org/codelibs/fess</outputDirectory>
+			<outputDirectory>/lib/classes/org/codelibs/fess</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.basedir}/src/main/assemblies/files</directory>
@@ -45,9 +60,10 @@
 				<include>logging.properties</include>
 				<include>tomcat_config.properties</include>
 			</includes>
-			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
+			<outputDirectory>/lib/classes</outputDirectory>
 		</fileSet>
 		<!-- app -->
+		<!--
 		<fileSet>
 			<directory>${project.basedir}/src/main/assemblies/files</directory>
 			<fileMode>0755</fileMode>
@@ -56,12 +72,13 @@
 				<include>fess</include>
 				<include>fess.in.sh</include>
 			</includes>
-			<outputDirectory>fess-${project.version}/bin</outputDirectory>
+			<outputDirectory>/bin</outputDirectory>
 		</fileSet>
+		-->
 		<!-- logs -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>fess-${project.version}/logs</outputDirectory>
+			<outputDirectory>/logs</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
@@ -70,7 +87,7 @@
 		<!-- temp -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>fess-${project.version}/temp</outputDirectory>
+			<outputDirectory>/temp</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
@@ -79,16 +96,26 @@
 		<!-- es/plugins -->
 		<fileSet>
 			<directory>${project.basedir}/plugins</directory>
-			<outputDirectory>fess-${project.version}/es/plugins</outputDirectory>
+			<outputDirectory>/es/plugins</outputDirectory>
 		</fileSet>
 		<!-- es/data -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>fess-${project.version}/es/data</outputDirectory>
+			<outputDirectory>/es/data</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
 			<filtered>false</filtered>
 		</fileSet>
 	</fileSets>
-</assembly>
+	<files>
+		<file>
+			<source>README.md</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+		<file>
+			<source>LICENSE</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+	</files>
+</component>

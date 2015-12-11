@@ -94,6 +94,13 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+
+		<!-- This file contains all the common properties used to build the different
+			packages (tar.gz, deb, rpm) using Maven resources plugin -->
+		<filters>
+			<filter>src/packaging/common/packaging.properties</filter>
+		</filters>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -285,6 +292,32 @@
 				<version>2.6</version>
 				<executions>
 					<execution>
+						<id>copy-resources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/bin</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/bin</directory>
+									<filtering>true</filtering>
+									<excludes>
+										<exclude>*.exe</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>${basedir}/bin</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>*.exe</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-resources-rpm</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -331,7 +364,7 @@
 				</executions>
 			</plugin>
 
-			<!-- zip -->
+			<!-- zip, tarball -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -341,7 +374,8 @@
 					<appendAssemblyId>false</appendAssemblyId>
 					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
 					<descriptors>
-						<descriptor>${basedir}/src/main/assemblies/package.xml</descriptor>
+						<descriptor>${basedir}/src/main/assemblies/targz-bin.xml</descriptor>
+						<descriptor>${basedir}/src/main/assemblies/zip-bin.xml</descriptor>
 					</descriptors>
 				</configuration>
 				<executions>
