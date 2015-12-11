@@ -72,7 +72,7 @@
 <dl>
 	<dt>Add To Browser Search Engines</dt>
 	<dd>
-		Click <a href="#" onclick='window.external.AddSearchProvider("http://localhost:8080/fess/osdd");return false;'>here</a>
+		Click <a href="#" onclick='window.external.AddSearchProvider("/osdd/");return false;'>here</a>
 		 to add a search engine list for your browser.
 	</dd>
 </dl>

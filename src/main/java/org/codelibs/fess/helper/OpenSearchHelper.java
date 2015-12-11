@@ -16,17 +16,15 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.exception.FessSystemException;
+import org.lastaflute.web.exception.ForcedRequest404NotFoundException;
+import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,21 +65,15 @@ public class OpenSearchHelper {
         return osddFile != null;
     }
 
-    public void write(final HttpServletResponse response) {
+    public StreamResponse asStream() {
         if (osddFile == null) {
-            throw new FessSystemException("Unsupported OpenSearch response.");
+            throw new ForcedRequest404NotFoundException("Unsupported OpenSearch response.");
         }
 
-        response.setContentType(contentType + "; charset=" + encoding);
-        ServletOutputStream os = null;
-        try {
-            os = response.getOutputStream();
-            os.write(FileUtil.readBytes(osddFile));
-        } catch (final IOException e) {
-            throw new FessSystemException("Failed to write OpenSearch response.", e);
-        } finally {
-            IOUtils.closeQuietly(os);
-        }
-
+        return new StreamResponse(osddFile.getName()).contentType(contentType + "; charset=" + encoding).stream(out -> {
+            try (InputStream ins = new FileInputStream(osddFile)) {
+                out.write(ins);
+            }
+        });
     }
 }

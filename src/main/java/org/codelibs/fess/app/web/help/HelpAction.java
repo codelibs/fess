@@ -46,6 +46,7 @@ public class HelpAction extends FessSearchAction {
             });
         }).renderWith(data -> {
             buildInitParams();
+            data.register("helpPage", viewHelper.getPagePath("common/help"));
         });
     }
 
