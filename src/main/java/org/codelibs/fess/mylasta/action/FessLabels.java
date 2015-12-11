@@ -1040,6 +1040,48 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Cancel */
     public static final String LABELS_crawling_info_delete_all_cancel = "{labels.crawling_info_delete_all_cancel}";
 
+    /** The key of the message: Crawler start time */
+    public static final String LABELS_crawling_info_CrawlerStartTime = "{labels.crawling_info_CrawlerStartTime}";
+
+    /** The key of the message: Crawler end time */
+    public static final String LABELS_crawling_info_CrawlerEndTime = "{labels.crawling_info_CrawlerEndTime}";
+
+    /** The key of the message: Crawler exec time */
+    public static final String LABELS_crawling_info_CrawlerExecTime = "{labels.crawling_info_CrawlerExecTime}";
+
+    /** The key of the message: Crawler status */
+    public static final String LABELS_crawling_info_CrawlerStatus = "{labels.crawling_info_CrawlerStatus}";
+
+    /** The key of the message: Crawl exec time (Web/File system) */
+    public static final String LABELS_crawling_info_WebFsCrawlExecTime = "{labels.crawling_info_WebFsCrawlExecTime}";
+
+    /** The key of the message: Crawl start time (Web/File system) */
+    public static final String LABELS_crawling_info_WebFsCrawlStartTime = "{labels.crawling_info_WebFsCrawlStartTime}";
+
+    /** The key of the message: Crawl end time (Web/File system) */
+    public static final String LABELS_crawling_info_WebFsCrawlEndTime = "{labels.crawling_info_WebFsCrawlEndTime}";
+
+    /** The key of the message: Indexing exec time (Web/File system) */
+    public static final String LABELS_crawling_info_WebFsIndexExecTime = "{labels.crawling_info_WebFsIndexExecTime}";
+
+    /** The key of the message: Index size (Web/File system) */
+    public static final String LABELS_crawling_info_WebFsIndexSize = "{labels.crawling_info_WebFsIndexSize}";
+
+    /** The key of the message: Crawl exec time (Data store) */
+    public static final String LABELS_crawling_info_DataCrawlExecTime = "{labels.crawling_info_DataCrawlExecTime}";
+
+    /** The key of the message: Crawl start time (Data store) */
+    public static final String LABELS_crawling_info_DataCrawlStartTime = "{labels.crawling_info_DataCrawlStartTime}";
+
+    /** The key of the message: Crawl end time (Data store) */
+    public static final String LABELS_crawling_info_DataCrawlEndTime = "{labels.crawling_info_DataCrawlEndTime}";
+
+    /** The key of the message: Indexing exec time (Data store) */
+    public static final String LABELS_crawling_info_DataIndexExecTime = "{labels.crawling_info_DataIndexExecTime}";
+
+    /** The key of the message: Index size (Data store) */
+    public static final String LABELS_crawling_info_DataIndexSize = "{labels.crawling_info_DataIndexSize}";
+
     /** The key of the message: Web Authentication */
     public static final String LABELS_webauth_configuration = "{labels.webauth_configuration}";
 
