@@ -62,19 +62,6 @@
 			</includes>
 			<outputDirectory>/lib/classes</outputDirectory>
 		</fileSet>
-		<!-- app -->
-		<!--
-		<fileSet>
-			<directory>${project.basedir}/src/main/assemblies/files</directory>
-			<fileMode>0755</fileMode>
-			<lineEnding>lf</lineEnding>
-			<includes>
-				<include>fess</include>
-				<include>fess.in.sh</include>
-			</includes>
-			<outputDirectory>/bin</outputDirectory>
-		</fileSet>
-		-->
 		<!-- logs -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
