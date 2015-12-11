@@ -163,8 +163,26 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_PURGE_DAY = "30";
 
-    public static final String DEFAULT_PURGE_BY_BOTS = "BaiduMobaider," + "Baiduspider," + "CCBot," + "Googlebot," + "ia_archive,"
-            + "Mediapartners-Google," + "mobile goo," + "msnbot," + "Slurp,Yeti";
+    public static final String DEFAULT_PURGE_BY_BOTS = "Crawler"//
+            + ",crawler"//
+            + ",Bot"//
+            + ",bot"//
+            + ",Slurp"//
+            + ",Yeti"//
+            + ",Baidu"//
+            + ",Steeler"//
+            + ",ichiro"//
+            + ",hotpage"//
+            + ",Feedfetcher"//
+            + ",ia_archiver"//
+            + ",Y!J-BRI"//
+            + ",Google Desktop"//
+            + ",Seznam"//
+            + ",Tumblr"//
+            + ",YandexBot"//
+            + ",Chilkat"//
+            + ",CloudFront"//
+            + ",Mediapartners";
 
     public static final String DEFAULT_FROM_EMAIL = "Administrator <root@localhost>";
 
