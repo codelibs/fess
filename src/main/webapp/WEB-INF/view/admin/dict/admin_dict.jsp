@@ -59,10 +59,9 @@
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
-												<tr>
+												<tr data-href="${f:h(data.type)}/?dictId=${f:h(data.id)}">
 													<td>${f:h(data.type)}</td>
-													<td><la:link
-															href="${f:h(data.type)}/?dictId=${f:h(data.id)}">${f:h(data.path)}</la:link></td>
+													<td>${f:h(data.path)}</td>
 												</tr>
 											</c:forEach>
 										</tbody>
