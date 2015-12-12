@@ -47,6 +47,7 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
+import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author jflute
@@ -150,5 +151,21 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @Override
     public FessMessages createMessages() { // application may call
         return new FessMessages(); // overriding to change return type to concrete-class
+    }
+
+    // ===================================================================================
+    //                                                                        Small Helper
+    //                                                                        ============
+
+    protected void saveInfo(final VaMessenger<FessMessages> validationMessagesLambda) {
+        final FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.info().save(messages);
+    }
+
+    protected void saveError(final VaMessenger<FessMessages> validationMessagesLambda) {
+        final FessMessages messages = createMessages();
+        validationMessagesLambda.message(messages);
+        sessionManager.errors().save(messages);
     }
 }

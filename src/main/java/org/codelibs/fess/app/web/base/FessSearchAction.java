@@ -42,6 +42,7 @@ import org.codelibs.fess.screenshot.ScreenShotManager;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -184,4 +185,9 @@ public abstract class FessSearchAction extends FessBaseAction {
         }
     }
 
+    protected HtmlResponse redirectToRoot() {
+        final String contextPath = request.getServletContext().getContextPath();
+        return newHtmlResponseAsRediect(StringUtil.isBlank(contextPath) ? "/" : contextPath);
+
+    }
 }

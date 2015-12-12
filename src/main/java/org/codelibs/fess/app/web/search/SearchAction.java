@@ -112,42 +112,45 @@ public class SearchAction extends FessSearchAction {
         if (StringUtil.isBlank(form.q) && form.fields.isEmpty()) {
             // redirect to index page
             form.q = null;
-            return redirect(RootAction.class);
+            return redirectToRoot();
         }
 
-        return asHtml(path_SearchJsp).renderWith(data -> {
+        try {
             updateSearchParams(form);
             buildLabelParams(form.fields);
             form.lang = searchService.getLanguages(request, form);
-            try {
-                final WebRenderData renderData = new WebRenderData(data);
-                searchService.search(request, form, renderData);
+            final WebRenderData renderData = new WebRenderData();
+            searchService.search(request, form, renderData);
+            return asHtml(path_SearchJsp).renderWith(data -> {
+                renderData.register(data);
                 // favorite or screenshot
-                if (favoriteSupport || screenShotManager != null) {
-                    final String queryId = renderData.getQueryId();
-                    final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
-                    userInfoHelper.storeQueryId(queryId, documentItems);
-                    if (screenShotManager != null) {
-                        screenShotManager.storeRequest(queryId, documentItems);
-                        data.register("screenShotSupport", true);
+                    if (favoriteSupport || screenShotManager != null) {
+                        final String queryId = renderData.getQueryId();
+                        final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
+                        userInfoHelper.storeQueryId(queryId, documentItems);
+                        if (screenShotManager != null) {
+                            screenShotManager.storeRequest(queryId, documentItems);
+                            data.register("screenShotSupport", true);
+                        }
                     }
-                }
-            } catch (final InvalidQueryException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(e.getMessage(), e);
-                }
-                throwValidationError(e.getMessageCode(), () -> asHtml(path_ErrorJsp));
-            } catch (final ResultOffsetExceededException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(e.getMessage(), e);
-                }
-                throwValidationError(messages -> {
-                    messages.addErrorsResultSizeExceeded(GLOBAL);
-                }, () -> asHtml(path_ErrorJsp));
+                    data.register("displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
+                    data.register("pagingQuery", getPagingQuery(form));
+                });
+        } catch (final InvalidQueryException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
             }
-            data.register("displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
-            data.register("pagingQuery", getPagingQuery(form));
-        });
+            saveError(e.getMessageCode());
+            return redirectToRoot();
+        } catch (final ResultOffsetExceededException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(e.getMessage(), e);
+            }
+            saveError(messages -> {
+                messages.addErrorsResultSizeExceeded(GLOBAL);
+            });
+            return redirectToRoot();
+        }
     }
 
     protected HtmlResponse doMove(final SearchForm form, final int move) {
@@ -246,118 +249,26 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected static class WebRenderData extends SearchRenderData {
-        private final RenderData data;
 
-        WebRenderData(final RenderData data) {
-            this.data = data;
-        }
-
-        @Override
-        public void setQueryId(final String queryId) {
+        public void register(RenderData data) {
             data.register("queryId", queryId);
-            super.setQueryId(queryId);
-        }
-
-        @Override
-        public void setDocumentItems(final List<Map<String, Object>> documentItems) {
             data.register("documentItems", documentItems);
-            super.setDocumentItems(documentItems);
-        }
-
-        @Override
-        public void setFacetResponse(final FacetResponse facetResponse) {
             data.register("facetResponse", facetResponse);
-            super.setFacetResponse(facetResponse);
-        }
-
-        @Override
-        public void setAppendHighlightParams(final String appendHighlightParams) {
             data.register("appendHighlightParams", appendHighlightParams);
-            super.setAppendHighlightParams(appendHighlightParams);
-        }
-
-        @Override
-        public void setExecTime(final String execTime) {
             data.register("execTime", execTime);
-            super.setExecTime(execTime);
-        }
-
-        @Override
-        public void setPageSize(final int pageSize) {
             data.register("pageSize", pageSize);
-            super.setPageSize(pageSize);
-        }
-
-        @Override
-        public void setCurrentPageNumber(final int currentPageNumber) {
             data.register("currentPageNumber", currentPageNumber);
-            super.setCurrentPageNumber(currentPageNumber);
-        }
-
-        @Override
-        public void setAllRecordCount(final long allRecordCount) {
             data.register("allRecordCount", allRecordCount);
-            super.setAllRecordCount(allRecordCount);
-        }
-
-        @Override
-        public void setAllPageCount(final int allPageCount) {
             data.register("allPageCount", allPageCount);
-            super.setAllPageCount(allPageCount);
-        }
-
-        @Override
-        public void setExistNextPage(final boolean existNextPage) {
             data.register("existNextPage", existNextPage);
-            super.setExistNextPage(existNextPage);
-        }
-
-        @Override
-        public void setExistPrevPage(final boolean existPrevPage) {
             data.register("existPrevPage", existPrevPage);
-            super.setExistPrevPage(existPrevPage);
-        }
-
-        @Override
-        public void setCurrentStartRecordNumber(final long currentStartRecordNumber) {
             data.register("currentStartRecordNumber", currentStartRecordNumber);
-            super.setCurrentStartRecordNumber(currentStartRecordNumber);
-        }
-
-        @Override
-        public void setCurrentEndRecordNumber(final long currentEndRecordNumber) {
             data.register("currentEndRecordNumber", currentEndRecordNumber);
-            super.setCurrentEndRecordNumber(currentEndRecordNumber);
-        }
-
-        @Override
-        public void setPageNumberList(final List<String> pageNumberList) {
             data.register("pageNumberList", pageNumberList);
-            super.setPageNumberList(pageNumberList);
-        }
-
-        @Override
-        public void setPartialResults(final boolean partialResults) {
             data.register("partialResults", partialResults);
-            super.setPartialResults(partialResults);
-        }
-
-        @Override
-        public void setQueryTime(final long queryTime) {
             data.register("queryTime", queryTime);
-            super.setQueryTime(queryTime);
-        }
-
-        @Override
-        public void setSearchQuery(final String searchQuery) {
             data.register("searchQuery", searchQuery);
-            super.setSearchQuery(searchQuery);
-        }
-
-        @Override
-        public void setRequestedTime(final long requestedTime) {
             data.register("requestedTime", requestedTime);
-            super.setRequestedTime(requestedTime);
         }
     }
 }

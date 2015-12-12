@@ -22,41 +22,41 @@ import org.codelibs.fess.util.FacetResponse;
 
 public class SearchRenderData {
 
-    private List<Map<String, Object>> documentItems;
+    protected List<Map<String, Object>> documentItems;
 
-    private FacetResponse facetResponse;
+    protected FacetResponse facetResponse;
 
-    private String appendHighlightParams;
+    protected String appendHighlightParams;
 
-    private String execTime;
+    protected String execTime;
 
-    private int pageSize;
+    protected int pageSize;
 
-    private int currentPageNumber;
+    protected int currentPageNumber;
 
-    private long allRecordCount;
+    protected long allRecordCount;
 
-    private int allPageCount;
+    protected int allPageCount;
 
-    private boolean existNextPage;
+    protected boolean existNextPage;
 
-    private boolean existPrevPage;
+    protected boolean existPrevPage;
 
-    private long currentStartRecordNumber;
+    protected long currentStartRecordNumber;
 
-    private long currentEndRecordNumber;
+    protected long currentEndRecordNumber;
 
-    private List<String> pageNumberList;
+    protected List<String> pageNumberList;
 
-    private boolean partialResults;
+    protected boolean partialResults;
 
-    private String searchQuery;
+    protected String searchQuery;
 
-    private long queryTime;
+    protected long queryTime;
 
-    private long requestedTime;
+    protected long requestedTime;
 
-    private String queryId;
+    protected String queryId;
 
     public void setDocumentItems(final List<Map<String, Object>> documentItems) {
         this.documentItems = documentItems;
