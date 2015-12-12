@@ -15,7 +15,7 @@
 	<div class="container">
 		<div class="content">
 			<div class="center row">
-				<div class="span16">
+				<div class="col-md-12">
 					<h2>
 						<la:message key="labels.logout" />
 					</h2>
