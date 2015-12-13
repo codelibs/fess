@@ -1,7 +1,7 @@
 <component>
 	<dependencySets>
 		<dependencySet>
-			<outputDirectory>/app</outputDirectory>
+			<outputDirectory>fess-${project.version}/app</outputDirectory>
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>true</unpack>
 			<includes>
@@ -13,7 +13,7 @@
 		<fileSet>
 			<filtered>true</filtered>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>bin</outputDirectory>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
 			<lineEnding>dos</lineEnding>
 			<includes>
 				<include>fess.in.bat</include>
@@ -24,7 +24,7 @@
 		<fileSet>
 			<filtered>false</filtered>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>bin</outputDirectory>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
 			<includes>
 				<include>*.exe</include>
 			</includes>
@@ -32,7 +32,7 @@
 		<fileSet>
 			<filtered>true</filtered>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>bin</outputDirectory>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 			<lineEnding>unix</lineEnding>
@@ -45,14 +45,14 @@
 		<!-- lib -->
 		<fileSet>
 			<directory>${project.build.directory}/tomcat-lib</directory>
-			<outputDirectory>/lib/classes</outputDirectory>
+			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/</directory>
 			<includes>
 				<include>FessBoot**</include>
 			</includes>
-			<outputDirectory>/lib/classes/org/codelibs/fess</outputDirectory>
+			<outputDirectory>fess-${project.version}/lib/classes/org/codelibs/fess</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>${project.basedir}/src/main/assemblies/files</directory>
@@ -60,12 +60,12 @@
 				<include>logging.properties</include>
 				<include>tomcat_config.properties</include>
 			</includes>
-			<outputDirectory>/lib/classes</outputDirectory>
+			<outputDirectory>fess-${project.version}/lib/classes</outputDirectory>
 		</fileSet>
 		<!-- logs -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>/logs</outputDirectory>
+			<outputDirectory>fess-${project.version}/logs</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
@@ -74,7 +74,7 @@
 		<!-- temp -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>/temp</outputDirectory>
+			<outputDirectory>fess-${project.version}/temp</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
@@ -83,12 +83,12 @@
 		<!-- es/plugins -->
 		<fileSet>
 			<directory>${project.basedir}/plugins</directory>
-			<outputDirectory>/es/plugins</outputDirectory>
+			<outputDirectory>fess-${project.version}/es/plugins</outputDirectory>
 		</fileSet>
 		<!-- es/data -->
 		<fileSet>
 			<directory>src/main/assemblies/files</directory>
-			<outputDirectory>/es/data</outputDirectory>
+			<outputDirectory>fess-${project.version}/es/data</outputDirectory>
 			<excludes>
 				<exclude>*</exclude>
 			</excludes>
@@ -98,11 +98,11 @@
 	<files>
 		<file>
 			<source>README.md</source>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>fess-${project.version}</outputDirectory>
 		</file>
 		<file>
 			<source>LICENSE</source>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>fess-${project.version}</outputDirectory>
 		</file>
 	</files>
 </component>

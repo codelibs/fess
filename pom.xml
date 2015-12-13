@@ -292,32 +292,6 @@
 				<version>2.6</version>
 				<executions>
 					<execution>
-						<id>copy-resources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/bin</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${basedir}/bin</directory>
-									<filtering>true</filtering>
-									<excludes>
-										<exclude>*.exe</exclude>
-									</excludes>
-								</resource>
-								<resource>
-									<directory>${basedir}/bin</directory>
-									<filtering>false</filtering>
-									<includes>
-										<include>*.exe</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
 						<id>copy-resources-rpm</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -373,6 +347,7 @@
 					<finalName>${project.artifactId}-${project.version}</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
+					<tarLongFileMode>gnu</tarLongFileMode>
 					<descriptors>
 						<descriptor>${basedir}/src/main/assemblies/targz-bin.xml</descriptor>
 						<descriptor>${basedir}/src/main/assemblies/zip-bin.xml</descriptor>
