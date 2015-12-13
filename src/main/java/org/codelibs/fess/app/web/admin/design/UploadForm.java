@@ -17,6 +17,8 @@ package org.codelibs.fess.app.web.admin.design;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Pattern;
+
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
@@ -27,5 +29,6 @@ public class UploadForm implements Serializable {
     @Required
     public MultipartFormFile designFile;
 
+    @Pattern(regexp = "^[^\\\\|/|:|\\*|?|\"|<|>|\\|]+$", message = "{errors.design_file_name_is_invalid}")
     public String designFileName;
 }
