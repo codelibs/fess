@@ -22,14 +22,12 @@ import javax.servlet.ServletContext;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
-import org.codelibs.fess.mylasta.action.FessMessages;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaServletContextUtil;
-import org.lastaflute.web.validation.VaMessenger;
 
 /**
  * @author codelibs
