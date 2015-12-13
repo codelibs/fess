@@ -145,6 +145,11 @@ public class SuggestJob {
             }
         }
 
+        final String lastaEnv = System.getProperty("lasta.env");
+        if (StringUtil.isNotBlank(lastaEnv)) {
+            suggestCreatorCmdList.add("-Dlasta.env=" + lastaEnv);
+        }
+
         suggestCreatorCmdList.add("-Dfess.suggest.process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");

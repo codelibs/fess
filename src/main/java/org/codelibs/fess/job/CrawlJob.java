@@ -275,6 +275,11 @@ public class CrawlJob {
             }
         }
 
+        final String lastaEnv = System.getProperty("lasta.env");
+        if (StringUtil.isNotBlank(lastaEnv)) {
+            crawlerCmdList.add("-Dlasta.env=" + lastaEnv);
+        }
+
         crawlerCmdList.add("-Dfess.crawler.process=true");
         crawlerCmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
         addSystemProperty(crawlerCmdList, "lasta.env", null, null);
