@@ -1,3 +1,21 @@
 ################################
 # Fess
 ################################
+
+# Fess Path
+FESS_TEMP_PATH=/var/tmp/fess
+FESS_LOG_PATH=/var/log/fess
+FESS_CONF_PATH=/etc/fess
+
+FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
+
+# Heap Memory
+FESS_HEAP_SIZE=512m
+
+# Elasticsearch Path
+ES_HOME=/usr/share/elasticsearch/
+
+# Elasticsearch URL
+ES_HTTP_URL=http://localhost:9200
+ES_TRANSPORT_URL=localhost:9300
+

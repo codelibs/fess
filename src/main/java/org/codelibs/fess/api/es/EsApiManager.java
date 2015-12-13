@@ -40,8 +40,8 @@ import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.WebApiException;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,9 +93,8 @@ public class EsApiManager extends BaseApiManager {
     }
 
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        final CurlRequest curlRequest = new CurlRequest(httpMethod, fessConfig.getElasticsearchHttpUrl() + path);
+        final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
                 curlRequest.param(entry.getKey(), String.join(",", entry.getValue()));

@@ -26,12 +26,22 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
     protected ResourceUtil() {
         // nothing
+    }
+
+    public static String getElasticsearchHttpUrl() {
+        final String url = System.getProperty("fess.es.http_address");
+        if (url != null) {
+            return url;
+        }
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessConfig.getElasticsearchHttpUrl();
     }
 
     public static Path getConfPath(final String... names) {

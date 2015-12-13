@@ -48,9 +48,14 @@ exec="$FESS_HOME/bin/fess"
 prog="fess"
 pidfile="$PID_DIR/${prog}.pid"
 
+export FESS_TEMP_PATH
+export FESS_LOG_PATH
+export FESS_CONF_PATH
+export FESS_DICTIONARY_PATH
 export FESS_HEAP_SIZE
-export FESS_HEAP_NEWSIZE
-export FESS_DIRECT_SIZE
+export ES_HOME
+export ES_HTTP_URL
+export ES_TRANSPORT_URL
 export FESS_JAVA_OPTS
 export JAVA_HOME
 

@@ -73,6 +73,14 @@ case `uname` in
     CYGWIN*)
         FESS_CLASSPATH=`cygpath -p -w "$FESS_CLASSPATH"`
         FESS_HOME=`cygpath -p -w "$FESS_HOME"`
+        if [ "x$FESS_CONF_PATH" != "x" ] ; then
+            FESS_CLASSPATH=`cygpath -p -w "$FESS_CONF_PATH"`":$FESS_CLASSPATH"
+        fi
+    ;;
+    *)
+        if [ "x$FESS_CONF_PATH" != "x" ] ; then
+            FESS_CLASSPATH="$FESS_CONF_PATH:$FESS_CLASSPATH"
+        fi
     ;;
 esac
 

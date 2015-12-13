@@ -72,10 +72,11 @@ public class FessBoot extends TomcatBoot {
         }
         tomcatBoot.logging(LOGGING_PROPERTIES, op -> {
             op.ignoreNoFile();
-            final String fessHomeDir = System.getProperty("fess.home");
-            if (fessHomeDir != null) {
-                op.replace("fess.home", fessHomeDir);
+            String fessLogPath = System.getProperty("fess.log.path");
+            if (fessLogPath == null) {
+                fessLogPath = "../../logs";
             }
+            op.replace("fess.log.path", fessLogPath);
         }) // uses jdk14logger
                 .asDevelopment(isNoneEnv()).bootAwait();
     }

@@ -9,7 +9,7 @@
       "char_filter": {
         "mapping_ja_cfilter": {
           "type": "mapping",
-          "mappings_path": "ja/mapping.txt"
+          "mappings_path": "${fess.dictionary.path}ja/mapping.txt"
         }
       },
       "filter": {
@@ -22,14 +22,14 @@
         "kuromoji_neologd_tokenizer": {
           "type": "reloadable_kuromoji_neologd_tokenizer",
           "mode": "normal",
-          "user_dictionary": "ja/kuromoji.txt",
+          "user_dictionary": "${fess.dictionary.path}ja/kuromoji.txt",
           "discard_punctuation": false,
           "reload_interval":"1m"
         },
         "2gram_synonym_tokenizer": {
           "type": "ngram_synonym",
           "n": "2",
-          "synonyms_path": "synonym.txt",
+          "synonyms_path": "${fess.dictionary.path}synonym.txt",
           "dynamic_reload":true,
           "reload_interval":"1m"
         }

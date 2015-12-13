@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -309,44 +310,42 @@ public class FessEsClient implements Client {
                     // ignore
             }
             if (!exists) {
-                if (runner != null) {// TODO replace with url
-                    configListMap.getOrDefault(configIndex, Collections.emptyList()).forEach(
-                            path -> {
-                                String source = null;
-                                final String filePath = indexConfigPath + "/" + configIndex + "/" + path;
-                                try {
-                                    source = FileUtil.readUTF8(filePath);
-                                    try (CurlResponse response =
-                                            Curl.post(runner.node(), "_configsync/file").param("path", path).body(source).execute()) {
-                                        if (response.getHttpStatusCode() == 200) {
-                                            logger.info("Register " + path + " to " + configIndex);
-                                        } else {
-                                            logger.warn("Invalid request for " + path);
-                                        }
+                configListMap.getOrDefault(configIndex, Collections.emptyList()).forEach(
+                        path -> {
+                            String source = null;
+                            final String filePath = indexConfigPath + "/" + configIndex + "/" + path;
+                            try {
+                                source = FileUtil.readUTF8(filePath);
+                                try (CurlResponse response =
+                                        Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file")
+                                                .param("path", path).body(source).execute()) {
+                                    if (response.getHttpStatusCode() == 200) {
+                                        logger.info("Register " + path + " to " + configIndex);
+                                    } else {
+                                        logger.warn("Invalid request for " + path);
                                     }
-                                } catch (final Exception e) {
-                                    logger.warn("Failed to register " + filePath, e);
                                 }
-                            });
-                    try (CurlResponse response = Curl.post(runner.node(), "_configsync/flush").execute()) {
-                        if (response.getHttpStatusCode() == 200) {
-                            logger.info("Flushed config files.");
-                        } else {
-                            logger.warn("Failed to flush config files.");
-                        }
-                    } catch (final Exception e) {
-                        logger.warn("Failed to flush config files.", e);
+                            } catch (final Exception e) {
+                                logger.warn("Failed to register " + filePath, e);
+                            }
+                        });
+                try (CurlResponse response =
+                        Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/flush").execute()) {
+                    if (response.getHttpStatusCode() == 200) {
+                        logger.info("Flushed config files.");
+                    } else {
+                        logger.warn("Failed to flush config files.");
                     }
+                } catch (final Exception e) {
+                    logger.warn("Failed to flush config files.", e);
                 }
 
+                String source = null;
+                final String indexConfigFile = indexConfigPath + "/" + configIndex + ".json";
                 try {
-                    String source = null;
-                    final String indexConfigFile = indexConfigPath + "/" + configIndex + ".json";
-                    try {
-                        source = FileUtil.readUTF8(indexConfigFile);
-                    } catch (final Exception e) {
-                        logger.warn(indexConfigFile + " is not found.", e);
-                    }
+                    source = FileUtil.readUTF8(indexConfigFile);
+                    final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+                    source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
                     final CreateIndexResponse indexResponse =
                             client.admin().indices().prepareCreate(configIndex).setSource(source).execute().actionGet();
                     if (indexResponse.isAcknowledged()) {
@@ -356,6 +355,8 @@ public class FessEsClient implements Client {
                     }
                 } catch (final IndexAlreadyExistsException e) {
                     // ignore
+                } catch (final Exception e) {
+                    logger.warn(indexConfigFile + " is not found.", e);
                 }
             }
 

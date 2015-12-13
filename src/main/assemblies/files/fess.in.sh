@@ -25,11 +25,6 @@ if [ "x$FESS_HEAP_NEWSIZE" != "x" ]; then
     JAVA_OPTS="$JAVA_OPTS -Xmn${FESS_HEAP_NEWSIZE}"
 fi
 
-# max direct memory
-if [ "x$FESS_DIRECT_SIZE" != "x" ]; then
-    JAVA_OPTS="$JAVA_OPTS -XX:MaxDirectMemorySize=${FESS_DIRECT_SIZE}"
-fi
-
 # set to headless, just in case
 JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
 
@@ -68,17 +63,35 @@ JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
 JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 
 # Application Configuration
-APP_NAME=fess
-ES_HOME=$FESS_HOME/es
+if [ "x$APP_NAME" = "x" ]; then
+  APP_NAME=fess
+fi
+if [ "x$ES_HOME" = "x" ]; then
+  ES_HOME=$FESS_HOME/es
+fi
+if [ "x$FESS_TEMP_PATH" = "x" ]; then
+  FESS_TEMP_PATH=$FESS_HOME/temp
+fi
+if [ "x$FESS_LOG_PATH" = "x" ]; then
+  FESS_LOG_PATH=$FESS_HOME/logs
+fi
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.home=$FESS_HOME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.context.path=/"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.port=8080"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.webapp.path=$FESS_HOME/app"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_HOME/temp"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_TEMP_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_HOME/logs"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_LOG_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=warn"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=production"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
-# __RPM__ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.transport_addresses=localhost:9300"
+if [ "x$ES_HTTP_URL" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
+fi
+if [ "x$ES_TRANSPORT_URL" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.transport_addresses=$ES_TRANSPORT_URL"
+fi
+if [ "x$FESS_DICTIONARY_PATH" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.dictionary.path=$FESS_DICTIONARY_PATH"
+fi
 

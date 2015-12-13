@@ -72,13 +72,13 @@
 		<tomcat.boot.version>0.4.0-RC2</tomcat.boot.version>
 
 		<!-- TODO: RPM build -->
-		<packaging.fess.home.dir>/opt/fess</packaging.fess.home.dir>
+		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
 		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
-		<packaging.fess.es.dir>${packaging.fess.home.dir}/es</packaging.fess.es.dir>
-		<packaging.fess.lib.dir>${packaging.fess.home.dir}/es</packaging.fess.lib.dir>
-		<packaging.fess.logs.dir>${packaging.fess.home.dir}/es</packaging.fess.logs.dir>
-		<packaging.fess.temp.dir>${packaging.fess.home.dir}/es</packaging.fess.temp.dir>
+		<packaging.fess.conf.dir>/etc/fess</packaging.fess.conf.dir>
+		<packaging.fess.lib.dir>${packaging.fess.home.dir}/lib</packaging.fess.lib.dir>
+		<packaging.fess.log.dir>/var/log/fess</packaging.fess.log.dir>
+		<packaging.fess.temp.dir>/var/tmp/fess</packaging.fess.temp.dir>
 		<packaging.fess.user>fess</packaging.fess.user>
 		<packaging.fess.group>fess</packaging.fess.group>
 		<packaging.fess.pid.dir>/var/run/fess</packaging.fess.pid.dir>
@@ -371,8 +371,8 @@
 				<configuration>
 					<distribution>Fess</distribution>
 					<group>Application/Internet</group>
-					<packager>Fess</packager>
-					<prefix>/opt</prefix>
+					<packager>CodeLibs</packager>
+					<prefix>/usr</prefix>
 					<needarch>noarch</needarch>
 					<targetOS>linux</targetOS>
 					<changelogFile>src/changelog</changelogFile>
@@ -400,17 +400,21 @@
 						</mapping>
 						<!-- app -->
 						<mapping>
-							<directory>${packaging.fess.home.dir}/app</directory>
+							<directory>${packaging.fess.app.dir}</directory>
 							<filemode>755</filemode>
 							<sources>
 								<source>
 									<location>${project.build.directory}/fess</location>
+									<excludes>
+										<exclude>**/fess_config.properties</exclude>
+										<exclude>**/fess_env*.properties</exclude>
+									</excludes>
 								</source>
 							</sources>
 						</mapping>
 						<!-- lib -->
 						<mapping>
-							<directory>${packaging.fess.home.dir}/lib/classes</directory>
+							<directory>${packaging.fess.lib.dir}/classes</directory>
 							<sources>
 								<source>
 									<location>${project.build.directory}/tomcat-lib</location>
@@ -418,7 +422,7 @@
 							</sources>
 						</mapping>
 						<mapping>
-							<directory>${packaging.fess.home.dir}/lib/classes/org/codelibs/fess</directory>
+							<directory>${packaging.fess.lib.dir}/classes/org/codelibs/fess</directory>
 							<sources>
 								<source>
 									<location>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess</location>
@@ -429,7 +433,7 @@
 							</sources>
 						</mapping>
 						<mapping>
-							<directory>${packaging.fess.home.dir}/lib/classes</directory>
+							<directory>${packaging.fess.conf.dir}</directory>
 							<sources>
 								<source>
 									<location>${project.basedir}/src/main/assemblies/files</location>
@@ -438,11 +442,18 @@
 										<include>tomcat_config.properties</include>
 									</includes>
 								</source>
+								<source>
+									<location>${project.build.directory}/fess/WEB-INF/classes</location>
+									<includes>
+										<include>fess_config.properties</include>
+										<include>fess_env_production.properties</include>
+									</includes>
+								</source>
 							</sources>
 						</mapping>
 						<!-- bin -->
 						<mapping>
-							<directory>${packaging.fess.home.dir}/bin</directory>
+							<directory>${packaging.fess.bin.dir}</directory>
 							<filemode>755</filemode>
 							<sources>
 								<source>
@@ -456,11 +467,11 @@
 						</mapping>
 						<!-- logs (empty) -->
 						<mapping>
-							<directory>${packaging.fess.home.dir}/logs</directory>
+							<directory>${packaging.fess.log.dir}</directory>
 						</mapping>
 						<!-- temp (empty) -->
 						<mapping>
-							<directory>${packaging.fess.home.dir}/temp</directory>
+							<directory>${packaging.fess.temp.dir}</directory>
 						</mapping>
 						<!-- es/plugins -->
 						<mapping>
@@ -470,10 +481,6 @@
 									<location>${project.basedir}/plugins</location>
 								</source>
 							</sources>
-						</mapping>
-						<!-- es/data (empty) -->
-						<mapping>
-							<directory>${packaging.fess.home.dir}/es/data</directory>
 						</mapping>
 						<!-- Add environment vars file -->
 						<mapping>
