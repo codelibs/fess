@@ -36,7 +36,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     public void test_dummy() throws ParseException {
-        System.out.println(queryHelper);
+        System.out.println(queryHelper); // TODO
     }
 
     //    public void test_build() {
