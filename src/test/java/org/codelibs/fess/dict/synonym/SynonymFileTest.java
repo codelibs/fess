@@ -38,6 +38,7 @@ public class SynonymFileTest extends UnitFessTestCase {
     }
 
     public void test_create() {
+        // TODO
         /*
         final SynonymCreator synonymCreator = new SynonymCreator();
         final SynonymFile synonymFile = (SynonymFile) synonymCreator.create(file1.getPath(), new Date());
