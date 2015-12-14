@@ -118,6 +118,12 @@ public class SuggestCreator implements Serializable {
     }
 
     private int create() {
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+        if(!Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+            logger.info("Skip create suggest document.");
+            return 0;
+        }
+
         logger.info("Start create suggest document.");
 
         final AtomicInteger result = new AtomicInteger(1);
