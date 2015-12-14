@@ -119,7 +119,7 @@ public class SuggestCreator implements Serializable {
 
     private int create() {
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
-        if(!Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+        if (!Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
             logger.info("Skip create suggest document.");
             return 0;
         }
