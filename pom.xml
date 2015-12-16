@@ -349,7 +349,7 @@
 					<outputDirectory>${project.build.directory}/releases/</outputDirectory>
 					<tarLongFileMode>gnu</tarLongFileMode>
 					<descriptors>
-						<descriptor>${basedir}/src/main/assemblies/targz-bin.xml</descriptor>
+						<!-- descriptor>${basedir}/src/main/assemblies/targz-bin.xml</descriptor -->
 						<descriptor>${basedir}/src/main/assemblies/zip-bin.xml</descriptor>
 					</descriptors>
 				</configuration>
