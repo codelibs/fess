@@ -1,5 +1,5 @@
 [Unit]
-Description=Fess
+Description=Fess is very powerful and easily deployable Enterprise Search Server.
 Documentation=http://fess.codelibs.org/
 Wants=network-online.target
 After=network-online.target

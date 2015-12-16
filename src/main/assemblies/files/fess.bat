@@ -51,7 +51,7 @@ set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.temp.path=%FESS_HOME%\temp
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.name=%APP_NAME%
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.path=%FESS_HOME%\logs
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.level=warn
-set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=production
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=web
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dtomcat.config.path=tomcat_config.properties
 
 "%JAVA_HOME%\bin\java" %JAVA_OPTS% %FESS_JAVA_OPTS% %FESS_PARAMS% !newparams! -cp "%FESS_CLASSPATH%" "org.codelibs.fess.FessBoot"

@@ -83,8 +83,11 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.temp.path=$FESS_TEMP_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.name=$APP_NAME"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.path=$FESS_LOG_PATH"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.log.level=warn"
-FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=production"
+FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dlasta.env=web"
 FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
+if [ "x$FESS_CONF_PATH" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.conf.path=$FESS_CONF_PATH"
+fi
 if [ "x$ES_HTTP_URL" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
 fi

@@ -234,6 +234,11 @@ public class CrawlJob {
         // -cp
         crawlerCmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
+        final String confPath = System.getProperty("fess.conf.path");
+        if (StringUtil.isNotBlank(confPath)) {
+            buf.append(confPath);
+            buf.append(cpSeparator);
+        }
         // WEB-INF/crawler/resources
         buf.append("WEB-INF");
         buf.append(File.separator);
@@ -277,12 +282,15 @@ public class CrawlJob {
 
         final String lastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(lastaEnv)) {
-            crawlerCmdList.add("-Dlasta.env=" + lastaEnv);
+            if (lastaEnv.equals("web")) {
+                crawlerCmdList.add("-Dlasta.env=crawler");
+            } else {
+                crawlerCmdList.add("-Dlasta.env=" + lastaEnv);
+            }
         }
 
         crawlerCmdList.add("-Dfess.crawler.process=true");
         crawlerCmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
-        addSystemProperty(crawlerCmdList, "lasta.env", null, null);
         addSystemProperty(crawlerCmdList, "fess.log.name", "fess-crawler", "-crawler");
         if (logLevel == null) {
             addSystemProperty(crawlerCmdList, "fess.log.level", null, null);

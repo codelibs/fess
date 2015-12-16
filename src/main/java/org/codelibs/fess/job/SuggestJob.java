@@ -104,6 +104,11 @@ public class SuggestJob {
         // -cp
         suggestCreatorCmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
+        final String confPath = System.getProperty("fess.conf.path");
+        if (StringUtil.isNotBlank(confPath)) {
+            buf.append(confPath);
+            buf.append(cpSeparator);
+        }
         // WEB-INF/suggest/resources
         buf.append("WEB-INF");
         buf.append(File.separator);
@@ -147,7 +152,11 @@ public class SuggestJob {
 
         final String lastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(lastaEnv)) {
-            suggestCreatorCmdList.add("-Dlasta.env=" + lastaEnv);
+            if (lastaEnv.equals("web")) {
+                suggestCreatorCmdList.add("-Dlasta.env=suggest");
+            } else {
+                suggestCreatorCmdList.add("-Dlasta.env=" + lastaEnv);
+            }
         }
 
         suggestCreatorCmdList.add("-Dfess.suggest.process=true");
@@ -156,7 +165,6 @@ public class SuggestJob {
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
         suggestCreatorCmdList.add("-Dfess.log.path=" + logFilePath);
-        addSystemProperty(suggestCreatorCmdList, "lasta.env", null, null);
         addSystemProperty(suggestCreatorCmdList, "fess.log.name", "fess-suggest", "-suggest");
         addSystemProperty(suggestCreatorCmdList, "fess.log.level", null, null);
         if (systemHelper.getCrawlerJavaOptions() != null) {

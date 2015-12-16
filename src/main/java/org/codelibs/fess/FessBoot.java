@@ -59,14 +59,17 @@ public class FessBoot extends TomcatBoot {
 
     public static void main(final String[] args) {
         // update java.io.tmpdir
-        final String value = System.getProperty(FESS_TEMP_PATH);
-        if (value != null) {
-            System.setProperty(JAVA_IO_TMPDIR, value);
+        final String tempPath = System.getProperty(FESS_TEMP_PATH);
+        if (tempPath != null) {
+            System.setProperty(JAVA_IO_TMPDIR, tempPath);
         }
 
-        final String tomcatConfigPath = getTomcatConfigPath();
         final TomcatBoot tomcatBoot = new FessBoot(getPort(), getContextPath()) //
                 .useTldDetect(); // for JSP
+        if (tempPath != null) {
+            tomcatBoot.atBaseDir(new File(tempPath, "webapp").getAbsolutePath());
+        }
+        final String tomcatConfigPath = getTomcatConfigPath();
         if (tomcatConfigPath != null) {
             tomcatBoot.configure(tomcatConfigPath); // e.g. URIEncoding
         }
