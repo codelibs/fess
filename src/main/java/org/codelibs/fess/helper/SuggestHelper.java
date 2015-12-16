@@ -39,7 +39,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
-import org.codelibs.fess.suggest.index.contents.document.DocumentReader;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
@@ -68,6 +67,10 @@ public class SuggestHelper {
     public String[] roleFieldNames = { "role" };
 
     public String[] contentsIndexFieldNames = { "content", "title" };
+
+    public long updateRequestIntervalMills = 1;
+
+    public int sourceReaderScrollSize = 1;
 
     private static final String TEXT_SEP = " ";
 
@@ -138,17 +141,14 @@ public class SuggestHelper {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final DocumentReader reader =
+        final ESSourceReader reader =
                 new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentIndex(),
                         fessConfig.getIndexDocumentType());
-
-        suggester.indexer().indexFromDocument(reader, 2, 100).then(response -> {
+        reader.setScrollSize(sourceReaderScrollSize);
+        suggester.indexer().indexFromDocument(reader, 2, updateRequestIntervalMills).then(response -> {
             suggester.refresh();
-
-            //TODO delete old doc
-
-                success.accept(true);
-            }).error(t -> error.accept(t));
+            success.accept(true);
+        }).error(t -> error.accept(t));
     }
 
     public void purgeDocumentSuggest(final LocalDateTime time) {
@@ -214,11 +214,11 @@ public class SuggestHelper {
 
     public void addElevateWord(final String word, final String reading, final String[] tags, final String roles, final float boost,
             final boolean commit) {
-        final List<String> labelList = new ArrayList<String>();
+        final List<String> labelList = new ArrayList<>();
         for (final String label : tags) {
             labelList.add(label);
         }
-        final List<String> roleList = new ArrayList<String>();
+        final List<String> roleList = new ArrayList<>();
         if (StringUtil.isNotBlank(roles)) {
             final String[] array = roles.trim().split(",");
             for (final String role : array) {
