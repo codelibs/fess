@@ -41,11 +41,11 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp9</dbflute.version>
-		<lastaflute.version>0.7.0-RC1</lastaflute.version>
-		<lasta.taglib.version>0.6.6-RC2</lasta.taglib.version>
+		<lastaflute.version>0.7.1</lastaflute.version>
+		<lasta.taglib.version>0.6.6</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
-		<mailflute.version>0.4.3-RC2</mailflute.version>
+		<mailflute.version>0.4.6</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.12</slf4j.version>
@@ -56,7 +56,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<utflute.version>0.5.2</utflute.version>
+		<utflute.version>0.5.9</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.0.0</crawler.version>
@@ -69,7 +69,7 @@
 		<cluster.runner.version>2.1.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.4.1-RC1</tomcat.boot.version>
+		<tomcat.boot.version>0.4.2</tomcat.boot.version>
 
 		<!-- TODO: RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
