@@ -6,6 +6,7 @@ After=network-online.target
 
 [Service]
 Environment=FESS_HOME=${packaging.fess.home.dir}
+EnvironmentFile=-/etc/sysconfig/fess
 
 User=${packaging.fess.user}
 Group=${packaging.fess.group}

@@ -3,9 +3,9 @@
 ################################
 
 # Fess Path
-FESS_TEMP_PATH=/var/tmp/fess
-FESS_LOG_PATH=/var/log/fess
-FESS_CONF_PATH=/etc/fess
+FESS_TEMP_PATH=${packaging.fess.temp.dir}
+FESS_LOG_PATH=${packaging.fess.log.dir}
+FESS_CONF_PATH=${packaging.fess.conf.dir}
 
 FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
 
