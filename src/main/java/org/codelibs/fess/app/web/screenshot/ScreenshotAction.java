@@ -65,7 +65,7 @@ public class ScreenshotAction extends FessSearchAction {
         BufferedInputStream in = null;
         try {
             final Map<String, Object> doc =
-                    fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+                    fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
                             queryRequestBuilder -> {
                                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                                 queryRequestBuilder.setQuery(termQuery);

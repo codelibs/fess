@@ -244,22 +244,20 @@ public class SearchLogHelper {
                 searchService.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId() })
-                            .forEach(
-                                    doc -> {
-                                        final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-                                        final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
-                                        if (id != null && docId != null && clickCountMap.containsKey(docId)) {
-                                            final Integer count = clickCountMap.get(docId);
-                                            final Script script =
-                                                    new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+="
-                                                            + count.toString());
-                                            final Map<String, Object> upsertMap = new HashMap<>();
-                                            upsertMap.put(fessConfig.getIndexFieldClickCount(), 1);
-                                            builder.add(new UpdateRequest(fessConfig.getIndexDocumentIndex(), fessConfig
-                                                    .getIndexDocumentType(), id).script(script).upsert(upsertMap));
-                                        }
-                                    });
+                            new String[] { fessConfig.getIndexFieldDocId() }).forEach(
+                            doc -> {
+                                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                if (id != null && docId != null && clickCountMap.containsKey(docId)) {
+                                    final Integer count = clickCountMap.get(docId);
+                                    final Script script =
+                                            new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
+                                    final Map<String, Object> upsertMap = new HashMap<>();
+                                    upsertMap.put(fessConfig.getIndexFieldClickCount(), 1);
+                                    builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), fessConfig
+                                            .getIndexDocumentType(), id).script(script).upsert(upsertMap));
+                                }
+                            });
                 });
             } catch (final Exception e) {
                 logger.warn("Failed to update clickCounts", e);

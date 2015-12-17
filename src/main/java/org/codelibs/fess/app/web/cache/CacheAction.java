@@ -51,12 +51,14 @@ public class CacheAction extends FessSearchAction {
 
         Map<String, Object> doc = null;
         try {
-            doc = fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryRequestBuilder -> {
-                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
-                queryRequestBuilder.setQuery(termQuery);
-                queryRequestBuilder.addFields(queryHelper.getCacheResponseFields());
-                return true;
-            }).get();
+            doc =
+                    fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                            queryRequestBuilder -> {
+                                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
+                                queryRequestBuilder.setQuery(termQuery);
+                                queryRequestBuilder.addFields(queryHelper.getCacheResponseFields());
+                                return true;
+                            }).get();
         } catch (final Exception e) {
             logger.warn("Failed to request: " + form.docId, e);
         }

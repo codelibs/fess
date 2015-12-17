@@ -83,7 +83,7 @@ public class SuggestHelper {
         final Thread th = new Thread(() -> {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-            suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentIndex());
+            suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
             suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
             for (final String field : contentsIndexFieldNames) {
                 suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
@@ -142,7 +142,7 @@ public class SuggestHelper {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final ESSourceReader reader =
-                new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentIndex(),
+                new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType());
         reader.setScrollSize(sourceReaderScrollSize);
         suggester.indexer().indexFromDocument(reader, 2, updateRequestIntervalMills).then(response -> {

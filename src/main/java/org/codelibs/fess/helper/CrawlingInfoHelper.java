@@ -161,7 +161,7 @@ public class CrawlingInfoHelper implements Serializable {
     public List<Map<String, String>> getSessionIdList(final FessEsClient fessEsClient) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.search(
-                fessConfig.getIndexDocumentIndex(),
+                fessConfig.getIndexDocumentSearchIndex(),
                 fessConfig.getIndexDocumentType(),
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());

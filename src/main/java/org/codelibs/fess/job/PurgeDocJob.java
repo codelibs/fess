@@ -38,7 +38,7 @@ public class PurgeDocJob {
         // clean up
         final QueryBuilder queryBuilder = QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to(new Date());
         try {
-            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), queryBuilder);
+            fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), queryBuilder);
 
         } catch (final Exception e) {
             logger.error("Could not delete expired documents: " + queryBuilder.toString(), e);

@@ -90,7 +90,7 @@ public class KeyMatchHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> documentList =
                 fessEsClient.getDocumentList(
-                        fessConfig.getIndexDocumentIndex(),
+                        fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess(true)

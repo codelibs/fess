@@ -258,8 +258,8 @@ public class DataIndexHelper implements Serializable {
                     QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
-                ComponentUtil.getElasticsearchClient().deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
-                        queryBuilder);
+                ComponentUtil.getElasticsearchClient().deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
+                        fessConfig.getIndexDocumentType(), queryBuilder);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataConfig, e);
             }

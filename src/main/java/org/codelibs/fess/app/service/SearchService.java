@@ -107,7 +107,7 @@ public class SearchService {
         final String sortField = params.getSort();
         final List<Map<String, Object>> documentItems =
                 fessEsClient.search(
-                        fessConfig.getIndexDocumentIndex(),
+                        fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             if (StringUtil.isNotBlank(sortField)) {
@@ -188,7 +188,7 @@ public class SearchService {
         final QueryContext queryContext = queryHelper.build(query, context -> {
             context.skipRoleQuery();
         });
-        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(),
+        return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
                 queryContext.getQueryBuilder());
     }
 
@@ -286,7 +286,7 @@ public class SearchService {
     }
 
     public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields) {
-        return fessEsClient.getDocument(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
+        return fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
             builder.addFields(fields);
             return true;
@@ -294,7 +294,7 @@ public class SearchService {
     }
 
     public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields) {
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), builder -> {
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
             builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
             builder.addFields(fields);
@@ -303,13 +303,13 @@ public class SearchService {
     }
 
     public boolean update(final String id, final String field, final Object value) {
-        return fessEsClient.update(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id, field, value);
+        return fessEsClient.update(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id, field, value);
     }
 
     public boolean update(final String id, final Consumer<UpdateRequestBuilder> builderLambda) {
         try {
             final UpdateRequestBuilder builder =
-                    fessEsClient.prepareUpdate(fessConfig.getIndexDocumentIndex(), fessConfig.getIndexDocumentType(), id);
+                    fessEsClient.prepareUpdate(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet();
             return response.isCreated();
