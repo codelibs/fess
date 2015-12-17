@@ -42,6 +42,7 @@ import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocumentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +112,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     return true;
                 }
 
-                final Date expires = (Date) document.get(fessConfig.getIndexFieldExpires());
+                final Date expires = DocumentUtil.getValue(document, fessConfig.getIndexFieldExpires(), Date.class);
                 if (expires != null && expires.getTime() < System.currentTimeMillis()) {
                     final Object idValue = document.get(fessConfig.getIndexFieldId());
                     if (idValue != null) {
@@ -120,7 +121,7 @@ public class FessCrawlerThread extends CrawlerThread {
                     return true;
                 }
 
-                final Date lastModified = (Date) document.get(fessConfig.getIndexFieldLastModified());
+                final Date lastModified = DocumentUtil.getValue(document, fessConfig.getIndexFieldLastModified(), Date.class);
                 if (lastModified == null) {
                     return true;
                 }

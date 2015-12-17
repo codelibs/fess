@@ -142,14 +142,18 @@ public class FessFunctions {
             return null;
         }
         try {
-            return new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT).parse(value);
+            final SimpleDateFormat sdf = new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT);
+            sdf.setTimeZone(Constants.TIMEZONE_UTC);
+            return sdf.parse(value);
         } catch (final ParseException e) {
             return null;
         }
     }
 
     public static String formatDate(final Date date) {
-        return new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT).format(date);
+        final SimpleDateFormat sdf = new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT);
+        sdf.setTimeZone(Constants.TIMEZONE_UTC);
+        return sdf.format(date);
     }
 
     public static String formatDate(final LocalDateTime date) {

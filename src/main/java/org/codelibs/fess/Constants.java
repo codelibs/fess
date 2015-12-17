@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess;
 
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.codelibs.core.CoreLibConstants;
@@ -355,4 +356,6 @@ public class Constants extends CoreLibConstants {
     public static final Integer DEFAULT_DAY_FOR_CLEANUP = 3;
 
     public static final String FESS_CONF_PATH = "fess.conf.path";
+
+    public static final TimeZone TIMEZONE_UTC = TimeZone.getTimeZone("UTC");
 }
