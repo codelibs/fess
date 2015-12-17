@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaServletContextUtil;
@@ -45,6 +46,10 @@ public class ResourceUtil {
     }
 
     public static Path getConfPath(final String... names) {
+        final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
+        if (StringUtil.isNotBlank(confPath)) {
+            return Paths.get(confPath, names);
+        }
         return getPath("conf", names);
     }
 

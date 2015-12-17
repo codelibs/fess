@@ -104,7 +104,7 @@ public class SuggestJob {
         // -cp
         suggestCreatorCmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
-        final String confPath = System.getProperty("fess.conf.path");
+        final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);
             buf.append(cpSeparator);

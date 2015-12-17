@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess;
 
+// DO NOT DEPEND OTHER JARs
+
 import java.io.File;
 
 import org.dbflute.tomcat.TomcatBoot;

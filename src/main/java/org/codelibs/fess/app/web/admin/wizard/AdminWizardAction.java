@@ -28,7 +28,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.service.WebConfigService;
-import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.FileConfig;
@@ -299,6 +298,6 @@ public class AdminWizardAction extends FessAdminAction {
         } else {
             saveError(messages -> messages.addErrorsFailedToStartCrawlProcess(GLOBAL));
         }
-        return redirect(AdminDashboardAction.class);
+        return redirect(AdminWizardAction.class);
     }
 }

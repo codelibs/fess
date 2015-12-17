@@ -353,4 +353,6 @@ public class Constants extends CoreLibConstants {
     public static final String DEFAULT_FIELD = "_default";
 
     public static final Integer DEFAULT_DAY_FOR_CLEANUP = 3;
+
+    public static final String FESS_CONF_PATH = "fess.conf.path";
 }

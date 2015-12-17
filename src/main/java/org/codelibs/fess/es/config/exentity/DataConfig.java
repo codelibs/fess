@@ -115,7 +115,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                         labelIdList.add(mapping.getLabelTypeId());
                     }
                     final LabelTypeBhv labelTypeBhv = ComponentUtil.getComponent(LabelTypeBhv.class);
-                    labelTypeList = labelTypeBhv.selectList(cb -> {
+                    labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(labelIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
                     });

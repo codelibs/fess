@@ -391,6 +391,9 @@
 						<passphrase>${gpg.passphrase}</passphrase>
 					</keyPassphrase>
 					-->
+					<requires>
+						<require>elasticsearch &gt;= ${elasticsearch.version}</require>
+					</requires>
 					<mappings>
 						<!-- fess home -->
 						<mapping>
@@ -486,7 +489,7 @@
 						</mapping>
 						<!-- Add environment vars file -->
 						<mapping>
-							<directory>/etc/sysconfig/</directory>
+							<directory>/etc/sysconfig</directory>
 							<directoryIncluded>false</directoryIncluded>
 							<username>root</username>
 							<groupname>root</groupname>

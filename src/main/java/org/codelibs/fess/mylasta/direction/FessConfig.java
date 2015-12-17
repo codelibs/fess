@@ -31,6 +31,15 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. http://localhost:9201 */
     String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
 
+    /** The key of the configuration. e.g. aes */
+    String APP_CIPHER_ALGORISM = "app.cipher.algorism";
+
+    /** The key of the configuration. e.g. __change_me__ */
+    String APP_CIPHER_KEY = "app.cipher.key";
+
+    /** The key of the configuration. e.g. sha256 */
+    String APP_DIGEST_ALGORISM = "app.digest.algorism";
+
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
 
@@ -322,7 +331,7 @@ public interface FessConfig extends FessEnv {
     /**
      * Get the value for the key 'elasticsearch.cluster.name'. <br>
      * The value is, e.g. elasticsearch <br>
-     * comment: elasticsearch
+     * comment: Elasticsearch
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getElasticsearchClusterName();
@@ -333,6 +342,28 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getElasticsearchHttpUrl();
+
+    /**
+     * Get the value for the key 'app.cipher.algorism'. <br>
+     * The value is, e.g. aes <br>
+     * comment: Cryptographer
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppCipherAlgorism();
+
+    /**
+     * Get the value for the key 'app.cipher.key'. <br>
+     * The value is, e.g. __change_me__ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppCipherKey();
+
+    /**
+     * Get the value for the key 'app.digest.algorism'. <br>
+     * The value is, e.g. sha256 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAppDigestAlgorism();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -1161,6 +1192,18 @@ public interface FessConfig extends FessEnv {
 
         public String getElasticsearchHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
+        }
+
+        public String getAppCipherAlgorism() {
+            return get(FessConfig.APP_CIPHER_ALGORISM);
+        }
+
+        public String getAppCipherKey() {
+            return get(FessConfig.APP_CIPHER_KEY);
+        }
+
+        public String getAppDigestAlgorism() {
+            return get(FessConfig.APP_DIGEST_ALGORISM);
         }
 
         public String getCrawlerDocumentCacheEnable() {
