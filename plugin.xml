@@ -13,43 +13,43 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-kuromoji-neologd -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="analysis-kuromoji-neologd" />
-			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151205.001447-5" />
+			<param name="plugin.version" value="2.1.0" />
+			<param name="plugin.zip.version" value="2.1.0" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151210.010142-5" />
+			<param name="plugin.version" value="2.1.0" />
+			<param name="plugin.zip.version" value="2.1.0" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151210.010328-2" />
+			<param name="plugin.version" value="2.1.0" />
+			<param name="plugin.zip.version" value="2.1.0" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151203.132121-4" />
+			<param name="plugin.version" value="2.1.0" />
+			<param name="plugin.zip.version" value="2.1.0" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="2.1.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.1.0-20151210.010528-2" />
+			<param name="plugin.version" value="2.1.0" />
+			<param name="plugin.zip.version" value="2.1.0" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}">
