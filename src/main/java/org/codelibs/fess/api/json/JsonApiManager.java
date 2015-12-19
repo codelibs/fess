@@ -46,9 +46,8 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
-import org.codelibs.fess.helper.HotSearchWordHelper;
-import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -93,8 +92,8 @@ public class JsonApiManager extends BaseApiManager {
         case LABEL:
             processLabelRequest(request, response, chain);
             break;
-        case HOTSEARCHWORD:
-            processHotSearchWordRequest(request, response, chain);
+        case POPULARWORD:
+            processPopularWordRequest(request, response, chain);
             break;
         case FAVORITE:
             processFavoriteRequest(request, response, chain);
@@ -311,20 +310,24 @@ public class JsonApiManager extends BaseApiManager {
 
     }
 
-    protected void processHotSearchWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE))) {
+    protected void processPopularWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
+        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, Constants.TRUE))) {
             writeJsonResponse(9, null, "Unsupported operation.");
             return;
         }
 
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
+        String seed = request.getParameter("seed");
+        String[] tags = request.getParameterValues("labels");
+        String[] fields = request.getParameterValues("fields");
+        String[] excludes = StringUtil.EMPTY_STRINGS;// TODO
+
+        final PopularWordHelper popularWordHelper = ComponentUtil.getPopularWordHelper();
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<String> hotSearchWordList =
-                    hotSearchWordHelper.getHotSearchWordList(Range.parseRange(request.getParameter("range")));
+            final List<String> hotSearchWordList = popularWordHelper.getWordList(seed, tags, fields, excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;

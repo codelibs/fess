@@ -31,9 +31,11 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.SuggestCreator;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,16 +95,17 @@ public class SuggestJob {
     }
 
     protected void executeSuggestCreator() {
-        final List<String> suggestCreatorCmdList = new ArrayList<>();
+        final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        suggestCreatorCmdList.add(systemHelper.getJavaCommandPath());
+        cmdList.add(systemHelper.getJavaCommandPath());
 
         // -cp
-        suggestCreatorCmdList.add("-cp");
+        cmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
@@ -137,41 +140,38 @@ public class SuggestJob {
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
         }
-        suggestCreatorCmdList.add(buf.toString());
+        cmdList.add(buf.toString());
 
         if (useLocaleElasticsearch) {
             final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
             if (StringUtil.isNotBlank(transportAddresses)) {
-                suggestCreatorCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+                cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
             }
             final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
             if (StringUtil.isNotBlank(clusterName)) {
-                suggestCreatorCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+                cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
             }
         }
 
         final String lastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(lastaEnv)) {
             if (lastaEnv.equals("web")) {
-                suggestCreatorCmdList.add("-Dlasta.env=suggest");
+                cmdList.add("-Dlasta.env=suggest");
             } else {
-                suggestCreatorCmdList.add("-Dlasta.env=" + lastaEnv);
+                cmdList.add("-Dlasta.env=" + lastaEnv);
             }
         }
 
-        suggestCreatorCmdList.add("-Dfess.suggest.process=true");
+        cmdList.add("-Dfess.suggest.process=true");
         if (logFilePath == null) {
             final String value = System.getProperty("fess.log.path");
             logFilePath = value != null ? value : new File(targetDir, "logs").getAbsolutePath();
         }
-        suggestCreatorCmdList.add("-Dfess.log.path=" + logFilePath);
-        addSystemProperty(suggestCreatorCmdList, "fess.log.name", "fess-suggest", "-suggest");
-        addSystemProperty(suggestCreatorCmdList, "fess.log.level", null, null);
-        if (systemHelper.getCrawlerJavaOptions() != null) {
-            for (final String value : systemHelper.getCrawlerJavaOptions()) {
-                suggestCreatorCmdList.add(value);
-            }
-        }
+        cmdList.add("-Dfess.log.path=" + logFilePath);
+        addSystemProperty(cmdList, "fess.log.name", "fess-suggest", "-suggest");
+        addSystemProperty(cmdList, "fess.log.level", null, null);
+        StreamUtil.of(fessConfig.getJvmSuggestOptions().split("\n")).filter(value -> StringUtil.isNotBlank(value))
+                .forEach(value -> cmdList.add(value));
 
         File ownTmpDir = null;
         if (systemHelper.isUseOwnTmpDir()) {
@@ -179,25 +179,25 @@ public class SuggestJob {
             if (StringUtil.isNotBlank(tmpDir)) {
                 ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
                 if (ownTmpDir.mkdirs()) {
-                    suggestCreatorCmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
+                    cmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
                 } else {
                     ownTmpDir = null;
                 }
             }
         }
 
-        suggestCreatorCmdList.add(SuggestCreator.class.getCanonicalName());
+        cmdList.add(SuggestCreator.class.getCanonicalName());
 
-        suggestCreatorCmdList.add("--sessionId");
-        suggestCreatorCmdList.add(sessionId);
+        cmdList.add("--sessionId");
+        cmdList.add(sessionId);
 
         final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
         if (logger.isInfoEnabled()) {
-            logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + suggestCreatorCmdList);
+            logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
         }
 
-        final ProcessBuilder pb = new ProcessBuilder(suggestCreatorCmdList);
+        final ProcessBuilder pb = new ProcessBuilder(cmdList);
         pb.directory(baseDir);
         pb.redirectErrorStream(true);
 

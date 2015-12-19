@@ -1,27 +1,33 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="/search" method="get" styleId="searchForm" styleClass="searchResultForm">
+<la:form action="/search" method="get" styleId="searchForm"
+	styleClass="searchResultForm">
 ${fe:facetForm()}${fe:geoForm()}
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
 		<la:link styleClass="navbar-brand" href="/">
-			<img src="${f:url('/images/logo-head.png')}" alt="<la:message key="labels.header_brand_name" />" />
+			<img src="${f:url('/images/logo-head.png')}"
+				alt="<la:message key="labels.header_brand_name" />" />
 		</la:link>
 		<div class="form-inline navbar-form pull-right">
-			<la:text property="query" maxlength="1000" styleId="query" styleClass="form-control" autocomplete="off"/>
-			<button class="btn medium btn-primary" type="submit" name="search" id="searchButton">
-				<i class="icon-search icon-white"></i><span class="hidden-phone"><la:message key="labels.search" /></span>
+			<la:text property="q" maxlength="1000" styleId="query"
+				styleClass="form-control" autocomplete="off" />
+			<button class="btn medium btn-primary" type="submit" name="search"
+				id="searchButton">
+				<i class="icon-search icon-white"></i><span class="hidden-phone"><la:message
+						key="labels.search" /></span>
 			</button>
-			<a href="#searchOptions" role="button" class="btn btn-secondary" data-toggle="modal"><i class="icon-cog"></i><span
-				class="hidden-phone"
-			><la:message key="labels.header_form_option_btn" /></span></a>
+			<a href="#searchOptions" role="button" class="btn btn-secondary"
+				data-toggle="modal"><i class="icon-cog"></i><span
+				class="hidden-phone"><la:message
+						key="labels.header_form_option_btn" /></span></a>
 		</div>
 	</nav>
-	<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog" aria-labelledby="searchOptionsLabel"
-		aria-hidden="true"
-	>
+	<div class="modal fade" id="searchOptions" tabindex="-1" role="dialog"
+		aria-labelledby="searchOptionsLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
 						<span aria-hidden="true">&times;</span> <span class="sr-only">Close</span>
 					</button>
 					<h4 class="modal-title" id="searchOptionsLabel">
@@ -31,7 +37,8 @@ ${fe:facetForm()}${fe:geoForm()}
 				<div class="modal-body">
 					<fieldset class="form-group">
 						<label for="contentNum"><la:message key="labels.index_num" /></label>
-						<la:select property="num" styleId="numSearchOption" styleClass="form-control" style="display:block;">
+						<la:select property="num" styleId="numSearchOption"
+							styleClass="form-control">
 							<option value="">
 								<la:message key="labels.search_result_select_num" />
 							</option>
@@ -44,8 +51,10 @@ ${fe:facetForm()}${fe:geoForm()}
 						</la:select>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="contentSort"><la:message key="labels.index_sort" /></label>
-						<la:select property="sort" styleId="sortSearchOption" styleClass="form-control" style="display:block;">
+						<label for="contentSort"><la:message
+								key="labels.index_sort" /></label>
+						<la:select property="sort" styleId="sortSearchOption"
+							styleClass="form-control">
 							<option value="">
 								<la:message key="labels.search_result_select_sort" />
 							</option>
@@ -86,8 +95,10 @@ ${fe:facetForm()}${fe:geoForm()}
 						</la:select>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="contentLang"><la:message key="labels.index_lang" /></label>
-						<la:select property="lang" styleId="langSearchOption" multiple="true" styleClass="form-control">
+						<label for="contentLang"><la:message
+								key="labels.index_lang" /></label>
+						<la:select property="lang" styleId="langSearchOption"
+							multiple="true" styleClass="form-control">
 							<c:forEach var="item" items="${langItems}">
 								<la:option value="${f:u(item.value)}">
 													${f:h(item.label)}
@@ -97,12 +108,15 @@ ${fe:facetForm()}${fe:geoForm()}
 					</fieldset>
 					<c:if test="${displayLabelTypeItems}">
 						<fieldset class="form-group">
-							<label for="contentLabelType"><la:message key="labels.index_label" /></label>
-							<la:select property="fields.label" styleId="labelTypeSearchOption" multiple="true" styleClass="form-control">
+							<label for="contentLabelType"><la:message
+									key="labels.index_label" /></label>
+							<la:select property="fields.label"
+								styleId="labelTypeSearchOption" multiple="true"
+								styleClass="form-control">
 								<c:forEach var="item" items="${labelTypeItems}">
 									<la:option value="${f:u(item.value)}">
-														${f:h(item.label)}
-													</la:option>
+										${f:h(item.label)}
+									</la:option>
 								</c:forEach>
 							</la:select>
 						</fieldset>
@@ -112,7 +126,8 @@ ${fe:facetForm()}${fe:geoForm()}
 					<button class="btn btn-secondary" id="searchOptionsClearButton">
 						<la:message key="labels.search_options_clear" />
 					</button>
-					<button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">
+					<button class="btn btn-secondary" data-dismiss="modal"
+						aria-hidden="true">
 						<la:message key="labels.search_options_close" />
 					</button>
 					<button class="btn btn-primary" type="submit">

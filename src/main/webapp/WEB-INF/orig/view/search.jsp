@@ -15,10 +15,10 @@
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
-<link href="${f:url('/css/admin/font-awesome.min.css')}"
+<link href="${f:url('/css/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
-<body>
+<body class="search">
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="row">
@@ -26,7 +26,7 @@
 				<ul class="searchOptionLabels">
 					<li><la:message key="labels.searchoptions_menu_sort" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <c:if test="${empty sort}">
+						data-toggle="control-options"> <c:if test="${empty sort}">
 								<la:message key="labels.searchoptions_score" />
 							</c:if> <c:if test="${sort=='created.asc'}">
 								<la:message key="labels.search_result_sort_created_asc" />
@@ -52,12 +52,12 @@
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_num" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <la:message
+						data-toggle="control-options"> <la:message
 								key="labels.searchoptions_num" arg0="${f:h(num)}" />
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_lang" /> <a
 						href="#searchOptions" class="label label-primary"
-						data-toggle="modal"> <c:if test="${empty lang}">
+						data-toggle="control-options"> <c:if test="${empty lang}">
 								<la:message key="labels.searchoptions_all" />
 							</c:if> <c:if test="${!empty lang}">
 								<c:forEach var="sLang" items="${lang}">
@@ -70,7 +70,8 @@
 					<c:if test="${displayLabelTypeItems}">
 						<li><la:message key="labels.searchoptions_menu_labels" /> <a
 							href="#searchOptions" class="label label-primary"
-							data-toggle="modal"> <c:if test="${empty fields.label}">
+							data-toggle="control-options"> <c:if
+									test="${empty fields.label}">
 									<la:message key="labels.searchoptions_all" />
 								</c:if> <c:if test="${!empty fields.label}">
 									<c:forEach var="sLabel" items="${fields.label}">
@@ -84,14 +85,14 @@
 				</ul>
 			</div>
 		</div>
-		<c:if test="${fe:hswsize(null) != 0}">
+		<c:if test="${!empty popularWords}">
 			<div class="row">
 				<div class="col-md-12">
 					<p class="hotSearchWordBody ellipsis">
-						<la:message key="labels.search_hot_search_word" />
-						<c:forEach var="item" items="${fe:hsw(null, 5)}">
+						<la:message key="labels.search_popular_word_word" />
+						<c:forEach var="item" items="${popularWords}">
 							<la:link
-								href="/search/search?query=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+								href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 						</c:forEach>
 					</p>
 				</div>
@@ -110,8 +111,7 @@
 		</c:choose>
 		<jsp:include page="footer.jsp" />
 	</div>
-	<input type="hidden" id="contextPath"
-		value="<%=request.getContextPath()%>" />
+	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>

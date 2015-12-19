@@ -40,7 +40,7 @@
 										key="labels.search_result_cache" /></la:link>
 							</c:if>
 						</div>
-						<div class="more visible-phone">
+						<div class="more hidden-md-up">
 							<a href="#result${s.index}"><la:message key="labels.search_result_more" /></a>
 						</div>
 						<div class="info">
@@ -79,7 +79,7 @@
 			</c:forEach>
 		</ol>
 	</div>
-	<div class="col-md-4 visible-desktop visible-tablet">
+	<aside class="col-md-4 hidden-sm-down">
 		<%-- Side Content --%>
 		<c:if test="${screenShotSupport}">
 			<div id="screenshot"></div>
@@ -92,7 +92,7 @@
 						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
 							<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search/search?query=${f:u(query)}&additional=label%3a${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
+										href="/search/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
 									>
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
@@ -108,7 +108,7 @@
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
-									href="/search/search?query=${f:u(query)}&additional=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
+									href="/search/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}"
 								>
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
@@ -117,22 +117,22 @@
 					</c:forEach>
 				</ul>
 			</c:forEach>
-			<c:if test="${!empty additional}">
+			<c:if test="${!empty ex_q}">
 				<div class="pull-right">
-					<la:link href="/search/search?query=${f:u(query)}" styleClass="btn btn-secondary btn-sm">
+					<la:link href="/search/search?q=${f:u(q)}" styleClass="btn btn-secondary btn-sm">
 						<la:message key="labels.facet_label_reset" />
 					</la:link>
 				</div>
 			</c:if>
 		</c:if>
-	</div>
+	</aside>
 </div>
 <div class="row center">
 	<nav id="subfooter">
 		<ul class="pagination">
 			<c:if test="${existPrevPage}">
 				<li class="prev"><la:link aria-label="Previous"
-						href="/search/prev?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 					<span aria-hidden="true">&laquo;</span>
 					<span class="sr-only"><la:message key="labels.prev_page" /></span>
 				</la:link></li>
@@ -149,12 +149,12 @@
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>
 					>
 					<la:link
-						href="/search/move?query=${f:u(query)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
+						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
 				<li class="next"><la:link aria-label="Next"
-						href="/search/next?query=${f:u(query)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
 					<span class="sr-only"><la:message key="labels.next_page" /></span>
 					<span aria-hidden="true">&raquo;</span>
 				</la:link></li>

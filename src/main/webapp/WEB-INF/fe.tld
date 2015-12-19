@@ -37,30 +37,6 @@
 
   <function>
     <description>
-      Returns a list of hot search words.
-    </description>
-    <name>hsw</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.util.List hsw(java.lang.String, java.lang.Integer)</function-signature>
-    <example>
-      ${fe:hsw("week", 5)}
-    </example>
-  </function>
-
-  <function>
-    <description>
-      Returns a size of hot search words.
-    </description>
-    <name>hswsize</name>
-    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
-    <function-signature>java.lang.Integer hswsize(java.lang.String)</function-signature>
-    <example>
-      ${fe:hswsize("week")}
-    </example>
-  </function>
-
-  <function>
-    <description>
       Returns Date from a given value.
     </description>
     <name>date</name>

@@ -85,12 +85,12 @@
 				</ul>
 			</div>
 		</div>
-		<c:if test="${fe:hswsize(null) != 0}">
+		<c:if test="${!empty popularWords}">
 			<div class="row">
 				<div class="col-md-12">
 					<p class="hotSearchWordBody ellipsis">
-						<la:message key="labels.search_hot_search_word" />
-						<c:forEach var="item" items="${fe:hsw(null, 5)}">
+						<la:message key="labels.search_popular_word_word" />
+						<c:forEach var="item" items="${popularWords}">
 							<la:link
 								href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 						</c:forEach>

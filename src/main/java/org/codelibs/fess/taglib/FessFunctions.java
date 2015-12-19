@@ -21,7 +21,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -31,11 +30,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
-import org.codelibs.fess.helper.HotSearchWordHelper;
-import org.codelibs.fess.helper.HotSearchWordHelper.Range;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
@@ -70,64 +66,6 @@ public class FessFunctions {
             }
         }
         return value;
-    }
-
-    public static List<String> hsw(final String value, final Integer size) {
-        if (!isSupportHotSearchWord()) {
-            return Collections.emptyList();
-        }
-
-        Range range;
-        if (value == null) {
-            range = Range.ENTIRE;
-        } else if ("day".equals(value) || "1".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("week".equals(value) || "7".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("month".equals(value) || "30".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("year".equals(value) || "365".equals(value)) {
-            range = Range.ONE_DAY;
-        } else {
-            range = Range.ENTIRE;
-        }
-
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
-        final List<String> wordList = hotSearchWordHelper.getHotSearchWordList(range);
-        if (wordList.size() > size) {
-            return wordList.subList(0, size);
-        }
-        return wordList;
-    }
-
-    public static Integer hswsize(final String value) {
-        if (!isSupportHotSearchWord()) {
-            return 0;
-        }
-
-        Range range;
-        if (value == null) {
-            range = Range.ENTIRE;
-        } else if ("day".equals(value) || "1".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("week".equals(value) || "7".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("month".equals(value) || "30".equals(value)) {
-            range = Range.ONE_DAY;
-        } else if ("year".equals(value) || "365".equals(value)) {
-            range = Range.ONE_DAY;
-        } else {
-            range = Range.ENTIRE;
-        }
-
-        final HotSearchWordHelper hotSearchWordHelper = ComponentUtil.getHotSearchWordHelper();
-        return hotSearchWordHelper.getHotSearchWordList(range).size();
-    }
-
-    private static boolean isSupportHotSearchWord() {
-        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
-        return crawlerProperties != null
-                && Constants.TRUE.equals(crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE));
     }
 
     public static Date date(final Long value) {

@@ -29,14 +29,15 @@ import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
-import org.codelibs.fess.helper.HotSearchWordHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SuggestHelper;
@@ -52,6 +53,10 @@ import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public final class ComponentUtil {
+    private static final String ROLE_QUERY_HELPER = "roleQueryHelper";
+
+    private static final String SUGGEST_HELPER = "suggestHelper";
+
     private static final String FESS_ES_CLIENT = "fessEsClient";
 
     private static final String DICTIONARY_MANAGER = "dictionaryManager";
@@ -84,7 +89,7 @@ public final class ComponentUtil {
 
     private static final String PATH_MAPPING_HELPER = "pathMappingHelper";
 
-    private static final String HOT_SEARCH_WORD_HELPER = "hotSearchWordHelper";
+    private static final String POPULAR_WORD_HELPER = "popularWordHelper";
 
     private static final String CRAWLING_INFO_HELPER = "crawlingInfoHelper";
 
@@ -169,8 +174,8 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(CRAWLING_INFO_HELPER);
     }
 
-    public static HotSearchWordHelper getHotSearchWordHelper() {
-        return SingletonLaContainer.getComponent(HOT_SEARCH_WORD_HELPER);
+    public static PopularWordHelper getPopularWordHelper() {
+        return SingletonLaContainer.getComponent(POPULAR_WORD_HELPER);
     }
 
     public static PathMappingHelper getPathMappingHelper() {
@@ -265,11 +270,15 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(clazz);
     }
 
-    public static boolean hasQueryHelper() {
-        return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
+    public static SuggestHelper getSuggestHelper() {
+        return SingletonLaContainer.getComponent(SUGGEST_HELPER);
     }
 
-    public static SuggestHelper getSuggestHelper() {
-        return getComponent(SuggestHelper.class);
+    public static RoleQueryHelper getRoleQueryHelper() {
+        return SingletonLaContainer.getComponent(ROLE_QUERY_HELPER);
+    }
+
+    public static boolean hasQueryHelper() {
+        return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
 }

@@ -120,6 +120,10 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
+          "roles" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
           "queryId" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -188,6 +192,15 @@
     "settings" : {
       "index" : {
         "refresh_interval" : "60s",
+        "dbflute" : {
+          "search_log" : {
+            "properties" : {
+              "roles" : {
+                "array" : "true"
+              }
+            }
+          }
+        },
         "number_of_shards" : "10",
         "number_of_replicas" : "0"
       }

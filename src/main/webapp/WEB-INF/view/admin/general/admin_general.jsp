@@ -69,7 +69,7 @@
 									</div>
 									<div class="form-group">
 										<label for="hotSearchWord" class="col-sm-3 control-label"><la:message
-												key="labels.hot_search_word_enabled" /></label>
+												key="labels.popular_word_word_enabled" /></label>
 										<div class="col-sm-9">
 											<la:errors property="hotSearchWord" />
 											<div class="checkbox">

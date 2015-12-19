@@ -40,6 +40,12 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. sha256 */
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
+    /** The key of the configuration. e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC */
+    String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
+
+    /** The key of the configuration. e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC */
+    String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
+
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
 
@@ -307,6 +313,39 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. crawlinginfo */
     String ONLINE_HELP_NAME_CRAWLINGINFO = "online.help.name.crawlinginfo";
 
+    /** The key of the configuration. e.g. 0 */
+    String SUGGEST_POPULAR_WORD_SEED = "suggest.popular.word.seed";
+
+    /** The key of the configuration. e.g. 10 */
+    String SUGGEST_POPULAR_WORD_SIZE = "suggest.popular.word.size";
+
+    /** The key of the configuration. e.g. 30 */
+    String SUGGEST_POPULAR_WORD_WINDOW_SIZE = "suggest.popular.word.window.size";
+
+    /** The key of the configuration. e.g. 1 */
+    String SUGGEST_MIN_HIT_COUNT = "suggest.min.hit.count";
+
+    /** The key of the configuration. e.g. _default */
+    String SUGGEST_FIELD_CONTENTS = "suggest.field.contents";
+
+    /** The key of the configuration. e.g. label */
+    String SUGGEST_FIELD_TAGS = "suggest.field.tags";
+
+    /** The key of the configuration. e.g. role */
+    String SUGGEST_FIELD_ROLES = "suggest.field.roles";
+
+    /** The key of the configuration. e.g. content,title */
+    String SUGGEST_FIELD_INDEX_CONTENTS = "suggest.field.index.contents";
+
+    /** The key of the configuration. e.g. 1 */
+    String SUGGEST_UPDATE_REQUEST_INTERVAL = "suggest.update.request.interval";
+
+    /** The key of the configuration. e.g. 1 */
+    String SUGGEST_SOURCE_READER_SCROLL_SIZE = "suggest.source.reader.scroll.size";
+
+    /** The key of the configuration. e.g. guest */
+    String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -367,6 +406,21 @@ public interface FessConfig extends FessEnv {
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppDigestAlgorism();
+
+    /**
+     * Get the value for the key 'jvm.crawler.options'. <br>
+     * The value is, e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC <br>
+     * comment: JVM options
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJvmCrawlerOptions();
+
+    /**
+     * Get the value for the key 'jvm.suggest.options'. <br>
+     * The value is, e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJvmSuggestOptions();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -1184,6 +1238,133 @@ public interface FessConfig extends FessEnv {
     String getOnlineHelpNameCrawlinginfo();
 
     /**
+     * Get the value for the key 'suggest.popular.word.seed'. <br>
+     * The value is, e.g. 0 <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordSeed();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.seed' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordSeedAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.size'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordSize();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.size' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordSizeAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.window.size'. <br>
+     * The value is, e.g. 30 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordWindowSize();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.window.size' as {@link Integer}. <br>
+     * The value is, e.g. 30 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordWindowSizeAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.min.hit.count'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestMinHitCount();
+
+    /**
+     * Get the value for the key 'suggest.min.hit.count' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestMinHitCountAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.field.contents'. <br>
+     * The value is, e.g. _default <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestFieldContents();
+
+    /**
+     * Get the value for the key 'suggest.field.tags'. <br>
+     * The value is, e.g. label <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestFieldTags();
+
+    /**
+     * Get the value for the key 'suggest.field.roles'. <br>
+     * The value is, e.g. role <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestFieldRoles();
+
+    /**
+     * Get the value for the key 'suggest.field.index.contents'. <br>
+     * The value is, e.g. content,title <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestFieldIndexContents();
+
+    /**
+     * Get the value for the key 'suggest.update.request.interval'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestUpdateRequestInterval();
+
+    /**
+     * Get the value for the key 'suggest.update.request.interval' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestUpdateRequestIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.source.reader.scroll.size'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestSourceReaderScrollSize();
+
+    /**
+     * Get the value for the key 'suggest.source.reader.scroll.size' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestSourceReaderScrollSizeAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.role.filters'. <br>
+     * The value is, e.g. guest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestRoleFilters();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -1214,6 +1395,14 @@ public interface FessConfig extends FessEnv {
 
         public String getAppDigestAlgorism() {
             return get(FessConfig.APP_DIGEST_ALGORISM);
+        }
+
+        public String getJvmCrawlerOptions() {
+            return get(FessConfig.JVM_CRAWLER_OPTIONS);
+        }
+
+        public String getJvmSuggestOptions() {
+            return get(FessConfig.JVM_SUGGEST_OPTIONS);
         }
 
         public String getCrawlerDocumentCacheEnable() {
@@ -1654,6 +1843,74 @@ public interface FessConfig extends FessEnv {
 
         public String getOnlineHelpNameCrawlinginfo() {
             return get(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO);
+        }
+
+        public String getSuggestPopularWordSeed() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_SEED);
+        }
+
+        public Integer getSuggestPopularWordSeedAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_SEED);
+        }
+
+        public String getSuggestPopularWordSize() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_SIZE);
+        }
+
+        public Integer getSuggestPopularWordSizeAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_SIZE);
+        }
+
+        public String getSuggestPopularWordWindowSize() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_WINDOW_SIZE);
+        }
+
+        public Integer getSuggestPopularWordWindowSizeAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_WINDOW_SIZE);
+        }
+
+        public String getSuggestMinHitCount() {
+            return get(FessConfig.SUGGEST_MIN_HIT_COUNT);
+        }
+
+        public Integer getSuggestMinHitCountAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_MIN_HIT_COUNT);
+        }
+
+        public String getSuggestFieldContents() {
+            return get(FessConfig.SUGGEST_FIELD_CONTENTS);
+        }
+
+        public String getSuggestFieldTags() {
+            return get(FessConfig.SUGGEST_FIELD_TAGS);
+        }
+
+        public String getSuggestFieldRoles() {
+            return get(FessConfig.SUGGEST_FIELD_ROLES);
+        }
+
+        public String getSuggestFieldIndexContents() {
+            return get(FessConfig.SUGGEST_FIELD_INDEX_CONTENTS);
+        }
+
+        public String getSuggestUpdateRequestInterval() {
+            return get(FessConfig.SUGGEST_UPDATE_REQUEST_INTERVAL);
+        }
+
+        public Integer getSuggestUpdateRequestIntervalAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_UPDATE_REQUEST_INTERVAL);
+        }
+
+        public String getSuggestSourceReaderScrollSize() {
+            return get(FessConfig.SUGGEST_SOURCE_READER_SCROLL_SIZE);
+        }
+
+        public Integer getSuggestSourceReaderScrollSizeAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_SOURCE_READER_SCROLL_SIZE);
+        }
+
+        public String getSuggestRoleFilters() {
+            return get(FessConfig.SUGGEST_ROLE_FILTERS);
         }
     }
 }

@@ -115,7 +115,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String FAILURE_COUNT_THRESHOLD_PROPERTY = "failure.countthreshold";
 
-    public static final String WEB_API_HOT_SEARCH_WORD_PROPERTY = "web.api.hotsearch";
+    public static final String WEB_API_POPULAR_WORD_PROPERTY = "web.api.popularword";
 
     public static final String CSV_FILE_ENCODING_PROPERTY = "csv.file.encoding";
 

@@ -32,9 +32,11 @@ import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,16 +225,17 @@ public class CrawlJob {
     }
 
     protected void executeCrawler() {
-        final List<String> crawlerCmdList = new ArrayList<String>();
+        final List<String> cmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        crawlerCmdList.add(systemHelper.getJavaCommandPath());
+        cmdList.add(systemHelper.getJavaCommandPath());
 
         // -cp
-        crawlerCmdList.add("-cp");
+        cmdList.add("-cp");
         final StringBuilder buf = new StringBuilder();
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
@@ -267,41 +270,38 @@ public class CrawlJob {
         if (targetLibDir.isDirectory()) {
             appendJarFile(cpSeparator, buf, targetLibDir, targetLibDir.getAbsolutePath() + File.separator);
         }
-        crawlerCmdList.add(buf.toString());
+        cmdList.add(buf.toString());
 
         if (useLocaleElasticsearch) {
             final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
             if (StringUtil.isNotBlank(transportAddresses)) {
-                crawlerCmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
+                cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);
             }
             final String clusterName = System.getProperty(Constants.FESS_ES_CLUSTER_NAME);
             if (StringUtil.isNotBlank(clusterName)) {
-                crawlerCmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
+                cmdList.add("-D" + Constants.FESS_ES_CLUSTER_NAME + "=" + clusterName);
             }
         }
 
         final String lastaEnv = System.getProperty("lasta.env");
         if (StringUtil.isNotBlank(lastaEnv)) {
             if (lastaEnv.equals("web")) {
-                crawlerCmdList.add("-Dlasta.env=crawler");
+                cmdList.add("-Dlasta.env=crawler");
             } else {
-                crawlerCmdList.add("-Dlasta.env=" + lastaEnv);
+                cmdList.add("-Dlasta.env=" + lastaEnv);
             }
         }
 
-        crawlerCmdList.add("-Dfess.crawler.process=true");
-        crawlerCmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
-        addSystemProperty(crawlerCmdList, "fess.log.name", "fess-crawler", "-crawler");
+        cmdList.add("-Dfess.crawler.process=true");
+        cmdList.add("-Dfess.log.path=" + (logFilePath != null ? logFilePath : systemHelper.getLogFilePath()));
+        addSystemProperty(cmdList, "fess.log.name", "fess-crawler", "-crawler");
         if (logLevel == null) {
-            addSystemProperty(crawlerCmdList, "fess.log.level", null, null);
+            addSystemProperty(cmdList, "fess.log.level", null, null);
         } else {
-            crawlerCmdList.add("-Dfess.log.level=" + logLevel);
+            cmdList.add("-Dfess.log.level=" + logLevel);
         }
-        if (systemHelper.getCrawlerJavaOptions() != null) {
-            for (final String value : systemHelper.getCrawlerJavaOptions()) {
-                crawlerCmdList.add(value);
-            }
-        }
+        StreamUtil.of(fessConfig.getJvmCrawlerOptions().split("\n")).filter(value -> StringUtil.isNotBlank(value))
+                .forEach(value -> cmdList.add(value));
 
         File ownTmpDir = null;
         if (systemHelper.isUseOwnTmpDir()) {
@@ -309,48 +309,48 @@ public class CrawlJob {
             if (StringUtil.isNotBlank(tmpDir)) {
                 ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
                 if (ownTmpDir.mkdirs()) {
-                    crawlerCmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
+                    cmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
                 } else {
                     ownTmpDir = null;
                 }
             }
         }
 
-        crawlerCmdList.add(Crawler.class.getCanonicalName());
+        cmdList.add(Crawler.class.getCanonicalName());
 
-        crawlerCmdList.add("--sessionId");
-        crawlerCmdList.add(sessionId);
-        crawlerCmdList.add("--name");
-        crawlerCmdList.add(namespace);
+        cmdList.add("--sessionId");
+        cmdList.add(sessionId);
+        cmdList.add("--name");
+        cmdList.add(namespace);
 
         if (webConfigIds != null && webConfigIds.length > 0) {
-            crawlerCmdList.add("-w");
-            crawlerCmdList.add(StringUtils.join(webConfigIds, ','));
+            cmdList.add("-w");
+            cmdList.add(StringUtils.join(webConfigIds, ','));
         }
         if (fileConfigIds != null && fileConfigIds.length > 0) {
-            crawlerCmdList.add("-f");
-            crawlerCmdList.add(StringUtils.join(fileConfigIds, ','));
+            cmdList.add("-f");
+            cmdList.add(StringUtils.join(fileConfigIds, ','));
         }
         if (dataConfigIds != null && dataConfigIds.length > 0) {
-            crawlerCmdList.add("-d");
-            crawlerCmdList.add(StringUtils.join(dataConfigIds, ','));
+            cmdList.add("-d");
+            cmdList.add(StringUtils.join(dataConfigIds, ','));
         }
         if (StringUtil.isNotBlank(operation)) {
-            crawlerCmdList.add("-o");
-            crawlerCmdList.add(operation);
+            cmdList.add("-o");
+            cmdList.add(operation);
         }
         if (documentExpires >= -1) {
-            crawlerCmdList.add("-e");
-            crawlerCmdList.add(Integer.toString(documentExpires));
+            cmdList.add("-e");
+            cmdList.add(Integer.toString(documentExpires));
         }
 
         final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + crawlerCmdList);
+            logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
         }
 
-        final ProcessBuilder pb = new ProcessBuilder(crawlerCmdList);
+        final ProcessBuilder pb = new ProcessBuilder(cmdList);
         pb.directory(baseDir);
         pb.redirectErrorStream(true);
 

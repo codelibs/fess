@@ -26,18 +26,11 @@ import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
 public abstract class BaseApiManager implements WebApiManager {
-    protected static final String FAVORITES_API = "/favoritesApi";
-
-    protected static final String FAVORITE_API = "/favoriteApi";
-
-    protected static final String HOT_SEARCH_WORD_API = "/hotSearchWordApi";
-
-    protected static final String SEARCH_API = "/searchApi";
 
     protected String pathPrefix;
 
     protected static enum FormatType {
-        SEARCH, LABEL, HOTSEARCHWORD, FAVORITE, FAVORITES, OTHER, PING;
+        SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
     public String getPathPrefix() {
@@ -57,8 +50,8 @@ public abstract class BaseApiManager implements WebApiManager {
             return FormatType.SEARCH;
         } else if (FormatType.LABEL.name().equals(type)) {
             return FormatType.LABEL;
-        } else if (FormatType.HOTSEARCHWORD.name().equals(type)) {
-            return FormatType.HOTSEARCHWORD;
+        } else if (FormatType.POPULARWORD.name().equals(type)) {
+            return FormatType.POPULARWORD;
         } else if (FormatType.FAVORITE.name().equals(type)) {
             return FormatType.FAVORITE;
         } else if (FormatType.FAVORITES.name().equals(type)) {

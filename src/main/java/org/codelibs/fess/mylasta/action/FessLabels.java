@@ -555,7 +555,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_search_title = "{labels.search_title}";
 
     /** The key of the message: Popular Words:  */
-    public static final String LABELS_search_hot_search_word = "{labels.search_hot_search_word}";
+    public static final String LABELS_search_popular_word_word = "{labels.search_popular_word_word}";
 
     /** The key of the message: -- Sort -- */
     public static final String LABELS_search_result_select_sort = "{labels.search_result_select_sort}";
@@ -927,7 +927,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_failure_count_threshold = "{labels.failure_count_threshold}";
 
     /** The key of the message: Popular Word Response */
-    public static final String LABELS_hot_search_word_enabled = "{labels.hot_search_word_enabled}";
+    public static final String LABELS_popular_word_word_enabled = "{labels.popular_word_word_enabled}";
 
     /** The key of the message: Web */
     public static final String LABELS_supported_search_web = "{labels.supported_search_web}";

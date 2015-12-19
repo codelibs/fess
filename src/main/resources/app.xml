@@ -155,8 +155,7 @@
 	</component>
 	<component name="userAgentHelper" class="org.codelibs.fess.helper.UserAgentHelper">
 	</component>
-	<component name="hotSearchWordHelper" class="org.codelibs.fess.helper.HotSearchWordHelper">
-		<property name="excludedWordPattern">java.util.regex.Pattern.compile(".*[a-zA-Z0-9_]+:.*")</property>
+	<component name="popularWordHelper" class="org.codelibs.fess.helper.PopularWordHelper">
 	</component>
 	<component name="userInfoHelper" class="org.codelibs.fess.helper.impl.CookieUserInfoHelperImpl">
 	</component>

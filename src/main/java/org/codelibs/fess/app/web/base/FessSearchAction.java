@@ -33,6 +33,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.UnsupportedSearchException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
+import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
@@ -78,6 +79,9 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected OpenSearchHelper openSearchHelper;
 
     @Resource
+    protected PopularWordHelper popularWordHelper;
+
+    @Resource
     protected DynamicProperties crawlerProperties;
 
     @Resource
@@ -93,6 +97,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
+        runtime.registerData("popularWords", popularWordHelper.getWordList(null, null, null, null));// TODO parameters
         return super.hookBefore(runtime);
     }
 

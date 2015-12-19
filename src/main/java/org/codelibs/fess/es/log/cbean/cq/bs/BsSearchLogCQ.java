@@ -507,6 +507,172 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setRoles_Equal(String roles) {
+        setRoles_Term(roles, null);
+    }
+
+    public void setRoles_Equal(String roles, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setRoles_Term(roles, opLambda);
+    }
+
+    public void setRoles_Term(String roles) {
+        setRoles_Term(roles, null);
+    }
+
+    public void setRoles_Term(String roles, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_NotEqual(String roles) {
+        setRoles_NotTerm(roles, null);
+    }
+
+    public void setRoles_NotEqual(String roles, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setRoles_NotTerm(roles, opLambda);
+    }
+
+    public void setRoles_NotTerm(String roles) {
+        setRoles_NotTerm(roles, null);
+    }
+
+    public void setRoles_NotTerm(String roles, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("roles", roles));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_Terms(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
+    }
+
+    public void setRoles_Terms(Collection<String> rolesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("roles", rolesList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_InScope(Collection<String> rolesList) {
+        setRoles_Terms(rolesList, null);
+    }
+
+    public void setRoles_InScope(Collection<String> rolesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setRoles_Terms(rolesList, opLambda);
+    }
+
+    public void setRoles_Match(String roles) {
+        setRoles_Match(roles, null);
+    }
+
+    public void setRoles_Match(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_MatchPhrase(String roles) {
+        setRoles_MatchPhrase(roles, null);
+    }
+
+    public void setRoles_MatchPhrase(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_MatchPhrasePrefix(String roles) {
+        setRoles_MatchPhrasePrefix(roles, null);
+    }
+
+    public void setRoles_MatchPhrasePrefix(String roles, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_Fuzzy(String roles) {
+        setRoles_Fuzzy(roles, null);
+    }
+
+    public void setRoles_Fuzzy(String roles, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_Prefix(String roles) {
+        setRoles_Prefix(roles, null);
+    }
+
+    public void setRoles_Prefix(String roles, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_GreaterThan(String roles) {
+        setRoles_GreaterThan(roles, null);
+    }
+
+    public void setRoles_GreaterThan(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_GREATER_THAN, roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_LessThan(String roles) {
+        setRoles_LessThan(roles, null);
+    }
+
+    public void setRoles_LessThan(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_LESS_THAN, roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_GreaterEqual(String roles) {
+        setRoles_GreaterEqual(roles, null);
+    }
+
+    public void setRoles_GreaterEqual(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_GREATER_EQUAL, roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_LessEqual(String roles) {
+        setRoles_LessEqual(roles, null);
+    }
+
+    public void setRoles_LessEqual(String roles, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("roles", ConditionKey.CK_LESS_EQUAL, roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_Roles_Asc() {
+        regOBA("roles");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_Roles_Desc() {
+        regOBD("roles");
+        return this;
+    }
+
     public void setQueryId_Equal(String queryId) {
         setQueryId_Term(queryId, null);
     }

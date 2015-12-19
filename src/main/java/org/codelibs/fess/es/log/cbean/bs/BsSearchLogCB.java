@@ -166,6 +166,10 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
             doColumn("user");
         }
 
+        public void columnRoles() {
+            doColumn("roles");
+        }
+
         public void columnQueryId() {
             doColumn("queryId");
         }

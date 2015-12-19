@@ -59,10 +59,6 @@ public class SystemHelper implements Serializable {
 
     private final Set<String> adminRoleSet = new HashSet<>();
 
-    private String[] crawlerJavaOptions = new String[] { "-Djava.awt.headless=true", "-server", "-Xmx256m", "-XX:MaxMetaspaceSize=128m",
-            "-XX:CompressedClassSpaceSize=32m", "-XX:-UseGCOverheadLimit", "-XX:+UseConcMarkSweepGC",
-            "-XX:CMSInitiatingOccupancyFraction=75", "-XX:+UseParNewGC", "-XX:+UseTLAB", "-XX:+DisableExplicitGC" };
-
     private String javaCommandPath = "java";
 
     private String filterPathEncoding = Constants.UTF_8;
@@ -219,14 +215,6 @@ public class SystemHelper implements Serializable {
         roleList.addAll(adminRoleSet);
 
         return roleList;
-    }
-
-    public String[] getCrawlerJavaOptions() {
-        return crawlerJavaOptions;
-    }
-
-    public void setCrawlerJavaOptions(final String[] crawlerJavaOptions) {
-        this.crawlerJavaOptions = crawlerJavaOptions;
     }
 
     public String getJavaCommandPath() {

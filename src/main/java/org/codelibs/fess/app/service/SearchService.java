@@ -42,6 +42,7 @@ import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
@@ -196,6 +197,7 @@ public class SearchService {
             final String query, final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
 
         final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
+        final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
         final SearchLog searchLog = new SearchLog();
 
         if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
@@ -205,6 +207,7 @@ public class SearchService {
             }
         }
 
+        searchLog.setRoles(roleQueryHelper.build().stream().toArray(n -> new String[n]));
         searchLog.setQueryId(queryId);
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
         searchLog.setResponseTime(queryResponseList.getExecTime());

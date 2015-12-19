@@ -14,8 +14,6 @@
 	</component>
 	<component name="aggregateLogJob" class="org.codelibs.fess.job.AggregateLogJob" instance="prototype">
 	</component>
-	<component name="updateHotWordJob" class="org.codelibs.fess.job.UpdateHotWordJob" instance="prototype">
-	</component>
 	<component name="purgeDocJob" class="org.codelibs.fess.job.PurgeDocJob" instance="prototype">
 	</component>
 	<component name="purgeLogJob" class="org.codelibs.fess.job.PurgeLogJob" instance="prototype">

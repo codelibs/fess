@@ -43,6 +43,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** user */
     protected String user;
 
+    /** roles */
+    protected String[] roles;
+
     /** queryId */
     protected String queryId;
 
@@ -109,6 +112,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (user != null) {
             sourceMap.put("user", user);
         }
+        if (roles != null) {
+            sourceMap.put("roles", roles);
+        }
         if (queryId != null) {
             sourceMap.put("queryId", queryId);
         }
@@ -159,6 +165,7 @@ public class BsSearchLog extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(accessType);
         sb.append(dm).append(user);
+        sb.append(dm).append(roles);
         sb.append(dm).append(queryId);
         sb.append(dm).append(clientIp);
         sb.append(dm).append(hitCount);
@@ -200,6 +207,16 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setUser(String value) {
         registerModifiedProperty("user");
         this.user = value;
+    }
+
+    public String[] getRoles() {
+        checkSpecifiedProperty("roles");
+        return roles;
+    }
+
+    public void setRoles(String[] value) {
+        registerModifiedProperty("roles");
+        this.roles = value;
     }
 
     public String getQueryId() {

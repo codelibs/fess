@@ -29,11 +29,13 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.json.JsonApiManager;
+import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ public class SuggestApiManager extends BaseApiManager {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
+        final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
 
         try {
 
@@ -67,9 +70,8 @@ public class SuggestApiManager extends BaseApiManager {
             final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
             final SuggestRequestBuilder builder = suggestHelper.suggester().suggest();
             builder.setQuery(parameter.getQuery());
-            for (final String field : parameter.getFields()) {
-                builder.addField(field);
-            }
+            StreamUtil.of(parameter.getFields()).forEach(field -> builder.addField(field));
+            roleQueryHelper.build().stream().forEach(role -> builder.addRole(role));
             builder.setSize(parameter.getNum());
 
             builder.addKind(SuggestItem.Kind.USER.toString());

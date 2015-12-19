@@ -82,6 +82,7 @@ public class SearchLogDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((SearchLog) et).getAccessType(), (et, vl) -> ((SearchLog) et).setAccessType(DfTypeUtil.toString(vl)),
                 "accessType");
         setupEpg(_epgMap, et -> ((SearchLog) et).getUser(), (et, vl) -> ((SearchLog) et).setUser(DfTypeUtil.toString(vl)), "user");
+        setupEpg(_epgMap, et -> ((SearchLog) et).getRoles(), (et, vl) -> ((SearchLog) et).setRoles((String[]) vl), "roles");
         setupEpg(_epgMap, et -> ((SearchLog) et).getQueryId(), (et, vl) -> ((SearchLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
         setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
                 "clientIp");
@@ -145,6 +146,8 @@ public class SearchLogDbm extends AbstractDBMeta {
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUser = cci("user", "user", null, null, String.class, "user", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnClientIp = cci("clientIp", "clientIp", null, null, String.class, "clientIp", null, false, false,
@@ -178,6 +181,10 @@ public class SearchLogDbm extends AbstractDBMeta {
 
     public ColumnInfo columnUser() {
         return _columnUser;
+    }
+
+    public ColumnInfo columnRoles() {
+        return _columnRoles;
     }
 
     public ColumnInfo columnQueryId() {
@@ -236,6 +243,7 @@ public class SearchLogDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnAccessType());
         ls.add(columnUser());
+        ls.add(columnRoles());
         ls.add(columnQueryId());
         ls.add(columnClientIp());
         ls.add(columnHitCount());

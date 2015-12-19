@@ -20,9 +20,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -43,6 +47,7 @@ import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
@@ -50,6 +55,8 @@ import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
     private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
+
+    private static final String TEXT_SEP = " ";
 
     @Resource
     protected ElevateWordBhv elevateWordBhv;
@@ -60,34 +67,39 @@ public class SuggestHelper {
     @Resource
     protected FessEsClient fessEsClient;
 
-    public String[] contentFieldNames = { "_default" };
-
-    public String[] tagFieldNames = { "label" };
-
-    public String[] roleFieldNames = { "role" };
-
-    public String[] contentsIndexFieldNames = { "content", "title" };
-
-    public long updateRequestIntervalMills = 1;
-
-    public int sourceReaderScrollSize = 1;
-
-    private static final String TEXT_SEP = " ";
-
     protected Suggester suggester;
 
     protected final AtomicBoolean initialized = new AtomicBoolean(false);
 
+    private FessConfig fessConfig;
+
+    private final Set<String> contentFieldNameSet = new HashSet<>();
+
+    private final Set<String> tagFieldNameSet = new HashSet<>();
+
+    private final Set<String> roleFieldNameSet = new HashSet<>();
+
+    private List<String> contentFieldList;
+
+    private List<Pattern> roleFilterList = new ArrayList<>();
+
     @PostConstruct
     public void init() {
+        fessConfig = ComponentUtil.getFessConfig();
+        stream(fessConfig.getSuggestFieldContents()).forEach(f -> contentFieldNameSet.add(f));
+        stream(fessConfig.getSuggestFieldTags()).forEach(f -> tagFieldNameSet.add(f));
+        stream(fessConfig.getSuggestFieldRoles()).forEach(f -> roleFieldNameSet.add(f));
+        contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).toArray(n -> new String[n]));
+        stream(fessConfig.getSuggestRoleFilters()).forEach(filter -> {
+            roleFilterList.add(Pattern.compile(filter));
+        });
         final Thread th = new Thread(() -> {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
             suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
             suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-            for (final String field : contentsIndexFieldNames) {
+            stream(fessConfig.getSuggestFieldIndexContents()).forEach(field -> {
                 suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
-            }
+            });
             suggester.createIndexIfNothing();
             initialized.set(true);
         });
@@ -99,34 +111,41 @@ public class SuggestHelper {
     }
 
     public void indexFromSearchLog(final List<SearchLog> searchLogList) {
-        for (final SearchLog searchLog : searchLogList) {
-            // TODO if(getHitCount == 0) continue;
-
-            final StringBuilder sb = new StringBuilder();
-            final List<String> fields = new ArrayList<>();
-            final List<String> tags = new ArrayList<>();
-            final List<String> roles = new ArrayList<>();
-
-            for (final SearchFieldLog searchFieldLog : searchLog.getSearchFieldLogList()) {
-                final String name = searchFieldLog.getName();
-                if (isContentField(name)) {
-                    if (sb.length() > 0) {
-                        sb.append(TEXT_SEP);
+        searchLogList.stream().forEach(
+                searchLog -> {
+                    if (searchLog.getHitCount() == null
+                            || searchLog.getHitCount().longValue() < fessConfig.getSuggestMinHitCountAsInteger().longValue()) {
+                        return;
                     }
-                    sb.append(searchFieldLog.getValue());
-                    fields.add(name);
-                } else if (isTagField(name)) {
-                    tags.add(searchFieldLog.getValue());
-                } else if (isRoleField(name)) {
-                    roles.add(searchFieldLog.getValue());
-                }
-            }
 
-            if (sb.length() > 0) {
-                suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
-                        tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
-            }
-        }
+                    final StringBuilder sb = new StringBuilder();
+                    final List<String> fields = new ArrayList<>();
+                    final List<String> tags = new ArrayList<>();
+                    final List<String> roles = new ArrayList<>();
+
+                    for (final SearchFieldLog searchFieldLog : searchLog.getSearchFieldLogList()) {
+                        final String name = searchFieldLog.getName();
+                        if (contentFieldNameSet.contains(name)) {
+                            if (sb.length() > 0) {
+                                sb.append(TEXT_SEP);
+                            }
+                            sb.append(searchFieldLog.getValue());
+                            fields.add(name);
+                        } else if (tagFieldNameSet.contains(name)) {
+                            tags.add(searchFieldLog.getValue());
+                        } else if (roleFieldNameSet.contains(name)) {
+                            roles.add(searchFieldLog.getValue());
+                        }
+                    }
+
+                    if (sb.length() > 0) {
+                        StreamUtil.of(searchLog.getRoles()).forEach(role -> roles.add(role));
+                        if (roles.stream().allMatch(v -> roleFilterList.stream().anyMatch(pattern -> pattern.matcher(v).matches()))) {
+                            suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
+                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
+                        }
+                    }
+                });
         suggester.refresh();
     }
 
@@ -144,11 +163,12 @@ public class SuggestHelper {
         final ESSourceReader reader =
                 new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType());
-        reader.setScrollSize(sourceReaderScrollSize);
-        suggester.indexer().indexFromDocument(reader, 2, updateRequestIntervalMills).then(response -> {
-            suggester.refresh();
-            success.accept(true);
-        }).error(t -> error.accept(t));
+        reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger().intValue());
+        suggester.indexer().indexFromDocument(reader, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue())
+                .then(response -> {
+                    suggester.refresh();
+                    success.accept(true);
+                }).error(t -> error.accept(t));
     }
 
     public void purgeDocumentSuggest(final LocalDateTime time) {
@@ -227,8 +247,8 @@ public class SuggestHelper {
         }
 
         suggester.indexer().addElevateWord(
-                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Collections.singletonList(reading), Arrays
-                        .asList(contentFieldNames), labelList, roleList));
+                new org.codelibs.fess.suggest.entity.ElevateWord(word, boost, Collections.singletonList(reading), contentFieldList,
+                        labelList, roleList));
     }
 
     public void deleteAllBadWords() {
@@ -254,30 +274,8 @@ public class SuggestHelper {
         suggester.indexer().deleteBadWord(badWord);
     }
 
-    protected boolean isContentField(final String field) {
-        for (final String contentField : contentFieldNames) {
-            if (contentField.equals(field)) {
-                return true;
-            }
-        }
-        return false;
+    private Stream<String> stream(String value) {
+        return StreamUtil.of(value.split(",")).filter(v -> StringUtil.isNotBlank(v));
     }
 
-    protected boolean isTagField(final String field) {
-        for (final String tagField : tagFieldNames) {
-            if (tagField.equals(field)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected boolean isRoleField(final String field) {
-        for (final String roleField : roleFieldNames) {
-            if (roleField.equals(field)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -31,25 +31,6 @@
             "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
             "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" }</property>
 		-->
-        <property name="crawlerJavaOptions">
-[
-"-Djava.awt.headless=true",
-"-server",
-"-Xmx256m",
-"-XX:MaxMetaspaceSize=128m",
-"-XX:CompressedClassSpaceSize=32m",
-"-XX:-UseGCOverheadLimit",
-"-XX:+UseConcMarkSweepGC",
-"-XX:CMSInitiatingOccupancyFraction=75",
-"-XX:+UseParNewGC",
-"-XX:+UseTLAB",
-"-XX:+DisableExplicitGC"
-]
-</property>
-<!-- remote debug
-"-Xdebug",
-"-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000",
- -->
  		<postConstruct name="addAdminRoles">
  			<arg>["fess"]</arg>
  		</postConstruct>

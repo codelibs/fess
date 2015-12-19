@@ -100,7 +100,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, form.supportedSearch);
         updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
         updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
-        updateProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY,
+        updateProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY,
                 form.hotSearchWord != null && Constants.ON.equalsIgnoreCase(form.hotSearchWord) ? Constants.TRUE : Constants.FALSE);
         updateProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
         updateProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay.toString());
@@ -133,7 +133,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ignoreFailureType =
                 crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
-        form.hotSearchWord = crawlerProperties.getProperty(Constants.WEB_API_HOT_SEARCH_WORD_PROPERTY, Constants.TRUE);
+        form.hotSearchWord = crawlerProperties.getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, Constants.TRUE);
         form.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
         form.purgeSearchLogDay =
                 Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
