@@ -343,6 +343,12 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. 1 */
     String SUGGEST_SOURCE_READER_SCROLL_SIZE = "suggest.source.reader.scroll.size";
 
+    /** The key of the configuration. e.g. 1000 */
+    String SUGGEST_POPULAR_WORD_CACHE_SIZE = "suggest.popular.word.cache.size";
+
+    /** The key of the configuration. e.g. 60 */
+    String SUGGEST_POPULAR_WORD_CACHE_EXPIRE = "suggest.popular.word.cache.expire";
+
     /** The key of the configuration. e.g. guest */
     String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
 
@@ -1358,6 +1364,36 @@ public interface FessConfig extends FessEnv {
     Integer getSuggestSourceReaderScrollSizeAsInteger();
 
     /**
+     * Get the value for the key 'suggest.popular.word.cache.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordCacheSize();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.cache.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.cache.expire'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordCacheExpire();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.cache.expire' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordCacheExpireAsInteger();
+
+    /**
      * Get the value for the key 'suggest.role.filters'. <br>
      * The value is, e.g. guest <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1907,6 +1943,22 @@ public interface FessConfig extends FessEnv {
 
         public Integer getSuggestSourceReaderScrollSizeAsInteger() {
             return getAsInteger(FessConfig.SUGGEST_SOURCE_READER_SCROLL_SIZE);
+        }
+
+        public String getSuggestPopularWordCacheSize() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_CACHE_SIZE);
+        }
+
+        public Integer getSuggestPopularWordCacheSizeAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_CACHE_SIZE);
+        }
+
+        public String getSuggestPopularWordCacheExpire() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_CACHE_EXPIRE);
+        }
+
+        public Integer getSuggestPopularWordCacheExpireAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_CACHE_EXPIRE);
         }
 
         public String getSuggestRoleFilters() {
