@@ -78,7 +78,7 @@ public class EditForm implements Serializable {
     public Integer failureCountThreshold;
 
     @Size(max = 10)
-    public String hotSearchWord;
+    public String popularWord;
 
     @Required
     @Size(max = 20)

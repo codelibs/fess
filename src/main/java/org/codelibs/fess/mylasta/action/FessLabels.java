@@ -213,7 +213,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_HANDLER_SCRIPT = "{labels.handlerScript}";
 
     /** The key of the message: Popular words */
-    public static final String LABELS_HOT_SEARCH_WORD = "{labels.hotSearchWord}";
+    public static final String LABELS_POPULAR_WORD = "{labels.popularWord}";
 
     /** The key of the message: Ignored Failure Type */
     public static final String LABELS_IGNORE_FAILURE_TYPE = "{labels.ignoreFailureType}";

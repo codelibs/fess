@@ -327,11 +327,11 @@ public class JsonApiManager extends BaseApiManager {
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<String> hotSearchWordList = popularWordHelper.getWordList(seed, tags, fields, excludes);
+            final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, fields, excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;
-            for (final String word : hotSearchWordList) {
+            for (final String word : popularWordList) {
                 if (!first1) {
                     buf.append(',');
                 } else {
@@ -348,7 +348,7 @@ public class JsonApiManager extends BaseApiManager {
             }
             errMsg = e.getMessage();
             if (logger.isDebugEnabled()) {
-                logger.debug("Failed to process a hotSearchWord request.", e);
+                logger.debug("Failed to process a popularWord request.", e);
             }
         }
 

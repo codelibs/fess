@@ -68,12 +68,12 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="hotSearchWord" class="col-sm-3 control-label"><la:message
+										<label for="popularWord" class="col-sm-3 control-label"><la:message
 												key="labels.popular_word_word_enabled" /></label>
 										<div class="col-sm-9">
-											<la:errors property="hotSearchWord" />
+											<la:errors property="popularWord" />
 											<div class="checkbox">
-												<label> <la:checkbox property="hotSearchWord" /> <la:message
+												<label> <la:checkbox property="popularWord" /> <la:message
 														key="labels.enabled" />
 												</label>
 											</div>

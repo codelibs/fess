@@ -52,7 +52,7 @@ public class MailForm implements Serializable {
 
     public String failureCountThreshold;
 
-    public String hotSearchWord;
+    public String popularWord;
 
     public String csvFileEncoding;
 

@@ -259,7 +259,7 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	#result ol {
 		margin-left: 0;
 	}
-	.hotSearchWordBody {
+	.popularWordBody {
 		width: 440px;
 	}
 	#result .site {
@@ -291,7 +291,7 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	.searchFormBox {
 		margin-top: 80px;
 	}
-	.hotSearchWordBody {
+	.popularWordBody {
 		width: 280px;
 	}
 	#result .site {

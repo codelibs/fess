@@ -72,7 +72,7 @@
 						</div>
 						<c:if test="${!empty popularWords}">
 							<div>
-								<p class="hotSearchWordBody ellipsis">
+								<p class="popularWordBody ellipsis">
 									<la:message key="labels.search_popular_word_word" />
 									<c:forEach var="item" items="${popularWords}">
 										<la:link
