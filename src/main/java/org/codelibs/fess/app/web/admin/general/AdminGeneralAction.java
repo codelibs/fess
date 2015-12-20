@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,22 +24,31 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
+import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  * @author Shunji Makino
  */
 public class AdminGeneralAction extends FessAdminAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminGeneralAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -69,6 +80,42 @@ public class AdminGeneralAction extends FessAdminAction {
                 updateForm(form);
             });
         });
+    }
+
+    @Execute
+    public HtmlResponse sendmail(final MailForm form) {
+        validate(form, messages -> {}, () -> {
+            return asHtml(path_AdminGeneral_AdminGeneralJsp);
+        });
+
+        final String[] toAddresses = form.notificationTo.split(",");
+        final Map<String, Object> dataMap = new HashMap<String, Object>();
+        try {
+            dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
+        } catch (final UnknownHostException e) {
+            dataMap.put("hostname", "UNKNOWN");
+        }
+
+        final FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
+        final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
+        try {
+            TestmailPostcard.droppedInto(postbox, postcard -> {
+                postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
+                postcard.addReplyTo(fessConfig.getMailReturnPath());
+                StreamUtil.of(toAddresses).forEach(address -> {
+                    postcard.addTo(address);
+                });
+                BeanUtil.copyMapToBean(dataMap, postcard);
+            });
+            saveInfo(messages -> messages.addSuccessSendTestmail(GLOBAL));
+            updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
+            crawlerProperties.store();
+        } catch (Exception e) {
+            logger.warn("Failed to send a test mail.", e);
+            saveError(messages -> messages.addErrorsFailedToSendTestmail(GLOBAL));
+        }
+
+        return redirectByParam(AdminGeneralAction.class, "notificationTo", form.notificationTo);
     }
 
     @Execute

@@ -40,10 +40,30 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. sha256 */
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
-    /** The key of the configuration. e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC */
+    /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
-    /** The key of the configuration. e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC */
+    /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. false */
@@ -415,7 +435,17 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
-     * The value is, e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC <br>
+     * The value is, e.g. -Djava.awt.headless=true
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -423,7 +453,17 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'jvm.suggest.options'. <br>
-     * The value is, e.g. -Djava.awt.headless=true-server-Xmx256m-XX:MaxMetaspaceSize=128m-XX:CompressedClassSpaceSize=32m-XX:-UseGCOverheadLimit-XX:+UseConcMarkSweepGC-XX:CMSInitiatingOccupancyFraction=75-XX:+UseParNewGC-XX:+UseTLAB-XX:+DisableExplicitGC <br>
+     * The value is, e.g. -Djava.awt.headless=true
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();

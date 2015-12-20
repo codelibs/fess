@@ -105,7 +105,14 @@
 												key="labels.notification_to" /></label>
 										<div class="col-sm-9">
 											<la:errors property="notificationTo" />
-											<la:text property="notificationTo" styleClass="form-control" />
+											<div class="input-group">
+												<la:text property="notificationTo" styleClass="form-control" />
+												<span class="input-group-btn">
+													<button type="submit" class="btn btn-default" name="sendmail" value="test">
+														<la:message key="labels.send_testmail" />
+													</button>
+												</span>
+											</div>
 										</div>
 									</div>
 									<%-- Crawler --%>

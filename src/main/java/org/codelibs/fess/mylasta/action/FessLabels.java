@@ -1232,13 +1232,13 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Upload File */
     public static final String LABELS_design_file = "{labels.design_file}";
 
-    /** The key of the message: Upload File Name (Optional) */
+    /** The key of the message: File Name (Optional) */
     public static final String LABELS_design_file_name = "{labels.design_file_name}";
 
     /** The key of the message: Upload */
     public static final String LABELS_design_button_upload = "{labels.design_button_upload}";
 
-    /** The key of the message: Page View Files */
+    /** The key of the message: JSP Files */
     public static final String LABELS_design_file_title_edit = "{labels.design_file_title_edit}";
 
     /** The key of the message: Edit */
@@ -1298,7 +1298,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Error Page (BadRequest) */
     public static final String LABELS_design_file_errorBadRequest = "{labels.design_file_errorBadRequest}";
 
-    /** The key of the message: Edit Page View File */
+    /** The key of the message: Edit JSP File */
     public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";
 
     /** The key of the message: Update */
@@ -1973,6 +1973,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Suggest */
     public static final String LABELS_general_menu_suggest = "{labels.general_menu_suggest}";
+
+    /** The key of the message: Send TestMail */
+    public static final String LABELS_send_testmail = "{labels.send_testmail}";
 
     /**
      * Assert the property is not null.

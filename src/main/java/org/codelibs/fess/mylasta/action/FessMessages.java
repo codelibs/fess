@@ -263,6 +263,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to delete document. */
     public static final String ERRORS_failed_to_delete_doc_in_admin = "{errors.failed_to_delete_doc_in_admin}";
 
+    /** The key of the message: Failed to send the test mail. */
+    public static final String ERRORS_failed_to_send_testmail = "{errors.failed_to_send_testmail}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -331,6 +334,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Uploaded Bad Word file. */
     public static final String SUCCESS_upload_bad_word = "{success.upload_bad_word}";
+
+    /** The key of the message: Sent the test mail. */
+    public static final String SUCCESS_send_testmail = "{success.send_testmail}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -1514,6 +1520,20 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_send_testmail' with parameters.
+     * <pre>
+     * message: Failed to send the test mail.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToSendTestmail(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_send_testmail));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.invalid_query_unknown' with parameters.
      * <pre>
      * message: The given query has unknown condition.
@@ -1844,6 +1864,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadBadWord(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_upload_bad_word));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.send_testmail' with parameters.
+     * <pre>
+     * message: Sent the test mail.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessSendTestmail(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_send_testmail));
         return this;
     }
 

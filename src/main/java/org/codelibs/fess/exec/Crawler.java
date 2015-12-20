@@ -274,7 +274,7 @@ public class Crawler implements Serializable {
         }
     }
 
-    public void sendMail(final Map<String, String> infoMap) {
+    protected void sendMail(final Map<String, String> infoMap) {
         final String toStrs = (String) crawlerProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
@@ -292,20 +292,16 @@ public class Crawler implements Serializable {
                 // ignore
             }
 
-            try {
-                final FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
-                final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
-                CrawlerPostcard.droppedInto(postbox, postcard -> {
-                    postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
-                    postcard.addReplyTo(fessConfig.getMailReturnPath());
-                    StreamUtil.of(toAddresses).forEach(address -> {
-                        postcard.addTo(address);
-                    });
-                    BeanUtil.copyMapToBean(dataMap, postcard);
+            final FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
+            final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
+            CrawlerPostcard.droppedInto(postbox, postcard -> {
+                postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
+                postcard.addReplyTo(fessConfig.getMailReturnPath());
+                StreamUtil.of(toAddresses).forEach(address -> {
+                    postcard.addTo(address);
                 });
-            } catch (final Exception e) {
-                logger.warn("Failed to send the notification.", e);
-            }
+                BeanUtil.copyMapToBean(dataMap, postcard);
+            });
         }
     }
 
