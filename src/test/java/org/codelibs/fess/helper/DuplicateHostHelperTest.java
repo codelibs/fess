@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import java.util.ArrayList;
+
+import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class DuplicateHostHelperTest extends UnitFessTestCase {
@@ -24,13 +27,18 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
     public void setUp() throws Exception {
         super.setUp();
         duplicateHostHelper = new DuplicateHostHelper();
-        // duplicateHostHelper.init(); // TODO cause error
+        duplicateHostHelper.duplicateHostList = new ArrayList<DuplicateHost>();
+
+        DuplicateHost foo = new DuplicateHost();
+        foo.setRegularName("www.foo.com");
+        foo.setDuplicateHostName("foo.com");
+        duplicateHostHelper.duplicateHostList.add(foo);
+        DuplicateHost bar = new DuplicateHost();
+        bar.setRegularName("www.bar.com");
+        bar.setDuplicateHostName("mail.bar.com");
+        duplicateHostHelper.duplicateHostList.add(bar);
     }
 
-    public void test_dummy() {
-    }
-
-    /*
     public void test_convert() {
         String url;
         String result;
@@ -77,5 +85,5 @@ public class DuplicateHostHelperTest extends UnitFessTestCase {
         result = "http://www.bar.com:8080/";
         assertEquals(result, duplicateHostHelper.convert(url));
     }
-    */
+
 }

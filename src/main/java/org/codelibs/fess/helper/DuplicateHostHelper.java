@@ -29,7 +29,7 @@ public class DuplicateHostHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<DuplicateHost> duplicateHostList;
+    protected List<DuplicateHost> duplicateHostList;
 
     @PostConstruct
     public void init() {

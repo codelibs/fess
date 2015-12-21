@@ -15,11 +15,13 @@
  */
 package org.codelibs.fess.helper.impl;
 
+import java.util.Set;
+
+import javax.servlet.http.Cookie;
+
 import org.codelibs.core.crypto.CachedCipher;
-import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.core.exception.IllegalBlockSizeRuntimeException;
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.util.ComponentUtil;
 
 public class RoleQueryHelperImplTest extends UnitFessTestCase {
     public RoleQueryHelperImpl roleQueryHelperImpl;
@@ -30,35 +32,26 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         super.setUp();
         roleQueryHelperImpl = new RoleQueryHelperImpl();
         cipher = new CachedCipher();
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        registerMockInstance(fessConfig);
-        registerMockInstance(new SystemHelper());
-        inject(roleQueryHelperImpl);
+        cipher.setKey("1234567890123456");
     }
 
-    public void test_dummy() {
-        // TODO
-    }
-
-    /*
-     * 
     public void test_buildByParameter() {
         final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
 
         Set<String> roleSet;
 
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.parameterKey = "fess1";
 
-        getRequest().setParameter("aaa", "bbb");
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        getMockRequest().setParameter("aaa", "bbb");
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedParameterValue = false;
-        getRequest().setParameter("fess1", "xxx\nrole1,role2,role3");
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        getMockRequest().setParameter("fess1", "xxx\nrole1,role2,role3");
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
@@ -68,17 +61,16 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
-        getRequest().setParameter("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        getMockRequest().setParameter("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
         assertTrue(roleSet.contains("role3"));
 
-        getRequest().setParameter("fess2", "fail");
+        getMockRequest().setParameter("fess2", "fail");
         try {
-            roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+            roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
             fail();
         } catch (final IllegalBlockSizeRuntimeException e) {
             // ok
@@ -87,14 +79,14 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         roleQueryHelperImpl.parameterKey = "fess3";
 
         roleQueryHelperImpl.encryptedParameterValue = false;
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.parameterKey = "fess4";
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedParameterValue = true;
-        roleSet = roleQueryHelperImpl.buildByParameter(getRequest());
+        roleSet = roleQueryHelperImpl.buildByParameter(getMockRequest());
         assertEquals(0, roleSet.size());
 
     }
@@ -105,7 +97,7 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         Set<String> roleSet;
 
         try {
-            roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+            roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
             fail();
         } catch (final NullPointerException e) {
             //ok
@@ -113,13 +105,13 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.headerKey = "fess1";
 
-        getRequest().addHeader("aaa", "bbb");
-        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        getMockRequest().addHeader("aaa", "bbb");
+        roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedHeaderValue = false;
-        getRequest().addHeader("fess1", "xxx\nrole1,role2,role3");
-        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        getMockRequest().addHeader("fess1", "xxx\nrole1,role2,role3");
+        roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
@@ -129,18 +121,17 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
-        getRequest().addHeader("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
-        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        getMockRequest().addHeader("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
         assertTrue(roleSet.contains("role3"));
 
         roleQueryHelperImpl.headerKey = "fess2x";
-        getRequest().addHeader("fess2x", "fail");
+        getMockRequest().addHeader("fess2x", "fail");
         try {
-            roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+            roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
             fail();
         } catch (final IllegalBlockSizeRuntimeException e) {
             // ok
@@ -149,14 +140,14 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         roleQueryHelperImpl.headerKey = "fess3";
 
         roleQueryHelperImpl.encryptedHeaderValue = false;
-        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.headerKey = "fess4";
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedHeaderValue = true;
-        roleSet = roleQueryHelperImpl.buildByHeader(getRequest());
+        roleSet = roleQueryHelperImpl.buildByHeader(getMockRequest());
         assertEquals(0, roleSet.size());
     }
 
@@ -166,13 +157,13 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         Set<String> roleSet;
         Cookie cookie;
 
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(0, roleSet.size());
 
         cookie = new Cookie("aaa", "bbb");
-        getRequest().addCookie(cookie);
+        getMockRequest().addCookie(cookie);
         try {
-            roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+            roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
             fail();
         } catch (final NullPointerException e) {
             // ok
@@ -180,13 +171,13 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cookieKey = "fess1";
 
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.encryptedCookieValue = false;
         cookie = new Cookie("fess1", "xxx\nrole1,role2,role3");
-        getRequest().addCookie(cookie);
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        getMockRequest().addCookie(cookie);
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
@@ -196,10 +187,9 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
-        cookie = new Cookie("fess2",
-                cipher.encryptoText("xxx\nrole1,role2,role3"));
-        getRequest().addCookie(cookie);
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        cookie = new Cookie("fess2", cipher.encryptoText("xxx\nrole1,role2,role3"));
+        getMockRequest().addCookie(cookie);
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(3, roleSet.size());
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
@@ -210,9 +200,9 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
         cookie = new Cookie("fess2x", "fail");
-        getRequest().addCookie(cookie);
+        getMockRequest().addCookie(cookie);
         try {
-            roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+            roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
             fail();
         } catch (final Exception e) {
             // ok
@@ -221,14 +211,14 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         roleQueryHelperImpl.cookieKey = "fess3";
 
         roleQueryHelperImpl.encryptedCookieValue = false;
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(0, roleSet.size());
 
         roleQueryHelperImpl.cookieKey = "fess4";
 
         roleQueryHelperImpl.cipher = cipher;
         roleQueryHelperImpl.encryptedCookieValue = true;
-        roleSet = roleQueryHelperImpl.buildByCookie(getRequest());
+        roleSet = roleQueryHelperImpl.buildByCookie(getMockRequest());
         assertEquals(0, roleSet.size());
     }
 
@@ -361,6 +351,6 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
         assertTrue(roleSet.contains("role1"));
         assertTrue(roleSet.contains("role2"));
         assertTrue(roleSet.contains("role3"));
-        }
-     */
+    }
+
 }
