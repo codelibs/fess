@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
@@ -61,16 +62,16 @@
 		<crawler.version>1.0.1</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>2.1.1-SNAPSHOT</suggest.version>
+		<suggest.version>2.1.0</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>2.1.0</elasticsearch.version>
-		<cluster.runner.version>2.1.0.0</cluster.runner.version>
+		<elasticsearch.version>2.1.1</elasticsearch.version>
+		<cluster.runner.version>2.1.1.0-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.4.2</tomcat.boot.version>
 
-		<!-- TODO: RPM build -->
+		<!-- RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
 		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
