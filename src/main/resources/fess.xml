@@ -20,6 +20,8 @@
     </component>
 	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
 	</component>
+	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
+	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
 		<!--
 		<property name="javaCommandPath">"java"</property>

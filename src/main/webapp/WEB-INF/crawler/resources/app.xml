@@ -28,8 +28,6 @@
 		</postConstruct>
 		 -->
 	</component>
-	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
-	</component>
 	<component name="indexUpdater" class="org.codelibs.fess.indexer.IndexUpdater"
 		instance="prototype">
 		<!-- 
