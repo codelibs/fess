@@ -15,16 +15,13 @@
  */
 package org.codelibs.fess.helper.impl;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -115,14 +111,7 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
         }
 
         final FessLoginAssist fessLoginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
-        fessLoginAssist.getSessionUserBean().ifPresent(
-                fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).map(role -> Base64.getDecoder().decode(role)).map(role -> {
-                    try {
-                        return Optional.of(new String(role, Constants.UTF_8));
-                    } catch (final IOException e) {
-                        return null;
-                    }
-                }).forEach(role -> role.ifPresent(roleList::add)));
+        fessLoginAssist.getSessionUserBean().ifPresent(fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).forEach(roleList::add));
 
         if (defaultRoleList != null) {
             roleList.addAll(defaultRoleList);

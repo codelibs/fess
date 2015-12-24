@@ -15,14 +15,38 @@
  */
 package org.codelibs.fess.ldap;
 
-import org.codelibs.fess.es.user.exentity.User;
+import java.util.Hashtable;
 
-public class LdapUser extends User {
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.FessUser;
+
+public class LdapUser implements FessUser {
 
     private static final long serialVersionUID = 1L;
 
-    public LdapUser(String username) {
-        setId(username);
+    protected Hashtable<String, String> env;
+
+    protected String name;
+
+    public LdapUser(Hashtable<String, String> env, String name) {
+        this.env = env;
+        this.name = name;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String[] getRoleNames() {
+        // TODO
+        return StringUtil.EMPTY_STRINGS;
+    }
+
+    @Override
+    public String[] getGroupNames() {
+        // TODO
+        return StringUtil.EMPTY_STRINGS;
+    }
 }

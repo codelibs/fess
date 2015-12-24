@@ -23,7 +23,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.filter.AdLoginInfoFilter;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class LdapManager {
     private static final Logger logger = LoggerFactory.getLogger(AdLoginInfoFilter.class);
 
-    public OptionalEntity<User> login(String username, String password) {
+    public OptionalEntity<FessUser> login(String username, String password) {
         FessConfig fessConfig = ComponentUtil.getFessConfig();
         String providerUrl = fessConfig.getLdapProviderUrl();
 
@@ -54,9 +54,9 @@ public class LdapManager {
             if (logger.isDebugEnabled()) {
                 logger.debug("Logged in.", ctx);
             }
-            return OptionalEntity.of(new LdapUser(username));
+            return OptionalEntity.of(createLdapUser(username, env));
         } catch (NamingException e) {
-            logger.warn("Login failed.", e);
+            logger.debug("Login failed.", e);
         } finally {
             if (ctx != null) {
                 try {
@@ -67,5 +67,9 @@ public class LdapManager {
             }
         }
         return OptionalEntity.empty();
+    }
+
+    protected LdapUser createLdapUser(String username, Hashtable<String, String> env) {
+        return new LdapUser(env, username);
     }
 }

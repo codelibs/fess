@@ -18,13 +18,14 @@ package org.codelibs.fess.es.user.exentity;
 import java.util.Base64;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.bsentity.BsUser;
 import org.codelibs.fess.util.StreamUtil;
 
 /**
  * @author FreeGen
  */
-public class User extends BsUser {
+public class User extends BsUser implements FessUser {
 
     private static final long serialVersionUID = 1L;
 

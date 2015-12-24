@@ -20,8 +20,8 @@ import javax.annotation.Resource;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.RootAction;
 import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.exbhv.UserBhv;
-import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -40,7 +40,7 @@ import org.lastaflute.web.login.option.LoginSpecifiedOption;
  * @author jflute
  * @author shinsuke
  */
-public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, User> // #change_it also UserBean
+public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, FessUser> // #change_it also UserBean
         implements LoginManager {
 
     // ===================================================================================
@@ -67,8 +67,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
     }
 
     @Override
-    public OptionalEntity<User> findLoginUser(String username, String password) {
-        OptionalEntity<User> ldapUser = ComponentUtil.getLdapManager().login(username, password);
+    public OptionalEntity<FessUser> findLoginUser(String username, String password) {
+        OptionalEntity<FessUser> ldapUser = ComponentUtil.getLdapManager().login(username, password);
         if (ldapUser.isPresent()) {
             return ldapUser;
         }
@@ -76,25 +76,25 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
     }
 
     @Override
-    protected OptionalEntity<User> doFindLoginUser(final String username, final String cipheredPassword) {
+    protected OptionalEntity<FessUser> doFindLoginUser(final String username, final String cipheredPassword) {
         return userBhv.selectEntity(cb -> {
             cb.query().setName_Equal(username);
             cb.query().setPassword_Equal(cipheredPassword);
-        });
+        }).map(user -> (FessUser) user);
     }
 
     @Override
-    protected OptionalEntity<User> doFindLoginUser(final String username) {
+    protected OptionalEntity<FessUser> doFindLoginUser(final String username) {
         return userBhv.selectEntity(cb -> {
             cb.query().setName_Equal(username);
-        });
+        }).map(user -> (FessUser) user);
     }
 
     // ===================================================================================
     //                                                                       Login Process
     //                                                                       =============
     @Override
-    protected FessUserBean createUserBean(final User user) {
+    protected FessUserBean createUserBean(final FessUser user) {
         return new FessUserBean(user);
     }
 
@@ -106,7 +106,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
     }
 
     @Override
-    protected void saveLoginHistory(final User user, final FessUserBean userBean, final LoginSpecifiedOption option) {
+    protected void saveLoginHistory(final FessUser user, final FessUserBean userBean, final LoginSpecifiedOption option) {
         asyncManager.async(() -> {
             insertLogin(user);
         });

@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
-import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.login.TypicalUserBean;
 
@@ -29,7 +29,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                          ==========
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;
-    private final User user;
+    private final FessUser user;
 
     // ===================================================================================
     //                                                                           Attribute
@@ -38,7 +38,7 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                         Constructor
     //                                                                         ===========
-    public FessUserBean(final User user) {
+    public FessUserBean(final FessUser user) {
         this.user = user;
     }
 
@@ -54,11 +54,11 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     //                                                                            Accessor
     //                                                                            ========
     public String[] getRoles() {
-        return user.getRoles();
+        return user.getRoleNames();
     }
 
     public String[] getGroups() {
-        return user.getGroups();
+        return user.getGroupNames();
     }
 
     public boolean hasRole(final String role) {
