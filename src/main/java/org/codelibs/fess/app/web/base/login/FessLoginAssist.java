@@ -25,6 +25,7 @@ import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.magic.async.AsyncManager;
@@ -63,6 +64,15 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Us
             cb.query().setName_Equal(username);
             cb.query().setPassword_Equal(cipheredPassword);
         }) > 0;
+    }
+
+    @Override
+    public OptionalEntity<User> findLoginUser(String username, String password) {
+        OptionalEntity<User> ldapUser = ComponentUtil.getLdapManager().login(username, password);
+        if (ldapUser.isPresent()) {
+            return ldapUser;
+        }
+        return doFindLoginUser(username, encryptPassword(password));
     }
 
     @Override

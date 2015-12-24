@@ -47,12 +47,15 @@ import org.codelibs.fess.helper.UserInfoHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
+import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public final class ComponentUtil {
+    private static final String LDAP_MANAGER = "ldapManager";
+
     private static final String ROLE_QUERY_HELPER = "roleQueryHelper";
 
     private static final String SUGGEST_HELPER = "suggestHelper";
@@ -276,6 +279,10 @@ public final class ComponentUtil {
 
     public static RoleQueryHelper getRoleQueryHelper() {
         return SingletonLaContainer.getComponent(ROLE_QUERY_HELPER);
+    }
+
+    public static LdapManager getLdapManager() {
+        return SingletonLaContainer.getComponent(LDAP_MANAGER);
     }
 
     public static boolean hasQueryHelper() {

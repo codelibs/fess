@@ -6,7 +6,7 @@
 	<include path="lastaflute.xml"/>
 
 	<include path="fess.xml"/>
-	<include path="fess_ad.xml"/>
+	<include path="fess_ldap.xml"/>
 	<include path="fess_api.xml"/>
 	<include path="fess_dict.xml"/>
 	<include path="fess_job.xml"/>

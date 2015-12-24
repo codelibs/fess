@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.login;
 
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
@@ -44,10 +45,6 @@ public class LoginAction extends FessSearchAction {
         return getHtmlResponse().useForm(LoginForm.class);
     }
 
-    private HtmlResponse getHtmlResponse() {
-        return getUserBean().map(user -> redirect(AdminDashboardAction.class)).orElse(asHtml(path_Login_IndexJsp));
-    }
-
     @Execute
     public HtmlResponse login(final LoginForm form) {
         validate(form, messages -> {}, () -> {
@@ -65,6 +62,17 @@ public class LoginAction extends FessSearchAction {
             });
         }
         return redirect(getClass());
+    }
+
+    private HtmlResponse getHtmlResponse() {
+        return getUserBean().map(user -> redirectByUser(user)).orElse(asHtml(path_Login_IndexJsp));
+    }
+
+    private HtmlResponse redirectByUser(FessUserBean user) {
+        if (!user.hasRoles(fessConfig.getAuthenticationAdminRoles().split(","))) {
+            return redirectToRoot();
+        }
+        return redirect(AdminDashboardAction.class);
     }
 
 }

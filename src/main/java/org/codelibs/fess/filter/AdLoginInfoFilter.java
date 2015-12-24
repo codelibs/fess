@@ -38,6 +38,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO refactoring
 public class AdLoginInfoFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(AdLoginInfoFilter.class);
 

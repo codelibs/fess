@@ -116,4 +116,9 @@ public class EditForm implements Serializable {
     @ValidateTypeFailure
     public Integer purgeSuggestSearchLogDay;
 
+    @Size(max = 1000)
+    public String ldapProviderUrl;
+
+    @Size(max = 1000)
+    public String ldapSecurityPrincipal;
 }

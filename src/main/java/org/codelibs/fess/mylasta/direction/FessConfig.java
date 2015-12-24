@@ -174,7 +174,7 @@ public interface FessConfig extends FessEnv {
     /** The key of the configuration. e.g. 1.3 */
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
 
-    /** The key of the configuration. e.g. false */
+    /** The key of the configuration. e.g. true */
     String ACL_AS_ROLE = "acl.as.role";
 
     /** The key of the configuration. e.g. admin */
@@ -775,7 +775,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Get the value for the key 'acl.as.role'. <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * comment: acl
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -783,7 +783,7 @@ public interface FessConfig extends FessEnv {
 
     /**
      * Is the property for the key 'acl.as.role' true? <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
      * comment: acl
      * @return The determination, true or false. (if not found, exception but basically no way)
      */

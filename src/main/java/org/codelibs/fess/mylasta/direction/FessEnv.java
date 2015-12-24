@@ -21,7 +21,7 @@ import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 /**
  * @author FreeGen
  */
-public interface FessEnv {
+public interface FessEnv extends FessProp {
 
     /** The key of the configuration. e.g. hot */
     String lasta_di_SMART_DEPLOY_MODE = "lasta_di.smart.deploy.mode";

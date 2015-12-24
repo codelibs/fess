@@ -288,6 +288,28 @@
 											<la:message key="labels.day" />
 										</div>
 									</div>
+									<%-- LDAP --%>
+									<h4><la:message key="labels.general_menu_ldap" /></h4>
+									<div class="form-group">
+										<label for="ldapProviderUrl"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldapProviderUrl" /></label>
+										<div class="form-inline col-sm-9">
+											<la:errors property="ldapProviderUrl" />
+											<la:text property="ldapProviderUrl"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapSecurityPrincipal"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldapSecurityPrincipal" /></label>
+										<div class="form-inline col-sm-9">
+											<la:errors property="ldapSecurityPrincipal" />
+											<la:text property="ldapSecurityPrincipal"
+												styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

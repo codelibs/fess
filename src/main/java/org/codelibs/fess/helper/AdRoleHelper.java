@@ -31,6 +31,7 @@ import javax.naming.directory.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO refactoring
 public class AdRoleHelper {
     private static final Logger logger = LoggerFactory.getLogger(AdRoleHelper.class);
 

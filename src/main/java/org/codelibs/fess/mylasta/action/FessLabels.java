@@ -197,7 +197,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Failure Count */
     public static final String LABELS_FAILURE_COUNT_THRESHOLD = "{labels.failureCountThreshold}";
 
-    /** The key of the message: FS Config Name */
+    /** The key of the message: File System Config Name */
     public static final String LABELS_FILE_CONFIG_NAME = "{labels.fileConfigName}";
 
     /** The key of the message: File name */
@@ -424,6 +424,12 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Extended Query */
     public static final String LABELS_ex_q = "{labels.ex_q}";
+
+    /** The key of the message: LDAP URL */
+    public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
+
+    /** The key of the message: LDAP Principal */
+    public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
 
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
@@ -1307,10 +1313,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Back */
     public static final String LABELS_design_button_back = "{labels.design_button_back}";
 
-    /** The key of the message: Data Crawling */
+    /** The key of the message: Data　Store Crawling */
     public static final String LABELS_data_crawling_configuration = "{labels.data_crawling_configuration}";
 
-    /** The key of the message: Data Crawling Configuration */
+    /** The key of the message: Data　Store Crawling Configuration */
     public static final String LABELS_data_crawling_title_details = "{labels.data_crawling_title_details}";
 
     /** The key of the message: Handler Name */
@@ -1518,7 +1524,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Parameters */
     public static final String LABELS_file_auth_parameters = "{labels.file_auth_parameters}";
 
-    /** The key of the message: FS Config */
+    /** The key of the message: File System Config */
     public static final String LABELS_file_auth_file_crawling_config = "{labels.file_auth_file_crawling_config}";
 
     /** The key of the message: Samba */
@@ -1973,6 +1979,15 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Suggest */
     public static final String LABELS_general_menu_suggest = "{labels.general_menu_suggest}";
+
+    /** The key of the message: LDAP */
+    public static final String LABELS_general_menu_ldap = "{labels.general_menu_ldap}";
+
+    /** The key of the message: LDAP URL */
+    public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
+
+    /** The key of the message: LDAP Principal */
+    public static final String LABELS_ldap_security_principal = "{labels.ldap_security_principal}";
 
     /** The key of the message: Send TestMail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";

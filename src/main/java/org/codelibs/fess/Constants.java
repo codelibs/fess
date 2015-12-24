@@ -358,4 +358,12 @@ public class Constants extends CoreLibConstants {
     public static final String FESS_CONF_PATH = "fess.conf.path";
 
     public static final TimeZone TIMEZONE_UTC = TimeZone.getTimeZone("UTC");
+
+    public static final String LDAP_SECURITY_PRINCIPAL = "ldap.security.principal";
+
+    public static final String LDAP_PROVIDER_URL = "ldap.provider.url";
+
+    public static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
+
+    public static final String LDAP_INITIAL_CONTEXT_FACTORY = "ldap.initial.context.factory";
 }

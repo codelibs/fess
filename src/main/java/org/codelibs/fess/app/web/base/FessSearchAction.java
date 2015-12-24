@@ -193,6 +193,5 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected HtmlResponse redirectToRoot() {
         final String contextPath = request.getServletContext().getContextPath();
         return newHtmlResponseAsRediect(StringUtil.isBlank(contextPath) ? "/" : contextPath);
-
     }
 }
