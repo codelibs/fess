@@ -859,7 +859,7 @@ public class FessEsClient implements Client {
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
             if (logger.isDebugEnabled()) {
-                logger.debug("Query: {0}", searchRequestBuilder);
+                logger.debug("Query: " + searchRequestBuilder);
             }
 
             return true;
