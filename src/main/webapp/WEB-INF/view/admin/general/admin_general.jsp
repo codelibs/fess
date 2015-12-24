@@ -320,6 +320,16 @@
 												styleClass="form-control" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="ldapAccountFilter"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_account_filter" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapAccountFilter" />
+											<la:text property="ldapAccountFilter"
+												styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

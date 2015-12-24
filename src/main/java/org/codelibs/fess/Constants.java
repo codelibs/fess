@@ -368,4 +368,6 @@ public class Constants extends CoreLibConstants {
     public static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
 
     public static final String LDAP_INITIAL_CONTEXT_FACTORY = "ldap.initial.context.factory";
+
+    public static final String LDAP_ACCOUNT_FILTER = "ldap.account.filter";
 }

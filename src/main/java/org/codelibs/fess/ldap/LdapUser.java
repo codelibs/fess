@@ -19,7 +19,6 @@ import java.util.Hashtable;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
-import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
 public class LdapUser implements FessUser {
@@ -46,8 +45,9 @@ public class LdapUser implements FessUser {
     public String[] getRoleNames() {
         if (roles == null) {
             final String baseDn = ComponentUtil.getFessConfig().getLdapBaseDn();
-            if (StringUtil.isNotBlank(baseDn)) {
-                roles = ComponentUtil.getLdapManager().getRoles(this, baseDn);
+            final String accountFilter = ComponentUtil.getFessConfig().getLdapAccountFilter();
+            if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
+                roles = ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter);
             }
         }
         return roles;

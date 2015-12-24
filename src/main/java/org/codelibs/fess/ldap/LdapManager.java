@@ -80,15 +80,16 @@ public class LdapManager {
         return new LdapUser(env, username);
     }
 
-    public String[] getRoles(final LdapUser ldapUser, String bindDn) {
-        final List<String> rolelist = new ArrayList<String>();
+    public String[] getRoles(final LdapUser ldapUser, String bindDn, String accountFilter) {
+        final List<String> roleList = new ArrayList<String>();
 
         DirContext ctx = null;
         try {
             ctx = new InitialDirContext(ldapUser.getEnvironment());
 
-            //set search conditions
-            final String filter = "cn=" + ldapUser.getName();
+            // LDAP: cn=%s
+            // AD: (&(objectClass=user)(sAMAccountName=%s))
+            final String filter = String.format(accountFilter, ldapUser.getName());
             final SearchControls controls = new SearchControls();
             controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
@@ -119,7 +120,7 @@ public class LdapManager {
 
                         strTmp = strTmp.substring(strStart, strEnd);
 
-                        rolelist.add(strTmp);
+                        roleList.add(strTmp);
                     }
                 }
             }
@@ -136,6 +137,6 @@ public class LdapManager {
             }
         }
 
-        return rolelist.toArray(new String[rolelist.size()]);
+        return roleList.toArray(new String[roleList.size()]);
     }
 }

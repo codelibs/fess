@@ -163,6 +163,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.LDAP_PROVIDER_URL, form.ldapProviderUrl);
         updateProperty(Constants.LDAP_SECURITY_PRINCIPAL, form.ldapSecurityPrincipal);
         updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
+        updateProperty(Constants.LDAP_ACCOUNT_FILTER, form.ldapAccountFilter);
 
         crawlerProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -201,6 +202,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapProviderUrl = crawlerProperties.getProperty(Constants.LDAP_PROVIDER_URL, StringUtil.EMPTY);
         form.ldapSecurityPrincipal = crawlerProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
         form.ldapBaseDn = crawlerProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
+        form.ldapAccountFilter = crawlerProperties.getProperty(Constants.LDAP_ACCOUNT_FILTER, StringUtil.EMPTY);
     }
 
     private void updateProperty(final String key, final String value) {

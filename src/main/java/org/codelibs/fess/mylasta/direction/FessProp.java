@@ -47,4 +47,8 @@ public interface FessProp {
     public default String getLdapBaseDn() {
         return getProperty(Constants.LDAP_BASE_DN);
     }
+
+    public default String getLdapAccountFilter() {
+        return getProperty(Constants.LDAP_ACCOUNT_FILTER);
+    }
 }
