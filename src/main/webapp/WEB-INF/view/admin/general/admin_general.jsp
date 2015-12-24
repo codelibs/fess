@@ -293,7 +293,7 @@
 									<div class="form-group">
 										<label for="ldapProviderUrl"
 											class="col-sm-3 control-label"><la:message
-												key="labels.ldapProviderUrl" /></label>
+												key="labels.ldap_provider_url" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapProviderUrl" />
 											<la:text property="ldapProviderUrl"
@@ -303,10 +303,20 @@
 									<div class="form-group">
 										<label for="ldapSecurityPrincipal"
 											class="col-sm-3 control-label"><la:message
-												key="labels.ldapSecurityPrincipal" /></label>
+												key="labels.ldap_security_principal" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapSecurityPrincipal" />
 											<la:text property="ldapSecurityPrincipal"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapBaseDn"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_base_dn" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapBaseDn" />
+											<la:text property="ldapBaseDn"
 												styleClass="form-control" />
 										</div>
 									</div>

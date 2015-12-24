@@ -359,6 +359,8 @@ public class Constants extends CoreLibConstants {
 
     public static final TimeZone TIMEZONE_UTC = TimeZone.getTimeZone("UTC");
 
+    public static final String LDAP_BASE_DN = "ldap.base.dn";
+
     public static final String LDAP_SECURITY_PRINCIPAL = "ldap.security.principal";
 
     public static final String LDAP_PROVIDER_URL = "ldap.provider.url";

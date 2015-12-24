@@ -19,6 +19,8 @@ import java.util.Hashtable;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class LdapUser implements FessUser {
 
@@ -27,6 +29,8 @@ public class LdapUser implements FessUser {
     protected Hashtable<String, String> env;
 
     protected String name;
+
+    protected String[] roles = null;
 
     public LdapUser(Hashtable<String, String> env, String name) {
         this.env = env;
@@ -40,13 +44,22 @@ public class LdapUser implements FessUser {
 
     @Override
     public String[] getRoleNames() {
-        // TODO
-        return StringUtil.EMPTY_STRINGS;
+        if (roles == null) {
+            final String baseDn = ComponentUtil.getFessConfig().getLdapBaseDn();
+            if (StringUtil.isNotBlank(baseDn)) {
+                roles = ComponentUtil.getLdapManager().getRoles(this, baseDn);
+            }
+        }
+        return roles;
     }
 
     @Override
     public String[] getGroupNames() {
         // TODO
         return StringUtil.EMPTY_STRINGS;
+    }
+
+    public Hashtable<String, String> getEnvironment() {
+        return env;
     }
 }

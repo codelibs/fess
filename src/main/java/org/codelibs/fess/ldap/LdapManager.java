@@ -15,12 +15,19 @@
  */
 package org.codelibs.fess.ldap;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
@@ -71,5 +78,64 @@ public class LdapManager {
 
     protected LdapUser createLdapUser(String username, Hashtable<String, String> env) {
         return new LdapUser(env, username);
+    }
+
+    public String[] getRoles(final LdapUser ldapUser, String bindDn) {
+        final List<String> rolelist = new ArrayList<String>();
+
+        DirContext ctx = null;
+        try {
+            ctx = new InitialDirContext(ldapUser.getEnvironment());
+
+            //set search conditions
+            final String filter = "cn=" + ldapUser.getName();
+            final SearchControls controls = new SearchControls();
+            controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+            //search
+            final NamingEnumeration<SearchResult> rslt = ctx.search(bindDn, filter, controls);
+            while (rslt.hasMoreElements()) {
+                final SearchResult srcrslt = rslt.next();
+                final Attributes attrs = srcrslt.getAttributes();
+
+                //get group attr
+                final Attribute attr = attrs.get("memberOf");
+                if (attr == null) {
+                    continue;
+                }
+
+                for (int i = 0; i < attr.size(); i++) {
+                    Object attrValue = attr.get(i);
+                    if (attrValue != null) {
+                        // TODO replace with regexp
+                        String strTmp = attrValue.toString();
+
+                        int strStart = 0;
+                        int strEnd = 0;
+
+                        strStart = strTmp.indexOf("CN=");
+                        strStart += "CN=".length();
+                        strEnd = strTmp.indexOf(',');
+
+                        strTmp = strTmp.substring(strStart, strEnd);
+
+                        rolelist.add(strTmp);
+                    }
+                }
+            }
+
+        } catch (final Exception e) {
+            logger.warn("Failed to resolve roles: " + ldapUser.getName(), e);
+        } finally {
+            if (ctx != null) {
+                try {
+                    ctx.close();
+                } catch (final NamingException e) {
+                    // ignored
+                }
+            }
+        }
+
+        return rolelist.toArray(new String[rolelist.size()]);
     }
 }

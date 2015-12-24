@@ -162,6 +162,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay.toString());
         updateProperty(Constants.LDAP_PROVIDER_URL, form.ldapProviderUrl);
         updateProperty(Constants.LDAP_SECURITY_PRINCIPAL, form.ldapSecurityPrincipal);
+        updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
 
         crawlerProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -199,6 +200,7 @@ public class AdminGeneralAction extends FessAdminAction {
                         Constants.DEFAULT_SUGGEST_PURGE_DAY));
         form.ldapProviderUrl = crawlerProperties.getProperty(Constants.LDAP_PROVIDER_URL, StringUtil.EMPTY);
         form.ldapSecurityPrincipal = crawlerProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
+        form.ldapBaseDn = crawlerProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
     }
 
     private void updateProperty(final String key, final String value) {

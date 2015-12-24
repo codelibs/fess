@@ -43,4 +43,8 @@ public interface FessProp {
     public default String getLdapSecurityPrincipal(String username) {
         return String.format(getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
     }
+
+    public default String getLdapBaseDn() {
+        return getProperty(Constants.LDAP_BASE_DN);
+    }
 }

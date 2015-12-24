@@ -121,4 +121,7 @@ public class EditForm implements Serializable {
 
     @Size(max = 1000)
     public String ldapSecurityPrincipal;
+
+    @Size(max = 1000)
+    public String ldapBaseDn;
 }
