@@ -159,7 +159,6 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
         final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-        final boolean useAclAsRole = Constants.TRUE.equals(fessConfig.getAclAsRole());
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
@@ -281,7 +280,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         for (final String roleType : crawlingConfig.getRoleTypeValues()) {
             roleTypeList.add(roleType);
         }
-        if (useAclAsRole && responseData.getUrl().startsWith("smb://")) {
+        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb://")) {
             final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
             if (aces != null) {
                 for (final ACE item : aces) {

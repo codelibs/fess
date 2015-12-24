@@ -20,7 +20,7 @@ import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 /**
  * @author FreeGen
  */
-public interface FessConfig extends FessEnv {
+public interface FessConfig extends FessEnv, FessProp {
 
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
@@ -175,7 +175,13 @@ public interface FessConfig extends FessEnv {
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
 
     /** The key of the configuration. e.g. true */
-    String ACL_AS_ROLE = "acl.as.role";
+    String SMB_ROLE_FROM_FILE = "smb.role.from.file";
+
+    /** The key of the configuration. e.g. true */
+    String SMB_ROLE_AS_USER = "smb.role.as.user";
+
+    /** The key of the configuration. e.g. true */
+    String SMB_ROLE_AS_GROUP = "smb.role.as.group";
 
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
@@ -774,20 +780,48 @@ public interface FessConfig extends FessEnv {
     java.math.BigDecimal getQueryBoostContentLangAsDecimal();
 
     /**
-     * Get the value for the key 'acl.as.role'. <br>
+     * Get the value for the key 'smb.role.from.file'. <br>
      * The value is, e.g. true <br>
      * comment: acl
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getAclAsRole();
+    String getSmbRoleFromFile();
 
     /**
-     * Is the property for the key 'acl.as.role' true? <br>
+     * Is the property for the key 'smb.role.from.file' true? <br>
      * The value is, e.g. true <br>
      * comment: acl
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
-    boolean isAclAsRole();
+    boolean isSmbRoleFromFile();
+
+    /**
+     * Get the value for the key 'smb.role.as.user'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSmbRoleAsUser();
+
+    /**
+     * Is the property for the key 'smb.role.as.user' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSmbRoleAsUser();
+
+    /**
+     * Get the value for the key 'smb.role.as.group'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSmbRoleAsGroup();
+
+    /**
+     * Is the property for the key 'smb.role.as.group' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSmbRoleAsGroup();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -1649,12 +1683,28 @@ public interface FessConfig extends FessEnv {
             return getAsDecimal(FessConfig.QUERY_BOOST_CONTENT_LANG);
         }
 
-        public String getAclAsRole() {
-            return get(FessConfig.ACL_AS_ROLE);
+        public String getSmbRoleFromFile() {
+            return get(FessConfig.SMB_ROLE_FROM_FILE);
         }
 
-        public boolean isAclAsRole() {
-            return is(FessConfig.ACL_AS_ROLE);
+        public boolean isSmbRoleFromFile() {
+            return is(FessConfig.SMB_ROLE_FROM_FILE);
+        }
+
+        public String getSmbRoleAsUser() {
+            return get(FessConfig.SMB_ROLE_AS_USER);
+        }
+
+        public boolean isSmbRoleAsUser() {
+            return is(FessConfig.SMB_ROLE_AS_USER);
+        }
+
+        public String getSmbRoleAsGroup() {
+            return get(FessConfig.SMB_ROLE_AS_GROUP);
+        }
+
+        public boolean isSmbRoleAsGroup() {
+            return is(FessConfig.SMB_ROLE_AS_GROUP);
         }
 
         public String getAuthenticationAdminRoles() {

@@ -170,7 +170,7 @@ public class SuggestJob {
         cmdList.add("-Dfess.log.path=" + logFilePath);
         addSystemProperty(cmdList, "fess.log.name", "fess-suggest", "-suggest");
         addSystemProperty(cmdList, "fess.log.level", null, null);
-        StreamUtil.of(fessConfig.getJvmSuggestOptions().split("\n")).filter(value -> StringUtil.isNotBlank(value))
+        StreamUtil.of(fessConfig.getJvmSuggestOptionsAsArray()).filter(value -> StringUtil.isNotBlank(value))
                 .forEach(value -> cmdList.add(value));
 
         File ownTmpDir = null;

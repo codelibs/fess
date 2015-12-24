@@ -38,6 +38,18 @@ public class SambaHelper {
     public static final int SID_TYPE_WKN_GRP = 5;
 
     public String getAccountId(final SID sid) {
-        return sid.getType() + "|" + sid.getAccountName();
+        return convert(sid.getType(), sid.getAccountName());
+    }
+
+    public String getRoleByUser(String name) {
+        return convert(SID_TYPE_USER, name);
+    }
+
+    public String getRoleByGroup(String name) {
+        return convert(SID_TYPE_DOM_GRP, name);
+    }
+
+    protected String convert(int type, String name) {
+        return type + name;
     }
 }

@@ -51,4 +51,22 @@ public interface FessProp {
     public default String getLdapAccountFilter() {
         return getProperty(Constants.LDAP_ACCOUNT_FILTER);
     }
+
+    String getAuthenticationAdminRoles();
+
+    public default String[] getAuthenticationAdminRolesAsArray() {
+        return getAuthenticationAdminRoles().split(",");
+    }
+
+    String getJvmCrawlerOptions();
+
+    public default String[] getJvmCrawlerOptionsAsArray() {
+        return getJvmCrawlerOptions().split("\n");
+    }
+
+    String getJvmSuggestOptions();
+
+    public default String[] getJvmSuggestOptionsAsArray() {
+        return getJvmSuggestOptions().split("\n");
+    }
 }

@@ -69,7 +69,7 @@ public class LoginAction extends FessSearchAction {
     }
 
     private HtmlResponse redirectByUser(FessUserBean user) {
-        if (!user.hasRoles(fessConfig.getAuthenticationAdminRoles().split(","))) {
+        if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
             return redirectToRoot();
         }
         return redirect(AdminDashboardAction.class);

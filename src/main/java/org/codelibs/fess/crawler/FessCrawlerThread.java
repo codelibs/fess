@@ -66,7 +66,6 @@ public class FessCrawlerThread extends CrawlerThread {
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
-            final boolean useAclAsRole = Constants.TRUE.equals(fessConfig.getAclAsRole());
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;
@@ -78,7 +77,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 for (final String roleType : crawlingConfig.getRoleTypeValues()) {
                     roleTypeList.add(roleType);
                 }
-                if (useAclAsRole && url.startsWith("smb://")) {
+                if (fessConfig.isSmbRoleFromFile() && url.startsWith("smb://")) {
                     // head method
                     responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
                     if (responseData == null) {

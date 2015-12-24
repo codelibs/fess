@@ -428,8 +428,14 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
 
-    /** The key of the message: LDAP Principal */
+    /** The key of the message: Bind DN */
     public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
+
+    /** The key of the message: Base DN */
+    public static final String LABELS_LDAP_BASE_DN = "{labels.ldapBaseDn}";
+
+    /** The key of the message: Account Filter */
+    public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
 
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
@@ -1986,8 +1992,14 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
-    /** The key of the message: LDAP Principal */
+    /** The key of the message: Bind DN */
     public static final String LABELS_ldap_security_principal = "{labels.ldap_security_principal}";
+
+    /** The key of the message: Base DN */
+    public static final String LABELS_ldap_base_dn = "{labels.ldap_base_dn}";
+
+    /** The key of the message: Account Filter */
+    public static final String LABELS_ldap_account_filter = "{labels.ldap_account_filter}";
 
     /** The key of the message: Send TestMail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";

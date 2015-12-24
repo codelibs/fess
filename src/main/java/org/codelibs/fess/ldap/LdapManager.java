@@ -32,6 +32,7 @@ import javax.naming.directory.SearchResult;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.filter.AdLoginInfoFilter;
+import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -81,7 +82,13 @@ public class LdapManager {
     }
 
     public String[] getRoles(final LdapUser ldapUser, String bindDn, String accountFilter) {
+        SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+        FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> roleList = new ArrayList<String>();
+
+        if (fessConfig.isSmbRoleAsUser()) {
+            roleList.add(sambaHelper.getRoleByUser(ldapUser.getName()));
+        }
 
         DirContext ctx = null;
         try {
@@ -120,7 +127,11 @@ public class LdapManager {
 
                         strTmp = strTmp.substring(strStart, strEnd);
 
-                        roleList.add(strTmp);
+                        if (fessConfig.isSmbRoleAsGroup()) {
+                            roleList.add(sambaHelper.getRoleByGroup(strTmp));
+                        } else {
+                            roleList.add(strTmp);
+                        }
                     }
                 }
             }

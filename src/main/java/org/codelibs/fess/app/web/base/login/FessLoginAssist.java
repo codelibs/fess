@@ -119,7 +119,7 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     protected void checkPermission(final LoginHandlingResource resource) throws LoginRequiredException {
         if (resource.getActionClass().getName().startsWith(Constants.ADMIN_PACKAGE)) {
             getSessionUserBean().ifPresent(user -> {
-                if (!user.hasRoles(fessConfig.getAuthenticationAdminRoles().split(","))) {
+                if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
                     throw new UserRoleLoginException(RootAction.class);
                 }
             });
