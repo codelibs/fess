@@ -160,7 +160,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                         roleIdList.add(mapping.getRoleTypeId());
                     }
                     final RoleTypeBhv roleTypeBhv = ComponentUtil.getComponent(RoleTypeBhv.class);
-                    roleTypeList = roleTypeBhv.selectList(cb -> {
+                    roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(roleIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
                     });

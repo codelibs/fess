@@ -135,7 +135,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                         roleIdList.add(mapping.getRoleTypeId());
                     }
                     final RoleTypeBhv roleTypeBhv = ComponentUtil.getComponent(RoleTypeBhv.class);
-                    roleTypeList = roleTypeBhv.selectList(cb -> {
+                    roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(roleIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
                     });
@@ -265,7 +265,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 final String domain = map.get("domain");
                 smbAuth.setDomain(domain == null ? StringUtil.EMPTY : domain);
                 smbAuth.setServer(fileAuth.getHostname());
-                smbAuth.setPort(fileAuth.getPort());
+                smbAuth.setPort(fileAuth.getPort() == null ? -1 : fileAuth.getPort().intValue());
                 smbAuth.setUsername(fileAuth.getUsername());
                 smbAuth.setPassword(fileAuth.getPassword());
                 smbAuthList.add(smbAuth);
