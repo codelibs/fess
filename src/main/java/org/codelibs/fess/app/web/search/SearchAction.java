@@ -94,7 +94,9 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected HtmlResponse doSearch(final SearchForm form) {
-        searchAvailable();
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
         validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
 
         if (viewHelper.isUseSession()) {

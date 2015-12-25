@@ -257,9 +257,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Start Pos */
     public static final String LABELS_START = "{labels.start}";
 
-    /** The key of the message: Supported Search */
-    public static final String LABELS_SUPPORTED_SEARCH = "{labels.supportedSearch}";
-
     /** The key of the message: Thread Name */
     public static final String LABELS_THREAD_NAME = "{labels.threadName}";
 
@@ -436,6 +433,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Account Filter */
     public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
+
+    /** The key of the message: Login Required */
+    public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
 
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
@@ -929,8 +929,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Append Params to URL */
     public static final String LABELS_append_query_param_enabled = "{labels.append_query_param_enabled}";
 
-    /** The key of the message: Supported Search */
-    public static final String LABELS_supported_search_feature = "{labels.supported_search_feature}";
+    /** The key of the message: Login Required */
+    public static final String LABELS_login_required = "{labels.login_required}";
 
     /** The key of the message: Excluded Failure Type */
     public static final String LABELS_ignore_failure_type = "{labels.ignore_failure_type}";

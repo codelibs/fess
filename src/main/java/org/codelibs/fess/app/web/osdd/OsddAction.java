@@ -17,7 +17,7 @@ package org.codelibs.fess.app.web.osdd;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.response.ActionResponse;
 
 public class OsddAction extends FessSearchAction {
 
@@ -38,8 +38,10 @@ public class OsddAction extends FessSearchAction {
     //                                                                      ==============
 
     @Execute
-    public StreamResponse index() {
-        searchAvailable();
+    public ActionResponse index() {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
         return openSearchHelper.asStream();
     }
 

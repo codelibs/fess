@@ -109,7 +109,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_LABEL_VALUE_PROPERTY = "label.value";
 
-    public static final String SUPPORTED_SEARCH_FEATURE_PROPERTY = "search.feature";
+    public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 
     public static final String IGNORE_FAILURE_TYPE_PROPERTY = "failure.ignoretype";
 
@@ -153,10 +153,6 @@ public class Constants extends CoreLibConstants {
     public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static final int DONE_STATUS = 9999;
-
-    public static final String SUPPORTED_SEARCH_WEB = "W";
-
-    public static final String SUPPORTED_SEARCH_NONE = "n";
 
     public static final String DEFAULT_IGNORE_FAILURE_TYPE = StringUtil.EMPTY;
 

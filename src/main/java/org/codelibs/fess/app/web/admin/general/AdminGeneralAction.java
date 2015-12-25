@@ -38,7 +38,6 @@ import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ public class AdminGeneralAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameGeneral()));
-        runtime.registerData("supportedSearchItems", getSupportedSearchItems());
         runtime.registerData("dayItems", getDayItems());
     }
 
@@ -127,38 +125,27 @@ public class AdminGeneralAction extends FessAdminAction {
             return asHtml(path_AdminGeneral_AdminGeneralJsp);
         });
 
-        updateProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY,
-                form.incrementalCrawling != null && Constants.ON.equalsIgnoreCase(form.incrementalCrawling) ? Constants.TRUE
-                        : Constants.FALSE);
+        fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
+        updateProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, getCheckboxValue(form.incrementalCrawling));
         updateProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
         updateProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount.toString());
-        updateProperty(Constants.SEARCH_LOG_PROPERTY,
-                form.searchLog != null && Constants.ON.equalsIgnoreCase(form.searchLog) ? Constants.TRUE : Constants.FALSE);
-        updateProperty(Constants.USER_INFO_PROPERTY, form.userInfo != null && Constants.ON.equalsIgnoreCase(form.userInfo) ? Constants.TRUE
-                : Constants.FALSE);
-        updateProperty(Constants.USER_FAVORITE_PROPERTY,
-                form.userFavorite != null && Constants.ON.equalsIgnoreCase(form.userFavorite) ? Constants.TRUE : Constants.FALSE);
-        updateProperty(Constants.WEB_API_JSON_PROPERTY,
-                form.webApiJson != null && Constants.ON.equalsIgnoreCase(form.webApiJson) ? Constants.TRUE : Constants.FALSE);
+        updateProperty(Constants.SEARCH_LOG_PROPERTY, getCheckboxValue(form.searchLog));
+        updateProperty(Constants.USER_INFO_PROPERTY, getCheckboxValue(form.userInfo));
+        updateProperty(Constants.USER_FAVORITE_PROPERTY, getCheckboxValue(form.userFavorite));
+        updateProperty(Constants.WEB_API_JSON_PROPERTY, getCheckboxValue(form.webApiJson));
         updateProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, form.defaultLabelValue);
-        updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY,
-                form.appendQueryParameter != null && Constants.ON.equalsIgnoreCase(form.appendQueryParameter) ? Constants.TRUE
-                        : Constants.FALSE);
-        updateProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, form.supportedSearch);
+        updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, getCheckboxValue(form.appendQueryParameter));
         updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
         updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
-        updateProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY,
-                form.popularWord != null && Constants.ON.equalsIgnoreCase(form.popularWord) ? Constants.TRUE : Constants.FALSE);
+        updateProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, getCheckboxValue(form.popularWord));
         updateProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
         updateProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay.toString());
         updateProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, form.purgeJobLogDay.toString());
         updateProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, form.purgeUserInfoDay.toString());
         updateProperty(Constants.PURGE_BY_BOTS_PROPERTY, form.purgeByBots);
         updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
-        updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY,
-                form.suggestSearchLog != null && Constants.ON.equalsIgnoreCase(form.suggestSearchLog) ? Constants.TRUE : Constants.FALSE);
-        updateProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY,
-                form.suggestDocuments != null && Constants.ON.equalsIgnoreCase(form.suggestDocuments) ? Constants.TRUE : Constants.FALSE);
+        updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, getCheckboxValue(form.suggestSearchLog));
+        updateProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, getCheckboxValue(form.suggestDocuments));
         updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay.toString());
         updateProperty(Constants.LDAP_PROVIDER_URL, form.ldapProviderUrl);
         updateProperty(Constants.LDAP_SECURITY_PRINCIPAL, form.ldapSecurityPrincipal);
@@ -170,7 +157,12 @@ public class AdminGeneralAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    private String getCheckboxValue(String value) {
+        return Constants.ON.equalsIgnoreCase(value) ? Constants.TRUE : Constants.FALSE;
+    }
+
     protected void updateForm(final EditForm form) {
+        form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
         form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
         form.crawlingThreadCount = Integer.parseInt(crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
@@ -180,7 +172,6 @@ public class AdminGeneralAction extends FessAdminAction {
         form.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
         form.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
         form.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
-        form.supportedSearch = crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
         form.ignoreFailureType =
                 crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
@@ -231,25 +222,6 @@ public class AdminGeneralAction extends FessAdminAction {
         }
         items.add(Integer.valueOf(365).toString());
         return items;
-    }
-
-    private List<Map<String, String>> getSupportedSearchItems() {
-        final List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-        list.add(createItem(
-                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_web"),
-                Constants.SUPPORTED_SEARCH_WEB));
-        list.add(createItem(
-                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(), "labels.supported_search_none"),
-                Constants.SUPPORTED_SEARCH_NONE));
-        return list;
-    }
-
-    private Map<String, String> createItem(final String label, final String value) {
-        final Map<String, String> map = new HashMap<String, String>();
-        map.put(Constants.ITEM_LABEL, label);
-        map.put(Constants.ITEM_VALUE, value);
-        return map;
-
     }
 
 }

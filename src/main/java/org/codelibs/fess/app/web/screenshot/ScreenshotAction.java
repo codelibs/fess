@@ -59,7 +59,9 @@ public class ScreenshotAction extends FessSearchAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final ScreenshotForm form) {
-        searchAvailable();
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
 
         OutputStream out = null;
         BufferedInputStream in = null;

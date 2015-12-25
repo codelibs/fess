@@ -23,7 +23,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.StreamResponse;
+import org.lastaflute.web.response.ActionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +46,10 @@ public class CacheAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public StreamResponse index(final CacheForm form) {
-        searchAvailable();
+    public ActionResponse index(final CacheForm form) {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
 
         Map<String, Object> doc = null;
         try {

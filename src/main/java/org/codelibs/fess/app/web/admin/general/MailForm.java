@@ -46,7 +46,7 @@ public class MailForm implements Serializable {
 
     public String appendQueryParameter;
 
-    public String supportedSearch;
+    public String loginRequired;
 
     public String ignoreFailureType;
 

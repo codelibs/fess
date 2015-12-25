@@ -40,6 +40,10 @@ public class HelpAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
+
         return asHtml(path_HelpJsp).useForm(SearchForm.class, op -> {
             op.setup(form -> {
                 buildLabelParams(form.fields);

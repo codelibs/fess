@@ -28,6 +28,15 @@ public interface FessProp {
         return ComponentUtil.getCrawlerProperties().getProperty(key, defaultValue);
     }
 
+    public default void setLoginRequired(boolean value) {
+        ComponentUtil.getCrawlerProperties().setProperty(Constants.LOGIN_REQUIRED_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
+    }
+
+    public default boolean isLoginRequired() {
+        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getCrawlerProperties().getProperty(Constants.LOGIN_REQUIRED_PROPERTY,
+                Constants.FALSE));
+    }
+
     public default String getLdapInitialContextFactory() {
         return getProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     }
@@ -69,4 +78,5 @@ public interface FessProp {
     public default String[] getJvmSuggestOptionsAsArray() {
         return getJvmSuggestOptions().split("\n");
     }
+
 }

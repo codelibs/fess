@@ -29,8 +29,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.exception.UnsupportedSearchException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -45,7 +45,6 @@ import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.util.LaRequestUtil;
 
 public abstract class FessSearchAction extends FessBaseAction {
 
@@ -126,12 +125,11 @@ public abstract class FessSearchAction extends FessBaseAction {
     // ===================================================================================
     //                                                                             Helpers
     //                                                                           =========
-    protected void searchAvailable() {
-        final String supportedSearch =
-                crawlerProperties.getProperty(Constants.SUPPORTED_SEARCH_FEATURE_PROPERTY, Constants.SUPPORTED_SEARCH_WEB);
-        if (Constants.SUPPORTED_SEARCH_NONE.equals(supportedSearch)) {
-            throw new UnsupportedSearchException("A search is not supported: " + LaRequestUtil.getRequest().getRequestURL());
+    protected boolean isLoginRequired() {
+        if (fessConfig.isLoginRequired() && !fessLoginAssist.getSessionUserBean().isPresent()) {
+            return true;
         }
+        return false;
     }
 
     protected void buildLabelParams(final Map<String, String[]> fields) {
@@ -188,6 +186,10 @@ public abstract class FessSearchAction extends FessBaseAction {
             request.setAttribute(queryKey, queryBuf.toString());
             request.setAttribute(formKey, formBuf.toString());
         }
+    }
+
+    protected HtmlResponse redirectToLogin() {
+        return redirect(LoginAction.class);
     }
 
     protected HtmlResponse redirectToRoot() {

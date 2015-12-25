@@ -35,7 +35,9 @@ public class RootAction extends FessSearchAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index() {
-        searchAvailable();
+        if (isLoginRequired()) {
+            return redirectToLogin();
+        }
 
         return asHtml(path_IndexJsp).useForm(SearchForm.class, op -> {
             op.setup(form -> {

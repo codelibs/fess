@@ -46,16 +46,15 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="supportedSearch" class="col-sm-3 control-label"><la:message
-												key="labels.supported_search_feature" /></label>
+										<label for="loginRequired" class="col-sm-3 control-label"><la:message
+												key="labels.login_required" /></label>
 										<div class="col-sm-9">
-											<la:errors property="supportedSearch" />
-											<la:select property="supportedSearch"
-												styleClass="form-control">
-												<c:forEach var="item" items="${supportedSearchItems}">
-													<la:option value="${f:u(item.value)}">${f:h(item.label)}</la:option>
-												</c:forEach>
-											</la:select>
+											<la:errors property="loginRequired" />
+											<div class="checkbox">
+												<label> <la:checkbox property="loginRequired" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">

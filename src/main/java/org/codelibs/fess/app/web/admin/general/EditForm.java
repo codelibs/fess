@@ -66,7 +66,7 @@ public class EditForm implements Serializable {
     public String appendQueryParameter;
 
     @Size(max = 10)
-    public String supportedSearch;
+    public String loginRequired;
 
     @Size(max = 1000)
     public String ignoreFailureType;
