@@ -21,7 +21,7 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 
 ### Download
 
-Fess 10.0 beta1 is available.
+Fess 10.0 beta2 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
 ### Run Fess
@@ -35,7 +35,7 @@ The release page is [HERE](https://github.com/codelibs/fess/releases "download")
 - Search UI: http://localhost:8080/
 - Admin UI: http://localhost:8080/admin/ (username/password is admin/admin)
 
-You can register crawling targets on Web/File System/Data Store of admin pages, and then start Fess Crawler on Scheduler page manually.
+You can register crawling targets on Web/File System/Data Store of admin pages, and then start Crawler on Scheduler page manually.
 
 ## Development Information
 
