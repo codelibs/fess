@@ -434,7 +434,7 @@ public class FessEsClient implements Client {
     private void waitForYellowStatus() {
         final ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
         if (logger.isDebugEnabled()) {
-            logger.debug("Elasticsearch Cluster Status: {0}", response.getStatus());
+            logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
         }
     }
 
