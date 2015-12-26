@@ -20,7 +20,7 @@ import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 /**
  * @author FreeGen
  */
-public interface FessConfig extends FessEnv, FessProp {
+public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction.FessProp {
 
     /** The key of the configuration. e.g. Fess */
     String DOMAIN_TITLE = "domain.title";
@@ -66,8 +66,74 @@ public interface FessConfig extends FessEnv, FessProp {
     -XX:+DisableExplicitGC */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
+    /** The key of the configuration. e.g. 50 */
+    String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
+
+    /** The key of the configuration. e.g. UTF-8 */
+    String CRAWLER_DOCUMENT_SITE_ENCODING = "crawler.document.site.encoding";
+
+    /** The key of the configuration. e.g. unknown */
+    String CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME = "crawler.document.unknown.hostname";
+
     /** The key of the configuration. e.g. false */
+    String CRAWLER_DOCUMENT_USE_SITE_ENCODING_ON_ENGLISH = "crawler.document.use.site.encoding.on.english";
+
+    /** The key of the configuration. e.g. true */
+    String CRAWLER_DOCUMENT_APPEND_DATA = "crawler.document.append.data";
+
+    /** The key of the configuration. e.g. //BODY */
+    String CRAWLER_DOCUMENT_HTML_CONTENT_XPATH = "crawler.document.html.content.xpath";
+
+    /** The key of the configuration. e.g. //HTML/@lang */
+    String CRAWLER_DOCUMENT_HTML_LANG_XPATH = "crawler.document.html.lang.xpath";
+
+    /** The key of the configuration. e.g. //META[@name='description']/@content */
+    String CRAWLER_DOCUMENT_HTML_DIGEST_XPATH = "crawler.document.html.digest.xpath";
+
+    /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
+    String CRAWLER_DOCUMENT_HTML_CANNONICAL_XPATH = "crawler.document.html.cannonical.xpath";
+
+    /** The key of the configuration. e.g. noscript,script */
+    String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
+
+    /** The key of the configuration. e.g. 200 */
+    String CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH = "crawler.document.html.max.digest.length";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_NAME_ENCODING = "crawler.document.file.name.encoding";
+
+    /** The key of the configuration. e.g. No title. */
+    String CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL = "crawler.document.file.no.title.label";
+
+    /** The key of the configuration. e.g. 10 */
+    String CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH = "crawler.document.file.abbreviation.margin.length";
+
+    /** The key of the configuration. e.g. false */
+    String CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT = "crawler.document.file.ignore.empty.content";
+
+    /** The key of the configuration. e.g. 100 */
+    String CRAWLER_DOCUMENT_FILE_MAX_TITLE_LENGTH = "crawler.document.file.max.title.length";
+
+    /** The key of the configuration. e.g. 200 */
+    String CRAWLER_DOCUMENT_FILE_MAX_DIGEST_LENGTH = "crawler.document.file.max.digest.length";
+
+    /** The key of the configuration. e.g. true */
+    String CRAWLER_DOCUMENT_FILE_APPEND_META_CONTENT = "crawler.document.file.append.meta.content";
+
+    /** The key of the configuration. e.g. true */
+    String CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT = "crawler.document.file.append.body.content";
+
+    /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
+
+    /** The key of the configuration. e.g. 2621440 */
+    String CRAWLER_DOCUMENT_CACHE_MAX_SIZE = "crawler.document.cache.max.size";
+
+    /** The key of the configuration. e.g. text/html */
+    String CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES = "crawler.document.cache.supported.mimetypes";
+
+    /** The key of the configuration. e.g. text/html */
+    String CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES = "crawler.document.cache.html.mimetypes";
 
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
@@ -475,18 +541,271 @@ public interface FessConfig extends FessEnv, FessProp {
     String getJvmSuggestOptions();
 
     /**
-     * Get the value for the key 'crawler.document.cache.enable'. <br>
+     * Get the value for the key 'crawler.document.max.site.length'. <br>
+     * The value is, e.g. 50 <br>
+     * comment: common
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentMaxSiteLength();
+
+    /**
+     * Get the value for the key 'crawler.document.max.site.length' as {@link Integer}. <br>
+     * The value is, e.g. 50 <br>
+     * comment: common
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentMaxSiteLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.site.encoding'. <br>
+     * The value is, e.g. UTF-8 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentSiteEncoding();
+
+    /**
+     * Get the value for the key 'crawler.document.unknown.hostname'. <br>
+     * The value is, e.g. unknown <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentUnknownHostname();
+
+    /**
+     * Get the value for the key 'crawler.document.use.site.encoding.on.english'. <br>
      * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentUseSiteEncodingOnEnglish();
+
+    /**
+     * Is the property for the key 'crawler.document.use.site.encoding.on.english' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentUseSiteEncodingOnEnglish();
+
+    /**
+     * Get the value for the key 'crawler.document.append.data'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentAppendData();
+
+    /**
+     * Is the property for the key 'crawler.document.append.data' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentAppendData();
+
+    /**
+     * Get the value for the key 'crawler.document.html.content.xpath'. <br>
+     * The value is, e.g. //BODY <br>
+     * comment: html
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlContentXpath();
+
+    /**
+     * Get the value for the key 'crawler.document.html.lang.xpath'. <br>
+     * The value is, e.g. //HTML/@lang <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlLangXpath();
+
+    /**
+     * Get the value for the key 'crawler.document.html.digest.xpath'. <br>
+     * The value is, e.g. //META[@name='description']/@content <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlDigestXpath();
+
+    /**
+     * Get the value for the key 'crawler.document.html.cannonical.xpath'. <br>
+     * The value is, e.g. //LINK[@rel='canonical']/@href <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlCannonicalXpath();
+
+    /**
+     * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
+     * The value is, e.g. noscript,script <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlPrunedTags();
+
+    /**
+     * Get the value for the key 'crawler.document.html.max.digest.length'. <br>
+     * The value is, e.g. 200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentHtmlMaxDigestLength();
+
+    /**
+     * Get the value for the key 'crawler.document.html.max.digest.length' as {@link Integer}. <br>
+     * The value is, e.g. 200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentHtmlMaxDigestLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.name.encoding'. <br>
+     * The value is, e.g.  <br>
+     * comment: file
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileNameEncoding();
+
+    /**
+     * Get the value for the key 'crawler.document.file.name.encoding' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: file
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileNameEncodingAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.no.title.label'. <br>
+     * The value is, e.g. No title. <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileNoTitleLabel();
+
+    /**
+     * Get the value for the key 'crawler.document.file.abbreviation.margin.length'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileAbbreviationMarginLength();
+
+    /**
+     * Get the value for the key 'crawler.document.file.abbreviation.margin.length' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.ignore.empty.content'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileIgnoreEmptyContent();
+
+    /**
+     * Is the property for the key 'crawler.document.file.ignore.empty.content' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentFileIgnoreEmptyContent();
+
+    /**
+     * Get the value for the key 'crawler.document.file.max.title.length'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileMaxTitleLength();
+
+    /**
+     * Get the value for the key 'crawler.document.file.max.title.length' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileMaxTitleLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.max.digest.length'. <br>
+     * The value is, e.g. 200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileMaxDigestLength();
+
+    /**
+     * Get the value for the key 'crawler.document.file.max.digest.length' as {@link Integer}. <br>
+     * The value is, e.g. 200 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileMaxDigestLengthAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.file.append.meta.content'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileAppendMetaContent();
+
+    /**
+     * Is the property for the key 'crawler.document.file.append.meta.content' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentFileAppendMetaContent();
+
+    /**
+     * Get the value for the key 'crawler.document.file.append.body.content'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileAppendBodyContent();
+
+    /**
+     * Is the property for the key 'crawler.document.file.append.body.content' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentFileAppendBodyContent();
+
+    /**
+     * Get the value for the key 'crawler.document.cache.enable'. <br>
+     * The value is, e.g. true <br>
+     * comment: cache
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheEnable();
 
     /**
      * Is the property for the key 'crawler.document.cache.enable' true? <br>
-     * The value is, e.g. false <br>
+     * The value is, e.g. true <br>
+     * comment: cache
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentCacheEnable();
+
+    /**
+     * Get the value for the key 'crawler.document.cache.max.size'. <br>
+     * The value is, e.g. 2621440 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentCacheMaxSize();
+
+    /**
+     * Get the value for the key 'crawler.document.cache.max.size' as {@link Integer}. <br>
+     * The value is, e.g. 2621440 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentCacheMaxSizeAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.cache.supported.mimetypes'. <br>
+     * The value is, e.g. text/html <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentCacheSupportedMimetypes();
+
+    /**
+     * Get the value for the key 'crawler.document.cache.html.mimetypes'. <br>
+     * The value is, e.g. text/html <br>
+     * comment: ,text/plain,application/xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentCacheHtmlMimetypes();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -1515,12 +1834,148 @@ public interface FessConfig extends FessEnv, FessProp {
             return get(FessConfig.JVM_SUGGEST_OPTIONS);
         }
 
+        public String getCrawlerDocumentMaxSiteLength() {
+            return get(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
+        }
+
+        public Integer getCrawlerDocumentMaxSiteLengthAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MAX_SITE_LENGTH);
+        }
+
+        public String getCrawlerDocumentSiteEncoding() {
+            return get(FessConfig.CRAWLER_DOCUMENT_SITE_ENCODING);
+        }
+
+        public String getCrawlerDocumentUnknownHostname() {
+            return get(FessConfig.CRAWLER_DOCUMENT_UNKNOWN_HOSTNAME);
+        }
+
+        public String getCrawlerDocumentUseSiteEncodingOnEnglish() {
+            return get(FessConfig.CRAWLER_DOCUMENT_USE_SITE_ENCODING_ON_ENGLISH);
+        }
+
+        public boolean isCrawlerDocumentUseSiteEncodingOnEnglish() {
+            return is(FessConfig.CRAWLER_DOCUMENT_USE_SITE_ENCODING_ON_ENGLISH);
+        }
+
+        public String getCrawlerDocumentAppendData() {
+            return get(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
+        }
+
+        public boolean isCrawlerDocumentAppendData() {
+            return is(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
+        }
+
+        public String getCrawlerDocumentHtmlContentXpath() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_CONTENT_XPATH);
+        }
+
+        public String getCrawlerDocumentHtmlLangXpath() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_LANG_XPATH);
+        }
+
+        public String getCrawlerDocumentHtmlDigestXpath() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_DIGEST_XPATH);
+        }
+
+        public String getCrawlerDocumentHtmlCannonicalXpath() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_CANNONICAL_XPATH);
+        }
+
+        public String getCrawlerDocumentHtmlPrunedTags() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_PRUNED_TAGS);
+        }
+
+        public String getCrawlerDocumentHtmlMaxDigestLength() {
+            return get(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH);
+        }
+
+        public Integer getCrawlerDocumentHtmlMaxDigestLengthAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_HTML_MAX_DIGEST_LENGTH);
+        }
+
+        public String getCrawlerDocumentFileNameEncoding() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING);
+        }
+
+        public Integer getCrawlerDocumentFileNameEncodingAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_NAME_ENCODING);
+        }
+
+        public String getCrawlerDocumentFileNoTitleLabel() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL);
+        }
+
+        public String getCrawlerDocumentFileAbbreviationMarginLength() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
+        }
+
+        public Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
+        }
+
+        public String getCrawlerDocumentFileIgnoreEmptyContent() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT);
+        }
+
+        public boolean isCrawlerDocumentFileIgnoreEmptyContent() {
+            return is(FessConfig.CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT);
+        }
+
+        public String getCrawlerDocumentFileMaxTitleLength() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_MAX_TITLE_LENGTH);
+        }
+
+        public Integer getCrawlerDocumentFileMaxTitleLengthAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_MAX_TITLE_LENGTH);
+        }
+
+        public String getCrawlerDocumentFileMaxDigestLength() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_MAX_DIGEST_LENGTH);
+        }
+
+        public Integer getCrawlerDocumentFileMaxDigestLengthAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_MAX_DIGEST_LENGTH);
+        }
+
+        public String getCrawlerDocumentFileAppendMetaContent() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_META_CONTENT);
+        }
+
+        public boolean isCrawlerDocumentFileAppendMetaContent() {
+            return is(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_META_CONTENT);
+        }
+
+        public String getCrawlerDocumentFileAppendBodyContent() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT);
+        }
+
+        public boolean isCrawlerDocumentFileAppendBodyContent() {
+            return is(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT);
+        }
+
         public String getCrawlerDocumentCacheEnable() {
             return get(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLE);
         }
 
         public boolean isCrawlerDocumentCacheEnable() {
             return is(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLE);
+        }
+
+        public String getCrawlerDocumentCacheMaxSize() {
+            return get(FessConfig.CRAWLER_DOCUMENT_CACHE_MAX_SIZE);
+        }
+
+        public Integer getCrawlerDocumentCacheMaxSizeAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_CACHE_MAX_SIZE);
+        }
+
+        public String getCrawlerDocumentCacheSupportedMimetypes() {
+            return get(FessConfig.CRAWLER_DOCUMENT_CACHE_SUPPORTED_MIMETYPES);
+        }
+
+        public String getCrawlerDocumentCacheHtmlMimetypes() {
+            return get(FessConfig.CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES);
         }
 
         public String getIndexFieldFavoriteCount() {

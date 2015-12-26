@@ -45,6 +45,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.extractor.Extractor;
+import org.codelibs.fess.crawler.transformer.impl.AbstractTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
@@ -57,35 +58,19 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jcifs.smb.ACE;
 import jcifs.smb.SID;
 
-public abstract class AbstractFessFileTransformer extends AbstractFessXpathTransformer {
-    private static final Logger logger = LoggerFactory // NOPMD
-            .getLogger(AbstractFessFileTransformer.class);
+public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
 
-    public String encoding = null;
-
-    public String noTitleLabel = "No title.";
-
-    public int abbreviationMarginLength = 10;
-
-    public boolean ignoreEmptyContent = false;
-
-    public int maxTitleLength = 100;
-
-    public int maxDigestLength = 200;
-
-    public boolean appendMetaContentToContent = true;
-
-    public boolean appendBodyContentToContent = true;
+    protected String charsetName = Constants.UTF_8;
 
     public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
     protected Map<String, String> metaContentMapping;
+
+    protected FessConfig fessConfig;
 
     protected abstract Extractor getExtractor(ResponseData responseData);
 
@@ -109,11 +94,11 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         try {
             final ExtractData extractData = extractor.getText(in, params);
             content = extractData.getContent();
-            if (ignoreEmptyContent && StringUtil.isBlank(content)) {
+            if (fessConfig.isCrawlerDocumentFileIgnoreEmptyContent() && StringUtil.isBlank(content)) {
                 return null;
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("ExtractData: " + extractData);
+            if (getLogger().isDebugEnabled()) {
+                getLogger().debug("ExtractData: " + extractData);
             }
             // meta
             for (final String key : extractData.getKeySet()) {
@@ -191,10 +176,10 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         putResultDataBody(dataMap, fessConfig.getIndexFieldSegment(), sessionId);
         // content
         final StringBuilder buf = new StringBuilder(content.length() + 1000);
-        if (appendBodyContentToContent) {
+        if (fessConfig.isCrawlerDocumentFileAppendBodyContent()) {
             buf.append(content);
         }
-        if (appendMetaContentToContent) {
+        if (fessConfig.isCrawlerDocumentFileAppendMetaContent()) {
             if (buf.length() > 0) {
                 buf.append(' ');
             }
@@ -206,23 +191,29 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         } else {
             putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), StringUtil.EMPTY);
         }
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
-                || fessConfig.isCrawlerDocumentCacheEnable()) {
-            final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
-            // text cache
-            putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), cache);
-            putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
+        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
+                .isCrawlerDocumentCacheEnable()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+            if (responseData.getContentLength() > 0
+                    && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
+
+                final String cache = content.trim().replaceAll("[ \\t\\x0B\\f]+", " ");
+                // text cache
+                putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), cache);
+                putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
+            }
         }
         // digest
         putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(),
-                Constants.DIGEST_PREFIX + abbreviate(normalizeContent(content), maxDigestLength));
+                Constants.DIGEST_PREFIX
+                        + abbreviate(normalizeContent(content), fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
         // title
         if (!dataMap.containsKey(fessConfig.getIndexFieldTitle())) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), abbreviate(body, maxTitleLength));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(),
+                            abbreviate(body, fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
                 } else {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), noTitleLabel);
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
             } else {
                 final String u = decodeUrlAsName(url, url.startsWith("file:"));
@@ -235,9 +226,9 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
             }
         }
         // host
-        putResultDataBody(dataMap, fessConfig.getIndexFieldHost(), getHost(url));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldHost(), getHostOnFile(url));
         // site
-        putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSite(url, urlEncoding));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSiteOnFile(url, urlEncoding));
         // url
         putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created
@@ -287,8 +278,8 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
                     final SID sid = item.getSID();
                     roleTypeList.add(sambaHelper.getAccountId(sid));
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
                 }
             }
         }
@@ -335,7 +326,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
     protected String abbreviate(final String str, final int maxWidth) {
         String newStr = StringUtils.abbreviate(str, maxWidth);
         try {
-            if (newStr.getBytes(Constants.UTF_8).length > maxWidth + abbreviationMarginLength) {
+            if (newStr.getBytes(Constants.UTF_8).length > maxWidth + fessConfig.getCrawlerDocumentFileAbbreviationMarginLengthAsInteger()) {
                 newStr = StringUtils.abbreviate(str, maxWidth / 2);
             }
         } catch (final UnsupportedEncodingException e) {
@@ -370,7 +361,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
 
         String enc = Constants.UTF_8;
-        if (encoding == null) {
+        if (StringUtil.isBlank(fessConfig.getCrawlerDocumentFileNameEncoding())) {
             final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
             if (urlQueue != null) {
                 final String parentUrl = urlQueue.getParentUrl();
@@ -385,7 +376,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
                 }
             }
         } else {
-            enc = encoding;
+            enc = fessConfig.getCrawlerDocumentFileNameEncoding();
         }
 
         final String escapedUrl = escapePlus ? url.replace("+", "%2B") : url;
@@ -415,8 +406,7 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         return null;
     }
 
-    @Override
-    protected String getHost(final String url) {
+    protected String getHostOnFile(final String url) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY; // empty
         }
@@ -435,30 +425,29 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
             return "localhost";
         }
 
-        return super.getHost(url);
+        return getHost(url);
     }
 
-    @Override
-    protected String getSite(final String url, final String encoding) {
+    protected String getSiteOnFile(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY; // empty
         }
 
         if (url.startsWith("file:////")) {
             final String value = decodeUrlAsName(url.substring(9), true);
-            return StringUtils.abbreviate("\\\\" + value.replace('/', '\\'), maxSiteLength);
+            return StringUtils.abbreviate("\\\\" + value.replace('/', '\\'), getMaxSiteLength());
         } else if (url.startsWith("file:")) {
             final String value = decodeUrlAsName(url.substring(5), true);
             if (value.length() > 2 && value.charAt(2) == ':') {
                 // Windows
-                return StringUtils.abbreviate(value.substring(1).replace('/', '\\'), maxSiteLength);
+                return StringUtils.abbreviate(value.substring(1).replace('/', '\\'), getMaxSiteLength());
             } else {
                 // Unix
-                return StringUtils.abbreviate(value, maxSiteLength);
+                return StringUtils.abbreviate(value, getMaxSiteLength());
             }
         }
 
-        return super.getSite(url, encoding);
+        return getSite(url, encoding);
     }
 
     @Override
@@ -480,4 +469,5 @@ public abstract class AbstractFessFileTransformer extends AbstractFessXpathTrans
         }
         metaContentMapping.put(metaname, dynamicField);
     }
+
 }

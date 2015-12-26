@@ -22,29 +22,20 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
-public abstract class AbstractFessXpathTransformer extends XpathTransformer {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractFessXpathTransformer.class);
+public interface FessTransformer {
 
-    public int maxSiteLength = 50;
+    FessConfig getFessConfig();
 
-    public String unknownHostname = "unknown";
+    Logger getLogger();
 
-    public String siteEncoding;
-
-    public boolean replaceSiteEncodingWhenEnglish = false;
-
-    public boolean appendResultData = true;
-
-    protected String getHost(final String u) {
+    public default String getHost(final String u) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
         }
@@ -63,13 +54,13 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
 
         if (url.equals(originalUrl)) {
-            return unknownHostname;
+            return getFessConfig().getCrawlerDocumentUnknownHostname();
         }
 
         return url;
     }
 
-    protected String getSite(final String u, final String encoding) {
+    public default String getSite(final String u, final String encoding) {
         if (StringUtil.isBlank(u)) {
             return StringUtil.EMPTY; // empty
         }
@@ -87,15 +78,15 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
 
         if (encoding != null) {
             String enc;
-            if (siteEncoding != null) {
-                if (replaceSiteEncodingWhenEnglish) {
+            if (StringUtil.isNotBlank(getFessConfig().getCrawlerDocumentSiteEncoding())) {
+                if (getFessConfig().isCrawlerDocumentUseSiteEncodingOnEnglish()) {
                     if ("ISO-8859-1".equalsIgnoreCase(encoding) || "US-ASCII".equalsIgnoreCase(encoding)) {
-                        enc = siteEncoding;
+                        enc = getFessConfig().getCrawlerDocumentSiteEncoding();
                     } else {
                         enc = encoding;
                     }
                 } else {
-                    enc = siteEncoding;
+                    enc = getFessConfig().getCrawlerDocumentSiteEncoding();
                 }
             } else {
                 enc = encoding;
@@ -106,39 +97,35 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
             } catch (final Exception e) {}
         }
 
-        return StringUtils.abbreviate(url, maxSiteLength);
+        return StringUtils.abbreviate(url, getMaxSiteLength());
     }
 
-    protected String normalizeContent(final String content) {
+    public default String normalizeContent(final String content) {
         if (content == null) {
             return StringUtil.EMPTY; // empty
         }
         return content.replaceAll("\\s+", " ");
     }
 
-    protected void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
+    public default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getIndexFieldUrl().equals(key)) {
             dataMap.put(key, value);
         } else if (dataMap.containsKey(key)) {
-            if (appendResultData) {
+            if (getFessConfig().isCrawlerDocumentAppendData()) {
                 final Object oldValue = dataMap.get(key);
-                if (key.endsWith("_m")) {
-                    final Object[] oldValues = (Object[]) oldValue;
-                    if (value.getClass().isArray()) {
-                        final Object[] newValues = (Object[]) value;
-                        final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
-                        for (int i = 0; i < newValues.length; i++) {
-                            values[values.length - 1 + i] = newValues[i];
-                        }
-                        dataMap.put(key, values);
-                    } else {
-                        final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
-                        values[values.length - 1] = value;
-                        dataMap.put(key, values);
+                final Object[] oldValues = (Object[]) oldValue;
+                if (value.getClass().isArray()) {
+                    final Object[] newValues = (Object[]) value;
+                    final Object[] values = Arrays.copyOf(oldValues, oldValues.length + newValues.length);
+                    for (int i = 0; i < newValues.length; i++) {
+                        values[values.length - 1 + i] = newValues[i];
                     }
+                    dataMap.put(key, values);
                 } else {
-                    dataMap.put(key, oldValue + " " + value);
+                    final Object[] values = Arrays.copyOf(oldValues, oldValues.length + 1);
+                    values[values.length - 1] = value;
+                    dataMap.put(key, values);
                 }
             } else {
                 dataMap.put(key, value);
@@ -148,7 +135,8 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
     }
 
-    protected void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value, final String template) {
+    public default void putResultDataWithTemplate(final Map<String, Object> dataMap, final String key, final Object value,
+            final String template) {
         Object target = value;
         if (template != null) {
             final Map<String, Object> paramMap = new HashMap<>(dataMap.size() + 1);
@@ -173,7 +161,7 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
         }
     }
 
-    protected String evaluateValue(final String template, final Map<String, Object> paramMap) {
+    public default String evaluateValue(final String template, final Map<String, Object> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }
@@ -185,8 +173,13 @@ public abstract class AbstractFessXpathTransformer extends XpathTransformer {
             }
             return value.toString();
         } catch (final Exception e) {
-            logger.warn("Invalid value format: " + template, e);
+            getLogger().warn("Invalid value format: " + template, e);
             return null;
         }
     }
+
+    public default int getMaxSiteLength() {
+        return getFessConfig().getCrawlerDocumentMaxSiteLengthAsInteger();
+    }
+
 }

@@ -18,6 +18,7 @@ package org.codelibs.fess.mylasta.direction;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 
 public interface FessProp {
     public default String getProperty(String key) {
@@ -77,6 +78,32 @@ public interface FessProp {
 
     public default String[] getJvmSuggestOptionsAsArray() {
         return getJvmSuggestOptions().split("\n");
+    }
+
+    String getCrawlerDocumentHtmlPrunedTags();
+
+    public default String[] getCrawlerDocumentHtmlPrunedTagsAsArray() {
+        return getCrawlerDocumentHtmlPrunedTags().split(",");
+    }
+
+    String getCrawlerDocumentCacheHtmlMimetypes();
+
+    public default boolean isHtmlMimetypeForCache(String mimetype) {
+        String[] mimetypes = getCrawlerDocumentCacheHtmlMimetypes().split(",");
+        if (mimetypes.length == 1 && StringUtil.isBlank(mimetypes[0])) {
+            return true;
+        }
+        return StreamUtil.of(mimetypes).anyMatch(s -> s.equalsIgnoreCase(mimetype));
+    }
+
+    String getCrawlerDocumentCacheSupportedMimetypes();
+
+    public default boolean isSupportedDocumentCacheMimetypes(String mimetype) {
+        String[] mimetypes = getCrawlerDocumentCacheSupportedMimetypes().split(",");
+        if (mimetypes.length == 1 && StringUtil.isBlank(mimetypes[0])) {
+            return true;
+        }
+        return StreamUtil.of(mimetypes).anyMatch(s -> s.equalsIgnoreCase(mimetype));
     }
 
 }

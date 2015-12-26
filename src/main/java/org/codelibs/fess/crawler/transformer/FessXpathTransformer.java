@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.IOUtils;
@@ -47,6 +48,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
+import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.crawler.util.ResponseDataUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
@@ -68,30 +70,31 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-public class FessXpathTransformer extends AbstractFessXpathTransformer {
+public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
 
     private static final int UTF8_BOM_SIZE = 3;
 
-    public String cacheXpath = "//BODY";
-
-    public String contentXpath = "//BODY";
-
-    public String langXpath = "//HTML/@lang";
-
-    public String digestXpath = "//META[@name='description']/@content";
-
-    public String canonicalXpath = "//LINK[@rel='canonical']/@href";
-
-    public List<String> prunedTagList = new ArrayList<String>();
-
     public boolean prunedCacheContent = true;
 
-    public int maxDigestLength = 200;
+    public Map<String, String> convertUrlMap = new HashMap<>();
 
-    public int maxCacheLength = 2621440; //  2.5Mbytes
+    protected FessConfig fessConfig;
 
-    public Map<String, String> convertUrlMap = new HashMap<String, String>();
+    @PostConstruct
+    public void init() {
+        fessConfig = ComponentUtil.getFessConfig();
+    }
+
+    @Override
+    public FessConfig getFessConfig() {
+        return fessConfig;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
 
     @Override
     protected void storeData(final ResponseData responseData, final ResultData resultData) {
@@ -181,7 +184,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
 
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
         // canonical
-        if (StringUtil.isNotBlank(canonicalXpath)) {
+        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentHtmlCannonicalXpath())) {
             final String canonicalUrl = getCanonicalUrl(responseData, document);
             if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl())) {
                 final Set<RequestData> childUrlSet = new HashSet<>();
@@ -202,6 +205,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
+        final String mimeType = responseData.getMimeType();
 
         final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
 
@@ -223,26 +227,32 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
             putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
-        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, langXpath, true));
+        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlLangXpath(), true));
         if (lang != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), lang);
         }
         // title
         // content
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), getDocumentContent(responseData, document));
-        if (Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache()))
-                || fessConfig.isCrawlerDocumentCacheEnable()) {
-            String charSet = responseData.getCharSet();
-            if (charSet == null) {
-                charSet = Constants.UTF_8;
-            }
-            try {
-                // cache
-                putResultDataBody(dataMap, fessConfig.getIndexFieldCache(),
-                        new String(InputStreamUtil.getBytes(responseData.getResponseBody()), charSet));
-                putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
-            } catch (final Exception e) {
-                logger.warn("Failed to write a cache: " + sessionId + ":" + responseData, e);
+        if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
+                .isCrawlerDocumentCacheEnable()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+            if (responseData.getContentLength() > 0
+                    && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
+                String charSet = responseData.getCharSet();
+                if (charSet == null) {
+                    charSet = Constants.UTF_8;
+                }
+                try {
+                    // cache
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldCache(),
+                            new String(InputStreamUtil.getBytes(responseData.getResponseBody()), charSet));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
+                } catch (final Exception e) {
+                    logger.warn("Failed to write a cache: " + sessionId + ":" + responseData, e);
+                }
+            } else {
+                logger.debug("Content size is too large({} > {}): {}", responseData.getContentLength(),
+                        fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger(), responseData.getUrl());
             }
         }
         // digest
@@ -261,7 +271,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         // anchor
         putResultDataBody(dataMap, fessConfig.getIndexFieldAnchor(), getAnchorList(document, responseData));
         // mimetype
-        final String mimeType = responseData.getMimeType();
         putResultDataBody(dataMap, fessConfig.getIndexFieldMimetype(), mimeType);
         if (fileTypeHelper != null) {
             // filetype
@@ -324,7 +333,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
-        final String canonicalUrl = getSingleNodeValue(document, canonicalXpath, false);
+        final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCannonicalXpath(), false);
         if (StringUtil.isNotBlank(canonicalUrl)) {
             return canonicalUrl;
         }
@@ -332,13 +341,15 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     protected String getDocumentDigest(final ResponseData responseData, final Document document) {
-        final String digest = getSingleNodeValue(document, digestXpath, false);
+        final String digest = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlDigestXpath(), false);
         if (StringUtil.isNotBlank(digest)) {
             return digest;
         }
 
-        final String body = normalizeContent(removeCommentTag(getSingleNodeValue(document, contentXpath, prunedCacheContent)));
-        return StringUtils.abbreviate(body, maxDigestLength);
+        final String body =
+                normalizeContent(removeCommentTag(getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlContentXpath(),
+                        prunedCacheContent)));
+        return StringUtils.abbreviate(body, fessConfig.getCrawlerDocumentHtmlMaxDigestLengthAsInteger());
     }
 
     String removeCommentTag(final String content) {
@@ -364,7 +375,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     private String getDocumentContent(final ResponseData responseData, final Document document) {
-        return normalizeContent(getSingleNodeValue(document, contentXpath, true));
+        return normalizeContent(getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlContentXpath(), true));
     }
 
     protected String getSingleNodeValue(final Document document, final String xpath, final boolean pruned) {
@@ -420,7 +431,7 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     }
 
     protected boolean isPrunedTag(final String tagName) {
-        for (final String name : prunedTagList) {
+        for (final String name : getCrawlerDocumentHtmlPrunedTags()) {
             if (name.equalsIgnoreCase(tagName)) {
                 return true;
             }
@@ -492,12 +503,6 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
         return urlList;
     }
 
-    public void addPrunedTag(final String tagName) {
-        if (StringUtil.isNotBlank(tagName)) {
-            prunedTagList.add(tagName);
-        }
-    }
-
     @Override
     public Object getData(final AccessResultData<?> accessResultData) {
         final byte[] data = accessResultData.getData();
@@ -554,4 +559,9 @@ public class FessXpathTransformer extends AbstractFessXpathTransformer {
     private boolean isUtf8BomBytes(final byte[] b) {
         return b[0] == (byte) 0xEF && b[1] == (byte) 0xBB && b[2] == (byte) 0xBF;
     }
+
+    protected String[] getCrawlerDocumentHtmlPrunedTags() {
+        return fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+    }
+
 }

@@ -41,6 +41,7 @@ map:{
         ; fess = map:{
             ; path = ..
             ; freeGenList = list:{ env ; config ; label ; message ; mail ; template ; jsp ; doc }
+            ; configPluginInterface = org.codelibs.fess.mylasta.direction.FessProp
             ; propertiesHtmlList = list:{ env ; config ; label ; message }
         }
     }

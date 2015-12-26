@@ -34,7 +34,7 @@ public class FessFileTransformerTest extends UnitFessTestCase {
 
     public void test_decodeUrl_ok() throws Exception {
         String url, exp;
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
 
         url = "";
         exp = "";
@@ -62,156 +62,171 @@ public class FessFileTransformerTest extends UnitFessTestCase {
     }
 
     public void test_decodeUrl_null() throws Exception {
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
         assertNull(transformer.decodeUrlAsName(null, true));
     }
 
     public void test_getHost_ok() {
         String url, exp;
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
 
         url = "";
         exp = "";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "http://server/home/user";
         exp = "server";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:/home/user";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:/c:/home/user";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:////server/home/user";
         exp = "server";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:/" + encodeUrl("ホーム") + "/user";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:/c:/" + encodeUrl("ホーム") + "/user";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:////" + encodeUrl("サーバー") + "/home/user";
         exp = "サーバー";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
     }
 
     public void test_getHost_unexpected() {
         String url, exp;
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
 
         url = null;
         exp = "";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "example:";
         exp = "unknown";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file://";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:///";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file://///";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file://///example";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
         url = "file:/c:";
         exp = "localhost";
-        assertEquals(exp, transformer.getHost(url));
+        assertEquals(exp, transformer.getHostOnFile(url));
 
     }
 
     public void test_getSite_ok() {
         String url, exp;
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
 
         url = "";
         exp = "";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "http://example.com/";
         exp = "example.com/";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "http://example.com/index.html";
         exp = "example.com/index.html";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:/home/user";
         exp = "/home/user";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:/c:/home/user";
         exp = "c:\\home\\user";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:/c:/";
         exp = "c:\\";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:////server/user";
         exp = "\\\\server\\user";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+    }
 
-        transformer.maxSiteLength = 10;
+    public void test_getSite_ok_len10() {
+        String url, exp;
+        final FessFileTransformer transformer = new FessFileTransformer() {
+            @Override
+            public int getMaxSiteLength() {
+                return 10;
+            }
+        };
+        transformer.init();
 
         url = "file:/home/user/foo";
         exp = "/home/u...";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
     }
 
     public void test_getSite_unexpected() {
         String url, exp;
-        final FessFileTransformer transformer = new FessFileTransformer();
+        final FessFileTransformer transformer = createInstance();
 
         url = "file:";
         exp = "";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file";
         exp = "file";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:/";
         exp = "/";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:/c:";
         exp = "c:";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file://";
         exp = "//";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file:///";
         exp = "///";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
 
         url = "file://///";
         exp = "\\\\\\";
-        assertEquals(exp, transformer.getSite(url, "UTF-8"));
+        assertEquals(exp, transformer.getSiteOnFile(url, "UTF-8"));
+    }
+
+    private FessFileTransformer createInstance() {
+        final FessFileTransformer transformer = new FessFileTransformer();
+        transformer.init();
+        return transformer;
     }
 }

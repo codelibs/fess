@@ -15,16 +15,34 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FessFileTransformer extends AbstractFessFileTransformer {
     private static final Logger logger = LoggerFactory.getLogger(FessFileTransformer.class);
+
+    @PostConstruct
+    public void init() {
+        fessConfig = ComponentUtil.getFessConfig();
+    }
+
+    @Override
+    public FessConfig getFessConfig() {
+        return fessConfig;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return logger;
+    }
 
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {

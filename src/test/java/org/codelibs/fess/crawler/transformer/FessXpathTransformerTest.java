@@ -46,6 +46,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     public void setUp() throws Exception {
         super.setUp();
         fessXpathTransformer = new FessXpathTransformer();
+        fessXpathTransformer.init();
         fessXpathTransformer.convertUrlMap.put("feed:", "http:");
     }
 
@@ -53,7 +54,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected String[] getCrawlerDocumentHtmlPrunedTags() {
+                return new String[0];
+            }
+        };
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         assertEquals(getXmlString(document), getXmlString(pruneNode));
@@ -63,8 +68,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
-        transformer.prunedTagList.add("noscript");
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected String[] getCrawlerDocumentHtmlPrunedTags() {
+                return new String[] { "noscript" };
+            }
+        };
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         final String docString = getXmlString(document);
@@ -83,9 +91,11 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer();
-        transformer.prunedTagList.add("script");
-        transformer.prunedTagList.add("noscript");
+        final FessXpathTransformer transformer = new FessXpathTransformer() {
+            protected String[] getCrawlerDocumentHtmlPrunedTags() {
+                return new String[] { "script", "noscript" };
+            }
+        };
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         final String docString = getXmlString(document);
@@ -235,6 +245,7 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
     public void test_canonicalXpath() throws Exception {
         final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
 
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         final ResponseData responseData = new ResponseData();

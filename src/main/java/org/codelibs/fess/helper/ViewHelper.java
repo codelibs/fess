@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
@@ -398,7 +399,7 @@ public class ViewHelper implements Serializable {
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
-        String url = DocumentUtil.getValue(doc, "url", String.class);
+        String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (url == null) {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
@@ -417,6 +418,10 @@ public class ViewHelper implements Serializable {
 
         String cache = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCache(), String.class);
         if (cache != null) {
+            String mimetype = DocumentUtil.getValue(doc, fessConfig.getIndexFieldMimetype(), String.class);
+            if (!ComponentUtil.getFessConfig().isHtmlMimetypeForCache(mimetype)) {
+                cache = StringEscapeUtils.escapeHtml4(cache);
+            }
             cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
                 doc.put("hlCache", replaceHighlightQueries(cache, queries));
