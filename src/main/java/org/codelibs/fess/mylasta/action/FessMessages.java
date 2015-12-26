@@ -140,6 +140,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: {item} cannot convert as {propertyType}. */
     public static final String CONSTRAINTS_TypeAny_MESSAGE = "{constraints.TypeAny.message}";
 
+    /** The key of the message: {item} has wrong URI. */
+    public static final String CONSTRAINTS_UriType_MESSAGE = "{constraints.UriType.message}";
+
+    /** The key of the message: {item} is invalid cron expression. */
+    public static final String CONSTRAINTS_CronExpression_MESSAGE = "{constraints.CronExpression.message}";
+
     /** The key of the message: Login failed. */
     public static final String ERRORS_LOGIN_FAILURE = "{errors.login.failure}";
 
@@ -929,6 +935,36 @@ public class FessMessages extends FessLabels {
     public FessMessages addConstraintsTypeAnyMessage(String property, String item, String propertyType) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(CONSTRAINTS_TypeAny_MESSAGE, item, propertyType));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.UriType.message' with parameters.
+     * <pre>
+     * message: {item} has wrong URI.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param item The parameter item for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsUriTypeMessage(String property, String item) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_UriType_MESSAGE, item));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'constraints.CronExpression.message' with parameters.
+     * <pre>
+     * message: {item} is invalid cron expression.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param item The parameter item for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addConstraintsCronExpressionMessage(String property, String item) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(CONSTRAINTS_CronExpression_MESSAGE, item));
         return this;
     }
 

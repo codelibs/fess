@@ -22,8 +22,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.annotation.CronExpression;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.validation.CronExpression;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
