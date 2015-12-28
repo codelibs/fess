@@ -81,7 +81,7 @@ public class SuggestHelper {
 
     private List<String> contentFieldList;
 
-    private List<Pattern> roleFilterList = new ArrayList<>();
+    private final List<Pattern> roleFilterList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -274,7 +274,7 @@ public class SuggestHelper {
         suggester.indexer().deleteBadWord(badWord);
     }
 
-    private Stream<String> stream(String value) {
+    private Stream<String> stream(final String value) {
         return StreamUtil.of(value.split(",")).filter(v -> StringUtil.isNotBlank(v));
     }
 

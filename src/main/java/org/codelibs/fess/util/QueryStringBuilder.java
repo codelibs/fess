@@ -60,18 +60,18 @@ public class QueryStringBuilder {
         return queryBuf.toString();
     }
 
-    public static QueryStringBuilder query(String query) {
-        QueryStringBuilder builder = new QueryStringBuilder();
+    public static QueryStringBuilder query(final String query) {
+        final QueryStringBuilder builder = new QueryStringBuilder();
         builder.query = query;
         return builder;
     }
 
-    public QueryStringBuilder extraQueries(String[] extraQueries) {
+    public QueryStringBuilder extraQueries(final String[] extraQueries) {
         this.extraQueries = extraQueries;
         return this;
     }
 
-    public QueryStringBuilder fields(Map<String, String[]> fieldMap) {
+    public QueryStringBuilder fields(final Map<String, String[]> fieldMap) {
         this.fieldMap = fieldMap;
         return this;
     }

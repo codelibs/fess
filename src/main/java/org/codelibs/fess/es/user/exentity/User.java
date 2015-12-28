@@ -45,11 +45,13 @@ public class User extends BsUser implements FessUser {
         asDocMeta().id(id);
     }
 
+    @Override
     public String[] getRoleNames() {
         return StreamUtil.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
     }
 
+    @Override
     public String[] getGroupNames() {
         return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);

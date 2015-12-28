@@ -23,15 +23,15 @@ import org.codelibs.core.lang.StringUtil;
 public class CronExpressionValidator implements ConstraintValidator<CronExpression, String> {
 
     @Override
-    public void initialize(CronExpression constraintAnnotation) {
+    public void initialize(final CronExpression constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
+    public boolean isValid(final String value, final ConstraintValidatorContext context) {
         return determineValid(value);
     }
 
-    protected boolean determineValid(String value) {
+    protected boolean determineValid(final String value) {
         if (StringUtil.isNotBlank(value) && !org.quartz.CronExpression.isValidExpression(value)) {
             return false;
         }

@@ -316,10 +316,10 @@ public class JsonApiManager extends BaseApiManager {
             return;
         }
 
-        String seed = request.getParameter("seed");
-        String[] tags = request.getParameterValues("labels");
-        String[] fields = request.getParameterValues("fields");
-        String[] excludes = StringUtil.EMPTY_STRINGS;// TODO
+        final String seed = request.getParameter("seed");
+        final String[] tags = request.getParameterValues("labels");
+        final String[] fields = request.getParameterValues("fields");
+        final String[] excludes = StringUtil.EMPTY_STRINGS;// TODO
 
         final PopularWordHelper popularWordHelper = ComponentUtil.getPopularWordHelper();
 
@@ -675,13 +675,13 @@ public class JsonApiManager extends BaseApiManager {
 
         private final HttpServletRequest request;
 
-        private FessConfig fessConfig;
+        private final FessConfig fessConfig;
 
         private int startPosition = -1;
 
         private int pageSize = -1;
 
-        protected SearchApiRequestParams(final HttpServletRequest request, FessConfig fessConfig) {
+        protected SearchApiRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
         }

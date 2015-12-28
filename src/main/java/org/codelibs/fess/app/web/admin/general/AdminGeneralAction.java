@@ -108,7 +108,7 @@ public class AdminGeneralAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessSendTestmail(GLOBAL));
             updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
             crawlerProperties.store();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to send a test mail.", e);
             saveError(messages -> messages.addErrorsFailedToSendTestmail(GLOBAL));
         }
@@ -157,7 +157,7 @@ public class AdminGeneralAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    private String getCheckboxValue(String value) {
+    private String getCheckboxValue(final String value) {
         return Constants.ON.equalsIgnoreCase(value) ? Constants.TRUE : Constants.FALSE;
     }
 

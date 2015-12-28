@@ -418,7 +418,7 @@ public class ViewHelper implements Serializable {
 
         String cache = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCache(), String.class);
         if (cache != null) {
-            String mimetype = DocumentUtil.getValue(doc, fessConfig.getIndexFieldMimetype(), String.class);
+            final String mimetype = DocumentUtil.getValue(doc, fessConfig.getIndexFieldMimetype(), String.class);
             if (!ComponentUtil.getFessConfig().isHtmlMimetypeForCache(mimetype)) {
                 cache = StringEscapeUtils.escapeHtml4(cache);
             }

@@ -252,7 +252,7 @@ public class SearchAction extends FessSearchAction {
 
     protected static class WebRenderData extends SearchRenderData {
 
-        public void register(RenderData data) {
+        public void register(final RenderData data) {
             RenderDataUtil.register(data, "queryId", queryId);
             RenderDataUtil.register(data, "documentItems", documentItems);
             RenderDataUtil.register(data, "facetResponse", facetResponse);

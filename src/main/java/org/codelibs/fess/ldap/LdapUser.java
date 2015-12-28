@@ -31,7 +31,7 @@ public class LdapUser implements FessUser {
 
     protected String[] roles = null;
 
-    public LdapUser(Hashtable<String, String> env, String name) {
+    public LdapUser(final Hashtable<String, String> env, final String name) {
         this.env = env;
         this.name = name;
     }

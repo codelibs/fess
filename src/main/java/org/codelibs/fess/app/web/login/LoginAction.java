@@ -68,7 +68,7 @@ public class LoginAction extends FessSearchAction {
         return getUserBean().map(user -> redirectByUser(user)).orElse(asHtml(path_Login_IndexJsp));
     }
 
-    private HtmlResponse redirectByUser(FessUserBean user) {
+    private HtmlResponse redirectByUser(final FessUserBean user) {
         if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
             return redirectToRoot();
         }

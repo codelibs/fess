@@ -112,8 +112,8 @@ public class SearchService {
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             if (StringUtil.isNotBlank(sortField)) {
-                                String[] sort = sortField.split("\\.");
-                                SortBuilder sortBuilder = SortBuilders.fieldSort(sort[0]);
+                                final String[] sort = sortField.split("\\.");
+                                final SortBuilder sortBuilder = SortBuilders.fieldSort(sort[0]);
                                 if ("asc".equals(sort[1])) {
                                     sortBuilder.order(SortOrder.ASC);
                                 } else if ("desc".equals(sort[1])) {

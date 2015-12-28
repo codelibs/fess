@@ -41,15 +41,15 @@ public class SambaHelper {
         return convert(sid.getType(), sid.getAccountName());
     }
 
-    public String getRoleByUser(String name) {
+    public String getRoleByUser(final String name) {
         return convert(SID_TYPE_USER, name);
     }
 
-    public String getRoleByGroup(String name) {
+    public String getRoleByGroup(final String name) {
         return convert(SID_TYPE_DOM_GRP, name);
     }
 
-    protected String convert(int type, String name) {
+    protected String convert(final int type, final String name) {
         return type + name;
     }
 }

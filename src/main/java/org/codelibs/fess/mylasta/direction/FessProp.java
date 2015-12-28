@@ -21,15 +21,15 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 
 public interface FessProp {
-    public default String getProperty(String key) {
+    public default String getProperty(final String key) {
         return ComponentUtil.getCrawlerProperties().getProperty(key);
     }
 
-    public default String getProperty(String key, String defaultValue) {
+    public default String getProperty(final String key, final String defaultValue) {
         return ComponentUtil.getCrawlerProperties().getProperty(key, defaultValue);
     }
 
-    public default void setLoginRequired(boolean value) {
+    public default void setLoginRequired(final boolean value) {
         ComponentUtil.getCrawlerProperties().setProperty(Constants.LOGIN_REQUIRED_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
     }
 
@@ -50,7 +50,7 @@ public interface FessProp {
         return getProperty(Constants.LDAP_PROVIDER_URL);
     }
 
-    public default String getLdapSecurityPrincipal(String username) {
+    public default String getLdapSecurityPrincipal(final String username) {
         return String.format(getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
     }
 
@@ -88,8 +88,8 @@ public interface FessProp {
 
     String getCrawlerDocumentCacheHtmlMimetypes();
 
-    public default boolean isHtmlMimetypeForCache(String mimetype) {
-        String[] mimetypes = getCrawlerDocumentCacheHtmlMimetypes().split(",");
+    public default boolean isHtmlMimetypeForCache(final String mimetype) {
+        final String[] mimetypes = getCrawlerDocumentCacheHtmlMimetypes().split(",");
         if (mimetypes.length == 1 && StringUtil.isBlank(mimetypes[0])) {
             return true;
         }
@@ -98,8 +98,8 @@ public interface FessProp {
 
     String getCrawlerDocumentCacheSupportedMimetypes();
 
-    public default boolean isSupportedDocumentCacheMimetypes(String mimetype) {
-        String[] mimetypes = getCrawlerDocumentCacheSupportedMimetypes().split(",");
+    public default boolean isSupportedDocumentCacheMimetypes(final String mimetype) {
+        final String[] mimetypes = getCrawlerDocumentCacheSupportedMimetypes().split(",");
         if (mimetypes.length == 1 && StringUtil.isBlank(mimetypes[0])) {
             return true;
         }

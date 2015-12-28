@@ -67,8 +67,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     }
 
     @Override
-    public OptionalEntity<FessUser> findLoginUser(String username, String password) {
-        OptionalEntity<FessUser> ldapUser = ComponentUtil.getLdapManager().login(username, password);
+    public OptionalEntity<FessUser> findLoginUser(final String username, final String password) {
+        final OptionalEntity<FessUser> ldapUser = ComponentUtil.getLdapManager().login(username, password);
         if (ldapUser.isPresent()) {
             return ldapUser;
         }

@@ -306,7 +306,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class);
     }
 
-    private HtmlResponse asListHtml(UploadForm uploadForm) {
+    private HtmlResponse asListHtml(final UploadForm uploadForm) {
         return asHtml(path_AdminDesign_AdminDesignJsp).useForm(DesignForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(uploadForm, form, op -> op.include("designFile", "designFileName"));

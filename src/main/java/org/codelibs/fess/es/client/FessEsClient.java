@@ -224,7 +224,7 @@ public class FessEsClient implements Client {
 
     @PostConstruct
     public void open() {
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final String transportAddressesValue = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
         if (StringUtil.isNotBlank(transportAddressesValue)) {

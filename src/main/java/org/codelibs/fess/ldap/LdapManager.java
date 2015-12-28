@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 public class LdapManager {
     private static final Logger logger = LoggerFactory.getLogger(AdLoginInfoFilter.class);
 
-    public OptionalEntity<FessUser> login(String username, String password) {
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String providerUrl = fessConfig.getLdapProviderUrl();
+    public OptionalEntity<FessUser> login(final String username, final String password) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String providerUrl = fessConfig.getLdapProviderUrl();
 
         if (StringUtil.isBlank(providerUrl)) {
             return OptionalEntity.empty();
@@ -52,7 +52,7 @@ public class LdapManager {
 
         DirContext ctx = null;
         try {
-            Hashtable<String, String> env = new Hashtable<>();
+            final Hashtable<String, String> env = new Hashtable<>();
             env.put(Context.INITIAL_CONTEXT_FACTORY, fessConfig.getLdapInitialContextFactory());
             env.put(Context.SECURITY_AUTHENTICATION, fessConfig.getLdapSecurityAuthentication());
             env.put(Context.PROVIDER_URL, providerUrl);
@@ -63,13 +63,13 @@ public class LdapManager {
                 logger.debug("Logged in.", ctx);
             }
             return OptionalEntity.of(createLdapUser(username, env));
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             logger.debug("Login failed.", e);
         } finally {
             if (ctx != null) {
                 try {
                     ctx.close();
-                } catch (NamingException e) {
+                } catch (final NamingException e) {
                     // ignore
                 }
             }
@@ -77,13 +77,13 @@ public class LdapManager {
         return OptionalEntity.empty();
     }
 
-    protected LdapUser createLdapUser(String username, Hashtable<String, String> env) {
+    protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
         return new LdapUser(env, username);
     }
 
-    public String[] getRoles(final LdapUser ldapUser, String bindDn, String accountFilter) {
-        SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+    public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter) {
+        final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<String> roleList = new ArrayList<String>();
 
         if (fessConfig.isSmbRoleAsUser()) {
@@ -113,7 +113,7 @@ public class LdapManager {
                 }
 
                 for (int i = 0; i < attr.size(); i++) {
-                    Object attrValue = attr.get(i);
+                    final Object attrValue = attr.get(i);
                     if (attrValue != null) {
                         // TODO replace with regexp
                         String strTmp = attrValue.toString();
