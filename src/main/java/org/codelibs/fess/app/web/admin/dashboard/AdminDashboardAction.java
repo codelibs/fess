@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import org.codelibs.fess.api.es.EsApiManager;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -56,7 +57,7 @@ public class AdminDashboardAction extends FessAdminAction {
     public HtmlResponse index() {
         esApiManager.saveToken();
         return asHtml(path_AdminDashboard_AdminDashboardJsp).renderWith(data -> {
-            data.register("serverPath", esApiManager.getServerPath());
+            RenderDataUtil.register(data, "serverPath", esApiManager.getServerPath());
         });
     }
 

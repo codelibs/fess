@@ -260,9 +260,7 @@ public class Crawler implements Serializable {
                 }
                 buf.append(entry.getKey()).append('=').append(entry.getValue());
             }
-            if (buf.length() != 0) {
-                logger.info("[CRAWL INFO] " + buf.toString());
-            }
+            logger.info("[CRAWL INFO] " + buf.toString());
 
             // notification
             try {

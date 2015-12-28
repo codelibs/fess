@@ -29,11 +29,6 @@ Num of Doc: /*pmb.dataFsIndexSize*/ docs
 Start Time: /*pmb.commitStartTime*/
 End Time:   /*pmb.commitEndTime*/
 Exec Time:  /*pmb.commitExecTime*/ms
-/*END*//*IF pmb.optimizeEndTime*/
---- Indexer(Optimize) ---
-Start Time: /*pmb.optimizeStartTime*/
-End Time:   /*pmb.optimizeEndTime*/
-Exec Time:  /*pmb.optimizeExecTime*/ms
 /*END*/
 --- Total ---
 Start Time: /*pmb.crawlerStartTime*/

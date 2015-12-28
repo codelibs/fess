@@ -52,8 +52,7 @@ public class CrawlerPostcard extends LaTypicalPostcard {
     protected String[] getPropertyNames() {
         return new String[] { "hostname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
                 "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataFsIndexSize",
-                "commitStartTime", "commitEndTime", "commitExecTime", "optimizeStartTime", "optimizeEndTime", "optimizeExecTime",
-                "crawlerStartTime", "crawlerEndTime", "crawlerExecTime" };
+                "commitStartTime", "commitEndTime", "commitExecTime", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime" };
     }
 
     // ===================================================================================
@@ -225,33 +224,6 @@ public class CrawlerPostcard extends LaTypicalPostcard {
      */
     public void setCommitExecTime(String commitExecTime) {
         registerVariable("commitExecTime", commitExecTime);
-    }
-
-    /**
-     * Set the value of optimizeStartTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param optimizeStartTime The parameter value of optimizeStartTime. (NotNull)
-     */
-    public void setOptimizeStartTime(String optimizeStartTime) {
-        registerVariable("optimizeStartTime", optimizeStartTime);
-    }
-
-    /**
-     * Set the value of optimizeEndTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param optimizeEndTime The parameter value of optimizeEndTime. (NotNull)
-     */
-    public void setOptimizeEndTime(String optimizeEndTime) {
-        registerVariable("optimizeEndTime", optimizeEndTime);
-    }
-
-    /**
-     * Set the value of optimizeExecTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param optimizeExecTime The parameter value of optimizeExecTime. (NotNull)
-     */
-    public void setOptimizeExecTime(String optimizeExecTime) {
-        registerVariable("optimizeExecTime", optimizeExecTime);
     }
 
     /**

@@ -24,6 +24,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -93,7 +94,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
+        RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
 
         // restore from pager
         copyBeanToBean(duplicateHostPager, form, op -> op.include("id"));
@@ -256,7 +257,7 @@ public class AdminDuplicatehostAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminDuplicatehost_AdminDuplicatehostJsp).renderWith(data -> {
-            data.register("duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
+            RenderDataUtil.register(data, "duplicateHostItems", duplicateHostService.getDuplicateHostList(duplicateHostPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(duplicateHostPager, form, op -> op.include("id"));

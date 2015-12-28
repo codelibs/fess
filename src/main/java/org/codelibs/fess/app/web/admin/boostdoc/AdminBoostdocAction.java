@@ -24,6 +24,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -92,7 +93,7 @@ public class AdminBoostdocAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager)); // page navi
+        RenderDataUtil.register(data, "boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager)); // page navi
 
         // restore from pager
         copyBeanToBean(boostDocPager, form, op -> op.include("id"));
@@ -256,7 +257,7 @@ public class AdminBoostdocAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBoostdoc_AdminBoostdocJsp).renderWith(data -> {
-            data.register("boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager));
+            RenderDataUtil.register(data, "boostDocumentRuleItems", boostDocumentRuleService.getBoostDocumentRuleList(boostDocPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(boostDocPager, form, op -> op.include("id"));

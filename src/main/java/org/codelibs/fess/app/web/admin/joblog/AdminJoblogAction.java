@@ -23,6 +23,7 @@ import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -93,7 +94,7 @@ public class AdminJoblogAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
+        RenderDataUtil.register(data, "jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
 
         // restore from pager
         copyBeanToBean(jobLogPager, form, op -> op.include("id"));
@@ -164,7 +165,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
-            data.register("jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
+            RenderDataUtil.register(data, "jobLogItems", jobLogService.getJobLogList(jobLogPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(jobLogPager, form, op -> op.include("id"));

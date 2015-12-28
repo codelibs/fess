@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
@@ -131,11 +132,11 @@ public class SearchAction extends FessSearchAction {
                         userInfoHelper.storeQueryId(queryId, documentItems);
                         if (screenShotManager != null) {
                             screenShotManager.storeRequest(queryId, documentItems);
-                            data.register("screenShotSupport", true);
+                            RenderDataUtil.register(data, "screenShotSupport", true);
                         }
                     }
-                    data.register("displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
-                    data.register("pagingQuery", getPagingQuery(form));
+                    RenderDataUtil.register(data, "displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
+                    RenderDataUtil.register(data, "pagingQuery", getPagingQuery(form));
                 });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
@@ -252,24 +253,24 @@ public class SearchAction extends FessSearchAction {
     protected static class WebRenderData extends SearchRenderData {
 
         public void register(RenderData data) {
-            data.register("queryId", queryId);
-            data.register("documentItems", documentItems);
-            data.register("facetResponse", facetResponse);
-            data.register("appendHighlightParams", appendHighlightParams);
-            data.register("execTime", execTime);
-            data.register("pageSize", pageSize);
-            data.register("currentPageNumber", currentPageNumber);
-            data.register("allRecordCount", allRecordCount);
-            data.register("allPageCount", allPageCount);
-            data.register("existNextPage", existNextPage);
-            data.register("existPrevPage", existPrevPage);
-            data.register("currentStartRecordNumber", currentStartRecordNumber);
-            data.register("currentEndRecordNumber", currentEndRecordNumber);
-            data.register("pageNumberList", pageNumberList);
-            data.register("partialResults", partialResults);
-            data.register("queryTime", queryTime);
-            data.register("searchQuery", searchQuery);
-            data.register("requestedTime", requestedTime);
+            RenderDataUtil.register(data, "queryId", queryId);
+            RenderDataUtil.register(data, "documentItems", documentItems);
+            RenderDataUtil.register(data, "facetResponse", facetResponse);
+            RenderDataUtil.register(data, "appendHighlightParams", appendHighlightParams);
+            RenderDataUtil.register(data, "execTime", execTime);
+            RenderDataUtil.register(data, "pageSize", pageSize);
+            RenderDataUtil.register(data, "currentPageNumber", currentPageNumber);
+            RenderDataUtil.register(data, "allRecordCount", allRecordCount);
+            RenderDataUtil.register(data, "allPageCount", allPageCount);
+            RenderDataUtil.register(data, "existNextPage", existNextPage);
+            RenderDataUtil.register(data, "existPrevPage", existPrevPage);
+            RenderDataUtil.register(data, "currentStartRecordNumber", currentStartRecordNumber);
+            RenderDataUtil.register(data, "currentEndRecordNumber", currentEndRecordNumber);
+            RenderDataUtil.register(data, "pageNumberList", pageNumberList);
+            RenderDataUtil.register(data, "partialResults", partialResults);
+            RenderDataUtil.register(data, "queryTime", queryTime);
+            RenderDataUtil.register(data, "searchQuery", searchQuery);
+            RenderDataUtil.register(data, "requestedTime", requestedTime);
         }
     }
 }

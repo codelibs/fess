@@ -24,6 +24,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -94,7 +95,7 @@ public class AdminPathmapAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
+        RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
 
         // restore from pager
         copyBeanToBean(pathMapPager, form, op -> op.include("id"));
@@ -257,7 +258,7 @@ public class AdminPathmapAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminPathmap_AdminPathmapJsp).renderWith(data -> {
-            data.register("pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
+            RenderDataUtil.register(data, "pathMappingItems", pathMappingService.getPathMappingList(pathMapPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(pathMapPager, form, op -> op.include("id"));

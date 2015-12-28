@@ -34,6 +34,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -114,7 +115,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
-        data.register("synonymItemItems", synonymService.getSynonymList(form.dictId, synonymPager));
+        RenderDataUtil.register(data, "synonymItemItems", synonymService.getSynonymList(form.dictId, synonymPager));
 
         // restore from pager
         BeanUtil.copyBeanToBean(synonymPager, form, op -> {
@@ -205,7 +206,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
             });
         }).renderWith(data -> {
             synonymService.getSynonymFile(dictId).ifPresent(file -> {
-                data.register("path", file.getPath());
+                RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
                 throwValidationError(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL), () -> asDictIndexHtml());
             });
@@ -240,7 +241,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
             });
         }).renderWith(data -> {
             synonymService.getSynonymFile(dictId).ifPresent(file -> {
-                data.register("path", file.getPath());
+                RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
                 throwValidationError(messages -> messages.addErrorsFailedToDownloadSynonymFile(GLOBAL), () -> asDictIndexHtml());
             });
@@ -405,7 +406,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
 
     private HtmlResponse asListHtml(final String dictId) {
         return asHtml(path_AdminDictSynonym_AdminDictSynonymJsp).renderWith(data -> {
-            data.register("synonymItemItems", synonymService.getSynonymList(dictId, synonymPager));
+            RenderDataUtil.register(data, "synonymItemItems", synonymService.getSynonymList(dictId, synonymPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(synonymPager, form, op -> op.include("id"));

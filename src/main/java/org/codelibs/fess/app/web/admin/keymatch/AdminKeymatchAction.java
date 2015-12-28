@@ -25,6 +25,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -94,7 +95,7 @@ public class AdminKeymatchAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
+        RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
 
         // restore from pager
         copyBeanToBean(keyMatchPager, form, op -> op.include("id"));
@@ -261,7 +262,7 @@ public class AdminKeymatchAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminKeymatch_AdminKeymatchJsp).renderWith(data -> {
-            data.register("keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
+            RenderDataUtil.register(data, "keyMatchItems", keyMatchService.getKeyMatchList(keyMatchPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(keyMatchPager, form, op -> op.include("id"));

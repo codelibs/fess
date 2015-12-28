@@ -38,6 +38,7 @@ import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -113,7 +114,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
+        RenderDataUtil.register(data, "elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
 
         // restore from pager
         copyBeanToBean(elevateWordPager, form, op -> op.include("id"));
@@ -326,7 +327,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     }
 
     protected void registerLabels(final RenderData data) {
-        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     // ===================================================================================
@@ -349,7 +350,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     //                                                                           =========
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminElevateword_AdminElevatewordJsp).renderWith(data -> {
-            data.register("elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
+            RenderDataUtil.register(data, "elevateWordItems", elevateWordService.getElevateWordList(elevateWordPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(elevateWordPager, form, op -> op.include("id"));

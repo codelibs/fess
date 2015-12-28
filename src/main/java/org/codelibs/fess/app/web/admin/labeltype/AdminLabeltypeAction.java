@@ -25,6 +25,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -97,7 +98,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
+        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
 
         // restore from pager
         copyBeanToBean(labelTypePager, form, op -> op.include("id"));
@@ -249,7 +250,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
     }
 
     protected void registerRoleTypeItems(final RenderData data) {
-        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
+        RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
     }
 
     // ===================================================================================
@@ -269,7 +270,7 @@ public class AdminLabeltypeAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminLabeltype_AdminLabeltypeJsp).renderWith(data -> {
-            data.register("labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
+            RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList(labelTypePager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(labelTypePager, form, op -> op.include("id"));

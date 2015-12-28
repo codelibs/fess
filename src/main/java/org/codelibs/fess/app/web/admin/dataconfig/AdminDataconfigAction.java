@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -107,7 +108,7 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
+        RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager)); // page navi
 
         // restore from pager
         copyBeanToBean(dataConfigPager, form, op -> op.include("id"));
@@ -254,8 +255,8 @@ public class AdminDataconfigAction extends FessAdminAction {
     }
 
     protected void registerRolesAndLabels(final RenderData data) {
-        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
+        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     protected void registerHandlerNames(final RenderData data) {
@@ -267,7 +268,7 @@ public class AdminDataconfigAction extends FessAdminAction {
             map.put(Constants.ITEM_VALUE, name);
             itemList.add(map);
         }
-        data.register("handlerNameItems", itemList);
+        RenderDataUtil.register(data, "handlerNameItems", itemList);
     }
 
     // ===================================================================================
@@ -287,7 +288,7 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminDataconfig_AdminDataconfigJsp).renderWith(data -> {
-            data.register("dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager));
+            RenderDataUtil.register(data, "dataConfigItems", dataConfigService.getDataConfigList(dataConfigPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(dataConfigPager, form, op -> op.include("id"));

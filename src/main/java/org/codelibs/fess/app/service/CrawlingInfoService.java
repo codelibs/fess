@@ -164,7 +164,9 @@ public class CrawlingInfoService implements Serializable {
                 cb2.query().setCrawlingInfoId_InScope(crawlingInfoIdList);
             });
 
-            crawlingInfoBhv.batchDelete(crawlingInfoList);
+            crawlingInfoBhv.batchDelete(crawlingInfoList, op -> {
+                op.setRefresh(true);
+            });
         }
     }
 
@@ -185,7 +187,9 @@ public class CrawlingInfoService implements Serializable {
                 crawlingInfoParam.setCreatedTime(now);
             }
         }
-        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList);
+        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList, op -> {
+            op.setRefresh(true);
+        });
     }
 
     public List<CrawlingInfoParam> getCrawlingInfoParamList(final String id) {
@@ -251,7 +255,9 @@ public class CrawlingInfoService implements Serializable {
                         crawlingInfo = new CrawlingInfo();
                         crawlingInfo.setSessionId(list.get(0));
                         crawlingInfo.setCreatedTime(formatter.parse(list.get(1)).getTime());
-                        crawlingInfoBhv.insert(crawlingInfo);
+                        crawlingInfoBhv.insert(crawlingInfo, op -> {
+                            op.setRefresh(true);
+                        });
                     }
 
                     final CrawlingInfoParam entity = new CrawlingInfoParam();
@@ -259,7 +265,9 @@ public class CrawlingInfoService implements Serializable {
                     entity.setKey(list.get(2));
                     entity.setValue(list.get(3));
                     entity.setCreatedTime(formatter.parse(list.get(4)).getTime());
-                    crawlingInfoParamBhv.insert(entity);
+                    crawlingInfoParamBhv.insert(entity, op -> {
+                        op.setRefresh(true);
+                    });
                 } catch (final Exception e) {
                     log.warn("Failed to read a click log: " + list, e);
                 }

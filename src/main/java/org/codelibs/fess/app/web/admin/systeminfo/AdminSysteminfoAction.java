@@ -27,6 +27,7 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -80,7 +81,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
         for (final Map.Entry<String, String> entry : System.getenv().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
-        data.register("envItems", itemList);
+        RenderDataUtil.register(data, "envItems", itemList);
     }
 
     protected void registerPropItems(final RenderData data) {
@@ -88,7 +89,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
         for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
-        data.register("propItems", itemList);
+        RenderDataUtil.register(data, "propItems", itemList);
     }
 
     protected void registerFessPropItems(final RenderData data) {
@@ -96,7 +97,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
         for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
-        data.register("fessPropItems", itemList);
+        RenderDataUtil.register(data, "fessPropItems", itemList);
     }
 
     protected void registerBugReportItems(final RenderData data) {
@@ -111,7 +112,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
             }
         }
 
-        data.register("bugReportItems", itemList);
+        RenderDataUtil.register(data, "bugReportItems", itemList);
     }
 
     private boolean isBugReportTarget(final Object key) {

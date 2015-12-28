@@ -35,6 +35,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -106,7 +107,7 @@ public class AdminLogAction extends FessAdminAction {
 
     private HtmlResponse asIndexHtml() {
         return asHtml(path_AdminLog_AdminLogJsp).renderWith(data -> {
-            data.register("logFileItems", getLogFileItems());
+            RenderDataUtil.register(data, "logFileItems", getLogFileItems());
         });
     }
 

@@ -27,6 +27,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -103,7 +104,7 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
+        RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
 
         // restore from webConfigPager
         copyBeanToBean(webConfigPager, form, op -> op.include("id"));
@@ -250,8 +251,8 @@ public class AdminWebconfigAction extends FessAdminAction {
     }
 
     protected void registerRolesAndLabels(final RenderData data) {
-        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
+        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     // ===================================================================================
@@ -271,7 +272,7 @@ public class AdminWebconfigAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminWebconfig_AdminWebconfigJsp).renderWith(data -> {
-            data.register("webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
+            RenderDataUtil.register(data, "webConfigItems", webConfigService.getWebConfigList(webConfigPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(webConfigPager, form, op -> op.include("id"));

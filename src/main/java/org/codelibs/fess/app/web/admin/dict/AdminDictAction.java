@@ -22,6 +22,7 @@ import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -55,7 +56,7 @@ public class AdminDictAction extends FessAdminAction {
     public HtmlResponse index() {
         return asHtml(path_AdminDict_AdminDictJsp).renderWith(data -> {
             final DictionaryFile<? extends DictionaryItem>[] dictFiles = dictionaryManager.getDictionaryFiles();
-            data.register("dictFiles", dictFiles);
+            RenderDataUtil.register(data, "dictFiles", dictFiles);
         });
     }
 }

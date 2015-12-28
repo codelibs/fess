@@ -26,6 +26,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -99,7 +100,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
+        RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
 
         // restore from pager
         copyBeanToBean(fileConfigPager, form, op -> op.include("id"));
@@ -250,8 +251,8 @@ public class AdminFileconfigAction extends FessAdminAction {
     }
 
     protected void registerRolesAndLabels(final RenderData data) {
-        data.register("roleTypeItems", roleTypeService.getRoleTypeList());
-        data.register("labelTypeItems", labelTypeService.getLabelTypeList());
+        RenderDataUtil.register(data, "roleTypeItems", roleTypeService.getRoleTypeList());
+        RenderDataUtil.register(data, "labelTypeItems", labelTypeService.getLabelTypeList());
     }
 
     // ===================================================================================
@@ -271,7 +272,7 @@ public class AdminFileconfigAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFileconfig_AdminFileconfigJsp).renderWith(data -> {
-            data.register("fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
+            RenderDataUtil.register(data, "fileConfigItems", fileConfigService.getFileConfigList(fileConfigPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(fileConfigPager, form, op -> op.include("id"));

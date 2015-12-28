@@ -27,6 +27,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -99,7 +100,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
+        RenderDataUtil.register(data, "scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
 
         // restore from pager
         copyBeanToBean(schedulerPager, form, op -> op.include("id"));
@@ -352,7 +353,7 @@ public class AdminSchedulerAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminScheduler_AdminSchedulerJsp).renderWith(data -> {
-            data.register("scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
+            RenderDataUtil.register(data, "scheduledJobItems", scheduledJobService.getScheduledJobList(schedulerPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(schedulerPager, form, op -> op.include("id"));

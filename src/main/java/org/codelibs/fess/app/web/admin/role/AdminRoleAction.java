@@ -26,6 +26,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -95,7 +96,7 @@ public class AdminRoleAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("roleItems", roleService.getRoleList(rolePager)); // page navi
+        RenderDataUtil.register(data, "roleItems", roleService.getRoleList(rolePager)); // page navi
 
         // restore from pager
         copyBeanToBean(rolePager, form, op -> op.include("id"));
@@ -253,7 +254,7 @@ public class AdminRoleAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminRole_AdminRoleJsp).renderWith(data -> {
-            data.register("roleItems", roleService.getRoleList(rolePager)); // page navi
+            RenderDataUtil.register(data, "roleItems", roleService.getRoleList(rolePager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(rolePager, form, op -> op.include("id"));

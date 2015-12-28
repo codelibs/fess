@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -106,14 +107,14 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("userItems", userService.getUserList(userPager)); // page navi
+        RenderDataUtil.register(data, "userItems", userService.getUserList(userPager)); // page navi
         // restore from pager
         copyBeanToBean(userPager, form, op -> op.include("id"));
     }
 
     private void registerForms(final RenderData data) {
-        data.register("roleItems", roleService.getAvailableRoleList());
-        data.register("groupItems", groupService.getAvailableGroupList());
+        RenderDataUtil.register(data, "roleItems", roleService.getAvailableRoleList());
+        RenderDataUtil.register(data, "groupItems", groupService.getAvailableGroupList());
     }
 
     // ===================================================================================
@@ -307,7 +308,7 @@ public class AdminUserAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminUser_AdminUserJsp).renderWith(data -> {
-            data.register("userItems", userService.getUserList(userPager)); // page navi
+            RenderDataUtil.register(data, "userItems", userService.getUserList(userPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(userPager, form, op -> op.include("id"));

@@ -33,6 +33,7 @@ import org.codelibs.fess.es.config.exentity.FileAuthentication;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -106,8 +107,9 @@ public class AdminFileauthAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("fileAuthenticationItems", fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-        data.register("displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "fileAuthenticationItems",
+                fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
+        RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
         // restore from pager
         copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
     }
@@ -259,7 +261,7 @@ public class AdminFileauthAction extends FessAdminAction {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_auth_scheme_samba"), Constants.SAMBA));
-        data.register("protocolSchemeItems", itemList);
+        RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 
     protected void registerFileConfigItems(final RenderData data) {
@@ -268,7 +270,7 @@ public class AdminFileauthAction extends FessAdminAction {
         for (final FileConfig fileConfig : fileConfigList) {
             itemList.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
         }
-        data.register("fileConfigItems", itemList);
+        RenderDataUtil.register(data, "fileConfigItems", itemList);
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
@@ -294,10 +296,13 @@ public class AdminFileauthAction extends FessAdminAction {
     //                                                                           =========
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminFileauth_AdminFileauthJsp).renderWith(data -> {
-            data.register("fileAuthenticationItems", fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
-                data.register("displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null).isEmpty());
-            }).useForm(SearchForm.class, setup -> {
+        return asHtml(path_AdminFileauth_AdminFileauthJsp).renderWith(
+                data -> {
+                    RenderDataUtil.register(data, "fileAuthenticationItems",
+                            fileAuthenticationService.getFileAuthenticationList(fileAuthenticationPager)); // page navi
+                    RenderDataUtil.register(data, "displayCreateLink", !fileConfigService.getAllFileConfigList(false, false, false, null)
+                            .isEmpty());
+                }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(fileAuthenticationPager, form, op -> op.include("id"));
             });

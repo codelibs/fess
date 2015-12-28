@@ -37,6 +37,7 @@ import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -110,7 +111,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("badWordItems", badWordService.getBadWordList(badWordPager)); // page navi
+        RenderDataUtil.register(data, "badWordItems", badWordService.getBadWordList(badWordPager)); // page navi
 
         // restore from pager
         copyBeanToBean(badWordPager, form, op -> op.include("id"));
@@ -334,7 +335,7 @@ public class AdminBadwordAction extends FessAdminAction {
     //                                                                           =========
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminBadword_AdminBadwordJsp).renderWith(data -> {
-            data.register("badWordItems", badWordService.getBadWordList(badWordPager));
+            RenderDataUtil.register(data, "badWordItems", badWordService.getBadWordList(badWordPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(badWordPager, form, op -> op.include("id"));

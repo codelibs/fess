@@ -32,6 +32,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.web.Execute;
@@ -246,85 +247,85 @@ public class AdminSearchlistAction extends FessAdminAction {
 
         @Override
         public void setDocumentItems(final List<Map<String, Object>> documentItems) {
-            data.register("documentItems", documentItems);
+            RenderDataUtil.register(data, "documentItems", documentItems);
             super.setDocumentItems(documentItems);
         }
 
         @Override
         public void setExecTime(final String execTime) {
-            data.register("execTime", execTime);
+            RenderDataUtil.register(data, "execTime", execTime);
             super.setExecTime(execTime);
         }
 
         @Override
         public void setPageSize(final int pageSize) {
-            data.register("pageSize", pageSize);
+            RenderDataUtil.register(data, "pageSize", pageSize);
             super.setPageSize(pageSize);
         }
 
         @Override
         public void setCurrentPageNumber(final int currentPageNumber) {
-            data.register("currentPageNumber", currentPageNumber);
+            RenderDataUtil.register(data, "currentPageNumber", currentPageNumber);
             super.setCurrentPageNumber(currentPageNumber);
         }
 
         @Override
         public void setAllRecordCount(final long allRecordCount) {
-            data.register("allRecordCount", allRecordCount);
+            RenderDataUtil.register(data, "allRecordCount", allRecordCount);
             super.setAllRecordCount(allRecordCount);
         }
 
         @Override
         public void setAllPageCount(final int allPageCount) {
-            data.register("allPageCount", allPageCount);
+            RenderDataUtil.register(data, "allPageCount", allPageCount);
             super.setAllPageCount(allPageCount);
         }
 
         @Override
         public void setExistNextPage(final boolean existNextPage) {
-            data.register("existNextPage", existNextPage);
+            RenderDataUtil.register(data, "existNextPage", existNextPage);
             super.setExistNextPage(existNextPage);
         }
 
         @Override
         public void setExistPrevPage(final boolean existPrevPage) {
-            data.register("existPrevPage", existPrevPage);
+            RenderDataUtil.register(data, "existPrevPage", existPrevPage);
             super.setExistPrevPage(existPrevPage);
         }
 
         @Override
         public void setCurrentStartRecordNumber(final long currentStartRecordNumber) {
-            data.register("currentStartRecordNumber", currentStartRecordNumber);
+            RenderDataUtil.register(data, "currentStartRecordNumber", currentStartRecordNumber);
             super.setCurrentStartRecordNumber(currentStartRecordNumber);
         }
 
         @Override
         public void setCurrentEndRecordNumber(final long currentEndRecordNumber) {
-            data.register("currentEndRecordNumber", currentEndRecordNumber);
+            RenderDataUtil.register(data, "currentEndRecordNumber", currentEndRecordNumber);
             super.setCurrentEndRecordNumber(currentEndRecordNumber);
         }
 
         @Override
         public void setPageNumberList(final List<String> pageNumberList) {
-            data.register("pageNumberList", pageNumberList);
+            RenderDataUtil.register(data, "pageNumberList", pageNumberList);
             super.setPageNumberList(pageNumberList);
         }
 
         @Override
         public void setPartialResults(final boolean partialResults) {
-            data.register("partialResults", partialResults);
+            RenderDataUtil.register(data, "partialResults", partialResults);
             super.setPartialResults(partialResults);
         }
 
         @Override
         public void setQueryTime(final long queryTime) {
-            data.register("queryTime", queryTime);
+            RenderDataUtil.register(data, "queryTime", queryTime);
             super.setQueryTime(queryTime);
         }
 
         @Override
         public void setSearchQuery(final String searchQuery) {
-            data.register("searchQuery", searchQuery);
+            RenderDataUtil.register(data, "searchQuery", searchQuery);
             super.setSearchQuery(searchQuery);
         }
     }

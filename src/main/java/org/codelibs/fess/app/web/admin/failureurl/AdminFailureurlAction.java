@@ -23,6 +23,7 @@ import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -94,7 +95,7 @@ public class AdminFailureurlAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
+        RenderDataUtil.register(data, "failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
 
         // restore from pager
         copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));
@@ -163,7 +164,7 @@ public class AdminFailureurlAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminFailureurl_AdminFailureurlJsp).renderWith(data -> {
-            data.register("failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
+            RenderDataUtil.register(data, "failureUrlItems", failureUrlService.getFailureUrlList(failureUrlPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(failureUrlPager, form, op -> op.include("url", "errorCountMin", "errorCountMax", "errorName"));

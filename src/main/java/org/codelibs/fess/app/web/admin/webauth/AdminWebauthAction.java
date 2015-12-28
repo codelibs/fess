@@ -33,6 +33,7 @@ import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -106,8 +107,8 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
-        data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+        RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
+        RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
         // restore from pager
         copyBeanToBean(webAuthPager, form, op -> op.include("id"));
     }
@@ -261,7 +262,7 @@ public class AdminWebauthAction extends FessAdminAction {
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_ntlm"), Constants.NTLM));
-        data.register("protocolSchemeItems", itemList);
+        RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 
     protected void registerWebConfigItems(final RenderData data) {
@@ -270,7 +271,7 @@ public class AdminWebauthAction extends FessAdminAction {
         for (final WebConfig webConfig : webConfigList) {
             itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
         }
-        data.register("webConfigItems", itemList);
+        RenderDataUtil.register(data, "webConfigItems", itemList);
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
@@ -297,8 +298,9 @@ public class AdminWebauthAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminWebauth_AdminWebauthJsp).renderWith(data -> {
-            data.register("webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
-                data.register("displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null).isEmpty());
+            RenderDataUtil.register(data, "webAuthenticationItems", webAuthenticationService.getWebAuthenticationList(webAuthPager)); // page navi
+                RenderDataUtil.register(data, "displayCreateLink", !webConfigService.getAllWebConfigList(false, false, false, null)
+                        .isEmpty());
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(webAuthPager, form, op -> op.include("id"));

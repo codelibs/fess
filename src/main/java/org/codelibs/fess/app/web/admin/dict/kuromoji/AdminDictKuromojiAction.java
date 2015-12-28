@@ -32,6 +32,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -111,7 +112,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
-        data.register("kuromojiItemItems", kuromojiService.getKuromojiList(form.dictId, kuromojiPager));
+        RenderDataUtil.register(data, "kuromojiItemItems", kuromojiService.getKuromojiList(form.dictId, kuromojiPager));
 
         // restore from pager
         BeanUtil.copyBeanToBean(kuromojiPager, form, op -> {
@@ -201,7 +202,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             });
         }).renderWith(data -> {
             kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
-                data.register("path", file.getPath());
+                RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
                 throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> asDictIndexHtml());
             });
@@ -236,7 +237,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
             });
         }).renderWith(data -> {
             kuromojiService.getKuromojiFile(dictId).ifPresent(file -> {
-                data.register("path", file.getPath());
+                RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
                 throwValidationError(messages -> messages.addErrorsFailedToDownloadKuromojiFile(GLOBAL), () -> asDictIndexHtml());
             });
@@ -367,7 +368,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
 
     private HtmlResponse asListHtml(final String dictId) {
         return asHtml(path_AdminDictKuromoji_AdminDictKuromojiJsp).renderWith(data -> {
-            data.register("kuromojiItemItems", kuromojiService.getKuromojiList(dictId, kuromojiPager));
+            RenderDataUtil.register(data, "kuromojiItemItems", kuromojiService.getKuromojiList(dictId, kuromojiPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(kuromojiPager, form, op -> op.include("id"));

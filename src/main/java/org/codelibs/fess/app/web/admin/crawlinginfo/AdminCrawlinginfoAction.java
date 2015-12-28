@@ -24,6 +24,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
@@ -101,7 +102,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        data.register("crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
+        RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
 
         // restore from pager
         copyBeanToBean(crawlingInfoPager, form, op -> op.include("sessionId"));
@@ -130,7 +131,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
                 });
             });
         }).renderWith(data -> {
-            data.register("crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
+            RenderDataUtil.register(data, "crawlingInfoParamItems", crawlingInfoService.getCrawlingInfoParamList(id));
         });
     }
 
@@ -180,7 +181,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminCrawlinginfo_AdminCrawlinginfoJsp).renderWith(data -> {
-            data.register("crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
+            RenderDataUtil.register(data, "crawlingInfoItems", crawlingInfoService.getCrawlingInfoList(crawlingInfoPager)); // page navi
             }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
                 copyBeanToBean(crawlingInfoPager, form, op -> op.include("id"));
