@@ -22,7 +22,6 @@ import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.SystemHelper;

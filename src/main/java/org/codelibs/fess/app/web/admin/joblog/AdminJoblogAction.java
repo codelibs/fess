@@ -21,7 +21,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SystemHelper;
 import org.lastaflute.web.Execute;

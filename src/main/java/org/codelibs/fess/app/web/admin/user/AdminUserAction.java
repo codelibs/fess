@@ -29,7 +29,6 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.service.RoleService;
 import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.CrudMode;
-import org.codelibs.fess.app.web.admin.boostdoc.SearchForm;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.User;
 import org.codelibs.fess.helper.SystemHelper;

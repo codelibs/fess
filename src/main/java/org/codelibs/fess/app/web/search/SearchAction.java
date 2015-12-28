@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
+import org.codelibs.fess.app.web.SearchForm;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
