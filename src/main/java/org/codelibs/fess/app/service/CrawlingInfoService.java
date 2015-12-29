@@ -217,24 +217,26 @@ public class CrawlingInfoService implements Serializable {
                     cb.specify().columnId();
                 });
         final List<String> idList = activeSessionList.stream().map(session -> session.getId()).collect(Collectors.toList());
-        if (!idList.isEmpty()) {
-            crawlingInfoParamBhv.queryDelete(cb1 -> {
-                cb1.query().filtered((cq, cf) -> {
-                    cq.matchAll();
+        crawlingInfoParamBhv.queryDelete(cb1 -> {
+            cb1.query().filtered((cq, cf) -> {
+                cq.matchAll();
+                if (!idList.isEmpty()) {
                     cf.not(subCf -> {
                         subCf.setCrawlingInfoId_InScope(idList);
                     });
-                });
+                }
             });
-            crawlingInfoBhv.queryDelete(cb2 -> {
-                cb2.query().filtered((cq, cf) -> {
-                    cq.matchAll();
+        });
+        crawlingInfoBhv.queryDelete(cb2 -> {
+            cb2.query().filtered((cq, cf) -> {
+                cq.matchAll();
+                if (!idList.isEmpty()) {
                     cf.not(subCf -> {
                         subCf.setId_InScope(idList);
                     });
-                });
+                }
             });
-        }
+        });
     }
 
     public void importCsv(final Reader reader) {
