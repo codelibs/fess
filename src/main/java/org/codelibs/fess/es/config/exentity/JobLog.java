@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.bsentity.BsJobLog;
 import org.codelibs.fess.util.ComponentUtil;
@@ -36,9 +37,10 @@ public class JobLog extends BsJobLog {
         setJobName(scheduledJob.getName());
         setScriptType(scheduledJob.getScriptType());
         setScriptData(scheduledJob.getScriptData());
-        setTarget(scheduledJob.getTarget());
         setStartTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         setJobStatus(Constants.RUNNING);
+        final String myName = ComponentUtil.getFessConfig().getSchedulerTargetName();
+        setTarget(StringUtil.isNotBlank(myName) ? myName : Constants.DEFAULT_JOB_TARGET);
     }
 
     public ScheduledJob getScheduledJob() {

@@ -309,6 +309,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. root@localhost */
     String MAIL_FROM_ADDRESS = "mail.from.address";
 
+    /** The key of the configuration. e.g.  */
+    String SCHEDULER_TARGET_NAME = "scheduler.target.name";
+
     /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
     String ONLINE_HELP_BASE_LINK = "online.help.base.link";
 
@@ -1412,6 +1415,23 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getMailFromAddress();
 
     /**
+     * Get the value for the key 'scheduler.target.name'. <br>
+     * The value is, e.g.  <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSchedulerTargetName();
+
+    /**
+     * Get the value for the key 'scheduler.target.name' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSchedulerTargetNameAsInteger();
+
+    /**
      * Get the value for the key 'online.help.base.link'. <br>
      * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/admin/ <br>
      * comment: ------
@@ -2296,6 +2316,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getMailFromAddress() {
             return get(FessConfig.MAIL_FROM_ADDRESS);
+        }
+
+        public String getSchedulerTargetName() {
+            return get(FessConfig.SCHEDULER_TARGET_NAME);
+        }
+
+        public Integer getSchedulerTargetNameAsInteger() {
+            return getAsInteger(FessConfig.SCHEDULER_TARGET_NAME);
         }
 
         public String getOnlineHelpBaseLink() {

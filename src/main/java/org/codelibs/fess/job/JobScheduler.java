@@ -20,17 +20,16 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.JobKey.jobKey;
 import static org.quartz.TriggerBuilder.newTrigger;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -52,8 +51,6 @@ public class JobScheduler {
 
     public Class<? extends Job> jobClass = TriggeredJob.class;
 
-    public List<String> targetList = new ArrayList<String>();
-
     @PostConstruct
     public void init() {
         final SchedulerFactory sf = new StdSchedulerFactory();
@@ -69,6 +66,15 @@ public class JobScheduler {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
         }, scheduledJob -> register(scheduledJob));
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String myName = fessConfig.getSchedulerTargetName();
+        if (StringUtil.isNotBlank(myName)) {
+            ComponentUtil.getComponent(JobLogBhv.class).queryDelete(cb -> {
+                cb.query().setJobStatus_Equal(Constants.RUNNING);
+                cb.query().setTarget_Equal(myName);
+            });
+        }
     }
 
     @PreDestroy
@@ -148,10 +154,15 @@ public class JobScheduler {
             return true;
         }
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String myName = fessConfig.getSchedulerTargetName();
+
         final String[] targets = target.split(",");
         for (String name : targets) {
             name = name.trim();
-            if (Constants.DEFAULT_JOB_TARGET.equals(name) || targetList.contains(name)) {
+            if (Constants.DEFAULT_JOB_TARGET.equalsIgnoreCase(name)) {
+                return true;
+            } else if (StringUtil.isNotBlank(myName) && myName.equalsIgnoreCase(name)) {
                 return true;
             }
         }
