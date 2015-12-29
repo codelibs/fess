@@ -41,7 +41,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.0-sp9</dbflute.version>
-		<lastaflute.version>0.7.3</lastaflute.version>
+		<lastaflute.version>0.7.4-RC1</lastaflute.version>
 		<lasta.taglib.version>0.6.7</lasta.taglib.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
