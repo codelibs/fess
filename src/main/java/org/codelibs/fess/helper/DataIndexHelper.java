@@ -28,6 +28,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.DataConfigService;
+import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.ds.DataStore;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.ds.IndexUpdateCallback;
@@ -235,6 +236,8 @@ public class DataIndexHelper implements Serializable {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
                 } catch (final Exception e) {
                     logger.error("Failed to process a data crawling: " + dataConfig.getName(), e);
+                    ComponentUtil.getComponent(FailureUrlService.class).store(dataConfig, e.getClass().getCanonicalName(),
+                            dataConfig.getConfigId() + ":" + dataConfig.getName(), e);
                 } finally {
                     indexUpdateCallback.commit();
                     deleteOldDocs();

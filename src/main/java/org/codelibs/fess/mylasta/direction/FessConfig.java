@@ -135,6 +135,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. text/html */
     String CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES = "crawler.document.cache.html.mimetypes";
 
+    /** The key of the configuration. e.g. true */
+    String INDEXER_THREAD_DUMP_ENABLED = "indexer.thread.dump.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String INDEXER_CLICK_COUNT_ENABLED = "indexer.click.count.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String INDEXER_FAVORITE_COUNT_ENABLED = "indexer.favorite.count.enabled";
+
+    /** The key of the configuration. e.g. 10000 */
+    String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
+
+    /** The key of the configuration. e.g. 60 */
+    String INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT = "indexer.webfs.max.empty.list.conunt";
+
+    /** The key of the configuration. e.g. 60000 */
+    String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
+
+    /** The key of the configuration. e.g. 5 */
+    String INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE = "indexer.webfs.max.document.cache.size";
+
+    /** The key of the configuration. e.g. 5 */
+    String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
+
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
 
@@ -809,6 +833,125 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentCacheHtmlMimetypes();
+
+    /**
+     * Get the value for the key 'indexer.thread.dump.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: indexer
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerThreadDumpEnabled();
+
+    /**
+     * Is the property for the key 'indexer.thread.dump.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: indexer
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isIndexerThreadDumpEnabled();
+
+    /**
+     * Get the value for the key 'indexer.click.count.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerClickCountEnabled();
+
+    /**
+     * Is the property for the key 'indexer.click.count.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isIndexerClickCountEnabled();
+
+    /**
+     * Get the value for the key 'indexer.favorite.count.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerFavoriteCountEnabled();
+
+    /**
+     * Is the property for the key 'indexer.favorite.count.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isIndexerFavoriteCountEnabled();
+
+    /**
+     * Get the value for the key 'indexer.webfs.commit.margin.time'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerWebfsCommitMarginTime();
+
+    /**
+     * Get the value for the key 'indexer.webfs.commit.margin.time' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerWebfsCommitMarginTimeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.empty.list.conunt'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerWebfsMaxEmptyListConunt();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.empty.list.conunt' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerWebfsMaxEmptyListConuntAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.webfs.update.interval'. <br>
+     * The value is, e.g. 60000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerWebfsUpdateInterval();
+
+    /**
+     * Get the value for the key 'indexer.webfs.update.interval' as {@link Integer}. <br>
+     * The value is, e.g. 60000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerWebfsUpdateIntervalAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.document.cache.size'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerWebfsMaxDocumentCacheSize();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.document.cache.size' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerWebfsMaxDocumentCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.cache.size'. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerDataMaxDocumentCacheSize();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.cache.size' as {@link Integer}. <br>
+     * The value is, e.g. 5 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerDataMaxDocumentCacheSizeAsInteger();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -1996,6 +2139,70 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getCrawlerDocumentCacheHtmlMimetypes() {
             return get(FessConfig.CRAWLER_DOCUMENT_CACHE_HTML_MIMETYPES);
+        }
+
+        public String getIndexerThreadDumpEnabled() {
+            return get(FessConfig.INDEXER_THREAD_DUMP_ENABLED);
+        }
+
+        public boolean isIndexerThreadDumpEnabled() {
+            return is(FessConfig.INDEXER_THREAD_DUMP_ENABLED);
+        }
+
+        public String getIndexerClickCountEnabled() {
+            return get(FessConfig.INDEXER_CLICK_COUNT_ENABLED);
+        }
+
+        public boolean isIndexerClickCountEnabled() {
+            return is(FessConfig.INDEXER_CLICK_COUNT_ENABLED);
+        }
+
+        public String getIndexerFavoriteCountEnabled() {
+            return get(FessConfig.INDEXER_FAVORITE_COUNT_ENABLED);
+        }
+
+        public boolean isIndexerFavoriteCountEnabled() {
+            return is(FessConfig.INDEXER_FAVORITE_COUNT_ENABLED);
+        }
+
+        public String getIndexerWebfsCommitMarginTime() {
+            return get(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME);
+        }
+
+        public Integer getIndexerWebfsCommitMarginTimeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME);
+        }
+
+        public String getIndexerWebfsMaxEmptyListConunt() {
+            return get(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        }
+
+        public Integer getIndexerWebfsMaxEmptyListConuntAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        }
+
+        public String getIndexerWebfsUpdateInterval() {
+            return get(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL);
+        }
+
+        public Integer getIndexerWebfsUpdateIntervalAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_UPDATE_INTERVAL);
+        }
+
+        public String getIndexerWebfsMaxDocumentCacheSize() {
+            return get(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE);
+        }
+
+        public Integer getIndexerWebfsMaxDocumentCacheSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE);
+        }
+
+        public String getIndexerDataMaxDocumentCacheSize() {
+            return get(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE);
+        }
+
+        public Integer getIndexerDataMaxDocumentCacheSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE);
         }
 
         public String getIndexFieldFavoriteCount() {

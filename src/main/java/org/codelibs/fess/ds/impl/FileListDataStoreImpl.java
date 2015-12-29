@@ -239,9 +239,10 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                 deleteIdList.add(crawlingInfoHelper.generateId(dataMap));
 
                 if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
+                    final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
                     final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                     for (final String id : deleteIdList) {
-                        indexingHelper.deleteDocument(indexUpdateCallback.getsClient(), id);
+                        indexingHelper.deleteDocument(fessEsClient, id);
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("Deleted " + deleteIdList);
@@ -256,20 +257,16 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         @Override
         public void commit() {
             if (!deleteIdList.isEmpty()) {
+                final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                 for (final String id : deleteIdList) {
-                    indexingHelper.deleteDocument(indexUpdateCallback.getsClient(), id);
+                    indexingHelper.deleteDocument(fessEsClient, id);
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Deleted " + deleteIdList);
                 }
             }
             indexUpdateCallback.commit();
-        }
-
-        @Override
-        public void setEsClient(final FessEsClient fessEsClient) {
-            indexUpdateCallback.setEsClient(fessEsClient);
         }
 
         @Override
@@ -282,9 +279,5 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             return indexUpdateCallback.getExecuteTime();
         }
 
-        @Override
-        public FessEsClient getsClient() {
-            return indexUpdateCallback.getsClient();
-        }
     }
 }

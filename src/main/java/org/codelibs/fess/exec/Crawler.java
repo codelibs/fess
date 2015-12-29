@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.CoreLibConstants;
-import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -276,14 +275,11 @@ public class Crawler implements Serializable {
         final String toStrs = (String) crawlerProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
-            final Map<String, Object> dataMap = new HashMap<String, Object>();
+            final Map<String, String> dataMap = new HashMap<>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
                 dataMap.put(StringUtil.decapitalize(entry.getKey()), entry.getValue());
             }
 
-            if (Constants.T.equals(infoMap.get(Constants.CRAWLER_STATUS))) {
-                dataMap.put("success", true);
-            }
             try {
                 dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
             } catch (final UnknownHostException e) {
@@ -298,9 +294,38 @@ public class Crawler implements Serializable {
                 StreamUtil.of(toAddresses).forEach(address -> {
                     postcard.addTo(address);
                 });
-                BeanUtil.copyMapToBean(dataMap, postcard);
+                postcard.setCommitEndTime(getValueOrEmpty(dataMap, "commitEndTime"));
+                postcard.setCommitExecTime(getValueOrEmpty(dataMap, "commitExecTime"));
+                postcard.setCommitStartTime(getValueOrEmpty(dataMap, "commitStartTime"));
+                postcard.setCrawlerEndTime(getValueOrEmpty(dataMap, "crawlerEndTime"));
+                postcard.setCrawlerExecTime(getValueOrEmpty(dataMap, "crawlerExecTime"));
+                postcard.setCrawlerStartTime(getValueOrEmpty(dataMap, "crawlerStartTime"));
+                postcard.setDataCrawlEndTime(getValueOrEmpty(dataMap, "dataCrawlEndTime"));
+                postcard.setDataCrawlExecTime(getValueOrEmpty(dataMap, "dataCrawlExecTime"));
+                postcard.setDataCrawlStartTime(getValueOrEmpty(dataMap, "dataCrawlStartTime"));
+                postcard.setDataFsIndexSize(getValueOrEmpty(dataMap, "dataFsIndexSize"));
+                postcard.setDataIndexExecTime(getValueOrEmpty(dataMap, "dataIndexExecTime"));
+                postcard.setHostname(getValueOrEmpty(dataMap, "hostname"));
+                postcard.setWebFsCrawlEndTime(getValueOrEmpty(dataMap, "webFsCrawlEndTime"));
+                postcard.setWebFsCrawlExecTime(getValueOrEmpty(dataMap, "webFsCrawlExecTime"));
+                postcard.setWebFsCrawlStartTime(getValueOrEmpty(dataMap, "webFsCrawlStartTime"));
+                postcard.setWebFsIndexExecTime(getValueOrEmpty(dataMap, "webFsIndexExecTime"));
+                postcard.setWebFsIndexSize(getValueOrEmpty(dataMap, "webFsIndexSize"));
+                if (Constants.T.equals(infoMap.get(Constants.CRAWLER_STATUS))) {
+                    postcard.setStatus(Constants.OK);
+                } else {
+                    postcard.setStatus(Constants.FAIL);
+                }
             });
         }
+    }
+
+    private String getValueOrEmpty(Map<String, String> dataMap, String key) {
+        String value = dataMap.get(key);
+        if (value == null) {
+            return StringUtil.EMPTY;
+        }
+        return value;
     }
 
     public int doCrawl(final Options options) {

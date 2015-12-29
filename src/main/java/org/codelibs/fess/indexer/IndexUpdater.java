@@ -83,13 +83,7 @@ public class IndexUpdater extends Thread {
     @Resource
     protected IndexingHelper indexingHelper;
 
-    public int maxDocumentCacheSize = 5;
-
-    public int maxInvalidDocumentSize = 100;
-
     protected boolean finishCrawling = false;
-
-    public long updateInterval = 60000; // 1 min
 
     protected long executeTime;
 
@@ -102,16 +96,6 @@ public class IndexUpdater extends Thread {
     protected int unprocessedDocumentSize = 100;
 
     protected List<String> finishedSessionIdList = new ArrayList<>();
-
-    public long commitMarginTime = 10000; // 10ms
-
-    public int maxEmptyListCount = 60; // 1hour
-
-    public boolean threadDump = false;
-
-    public boolean clickCountEnabled = true;
-
-    public boolean favoriteCountEnabled = true;
 
     private final List<DocBoostMatcher> docBoostMatcherList = new ArrayList<>();
 
@@ -160,6 +144,9 @@ public class IndexUpdater extends Thread {
         executeTime = 0;
         documentSize = 0;
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final long updateInterval = fessConfig.getIndexerWebfsUpdateIntervalAsInteger().longValue();
+        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListConuntAsInteger().intValue();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final Consumer<SearchRequestBuilder> cb =
@@ -172,10 +159,8 @@ public class IndexUpdater extends Thread {
                                                 org.codelibs.fess.crawler.Constants.OK_STATUS));
                         builder.setQuery(queryBuilder);
                         builder.setFrom(0);
-                        if (maxDocumentCacheSize <= 0) {
-                            maxDocumentCacheSize = 1;
-                        }
-                        builder.setSize(maxDocumentCacheSize);
+                        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger().intValue();
+                        builder.setSize(maxDocumentCacheSize <= 0 ? 1 : maxDocumentCacheSize);
                         builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
                     };
 
@@ -269,7 +254,7 @@ public class IndexUpdater extends Thread {
                     // terminate crawling
                     finishCrawling = true;
                     forceStop();
-                    if (threadDump) {
+                    if (fessConfig.getIndexerThreadDumpEnabledAsBoolean()) {
                         printThreadDump();
                     }
 
@@ -304,6 +289,8 @@ public class IndexUpdater extends Thread {
 
     private void processAccessResults(final List<Map<String, Object>> docList, final List<EsAccessResult> accessResultList,
             final List<EsAccessResult> arList) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger().intValue();
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
@@ -319,9 +306,9 @@ public class IndexUpdater extends Thread {
                 continue;
             }
 
-            final AccessResultData accessResultData = accessResult.getAccessResultData();
+            final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
-                accessResult.setAccessResultData((AccessResultData) null);
+                accessResult.setAccessResultData(null);
                 try {
                     final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
@@ -373,11 +360,13 @@ public class IndexUpdater extends Thread {
     }
 
     protected void updateDocument(final Map<String, Object> map) {
-        if (clickCountEnabled) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (fessConfig.getIndexerClickCountEnabledAsBoolean()) {
             addClickCountField(map);
         }
 
-        if (favoriteCountEnabled) {
+        if (fessConfig.getIndexerFavoriteCountEnabledAsBoolean()) {
             addFavoriteCountField(map);
         }
 
@@ -402,7 +391,6 @@ public class IndexUpdater extends Thread {
             addBoostValue(map, documentBoost);
         }
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!map.containsKey(fessConfig.getIndexFieldDocId())) {
             map.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(map));
         }
@@ -460,7 +448,9 @@ public class IndexUpdater extends Thread {
         final long execTime = System.currentTimeMillis();
         final List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
         if (!arList.isEmpty()) {
-            for (final AccessResult ar : arList.toArray(new AccessResult[arList.size()])) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            final long commitMarginTime = fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue();
+            for (final AccessResult<?> ar : arList.toArray(new AccessResult[arList.size()])) {
                 if (ar.getCreateTime().longValue() > execTime - commitMarginTime) {
                     arList.remove(ar);
                 }

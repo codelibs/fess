@@ -28,9 +28,6 @@
 	</component>
 
 	<component name="indexUpdateCallback" class="org.codelibs.fess.ds.impl.IndexUpdateCallbackImpl" instance="prototype">
-		<!-- 
-		<property name="maxDocumentCacheSize">10</property>
-		 -->
 	</component>
 
 </components>

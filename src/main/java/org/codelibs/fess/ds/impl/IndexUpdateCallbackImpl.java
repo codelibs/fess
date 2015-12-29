@@ -35,14 +35,6 @@ import org.slf4j.LoggerFactory;
 public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LoggerFactory.getLogger(IndexUpdateCallbackImpl.class);
 
-    protected FessEsClient fessEsClient;
-
-    public int maxDocumentCacheSize = 5;
-
-    public boolean clickCountEnabled = true;
-
-    public boolean favoriteCountEnabled = true;
-
     protected volatile AtomicLong documentSize = new AtomicLong(0);
 
     protected volatile long executeTime = 0;
@@ -56,6 +48,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     public synchronized boolean store(final Map<String, Object> dataMap) {
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Adding " + dataMap);
@@ -73,11 +66,11 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
         final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
 
-        if (clickCountEnabled) {
+        if (fessConfig.getIndexerClickCountEnabledAsBoolean()) {
             addClickCountField(dataMap, url, fessConfig.getIndexFieldClickCount());
         }
 
-        if (favoriteCountEnabled) {
+        if (fessConfig.getIndexerFavoriteCountEnabledAsBoolean()) {
             addFavoriteCountField(dataMap, url, fessConfig.getIndexFieldFavoriteCount());
         }
 
@@ -91,14 +84,11 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
         }
 
-        if (docList.size() >= maxDocumentCacheSize) {
+        if (docList.size() >= fessConfig.getIndexerDataMaxDocumentCacheSizeAsInteger().intValue()) {
             indexingHelper.sendDocuments(fessEsClient, docList);
         }
         documentSize.getAndIncrement();
 
-        if (!docList.isEmpty()) {
-            indexingHelper.sendDocuments(fessEsClient, docList);
-        }
         if (logger.isDebugEnabled()) {
             logger.debug("The number of an added document is " + documentSize.get() + ".");
         }
@@ -111,6 +101,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     public void commit() {
         if (!docList.isEmpty()) {
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+            final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
             indexingHelper.sendDocuments(fessEsClient, docList);
         }
     }
@@ -141,16 +132,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     @Override
     public long getExecuteTime() {
         return executeTime;
-    }
-
-    @Override
-    public FessEsClient getsClient() {
-        return fessEsClient;
-    }
-
-    @Override
-    public void setEsClient(final FessEsClient fessEsClient) {
-        this.fessEsClient = fessEsClient;
     }
 
 }

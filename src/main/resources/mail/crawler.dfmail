@@ -7,32 +7,32 @@ subject: [FESS] Crawler completed: /*pmb.hostname*/
 --- Server Info ---
 Host Name: /*IF pmb.hostname != null*//*pmb.hostname*//*END*//*IF pmb.hostname == null*/Unknown/*END*/
 /*IF pmb.webFsIndexSize != null*/
---- Web/FileSystem Crawler ---
-Start Time: /*pmb.webFsCrawlStartTime*/
-End Time:   /*pmb.webFsCrawlEndTime*/
-Exec Time:  /*pmb.webFsCrawlExecTime*/ms
+--- Web/FileSystem Crawler ---/*IF pmb.webFsCrawlStartTime != null*/
+Start Time: /*pmb.webFsCrawlStartTime*//*END*//*IF pmb.webFsCrawlEndTime != null*/
+End Time:   /*pmb.webFsCrawlEndTime*//*END*//*IF pmb.webFsCrawlExecTime != null*/
+Exec Time:  /*pmb.webFsCrawlExecTime*/ms/*END*/
 
---- Web/FileSystem Indexer ---
-Exec Time:  /*pmb.webFsIndexExecTime*/
-Num of Doc: /*pmb.webFsIndexSize*/ docs
+--- Web/FileSystem Indexer ---/*IF pmb.webFsIndexExecTime != null*/
+Exec Time:  /*pmb.webFsIndexExecTime*//*END*//*IF pmb.webFsIndexSize != null*/
+Num of Doc: /*pmb.webFsIndexSize*/ docs/*END*/
 /*END*//*IF pmb.dataFsIndexSize != null*/
---- Data Store Crawler ---
-Start Time: /*pmb.dataCrawlStartTime*/
-End Time:   /*pmb.dataCrawlEndTime*/
-Exec Time:  /*pmb.dataCrawlExecTime*/ms
+--- Data Store Crawler ---/*IF pmb.dataCrawlStartTime != null*/
+Start Time: /*pmb.dataCrawlStartTime*//*END*//*IF pmb.dataCrawlEndTime != null*/
+End Time:   /*pmb.dataCrawlEndTime*//*END*//*IF pmb.dataCrawlExecTime != null*/
+Exec Time:  /*pmb.dataCrawlExecTime*/ms/*END*/
 
---- Data Store Indexer ---
-Exec Time:  /*pmb.dataIndexExecTime*/
-Num of Doc: /*pmb.dataFsIndexSize*/ docs
+--- Data Store Indexer ---/*IF pmb.dataIndexExecTime != null*/
+Exec Time:  /*pmb.dataIndexExecTime*//*END*//*IF pmb.dataFsIndexSize != null*/
+Num of Doc: /*pmb.dataFsIndexSize*/ docs/*END*/
 /*END*//*IF pmb.commitExecTime != null*/
---- Indexer(Commit) ---
-Start Time: /*pmb.commitStartTime*/
-End Time:   /*pmb.commitEndTime*/
-Exec Time:  /*pmb.commitExecTime*/ms
+--- Indexer(Commit) ---/*IF pmb.commitStartTime != null*/
+Start Time: /*pmb.commitStartTime*//*END*//*IF pmb.commitEndTime != null*/
+End Time:   /*pmb.commitEndTime*//*END*//*IF pmb.commitExecTime != null*/
+Exec Time:  /*pmb.commitExecTime*/ms/*END*/
 /*END*/
---- Total ---
-Start Time: /*pmb.crawlerStartTime*/
-End Time:   /*pmb.crawlerEndTime*/
-Exec Time:  /*pmb.crawlerExecTime*/ms
-Status:     /*IF pmb.success != null*/Success/*END*//*IF pmb.success == null*/Fail/*END*/
+--- Total ---/*IF pmb.crawlerStartTime != null*/
+Start Time: /*pmb.crawlerStartTime*//*END*//*IF pmb.crawlerEndTime != null*/
+End Time:   /*pmb.crawlerEndTime*//*END*//*IF pmb.crawlerExecTime != null*/
+Exec Time:  /*pmb.crawlerExecTime*/ms/*END*/
+Status:     /*pmb.status*/
 

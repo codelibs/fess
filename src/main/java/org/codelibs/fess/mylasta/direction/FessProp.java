@@ -106,4 +106,22 @@ public interface FessProp {
         return StreamUtil.of(mimetypes).anyMatch(s -> s.equalsIgnoreCase(mimetype));
     }
 
+    String getIndexerClickCountEnabled();
+
+    public default boolean getIndexerClickCountEnabledAsBoolean() {
+        return Constants.TRUE.equalsIgnoreCase(getIndexerClickCountEnabled());
+    }
+
+    String getIndexerFavoriteCountEnabled();
+
+    public default boolean getIndexerFavoriteCountEnabledAsBoolean() {
+        return Constants.TRUE.equalsIgnoreCase(getIndexerFavoriteCountEnabled());
+    }
+
+    String getIndexerThreadDumpEnabled();
+
+    public default boolean getIndexerThreadDumpEnabledAsBoolean() {
+        return Constants.TRUE.equalsIgnoreCase(getIndexerThreadDumpEnabled());
+    }
+
 }

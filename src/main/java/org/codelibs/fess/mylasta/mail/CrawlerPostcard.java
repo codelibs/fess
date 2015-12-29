@@ -52,7 +52,7 @@ public class CrawlerPostcard extends LaTypicalPostcard {
     protected String[] getPropertyNames() {
         return new String[] { "hostname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
                 "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataFsIndexSize",
-                "commitStartTime", "commitEndTime", "commitExecTime", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime" };
+                "commitStartTime", "commitEndTime", "commitExecTime", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
     }
 
     // ===================================================================================
@@ -251,5 +251,14 @@ public class CrawlerPostcard extends LaTypicalPostcard {
      */
     public void setCrawlerExecTime(String crawlerExecTime) {
         registerVariable("crawlerExecTime", crawlerExecTime);
+    }
+
+    /**
+     * Set the value of status, used in parameter comment. <br>
+     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
+     * @param status The parameter value of status. (NotNull)
+     */
+    public void setStatus(String status) {
+        registerVariable("status", status);
     }
 }

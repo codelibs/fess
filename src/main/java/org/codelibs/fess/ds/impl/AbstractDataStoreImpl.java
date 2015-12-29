@@ -121,7 +121,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
             }
             return value;
         } catch (final Exception e) {
-            logger.warn("Invalid value format: " + template, e);
+            logger.warn("Invalid value format: " + template + " => " + paramMap, e);
             return null;
         }
     }

@@ -17,15 +17,9 @@ package org.codelibs.fess.ds;
 
 import java.util.Map;
 
-import org.codelibs.fess.es.client.FessEsClient;
-
 public interface IndexUpdateCallback {
 
     boolean store(Map<String, Object> dataMap);
-
-    void setEsClient(FessEsClient fessEsClient);
-
-    FessEsClient getsClient();
 
     long getDocumentSize();
 
