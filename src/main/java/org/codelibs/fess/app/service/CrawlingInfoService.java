@@ -26,14 +26,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -50,6 +47,8 @@ import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -59,17 +58,13 @@ public class CrawlingInfoService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory.getLog(CrawlingInfoService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoService.class);
 
     @Resource
     protected CrawlingInfoParamBhv crawlingInfoParamBhv;
 
     @Resource
     protected CrawlingInfoBhv crawlingInfoBhv;
-
-    public CrawlingInfoService() {
-        super();
-    }
 
     public List<CrawlingInfo> getCrawlingInfoList(final CrawlingInfoPager crawlingInfoPager) {
 
@@ -107,9 +102,6 @@ public class CrawlingInfoService implements Serializable {
             op.setRefresh(true);
         });
 
-    }
-
-    protected void setupEntityCondition(final CrawlingInfoCB cb, final Map<String, String> keys) {
     }
 
     protected void setupListCondition(final CrawlingInfoCB cb, final CrawlingInfoPager crawlingInfoPager) {
@@ -271,11 +263,11 @@ public class CrawlingInfoService implements Serializable {
                         op.setRefresh(true);
                     });
                 } catch (final Exception e) {
-                    log.warn("Failed to read a click log: " + list, e);
+                    logger.warn("Failed to read a click log: " + list, e);
                 }
             }
         } catch (final IOException e) {
-            log.warn("Failed to read a click log.", e);
+            logger.warn("Failed to read a click log.", e);
         }
     }
 
@@ -315,7 +307,7 @@ public class CrawlingInfoService implements Serializable {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn("Failed to write a crawling session info: " + entity, e);
+                        logger.warn("Failed to write a crawling session info: " + entity, e);
                     }
                 }
 
@@ -331,7 +323,7 @@ public class CrawlingInfoService implements Serializable {
             });
             csvWriter.flush();
         } catch (final IOException e) {
-            log.warn("Failed to write a crawling session info.", e);
+            logger.warn("Failed to write a crawling session info.", e);
         }
     }
 

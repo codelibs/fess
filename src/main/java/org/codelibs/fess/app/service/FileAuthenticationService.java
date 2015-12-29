@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,6 @@ public class FileAuthenticationService implements Serializable {
 
     @Resource
     protected FileAuthenticationBhv fileAuthenticationBhv;
-
-    public FileAuthenticationService() {
-        super();
-    }
 
     public List<FileAuthentication> getFileAuthenticationList(final FileAuthPager fileAuthenticationPager) {
 
@@ -62,7 +57,6 @@ public class FileAuthenticationService implements Serializable {
     }
 
     public void store(final FileAuthentication fileAuthentication) {
-        setupStoreCondition(fileAuthentication);
 
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
             op.setRefresh(true);
@@ -71,7 +65,6 @@ public class FileAuthenticationService implements Serializable {
     }
 
     public void delete(final FileAuthentication fileAuthentication) {
-        setupDeleteCondition(fileAuthentication);
 
         fileAuthenticationBhv.delete(fileAuthentication, op -> {
             op.setRefresh(true);
@@ -89,24 +82,6 @@ public class FileAuthenticationService implements Serializable {
         cb.query().addOrderBy_Hostname_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final FileAuthenticationCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final FileAuthentication fileAuthentication) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final FileAuthentication fileAuthentication) {
-
-        // setup condition
 
     }
 

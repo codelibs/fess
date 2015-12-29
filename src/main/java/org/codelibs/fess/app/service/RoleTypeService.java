@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -41,10 +40,6 @@ public class RoleTypeService implements Serializable {
     @Resource
     protected FessConfig fessConfig;
 
-    public RoleTypeService() {
-        super();
-    }
-
     public List<RoleType> getRoleTypeList(final RoleTypePager roleTypePager) {
 
         final PagingResultBean<RoleType> roleTypeList = roleTypeBhv.selectPage(cb -> {
@@ -66,7 +61,6 @@ public class RoleTypeService implements Serializable {
     }
 
     public void store(final RoleType roleType) {
-        setupStoreCondition(roleType);
 
         roleTypeBhv.insertOrUpdate(roleType, op -> {
             op.setRefresh(true);
@@ -75,7 +69,6 @@ public class RoleTypeService implements Serializable {
     }
 
     public void delete(final RoleType roleType) {
-        setupDeleteCondition(roleType);
 
         roleTypeBhv.delete(roleType, op -> {
             op.setRefresh(true);
@@ -93,24 +86,6 @@ public class RoleTypeService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
         // search
-
-    }
-
-    protected void setupEntityCondition(final RoleTypeCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final RoleType roleType) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final RoleType roleType) {
-
-        // setup condition
 
     }
 

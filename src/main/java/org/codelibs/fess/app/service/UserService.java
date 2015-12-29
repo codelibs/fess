@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,6 @@ public class UserService implements Serializable {
 
     @Resource
     protected UserBhv userBhv;
-
-    public UserService() {
-        super();
-    }
 
     public List<User> getUserList(final UserPager userPager) {
 
@@ -62,7 +57,6 @@ public class UserService implements Serializable {
     }
 
     public void store(final User user) {
-        setupStoreCondition(user);
 
         userBhv.insertOrUpdate(user, op -> {
             op.setRefresh(true);
@@ -71,7 +65,6 @@ public class UserService implements Serializable {
     }
 
     public void delete(final User user) {
-        setupDeleteCondition(user);
 
         userBhv.delete(user, op -> {
             op.setRefresh(true);
@@ -89,24 +82,6 @@ public class UserService implements Serializable {
         cb.query().addOrderBy_Name_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final UserCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final User user) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final User user) {
-
-        // setup condition
 
     }
 

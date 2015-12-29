@@ -21,12 +21,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -40,6 +37,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -49,17 +48,13 @@ public class ElevateWordService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory.getLog(ElevateWordService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElevateWordService.class);
 
     @Resource
     protected ElevateWordToLabelBhv elevateWordToLabelBhv;
 
     @Resource
     protected ElevateWordBhv elevateWordBhv;
-
-    public ElevateWordService() {
-        super();
-    }
 
     public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 
@@ -97,7 +92,6 @@ public class ElevateWordService implements Serializable {
     public void store(final ElevateWord elevateWord) {
         final boolean isNew = elevateWord.getId() == null;
         final String[] labelTypeIds = elevateWord.getLabelTypeIds();
-        setupStoreCondition(elevateWord);
 
         elevateWordBhv.insertOrUpdate(elevateWord, op -> {
             op.setRefresh(true);
@@ -154,7 +148,6 @@ public class ElevateWordService implements Serializable {
     }
 
     public void delete(final ElevateWord elevateWord) {
-        setupDeleteCondition(elevateWord);
 
         elevateWordBhv.delete(elevateWord, op -> {
             op.setRefresh(true);
@@ -175,25 +168,8 @@ public class ElevateWordService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final ElevateWordCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final ElevateWord elevateWord) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final ElevateWord elevateWord) {
-
-        // setup condition
-
-    }
-
     public void importCsv(final Reader reader) {
+        @SuppressWarnings("resource")
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
         try {
             List<String> list;
@@ -239,11 +215,11 @@ public class ElevateWordService implements Serializable {
                         elevateWordBhv.update(elevateWord);
                     }
                 } catch (final Exception e) {
-                    log.warn("Failed to read a sugget elevate word: " + list, e);
+                    logger.warn("Failed to read a sugget elevate word: " + list, e);
                 }
             }
         } catch (final IOException e) {
-            log.warn("Failed to read a sugget elevate word.", e);
+            logger.warn("Failed to read a sugget elevate word.", e);
         }
     }
 
@@ -276,7 +252,7 @@ public class ElevateWordService implements Serializable {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn("Failed to write a sugget elevate word: " + entity, e);
+                        logger.warn("Failed to write a sugget elevate word: " + entity, e);
                     }
                 }
 
@@ -291,7 +267,7 @@ public class ElevateWordService implements Serializable {
 
             csvWriter.flush();
         } catch (final IOException e) {
-            log.warn("Failed to write a sugget elevate word.", e);
+            logger.warn("Failed to write a sugget elevate word.", e);
         }
     }
 

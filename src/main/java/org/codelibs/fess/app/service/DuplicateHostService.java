@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,6 @@ public class DuplicateHostService implements Serializable {
 
     @Resource
     protected DuplicateHostBhv duplicateHostBhv;
-
-    public DuplicateHostService() {
-        super();
-    }
 
     public List<DuplicateHost> getDuplicateHostList(final DuplicateHostPager duplicateHostPager) {
 
@@ -62,7 +57,6 @@ public class DuplicateHostService implements Serializable {
     }
 
     public void store(final DuplicateHost duplicateHost) {
-        setupStoreCondition(duplicateHost);
 
         duplicateHostBhv.insertOrUpdate(duplicateHost, op -> {
             op.setRefresh(true);
@@ -71,7 +65,6 @@ public class DuplicateHostService implements Serializable {
     }
 
     public void delete(final DuplicateHost duplicateHost) {
-        setupDeleteCondition(duplicateHost);
 
         duplicateHostBhv.delete(duplicateHost, op -> {
             op.setRefresh(true);
@@ -98,24 +91,6 @@ public class DuplicateHostService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final DuplicateHostCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final DuplicateHost duplicateHost) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final DuplicateHost duplicateHost) {
-
-        // setup condition
 
     }
 

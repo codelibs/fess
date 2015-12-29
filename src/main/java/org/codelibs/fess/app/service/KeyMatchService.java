@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -62,7 +61,6 @@ public class KeyMatchService implements Serializable {
     }
 
     public void store(final KeyMatch keyMatch) {
-        setupStoreCondition(keyMatch);
 
         keyMatchBhv.insertOrUpdate(keyMatch, op -> {
             op.setRefresh(true);
@@ -71,7 +69,6 @@ public class KeyMatchService implements Serializable {
     }
 
     public void delete(final KeyMatch keyMatch) {
-        setupDeleteCondition(keyMatch);
 
         keyMatchBhv.delete(keyMatch, op -> {
             op.setRefresh(true);
@@ -89,24 +86,6 @@ public class KeyMatchService implements Serializable {
         cb.query().addOrderBy_Term_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final KeyMatchCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final KeyMatch keyMatch) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final KeyMatch keyMatch) {
-
-        // setup condition
 
     }
 

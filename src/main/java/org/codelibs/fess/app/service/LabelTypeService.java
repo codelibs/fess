@@ -18,7 +18,6 @@ package org.codelibs.fess.app.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -50,10 +49,6 @@ public class LabelTypeService implements Serializable {
     @Resource
     protected FessConfig fessConfig;
 
-    public LabelTypeService() {
-        super();
-    }
-
     public List<LabelType> getLabelTypeList(final LabelTypePager labelTypePager) {
 
         final PagingResultBean<LabelType> labelTypeList = labelTypeBhv.selectPage(cb -> {
@@ -71,7 +66,6 @@ public class LabelTypeService implements Serializable {
     }
 
     public void delete(final LabelType labelType) {
-        setupDeleteCondition(labelType);
 
         labelTypeBhv.delete(labelType, op -> {
             op.setRefresh(true);
@@ -92,24 +86,6 @@ public class LabelTypeService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
         cb.query().addOrderBy_Name_Asc();
         // search
-
-    }
-
-    protected void setupEntityCondition(final LabelTypeCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final LabelType labelType) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final LabelType labelType) {
-
-        // setup condition
 
     }
 
@@ -134,7 +110,6 @@ public class LabelTypeService implements Serializable {
     public void store(final LabelType labelType) {
         final boolean isNew = labelType.getId() == null;
         final String[] roleTypeIds = labelType.getRoleTypeIds();
-        setupStoreCondition(labelType);
 
         labelTypeBhv.insertOrUpdate(labelType, op -> {
             op.setRefresh(true);

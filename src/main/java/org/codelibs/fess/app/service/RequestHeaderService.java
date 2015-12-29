@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,6 @@ public class RequestHeaderService implements Serializable {
 
     @Resource
     protected RequestHeaderBhv requestHeaderBhv;
-
-    public RequestHeaderService() {
-        super();
-    }
 
     public List<RequestHeader> getRequestHeaderList(final ReqHeaderPager requestHeaderPager) {
 
@@ -62,7 +57,6 @@ public class RequestHeaderService implements Serializable {
     }
 
     public void store(final RequestHeader requestHeader) {
-        setupStoreCondition(requestHeader);
 
         requestHeaderBhv.insertOrUpdate(requestHeader, op -> {
             op.setRefresh(true);
@@ -71,7 +65,6 @@ public class RequestHeaderService implements Serializable {
     }
 
     public void delete(final RequestHeader requestHeader) {
-        setupDeleteCondition(requestHeader);
 
         requestHeaderBhv.delete(requestHeader, op -> {
             op.setRefresh(true);
@@ -89,24 +82,6 @@ public class RequestHeaderService implements Serializable {
         cb.query().addOrderBy_Name_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final RequestHeaderCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final RequestHeader requestHeader) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final RequestHeader requestHeader) {
-
-        // setup condition
 
     }
 

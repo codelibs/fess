@@ -18,7 +18,6 @@ package org.codelibs.fess.app.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -48,10 +47,6 @@ public class WebConfigService implements Serializable {
     @Resource
     protected WebConfigBhv webConfigBhv;
 
-    public WebConfigService() {
-        super();
-    }
-
     public List<WebConfig> getWebConfigList(final WebConfigPager webConfigPager) {
 
         final PagingResultBean<WebConfig> webConfigList = webConfigBhv.selectPage(cb -> {
@@ -69,7 +64,6 @@ public class WebConfigService implements Serializable {
     }
 
     public void delete(final WebConfig webConfig) {
-        setupDeleteCondition(webConfig);
 
         webConfigBhv.delete(webConfig, op -> {
             op.setRefresh(true);
@@ -135,7 +129,6 @@ public class WebConfigService implements Serializable {
         final boolean isNew = webConfig.getId() == null;
         final String[] labelTypeIds = webConfig.getLabelTypeIds();
         final String[] roleTypeIds = webConfig.getRoleTypeIds();
-        setupStoreCondition(webConfig);
 
         webConfigBhv.insertOrUpdate(webConfig, op -> {
             op.setRefresh(true);
@@ -248,21 +241,4 @@ public class WebConfigService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final WebConfigCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final WebConfig webConfig) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final WebConfig webConfig) {
-
-        // setup condition
-
-    }
 }

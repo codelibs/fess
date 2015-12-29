@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -37,10 +36,6 @@ public class ScheduledJobService implements Serializable {
 
     @Resource
     protected ScheduledJobBhv scheduledJobBhv;
-
-    public ScheduledJobService() {
-        super();
-    }
 
     public List<ScheduledJob> getScheduledJobList(final SchedulerPager scheduledJobPager) {
 
@@ -63,7 +58,6 @@ public class ScheduledJobService implements Serializable {
     }
 
     public void delete(final ScheduledJob scheduledJob) {
-        setupDeleteCondition(scheduledJob);
 
         scheduledJobBhv.delete(scheduledJob, op -> {
             op.setRefresh(true);
@@ -88,24 +82,6 @@ public class ScheduledJobService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final ScheduledJobCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final ScheduledJob scheduledJob) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final ScheduledJob scheduledJob) {
-
-        // setup condition
-
-    }
-
     public List<ScheduledJob> getScheduledJobList() {
         return scheduledJobBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
@@ -115,7 +91,6 @@ public class ScheduledJobService implements Serializable {
 
     public void store(final ScheduledJob scheduledJob) {
         final boolean isNew = scheduledJob.getId() == null;
-        setupStoreCondition(scheduledJob);
 
         scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
             op.setRefresh(true);

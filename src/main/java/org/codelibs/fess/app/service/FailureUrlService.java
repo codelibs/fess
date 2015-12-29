@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
@@ -52,10 +51,6 @@ public class FailureUrlService implements Serializable {
     @Resource
     protected FailureUrlBhv failureUrlBhv;
 
-    public FailureUrlService() {
-        super();
-    }
-
     public List<FailureUrl> getFailureUrlList(final FailureUrlPager failureUrlPager) {
 
         final PagingResultBean<FailureUrl> failureUrlList = failureUrlBhv.selectPage(cb -> {
@@ -77,7 +72,6 @@ public class FailureUrlService implements Serializable {
     }
 
     public void store(final FailureUrl failureUrl) {
-        setupStoreCondition(failureUrl);
 
         failureUrlBhv.insertOrUpdate(failureUrl, op -> {
             op.setRefresh(true);
@@ -86,7 +80,6 @@ public class FailureUrlService implements Serializable {
     }
 
     public void delete(final FailureUrl failureUrl) {
-        setupDeleteCondition(failureUrl);
 
         failureUrlBhv.delete(failureUrl, op -> {
             op.setRefresh(true);
@@ -104,24 +97,6 @@ public class FailureUrlService implements Serializable {
         cb.query().addOrderBy_LastAccessTime_Desc();
 
         buildSearchCondition(failureUrlPager, cb);
-    }
-
-    protected void setupEntityCondition(final FailureUrlCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final FailureUrl failureUrl) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final FailureUrl failureUrl) {
-
-        // setup condition
-
     }
 
     public void deleteAll(final FailureUrlPager failureUrlPager) {

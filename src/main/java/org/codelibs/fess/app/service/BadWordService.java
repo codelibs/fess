@@ -21,12 +21,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -38,6 +35,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
@@ -49,7 +48,7 @@ public class BadWordService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log log = LogFactory.getLog(BadWordService.class);
+    private static final Logger logger = LoggerFactory.getLogger(BadWordService.class);
 
     @Resource
     protected BadWordBhv badWordBhv;
@@ -79,7 +78,6 @@ public class BadWordService implements Serializable {
     }
 
     public void store(final BadWord badWord) {
-        setupStoreCondition(badWord);
 
         badWordBhv.insertOrUpdate(badWord, op -> {
             op.setRefresh(true);
@@ -88,7 +86,6 @@ public class BadWordService implements Serializable {
     }
 
     public void delete(final BadWord badWord) {
-        setupDeleteCondition(badWord);
 
         badWordBhv.delete(badWord, op -> {
             op.setRefresh(true);
@@ -109,25 +106,8 @@ public class BadWordService implements Serializable {
 
     }
 
-    protected void setupEntityCondition(final BadWordCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final BadWord badWord) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final BadWord badWord) {
-
-        // setup condition
-
-    }
-
     public void importCsv(final Reader reader) {
+        @SuppressWarnings("resource")
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
         try {
             List<String> list;
@@ -163,11 +143,11 @@ public class BadWordService implements Serializable {
                         badWordBhv.update(badWord);
                     }
                 } catch (final Exception e) {
-                    log.warn("Failed to read a sugget elevate word: " + list, e);
+                    logger.warn("Failed to read a sugget elevate word: " + list, e);
                 }
             }
         } catch (final IOException e) {
-            log.warn("Failed to read a sugget elevate word.", e);
+            logger.warn("Failed to read a sugget elevate word.", e);
         }
     }
 
@@ -192,7 +172,7 @@ public class BadWordService implements Serializable {
                     try {
                         csvWriter.writeValues(list);
                     } catch (final IOException e) {
-                        log.warn("Failed to write a sugget bad word: " + entity, e);
+                        logger.warn("Failed to write a sugget bad word: " + entity, e);
                     }
                 }
 
@@ -207,7 +187,7 @@ public class BadWordService implements Serializable {
 
             csvWriter.flush();
         } catch (final IOException e) {
-            log.warn("Failed to write a sugget bad word.", e);
+            logger.warn("Failed to write a sugget bad word.", e);
         }
     }
 

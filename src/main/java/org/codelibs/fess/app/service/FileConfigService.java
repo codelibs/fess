@@ -18,7 +18,6 @@ package org.codelibs.fess.app.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -48,10 +47,6 @@ public class FileConfigService implements Serializable {
     @Resource
     protected FileConfigBhv fileConfigBhv;
 
-    public FileConfigService() {
-        super();
-    }
-
     public List<FileConfig> getFileConfigList(final FileConfigPager fileConfigPager) {
 
         final PagingResultBean<FileConfig> fileConfigList = fileConfigBhv.selectPage(cb -> {
@@ -69,7 +64,6 @@ public class FileConfigService implements Serializable {
     }
 
     public void delete(final FileConfig fileConfig) {
-        setupDeleteCondition(fileConfig);
 
         fileConfigBhv.delete(fileConfig, op -> {
             op.setRefresh(true);
@@ -134,7 +128,6 @@ public class FileConfigService implements Serializable {
         final boolean isNew = fileConfig.getId() == null;
         final String[] labelTypeIds = fileConfig.getLabelTypeIds();
         final String[] roleTypeIds = fileConfig.getRoleTypeIds();
-        setupStoreCondition(fileConfig);
 
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
             op.setRefresh(true);
@@ -243,24 +236,6 @@ public class FileConfigService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final FileConfigCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final FileConfig fileConfig) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final FileConfig fileConfig) {
-
-        // setup condition
 
     }
 

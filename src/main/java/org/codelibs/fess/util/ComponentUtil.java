@@ -24,7 +24,6 @@ import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.helper.AdRoleHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
@@ -110,8 +109,6 @@ public final class ComponentUtil {
     private static final String VIEW_HELPER = "viewHelper";
 
     private static final String SYSTEM_HELPER = "systemHelper";
-
-    private static final String AD_ROLE_HELPER = "adRoleHelper";
 
     private static final String CRAWLER_PROPERTIES = "crawlerProperties";
 
@@ -220,10 +217,6 @@ public final class ComponentUtil {
 
     public static FileTypeHelper getFileTypeHelper() {
         return SingletonLaContainer.getComponent(FILE_TYPE_HELPER);
-    }
-
-    public static AdRoleHelper getAdRoleHelper() {
-        return SingletonLaContainer.getComponent(AD_ROLE_HELPER);
     }
 
     public static IndexUpdater getIndexUpdater() {

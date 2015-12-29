@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -62,7 +61,6 @@ public class RoleService implements Serializable {
     }
 
     public void store(final Role role) {
-        setupStoreCondition(role);
 
         roleBhv.insertOrUpdate(role, op -> {
             op.setRefresh(true);
@@ -71,7 +69,6 @@ public class RoleService implements Serializable {
     }
 
     public void delete(final Role role) {
-        setupDeleteCondition(role);
 
         roleBhv.delete(role, op -> {
             op.setRefresh(true);
@@ -89,24 +86,6 @@ public class RoleService implements Serializable {
         cb.query().addOrderBy_Name_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final RoleCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final Role role) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final Role role) {
-
-        // setup condition
 
     }
 

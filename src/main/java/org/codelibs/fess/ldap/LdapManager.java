@@ -31,7 +31,6 @@ import javax.naming.directory.SearchResult;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
-import org.codelibs.fess.filter.AdLoginInfoFilter;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -40,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LdapManager {
-    private static final Logger logger = LoggerFactory.getLogger(AdLoginInfoFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(LdapManager.class);
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();

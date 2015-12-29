@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -62,7 +61,6 @@ public class GroupService implements Serializable {
     }
 
     public void store(final Group group) {
-        setupStoreCondition(group);
 
         groupBhv.insertOrUpdate(group, op -> {
             op.setRefresh(true);
@@ -71,7 +69,6 @@ public class GroupService implements Serializable {
     }
 
     public void delete(final Group group) {
-        setupDeleteCondition(group);
 
         groupBhv.delete(group, op -> {
             op.setRefresh(true);
@@ -89,24 +86,6 @@ public class GroupService implements Serializable {
         cb.query().addOrderBy_Name_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final GroupCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final Group group) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final Group group) {
-
-        // setup condition
 
     }
 

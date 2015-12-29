@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,6 @@ public class WebAuthenticationService implements Serializable {
 
     @Resource
     protected WebAuthenticationBhv webAuthenticationBhv;
-
-    public WebAuthenticationService() {
-        super();
-    }
 
     public List<WebAuthentication> getWebAuthenticationList(final WebAuthPager webAuthenticationPager) {
 
@@ -62,7 +57,6 @@ public class WebAuthenticationService implements Serializable {
     }
 
     public void store(final WebAuthentication webAuthentication) {
-        setupStoreCondition(webAuthentication);
 
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
             op.setRefresh(true);
@@ -71,7 +65,6 @@ public class WebAuthenticationService implements Serializable {
     }
 
     public void delete(final WebAuthentication webAuthentication) {
-        setupDeleteCondition(webAuthentication);
 
         webAuthenticationBhv.delete(webAuthentication, op -> {
             op.setRefresh(true);
@@ -89,24 +82,6 @@ public class WebAuthenticationService implements Serializable {
         cb.query().addOrderBy_WebConfigId_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final WebAuthenticationCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final WebAuthentication webAuthentication) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final WebAuthentication webAuthentication) {
-
-        // setup condition
 
     }
 

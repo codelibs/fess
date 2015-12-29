@@ -18,7 +18,6 @@ package org.codelibs.fess.app.service;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -59,7 +58,6 @@ public class PathMappingService implements Serializable {
     }
 
     public void store(final PathMapping pathMapping) {
-        setupStoreCondition(pathMapping);
 
         pathMappingBhv.insertOrUpdate(pathMapping, op -> {
             op.setRefresh(true);
@@ -68,7 +66,6 @@ public class PathMappingService implements Serializable {
     }
 
     public void delete(final PathMapping pathMapping) {
-        setupDeleteCondition(pathMapping);
 
         pathMappingBhv.delete(pathMapping, op -> {
             op.setRefresh(true);
@@ -94,24 +91,6 @@ public class PathMappingService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final PathMappingCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final PathMapping pathMapping) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final PathMapping pathMapping) {
-
-        // setup condition
 
     }
 

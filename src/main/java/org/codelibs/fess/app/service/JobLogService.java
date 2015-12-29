@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -37,10 +36,6 @@ public class JobLogService implements Serializable {
 
     @Resource
     protected JobLogBhv jobLogBhv;
-
-    public JobLogService() {
-        super();
-    }
 
     public List<JobLog> getJobLogList(final JobLogPager jobLogPager) {
 
@@ -63,7 +58,6 @@ public class JobLogService implements Serializable {
     }
 
     public void store(final JobLog jobLog) {
-        setupStoreCondition(jobLog);
 
         jobLogBhv.insertOrUpdate(jobLog, op -> {
             op.setRefresh(true);
@@ -72,7 +66,6 @@ public class JobLogService implements Serializable {
     }
 
     public void delete(final JobLog jobLog) {
-        setupDeleteCondition(jobLog);
 
         jobLogBhv.delete(jobLog, op -> {
             op.setRefresh(true);
@@ -91,24 +84,6 @@ public class JobLogService implements Serializable {
         cb.query().addOrderBy_EndTime_Desc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final JobLogCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final JobLog jobLog) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final JobLog jobLog) {
-
-        // setup condition
 
     }
 

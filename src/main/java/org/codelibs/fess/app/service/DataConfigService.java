@@ -18,7 +18,6 @@ package org.codelibs.fess.app.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -48,10 +47,6 @@ public class DataConfigService implements Serializable {
     @Resource
     protected DataConfigBhv dataConfigBhv;
 
-    public DataConfigService() {
-        super();
-    }
-
     public List<DataConfig> getDataConfigList(final DataConfigPager dataConfigPager) {
 
         final PagingResultBean<DataConfig> dataConfigList = dataConfigBhv.selectPage(cb -> {
@@ -70,7 +65,6 @@ public class DataConfigService implements Serializable {
     }
 
     public void delete(final DataConfig dataConfig) {
-        setupDeleteCondition(dataConfig);
 
         dataConfigBhv.delete(dataConfig, op -> {
             op.setRefresh(true);
@@ -136,7 +130,6 @@ public class DataConfigService implements Serializable {
         final boolean isNew = dataConfig.getId() == null;
         final String[] labelTypeIds = dataConfig.getLabelTypeIds();
         final String[] roleTypeIds = dataConfig.getRoleTypeIds();
-        setupStoreCondition(dataConfig);
 
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
             op.setRefresh(true);
@@ -245,24 +238,6 @@ public class DataConfigService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final DataConfigCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final DataConfig dataConfig) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final DataConfig dataConfig) {
-
-        // setup condition
 
     }
 

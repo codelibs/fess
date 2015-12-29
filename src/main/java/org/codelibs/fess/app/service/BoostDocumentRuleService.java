@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -62,7 +61,6 @@ public class BoostDocumentRuleService implements Serializable {
     }
 
     public void store(final BoostDocumentRule boostDocumentRule) {
-        setupStoreCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> {
             op.setRefresh(true);
@@ -71,7 +69,6 @@ public class BoostDocumentRuleService implements Serializable {
     }
 
     public void delete(final BoostDocumentRule boostDocumentRule) {
-        setupDeleteCondition(boostDocumentRule);
 
         boostDocumentRuleBhv.delete(boostDocumentRule, op -> {
             op.setRefresh(true);
@@ -89,24 +86,6 @@ public class BoostDocumentRuleService implements Serializable {
         cb.query().addOrderBy_SortOrder_Asc();
 
         // search
-
-    }
-
-    protected void setupEntityCondition(final BoostDocumentRuleCB cb, final Map<String, String> keys) {
-
-        // setup condition
-
-    }
-
-    protected void setupStoreCondition(final BoostDocumentRule boostDocumentRule) {
-
-        // setup condition
-
-    }
-
-    protected void setupDeleteCondition(final BoostDocumentRule boostDocumentRule) {
-
-        // setup condition
 
     }
 
