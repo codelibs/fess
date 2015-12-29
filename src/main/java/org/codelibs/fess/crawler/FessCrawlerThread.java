@@ -23,8 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
@@ -53,7 +55,7 @@ public class FessCrawlerThread extends CrawlerThread {
     private static final Logger logger = LoggerFactory.getLogger(FessCrawlerThread.class);
 
     @Override
-    protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue urlQueue) {
+    protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
         final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
         if (crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
@@ -163,11 +165,12 @@ public class FessCrawlerThread extends CrawlerThread {
         return true;
     }
 
-    protected void storeChildUrlsToQueue(final UrlQueue urlQueue, final Set<RequestData> childUrlSet) {
+    protected void storeChildUrlsToQueue(final UrlQueue<?> urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             synchronized (crawlerContext.getAccessCountLock()) {
                 // add an url
-                storeChildUrls(childUrlSet, urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
+                storeChildUrls(childUrlSet.stream().filter(rd -> StringUtil.isNotBlank(rd.getUrl())).collect(Collectors.toSet()),
+                        urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
             }
         }
     }
