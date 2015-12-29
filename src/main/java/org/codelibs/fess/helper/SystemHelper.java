@@ -41,11 +41,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.RoleTypeService;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.RoleType;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
 
 import com.google.common.cache.CacheBuilder;
@@ -114,7 +115,8 @@ public class SystemHelper implements Serializable {
     }
 
     public String getUsername() {
-        return ComponentUtil.getComponent(FessLoginAssist.class).getSessionUserBean().map(user -> {
+        final RequestManager requestManager = ComponentUtil.getRequestManager();
+        return requestManager.findUserBean(FessUserBean.class).map(user -> {
             return user.getUserId();
         }).orElse(Constants.GUEST_USER);
     }

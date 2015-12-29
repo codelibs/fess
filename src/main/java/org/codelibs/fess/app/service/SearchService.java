@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
@@ -46,6 +45,7 @@ import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.helper.UserInfoHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -217,7 +217,7 @@ public class SearchService {
         searchLog.setRequestedAt(requestedTime);
         searchLog.setQueryOffset(pageStart);
         searchLog.setQueryPageSize(pageSize);
-        ComponentUtil.getComponent(FessLoginAssist.class).getSessionUserBean().ifPresent(user -> {
+        ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(user -> {
             searchLog.setUser(user.getUserId());
         });
 

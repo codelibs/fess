@@ -52,6 +52,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
     private static final String LDAP_MANAGER = "ldapManager";
@@ -269,10 +270,6 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(FessConfig.class);
     }
 
-    public static <T> T getComponent(final Class<T> clazz) {
-        return SingletonLaContainer.getComponent(clazz);
-    }
-
     public static SuggestHelper getSuggestHelper() {
         return SingletonLaContainer.getComponent(SUGGEST_HELPER);
     }
@@ -285,7 +282,16 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(LDAP_MANAGER);
     }
 
+    public static RequestManager getRequestManager() {
+        return SingletonLaContainer.getComponent(RequestManager.class);
+    }
+
+    public static <T> T getComponent(final Class<T> clazz) {
+        return SingletonLaContainer.getComponent(clazz);
+    }
+
     public static boolean hasQueryHelper() {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
     }
+
 }

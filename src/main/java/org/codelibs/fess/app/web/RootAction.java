@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.base.SearchForm;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 

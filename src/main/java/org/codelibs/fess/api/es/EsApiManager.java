@@ -37,11 +37,12 @@ import org.codelibs.elasticsearch.runner.net.Curl.Method;
 import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.WebApiException;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +65,9 @@ public class EsApiManager extends BaseApiManager {
     public boolean matches(final HttpServletRequest request) {
         final String servletPath = request.getServletPath();
         if (servletPath.startsWith(pathPrefix)) {
-            final FessLoginAssist loginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
-            return loginAssist.getSessionUserBean().map(user -> user.hasRoles(acceptedRoles)).orElseGet(() -> Boolean.FALSE).booleanValue();
+            final RequestManager requestManager = ComponentUtil.getRequestManager();
+            return requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElseGet(() -> Boolean.FALSE)
+                    .booleanValue();
         }
         return false;
     }

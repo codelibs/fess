@@ -31,7 +31,7 @@ import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.web.login.LoginHandlingResource;
-import org.lastaflute.web.login.LoginManager;
+import org.lastaflute.web.login.PrimaryLoginManager;
 import org.lastaflute.web.login.TypicalLoginAssist;
 import org.lastaflute.web.login.exception.LoginRequiredException;
 import org.lastaflute.web.login.option.LoginSpecifiedOption;
@@ -41,7 +41,7 @@ import org.lastaflute.web.login.option.LoginSpecifiedOption;
  * @author shinsuke
  */
 public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, FessUser> // #change_it also UserBean
-        implements LoginManager {
+        implements PrimaryLoginManager {
 
     // ===================================================================================
     //                                                                           Attribute

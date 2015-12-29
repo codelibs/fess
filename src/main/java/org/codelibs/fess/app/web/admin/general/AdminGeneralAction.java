@@ -94,7 +94,7 @@ public class AdminGeneralAction extends FessAdminAction {
             dataMap.put("hostname", "UNKNOWN");
         }
 
-        final FessConfig fessConfig = ComponentUtil.getComponent(FessConfig.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
         try {
             TestmailPostcard.droppedInto(postbox, postcard -> {

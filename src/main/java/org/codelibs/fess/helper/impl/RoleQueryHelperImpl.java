@@ -30,10 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.RoleQueryHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,8 +111,9 @@ public class RoleQueryHelperImpl implements RoleQueryHelper, Serializable {
             roleList.addAll(buildByCookieNameMapping(request));
         }
 
-        final FessLoginAssist fessLoginAssist = ComponentUtil.getComponent(FessLoginAssist.class);
-        fessLoginAssist.getSessionUserBean().ifPresent(fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).forEach(roleList::add));
+        final RequestManager requestManager = ComponentUtil.getRequestManager();
+        requestManager.findUserBean(FessUserBean.class).ifPresent(
+                fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).forEach(roleList::add));
 
         if (defaultRoleList != null) {
             roleList.addAll(defaultRoleList);
