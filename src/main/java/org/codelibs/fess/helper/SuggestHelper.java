@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -50,11 +49,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
-    private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
 
     private static final String TEXT_SEP = " ";
 
@@ -68,8 +64,6 @@ public class SuggestHelper {
     protected FessEsClient fessEsClient;
 
     protected Suggester suggester;
-
-    protected final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private FessConfig fessConfig;
 
@@ -93,17 +87,15 @@ public class SuggestHelper {
         stream(fessConfig.getSuggestRoleFilters()).forEach(filter -> {
             roleFilterList.add(Pattern.compile(filter));
         });
-        final Thread th = new Thread(() -> {
-            fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
-            suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
-            suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-            stream(fessConfig.getSuggestFieldIndexContents()).forEach(field -> {
-                suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
-            });
-            suggester.createIndexIfNothing();
-            initialized.set(true);
+
+        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+
+        suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
+        suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
+        stream(fessConfig.getSuggestFieldIndexContents()).forEach(field -> {
+            suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
         });
-        th.start();
+        suggester.createIndexIfNothing();
     }
 
     public Suggester suggester() {
@@ -150,15 +142,6 @@ public class SuggestHelper {
     }
 
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
-        while (!initialized.get()) {
-            try {
-                Thread.sleep(100);
-            } catch (final Exception e) {
-                error.accept(e);
-                return;
-            }
-        }
-
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final ESSourceReader reader =
                 new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
