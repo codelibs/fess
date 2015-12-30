@@ -62,11 +62,13 @@ public class AdminJoblogAction extends FessAdminAction {
     //                                                                      ==============
     @Execute
     public HtmlResponse index(final SearchForm form) {
+        saveToken();
         return asListHtml();
     }
 
     @Execute
     public HtmlResponse list(final Integer pageNumber, final SearchForm form) {
+        saveToken();
         jobLogPager.setCurrentPageNumber(pageNumber);
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -75,6 +77,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
+        saveToken();
         copyBeanToBean(form, jobLogPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -83,6 +86,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
+        saveToken();
         jobLogPager.clear();
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
@@ -91,6 +95,7 @@ public class AdminJoblogAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse back(final SearchForm form) {
+        saveToken();
         return asHtml(path_AdminJoblog_AdminJoblogJsp).renderWith(data -> {
             searchPaging(data, form);
         });
