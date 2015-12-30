@@ -115,7 +115,7 @@ public class IndexingHelper {
         return fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), id,
                 requestBuilder -> {
                     return true;
-                }).orElseGet(() -> null);
+                }).orElse(null);
     }
 
     public List<Map<String, Object>> getDocumentListByPrefixId(final FessEsClient fessEsClient, final String id, final String[] fields) {

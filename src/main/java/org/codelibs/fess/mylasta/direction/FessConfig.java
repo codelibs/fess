@@ -318,6 +318,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String PAGE_GROUP_MAX_FETCH_SIZE = "page.group.max.fetch.size";
 
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE = "page.crawling.info.param.max.fetch.size";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -1406,7 +1409,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.docboost.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
-     * comment: max page size
+     * comment: fetch page size
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getPageDocboostMaxFetchSize();
@@ -1414,7 +1417,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'page.docboost.max.fetch.size' as {@link Integer}. <br>
      * The value is, e.g. 1000 <br>
-     * comment: max page size
+     * comment: fetch page size
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1494,6 +1497,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPageGroupMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.crawling.info.param.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageCrawlingInfoParamMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.crawling.info.param.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageCrawlingInfoParamMaxFetchSizeAsInteger();
 
     /**
      * Get the value for the key 'paging.search.page.start'. <br>
@@ -2491,6 +2509,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPageGroupMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_GROUP_MAX_FETCH_SIZE);
+        }
+
+        public String getPageCrawlingInfoParamMaxFetchSize() {
+            return get(FessConfig.PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageCrawlingInfoParamMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE);
         }
 
         public String getPagingSearchPageStart() {

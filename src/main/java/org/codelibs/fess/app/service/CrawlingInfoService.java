@@ -42,6 +42,7 @@ import org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv;
 import org.codelibs.fess.es.config.exentity.CrawlingInfo;
 import org.codelibs.fess.es.config.exentity.CrawlingInfoParam;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.ListResultBean;
@@ -196,9 +197,11 @@ public class CrawlingInfoService implements Serializable {
         if (crawlingInfo == null) {
             return Collections.emptyList();
         }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return crawlingInfoParamBhv.selectList(cb -> {
             cb.query().setCrawlingInfoId_Equal(crawlingInfo.getId());
             cb.query().addOrderBy_Id_Asc();
+            cb.paging(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger().intValue(), 1);
         });
     }
 

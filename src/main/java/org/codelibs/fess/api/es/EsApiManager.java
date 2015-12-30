@@ -66,8 +66,7 @@ public class EsApiManager extends BaseApiManager {
         final String servletPath = request.getServletPath();
         if (servletPath.startsWith(pathPrefix)) {
             final RequestManager requestManager = ComponentUtil.getRequestManager();
-            return requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElseGet(() -> Boolean.FALSE)
-                    .booleanValue();
+            return requestManager.findUserBean(FessUserBean.class).map(user -> user.hasRoles(acceptedRoles)).orElse(Boolean.FALSE);
         }
         return false;
     }
@@ -138,9 +137,7 @@ public class EsApiManager extends BaseApiManager {
 
     public String getServerPath() {
         return getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).map(token -> ADMIN_SERVER + token)
-                .orElseGet(() -> {
-                    throw new FessSystemException("Cannot create an access token.");
-                });
+                .orElseThrow(() -> new FessSystemException("Cannot create an access token."));
     }
 
     public void saveToken() {

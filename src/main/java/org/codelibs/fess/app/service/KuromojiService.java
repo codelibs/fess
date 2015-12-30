@@ -44,7 +44,7 @@ public class KuromojiService {
                 kuromojiPager.setPageNumberList(kuromojiList.createPageNumberList());
 
                 return (List<KuromojiItem>) kuromojiList;
-            }).orElseGet(() -> Collections.emptyList());
+            }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<KuromojiFile> getKuromojiFile(final String dictId) {

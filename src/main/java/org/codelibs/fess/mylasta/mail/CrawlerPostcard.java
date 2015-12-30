@@ -52,7 +52,7 @@ public class CrawlerPostcard extends LaTypicalPostcard {
     protected String[] getPropertyNames() {
         return new String[] { "hostname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
                 "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataFsIndexSize",
-                "commitStartTime", "commitEndTime", "commitExecTime", "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
+                "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
     }
 
     // ===================================================================================
@@ -197,33 +197,6 @@ public class CrawlerPostcard extends LaTypicalPostcard {
      */
     public void setDataFsIndexSize(String dataFsIndexSize) {
         registerVariable("dataFsIndexSize", dataFsIndexSize);
-    }
-
-    /**
-     * Set the value of commitStartTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param commitStartTime The parameter value of commitStartTime. (NotNull)
-     */
-    public void setCommitStartTime(String commitStartTime) {
-        registerVariable("commitStartTime", commitStartTime);
-    }
-
-    /**
-     * Set the value of commitEndTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param commitEndTime The parameter value of commitEndTime. (NotNull)
-     */
-    public void setCommitEndTime(String commitEndTime) {
-        registerVariable("commitEndTime", commitEndTime);
-    }
-
-    /**
-     * Set the value of commitExecTime, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param commitExecTime The parameter value of commitExecTime. (NotNull)
-     */
-    public void setCommitExecTime(String commitExecTime) {
-        registerVariable("commitExecTime", commitExecTime);
     }
 
     /**

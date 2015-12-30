@@ -181,7 +181,7 @@ public class SystemHelper implements Serializable {
                         }
                     }
                     return getDefaultHelpLink(url);
-                }).orElseGet(() -> getDefaultHelpLink(url));
+                }).orElse(getDefaultHelpLink(url));
     }
 
     private String getDefaultHelpLink(final String url) {

@@ -44,7 +44,7 @@ public class SynonymService {
                 synonymPager.setPageNumberList(synonymList.createPageNumberList());
 
                 return (List<SynonymItem>) synonymList;
-            }).orElseGet(() -> Collections.emptyList());
+            }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<SynonymFile> getSynonymFile(final String dictId) {

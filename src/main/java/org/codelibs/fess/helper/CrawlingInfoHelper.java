@@ -99,6 +99,7 @@ public class CrawlingInfoHelper implements Serializable {
         if (infoMap == null) {
             infoMap = Collections.synchronizedMap(new LinkedHashMap<String, String>());
         }
+        logger.debug("infoMap: {}={} => {}", key, value, infoMap);
         infoMap.put(key, value);
     }
 

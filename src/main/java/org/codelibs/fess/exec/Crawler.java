@@ -286,6 +286,8 @@ public class Crawler implements Serializable {
                 // ignore
             }
 
+            logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
+
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
             CrawlerPostcard.droppedInto(postbox, postcard -> {
@@ -294,24 +296,21 @@ public class Crawler implements Serializable {
                 StreamUtil.of(toAddresses).forEach(address -> {
                     postcard.addTo(address);
                 });
-                postcard.setCommitEndTime(getValueOrEmpty(dataMap, "commitEndTime"));
-                postcard.setCommitExecTime(getValueOrEmpty(dataMap, "commitExecTime"));
-                postcard.setCommitStartTime(getValueOrEmpty(dataMap, "commitStartTime"));
-                postcard.setCrawlerEndTime(getValueOrEmpty(dataMap, "crawlerEndTime"));
-                postcard.setCrawlerExecTime(getValueOrEmpty(dataMap, "crawlerExecTime"));
-                postcard.setCrawlerStartTime(getValueOrEmpty(dataMap, "crawlerStartTime"));
-                postcard.setDataCrawlEndTime(getValueOrEmpty(dataMap, "dataCrawlEndTime"));
-                postcard.setDataCrawlExecTime(getValueOrEmpty(dataMap, "dataCrawlExecTime"));
-                postcard.setDataCrawlStartTime(getValueOrEmpty(dataMap, "dataCrawlStartTime"));
-                postcard.setDataFsIndexSize(getValueOrEmpty(dataMap, "dataFsIndexSize"));
-                postcard.setDataIndexExecTime(getValueOrEmpty(dataMap, "dataIndexExecTime"));
-                postcard.setHostname(getValueOrEmpty(dataMap, "hostname"));
-                postcard.setWebFsCrawlEndTime(getValueOrEmpty(dataMap, "webFsCrawlEndTime"));
-                postcard.setWebFsCrawlExecTime(getValueOrEmpty(dataMap, "webFsCrawlExecTime"));
-                postcard.setWebFsCrawlStartTime(getValueOrEmpty(dataMap, "webFsCrawlStartTime"));
-                postcard.setWebFsIndexExecTime(getValueOrEmpty(dataMap, "webFsIndexExecTime"));
-                postcard.setWebFsIndexSize(getValueOrEmpty(dataMap, "webFsIndexSize"));
-                if (Constants.T.equals(infoMap.get(Constants.CRAWLER_STATUS))) {
+                postcard.setCrawlerEndTime(getValueFromMap(dataMap, "crawlerEndTime", StringUtil.EMPTY));
+                postcard.setCrawlerExecTime(getValueFromMap(dataMap, "crawlerExecTime", "0"));
+                postcard.setCrawlerStartTime(getValueFromMap(dataMap, "crawlerStartTime", StringUtil.EMPTY));
+                postcard.setDataCrawlEndTime(getValueFromMap(dataMap, "dataCrawlEndTime", StringUtil.EMPTY));
+                postcard.setDataCrawlExecTime(getValueFromMap(dataMap, "dataCrawlExecTime", "0"));
+                postcard.setDataCrawlStartTime(getValueFromMap(dataMap, "dataCrawlStartTime", StringUtil.EMPTY));
+                postcard.setDataFsIndexSize(getValueFromMap(dataMap, "dataFsIndexSize", "0"));
+                postcard.setDataIndexExecTime(getValueFromMap(dataMap, "dataIndexExecTime", "0"));
+                postcard.setHostname(getValueFromMap(dataMap, "hostname", StringUtil.EMPTY));
+                postcard.setWebFsCrawlEndTime(getValueFromMap(dataMap, "webFsCrawlEndTime", StringUtil.EMPTY));
+                postcard.setWebFsCrawlExecTime(getValueFromMap(dataMap, "webFsCrawlExecTime", "0"));
+                postcard.setWebFsCrawlStartTime(getValueFromMap(dataMap, "webFsCrawlStartTime", StringUtil.EMPTY));
+                postcard.setWebFsIndexExecTime(getValueFromMap(dataMap, "webFsIndexExecTime", "0"));
+                postcard.setWebFsIndexSize(getValueFromMap(dataMap, "webFsIndexSize", "0"));
+                if (Constants.TRUE.equalsIgnoreCase(infoMap.get(Constants.CRAWLER_STATUS))) {
                     postcard.setStatus(Constants.OK);
                 } else {
                     postcard.setStatus(Constants.FAIL);
@@ -320,10 +319,10 @@ public class Crawler implements Serializable {
         }
     }
 
-    private String getValueOrEmpty(Map<String, String> dataMap, String key) {
+    private String getValueFromMap(Map<String, String> dataMap, String key, String defaultValue) {
         String value = dataMap.get(key);
-        if (value == null) {
-            return StringUtil.EMPTY;
+        if (StringUtil.isBlank(value)) {
+            return defaultValue;
         }
         return value;
     }
