@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.joblog;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -141,6 +144,18 @@ public class AdminJoblogAction extends FessAdminAction {
             jobLogService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         });
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse deleteall() {
+        verifyToken(() -> asListHtml());
+        List<String> jobStatusList = new ArrayList<>();
+        jobStatusList.add(Constants.OK);
+        jobStatusList.add(Constants.FAIL);
+        jobLogService.deleteByJobStatus(jobStatusList);
+        jobLogPager.clear();
+        saveInfo(messages -> messages.addSuccessJobLogDeleteAll(GLOBAL));
         return redirect(getClass());
     }
 

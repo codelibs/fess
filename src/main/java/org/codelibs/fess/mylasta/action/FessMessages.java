@@ -344,6 +344,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Sent the test mail. */
     public static final String SUCCESS_send_testmail = "{success.send_testmail}";
 
+    /** The key of the message: Deleted job logs. */
+    public static final String SUCCESS_job_log_delete_all = "{success.job_log_delete_all}";
+
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
 
@@ -1914,6 +1917,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessSendTestmail(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_send_testmail));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.job_log_delete_all' with parameters.
+     * <pre>
+     * message: Deleted job logs.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessJobLogDeleteAll(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_job_log_delete_all));
         return this;
     }
 

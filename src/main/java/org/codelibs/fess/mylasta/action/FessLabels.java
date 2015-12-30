@@ -1641,6 +1641,15 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Job Log Details */
     public static final String LABELS_joblog_title_details = "{labels.joblog_title_details}";
 
+    /** The key of the message: Delete All */
+    public static final String LABELS_joblog_delete_all_link = "{labels.joblog_delete_all_link}";
+
+    /** The key of the message: Do you really want to delete all? */
+    public static final String LABELS_joblog_delete_all_confirmation = "{labels.joblog_delete_all_confirmation}";
+
+    /** The key of the message: Cancel */
+    public static final String LABELS_joblog_delete_all_cancel = "{labels.joblog_delete_all_cancel}";
+
     /** The key of the message: Dictionary List */
     public static final String LABELS_dict_configuration = "{labels.dict_configuration}";
 
