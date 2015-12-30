@@ -246,14 +246,14 @@ public class SearchLogHelper {
                     searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
                             new String[] { fessConfig.getIndexFieldDocId() }).forEach(
                             doc -> {
-                                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
+                                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                 final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);
                                 if (id != null && docId != null && clickCountMap.containsKey(docId)) {
                                     final Integer count = clickCountMap.get(docId);
                                     final Script script =
                                             new Script("ctx._source." + fessConfig.getIndexFieldClickCount() + "+=" + count.toString());
                                     final Map<String, Object> upsertMap = new HashMap<>();
-                                    upsertMap.put(fessConfig.getIndexFieldClickCount(), 1);
+                                    upsertMap.put(fessConfig.getIndexFieldClickCount(), count);
                                     builder.add(new UpdateRequest(fessConfig.getIndexDocumentUpdateIndex(), fessConfig
                                             .getIndexDocumentType(), id).script(script).upsert(upsertMap));
                                 }
