@@ -50,9 +50,9 @@
 													</tr>
 													<c:forEach var="logFile" varStatus="s"
 														items="${logFileItems}">
-														<tr>
-															<td><la:link href="download/${f:u(logFile.id)}"
-																	target="_blank">${f:h(logFile.name)}</la:link></td>
+														<tr
+															data-href="${contextPath}/admin/log/download/${f:u(logFile.id)}/">
+															<td>${f:h(logFile.name)}</td>
 															<td><fmt:formatDate value="${logFile.lastModified}"
 																	type="BOTH" dateStyle="MEDIUM" /></td>
 														</tr>

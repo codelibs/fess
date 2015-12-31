@@ -68,7 +68,7 @@ public class AdminLogAction extends FessAdminAction {
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path path = Paths.get(logFilePath, filename);
-            return asStream(filename).contentType("text/plain; charset=UTF-8").stream(out -> {
+            return asStream(filename).stream(out -> {
                 try (InputStream in = Files.newInputStream(path)) {
                     out.write(in);
                 }

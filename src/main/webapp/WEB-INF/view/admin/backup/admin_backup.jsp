@@ -49,9 +49,9 @@
 													</tr>
 													<c:forEach var="data" varStatus="s"
 														items="${backupItems}">
-														<tr>
-															<td><la:link href="download/${f:u(data.id)}"
-																	target="_blank">${f:h(data.name)}</la:link></td>
+														<tr
+															data-href="${contextPath}/admin/backup/download/${f:u(data.id)}/">
+															<td>${f:h(data.name)}</td>
 														</tr>
 													</c:forEach>
 												</tbody>
