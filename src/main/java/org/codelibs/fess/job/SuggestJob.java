@@ -51,6 +51,8 @@ public class SuggestJob {
 
     protected String logFilePath;
 
+    protected String logLevel;
+
     protected int retryCountToDeleteTempDir = 10;
 
     protected long retryIntervalToDeleteTempDir = 5000;
@@ -62,6 +64,27 @@ public class SuggestJob {
 
     public SuggestJob sessionId(final String sessionId) {
         this.sessionId = sessionId;
+        return this;
+    }
+
+    public SuggestJob logFilePath(final String logFilePath) {
+        this.logFilePath = logFilePath;
+        return this;
+    }
+
+    public SuggestJob logLevel(final String logLevel) {
+        this.logLevel = logLevel;
+        return this;
+    }
+
+    public SuggestJob retryToDeleteTempDir(final int retryCount, final long retryInterval) {
+        retryCountToDeleteTempDir = retryCount;
+        retryIntervalToDeleteTempDir = retryInterval;
+        return this;
+    }
+
+    public SuggestJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
+        this.useLocaleElasticsearch = useLocaleElasticsearch;
         return this;
     }
 
@@ -169,7 +192,11 @@ public class SuggestJob {
         }
         cmdList.add("-Dfess.log.path=" + logFilePath);
         addSystemProperty(cmdList, "fess.log.name", "fess-suggest", "-suggest");
-        addSystemProperty(cmdList, "fess.log.level", null, null);
+        if (logLevel == null) {
+            addSystemProperty(cmdList, "fess.log.level", null, null);
+        } else {
+            cmdList.add("-Dfess.log.level=" + logLevel);
+        }
         StreamUtil.of(fessConfig.getJvmSuggestOptionsAsArray()).filter(value -> StringUtil.isNotBlank(value))
                 .forEach(value -> cmdList.add(value));
 
