@@ -23,6 +23,9 @@ import org.lastaflute.web.response.next.HtmlNext;
  */
 public interface FessHtmlPath {
 
+    /** The path of the HTML: /admin/backup/admin_backup.jsp */
+    HtmlNext path_AdminBackup_AdminBackupJsp = new HtmlNext("/admin/backup/admin_backup.jsp");
+
     /** The path of the HTML: /admin/badword/admin_badword.jsp */
     HtmlNext path_AdminBadword_AdminBadwordJsp = new HtmlNext("/admin/badword/admin_badword.jsp");
 

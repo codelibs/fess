@@ -272,6 +272,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to send the test mail. */
     public static final String ERRORS_failed_to_send_testmail = "{errors.failed_to_send_testmail}";
 
+    /** The key of the message: Could not find index for backup. */
+    public static final String ERRORS_COULD_NOT_FIND_BACKUP_INDEX = "{errors.could.not.find.backup.index}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1569,6 +1572,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToSendTestmail(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_send_testmail));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.could.not.find.backup.index' with parameters.
+     * <pre>
+     * message: Could not find index for backup.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCouldNotFindBackupIndex(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_COULD_NOT_FIND_BACKUP_INDEX));
         return this;
     }
 

@@ -257,6 +257,13 @@
 							<span><la:message key="labels.menu_search_list" /></span>
 						</la:link></li>
 
+					<li
+						<c:if test="${param.menuType=='backup'}">class="active"</c:if>><la:link
+							href="/admin/backup/">
+							<i class='fa fa-circle-o'></i>
+							<span><la:message key="labels.menu_backup" /></span>
+						</la:link></li>
+
 				</ul></li>
 		</ul>
 		<!-- /.sidebar-menu -->

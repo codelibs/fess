@@ -124,4 +124,10 @@ public interface FessProp {
         return Constants.TRUE.equalsIgnoreCase(getIndexerThreadDumpEnabled());
     }
 
+    String getIndexBackupTargets();
+
+    public default String[] getIndexBackupTargetsAsArray() {
+        return getIndexBackupTargets().split(",");
+    }
+
 }

@@ -539,6 +539,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search */
     public static final String LABELS_menu_search_list = "{labels.menu_search_list}";
 
+    /** The key of the message: Back Up */
+    public static final String LABELS_menu_backup = "{labels.menu_backup}";
+
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
@@ -2012,6 +2015,12 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Send TestMail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";
+
+    /** The key of the message: Back Up */
+    public static final String LABELS_backup_configuration = "{labels.backup_configuration}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_backup_name = "{labels.backup_name}";
 
     /**
      * Assert the property is not null.

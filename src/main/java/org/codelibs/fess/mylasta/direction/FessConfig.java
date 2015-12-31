@@ -273,6 +273,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_AS_GROUP = "smb.role.as.group";
 
+    /** The key of the configuration. e.g. .fess_config,.fess_user */
+    String INDEX_BACKUP_TARGETS = "index.backup.targets";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
@@ -1290,6 +1293,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isSmbRoleAsGroup();
+
+    /**
+     * Get the value for the key 'index.backup.targets'. <br>
+     * The value is, e.g. .fess_config,.fess_user <br>
+     * comment: backup
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexBackupTargets();
 
     /**
      * Get the value for the key 'authentication.admin.roles'. <br>
@@ -2405,6 +2416,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isSmbRoleAsGroup() {
             return is(FessConfig.SMB_ROLE_AS_GROUP);
+        }
+
+        public String getIndexBackupTargets() {
+            return get(FessConfig.INDEX_BACKUP_TARGETS);
         }
 
         public String getAuthenticationAdminRoles() {
