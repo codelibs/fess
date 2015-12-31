@@ -129,8 +129,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_FILE_PROXY_PROPERTY = "search.file.proxy";
 
-    public static final String SEARCH_DESKTOP_PROPERTY = "search.desktop";
-
     public static final String NOTIFICATION_TO_PROPERTY = "notification.to";
 
     public static final String USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY = "search.use.browser.locale";

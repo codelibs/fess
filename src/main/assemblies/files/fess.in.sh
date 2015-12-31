@@ -88,6 +88,9 @@ FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dtomcat.config.path=tomcat_config.properties"
 if [ "x$FESS_CONF_PATH" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.conf.path=$FESS_CONF_PATH"
 fi
+if [ "x$FESS_VAR_PATH" != "x" ]; then
+  FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.var.path=$FESS_VAR_PATH"
+fi
 if [ "x$ES_HTTP_URL" != "x" ]; then
   FESS_JAVA_OPTS="$FESS_JAVA_OPTS -Dfess.es.http_address=$ES_HTTP_URL"
 fi

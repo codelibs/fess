@@ -48,7 +48,7 @@ public class ScreenShotManager {
     @Resource
     protected ServletContext application;
 
-    public File baseDir;
+    protected File baseDir;
 
     public long shutdownTimeout = 5 * 60 * 1000; // 5min
 
@@ -68,16 +68,19 @@ public class ScreenShotManager {
 
     @PostConstruct
     public void init() {
-        if (baseDir == null) {
+        final String varPath = System.getProperty("fess.var.path");
+        if (varPath != null) {
+            baseDir = new File(varPath, "screenshots");
+        } else {
             final String path = application.getRealPath(DEFAULT_SCREENSHOT_DIR);
             if (StringUtil.isNotBlank(path)) {
                 baseDir = new File(path);
             } else {
                 baseDir = new File("." + DEFAULT_SCREENSHOT_DIR);
             }
-            if (baseDir.mkdirs()) {
-                logger.info("Created: " + baseDir.getAbsolutePath());
-            }
+        }
+        if (baseDir.mkdirs()) {
+            logger.info("Created: " + baseDir.getAbsolutePath());
         }
         if (!baseDir.isDirectory()) {
             throw new FessSystemException("Not found: " + baseDir.getAbsolutePath());

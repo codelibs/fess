@@ -15,19 +15,16 @@
  */
 package org.codelibs.fess.app.web.go;
 
-import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.error.ErrorAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.log.exentity.ClickLog;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -66,7 +63,7 @@ public class GoAction extends FessSearchAction {
         if (isLoginRequired()) {
             return redirectToLogin();
         }
-        validate(form, messages -> {}, () -> asHtml(path_ErrorJsp));
+        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
 
         Map<String, Object> doc = null;
         try {
@@ -75,22 +72,20 @@ public class GoAction extends FessSearchAction {
                             queryRequestBuilder -> {
                                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                                 queryRequestBuilder.setQuery(termQuery);
-                                queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl());
+                                queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId());
                                 return true;
                             }).get();
         } catch (final Exception e) {
             logger.warn("Failed to request: " + form.docId, e);
         }
         if (doc == null) {
-            throwValidationError(messages -> {
-                messages.addErrorsDocidNotFound(GLOBAL, form.docId);
-            }, () -> asHtml(path_ErrorJsp));
+            saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
+            return redirect(ErrorAction.class);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (url == null) {
-            throwValidationError(messages -> {
-                messages.addErrorsDocumentNotFound(GLOBAL, form.docId);
-            }, () -> asHtml(path_ErrorJsp));
+            saveError(messages -> messages.addErrorsDocumentNotFound(GLOBAL, form.docId));
+            return redirect(ErrorAction.class);
         }
 
         if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
@@ -137,31 +132,10 @@ public class GoAction extends FessSearchAction {
                 try {
                     return viewHelper.asContentResponse(doc);
                 } catch (final Exception e) {
-                    logger.error("Failed to load: " + doc, e);
-                    throwValidationError(messages -> {
-                        messages.addErrorsNotLoadFromServer(GLOBAL, url);
-                    }, () -> asHtml(path_ErrorJsp));
-                    return null; // workaround
+                    logger.debug("Failed to load: " + doc, e);
+                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, url));
+                    return redirect(ErrorAction.class);
                 }
-            } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_DESKTOP_PROPERTY, Constants.FALSE))) {
-                final String path = url.replaceFirst("file:/+", "//");
-                final File file = new File(path);
-                if (!file.exists()) {
-                    throwValidationError(messages -> {
-                        messages.addErrorsNotFoundOnFileSystem(GLOBAL, url);
-                    }, () -> asHtml(path_ErrorJsp));
-                }
-                final Desktop desktop = Desktop.getDesktop();
-                try {
-                    desktop.open(file);
-                } catch (final Exception e) {
-                    logger.warn("Could not open " + path, e);
-                    throwValidationError(messages -> {
-                        messages.addErrorsCouldNotOpenOnSystem(GLOBAL, url);
-                    }, () -> asHtml(path_ErrorJsp));
-                }
-
-                return HtmlResponse.asEmptyBody().httpStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
                 return HtmlResponse.fromRedirectPathAsIs(url + hash);
             }

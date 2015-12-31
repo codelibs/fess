@@ -19,7 +19,7 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
-public class ErrorAction extends FessSearchAction {
+public class ErrorBadrequrestAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                            Constant
@@ -32,8 +32,9 @@ public class ErrorAction extends FessSearchAction {
     // ===================================================================================
     //                                                                      Search Execute
     //                                                                      ==============
+
     @Execute
     public HtmlResponse index(final ErrorForm form) {
-        return asHtml(path_Error_ErrorJsp);
+        return asHtml(path_Error_BadRequestJsp);
     }
 }

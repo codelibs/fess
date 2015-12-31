@@ -6,6 +6,7 @@
 FESS_TEMP_PATH=${packaging.fess.temp.dir}
 FESS_LOG_PATH=${packaging.fess.log.dir}
 FESS_CONF_PATH=${packaging.fess.conf.dir}
+FESS_VAR_PATH=${packaging.fess.var.dir}
 
 FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
 

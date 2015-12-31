@@ -489,13 +489,12 @@ public class ViewHelper implements Serializable {
         }
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
-        final Object configIdObj = doc.get(fessConfig.getIndexFieldConfigId());
-        if (configIdObj == null) {
+        final String configId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldConfigId(), String.class);
+        if (configId == null) {
             throw new FessSystemException("configId is null.");
         }
-        final String configId = configIdObj.toString();
         if (configId.length() < 2) {
-            throw new FessSystemException("Invalid configId: " + configIdObj);
+            throw new FessSystemException("Invalid configId: " + configId);
         }
         final ConfigType configType = crawlingConfigHelper.getConfigType(configId);
         CrawlingConfig config = null;
@@ -513,14 +512,14 @@ public class ViewHelper implements Serializable {
             config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
         }
         if (config == null) {
-            throw new FessSystemException("No crawlingConfig: " + configIdObj);
+            throw new FessSystemException("No crawlingConfig: " + configId);
         }
-        final String url = (String) doc.get(fessConfig.getIndexFieldUrl());
+        final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         final CrawlerClientFactory crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
         config.initializeClientFactory(crawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {
-            throw new FessSystemException("No CrawlerClient: " + configIdObj + ", url: " + url);
+            throw new FessSystemException("No CrawlerClient: " + configId + ", url: " + url);
         }
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
@@ -532,7 +531,7 @@ public class ViewHelper implements Serializable {
                 out.write(is);
             } catch (final IOException e) {
                 if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
-                    throw new FessSystemException("Failed to write a content. configId: " + configIdObj + ", url: " + url, e);
+                    throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             }
             if (logger.isDebugEnabled()) {

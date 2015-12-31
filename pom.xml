@@ -76,6 +76,7 @@
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
 		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
 		<packaging.fess.conf.dir>/etc/fess</packaging.fess.conf.dir>
+        <packaging.fess.var.dir>/var/lib/fess</packaging.fess.var.dir>
 		<packaging.fess.lib.dir>${packaging.fess.home.dir}/lib</packaging.fess.lib.dir>
 		<packaging.fess.log.dir>/var/log/fess</packaging.fess.log.dir>
 		<packaging.fess.temp.dir>/var/tmp/fess</packaging.fess.temp.dir>
@@ -455,6 +456,12 @@
 									</includes>
 								</source>
 							</sources>
+						</mapping>
+						<mapping>
+							<directory>${packaging.fess.var.dir}</directory>
+							<filemode>755</filemode>
+							<username>${packaging.fess.user}</username>
+							<groupname>${packaging.fess.group}</groupname>
 						</mapping>
 						<!-- bin -->
 						<mapping>

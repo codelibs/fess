@@ -2,7 +2,6 @@ $(function() {
 	var $result = $('#result');
 	var $queryId = $('#queryId');
 	var $favorites = $('.favorite', $result);
-	var $screenshot = $('#screenshot', $result);
 	var $searchButton = $('#searchButton');
 	var contextPath = $('#contextPath').val();
 
@@ -56,38 +55,20 @@ $(function() {
 	});
 
 	$result.on('mouseover', 'a.link', function(e) {
-		if ($screenshot.size() > 0) {
-			var docId = $(this).attr('data-id'), rt = $('#rt').val(), url = $(
-					this).attr('href'), queryId = $queryId.val(), buf = [];
-			buf.push(contextPath);
-			buf.push('/go/?rt=');
-			buf.push(rt);
-			buf.push('&docId=');
-			buf.push(docId);
+		var docId = $(this).attr('data-id'), rt = $('#rt').val(), url = $(
+				this).attr('href'), queryId = $queryId.val(), buf = [];
+		buf.push(contextPath);
+		buf.push('/go/?rt=');
+		buf.push(rt);
+		buf.push('&docId=');
+		buf.push(docId);
 
-			var hashIndex = url.indexOf('#');
-			if (hashIndex >= 0) {
-				var hashStr = url.substring(hashIndex);
-				buf.push('&hash=');
-				buf.push(encodeURIComponent(hashStr));
-				buf.push(hashStr);
-			}
-
-			$screenshot.children().remove();
-
-			var content = '<a href="' + buf.join('')
-					+ '"><img src="screenshot?queryId=' + queryId + '&docId='
-					+ docId + '"></a>';
-			$screenshot.append(content);
-			$('img', $screenshot).error(function() {
-				$screenshot.children().remove();
-			});
-		}
-	});
-
-	$result.on('mouseout', 'a.link', function(e) {
-		if ($screenshot.size() > 0) {
-			$screenshot.children().remove();
+		var hashIndex = url.indexOf('#');
+		if (hashIndex >= 0) {
+			var hashStr = url.substring(hashIndex);
+			buf.push('&hash=');
+			buf.push(encodeURIComponent(hashStr));
+			buf.push(hashStr);
 		}
 	});
 

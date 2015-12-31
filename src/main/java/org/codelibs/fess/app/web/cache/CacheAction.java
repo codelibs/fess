@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
+import org.codelibs.fess.app.web.error.ErrorAction;
 import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -65,16 +66,14 @@ public class CacheAction extends FessSearchAction {
             logger.warn("Failed to request: " + form.docId, e);
         }
         if (doc == null) {
-            throwValidationError(messages -> {
-                messages.addErrorsDocidNotFound(GLOBAL, form.docId);
-            }, () -> asHtml(path_ErrorJsp));
+            saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
+            return redirect(ErrorAction.class);
         }
 
         final String content = viewHelper.createCacheContent(doc, form.hq);
         if (content == null) {
-            throwValidationError(messages -> {
-                messages.addErrorsDocidNotFound(GLOBAL, form.docId);
-            }, () -> asHtml(path_ErrorJsp));
+            saveError(messages -> messages.addErrorsDocidNotFound(GLOBAL, form.docId));
+            return redirect(ErrorAction.class);
         }
 
         return asStream(DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class)).contentType("text/html; charset=UTF-8")

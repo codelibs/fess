@@ -18,31 +18,20 @@ package org.codelibs.fess.app.web.screenshot;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.codelibs.core.io.CopyUtil;
-import org.codelibs.core.io.OutputStreamUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
-import org.lastaflute.web.response.HtmlResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.lastaflute.web.response.ActionResponse;
 
 public class ScreenshotAction extends FessSearchAction {
-
-    // ===================================================================================
-    //                                                                            Constant
-    //
-    private static final Logger logger = LoggerFactory.getLogger(ScreenshotAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -58,51 +47,39 @@ public class ScreenshotAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public HtmlResponse index(final ScreenshotForm form) {
+    public ActionResponse index(final ScreenshotForm form) {
         if (isLoginRequired()) {
             return redirectToLogin();
         }
 
-        OutputStream out = null;
-        BufferedInputStream in = null;
-        try {
-            final Map<String, Object> doc =
-                    fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
-                            queryRequestBuilder -> {
-                                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
-                                queryRequestBuilder.setQuery(termQuery);
-                                queryRequestBuilder.addFields(queryHelper.getResponseFields());
-                                return true;
-                            }).get();
-            final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-            if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
-                // 404
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-
-            final File screenShotFile = screenShotManager.getScreenShotFile(form.queryId, form.docId);
-            if (screenShotFile == null) {
-                // 404
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                screenShotManager.generate(doc);
-                return null;
-            }
-
-            response.setContentType(getImageMimeType(screenShotFile));
-
-            out = response.getOutputStream();
-            in = new BufferedInputStream(new FileInputStream(screenShotFile));
-            CopyUtil.copy(in, out);
-            OutputStreamUtil.flush(out);
-        } catch (final Exception e) {
-            logger.error("Failed to response: " + form.docId, e);
-        } finally {
-            IOUtils.closeQuietly(in);
-            IOUtils.closeQuietly(out);
+        final Map<String, Object> doc =
+                fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                        queryRequestBuilder -> {
+                            final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
+                            queryRequestBuilder.setQuery(termQuery);
+                            queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                            return true;
+                        }).get();
+        final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+        if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
+            // 404
+            throw404("Screenshot for " + form.docId + " is not found.");
+            return null;
         }
 
-        return null;
+        final File screenShotFile = screenShotManager.getScreenShotFile(form.queryId, form.docId);
+        if (screenShotFile == null) {
+            // 404
+            throw404("Screenshot for " + form.docId + " is under generating.");
+            screenShotManager.generate(doc);
+            return null;
+        }
+
+        return asStream(form.docId).contentType(getImageMimeType(screenShotFile)).stream(out -> {
+            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(screenShotFile))) {
+                out.write(in);
+            }
+        });
     }
 
     protected String getImageMimeType(final File imageFile) {
