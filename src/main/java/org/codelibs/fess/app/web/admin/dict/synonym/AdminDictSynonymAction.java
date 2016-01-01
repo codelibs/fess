@@ -218,7 +218,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
         return synonymService.getSynonymFile(form.dictId).map(file -> {
-            return asStream(new File(file.getPath()).getName()).stream(out -> {
+            return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                 try (InputStream inputStream = file.getInputStream()) {
                     out.write(inputStream);
                 }

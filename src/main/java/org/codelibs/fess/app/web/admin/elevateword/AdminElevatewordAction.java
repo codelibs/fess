@@ -195,7 +195,7 @@ public class AdminElevatewordAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         verifyToken(() -> asDownloadHtml());
 
-        return asStream("elevate.csv").stream(out -> {
+        return asStream("elevate.csv").contentTypeOctetStream().stream(out -> {
             final Path tempFile = Files.createTempFile(null, null);
             try {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(tempFile), getCsvEncoding()))) {

@@ -57,7 +57,7 @@ public class AdminBackupAction extends FessAdminAction {
     @Execute
     public ActionResponse download(final String id) {
         if (StreamUtil.of(fessConfig.getIndexBackupTargetsAsArray()).anyMatch(s -> s.equals(id))) {
-            return asStream(id + ".json").stream(
+            return asStream(id + ".bulk").contentTypeOctetStream().stream(
                     out -> {
                         try (CurlResponse response =
                                 Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/" + id + "/_data").param("format", "json").execute()) {

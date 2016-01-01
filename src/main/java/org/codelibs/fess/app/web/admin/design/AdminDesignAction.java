@@ -190,7 +190,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         }
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
-        return asStream(file.getName()).stream(out -> {
+        return asStream(file.getName()).contentTypeOctetStream().stream(out -> {
             try (FileInputStream fis = new FileInputStream(file)) {
                 out.write(fis);
             }
