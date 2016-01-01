@@ -36,6 +36,7 @@ import org.dbflute.bhv.writable.UpdateOption;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.coption.CursorSelectOption;
 import org.dbflute.cbean.result.ListResultBean;
+import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -85,6 +86,19 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         // #pending check response and cast problem
         final CountRequestBuilder builder = client.prepareCount(asEsIndex()).setTypes(asEsSearchType());
         return (int) ((EsAbstractConditionBean) cb).build(builder).execute().actionGet().getCount();
+    }
+
+    @Override
+    protected <RESULT extends ENTITY> RESULT delegateSelectEntity(final ConditionBean cb, final Class<? extends RESULT> entityType) {
+        final List<? extends RESULT> list = delegateSelectList(cb, entityType);
+        if (list.isEmpty()) {
+            return null;
+        }
+        if (list.size() >= 2) {
+            String msg = "The size of selected list is over 1: " + list.size();
+            throw new FetchingOverSafetySizeException(msg, 1); // immediatly catched by caller and tranlated 
+        }
+        return list.get(0);
     }
 
     @Override
