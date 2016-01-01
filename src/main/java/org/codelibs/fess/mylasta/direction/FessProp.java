@@ -130,4 +130,12 @@ public interface FessProp {
         return getIndexBackupTargets().split(",");
     }
 
+    String getJobSystemJobIds();
+
+    public default boolean isSystemJobId(String id) {
+        if (StringUtil.isBlank(getJobSystemJobIds())) {
+            return false;
+        }
+        return StreamUtil.of(getJobSystemJobIds().split(",")).anyMatch(s -> s.equals(id));
+    }
 }

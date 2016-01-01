@@ -168,7 +168,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
             form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml();
+            return asDetailsHtml(id);
         } else {
             form.crudMode = CrudMode.EDIT;
             return asEditHtml();
@@ -182,7 +182,9 @@ public class AdminSchedulerAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).useForm(EditForm.class, op -> {
+        return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
+            data.register("systemJobId", fessConfig.isSystemJobId(id));
+        }).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
                     loadScheduledJob(form, entity);
@@ -231,14 +233,14 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
+        validate(form, messages -> {}, () -> asDetailsHtml(id));
+        verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             scheduledJobService.delete(entity);
             saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml(id));
         });
         return redirect(getClass());
     }
@@ -246,9 +248,9 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     public HtmlResponse start(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
+        validate(form, messages -> {}, () -> asDetailsHtml(id));
+        verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
                 entity.start();
@@ -256,12 +258,12 @@ public class AdminSchedulerAction extends FessAdminAction {
             } catch (final Exception e) {
                 throwValidationError(messages -> {
                     messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
-                }, () -> asDetailsHtml());
+                }, () -> asDetailsHtml(id));
             }
         }).orElse(() -> {
             throwValidationError(messages -> {
                 messages.addErrorsFailedToStartJob(GLOBAL, id);
-            }, () -> asDetailsHtml());
+            }, () -> asDetailsHtml(id));
         });
         return redirect(getClass());
     }
@@ -269,9 +271,9 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     public HtmlResponse stop(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
-        validate(form, messages -> {}, () -> asDetailsHtml());
-        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
+        validate(form, messages -> {}, () -> asDetailsHtml(id));
+        verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
                 final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(entity.getId());
@@ -280,12 +282,12 @@ public class AdminSchedulerAction extends FessAdminAction {
             } catch (final Exception e) {
                 throwValidationError(messages -> {
                     messages.addErrorsFailedToStopJob(GLOBAL, entity.getName());
-                }, () -> asDetailsHtml());
+                }, () -> asDetailsHtml(id));
             }
         }).orElse(() -> {
             throwValidationError(messages -> {
                 messages.addErrorsFailedToStartJob(GLOBAL, id);
-            }, () -> asDetailsHtml());
+            }, () -> asDetailsHtml(id));
         });
         return redirect(getClass());
     }
@@ -365,7 +367,9 @@ public class AdminSchedulerAction extends FessAdminAction {
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp);
     }
 
-    private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp);
+    private HtmlResponse asDetailsHtml(String id) {
+        return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
+            data.register("systemJobId", fessConfig.isSystemJobId(id));
+        });
     }
 }

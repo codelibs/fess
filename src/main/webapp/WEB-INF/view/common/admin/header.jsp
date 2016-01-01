@@ -21,6 +21,8 @@
 		<!-- Navbar Right Menu -->
 		<div class="navbar-custom-menu">
 			<ul class="nav navbar-nav">
+				<li><a href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
+						class="fa fa-play-circle"></i></a></li>
 				<li><a href="${helpLink}" target="_olh"><i
 						class="fa fa-question-circle"></i></a></li>
 				<li><a href="${contextPath}/logout"><i

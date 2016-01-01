@@ -66,6 +66,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+DisableExplicitGC */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
+    /** The key of the configuration. e.g. default_crawler */
+    String JOB_SYSTEM_JOB_IDS = "job.system.job.ids";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -438,6 +441,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. crawlinginfo */
     String ONLINE_HELP_NAME_CRAWLINGINFO = "online.help.name.crawlinginfo";
 
+    /** The key of the configuration. e.g. backup */
+    String ONLINE_HELP_NAME_BACKUP = "online.help.name.backup";
+
     /** The key of the configuration. e.g. 0 */
     String SUGGEST_POPULAR_WORD_SEED = "suggest.popular.word.seed";
 
@@ -572,6 +578,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
+
+    /**
+     * Get the value for the key 'job.system.job.ids'. <br>
+     * The value is, e.g. default_crawler <br>
+     * comment: job
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobSystemJobIds();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -1829,6 +1843,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameCrawlinginfo();
 
     /**
+     * Get the value for the key 'online.help.name.backup'. <br>
+     * The value is, e.g. backup <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameBackup();
+
+    /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
      * The value is, e.g. 0 <br>
      * comment: ------
@@ -2024,6 +2045,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getJvmSuggestOptions() {
             return get(FessConfig.JVM_SUGGEST_OPTIONS);
+        }
+
+        public String getJobSystemJobIds() {
+            return get(FessConfig.JOB_SYSTEM_JOB_IDS);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
@@ -2700,6 +2725,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameCrawlinginfo() {
             return get(FessConfig.ONLINE_HELP_NAME_CRAWLINGINFO);
+        }
+
+        public String getOnlineHelpNameBackup() {
+            return get(FessConfig.ONLINE_HELP_NAME_BACKUP);
         }
 
         public String getSuggestPopularWordSeed() {
