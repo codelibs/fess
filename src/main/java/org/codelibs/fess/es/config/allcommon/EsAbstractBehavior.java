@@ -361,16 +361,27 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     }
 
     protected <BUILDER> int[] delegateBatchRequest(final List<? extends Entity> entityList, Function<EsAbstractEntity, BUILDER> call) {
-        final BulkList<? extends Entity> bulkList = (BulkList<? extends Entity>) entityList;
+        @SuppressWarnings("unchecked")
+        final BulkList<? extends Entity, BUILDER> bulkList = (BulkList<? extends Entity, BUILDER>) entityList;
+        final RequestOptionCall<BUILDER> builderEntityCall = bulkList.getEntityCall();
         final BulkRequestBuilder bulkBuilder = client.prepareBulk();
         for (final Entity entity : entityList) {
             final EsAbstractEntity esEntity = (EsAbstractEntity) entity;
             BUILDER builder = call.apply(esEntity);
             if (builder instanceof IndexRequestBuilder) {
+                if (builderEntityCall != null) {
+                    builderEntityCall.callback(builder);
+                }
                 bulkBuilder.add((IndexRequestBuilder) builder);
             } else if (builder instanceof UpdateRequestBuilder) {
+                if (builderEntityCall != null) {
+                    builderEntityCall.callback(builder);
+                }
                 bulkBuilder.add((UpdateRequestBuilder) builder);
             } else if (builder instanceof DeleteRequestBuilder) {
+                if (builderEntityCall != null) {
+                    builderEntityCall.callback(builder);
+                }
                 bulkBuilder.add((DeleteRequestBuilder) builder);
             }
         }
@@ -424,14 +435,17 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         return new String[] { str };
     }
 
-    public static class BulkList<E> implements List<E> {
+    public static class BulkList<E, B> implements List<E> {
 
         private final List<E> parent;
 
         private final RequestOptionCall<BulkRequestBuilder> call;
 
-        public BulkList(final List<E> parent, final RequestOptionCall<BulkRequestBuilder> call) {
+        private final RequestOptionCall<B> entityCall;
+
+        public BulkList(final List<E> parent, final RequestOptionCall<BulkRequestBuilder> call, final RequestOptionCall<B> entityCall) {
             this.parent = parent;
+            this.entityCall = entityCall;
             this.call = call;
         }
 
@@ -537,6 +551,10 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
         public RequestOptionCall<BulkRequestBuilder> getCall() {
             return call;
+        }
+
+        public RequestOptionCall<B> getEntityCall() {
+            return entityCall;
         }
     }
 }

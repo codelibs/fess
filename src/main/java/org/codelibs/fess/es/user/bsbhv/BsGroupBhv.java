@@ -220,27 +220,39 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public int[] batchInsert(List<Group> list) {
-        return batchInsert(list, null);
+        return batchInsert(list, null, null);
     }
 
     public int[] batchInsert(List<Group> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchInsert(new BulkList<>(list, call), null);
+        return batchInsert(list, call, null);
+    }
+
+    public int[] batchInsert(List<Group> list, RequestOptionCall<BulkRequestBuilder> call, RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchInsert(new BulkList<>(list, call, entityCall), null);
     }
 
     public int[] batchUpdate(List<Group> list) {
-        return batchUpdate(list, null);
+        return batchUpdate(list, null, null);
     }
 
     public int[] batchUpdate(List<Group> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchUpdate(new BulkList<>(list, call), null);
+        return batchUpdate(list, call, null);
+    }
+
+    public int[] batchUpdate(List<Group> list, RequestOptionCall<BulkRequestBuilder> call, RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchUpdate(new BulkList<>(list, call, entityCall), null);
     }
 
     public int[] batchDelete(List<Group> list) {
-        return batchDelete(list, null);
+        return batchDelete(list, null, null);
     }
 
     public int[] batchDelete(List<Group> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchDelete(new BulkList<>(list, call), null);
+        return batchDelete(list, call, null);
+    }
+
+    public int[] batchDelete(List<Group> list, RequestOptionCall<BulkRequestBuilder> call, RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchDelete(new BulkList<>(list, call, entityCall), null);
     }
 
     // #pending create, modify, remove

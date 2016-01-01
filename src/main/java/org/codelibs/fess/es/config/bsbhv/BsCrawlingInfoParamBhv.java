@@ -224,27 +224,42 @@ public abstract class BsCrawlingInfoParamBhv extends EsAbstractBehavior<Crawling
     }
 
     public int[] batchInsert(List<CrawlingInfoParam> list) {
-        return batchInsert(list, null);
+        return batchInsert(list, null, null);
     }
 
     public int[] batchInsert(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchInsert(new BulkList<>(list, call), null);
+        return batchInsert(list, call, null);
+    }
+
+    public int[] batchInsert(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call,
+            RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchInsert(new BulkList<>(list, call, entityCall), null);
     }
 
     public int[] batchUpdate(List<CrawlingInfoParam> list) {
-        return batchUpdate(list, null);
+        return batchUpdate(list, null, null);
     }
 
     public int[] batchUpdate(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchUpdate(new BulkList<>(list, call), null);
+        return batchUpdate(list, call, null);
+    }
+
+    public int[] batchUpdate(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call,
+            RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchUpdate(new BulkList<>(list, call, entityCall), null);
     }
 
     public int[] batchDelete(List<CrawlingInfoParam> list) {
-        return batchDelete(list, null);
+        return batchDelete(list, null, null);
     }
 
     public int[] batchDelete(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call) {
-        return doBatchDelete(new BulkList<>(list, call), null);
+        return batchDelete(list, call, null);
+    }
+
+    public int[] batchDelete(List<CrawlingInfoParam> list, RequestOptionCall<BulkRequestBuilder> call,
+            RequestOptionCall<IndexRequestBuilder> entityCall) {
+        return doBatchDelete(new BulkList<>(list, call, entityCall), null);
     }
 
     // #pending create, modify, remove
