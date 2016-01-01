@@ -194,7 +194,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
         final String docId = form.docId;
-        if (jobHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isProcessRunning()) {
             throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
         }
         try {
@@ -211,7 +211,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse deleteall(final ListForm form) {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
-        if (jobHelper.isCrawlProcessRunning()) {
+        if (jobHelper.isProcessRunning()) {
             throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
         }
         try {
@@ -227,7 +227,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     public boolean isSolrProcessRunning() {
-        return jobHelper.isCrawlProcessRunning();
+        return jobHelper.isProcessRunning();
     }
 
     // ===================================================================================

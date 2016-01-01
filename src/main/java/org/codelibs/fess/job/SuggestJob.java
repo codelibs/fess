@@ -102,7 +102,7 @@ public class SuggestJob {
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         if (jobExecutor != null) {
-            jobExecutor.addShutdownListener(() -> ComponentUtil.getJobHelper().destroyCrawlerProcess(sessionId));
+            jobExecutor.addShutdownListener(() -> ComponentUtil.getJobHelper().destroyProcess(sessionId));
         }
 
         try {
@@ -224,12 +224,11 @@ public class SuggestJob {
             logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
         }
 
-        final ProcessBuilder pb = new ProcessBuilder(cmdList);
-        pb.directory(baseDir);
-        pb.redirectErrorStream(true);
-
         try {
-            final JobProcess jobProcess = jobHelper.startCrawlerProcess(sessionId, pb);
+            final JobProcess jobProcess = jobHelper.startProcess(sessionId, cmdList, pb -> {
+                pb.directory(baseDir);
+                pb.redirectErrorStream(true);
+            });
 
             final InputStreamThread it = jobProcess.getInputStreamThread();
             it.start();
@@ -254,7 +253,7 @@ public class SuggestJob {
             throw new FessSystemException("SuggestCreator Process terminated.", e);
         } finally {
             try {
-                jobHelper.destroyCrawlerProcess(sessionId);
+                jobHelper.destroyProcess(sessionId);
             } finally {
                 deleteTempDir(ownTmpDir);
             }

@@ -16,10 +16,12 @@
 package org.codelibs.fess.helper;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.PreDestroy;
 
@@ -41,32 +43,34 @@ public class JobHelper {
     @PreDestroy
     public void destroy() {
         for (final String sessionId : runningProcessMap.keySet()) {
-            destroyCrawlerProcess(sessionId);
+            destroyProcess(sessionId);
         }
     }
 
-    public JobProcess startCrawlerProcess(final String sessionId, final ProcessBuilder processBuilder) {
-        destroyCrawlerProcess(sessionId);
+    public synchronized JobProcess startProcess(String sessionId, List<String> cmdList, Consumer<ProcessBuilder> pbCall) {
+        ProcessBuilder pb = new ProcessBuilder(cmdList);
+        pbCall.accept(pb);
+        destroyProcess(sessionId);
         JobProcess jobProcess;
         try {
-            jobProcess = new JobProcess(processBuilder.start());
-            destroyCrawlerProcess(runningProcessMap.putIfAbsent(sessionId, jobProcess));
+            jobProcess = new JobProcess(pb.start());
+            destroyProcess(runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
             throw new FessSystemException("Crawler Process terminated.", e);
         }
     }
 
-    public void destroyCrawlerProcess(final String sessionId) {
+    public void destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
-        destroyCrawlerProcess(jobProcess);
+        destroyProcess(jobProcess);
     }
 
-    public boolean isCrawlProcessRunning() {
+    public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
     }
 
-    protected void destroyCrawlerProcess(final JobProcess jobProcess) {
+    protected void destroyProcess(final JobProcess jobProcess) {
         if (jobProcess != null) {
             final InputStreamThread ist = jobProcess.getInputStreamThread();
             try {
@@ -124,4 +128,5 @@ public class JobHelper {
     public JobExecutor getJobExecutoer(final String id) {
         return runningJobExecutorMap.get(id);
     }
+
 }

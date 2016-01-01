@@ -289,7 +289,7 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
         verifyToken(() -> asIndexHtml());
-        if (!jobHelper.isCrawlProcessRunning()) {
+        if (!jobHelper.isProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
                 new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();

@@ -81,7 +81,7 @@ public class JobScheduler {
     public void destroy() {
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         for (final String sessionId : jobHelper.getRunningSessionIdSet()) {
-            jobHelper.destroyCrawlerProcess(sessionId);
+            jobHelper.destroyProcess(sessionId);
         }
         try {
             scheduler.shutdown(true);
