@@ -150,4 +150,40 @@ public interface FessProp {
             return s.equals(value);
         });
     }
+
+    String getSupportedLanguages();
+
+    public default String[] getSupportedLanguagesAsArray() {
+        return StreamUtil.of(getSupportedLanguages().split(",")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    String getOnlineHelpSupportedLangs();
+
+    public default boolean isOnlineHelpSupportedLang(String lang) {
+        if (StringUtil.isBlank(getOnlineHelpSupportedLangs())) {
+            return false;
+        }
+        return StreamUtil.of(getOnlineHelpSupportedLangs().split(",")).filter(s -> StringUtil.isNotBlank(s)).anyMatch(s -> s.equals(lang));
+    }
+
+    String getSupportedUploadedJsExtentions();
+
+    public default String[] getSupportedUploadedJsExtentionsAsArray() {
+        return StreamUtil.of(getSupportedUploadedJsExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
+                .toArray(n -> new String[n]);
+    }
+
+    String getSupportedUploadedCssExtentions();
+
+    public default String[] getSupportedUploadedCssExtentionsAsArray() {
+        return StreamUtil.of(getSupportedUploadedCssExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
+                .toArray(n -> new String[n]);
+    }
+
+    String getSupportedUploadedMediaExtentions();
+
+    public default String[] getSupportedUploadedMediaExtentionsAsArray() {
+        return StreamUtil.of(getSupportedUploadedMediaExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
+                .toArray(n -> new String[n]);
+    }
 }

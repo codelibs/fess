@@ -139,14 +139,14 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
         String baseDir = null;
         // normalize filename
-        if (checkFileType(fileName, systemHelper.getSupportedUploadedMediaExtentions())
-                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedMediaExtentions())) {
+        if (checkFileType(fileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())
+                && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())) {
             baseDir = "/images/";
-        } else if (checkFileType(fileName, systemHelper.getSupportedUploadedCssExtentions())
-                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedCssExtentions())) {
+        } else if (checkFileType(fileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())
+                && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())) {
             baseDir = "/css/";
-        } else if (checkFileType(fileName, systemHelper.getSupportedUploadedJSExtentions())
-                && checkFileType(uploadedFileName, systemHelper.getSupportedUploadedJSExtentions())) {
+        } else if (checkFileType(fileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())
+                && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())) {
             baseDir = "/js/";
         } else {
             throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), () -> asListHtml());
@@ -280,9 +280,9 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     private List<File> getAccessibleFileList(final File baseDir) {
         final List<File> fileList = new ArrayList<File>();
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"), systemHelper.getSupportedUploadedMediaExtentions(), true));
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"), systemHelper.getSupportedUploadedCssExtentions(), true));
-        fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"), systemHelper.getSupportedUploadedJSExtentions(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"), fessConfig.getSupportedUploadedMediaExtentionsAsArray(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"), fessConfig.getSupportedUploadedCssExtentionsAsArray(), true));
+        fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"), fessConfig.getSupportedUploadedJsExtentionsAsArray(), true));
         return fileList;
     }
 

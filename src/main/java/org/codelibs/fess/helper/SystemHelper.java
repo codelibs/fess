@@ -44,6 +44,7 @@ import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.RoleType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.servlet.request.RequestManager;
@@ -60,33 +61,21 @@ public class SystemHelper implements Serializable {
 
     private final Set<String> adminRoleSet = new HashSet<>();
 
-    private String javaCommandPath = "java";
-
-    private String filterPathEncoding = Constants.UTF_8;
-
-    private boolean useOwnTmpDir = true;
-
-    private String[] supportedHelpLangs = new String[] {};
-
     private final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
-
-    private String[] supportedUploadedJSExtentions = new String[] { "js" };
-
-    private String[] supportedUploadedCssExtentions = new String[] { "css" };
-
-    private String[] supportedUploadedMediaExtentions = new String[] { "jpg", "jpeg", "gif", "png", "swf" };
-
-    private int maxTextLength = 4000;
 
     private final AtomicBoolean forceStop = new AtomicBoolean(false);
 
-    protected String[] supportedLanguages = new String[] { "ar", "bg", "ca", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga",
-            "gl", "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt", "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" };
-
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
+
+    private String filterPathEncoding;
+
+    private String[] supportedLanguages;
 
     @PostConstruct
     public void init() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        filterPathEncoding = fessConfig.getPathEncoding();
+        supportedLanguages = fessConfig.getSupportedLanguagesAsArray();
         langItemsCache =
                 CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(1, TimeUnit.HOURS)
                         .build(new CacheLoader<String, List<Map<String, String>>>() {
@@ -173,11 +162,9 @@ public class SystemHelper implements Serializable {
                     final Locale locale = request.getLocale();
                     if (locale != null) {
                         final String lang = locale.getLanguage();
-                        for (final String l : supportedHelpLangs) {
-                            if (l.equals(lang)) {
-                                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
-                                        Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
-                            }
+                        if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
+                            return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
+                                    Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
                         }
                     }
                     return getDefaultHelpLink(url);
@@ -219,88 +206,6 @@ public class SystemHelper implements Serializable {
         return roleList;
     }
 
-    public String getJavaCommandPath() {
-        return javaCommandPath;
-    }
-
-    public void setJavaCommandPath(final String javaCommandPath) {
-        this.javaCommandPath = javaCommandPath;
-    }
-
-    /**
-     * @return the filterPathEncoding
-     */
-    public String getFilterPathEncoding() {
-        return filterPathEncoding;
-    }
-
-    /**
-     * @param filterPathEncoding the filterPathEncoding to set
-     */
-    public void setFilterPathEncoding(final String filterPathEncoding) {
-        this.filterPathEncoding = filterPathEncoding;
-    }
-
-    /**
-     * @return the useOwnTmpDir
-     */
-    public boolean isUseOwnTmpDir() {
-        return useOwnTmpDir;
-    }
-
-    /**
-     * @param useOwnTmpDir the useOwnTmpDir to set
-     */
-    public void setUseOwnTmpDir(final boolean useOwnTmpDir) {
-        this.useOwnTmpDir = useOwnTmpDir;
-    }
-
-    /**
-     * @return the supportedHelpLangs
-     */
-    public String[] getSupportedHelpLangs() {
-        return supportedHelpLangs;
-    }
-
-    /**
-     * @param supportedHelpLangs the supportedHelpLangs to set
-     */
-    public void setSupportedHelpLangs(final String[] supportedHelpLangs) {
-        this.supportedHelpLangs = supportedHelpLangs;
-    }
-
-    public String[] getSupportedUploadedJSExtentions() {
-        return supportedUploadedJSExtentions;
-    }
-
-    public void setSupportedUploadedJSExtentions(final String[] supportedUploadedJSExtentions) {
-        this.supportedUploadedJSExtentions = supportedUploadedJSExtentions;
-    }
-
-    public String[] getSupportedUploadedCssExtentions() {
-        return supportedUploadedCssExtentions;
-    }
-
-    public void setSupportedUploadedCssExtentions(final String[] supportedUploadedCssExtentions) {
-        this.supportedUploadedCssExtentions = supportedUploadedCssExtentions;
-    }
-
-    public String[] getSupportedUploadedMediaExtentions() {
-        return supportedUploadedMediaExtentions;
-    }
-
-    public void setSupportedUploadedMediaExtentions(final String[] supportedUploadedMediaExtentions) {
-        this.supportedUploadedMediaExtentions = supportedUploadedMediaExtentions;
-    }
-
-    public int getMaxTextLength() {
-        return maxTextLength;
-    }
-
-    public void setMaxTextLength(final int maxTextLength) {
-        this.maxTextLength = maxTextLength;
-    }
-
     public boolean isForceStop() {
         return forceStop.get();
     }
@@ -314,7 +219,7 @@ public class SystemHelper implements Serializable {
     }
 
     public String abbreviateLongText(final String str) {
-        return StringUtils.abbreviate(str, maxTextLength);
+        return StringUtils.abbreviate(str, ComponentUtil.getFessConfig().getMaxLogOutputLengthAsInteger().intValue());
     }
 
     public String normalizeLang(final String value) {
@@ -347,11 +252,4 @@ public class SystemHelper implements Serializable {
         }
     }
 
-    public String[] getSupportedLanguages() {
-        return supportedLanguages;
-    }
-
-    public void setSupportedLanguages(final String[] supportedLanguages) {
-        this.supportedLanguages = supportedLanguages;
-    }
 }

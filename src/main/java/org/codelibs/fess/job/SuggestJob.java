@@ -16,11 +16,13 @@
 package org.codelibs.fess.job;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
@@ -125,7 +127,7 @@ public class SuggestJob {
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-        cmdList.add(systemHelper.getJavaCommandPath());
+        cmdList.add(fessConfig.getJavaCommandPath());
 
         // -cp
         cmdList.add("-cp");
@@ -201,15 +203,13 @@ public class SuggestJob {
                 .forEach(value -> cmdList.add(value));
 
         File ownTmpDir = null;
-        if (systemHelper.isUseOwnTmpDir()) {
-            final String tmpDir = System.getProperty("java.io.tmpdir");
-            if (StringUtil.isNotBlank(tmpDir)) {
-                ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
-                if (ownTmpDir.mkdirs()) {
-                    cmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
-                } else {
-                    ownTmpDir = null;
-                }
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        if (fessConfig.isUseOwnTmpDir() && StringUtil.isNotBlank(tmpDir)) {
+            ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
+            if (ownTmpDir.mkdirs()) {
+                cmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
+            } else {
+                ownTmpDir = null;
             }
         }
 
@@ -218,13 +218,24 @@ public class SuggestJob {
         cmdList.add("--sessionId");
         cmdList.add(sessionId);
 
-        final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
-
-        if (logger.isInfoEnabled()) {
-            logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
-        }
-
         try {
+            cmdList.add("-p");
+            File propFile =
+                    new File(ownTmpDir != null ? ownTmpDir.getAbsolutePath() : tmpDir, "crawler_" + systemHelper.getCurrentTimeAsLong()
+                            + ".properties");
+            cmdList.add(propFile.getAbsolutePath());
+            try (FileOutputStream out = new FileOutputStream(propFile)) {
+                Properties prop = new Properties();
+                prop.putAll(ComponentUtil.getCrawlerProperties());
+                prop.store(out, cmdList.toString());
+            }
+
+            final File baseDir = new File(servletContext.getRealPath("/WEB-INF")).getParentFile();
+
+            if (logger.isInfoEnabled()) {
+                logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
+            }
+
             final JobProcess jobProcess = jobHelper.startProcess(sessionId, cmdList, pb -> {
                 pb.directory(baseDir);
                 pb.redirectErrorStream(true);

@@ -69,6 +69,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. default_crawler */
     String JOB_SYSTEM_JOB_IDS = "job.system.job.ids";
 
+    /** The key of the configuration. e.g. java */
+    String JAVA_COMMAND_PATH = "java.command.path";
+
+    /** The key of the configuration. e.g. UTF-8 */
+    String PATH_ENCODING = "path.encoding";
+
+    /** The key of the configuration. e.g. true */
+    String USE_OWN_TMP_DIR = "use.own.tmp.dir";
+
+    /** The key of the configuration. e.g. 4000 */
+    String MAX_LOG_OUTPUT_LENGTH = "max.log.output.length";
+
+    /** The key of the configuration. e.g. js */
+    String SUPPORTED_UPLOADED_JS_EXTENTIONS = "supported.uploaded.js.extentions";
+
+    /** The key of the configuration. e.g. css */
+    String SUPPORTED_UPLOADED_CSS_EXTENTIONS = "supported.uploaded.css.extentions";
+
+    /** The key of the configuration. e.g. jpg,jpeg,gif,png,swf */
+    String SUPPORTED_UPLOADED_MEDIA_EXTENTIONS = "supported.uploaded.media.extentions";
+
+    /** The key of the configuration. e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh */
+    String SUPPORTED_LANGUAGES = "supported.languages";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -447,6 +471,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. backup */
     String ONLINE_HELP_NAME_BACKUP = "online.help.name.backup";
 
+    /** The key of the configuration. e.g.  */
+    String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
+
     /** The key of the configuration. e.g. 0 */
     String SUGGEST_POPULAR_WORD_SEED = "suggest.popular.word.seed";
 
@@ -589,6 +616,77 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobSystemJobIds();
+
+    /**
+     * Get the value for the key 'java.command.path'. <br>
+     * The value is, e.g. java <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJavaCommandPath();
+
+    /**
+     * Get the value for the key 'path.encoding'. <br>
+     * The value is, e.g. UTF-8 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPathEncoding();
+
+    /**
+     * Get the value for the key 'use.own.tmp.dir'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getUseOwnTmpDir();
+
+    /**
+     * Is the property for the key 'use.own.tmp.dir' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isUseOwnTmpDir();
+
+    /**
+     * Get the value for the key 'max.log.output.length'. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getMaxLogOutputLength();
+
+    /**
+     * Get the value for the key 'max.log.output.length' as {@link Integer}. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getMaxLogOutputLengthAsInteger();
+
+    /**
+     * Get the value for the key 'supported.uploaded.js.extentions'. <br>
+     * The value is, e.g. js <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedUploadedJsExtentions();
+
+    /**
+     * Get the value for the key 'supported.uploaded.css.extentions'. <br>
+     * The value is, e.g. css <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedUploadedCssExtentions();
+
+    /**
+     * Get the value for the key 'supported.uploaded.media.extentions'. <br>
+     * The value is, e.g. jpg,jpeg,gif,png,swf <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedUploadedMediaExtentions();
+
+    /**
+     * Get the value for the key 'supported.languages'. <br>
+     * The value is, e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedLanguages();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -1868,6 +1966,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameBackup();
 
     /**
+     * Get the value for the key 'online.help.supported.langs'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpSupportedLangs();
+
+    /**
+     * Get the value for the key 'online.help.supported.langs' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getOnlineHelpSupportedLangsAsInteger();
+
+    /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
      * The value is, e.g. 0 <br>
      * comment: ------
@@ -2067,6 +2180,46 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getJobSystemJobIds() {
             return get(FessConfig.JOB_SYSTEM_JOB_IDS);
+        }
+
+        public String getJavaCommandPath() {
+            return get(FessConfig.JAVA_COMMAND_PATH);
+        }
+
+        public String getPathEncoding() {
+            return get(FessConfig.PATH_ENCODING);
+        }
+
+        public String getUseOwnTmpDir() {
+            return get(FessConfig.USE_OWN_TMP_DIR);
+        }
+
+        public boolean isUseOwnTmpDir() {
+            return is(FessConfig.USE_OWN_TMP_DIR);
+        }
+
+        public String getMaxLogOutputLength() {
+            return get(FessConfig.MAX_LOG_OUTPUT_LENGTH);
+        }
+
+        public Integer getMaxLogOutputLengthAsInteger() {
+            return getAsInteger(FessConfig.MAX_LOG_OUTPUT_LENGTH);
+        }
+
+        public String getSupportedUploadedJsExtentions() {
+            return get(FessConfig.SUPPORTED_UPLOADED_JS_EXTENTIONS);
+        }
+
+        public String getSupportedUploadedCssExtentions() {
+            return get(FessConfig.SUPPORTED_UPLOADED_CSS_EXTENTIONS);
+        }
+
+        public String getSupportedUploadedMediaExtentions() {
+            return get(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS);
+        }
+
+        public String getSupportedLanguages() {
+            return get(FessConfig.SUPPORTED_LANGUAGES);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
@@ -2755,6 +2908,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameBackup() {
             return get(FessConfig.ONLINE_HELP_NAME_BACKUP);
+        }
+
+        public String getOnlineHelpSupportedLangs() {
+            return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
+        }
+
+        public Integer getOnlineHelpSupportedLangsAsInteger() {
+            return getAsInteger(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
 
         public String getSuggestPopularWordSeed() {
