@@ -276,6 +276,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_AS_GROUP = "smb.role.as.group";
 
+    /** The key of the configuration. e.g. 1,2 */
+    String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
+
     /** The key of the configuration. e.g. .fess_config,.fess_user */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
@@ -1307,6 +1310,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isSmbRoleAsGroup();
+
+    /**
+     * Get the value for the key 'smb.available.sid.types'. <br>
+     * The value is, e.g. 1,2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSmbAvailableSidTypes();
+
+    /**
+     * Get the value for the key 'smb.available.sid.types' as {@link Integer}. <br>
+     * The value is, e.g. 1,2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSmbAvailableSidTypesAsInteger();
 
     /**
      * Get the value for the key 'index.backup.targets'. <br>
@@ -2441,6 +2459,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isSmbRoleAsGroup() {
             return is(FessConfig.SMB_ROLE_AS_GROUP);
+        }
+
+        public String getSmbAvailableSidTypes() {
+            return get(FessConfig.SMB_AVAILABLE_SID_TYPES);
+        }
+
+        public Integer getSmbAvailableSidTypesAsInteger() {
+            return getAsInteger(FessConfig.SMB_AVAILABLE_SID_TYPES);
         }
 
         public String getIndexBackupTargets() {

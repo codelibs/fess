@@ -138,4 +138,16 @@ public interface FessProp {
         }
         return StreamUtil.of(getJobSystemJobIds().split(",")).anyMatch(s -> s.equals(id));
     }
+
+    String getSmbAvailableSidTypes();
+
+    public default boolean isAvailableSmbSidType(int sidType) {
+        if (StringUtil.isBlank(getSmbAvailableSidTypes())) {
+            return false;
+        }
+        final String value = Integer.toString(sidType);
+        return StreamUtil.of(getSmbAvailableSidTypes().split(",")).anyMatch(s -> {
+            return s.equals(value);
+        });
+    }
 }

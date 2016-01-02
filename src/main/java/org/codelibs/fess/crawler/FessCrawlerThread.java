@@ -90,7 +90,10 @@ public class FessCrawlerThread extends CrawlerThread {
                     if (aces != null) {
                         for (final ACE item : aces) {
                             final SID sid = item.getSID();
-                            roleTypeList.add(sambaHelper.getAccountId(sid));
+                            final String accountId = sambaHelper.getAccountId(sid);
+                            if (accountId != null) {
+                                roleTypeList.add(accountId);
+                            }
                         }
                         if (logger.isDebugEnabled()) {
                             logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());

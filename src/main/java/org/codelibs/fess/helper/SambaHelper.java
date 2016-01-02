@@ -15,6 +15,11 @@
  */
 package org.codelibs.fess.helper;
 
+import javax.annotation.PostConstruct;
+
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
+
 import jcifs.smb.SID;
 
 public class SambaHelper {
@@ -37,15 +42,25 @@ public class SambaHelper {
 
     public static final int SID_TYPE_WKN_GRP = 5;
 
+    private FessConfig fessConfig;
+
+    @PostConstruct
+    public void init() {
+        fessConfig = ComponentUtil.getFessConfig();
+    }
+
     public String getAccountId(final SID sid) {
-        return convert(sid.getType(), sid.getAccountName());
+        if (fessConfig.isAvailableSmbSidType(sid.getType())) {
+            return convert(sid.getType(), sid.getAccountName());
+        }
+        return null;
     }
 
     public String getRoleByUser(final String name) {
         return convert(SID_TYPE_USER, name);
     }
 
-    public String getRoleByGroup(final String name) {
+    public String getRoleByDomainGroup(final String name) {
         return convert(SID_TYPE_DOM_GRP, name);
     }
 

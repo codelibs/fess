@@ -276,7 +276,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (aces != null) {
                 for (final ACE item : aces) {
                     final SID sid = item.getSID();
-                    roleTypeList.add(sambaHelper.getAccountId(sid));
+                    final String accountId = sambaHelper.getAccountId(sid);
+                    if (accountId != null) {
+                        roleTypeList.add(accountId);
+                    }
                 }
                 if (getLogger().isDebugEnabled()) {
                     getLogger().debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());

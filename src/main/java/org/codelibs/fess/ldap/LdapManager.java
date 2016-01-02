@@ -127,7 +127,7 @@ public class LdapManager {
                         strTmp = strTmp.substring(strStart, strEnd);
 
                         if (fessConfig.isSmbRoleAsGroup()) {
-                            roleList.add(sambaHelper.getRoleByGroup(strTmp));
+                            roleList.add(sambaHelper.getRoleByDomainGroup(strTmp));
                         } else {
                             roleList.add(strTmp);
                         }
