@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.exec;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
@@ -51,6 +53,9 @@ public class SuggestCreator implements Serializable {
 
         @Option(name = "-n", aliases = "--name", metaVar = "name", usage = "Name")
         protected String name;
+
+        @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
+        protected String propertiesPath;
 
         protected Options() {
             // noghing
@@ -108,6 +113,23 @@ public class SuggestCreator implements Serializable {
     }
 
     private static int process(final Options options) {
+        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+
+        if (StringUtil.isNotBlank(options.propertiesPath)) {
+            crawlerProperties.reload(options.propertiesPath);
+        } else {
+            try {
+                final File propFile = File.createTempFile("crawler_", ".properties");
+                if (propFile.delete() && logger.isDebugEnabled()) {
+                    logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
+                }
+                crawlerProperties.reload(propFile.getAbsolutePath());
+                propFile.deleteOnExit(); // NOSONAR
+            } catch (final IOException e) {
+                logger.warn("Failed to create crawler properties file.", e);
+            }
+        }
+
         final SuggestCreator creator = SingletonLaContainer.getComponent(SuggestCreator.class);
         final LocalDateTime startTime = LocalDateTime.now();
         int ret = creator.create();
