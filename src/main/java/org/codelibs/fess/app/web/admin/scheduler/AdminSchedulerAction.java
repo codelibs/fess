@@ -183,7 +183,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
         return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
-            data.register("systemJobId", fessConfig.isSystemJobId(id));
+            RenderDataUtil.register(data, "systemJobId", fessConfig.isSystemJobId(id));
         }).useForm(EditForm.class, op -> {
             op.setup(form -> {
                 scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
@@ -369,7 +369,7 @@ public class AdminSchedulerAction extends FessAdminAction {
 
     private HtmlResponse asDetailsHtml(String id) {
         return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
-            data.register("systemJobId", fessConfig.isSystemJobId(id));
+            RenderDataUtil.register(data, "systemJobId", fessConfig.isSystemJobId(id));
         });
     }
 }
