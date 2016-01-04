@@ -36,8 +36,10 @@
 						<div class="site ellipsis">
 							<cite>${f:h(doc.sitePath)}</cite>
 							<c:if test="${doc.has_cache=='true'}">
+								<small>
 								<la:link href="/cache/?docId=${doc.doc_id}${appendHighlightParams}" class="cache"><la:message
 										key="labels.search_result_cache" /></la:link>
+								</small>
 							</c:if>
 						</div>
 						<div class="more hidden-md-up">
