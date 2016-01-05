@@ -74,23 +74,28 @@ public class EsApiManager extends BaseApiManager {
     @Override
     public void process(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) throws IOException,
             ServletException {
-        getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
-            final String servletPath = request.getServletPath();
-            final String pathPrefix = ADMIN_SERVER + token;
-            if (!servletPath.startsWith(pathPrefix)) {
-                throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid access token.");
-            }
-            final String path;
-            final String value = servletPath.substring(pathPrefix.length());
-            if (!value.startsWith("/")) {
-                path = "/" + value;
-            } else {
-                path = value;
-            }
-            processRequest(request, response, path);
-        }).orElse(() -> {
-            throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid session.");
-        });
+        try {
+            getSessionManager().getAttribute(Constants.ES_API_ACCESS_TOKEN, String.class).ifPresent(token -> {
+                final String servletPath = request.getServletPath();
+                final String pathPrefix = ADMIN_SERVER + token;
+                if (!servletPath.startsWith(pathPrefix)) {
+                    throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid access token.");
+                }
+                final String path;
+                final String value = servletPath.substring(pathPrefix.length());
+                if (!value.startsWith("/")) {
+                    path = "/" + value;
+                } else {
+                    path = value;
+                }
+                processRequest(request, response, path);
+            }).orElse(() -> {
+                throw new WebApiException(HttpServletResponse.SC_FORBIDDEN, "Invalid session.");
+            });
+        } catch (WebApiException e) {
+            logger.debug("Web API access error. ", e);
+            e.sendError(response);
+        }
     }
 
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
