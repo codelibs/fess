@@ -166,7 +166,7 @@ public class CrawlJob {
 
         if (sessionId == null) { // create session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sessionId = sdf.format(new Date());
+            sessionId = Constants.CRAWLER_SESSION_ID_PREFIX + sdf.format(new Date());
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         resultBuf.append("Web  Config Id:");
@@ -344,11 +344,10 @@ public class CrawlJob {
             cmdList.add(Integer.toString(documentExpires));
         }
 
+        File propFile = null;
         try {
             cmdList.add("-p");
-            File propFile =
-                    new File(ownTmpDir != null ? ownTmpDir.getAbsolutePath() : tmpDir, "crawler_" + systemHelper.getCurrentTimeAsLong()
-                            + ".properties");
+            propFile = File.createTempFile("crawler_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 Properties prop = new Properties();
@@ -392,6 +391,9 @@ public class CrawlJob {
             try {
                 jobHelper.destroyProcess(sessionId);
             } finally {
+                if (propFile != null && !propFile.delete()) {
+                    logger.warn("Failed to delete {}.", propFile.getAbsolutePath());
+                }
                 deleteTempDir(ownTmpDir);
             }
         }

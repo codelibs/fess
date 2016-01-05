@@ -32,7 +32,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.SuggestCreator;
 import org.codelibs.fess.helper.JobHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
@@ -100,7 +99,7 @@ public class SuggestJob {
 
         if (sessionId == null) { // create session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sessionId = sdf.format(new Date());
+            sessionId = Constants.SUGGEST_SESSION_ID_PREFIX + sdf.format(new Date());
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         if (jobExecutor != null) {
@@ -123,7 +122,6 @@ public class SuggestJob {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobHelper jobHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -218,11 +216,10 @@ public class SuggestJob {
         cmdList.add("--sessionId");
         cmdList.add(sessionId);
 
+        File propFile = null;
         try {
             cmdList.add("-p");
-            File propFile =
-                    new File(ownTmpDir != null ? ownTmpDir.getAbsolutePath() : tmpDir, "crawler_" + systemHelper.getCurrentTimeAsLong()
-                            + ".properties");
+            propFile = File.createTempFile("crawler_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
                 Properties prop = new Properties();
@@ -266,6 +263,9 @@ public class SuggestJob {
             try {
                 jobHelper.destroyProcess(sessionId);
             } finally {
+                if (propFile != null && !propFile.delete()) {
+                    logger.warn("Failed to delete {}.", propFile.getAbsolutePath());
+                }
                 deleteTempDir(ownTmpDir);
             }
         }
