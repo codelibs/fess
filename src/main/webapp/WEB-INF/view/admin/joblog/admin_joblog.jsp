@@ -81,7 +81,7 @@
 																				key="labels.joblog_status_fail" /></span>
 																	</c:when>
 																	<c:when test="${data.jobStatus == 'running'}">
-																		<span class="label label-danger"><la:message
+																		<span class="label label-success"><la:message
 																				key="labels.joblog_status_running" /></span>
 																	</c:when>
 																	<c:otherwise>
