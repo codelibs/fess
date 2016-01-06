@@ -103,7 +103,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_SUGGEST_PROPERTY = "web.api.suggest";
 
-    public static final String WEB_API_ANALYSIS_PROPERTY = "web.api.analysis";
+    public static final String WEB_API_POPULAR_WORD_PROPERTY = "web.api.popularword";
 
     public static final String WEB_DESIGN_EDITOR_PROPERTY = "design.editor";
 
@@ -114,8 +114,6 @@ public class Constants extends CoreLibConstants {
     public static final String IGNORE_FAILURE_TYPE_PROPERTY = "failure.ignoretype";
 
     public static final String FAILURE_COUNT_THRESHOLD_PROPERTY = "failure.countthreshold";
-
-    public static final String WEB_API_POPULAR_WORD_PROPERTY = "web.api.popularword";
 
     public static final String CSV_FILE_ENCODING_PROPERTY = "csv.file.encoding";
 

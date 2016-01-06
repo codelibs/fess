@@ -206,7 +206,7 @@ public class Crawler implements Serializable {
         }
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil.getCrawlerProperties();
+        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
             crawlerProperties.reload(options.propertiesPath);
@@ -219,7 +219,7 @@ public class Crawler implements Serializable {
                 crawlerProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit(); // NOSONAR
             } catch (final IOException e) {
-                logger.warn("Failed to create crawler properties file.", e);
+                logger.warn("Failed to create system properties file.", e);
             }
         }
 

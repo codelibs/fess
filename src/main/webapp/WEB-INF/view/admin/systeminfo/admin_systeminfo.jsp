@@ -71,7 +71,7 @@
 								<c:if test="${empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"
 										readonly><la:message
-											key="labels.system_info_crawler_properties_does_not_exist" /></textarea>
+											key="labels.system_info_system_properties_does_not_exist" /></textarea>
 								</c:if>
 								<c:if test="${!empty fessPropItems}">
 									<textarea id="fessPropData" class="systemInfoData form-control"

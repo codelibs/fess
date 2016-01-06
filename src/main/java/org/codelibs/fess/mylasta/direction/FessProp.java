@@ -21,21 +21,35 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 
 public interface FessProp {
-    public default String getProperty(final String key) {
-        return ComponentUtil.getCrawlerProperties().getProperty(key);
+
+    //
+    // system.properties
+    //
+
+    public default String getSystemProperty(final String key) {
+        return ComponentUtil.getSystemProperties().getProperty(key);
     }
 
     public default String getProperty(final String key, final String defaultValue) {
-        return ComponentUtil.getCrawlerProperties().getProperty(key, defaultValue);
+        return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
     }
 
     public default void setLoginRequired(final boolean value) {
-        ComponentUtil.getCrawlerProperties().setProperty(Constants.LOGIN_REQUIRED_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
+        ComponentUtil.getSystemProperties().setProperty(Constants.LOGIN_REQUIRED_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
     }
 
     public default boolean isLoginRequired() {
-        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getCrawlerProperties().getProperty(Constants.LOGIN_REQUIRED_PROPERTY,
+        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getSystemProperties().getProperty(Constants.LOGIN_REQUIRED_PROPERTY,
                 Constants.FALSE));
+    }
+
+    public default void setWebApiPopularWord(final boolean value) {
+        ComponentUtil.getSystemProperties().setProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
+    }
+
+    public default boolean isWebApiPopularWord() {
+        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getSystemProperties().getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY,
+                Constants.TRUE));
     }
 
     public default String getLdapInitialContextFactory() {
@@ -47,7 +61,7 @@ public interface FessProp {
     }
 
     public default String getLdapProviderUrl() {
-        return getProperty(Constants.LDAP_PROVIDER_URL);
+        return getSystemProperty(Constants.LDAP_PROVIDER_URL);
     }
 
     public default String getLdapSecurityPrincipal(final String username) {
@@ -55,12 +69,16 @@ public interface FessProp {
     }
 
     public default String getLdapBaseDn() {
-        return getProperty(Constants.LDAP_BASE_DN);
+        return getSystemProperty(Constants.LDAP_BASE_DN);
     }
 
     public default String getLdapAccountFilter() {
-        return getProperty(Constants.LDAP_ACCOUNT_FILTER);
+        return getSystemProperty(Constants.LDAP_ACCOUNT_FILTER);
     }
+
+    //
+    // fess_*.properties
+    //
 
     String getAuthenticationAdminRoles();
 

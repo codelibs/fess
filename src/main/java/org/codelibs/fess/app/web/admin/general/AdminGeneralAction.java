@@ -137,7 +137,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, getCheckboxValue(form.appendQueryParameter));
         updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
         updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
-        updateProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, getCheckboxValue(form.popularWord));
+        fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
         updateProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
         updateProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay.toString());
         updateProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, form.purgeJobLogDay.toString());
@@ -175,7 +175,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ignoreFailureType =
                 crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
-        form.popularWord = crawlerProperties.getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, Constants.TRUE);
+        form.popularWord = fessConfig.isWebApiPopularWord() ? Constants.TRUE : Constants.FALSE;
         form.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
         form.purgeSearchLogDay =
                 Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));

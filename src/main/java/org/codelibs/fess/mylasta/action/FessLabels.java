@@ -1484,9 +1484,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Properties for Bug Report */
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
-    /** The key of the message: crawler.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_crawler_properties_does_not_exist =
-            "{labels.system_info_crawler_properties_does_not_exist}";
+    /** The key of the message: system.properties does not exist. Default values are applied. */
+    public static final String LABELS_system_info_system_properties_does_not_exist =
+            "{labels.system_info_system_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";

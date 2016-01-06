@@ -139,7 +139,7 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(groupName + PROPERTIES_SUFFIX);
     }
 
-    public static DynamicProperties getCrawlerProperties() {
+    public static DynamicProperties getSystemProperties() {
         return SingletonLaContainer.getComponent(CRAWLER_PROPERTIES);
     }
 

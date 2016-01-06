@@ -4,7 +4,7 @@
 <components>
 	<component name="crawlerProperties" class="org.codelibs.core.misc.DynamicProperties">
 		<arg>
-			org.codelibs.fess.util.ResourceUtil.getConfPath("crawler.properties")
+			org.codelibs.fess.util.ResourceUtil.getConfPath("system.properties")
 		</arg>
 	</component>
 

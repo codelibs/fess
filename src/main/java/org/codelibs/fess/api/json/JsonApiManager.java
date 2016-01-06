@@ -73,7 +73,7 @@ public class JsonApiManager extends BaseApiManager {
 
     @Override
     public boolean matches(final HttpServletRequest request) {
-        if (Constants.FALSE.equals(ComponentUtil.getCrawlerProperties().getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(ComponentUtil.getSystemProperties().getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE))) {
             return false;
         }
 
