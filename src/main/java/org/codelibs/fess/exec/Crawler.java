@@ -281,9 +281,9 @@ public class Crawler implements Serializable {
             }
 
             try {
-                dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
+                dataMap.put("hostname", InetAddress.getLocalHost().toString());
             } catch (final UnknownHostException e) {
-                // ignore
+                dataMap.put("hostname", "Unknown");
             }
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
