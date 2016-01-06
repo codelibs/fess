@@ -16,7 +16,7 @@
 package org.codelibs.fess.helper;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,7 +156,8 @@ public class SuggestHelper {
 
     public void purgeDocumentSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.ISO_DATE)));
+        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(
+                time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
@@ -167,7 +168,8 @@ public class SuggestHelper {
 
     public void purgeSearchlogSuggest(final LocalDateTime time) {
         final BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(time.format(DateTimeFormatter.ISO_DATE)));
+        boolQueryBuilder.must(QueryBuilders.rangeQuery(FieldNames.TIMESTAMP).lt(
+                time.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.DOCUMENT.toString()));
         boolQueryBuilder.must(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.QUERY.toString()));
