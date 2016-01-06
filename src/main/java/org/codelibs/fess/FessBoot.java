@@ -19,6 +19,7 @@ package org.codelibs.fess;
 
 import java.io.File;
 
+import org.codelibs.core.lang.StringUtil;
 import org.dbflute.tomcat.TomcatBoot;
 
 public class FessBoot extends TomcatBoot {
@@ -105,9 +106,13 @@ public class FessBoot extends TomcatBoot {
     protected static String getContextPath() {
         final String value = System.getProperty(FESS_CONTEXT_PATH);
         if (value != null) {
-            return value;
+            if ("/".equals(value)) {
+                return StringUtil.EMPTY;
+            } else {
+                return value;
+            }
         }
-        return "/";
+        return StringUtil.EMPTY;
     }
 
     protected static String getTomcatConfigPath() {
