@@ -59,7 +59,7 @@ public class ScreenshotAction extends FessSearchAction {
                             queryRequestBuilder.setQuery(termQuery);
                             queryRequestBuilder.addFields(queryHelper.getResponseFields());
                             return true;
-                        }).get();
+                        }).orElse(null);
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
             // 404

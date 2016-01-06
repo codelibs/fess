@@ -74,7 +74,7 @@ public class GoAction extends FessSearchAction {
                                 queryRequestBuilder.setQuery(termQuery);
                                 queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId());
                                 return true;
-                            }).get();
+                            }).orElse(null);
         } catch (final Exception e) {
             logger.warn("Failed to request: " + form.docId, e);
         }
