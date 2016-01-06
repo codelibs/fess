@@ -99,7 +99,7 @@ public class SuggestJob {
 
         if (sessionId == null) { // create session id
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sessionId = Constants.SUGGEST_SESSION_ID_PREFIX + sdf.format(new Date());
+            sessionId = sdf.format(new Date());
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         if (jobExecutor != null) {

@@ -364,8 +364,4 @@ public class Constants extends CoreLibConstants {
     public static final String LDAP_INITIAL_CONTEXT_FACTORY = "ldap.initial.context.factory";
 
     public static final String LDAP_ACCOUNT_FILTER = "ldap.account.filter";
-
-    public static final String CRAWLER_SESSION_ID_PREFIX = "C";
-
-    public static final String SUGGEST_SESSION_ID_PREFIX = "S";
 }

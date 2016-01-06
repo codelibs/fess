@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.scheduler;
 
+import java.text.MessageFormat;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
@@ -26,7 +28,6 @@ import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -116,32 +117,26 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Execute
     public HtmlResponse createnewjob(final String type, final String id, final String name) {
         saveToken();
-        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(
-                CreateForm.class,
-                op -> {
-                    op.setup(scheduledJobForm -> {
-                        scheduledJobForm.initialize();
-                        scheduledJobForm.crudMode = CrudMode.CREATE;
-                        scheduledJobForm.jobLogging = Constants.ON;
-                        scheduledJobForm.crawler = Constants.ON;
-                        scheduledJobForm.available = Constants.ON;
-                        scheduledJobForm.cronExpression = null;
-                        scheduledJobForm.name =
-                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels." + type + "_job_title", name);
-                        final String[] ids = new String[] { "", "", "" };
-                        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
-                            ids[0] = "\"" + id + "\"";
-                        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
-                            ids[1] = "\"" + id + "\"";
-                        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
-                            ids[2] = "\"" + id + "\"";
-                        }
-                        scheduledJobForm.scriptData =
-                                ComponentUtil.getMessageManager().getMessage(LaRequestUtil.getRequest().getLocale(),
-                                        "labels.scheduledjob_script_template", ids[0], ids[1], ids[2]);
-                    });
-                });
+        return asHtml(path_AdminScheduler_AdminSchedulerEditJsp).useForm(CreateForm.class, op -> {
+            op.setup(scheduledJobForm -> {
+                scheduledJobForm.initialize();
+                scheduledJobForm.crudMode = CrudMode.CREATE;
+                scheduledJobForm.jobLogging = Constants.ON;
+                scheduledJobForm.crawler = Constants.ON;
+                scheduledJobForm.available = Constants.ON;
+                scheduledJobForm.cronExpression = null;
+                scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), name);
+                final String[] ids = new String[] { "", "", "" };
+                if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+                    ids[0] = "\"" + id + "\"";
+                } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+                    ids[1] = "\"" + id + "\"";
+                } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+                    ids[2] = "\"" + id + "\"";
+                }
+                scheduledJobForm.scriptData = MessageFormat.format(fessConfig.getJobTemplateScript(), ids[0], ids[1], ids[2], id);
+            });
+        });
     }
 
     @Execute

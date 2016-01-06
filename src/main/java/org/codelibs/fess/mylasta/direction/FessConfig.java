@@ -69,6 +69,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. default_crawler */
     String JOB_SYSTEM_JOB_IDS = "job.system.job.ids";
 
+    /** The key of the configuration. e.g. Web Crawler - {0} */
+    String JOB_TEMPLATE_TITLE_WEB = "job.template.title.web";
+
+    /** The key of the configuration. e.g. File Crawler - {0} */
+    String JOB_TEMPLATE_TITLE_FILE = "job.template.title.file";
+
+    /** The key of the configuration. e.g. Data Crawler - {0} */
+    String JOB_TEMPLATE_TITLE_DATA = "job.template.title.data";
+
+    /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); */
+    String JOB_TEMPLATE_SCRIPT = "job.template.script";
+
     /** The key of the configuration. e.g. java */
     String JAVA_COMMAND_PATH = "java.command.path";
 
@@ -616,6 +628,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobSystemJobIds();
+
+    /**
+     * Get the value for the key 'job.template.title.web'. <br>
+     * The value is, e.g. Web Crawler - {0} <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobTemplateTitleWeb();
+
+    /**
+     * Get the value for the key 'job.template.title.file'. <br>
+     * The value is, e.g. File Crawler - {0} <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobTemplateTitleFile();
+
+    /**
+     * Get the value for the key 'job.template.title.data'. <br>
+     * The value is, e.g. Data Crawler - {0} <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobTemplateTitleData();
+
+    /**
+     * Get the value for the key 'job.template.script'. <br>
+     * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getJobTemplateScript();
 
     /**
      * Get the value for the key 'java.command.path'. <br>
@@ -2180,6 +2220,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getJobSystemJobIds() {
             return get(FessConfig.JOB_SYSTEM_JOB_IDS);
+        }
+
+        public String getJobTemplateTitleWeb() {
+            return get(FessConfig.JOB_TEMPLATE_TITLE_WEB);
+        }
+
+        public String getJobTemplateTitleFile() {
+            return get(FessConfig.JOB_TEMPLATE_TITLE_FILE);
+        }
+
+        public String getJobTemplateTitleData() {
+            return get(FessConfig.JOB_TEMPLATE_TITLE_DATA);
+        }
+
+        public String getJobTemplateScript() {
+            return get(FessConfig.JOB_TEMPLATE_SCRIPT);
         }
 
         public String getJavaCommandPath() {

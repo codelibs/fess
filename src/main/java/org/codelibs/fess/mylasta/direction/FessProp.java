@@ -186,4 +186,22 @@ public interface FessProp {
         return StreamUtil.of(getSupportedUploadedMediaExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
                 .toArray(n -> new String[n]);
     }
+
+    String getJobTemplateTitleWeb();
+
+    String getJobTemplateTitleFile();
+
+    String getJobTemplateTitleData();
+
+    public default String getJobTemplateTitle(String type) {
+        if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
+            return getJobTemplateTitleWeb();
+        } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
+            return getJobTemplateTitleFile();
+        } else if (Constants.DATA_CRAWLER_TYPE.equals(type)) {
+            return getJobTemplateTitleData();
+        }
+        return "None";
+    }
+
 }
