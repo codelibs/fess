@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 CodeLibs Project and the Others.
+ * Copyright 2012-2016 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -545,7 +545,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
-    /** The key of the message: Copyright(C) 2009-2015 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. &lt;span class="br-phone"&gt;&lt;/span&gt;All Rights Reserved. */
+    /** The key of the message: Copyright(C) 2009-2016 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. &lt;span class="br-phone"&gt;&lt;/span&gt;All Rights Reserved. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 
     /** The key of the message: Search */
