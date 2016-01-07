@@ -26,54 +26,112 @@ public interface FessProp {
     // system.properties
     //
 
+    public default void storeSystemProperties() {
+        ComponentUtil.getSystemProperties().store();
+    }
+
     public default String getSystemProperty(final String key) {
         return ComponentUtil.getSystemProperties().getProperty(key);
     }
 
-    public default String getProperty(final String key, final String defaultValue) {
+    public default String getSystemProperty(final String key, final String defaultValue) {
         return ComponentUtil.getSystemProperties().getProperty(key, defaultValue);
     }
 
+    public default void setSystemProperty(final String key, final String value) {
+        ComponentUtil.getSystemProperties().setProperty(key, value);
+    }
+
+    public default boolean getSystemPropertyAsBoolean(final String key, final boolean defaultValue) {
+        return Constants.TRUE.equalsIgnoreCase(getSystemProperty(key, defaultValue ? Constants.TRUE : Constants.FALSE));
+    }
+
+    public default void setSystemPropertyAsBoolean(final String key, final boolean value) {
+        setSystemProperty(key, value ? Constants.TRUE : Constants.FALSE);
+    }
+
+    public default int getSystemPropertyAsInt(final String key, final int defaultValue) {
+        final String value = getSystemProperty(key);
+        if (value != null) {
+            try {
+                return Integer.valueOf(value);
+            } catch (final NumberFormatException e) {
+                // ignore
+            }
+        }
+        return defaultValue;
+    }
+
+    public default void setSystemPropertyAsInt(final String key, final int value) {
+        setSystemProperty(key, Integer.toString(value));
+    }
+
     public default void setLoginRequired(final boolean value) {
-        ComponentUtil.getSystemProperties().setProperty(Constants.LOGIN_REQUIRED_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
+        setSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
     }
 
     public default boolean isLoginRequired() {
-        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getSystemProperties().getProperty(Constants.LOGIN_REQUIRED_PROPERTY,
-                Constants.FALSE));
+        return getSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, false);
     }
 
     public default void setWebApiPopularWord(final boolean value) {
-        ComponentUtil.getSystemProperties().setProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, value ? Constants.TRUE : Constants.FALSE);
+        setSystemPropertyAsBoolean(Constants.WEB_API_POPULAR_WORD_PROPERTY, value);
     }
 
     public default boolean isWebApiPopularWord() {
-        return Constants.TRUE.equalsIgnoreCase(ComponentUtil.getSystemProperties().getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY,
-                Constants.TRUE));
+        return getSystemPropertyAsBoolean(Constants.WEB_API_POPULAR_WORD_PROPERTY, true);
     }
 
     public default String getLdapInitialContextFactory() {
-        return getProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        return getSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+    }
+
+    public default void setLdapInitialContextFactory(final String value) {
+        setSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, value);
     }
 
     public default String getLdapSecurityAuthentication() {
-        return getProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
+        return getSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
+    }
+
+    public default void setLdapSecurityAuthentication(final String value) {
+        setSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, value);
     }
 
     public default String getLdapProviderUrl() {
         return getSystemProperty(Constants.LDAP_PROVIDER_URL);
     }
 
+    public default void setLdapProviderUrl(final String value) {
+        setSystemProperty(Constants.LDAP_PROVIDER_URL, value);
+    }
+
     public default String getLdapSecurityPrincipal(final String username) {
-        return String.format(getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
+        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
+    }
+
+    public default String getLdapSecurityPrincipal() {
+        return getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL);
+    }
+
+    public default void setLdapSecurityPrincipal(final String value) {
+        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
     public default String getLdapBaseDn() {
         return getSystemProperty(Constants.LDAP_BASE_DN);
     }
 
+    public default void setLdapBaseDn(final String value) {
+        setSystemProperty(Constants.LDAP_BASE_DN, value);
+    }
+
     public default String getLdapAccountFilter() {
         return getSystemProperty(Constants.LDAP_ACCOUNT_FILTER);
+    }
+
+    public default void setLdapAccountFilter(final String value) {
+        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
     }
 
     //

@@ -152,7 +152,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
         updateProperty(Constants.LDAP_ACCOUNT_FILTER, form.ldapAccountFilter);
 
-        systemProperties.store();
+        fessConfig.storeSystemProperties();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
         return redirect(getClass());
     }
