@@ -236,6 +236,7 @@ public class DataConfigService implements Serializable {
 
         // setup condition
         cb.query().addOrderBy_SortOrder_Asc();
+        cb.query().addOrderBy_Name_Asc();
 
         // search
 

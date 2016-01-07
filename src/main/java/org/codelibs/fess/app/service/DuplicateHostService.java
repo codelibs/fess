@@ -89,6 +89,7 @@ public class DuplicateHostService implements Serializable {
 
         // setup condition
         cb.query().addOrderBy_SortOrder_Asc();
+        cb.query().addOrderBy_CreatedTime_Asc();
 
         // search
 
