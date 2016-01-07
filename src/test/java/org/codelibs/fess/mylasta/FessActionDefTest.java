@@ -16,7 +16,6 @@
 package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.dbflute.utflute.lastaflute.police.HotDeployDestroyerPolice;
 import org.dbflute.utflute.lastaflute.police.NonActionExtendsActionPolice;
 import org.dbflute.utflute.lastaflute.police.NonWebHasWebReferencePolice;
 import org.dbflute.utflute.lastaflute.police.WebPackageNinjaReferencePolice;

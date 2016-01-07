@@ -16,7 +16,6 @@
 package org.codelibs.fess.mylasta;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.dbflute.utflute.core.document.DocumentGenerator;
 
 public class FessLastaDocTest extends UnitFessTestCase {
 
@@ -49,8 +48,7 @@ public class FessLastaDocTest extends UnitFessTestCase {
     //                                                                            Document
     //                                                                            ========
     public void test_document() throws Exception {
-        DocumentGenerator documentGenerator = new DocumentGenerator();
-        documentGenerator.saveLastaDocMeta();
+        saveLastaDocMeta();
     }
 
 }
