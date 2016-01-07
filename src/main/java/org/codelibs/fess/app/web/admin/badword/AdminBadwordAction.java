@@ -61,7 +61,7 @@ public class AdminBadwordAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
     @Resource
     protected SuggestHelper suggestHelper;
 
@@ -327,7 +327,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     private String getCsvEncoding() {
-        return crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+        return systemProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
     }
 
     // ===================================================================================

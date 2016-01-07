@@ -56,8 +56,8 @@ public class FessCrawlerThread extends CrawlerThread {
 
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
-        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
-        if (crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        if (systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
             log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
             final long startTime = System.currentTimeMillis();

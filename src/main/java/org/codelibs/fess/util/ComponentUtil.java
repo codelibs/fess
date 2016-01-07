@@ -110,7 +110,7 @@ public final class ComponentUtil {
 
     private static final String SYSTEM_HELPER = "systemHelper";
 
-    private static final String CRAWLER_PROPERTIES = "crawlerProperties";
+    private static final String CRAWLER_PROPERTIES = "systemProperties";
 
     private static final String PROPERTIES_SUFFIX = "Properties";
 

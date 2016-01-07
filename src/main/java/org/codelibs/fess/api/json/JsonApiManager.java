@@ -65,7 +65,7 @@ public class JsonApiManager extends BaseApiManager {
     private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     public JsonApiManager() {
         setPathPrefix("/json");
@@ -311,7 +311,7 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processPopularWordRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, Constants.TRUE))) {
+        if (Constants.FALSE.equals(systemProperties.getProperty(Constants.WEB_API_POPULAR_WORD_PROPERTY, Constants.TRUE))) {
             writeJsonResponse(9, null, "Unsupported operation.");
             return;
         }
@@ -357,7 +357,7 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processFavoriteRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+        if (Constants.FALSE.equals(systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
             writeJsonResponse(9, null, "Unsupported operation.");
             return;
         }
@@ -440,7 +440,7 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processFavoritesRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        if (Constants.FALSE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
+        if (Constants.FALSE.equals(systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE))) {
             writeJsonResponse(9, null, "Unsupported operation.");
             return;
         }

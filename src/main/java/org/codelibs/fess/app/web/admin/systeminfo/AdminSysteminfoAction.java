@@ -44,7 +44,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     private static final String[] bugReportLabels = { "file.separator", "file.encoding", "java.runtime.version", "java.vm.info",
             "java.vm.name", "java.vm.vendor", "java.vm.version", "os.arch", "os.name", "os.version", "user.country", "user.language",
@@ -94,7 +94,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
 
     protected void registerFessPropItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
-        for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
+        for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
         RenderDataUtil.register(data, "fessPropItems", itemList);
@@ -106,7 +106,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
             itemList.add(createPropItem(label));
         }
 
-        for (final Map.Entry<Object, Object> entry : crawlerProperties.entrySet()) {
+        for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
             if (isBugReportTarget(entry.getKey())) {
                 itemList.add(createItem(entry.getKey(), entry.getValue()));
             }

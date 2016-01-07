@@ -55,7 +55,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private DynamicProperties crawlerProperties;
+    private DynamicProperties systemProperties;
     @Resource
     private SystemHelper systemHelper;
 
@@ -83,7 +83,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     private boolean editable() {
-        return Constants.TRUE.equals(crawlerProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
+        return Constants.TRUE.equals(systemProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
     }
 
     private List<String> loadFileNameItems() {

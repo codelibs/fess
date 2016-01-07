@@ -51,7 +51,7 @@ public class WebFsIndexHelper implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(WebFsIndexHelper.class);
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     public WebConfigService webConfigService;
@@ -126,7 +126,7 @@ public class WebFsIndexHelper implements Serializable {
 
     protected void doCrawl(final String sessionId, final List<WebConfig> webConfigList, final List<FileConfig> fileConfigList) {
         int multiprocessCrawlingCount = 5;
-        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        final String value = systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
         } catch (final NumberFormatException e) {

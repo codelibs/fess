@@ -47,7 +47,7 @@ public class SuggestApiManager extends BaseApiManager {
     }
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Override
     public boolean matches(final HttpServletRequest request) {
@@ -75,10 +75,10 @@ public class SuggestApiManager extends BaseApiManager {
             builder.setSize(parameter.getNum());
 
             builder.addKind(SuggestItem.Kind.USER.toString());
-            if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE))) {
                 builder.addKind(SuggestItem.Kind.QUERY.toString());
             }
-            if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
                 builder.addKind(SuggestItem.Kind.DOCUMENT.toString());
             }
 

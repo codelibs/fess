@@ -53,7 +53,7 @@ public class EsApiManager extends BaseApiManager {
     private static final Logger logger = LoggerFactory.getLogger(EsApiManager.class);
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     protected String[] acceptedRoles = new String[] { "admin" };
 

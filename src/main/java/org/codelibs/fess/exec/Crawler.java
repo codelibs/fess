@@ -81,7 +81,7 @@ public class Crawler implements Serializable {
     protected CrawlingInfoService crawlingInfoService;
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     protected static class Options {
 
@@ -206,17 +206,17 @@ public class Crawler implements Serializable {
         }
 
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
-            crawlerProperties.reload(options.propertiesPath);
+            systemProperties.reload(options.propertiesPath);
         } else {
             try {
                 final File propFile = File.createTempFile("crawler_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
-                crawlerProperties.reload(propFile.getAbsolutePath());
+                systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit(); // NOSONAR
             } catch (final IOException e) {
                 logger.warn("Failed to create system properties file.", e);
@@ -230,7 +230,7 @@ public class Crawler implements Serializable {
                 dayForCleanupStr = options.expires;
             } else {
                 dayForCleanupStr =
-                        crawlerProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP.toString());
+                        systemProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP.toString());
             }
             int dayForCleanup = -1;
             try {
@@ -272,7 +272,7 @@ public class Crawler implements Serializable {
     }
 
     protected void sendMail(final Map<String, String> infoMap) {
-        final String toStrs = (String) crawlerProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
+        final String toStrs = (String) systemProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
             final Map<String, String> dataMap = new HashMap<>();

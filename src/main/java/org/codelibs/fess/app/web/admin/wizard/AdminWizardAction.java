@@ -55,7 +55,7 @@ public class AdminWizardAction extends FessAdminAction {
     //                                                                           Attribute
     //
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     protected WebConfigService webConfigService;
@@ -226,7 +226,7 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     protected Integer getDefaultInteger(final String key, final Integer defaultValue) {
-        final String value = crawlerProperties.getProperty(key);
+        final String value = systemProperties.getProperty(key);
         if (value != null) {
             try {
                 return Integer.parseInt(value);
@@ -236,7 +236,7 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     protected Long getDefaultLong(final String key, final Long defaultValue) {
-        final String value = crawlerProperties.getProperty(key);
+        final String value = systemProperties.getProperty(key);
         if (value != null) {
             try {
                 return Long.parseLong(value);
@@ -246,7 +246,7 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     protected String getDefaultString(final String key, final String defaultValue) {
-        final String value = crawlerProperties.getProperty(key);
+        final String value = systemProperties.getProperty(key);
         if (value != null) {
             return value;
         }

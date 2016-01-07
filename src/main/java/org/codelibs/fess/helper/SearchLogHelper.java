@@ -54,7 +54,7 @@ public class SearchLogHelper {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     public long userCheckInterval = 5 * 60 * 1000;// 5 min
 
@@ -132,7 +132,7 @@ public class SearchLogHelper {
     }
 
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
-        final String value = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
+        final String value = systemProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
         String[] botNames;
         if (StringUtil.isBlank(value)) {
             botNames = StringUtil.EMPTY_STRINGS;

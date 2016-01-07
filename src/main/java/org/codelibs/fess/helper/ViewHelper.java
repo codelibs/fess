@@ -90,7 +90,7 @@ public class ViewHelper implements Serializable {
     protected UserAgentHelper userAgentHelper;
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     public int descriptionLength = 200;
 
@@ -247,44 +247,44 @@ public class ViewHelper implements Serializable {
             switch (ua) {
             case IE:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.ie", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.ie", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.ie", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.ie", "file://"));
                 }
                 break;
             case FIREFOX:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.firefox", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.firefox", "file://///"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.firefox", "file://///"));
                 }
                 break;
             case CHROME:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.chrome", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.chrome", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.chrome", "file://"));
                 }
                 break;
             case SAFARI:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.safari", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.safari", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.safari", "file:////"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.safari", "file:////"));
                 }
                 break;
             case OPERA:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.opera", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.opera", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.opera", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.opera", "file://"));
                 }
                 break;
             default:
                 if (isLocalFile) {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.winlocal.other", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.winlocal.other", "file://"));
                 } else {
-                    url = url.replaceFirst("file:/+", crawlerProperties.getProperty("file.protocol.other", "file://"));
+                    url = url.replaceFirst("file:/+", systemProperties.getProperty("file.protocol.other", "file://"));
                 }
                 break;
             }
@@ -305,7 +305,7 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
-        if (Constants.TRUE.equals(crawlerProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
+        if (Constants.TRUE.equals(systemProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final String mimetype = getString(document, fessConfig.getIndexFieldMimetype());
             if (StringUtil.isNotBlank(mimetype)) {

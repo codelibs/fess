@@ -53,7 +53,7 @@ public class AdminGeneralAction extends FessAdminAction {
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
     @Resource
     protected SystemHelper systemHelper;
 
@@ -107,7 +107,7 @@ public class AdminGeneralAction extends FessAdminAction {
             });
             saveInfo(messages -> messages.addSuccessSendTestmail(GLOBAL));
             updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
-            crawlerProperties.store();
+            systemProperties.store();
         } catch (final Exception e) {
             logger.warn("Failed to send a test mail.", e);
             saveError(messages -> messages.addErrorsFailedToSendTestmail(GLOBAL));
@@ -152,7 +152,7 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
         updateProperty(Constants.LDAP_ACCOUNT_FILTER, form.ldapAccountFilter);
 
-        crawlerProperties.store();
+        systemProperties.store();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
         return redirect(getClass());
     }
@@ -163,45 +163,45 @@ public class AdminGeneralAction extends FessAdminAction {
 
     protected void updateForm(final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
-        form.incrementalCrawling = crawlerProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
+        form.incrementalCrawling = systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
         form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
-        form.crawlingThreadCount = Integer.parseInt(crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
-        form.searchLog = crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.userInfo = crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
-        form.userFavorite = crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-        form.webApiJson = crawlerProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-        form.defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
-        form.appendQueryParameter = crawlerProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
+        form.crawlingThreadCount = Integer.parseInt(systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
+        form.searchLog = systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
+        form.userInfo = systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
+        form.userFavorite = systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
+        form.webApiJson = systemProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
+        form.defaultLabelValue = systemProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+        form.appendQueryParameter = systemProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
         form.ignoreFailureType =
-                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+                systemProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
         form.popularWord = fessConfig.isWebApiPopularWord() ? Constants.TRUE : Constants.FALSE;
-        form.csvFileEncoding = crawlerProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+        form.csvFileEncoding = systemProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
         form.purgeSearchLogDay =
-                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
+                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
         form.purgeJobLogDay =
-                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
+                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
         form.purgeUserInfoDay =
-                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
-        form.purgeByBots = crawlerProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
-        form.notificationTo = crawlerProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
-        form.suggestSearchLog = crawlerProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.suggestDocuments = crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE);
+                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
+        form.purgeByBots = systemProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
+        form.notificationTo = systemProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
+        form.suggestSearchLog = systemProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
+        form.suggestDocuments = systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE);
         form.purgeSuggestSearchLogDay =
-                Integer.parseInt(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
+                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
                         Constants.DEFAULT_SUGGEST_PURGE_DAY));
-        form.ldapProviderUrl = crawlerProperties.getProperty(Constants.LDAP_PROVIDER_URL, StringUtil.EMPTY);
-        form.ldapSecurityPrincipal = crawlerProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
-        form.ldapBaseDn = crawlerProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
-        form.ldapAccountFilter = crawlerProperties.getProperty(Constants.LDAP_ACCOUNT_FILTER, StringUtil.EMPTY);
+        form.ldapProviderUrl = systemProperties.getProperty(Constants.LDAP_PROVIDER_URL, StringUtil.EMPTY);
+        form.ldapSecurityPrincipal = systemProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
+        form.ldapBaseDn = systemProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
+        form.ldapAccountFilter = systemProperties.getProperty(Constants.LDAP_ACCOUNT_FILTER, StringUtil.EMPTY);
     }
 
     private void updateProperty(final String key, final String value) {
-        crawlerProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
+        systemProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
     }
 
     private Integer getPropertyAsInteger(final String key, final int defaultValue) {
-        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
+        final String value = systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
         if (value != null) {
             try {
                 return Integer.valueOf(value);

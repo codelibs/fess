@@ -113,17 +113,17 @@ public class SuggestCreator implements Serializable {
     }
 
     private static int process(final Options options) {
-        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
 
         if (StringUtil.isNotBlank(options.propertiesPath)) {
-            crawlerProperties.reload(options.propertiesPath);
+            systemProperties.reload(options.propertiesPath);
         } else {
             try {
                 final File propFile = File.createTempFile("suggest_", ".properties");
                 if (propFile.delete() && logger.isDebugEnabled()) {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
-                crawlerProperties.reload(propFile.getAbsolutePath());
+                systemProperties.reload(propFile.getAbsolutePath());
                 propFile.deleteOnExit(); // NOSONAR
             } catch (final IOException e) {
                 logger.warn("Failed to create system properties file.", e);
@@ -140,8 +140,8 @@ public class SuggestCreator implements Serializable {
     }
 
     private int create() {
-        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
-        if (!Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
+        if (!Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
             logger.info("Skip create suggest document.");
             return 0;
         }
@@ -171,12 +171,12 @@ public class SuggestCreator implements Serializable {
 
     private int purge(final LocalDateTime time) {
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-        final DynamicProperties crawlerProperties = ComponentUtil.getSystemProperties();
+        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
 
         try {
             suggestHelper.purgeDocumentSuggest(time);
             final long cleanupDay =
-                    Long.parseLong(crawlerProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
+                    Long.parseLong(systemProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
                             Constants.DEFAULT_SUGGEST_PURGE_DAY));
             if (cleanupDay > 0) {
                 suggestHelper.purgeSearchlogSuggest(time.minusDays(cleanupDay));

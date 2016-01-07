@@ -57,7 +57,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook

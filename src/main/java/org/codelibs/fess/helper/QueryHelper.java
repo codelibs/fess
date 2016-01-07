@@ -79,7 +79,7 @@ public class QueryHelper implements Serializable {
     protected static final String INURL_FIELD = "inurl";
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     protected FessConfig fessConfig;

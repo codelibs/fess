@@ -46,7 +46,7 @@ public class FailureUrlService implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     protected FailureUrlBhv failureUrlBhv;
@@ -125,9 +125,9 @@ public class FailureUrlService implements Serializable {
     }
 
     public List<String> getExcludedUrlList(final String configId) {
-        final String failureCountStr = crawlerProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY);
+        final String failureCountStr = systemProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY);
         final String ignoreFailureType =
-                crawlerProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+                systemProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
         int failureCount = Constants.DEFAULT_FAILURE_COUNT;
         if (failureCountStr != null) {
             try {

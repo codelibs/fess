@@ -81,7 +81,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected PopularWordHelper popularWordHelper;
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     protected HttpServletRequest request;
@@ -92,8 +92,8 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
-        searchLogSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
-        favoriteSupport = Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+        searchLogSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        favoriteSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
         if (fessConfig.isWebApiPopularWord()) {
@@ -139,7 +139,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
 
         if (!labelTypeItems.isEmpty() && !fields.containsKey(FessSearchAction.LABEL_FIELD)) {
-            final String defaultLabelValue = crawlerProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+            final String defaultLabelValue = systemProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
             if (StringUtil.isNotBlank(defaultLabelValue)) {
                 final String[] values = defaultLabelValue.split("\n");
                 if (values != null && values.length > 0) {

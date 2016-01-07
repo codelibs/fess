@@ -50,7 +50,7 @@ public class DataIndexHelper implements Serializable {
     private static final String DELETE_OLD_DOCS = "delete_old_docs";
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     public DataConfigService dataConfigService;
@@ -94,7 +94,7 @@ public class DataIndexHelper implements Serializable {
 
     protected void doCrawl(final String sessionId, final List<DataConfig> configList) {
         int multiprocessCrawlingCount = 5;
-        final String value = crawlerProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
+        final String value = systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
         try {
             multiprocessCrawlingCount = Integer.parseInt(value);
         } catch (final NumberFormatException e) {

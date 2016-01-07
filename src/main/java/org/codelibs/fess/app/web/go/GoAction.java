@@ -88,7 +88,7 @@ public class GoAction extends FessSearchAction {
             return redirect(ErrorAction.class);
         }
 
-        if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+        if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
             final String userSessionId = userInfoHelper.getUserCode();
             if (userSessionId != null) {
                 final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
@@ -127,7 +127,7 @@ public class GoAction extends FessSearchAction {
         }
 
         if (isFileSystemPath(url)) {
-            if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
+            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
                     return viewHelper.asContentResponse(doc);

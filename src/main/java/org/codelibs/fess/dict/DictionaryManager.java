@@ -41,7 +41,7 @@ public class DictionaryManager {
     private static final Logger logger = LoggerFactory.getLogger(DictionaryManager.class);
 
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     protected List<DictionaryCreator> creatorList = new ArrayList<>();
 

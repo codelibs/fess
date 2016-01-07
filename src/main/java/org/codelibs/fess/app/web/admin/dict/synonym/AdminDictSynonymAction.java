@@ -60,7 +60,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook

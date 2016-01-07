@@ -72,7 +72,7 @@ public class SearchService {
     //                                                                           Attribute
     //
     @Resource
-    protected DynamicProperties crawlerProperties;
+    protected DynamicProperties systemProperties;
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -97,8 +97,7 @@ public class SearchService {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
 
         final long startTime = System.currentTimeMillis();
-        final boolean searchLogSupport =
-                Constants.TRUE.equals(crawlerProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        final boolean searchLogSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
 
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
@@ -200,7 +199,7 @@ public class SearchService {
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
         final SearchLog searchLog = new SearchLog();
 
-        if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
+        if (Constants.TRUE.equals(systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
@@ -269,7 +268,7 @@ public class SearchService {
                 langSet.remove(Constants.ALL_LANGUAGES);
             }
             return langSet.toArray(new String[langSet.size()]);
-        } else if (Constants.TRUE.equals(crawlerProperties.getProperty(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, Constants.FALSE))) {
+        } else if (Constants.TRUE.equals(systemProperties.getProperty(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, Constants.FALSE))) {
             final Set<String> langSet = new HashSet<>();
             final Enumeration<Locale> locales = request.getLocales();
             if (locales != null) {
