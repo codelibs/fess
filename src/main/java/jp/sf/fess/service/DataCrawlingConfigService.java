@@ -248,6 +248,7 @@ public class DataCrawlingConfigService extends BsDataCrawlingConfigService
         // setup condition
         cb.query().setDeletedBy_IsNull();
         cb.query().addOrderBy_SortOrder_Asc();
+        cb.query().addOrderBy_Name_Asc();
 
         // search
 
