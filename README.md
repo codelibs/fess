@@ -30,7 +30,7 @@ The release page is [HERE](https://github.com/codelibs/fess/releases "download")
     $ cd fess-10.0.x
     $ ./bin/fess
 
-For the details, see `Installation Guide <http://fess.codelibs.org/10.0/install/index.html>`__.
+For the details, see [Installation Guide](http://fess.codelibs.org/10.0/install/index.html).
 
 ### Access Fess
 
