@@ -7,15 +7,19 @@
     },
     "analysis": {
       "char_filter": {
-        "mapping_ja_cfilter": {
+        "mapping_ja_filter": {
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}ja/mapping.txt"
         }
       },
       "filter": {
-        "stemmer_en_tfilter": {
+        "stemmer_en_filter": {
           "type": "stemmer",
           "name": "english"
+        },
+        "possessive_stemmer_en_filter": {
+          "type": "stemmer",
+          "name": "possessive_english"
         }
       },
       "tokenizer": {
@@ -26,9 +30,9 @@
           "discard_punctuation": false,
           "reload_interval":"1m"
         },
-        "2gram_synonym_tokenizer": {
+        "unigram_synonym_tokenizer": {
           "type": "ngram_synonym",
-          "n": "2",
+          "n": "1",
           "synonyms_path": "${fess.dictionary.path}synonym.txt",
           "dynamic_reload":true,
           "reload_interval":"1m"
@@ -38,29 +42,37 @@
         "japanese_analyzer": {
           "type": "custom",
           "char_filter": [
-            "mapping_ja_cfilter",
+            "mapping_ja_filter",
             "kuromoji_neologd_iteration_mark"
           ],
           "tokenizer": "kuromoji_neologd_tokenizer",
           "filter": [
             "kuromoji_neologd_baseform",
             "kuromoji_neologd_stemmer",
-            "kuromoji_neologd_part_of_speech"
+            "kuromoji_neologd_part_of_speech",
+            "lowercase"
           ]
         },
         "english_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "stemmer_en_tfilter"
+            "lowercase",
+            "possessive_stemmer_en_filter"
           ]
         },
         "standard_analyzer": {
           "type": "custom",
           "char_filter": [
-            "mapping_ja_cfilter"
+            "mapping_ja_filter"
           ],
-          "tokenizer": "2gram_synonym_tokenizer"
+          "tokenizer": "unigram_synonym_tokenizer",
+          "filter": [
+            "alphanum_word",
+            "cjk_bigram",
+            "lowercase",
+            "stemmer_en_filter"
+          ]
         }
       }
     }

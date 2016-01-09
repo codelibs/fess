@@ -19,6 +19,14 @@
 			<param name="plugin.version" value="2.1.1" />
 			<param name="plugin.zip.version" value="2.1.1" />
 		</antcall>
+		<!-- analysis-ja -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name" value="analysis-ja" />
+			<param name="plugin.version" value="2.1.1-SNAPSHOT" />
+			<param name="plugin.zip.version" value="2.1.1-20160109.131004-2" />
+		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
