@@ -20,6 +20,10 @@
         "possessive_stemmer_en_filter": {
           "type": "stemmer",
           "name": "possessive_english"
+        },
+        "stopword_en_filter": {
+          "type": "stop",
+          "stopwords": "_english_"
         }
       },
       "tokenizer": {
@@ -70,6 +74,7 @@
           "filter": [
             "alphanum_word",
             "cjk_bigram",
+            "stopword_en_filter",
             "lowercase",
             "stemmer_en_filter"
           ]
