@@ -41,6 +41,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -270,6 +271,8 @@ public class QueryHelper implements Serializable {
             return convertTermQuery(context, (TermQuery) query);
         } else if (query instanceof TermRangeQuery) {
             return convertTermRangeQuery(context, (TermRangeQuery) query);
+        } else if (query instanceof PhraseQuery) {
+            return convertPhraseQuery(context, (PhraseQuery) query);
         } else if (query instanceof FuzzyQuery) {
             return convertFuzzyQuery(context, (FuzzyQuery) query);
         } else if (query instanceof PrefixQuery) {
@@ -435,6 +438,20 @@ public class QueryHelper implements Serializable {
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
         }
+    }
+
+    private QueryBuilder convertPhraseQuery(QueryContext context, PhraseQuery query) {
+        Term[] terms = query.getTerms();
+        if (terms.length == 0) {
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(ActionMessages.GLOBAL_PROPERTY_KEY),
+                    "Unknown phrase query: " + query);
+        }
+        final String field = terms[0].field();
+        final String[] texts = StreamUtil.of(terms).map(term -> term.text()).toArray(n -> new String[n]);
+        final String text = String.join(" ", texts);
+        context.addFieldLog(field, text);
+        StreamUtil.of(texts).forEach(t -> context.addHighlightedQuery(t));
+        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b));
     }
 
     private boolean isSearchField(final String field) {
