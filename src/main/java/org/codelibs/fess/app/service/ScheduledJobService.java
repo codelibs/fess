@@ -39,6 +39,7 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
+import org.lastaflute.job.subsidiary.CronOpCall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,32 +143,26 @@ public class ScheduledJobService implements Serializable {
             return;
         }
 
+        final String cronExpression;
         if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
             logger.info("Starting Job " + id + ":" + scheduledJob.getName());
-            findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
-                job.reschedule(scheduledJob.getCronExpression(), option -> option.uniqueBy(id).changeNoticeLogToDebug().params(() -> {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put(Constants.SCHEDULED_JOB, scheduledJob);
-                    return params;
-                }));
-            }).orElse(
-                    () -> {
-                        cron.register(scheduledJob.getCronExpression(), fessConfig.getSchedulerJobClassAsClass(),
-                                fessConfig.getSchedulerConcurrentExecModeAsEnum(), option -> option.uniqueBy(id).changeNoticeLogToDebug()
-                                        .params(() -> {
-                                            Map<String, Object> params = new HashMap<>();
-                                            params.put(Constants.SCHEDULED_JOB, scheduledJob);
-                                            return params;
-                                        }));
-                    });
+            cronExpression = scheduledJob.getCronExpression();
         } else {
             logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
-            try {
-                unregister(scheduledJob);
-            } catch (final Exception e) {
-                logger.debug("Failed to delete Job " + scheduledJob, e);
-            }
+            cronExpression = Constants.UNSCHEDULE_CRON_EXPRESSION;
         }
+        final CronOpCall opLambda = option -> option.uniqueBy(id).changeNoticeLogToDebug().params(() -> {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.SCHEDULED_JOB, scheduledJob);
+            return params;
+        });
+        findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
+            job.reschedule(cronExpression, opLambda);
+        }).orElse(
+                () -> {
+                    cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(),
+                            fessConfig.getSchedulerConcurrentExecModeAsEnum(), opLambda);
+                });
     }
 
     private OptionalThing<LaScheduledJob> findJobByUniqueOf(LaJobUnique jobUnique) {
@@ -182,9 +177,11 @@ public class ScheduledJobService implements Serializable {
     public void unregister(final ScheduledJob scheduledJob) {
         try {
             JobManager jobManager = ComponentUtil.getJobManager();
-            jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
-                job.unschedule();
-            }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
+            if (jobManager.isSchedulingDone()) {
+                jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
+                    job.unschedule();
+                }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
+            }
         } catch (final Exception e) {
             throw new ScheduledJobException("Failed to delete Job: " + scheduledJob, e);
         }
@@ -217,6 +214,12 @@ public class ScheduledJobService implements Serializable {
             cb.query().setAvailable_Equal(Constants.T);
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
-        }, scheduledJob -> register(cron, scheduledJob));
+        }, scheduledJob -> {
+            try {
+                register(cron, scheduledJob);
+            } catch (Exception e) {
+                logger.error("Failed to start Job " + scheduledJob.getId(), e);
+            }
+        });
     }
 }

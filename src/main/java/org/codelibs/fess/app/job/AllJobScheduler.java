@@ -27,18 +27,12 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.core.time.TimeManager;
-import org.lastaflute.di.core.exception.TooManyRegistrationComponentException;
-import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRunner;
-import org.lastaflute.job.LaJobRuntime;
 import org.lastaflute.job.LaJobScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AllJobScheduler implements LaJobScheduler {
-    private static final Logger logger = LoggerFactory.getLogger(AllJobScheduler.class);
 
     protected static final String APP_TYPE = "JOB";
 
@@ -75,25 +69,7 @@ public class AllJobScheduler implements LaJobScheduler {
 
     @Override
     public LaJobRunner createRunner() {
-        return new LaJobRunner() {
-            @Override
-            protected boolean isSuppressHotdeploy() { // TODO workaround
-                return true;
-            }
-
-            @Override
-            protected void actuallyRun(Class<? extends LaJob> jobType, LaJobRuntime runtime) { // TODO workaround
-                try {
-                    super.actuallyRun(jobType, runtime);
-                } catch (TooManyRegistrationComponentException e) {
-                    if (HotdeployUtil.isHotdeploy()) {
-                        logger.warn("Failed to start job {}", jobType);
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-        }.useAccessContext(resource -> {
+        return new LaJobRunner().useAccessContext(resource -> {
             return accessContextLogic.create(resource, () -> OptionalThing.empty(), () -> OptionalThing.empty(), () -> APP_TYPE);
         });
     }

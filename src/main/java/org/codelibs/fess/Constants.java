@@ -76,6 +76,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_HOURLY_CRON_EXPRESSION = "0 * * * *";
 
+    public static final String UNSCHEDULE_CRON_EXPRESSION = "0 0 1 1 sun";
+
     public static final int DEFAULT_INTERVAL_TIME_FOR_FS = 1000;
 
     public static final int DEFAULT_INTERVAL_TIME_FOR_WEB = 30000;
