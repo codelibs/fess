@@ -131,7 +131,7 @@ public class ScheduledJobService implements Serializable {
             try {
                 unregister(scheduledJob);
             } catch (final Exception e) {
-                // ignore
+                logger.debug("Failed to delete Job " + scheduledJob, e);
             }
             return;
         }
@@ -162,7 +162,11 @@ public class ScheduledJobService implements Serializable {
                     });
         } else {
             logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
-            unregister(scheduledJob);
+            try {
+                unregister(scheduledJob);
+            } catch (final Exception e) {
+                logger.debug("Failed to delete Job " + scheduledJob, e);
+            }
         }
     }
 
