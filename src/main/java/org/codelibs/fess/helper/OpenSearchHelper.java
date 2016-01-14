@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class OpenSearchHelper {
-    private static final Logger logger = LoggerFactory // NOPMD
-            .getLogger(OpenSearchHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenSearchHelper.class);
 
     public String osddPath;
 

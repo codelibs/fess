@@ -69,9 +69,8 @@ public class SuggestCreator implements Serializable {
         try {
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
-            System.err.println(e.getMessage()); // NOPMD
-            System.err.println("java " + Crawler.class.getCanonicalName() // NOPMD
-                    + " [options...] arguments...");
+            System.err.println(e.getMessage());
+            System.err.println("java " + Crawler.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
         }
@@ -101,7 +100,7 @@ public class SuggestCreator implements Serializable {
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
             exitCode = process(options);
-        } catch (final Throwable t) { // NOPMD
+        } catch (final Throwable t) {
             logger.error("Suggest creator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {

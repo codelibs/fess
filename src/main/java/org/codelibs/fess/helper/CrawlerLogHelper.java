@@ -28,8 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CrawlerLogHelper extends LogHelperImpl {
-    private static final Logger logger = LoggerFactory // NOPMD
-            .getLogger(CrawlerLogHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlerLogHelper.class);
 
     @Override
     public void log(final LogType key, final Object... objs) {

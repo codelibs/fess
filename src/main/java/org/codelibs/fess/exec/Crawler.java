@@ -151,9 +151,8 @@ public class Crawler implements Serializable {
         try {
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
-            System.err.println(e.getMessage()); // NOPMD
-            System.err.println("java " + Crawler.class.getCanonicalName() // NOPMD
-                    + " [options...] arguments...");
+            System.err.println(e.getMessage());
+            System.err.println("java " + Crawler.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
         }
@@ -184,7 +183,7 @@ public class Crawler implements Serializable {
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
             exitCode = process(options);
-        } catch (final Throwable t) { // NOPMD
+        } catch (final Throwable t) {
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
@@ -398,7 +397,7 @@ public class Crawler implements Serializable {
             completed = true;
 
             return exitCode;
-        } catch (final Throwable t) { // NOPMD
+        } catch (final Throwable t) {
             logger.warn("An exception occurs on the crawl task.", t);
             return Constants.EXIT_FAIL;
         } finally {

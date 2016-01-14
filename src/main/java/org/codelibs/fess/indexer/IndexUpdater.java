@@ -264,7 +264,7 @@ public class IndexUpdater extends Thread {
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished indexUpdater.");
             }
-        } catch (final Throwable t) { // NOPMD
+        } catch (final Throwable t) {
             logger.error("IndexUpdater is terminated.", t);
             forceStop();
         } finally {
