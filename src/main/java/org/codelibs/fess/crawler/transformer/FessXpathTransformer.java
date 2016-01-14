@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,7 +124,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
             final Document document = parser.getDocument();
 
-            final Map<String, Object> dataMap = new HashMap<String, Object>();
+            final Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
             for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
                 final String path = entry.getValue();
                 try {
