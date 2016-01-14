@@ -19,6 +19,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.codelibs.core.lang.StringUtil;
+import org.lastaflute.job.util.LaCronUtil;
 
 public class CronExpressionValidator implements ConstraintValidator<CronExpression, String> {
 
@@ -32,7 +33,7 @@ public class CronExpressionValidator implements ConstraintValidator<CronExpressi
     }
 
     protected boolean determineValid(final String value) {
-        if (StringUtil.isNotBlank(value) && !org.quartz.CronExpression.isValidExpression(value)) {
+        if (StringUtil.isNotBlank(value) && !LaCronUtil.isCronExpValid(value)) {
             return false;
         }
         return true;

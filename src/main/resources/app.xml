@@ -4,6 +4,7 @@
 <components>
 	<include path="convention.xml"/>
 	<include path="lastaflute.xml"/>
+	<include path="lasta_job.xml"/>
 
 	<include path="fess.xml"/>
 	<include path="fess_ldap.xml"/>

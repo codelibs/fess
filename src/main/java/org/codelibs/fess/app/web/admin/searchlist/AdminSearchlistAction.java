@@ -29,7 +29,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -66,7 +66,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected QueryHelper queryHelper;
 
     @Resource
-    protected JobHelper jobHelper;
+    protected ProcessHelper processHelper;
 
     @Resource
     protected SearchService searchService;
@@ -194,7 +194,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
         final String docId = form.docId;
-        if (jobHelper.isProcessRunning()) {
+        if (processHelper.isProcessRunning()) {
             throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
         }
         try {
@@ -211,7 +211,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse deleteall(final ListForm form) {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
-        if (jobHelper.isProcessRunning()) {
+        if (processHelper.isProcessRunning()) {
             throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
         }
         try {
@@ -227,7 +227,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     public boolean isSolrProcessRunning() {
-        return jobHelper.isProcessRunning();
+        return processHelper.isProcessRunning();
     }
 
     // ===================================================================================

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.codelibs.fess</groupId>
 	<artifactId>fess</artifactId>
@@ -40,8 +41,9 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.7.8-RC2</lastaflute.version>
+		<lastaflute.version>0.7.9-RC2</lastaflute.version>
 		<lasta.taglib.version>0.6.8</lasta.taglib.version>
+		<lasta.job.version>0.2.0-RCB</lasta.job.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
 		<mailflute.version>0.4.8</mailflute.version>
@@ -58,7 +60,7 @@
 		<utflute.version>0.6.0E</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.2</crawler.version>
+		<crawler.version>1.0.3-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.1.1</suggest.version>
@@ -75,7 +77,7 @@
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
 		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
 		<packaging.fess.conf.dir>/etc/fess</packaging.fess.conf.dir>
-        <packaging.fess.var.dir>/var/lib/fess</packaging.fess.var.dir>
+		<packaging.fess.var.dir>/var/lib/fess</packaging.fess.var.dir>
 		<packaging.fess.lib.dir>${packaging.fess.home.dir}/lib</packaging.fess.lib.dir>
 		<packaging.fess.log.dir>/var/log/fess</packaging.fess.log.dir>
 		<packaging.fess.temp.dir>/var/tmp/fess</packaging.fess.temp.dir>
@@ -95,7 +97,7 @@
 			</resource>
 		</resources>
 
-		<!-- This file contains all the common properties used to build the different
+		<!-- This file contains all the common properties used to build the different 
 			packages (tar.gz, deb, rpm) using Maven resources plugin -->
 		<filters>
 			<filter>src/packaging/common/packaging.properties</filter>
@@ -759,9 +761,9 @@
 
 		<!-- scheduler -->
 		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>2.2.2</version>
+			<groupId>org.lastaflute.job</groupId>
+			<artifactId>lasta-job</artifactId>
+			<version>${lasta.job.version}</version>
 		</dependency>
 
 		<!-- mail -->

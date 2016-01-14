@@ -16,26 +16,43 @@
 package org.codelibs.fess.app.service;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SchedulerPager;
 import org.codelibs.fess.es.config.cbean.ScheduledJobCB;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
-import org.codelibs.fess.job.JobScheduler;
+import org.codelibs.fess.job.ScheduledJobException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
+import org.lastaflute.job.JobManager;
+import org.lastaflute.job.LaCron;
+import org.lastaflute.job.LaScheduledJob;
+import org.lastaflute.job.key.LaJobUnique;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScheduledJobService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger logger = LoggerFactory.getLogger(ScheduledJobService.class);
+
     @Resource
     protected ScheduledJobBhv scheduledJobBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<ScheduledJob> getScheduledJobList(final SchedulerPager scheduledJobPager) {
 
@@ -65,9 +82,6 @@ public class ScheduledJobService implements Serializable {
 
     }
 
-    @Resource
-    protected JobScheduler jobScheduler;
-
     protected void setupListCondition(final ScheduledJobCB cb, final SchedulerPager scheduledJobPager) {
         if (scheduledJobPager.id != null) {
             cb.query().docMeta().setId_Equal(scheduledJobPager.id);
@@ -90,15 +104,12 @@ public class ScheduledJobService implements Serializable {
     }
 
     public void store(final ScheduledJob scheduledJob) {
-        final boolean isNew = scheduledJob.getId() == null;
 
         scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
             op.setRefresh(true);
         });
-        if (!isNew) {
-            jobScheduler.unregister(scheduledJob);
-        }
-        jobScheduler.register(scheduledJob);
+        JobManager jobManager = ComponentUtil.getJobManager();
+        jobManager.schedule(cron -> register(cron, scheduledJob));
     }
 
     public List<ScheduledJob> getCrawlerJobList() {
@@ -109,4 +120,99 @@ public class ScheduledJobService implements Serializable {
         });
     }
 
+    protected void register(LaCron cron, final ScheduledJob scheduledJob) {
+        if (scheduledJob == null) {
+            throw new ScheduledJobException("No job.");
+        }
+
+        final String id = scheduledJob.getId();
+        if (!Constants.T.equals(scheduledJob.getAvailable())) {
+            logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+            try {
+                unregister(scheduledJob);
+            } catch (final Exception e) {
+                // ignore
+            }
+            return;
+        }
+
+        final String target = scheduledJob.getTarget();
+        if (!isTarget(target)) {
+            logger.info("Ignore Job " + id + ":" + scheduledJob.getName() + " because of not target: " + scheduledJob.getTarget());
+            return;
+        }
+
+        if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
+            logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+            findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
+                job.reschedule(scheduledJob.getCronExpression(), option -> option.uniqueBy(id).changeNoticeLogToDebug().params(() -> {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(Constants.SCHEDULED_JOB, scheduledJob);
+                    return params;
+                }));
+            }).orElse(
+                    () -> {
+                        cron.register(scheduledJob.getCronExpression(), fessConfig.getSchedulerJobClassAsClass(),
+                                fessConfig.getSchedulerConcurrentExecModeAsEnum(), option -> option.uniqueBy(id).changeNoticeLogToDebug()
+                                        .params(() -> {
+                                            Map<String, Object> params = new HashMap<>();
+                                            params.put(Constants.SCHEDULED_JOB, scheduledJob);
+                                            return params;
+                                        }));
+                    });
+        } else {
+            logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+            unregister(scheduledJob);
+        }
+    }
+
+    private OptionalThing<LaScheduledJob> findJobByUniqueOf(LaJobUnique jobUnique) {
+        final JobManager jobManager = ComponentUtil.getJobManager();
+        try {
+            return jobManager.findJobByUniqueOf(jobUnique);
+        } catch (Exception e) {
+            return OptionalThing.empty();
+        }
+    }
+
+    public void unregister(final ScheduledJob scheduledJob) {
+        try {
+            JobManager jobManager = ComponentUtil.getJobManager();
+            jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
+                job.unschedule();
+            }).orElse(() -> logger.debug("Job {} is not scheduled.", scheduledJob.getId()));
+        } catch (final Exception e) {
+            throw new ScheduledJobException("Failed to delete Job: " + scheduledJob, e);
+        }
+    }
+
+    protected boolean isTarget(final String target) {
+        if (StringUtil.isBlank(target))
+
+        {
+            return true;
+        }
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String myName = fessConfig.getSchedulerTargetName();
+
+        final String[] targets = target.split(",");
+        for (String name : targets) {
+            name = name.trim();
+            if (Constants.DEFAULT_JOB_TARGET.equalsIgnoreCase(name)) {
+                return true;
+            } else if (StringUtil.isNotBlank(myName) && myName.equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void start(LaCron cron) {
+        scheduledJobBhv.selectCursor(cb -> {
+            cb.query().setAvailable_Equal(Constants.T);
+            cb.query().addOrderBy_SortOrder_Asc();
+            cb.query().addOrderBy_Name_Asc();
+        }, scheduledJob -> register(cron, scheduledJob));
+    }
 }

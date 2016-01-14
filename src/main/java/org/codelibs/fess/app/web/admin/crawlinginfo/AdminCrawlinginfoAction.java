@@ -22,7 +22,7 @@ import org.codelibs.fess.app.pager.CrawlingInfoPager;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
@@ -46,7 +46,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected JobHelper jobHelper;
+    protected ProcessHelper processHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -154,7 +154,7 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     @Execute
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
-        crawlingInfoService.deleteOldSessions(jobHelper.getRunningSessionIdSet());
+        crawlingInfoService.deleteOldSessions(processHelper.getRunningSessionIdSet());
         crawlingInfoPager.clear();
         saveInfo(messages -> messages.addSuccessCrawlingInfoDeleteAll(GLOBAL));
         return redirect(getClass());

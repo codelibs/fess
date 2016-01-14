@@ -33,11 +33,12 @@ import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.job.TriggeredJob;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.lastaflute.job.JobManager;
+import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -67,7 +68,7 @@ public class AdminWizardAction extends FessAdminAction {
     protected SystemHelper systemHelper;
 
     @Resource
-    protected JobHelper jobHelper;
+    protected ProcessHelper processHelper;
 
     @Resource
     protected ScheduledJobService scheduledJobService;
@@ -289,10 +290,13 @@ public class AdminWizardAction extends FessAdminAction {
     @Execute
     public HtmlResponse startCrawling(final StartCrawlingForm form) {
         verifyToken(() -> asIndexHtml());
-        if (!jobHelper.isProcessRunning()) {
+        if (!processHelper.isProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
+            JobManager jobManager = ComponentUtil.getJobManager();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
-                new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
+                jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
+                    job.launchNow();
+                });
             }
             saveInfo(messages -> messages.addSuccessStartCrawlProcess(GLOBAL));
         } else {

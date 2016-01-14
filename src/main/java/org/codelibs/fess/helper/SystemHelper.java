@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,8 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -56,6 +59,7 @@ import com.google.common.cache.LoadingCache;
 import com.ibm.icu.util.ULocale;
 
 public class SystemHelper implements Serializable {
+    private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -70,6 +74,8 @@ public class SystemHelper implements Serializable {
     private String filterPathEncoding;
 
     private String[] supportedLanguages;
+
+    private List<Runnable> shutdownHookList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -101,6 +107,17 @@ public class SystemHelper implements Serializable {
                                 return langItems;
                             }
                         });
+    }
+
+    @PreDestroy
+    public void destroy() {
+        shutdownHookList.forEach(action -> {
+            try {
+                action.run();
+            } catch (Exception e) {
+                logger.warn("Failed to process shutdown task.", e);
+            }
+        });
     }
 
     public String getUsername() {
@@ -250,6 +267,18 @@ public class SystemHelper implements Serializable {
             langItems.add(defaultMap);
             return langItems;
         }
+    }
+
+    public void sleep(int sec) {
+        try {
+            Thread.sleep(sec * 1000L);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
+
+    public void addShutdownHook(Runnable hook) {
+        shutdownHookList.add(hook);
     }
 
 }

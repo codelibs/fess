@@ -56,6 +56,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String FAIL = "fail";
 
+    public static final String STOP = "stop";
+
     public static final String ITEM_LABEL = "label";
 
     public static final String ITEM_VALUE = "value";
@@ -66,13 +68,13 @@ public class Constants extends CoreLibConstants {
 
     public static final String MS932 = "MS932";
 
-    public static final String DEFAULT_CRON_EXPRESSION = "0 0 0 * * ?";
+    public static final String DEFAULT_CRON_EXPRESSION = "0 0 * * *";
 
-    public static final String DEFAULT_SEARCH_LOG_CRON_EXPRESSION = "0 * * * * ?";
+    public static final String DEFAULT_SEARCH_LOG_CRON_EXPRESSION = "* * * * *";
 
-    public static final String DEFAULT_DAILY_CRON_EXPRESSION = "0 0 0 * * ?";
+    public static final String DEFAULT_DAILY_CRON_EXPRESSION = "0 0 * * *";
 
-    public static final String DEFAULT_HOURLY_CRON_EXPRESSION = "0 0 * * * ?";
+    public static final String DEFAULT_HOURLY_CRON_EXPRESSION = "0 * * * *";
 
     public static final int DEFAULT_INTERVAL_TIME_FOR_FS = 1000;
 
@@ -279,11 +281,8 @@ public class Constants extends CoreLibConstants {
     public static final String OPTION_QUERY_NQ = "nq";
 
     // job
-    public static final String JOB_ID_PREFIX = "job";
 
     public static final String SCHEDULED_JOB = "scheduledJob";
-
-    public static final String JOB_EXECUTOR_TYPE = "jobExecutor";
 
     public static final String DEFAULT_JOB_TARGET = "all";
 

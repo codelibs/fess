@@ -31,7 +31,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.SuggestCreator;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
@@ -122,7 +122,7 @@ public class SuggestJob {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
-        final JobHelper jobHelper = ComponentUtil.getJobHelper();
+        final ProcessHelper processHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         cmdList.add(fessConfig.getJavaCommandPath());
@@ -233,7 +233,7 @@ public class SuggestJob {
                 logger.info("SuggestCreator: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
             }
 
-            final JobProcess jobProcess = jobHelper.startProcess(sessionId, cmdList, pb -> {
+            final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
                 pb.directory(baseDir);
                 pb.redirectErrorStream(true);
             });
@@ -261,7 +261,7 @@ public class SuggestJob {
             throw new FessSystemException("SuggestCreator Process terminated.", e);
         } finally {
             try {
-                jobHelper.destroyProcess(sessionId);
+                processHelper.destroyProcess(sessionId);
             } finally {
                 if (propFile != null && !propFile.delete()) {
                     logger.warn("Failed to delete {}.", propFile.getAbsolutePath());

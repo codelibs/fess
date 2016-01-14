@@ -15,10 +15,13 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.lastaflute.job.LaJob;
+import org.lastaflute.job.subsidiary.ConcurrentExec;
 
 public interface FessProp {
 
@@ -278,6 +281,24 @@ public interface FessProp {
             return getJobTemplateTitleData();
         }
         return "None";
+    }
+
+    String getSchedulerJobClass();
+
+    public default Class<? extends LaJob> getSchedulerJobClassAsClass() {
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends LaJob> clazz = (Class<? extends LaJob>) Class.forName(getSchedulerJobClass());
+            return clazz;
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundRuntimeException(e);
+        }
+    }
+
+    String getSchedulerConcurrentExecMode();
+
+    public default ConcurrentExec getSchedulerConcurrentExecModeAsEnum() {
+        return ConcurrentExec.valueOf(getSchedulerConcurrentExecMode());
     }
 
 }

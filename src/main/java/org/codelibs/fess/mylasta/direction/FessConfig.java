@@ -384,6 +384,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String SCHEDULER_TARGET_NAME = "scheduler.target.name";
 
+    /** The key of the configuration. e.g. org.codelibs.fess.app.job.ScriptExecutorJob */
+    String SCHEDULER_JOB_CLASS = "scheduler.job.class";
+
+    /** The key of the configuration. e.g. QUIT */
+    String SCHEDULER_CONCURRENT_EXEC_MODE = "scheduler.concurrent.exec.mode";
+
     /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
     String ONLINE_HELP_BASE_LINK = "online.help.base.link";
 
@@ -1774,6 +1780,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSchedulerTargetNameAsInteger();
 
     /**
+     * Get the value for the key 'scheduler.job.class'. <br>
+     * The value is, e.g. org.codelibs.fess.app.job.ScriptExecutorJob <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSchedulerJobClass();
+
+    /**
+     * Get the value for the key 'scheduler.concurrent.exec.mode'. <br>
+     * The value is, e.g. QUIT <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSchedulerConcurrentExecMode();
+
+    /**
      * Get the value for the key 'online.help.base.link'. <br>
      * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/admin/ <br>
      * comment: ------
@@ -2832,6 +2852,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getSchedulerTargetNameAsInteger() {
             return getAsInteger(FessConfig.SCHEDULER_TARGET_NAME);
+        }
+
+        public String getSchedulerJobClass() {
+            return get(FessConfig.SCHEDULER_JOB_CLASS);
+        }
+
+        public String getSchedulerConcurrentExecMode() {
+            return get(FessConfig.SCHEDULER_CONCURRENT_EXEC_MODE);
         }
 
         public String getOnlineHelpBaseLink() {

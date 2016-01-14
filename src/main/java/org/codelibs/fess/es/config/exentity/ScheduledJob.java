@@ -15,10 +15,11 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.bsentity.BsScheduledJob;
-import org.codelibs.fess.job.TriggeredJob;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.job.key.LaJobUnique;
 
 /**
  * @author FreeGen
@@ -26,6 +27,14 @@ import org.codelibs.fess.util.ComponentUtil;
 public class ScheduledJob extends BsScheduledJob {
 
     private static final long serialVersionUID = 1L;
+
+    public String getScriptType() {
+        String st = super.getScriptType();
+        if (StringUtil.isBlank(st)) {
+            return "groovy";
+        }
+        return st;
+    }
 
     public boolean isLoggingEnabled() {
         return Constants.T.equals(getJobLogging());
@@ -40,12 +49,19 @@ public class ScheduledJob extends BsScheduledJob {
     }
 
     public boolean isRunning() {
-        return ComponentUtil.getJobHelper().getJobExecutoer(getId()) != null;
+        return ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).map(job -> job.isExecutingNow()).orElse(false);
     }
 
     public void start() {
-        final ScheduledJob scheduledJob = this;
-        new Thread(() -> new TriggeredJob().execute(scheduledJob)).start();
+        ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
+            job.launchNow();
+        });
+    }
+
+    public void stop() {
+        ComponentUtil.getJobManager().findJobByUniqueOf(LaJobUnique.of(getId())).ifPresent(job -> {
+            job.stopNow();
+        });
     }
 
     public String getId() {

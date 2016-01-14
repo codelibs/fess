@@ -32,7 +32,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exec.Crawler;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -231,7 +231,7 @@ public class CrawlJob {
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final JobHelper jobHelper = ComponentUtil.getJobHelper();
+        final ProcessHelper processHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         cmdList.add(fessConfig.getJavaCommandPath());
@@ -361,7 +361,7 @@ public class CrawlJob {
                 logger.info("Crawler: \nDirectory=" + baseDir + "\nOptions=" + cmdList);
             }
 
-            final JobProcess jobProcess = jobHelper.startProcess(sessionId, cmdList, pb -> {
+            final JobProcess jobProcess = processHelper.startProcess(sessionId, cmdList, pb -> {
                 pb.directory(baseDir);
                 pb.redirectErrorStream(true);
             });
@@ -389,7 +389,7 @@ public class CrawlJob {
             throw new FessSystemException("Crawler Process terminated.", e);
         } finally {
             try {
-                jobHelper.destroyProcess(sessionId);
+                processHelper.destroyProcess(sessionId);
             } finally {
                 if (propFile != null && !propFile.delete()) {
                     logger.warn("Failed to delete {}.", propFile.getAbsolutePath());

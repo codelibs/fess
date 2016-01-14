@@ -27,18 +27,15 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JobHelper {
-    private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
+public class ProcessHelper {
+    private static final Logger logger = LoggerFactory.getLogger(ProcessHelper.class);
 
     private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
-
-    private final ConcurrentHashMap<String, JobExecutor> runningJobExecutorMap = new ConcurrentHashMap<>();
 
     @PreDestroy
     public void destroy() {
@@ -115,18 +112,6 @@ public class JobHelper {
 
     public Set<String> getRunningSessionIdSet() {
         return runningProcessMap.keySet();
-    }
-
-    public JobExecutor startJobExecutoer(final String id, final JobExecutor jobExecutor) {
-        return runningJobExecutorMap.putIfAbsent(id, jobExecutor);
-    }
-
-    public void finishJobExecutoer(final String id) {
-        runningJobExecutorMap.remove(id);
-    }
-
-    public JobExecutor getJobExecutoer(final String id) {
-        return runningJobExecutorMap.get(id);
     }
 
 }

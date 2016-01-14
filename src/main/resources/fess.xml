@@ -18,7 +18,7 @@
 	</component>
     <component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
     </component>
-	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
+	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>

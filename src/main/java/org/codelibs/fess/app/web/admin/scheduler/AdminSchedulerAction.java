@@ -25,9 +25,8 @@ import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
-import org.codelibs.fess.helper.JobHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -53,7 +52,7 @@ public class AdminSchedulerAction extends FessAdminAction {
     @Resource
     private SystemHelper systemHelper;
     @Resource
-    protected JobHelper jobHelper;
+    protected ProcessHelper processHelper;
 
     // ===================================================================================
     //                                                                               Hook
@@ -271,8 +270,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
             try {
-                final JobExecutor jobExecutoer = jobHelper.getJobExecutoer(entity.getId());
-                jobExecutoer.shutdown();
+                entity.stop();
                 saveInfo(messages -> messages.addSuccessJobStopped(GLOBAL, entity.getName()));
             } catch (final Exception e) {
                 throwValidationError(messages -> {

@@ -30,11 +30,11 @@ import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
-import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
+import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SambaHelper;
@@ -51,6 +51,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
@@ -86,7 +87,7 @@ public final class ComponentUtil {
 
     private static final String WEB_API_MANAGER_FACTORY = "webApiManagerFactory";
 
-    private static final String JOB_HELPER = "jobHelper";
+    private static final String JOB_HELPER = "processHelper";
 
     private static final String DUPLICATE_HOST_HELPER = "duplicateHostHelper";
 
@@ -187,7 +188,7 @@ public final class ComponentUtil {
         return SingletonLaContainer.getComponent(DUPLICATE_HOST_HELPER);
     }
 
-    public static JobHelper getJobHelper() {
+    public static ProcessHelper getJobHelper() {
         return SingletonLaContainer.getComponent(JOB_HELPER);
     }
 
@@ -277,6 +278,10 @@ public final class ComponentUtil {
 
     public static RequestManager getRequestManager() {
         return SingletonLaContainer.getComponent(RequestManager.class);
+    }
+
+    public static JobManager getJobManager() {
+        return SingletonLaContainer.getComponent(JobManager.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {
