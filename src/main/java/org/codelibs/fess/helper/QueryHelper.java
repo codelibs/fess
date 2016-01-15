@@ -416,7 +416,7 @@ public class QueryHelper implements Serializable {
             }
             SortOrder sortOrder;
             if (values.length == 2) {
-                sortOrder = SortOrder.valueOf(values[1]);
+                sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1])?SortOrder.DESC:SortOrder.ASC;
                 if (sortOrder == null) {
                     throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
                             ActionMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
@@ -734,7 +734,7 @@ public class QueryHelper implements Serializable {
         if (defaultSortBuilders != null) {
             StreamUtil.of(defaultSortBuilders).forEach(builder -> list.add(builder));
         }
-        list.add(SortBuilders.fieldSort(fieldName).order(SortOrder.ASC.toString().equalsIgnoreCase(order) ? SortOrder.ASC : SortOrder.DESC));
+        list.add(SortBuilders.fieldSort(fieldName).order(SortOrder.DESC.toString().equalsIgnoreCase(order) ? SortOrder.DESC : SortOrder.ASC));
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
     }
 
