@@ -1,10 +1,26 @@
 /* Override some defaults */
+html {
+	min-height: 100%;
+	position: relative;
+}
+
 body {
 	padding-top: 70px;
+	margin-bottom: 4em;
+}
+
+footer {
+	width: 100%;
+	bottom: 0;
+	left: 0; height : 4em;
+	position: absolute;
+	border-top: 1px solid;
+	padding-top: 1em;
+	height: 4em;
 }
 
 .content {
-	min-height: 500px;
+	min-height: 100%;
 }
 
 h1, h2, h3 {
@@ -215,13 +231,19 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	right: 0;
 }
 
+.centered {
+	float: none;
+	display: inline-block;
+}
+
+#contentQuery {
+	display: inline-block;
+}
+
 /* Large desktop */
 @media ( min-width : 74.9em) {
 	.visible-phone {
 		display: none !important;
-	}
-	#contentQuery {
-		width: 500px;
 	}
 }
 
@@ -233,16 +255,10 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	.br-tablet {
 		display: block;
 	}
-	#contentQuery {
-		width: 500px;
-	}
 }
 
 /* Medium devices (tablets, less than 62em) */
 @media ( max-width : 61.9em) {
-	#contentQuery {
-		width: 500px;
-	}
 }
 
 /* Small devices (landscape phones, less than 48em) */
@@ -250,20 +266,17 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	.br-phone {
 		display: block;
 	}
-	#contentQuery {
+	.mainLogo img {
 		width: 200px;
+	}
+	.navbar-brand img {
+		width: 80px;
 	}
 	.searchFormBox {
 		margin-top: 20px;
 	}
 	#result ol {
 		margin-left: 0;
-	}
-	.popularWordBody {
-		width: 440px;
-	}
-	#result .site {
-		width: 440px;
 	}
 	#result .info {
 		display: none;
@@ -290,12 +303,6 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	}
 	.searchFormBox {
 		margin-top: 80px;
-	}
-	.popularWordBody {
-		width: 280px;
-	}
-	#result .site {
-		width: 280px;
 	}
 	#result .info {
 		display: none;
