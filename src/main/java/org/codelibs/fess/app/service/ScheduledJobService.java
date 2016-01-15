@@ -143,25 +143,38 @@ public class ScheduledJobService implements Serializable {
             return;
         }
 
-        final String cronExpression;
-        if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
-            logger.info("Starting Job " + id + ":" + scheduledJob.getName());
-            cronExpression = scheduledJob.getCronExpression();
-        } else {
-            logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
-            cronExpression = Constants.UNSCHEDULE_CRON_EXPRESSION;
-        }
         final CronOpCall opLambda = option -> option.uniqueBy(id).changeNoticeLogToDebug().params(() -> {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.SCHEDULED_JOB, scheduledJob);
             return params;
         });
         findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
-            job.reschedule(cronExpression, opLambda);
+            if (!job.isUnscheduled()) {
+                if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
+                    logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                    final String cronExpression = scheduledJob.getCronExpression();
+                    job.reschedule(cronExpression, opLambda);
+                } else {
+                    logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+                    job.becomeNonCron();
+                }
+            } else if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
+                logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                String cronExpression = scheduledJob.getCronExpression();
+                job.reschedule(cronExpression, opLambda);
+            }
         }).orElse(
                 () -> {
-                    cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(),
-                            fessConfig.getSchedulerConcurrentExecModeAsEnum(), opLambda);
+                    if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
+                        logger.info("Starting Job " + id + ":" + scheduledJob.getName());
+                        final String cronExpression = scheduledJob.getCronExpression();
+                        cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(),
+                                fessConfig.getSchedulerConcurrentExecModeAsEnum(), opLambda);
+                    } else {
+                        logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
+                        cron.registerNonCron(fessConfig.getSchedulerJobClassAsClass(), fessConfig.getSchedulerConcurrentExecModeAsEnum(),
+                                opLambda);
+                    }
                 });
     }
 
@@ -188,9 +201,7 @@ public class ScheduledJobService implements Serializable {
     }
 
     protected boolean isTarget(final String target) {
-        if (StringUtil.isBlank(target))
-
-        {
+        if (StringUtil.isBlank(target)) {
             return true;
         }
 
