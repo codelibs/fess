@@ -41,9 +41,9 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.7.9-RC5</lastaflute.version>
+		<lastaflute.version>0.7.9</lastaflute.version>
 		<lasta.taglib.version>0.6.8</lasta.taglib.version>
-		<lasta.job.version>0.2.0-RCM</lasta.job.version>
+		<lasta.job.version>0.2.0</lasta.job.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jsp.version>2.3.1</jsp.version>
 		<mailflute.version>0.4.8</mailflute.version>
@@ -785,6 +785,12 @@
 			<groupId>org.codelibs.fess</groupId>
 			<artifactId>fess-crawler-lasta</artifactId>
 			<version>${crawler.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs.fess</groupId>
