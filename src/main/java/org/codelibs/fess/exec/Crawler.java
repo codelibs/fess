@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -281,8 +280,12 @@ public class Crawler implements Serializable {
 
             try {
                 dataMap.put("hostname", InetAddress.getLocalHost().toString());
-            } catch (final UnknownHostException e) {
-                dataMap.put("hostname", "Unknown");
+            } catch (final Exception e1) {
+                try {
+                    dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
+                } catch (final Exception e2) {
+                    dataMap.put("hostname", "Unknown");
+                }
             }
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
