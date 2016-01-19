@@ -281,4 +281,14 @@ public class SystemHelper implements Serializable {
         shutdownHookList.add(hook);
     }
 
+    public String getHostname() {
+        Map<String, String> env = System.getenv();
+        if (env.containsKey("COMPUTERNAME"))
+            return env.get("COMPUTERNAME");
+        else if (env.containsKey("HOSTNAME"))
+            return env.get("HOSTNAME");
+        else
+            return "Unknown";
+    }
+
 }

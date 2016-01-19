@@ -18,7 +18,6 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -278,15 +277,7 @@ public class Crawler implements Serializable {
                 dataMap.put(StringUtil.decapitalize(entry.getKey()), entry.getValue());
             }
 
-            try {
-                dataMap.put("hostname", InetAddress.getLocalHost().toString());
-            } catch (final Exception e1) {
-                try {
-                    dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
-                } catch (final Exception e2) {
-                    dataMap.put("hostname", "Unknown");
-                }
-            }
+            dataMap.put("hostname", ComponentUtil.getSystemHelper().getHostname());
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
