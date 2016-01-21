@@ -36,23 +36,6 @@
   </filter>
 
   <filter>
-    <filter-name>authenticationFilter</filter-name>
-    <filter-class>org.codelibs.fess.filter.AdminAuthFilter</filter-class>
-    <init-param>
-      <param-name>urlPatterns</param-name>
-      <param-value>/fess/admin.*</param-value>
-    </init-param>
-    <init-param>
-      <param-name>loginPath</param-name>
-      <param-value>/fess/login/</param-value>
-    </init-param>
-    <init-param>
-      <param-name>cipherName</param-name>
-      <param-value>authenticationCipher</param-value>
-    </init-param>
-  </filter>
-
-  <filter>
     <filter-name>webApiFilter</filter-name>
     <filter-class>org.codelibs.fess.filter.WebApiFilter</filter-class>
   </filter>
@@ -152,13 +135,6 @@
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
-
-<!-- TODO
-  <filter-mapping>
-    <filter-name>authenticationFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
- -->
 
   <filter-mapping>
     <filter-name>webApiFilter</filter-name>
