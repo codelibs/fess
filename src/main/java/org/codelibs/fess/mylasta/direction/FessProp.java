@@ -15,8 +15,15 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
+import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
@@ -24,6 +31,12 @@ import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 
 public interface FessProp {
+
+    public static final String CRAWLER_METADATA_NAME_MAPPING = "crawlerMetadataNameMapping";
+
+    public static final String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawlerMetadataContentExcludes";
+
+    public static final Map<String, Object> propMap = new ConcurrentHashMap<>();
 
     //
     // system.properties
@@ -301,4 +314,39 @@ public interface FessProp {
         return ConcurrentExec.valueOf(getSchedulerConcurrentExecMode());
     }
 
+    String getCrawlerMetadataContentExcludes();
+
+    public default boolean isCrawlerMetadataContentIncluded(String name) {
+        Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
+        if (patterns == null) {
+            patterns =
+                    StreamUtil.of(getCrawlerMetadataContentExcludes().split(",")).filter(v -> StringUtil.isNotBlank(v))
+                            .map(v -> Pattern.compile(v)).toArray(n -> new Pattern[n]);
+            propMap.put(CRAWLER_METADATA_CONTENT_EXCLUDES, patterns);
+        }
+        return !StreamUtil.of(patterns).anyMatch(p -> p.matcher(name).matches());
+    }
+
+    String getCrawlerMetadataNameMapping();
+
+    public default Pair<String, String> getCrawlerMetadataNameMapping(String name) {
+        @SuppressWarnings("unchecked")
+        Map<String, Pair<String, String>> params = (Map<String, Pair<String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
+        if (params == null) {
+            params = StreamUtil.of(getCrawlerMetadataNameMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
+                String[] values = v.split("=");
+                if (values.length == 2) {
+                    String[] subValues = values[1].split(":");
+                    if (subValues.length == 2) {
+                        return new Tuple3<String, String, String>(values[0], subValues[0], subValues[1]);
+                    } else {
+                        return new Tuple3<String, String, String>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
+                    }
+                }
+                return null;
+            }).collect(Collectors.toMap(Tuple3::getValue1, d -> new Pair<>(d.getValue2(), d.getValue3())));
+            propMap.put(CRAWLER_METADATA_NAME_MAPPING, params);
+        }
+        return params.get(name);
+    }
 }

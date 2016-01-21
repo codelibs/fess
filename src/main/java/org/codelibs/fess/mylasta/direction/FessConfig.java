@@ -120,6 +120,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_APPEND_DATA = "crawler.document.append.data";
 
+    /** The key of the configuration. e.g. UTF-8 */
+    String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
+
+    /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
+    String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
+
+    /** The key of the configuration. e.g. title=title:string
+    Title=title:string
+    */
+    String CRAWLER_METADATA_NAME_MAPPING = "crawler.metadata.name.mapping";
+
     /** The key of the configuration. e.g. //BODY */
     String CRAWLER_DOCUMENT_HTML_CONTENT_XPATH = "crawler.document.html.content.xpath";
 
@@ -792,6 +803,29 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentAppendData();
+
+    /**
+     * Get the value for the key 'crawler.crawling.data.encoding'. <br>
+     * The value is, e.g. UTF-8 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerCrawlingDataEncoding();
+
+    /**
+     * Get the value for the key 'crawler.metadata.content.excludes'. <br>
+     * The value is, e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerMetadataContentExcludes();
+
+    /**
+     * Get the value for the key 'crawler.metadata.name.mapping'. <br>
+     * The value is, e.g. title=title:string
+    Title=title:string
+    <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerMetadataNameMapping();
 
     /**
      * Get the value for the key 'crawler.document.html.content.xpath'. <br>
@@ -2328,6 +2362,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentAppendData() {
             return is(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
+        }
+
+        public String getCrawlerCrawlingDataEncoding() {
+            return get(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING);
+        }
+
+        public String getCrawlerMetadataContentExcludes() {
+            return get(FessConfig.CRAWLER_METADATA_CONTENT_EXCLUDES);
+        }
+
+        public String getCrawlerMetadataNameMapping() {
+            return get(FessConfig.CRAWLER_METADATA_NAME_MAPPING);
         }
 
         public String getCrawlerDocumentHtmlContentXpath() {

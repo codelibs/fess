@@ -34,6 +34,7 @@ import org.apache.tika.metadata.TikaMetadataKeys;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.crawler.entity.AccessResult;
@@ -58,13 +59,15 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jcifs.smb.ACE;
 import jcifs.smb.SID;
 
 public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
 
-    protected String charsetName = Constants.UTF_8;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractFessFileTransformer.class);
 
     public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
@@ -101,29 +104,46 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                 getLogger().debug("ExtractData: " + extractData);
             }
             // meta
-            for (final String key : extractData.getKeySet()) {
-                final String[] values = extractData.getValues(key);
-                if (values != null) {
-                    metaDataMap.put(key, values);
-                    if (contentMetaBuf.length() > 0) {
-                        contentMetaBuf.append(' ');
-                    }
-                    final String joinValue = StringUtils.join(values, ' ');
-                    if (StringUtil.isNotBlank(joinValue)) {
-                        contentMetaBuf.append(joinValue);
-                        if (metaContentMapping != null) {
-                            final String dynamicField = metaContentMapping.get(key);
-                            if (StringUtil.isNotBlank(dynamicField)) {
-                                if (dynamicField.endsWith("_m")) {
-                                    dataMap.put(dynamicField, values);
-                                } else {
-                                    dataMap.put(dynamicField, joinValue);
+            extractData.getKeySet().stream()//
+                    .filter(k -> extractData.getValues(k) != null)//
+                    .forEach(key -> {
+                        final String[] values = extractData.getValues(key);
+                        metaDataMap.put(key, values);
+
+                        // meta -> content
+                            if (fessConfig.isCrawlerMetadataContentIncluded(key)) {
+                                final String joinedValue = StringUtils.join(values, ' ');
+                                if (StringUtil.isNotBlank(joinedValue)) {
+                                    if (contentMetaBuf.length() > 0) {
+                                        contentMetaBuf.append(' ');
+                                    }
+                                    contentMetaBuf.append(joinedValue.trim());
                                 }
                             }
-                        }
-                    }
-                }
-            }
+
+                            Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
+                            if (mapping != null) {
+                                if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getSecond())) {
+                                    dataMap.put(mapping.getFirst(), values);
+                                } else if (Constants.MAPPING_TYPE_STRING.equalsIgnoreCase(mapping.getSecond())) {
+                                    final String joinedValue = StringUtils.join(values, ' ');
+                                    dataMap.put(mapping.getFirst(), joinedValue.trim());
+                                } else if (values.length == 1) {
+                                    try {
+                                        if (Constants.MAPPING_TYPE_LONG.equalsIgnoreCase(mapping.getSecond())) {
+                                            dataMap.put(mapping.getFirst(), Long.parseLong(values[0]));
+                                        } else if (Constants.MAPPING_TYPE_DOUBLE.equalsIgnoreCase(mapping.getSecond())) {
+                                            dataMap.put(mapping.getFirst(), Double.parseDouble(values[0]));
+                                        } else {
+                                            logger.warn("Unknown mapping type: {}={}", key, mapping);
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        logger.warn("Failed to parse " + values[0], e);
+                                    }
+                                }
+                            }
+
+                        });
         } catch (final Exception e) {
             final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
             rcae.setLogLevel(CrawlingAccessException.WARN);
@@ -321,7 +341,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         } catch (final Exception e) {
             throw new CrawlingAccessException("Could not serialize object: " + url, e);
         }
-        resultData.setEncoding(charsetName);
+        resultData.setEncoding(fessConfig.getCrawlerCrawlingDataEncoding());
 
         return resultData;
     }

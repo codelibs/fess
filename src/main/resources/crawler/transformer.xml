@@ -24,39 +24,9 @@
 
 	<component name="fessFileTransformer" class="org.codelibs.fess.crawler.transformer.FessFileTransformer" instance="singleton">
 		<property name="name">"fessFileTransformer"</property>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"title"</arg>
-			<arg>"title"</arg>
-		</postConstruct>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"Title"</arg>
-			<arg>"title"</arg>
-		</postConstruct>
-		<!-- 
-		<property name="ignoreEmptyContent">false</property>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"Author"</arg>
-			<arg>"author_t"</arg>
-		</postConstruct>
-		 -->
 	</component>
 
 	<component name="fessTikaTransformer" class="org.codelibs.fess.crawler.transformer.FessTikaTransformer" instance="singleton">
 		<property name="name">"fessTikaTransformer"</property>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"title"</arg>
-			<arg>"title"</arg>
-		</postConstruct>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"Title"</arg>
-			<arg>"title"</arg>
-		</postConstruct>
-		<!-- 
-		<property name="ignoreEmptyContent">false</property>
-		<postConstruct name="addMetaContentMapping">
-			<arg>"Author"</arg>
-			<arg>"author_t"</arg>
-		</postConstruct>
-		 -->
 	</component>
 </components>

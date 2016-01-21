@@ -361,4 +361,12 @@ public class Constants extends CoreLibConstants {
     public static final String LDAP_INITIAL_CONTEXT_FACTORY = "ldap.initial.context.factory";
 
     public static final String LDAP_ACCOUNT_FILTER = "ldap.account.filter";
+
+    public static final String MAPPING_TYPE_ARRAY = "array";
+
+    public static final String MAPPING_TYPE_STRING = "string";
+
+    public static final String MAPPING_TYPE_LONG = "long";
+
+    public static final String MAPPING_TYPE_DOUBLE = "double";
 }
