@@ -397,12 +397,6 @@
 						<require>elasticsearch &gt;= ${elasticsearch.version}</require>
 					</requires>
 					<mappings>
-						<!-- fess home -->
-						<mapping>
-							<directory>${packaging.fess.home.dir}</directory>
-							<directoryIncluded>true</directoryIncluded>
-							<recurseDirectories>true</recurseDirectories>
-						</mapping>
 						<!-- app -->
 						<mapping>
 							<directory>${packaging.fess.app.dir}</directory>
@@ -439,6 +433,7 @@
 						</mapping>
 						<mapping>
 							<directory>${packaging.fess.conf.dir}</directory>
+							<configuration>noreplace</configuration>
 							<sources>
 								<source>
 									<location>${project.basedir}/src/main/assemblies/files</location>
