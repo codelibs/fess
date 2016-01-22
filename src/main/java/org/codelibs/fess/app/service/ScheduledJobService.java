@@ -39,7 +39,7 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaScheduledJob;
 import org.lastaflute.job.key.LaJobUnique;
-import org.lastaflute.job.subsidiary.CronOpCall;
+import org.lastaflute.job.subsidiary.CronParamsSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,17 +143,17 @@ public class ScheduledJobService implements Serializable {
             return;
         }
 
-        final CronOpCall opLambda = option -> option.uniqueBy(id).changeNoticeLogToDebug().params(() -> {
+        final CronParamsSupplier paramsOp = () -> {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.SCHEDULED_JOB, scheduledJob);
             return params;
-        });
+        };
         findJobByUniqueOf(LaJobUnique.of(id)).ifPresent(job -> {
             if (!job.isUnscheduled()) {
                 if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
                     logger.info("Starting Job " + id + ":" + scheduledJob.getName());
                     final String cronExpression = scheduledJob.getCronExpression();
-                    job.reschedule(cronExpression, opLambda);
+                    job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
                 } else {
                     logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
                     job.becomeNonCron();
@@ -161,7 +161,7 @@ public class ScheduledJobService implements Serializable {
             } else if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
                 logger.info("Starting Job " + id + ":" + scheduledJob.getName());
                 String cronExpression = scheduledJob.getCronExpression();
-                job.reschedule(cronExpression, opLambda);
+                job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
             }
         }).orElse(
                 () -> {
@@ -169,11 +169,12 @@ public class ScheduledJobService implements Serializable {
                         logger.info("Starting Job " + id + ":" + scheduledJob.getName());
                         final String cronExpression = scheduledJob.getCronExpression();
                         cron.register(cronExpression, fessConfig.getSchedulerJobClassAsClass(),
-                                fessConfig.getSchedulerConcurrentExecModeAsEnum(), opLambda);
+                                fessConfig.getSchedulerConcurrentExecModeAsEnum(),
+                                op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
                     } else {
                         logger.info("Inactive Job " + id + ":" + scheduledJob.getName());
                         cron.registerNonCron(fessConfig.getSchedulerJobClassAsClass(), fessConfig.getSchedulerConcurrentExecModeAsEnum(),
-                                opLambda);
+                                op -> op.uniqueBy(id).changeNoticeLogToDebug().params(paramsOp));
                     }
                 });
     }
