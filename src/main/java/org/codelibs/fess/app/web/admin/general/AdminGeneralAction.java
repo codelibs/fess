@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,11 +86,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
         final String[] toAddresses = form.notificationTo.split(",");
         final Map<String, Object> dataMap = new HashMap<String, Object>();
-        try {
-            dataMap.put("hostname", InetAddress.getLocalHost().getHostAddress());
-        } catch (final UnknownHostException e) {
-            dataMap.put("hostname", "UNKNOWN");
-        }
+        dataMap.put("hostname", systemHelper.getHostname());
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
