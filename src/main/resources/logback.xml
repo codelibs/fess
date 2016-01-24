@@ -8,7 +8,7 @@
 	<property name="log.file.basedir" value="${fess.log.path:-target/logs}" />
 	<property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
 	<property name="backup.max.history" value="90" />
-	<property name="audit.log.pattern" value="%d %msg%n" />
+	<property name="audit.log.pattern" value="%msg%n" />
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>

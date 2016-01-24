@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.login;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ActivityUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
@@ -51,11 +52,12 @@ public class LoginAction extends FessSearchAction {
             form.clearSecurityInfo();
             return asHtml(path_Login_IndexJsp);
         });
-        final String email = form.username;
+        final String username = form.username;
         final String password = form.password;
         form.clearSecurityInfo();
+        ActivityUtil.login(username);
         try {
-            return fessLoginAssist.loginRedirect(email, password, op -> {}, () -> getHtmlResponse());
+            return fessLoginAssist.loginRedirect(username, password, op -> {}, () -> getHtmlResponse());
         } catch (final LoginFailureException lfe) {
             throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> {
                 return asHtml(path_Login_IndexJsp);

@@ -15,9 +15,14 @@
  */
 package org.codelibs.fess.util;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,30 +31,63 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ActivityUtil {
-    private static Logger logger = LoggerFactory.getLogger("activity");
+    private static Logger logger = LoggerFactory.getLogger("fess.log.audit");
 
-    public static void login(final String username, final HttpServletRequest request) {
-        log(Action.LOGIN, username + ' ' + getRemoteAddr(request));
+    public static void login(final String username) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.LOGIN);
+        buf.append('\t');
+        buf.append("user:");
+        buf.append(username);
+        log(buf);
     }
 
-    public static void logout(final String username, final HttpServletRequest request) {
-        log(Action.LOGOUT, username + ' ' + getRemoteAddr(request));
+    public static void logout(final String username) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.LOGOUT);
+        buf.append('\t');
+        buf.append("user:");
+        buf.append(username);
+        log(buf);
     }
 
-    public static void access(final String username, final HttpServletRequest request) {
-        log(Action.ACCESS, username + ' ' + getRemoteAddr(request) + ' ' + request.getRequestURL());
+    public static void access(final String username, final String path, final String execute) {
+        final StringBuilder buf = new StringBuilder(100);
+        buf.append("action:");
+        buf.append(Action.ACCESS);
+        buf.append('\t');
+        buf.append("user:");
+        buf.append(username);
+        buf.append('\t');
+        buf.append("path:");
+        buf.append(path);
+        buf.append('\t');
+        buf.append("execute:");
+        buf.append(execute);
+        log(buf);
     }
 
-    protected static void log(final Action action, final String msg) {
-        logger.info("[" + action + "] " + msg);
+    private static void log(final StringBuilder buf) {
+        buf.append('\t');
+        buf.append("ip:");
+        buf.append(getClientIp());
+        buf.append('\t');
+        buf.append("time:");
+        buf.append(DateTimeFormatter.ISO_INSTANT.format(ZonedDateTime.now()));
+        logger.info(buf.toString());
     }
 
-    protected static String getRemoteAddr(final HttpServletRequest request) {
-        final String clientIp = request.getHeader("x-forwarded-for");
-        if (StringUtil.isNotBlank(clientIp)) {
-            return clientIp;
-        }
-        return request.getRemoteAddr();
+    protected static String getClientIp() {
+        return LaRequestUtil.getOptionalRequest().map(req -> {
+            final String value = req.getHeader("x-forwarded-for");
+            if (StringUtil.isNotBlank(value)) {
+                return value;
+            } else {
+                return req.getRemoteAddr();
+            }
+        }).orElse("-");
     }
 
     protected enum Action {

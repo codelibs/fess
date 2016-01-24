@@ -23,6 +23,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
+import org.codelibs.fess.util.ActivityUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
@@ -38,8 +39,6 @@ import org.slf4j.LoggerFactory;
  * @author jflute
  */
 public abstract class FessAdminAction extends FessBaseAction {
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("fess.log.audit");
 
     // ===================================================================================
     //                                                                           Attribute
@@ -102,18 +101,10 @@ public abstract class FessAdminAction extends FessBaseAction {
 
     @Override
     public ActionResponse hookBefore(ActionRuntime runtime) {
-        final String client = LaRequestUtil.getOptionalRequest().map(req -> {
-            final String value = req.getHeader("x-forwarded-for");
-            if (StringUtil.isNotBlank(value)) {
-                return value;
-            } else {
-                return req.getRemoteAddr();
-            }
-        }).orElse("-");
         final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
         final String requestPath = runtime.getRequestPath();
         final String executeName = runtime.getExecuteMethod().getName();
-        auditLogger.info("{} {} {} {}", client, username, requestPath, executeName);
+        ActivityUtil.access(username, requestPath, executeName);
         return super.hookBefore(runtime);
     }
 
