@@ -21,19 +21,25 @@ import javax.servlet.ServletContext;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author codelibs
  * @author jflute
  */
 public abstract class FessAdminAction extends FessBaseAction {
+
+    private static final Logger auditLogger = LoggerFactory.getLogger("fess.log.audit");
 
     // ===================================================================================
     //                                                                           Attribute
@@ -92,6 +98,28 @@ public abstract class FessAdminAction extends FessBaseAction {
         } catch (final UserRoleLoginException e) {
             return redirect(e.getActionClass());
         }
+    }
+
+    @Override
+    public ActionResponse hookBefore(ActionRuntime runtime) {
+        final String client = LaRequestUtil.getOptionalRequest().map(req -> {
+            final String value = req.getHeader("x-forwarded-for");
+            if (StringUtil.isNotBlank(value)) {
+                return value;
+            } else {
+                return req.getRemoteAddr();
+            }
+        }).orElse("-");
+        final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
+        final String requestPath = runtime.getRequestPath();
+        final String executeName = runtime.getExecuteMethod().getName();
+        auditLogger.info("{} {} {} {}", client, username, requestPath, executeName);
+        return super.hookBefore(runtime);
+    }
+
+    @Override
+    public void hookFinally(ActionRuntime runtime) {
+        super.hookFinally(runtime);
     }
 
 }

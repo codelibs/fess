@@ -7,7 +7,7 @@
 	<!-- <property name="log.pattern" value="%d [%t] %-5p \\(%C{0}@%M\\(\\):%L\\) - %msg%n" /> -->
 	<property name="log.file.basedir" value="${fess.log.path:-target/logs}" />
 	<property name="backup.date.suffix" value="_%d{yyyyMMdd}" />
-	<property name="backup.max.history" value="180" />
+	<property name="backup.max.history" value="90" />
 	<property name="audit.log.pattern" value="%d %msg%n" />
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
@@ -37,19 +37,6 @@
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${log.file.basedir}/backup/audit${backup.date.suffix}.log
-			</fileNamePattern>
-			<maxHistory>${backup.max.history}</maxHistory>
-		</rollingPolicy>
-	</appender>
-	<appender name="mailfile"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>${log.file.basedir}/mail.log</File>
-		<Append>true</Append>
-		<encoder>
-			<pattern>${log.pattern}</pattern>
-		</encoder>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${log.file.basedir}/backup/mail${backup.date.suffix}.log
 			</fileNamePattern>
 			<maxHistory>${backup.max.history}</maxHistory>
 		</rollingPolicy>
