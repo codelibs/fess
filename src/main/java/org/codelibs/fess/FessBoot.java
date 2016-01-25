@@ -82,7 +82,7 @@ public class FessBoot extends TomcatBoot {
             if (fessLogPath == null) {
                 fessLogPath = "../../logs";
             }
-            op.replace("fess.log.path", fessLogPath);
+            op.replace("fess.log.path", fessLogPath.replace("\\", "/"));
         }) // uses jdk14logger
                 .asDevelopment(isNoneEnv()).bootAwait();
     }
