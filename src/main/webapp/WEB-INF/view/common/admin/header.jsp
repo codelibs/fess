@@ -1,16 +1,15 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <!-- Main Header -->
 <header class="main-header">
-
 	<!-- Logo -->
 	<la:link href="/admin/" styleClass="logo">
-		<span class="logo-mini"><b><la:message
-					key="labels.admin_brand_title" /></b></span>
-		<span class="logo-lg"><b><la:message
-					key="labels.admin_brand_title" /></b> <la:message
-				key="labels.admin_dashboard_title" /></span>
+		<span class="logo-mini"><img
+			src="${f:url('/images/logo-head.png')}"
+			alt="<la:message key="labels.header_brand_name" />" /></span>
+		<span class="logo-lg"><img
+			src="${f:url('/images/logo-head.png')}"
+			alt="<la:message key="labels.header_brand_name" />" /></span>
 	</la:link>
-
 	<!-- Header Navbar -->
 	<nav class="navbar navbar-static-top" role="navigation">
 		<!-- Sidebar toggle button-->
@@ -21,7 +20,8 @@
 		<!-- Navbar Right Menu -->
 		<div class="navbar-custom-menu">
 			<ul class="nav navbar-nav">
-				<li><a href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
+				<li><a
+					href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
 						class="fa fa-play-circle"></i></a></li>
 				<li><a href="${helpLink}" target="_olh"><i
 						class="fa fa-question-circle"></i></a></li>
