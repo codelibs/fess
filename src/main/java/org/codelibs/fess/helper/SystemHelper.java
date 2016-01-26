@@ -18,7 +18,9 @@ package org.codelibs.fess.helper;
 import java.io.File;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -283,12 +285,17 @@ public class SystemHelper implements Serializable {
 
     public String getHostname() {
         Map<String, String> env = System.getenv();
-        if (env.containsKey("COMPUTERNAME"))
+        if (env.containsKey("COMPUTERNAME")) {
             return env.get("COMPUTERNAME");
-        else if (env.containsKey("HOSTNAME"))
+        } else if (env.containsKey("HOSTNAME")) {
             return env.get("HOSTNAME");
-        else
-            return "Unknown";
+        }
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            logger.debug("Unknown hostname.", e);
+        }
+        return "Unknown";
     }
 
 }
