@@ -156,21 +156,21 @@ public class JsonApiManager extends BaseApiManager {
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
-            buf.append(",\"execTime\":");
+            buf.append(",\"exec_time\":");
             buf.append(execTime);
-            buf.append(",\"queryTime\":");
+            buf.append(",\"query_time\":");
             buf.append(queryTime);
             buf.append(',');
-            buf.append("\"pageSize\":");
+            buf.append("\"page_size\":");
             buf.append(pageSize);
             buf.append(',');
-            buf.append("\"pageNumber\":");
+            buf.append("\"page_number\":");
             buf.append(currentPageNumber);
             buf.append(',');
-            buf.append("\"recordCount\":");
+            buf.append("\"record_count\":");
             buf.append(allRecordCount);
             buf.append(',');
-            buf.append("\"pageCount\":");
+            buf.append("\"page_count\":");
             buf.append(allPageCount);
             if (!documentItems.isEmpty()) {
                 buf.append(',');
@@ -206,7 +206,7 @@ public class JsonApiManager extends BaseApiManager {
                 // facet field
                 if (facetResponse.getFieldList() != null) {
                     buf.append(',');
-                    buf.append("\"facetField\":[");
+                    buf.append("\"facet_field\":[");
                     boolean first1 = true;
                     for (final Field field : facetResponse.getFieldList()) {
                         if (!first1) {
@@ -238,7 +238,7 @@ public class JsonApiManager extends BaseApiManager {
                 // facet q
                 if (facetResponse.getQueryCountMap() != null) {
                     buf.append(',');
-                    buf.append("\"facetQuery\":[");
+                    buf.append("\"facet_query\":[");
                     boolean first1 = true;
                     for (final Map.Entry<String, Long> entry : facetResponse.getQueryCountMap().entrySet()) {
                         if (!first1) {
@@ -278,7 +278,7 @@ public class JsonApiManager extends BaseApiManager {
         final StringBuilder buf = new StringBuilder(255);
         try {
             final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
-            buf.append("\"recordCount\":");
+            buf.append("\"record_count\":");
             buf.append(labelTypeItems.size());
             if (!labelTypeItems.isEmpty()) {
                 buf.append(',');
@@ -492,7 +492,7 @@ public class JsonApiManager extends BaseApiManager {
             final StringBuilder buf = new StringBuilder();
             buf.append("\"num\":").append(docIdList.size());
             if (!docIdList.isEmpty()) {
-                buf.append(", \"docIds\":[");
+                buf.append(", \"doc_ids\":[");
                 for (int i = 0; i < docIdList.size(); i++) {
                     if (i > 0) {
                         buf.append(',');
@@ -698,7 +698,6 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            // TODO Auto-generated method stub
             return Collections.emptyMap();
         }
 
@@ -709,13 +708,11 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public GeoInfo getGeoInfo() {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public FacetInfo getFacetInfo() {
-            // TODO Auto-generated method stub
             return null;
         }
 

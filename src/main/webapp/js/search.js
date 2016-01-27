@@ -127,7 +127,7 @@ $(function() {
 					if (data.response.status === 0
 							&& typeof data.response.num !== 'undefined'
 							&& data.response.num > 0) {
-						var docIds = data.response.docIds;
+						var docIds = data.response.doc_ids;
 						for (var i = 0; i < docIds.length; i++) {
 							docIds[i] = '#' + docIds[i];
 						}
