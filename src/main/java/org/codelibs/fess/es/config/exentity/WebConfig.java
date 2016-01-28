@@ -34,6 +34,7 @@ import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.ListResultBean;
@@ -83,10 +84,12 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         if (labelTypeList == null) {
             synchronized (this) {
                 if (labelTypeList == null) {
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final WebConfigToLabelBhv webConfigToLabelBhv = ComponentUtil.getComponent(WebConfigToLabelBhv.class);
                     final ListResultBean<WebConfigToLabel> mappingList = webConfigToLabelBhv.selectList(cb -> {
                         cb.query().setWebConfigId_Equal(getId());
                         cb.specify().columnLabelTypeId();
+                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
                     });
                     final List<String> labelIdList = new ArrayList<>();
                     for (final WebConfigToLabel mapping : mappingList) {
@@ -131,10 +134,12 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         if (roleTypeList == null) {
             synchronized (this) {
                 if (roleTypeList == null) {
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final WebConfigToRoleBhv webConfigToRoleBhv = ComponentUtil.getComponent(WebConfigToRoleBhv.class);
                     final ListResultBean<WebConfigToRole> mappingList = webConfigToRoleBhv.selectList(cb -> {
                         cb.query().setWebConfigId_Equal(getId());
                         cb.specify().columnRoleTypeId();
+                        cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
                     });
                     final List<String> roleIdList = new ArrayList<>();
                     for (final WebConfigToRole mapping : mappingList) {

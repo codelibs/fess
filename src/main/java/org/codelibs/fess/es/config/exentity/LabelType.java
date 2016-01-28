@@ -23,6 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsLabelType;
 import org.codelibs.fess.es.config.exbhv.LabelToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 
@@ -51,10 +52,12 @@ public class LabelType extends BsLabelType {
         if (roleTypeList == null) {
             synchronized (this) {
                 if (roleTypeList == null) {
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final LabelToRoleBhv labelToRoleBhv = ComponentUtil.getComponent(LabelToRoleBhv.class);
                     final ListResultBean<LabelToRole> mappingList = labelToRoleBhv.selectList(cb -> {
                         cb.query().setLabelTypeId_Equal(getId());
                         cb.specify().columnRoleTypeId();
+                        cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
                     });
                     final List<String> roleIdList = new ArrayList<>();
                     for (final LabelToRole mapping : mappingList) {

@@ -23,6 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsElevateWord;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 
@@ -55,10 +56,12 @@ public class ElevateWord extends BsElevateWord {
         if (labelTypeList == null) {
             synchronized (this) {
                 if (labelTypeList == null) {
+                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     final WebConfigToLabelBhv webConfigToLabelBhv = ComponentUtil.getComponent(WebConfigToLabelBhv.class);
                     final ListResultBean<WebConfigToLabel> mappingList = webConfigToLabelBhv.selectList(cb -> {
                         cb.query().setWebConfigId_Equal(getId());
                         cb.specify().columnLabelTypeId();
+                        cb.paging(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger().intValue(), 1);
                     });
                     final List<String> labelIdList = new ArrayList<>();
                     for (final WebConfigToLabel mapping : mappingList) {
