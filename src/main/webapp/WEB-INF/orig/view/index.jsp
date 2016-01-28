@@ -14,8 +14,8 @@
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
-<link href="${f:url('/css/font-awesome.min.css')}"
-	rel="stylesheet" type="text/css" />
+<link href="${f:url('/css/font-awesome.min.css')}" rel="stylesheet"
+	type="text/css" />
 </head>
 <body>
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
@@ -63,15 +63,15 @@
 					styleId="searchForm">
 					${fe:facetForm()}${fe:geoForm()}
 					<fieldset>
-						<div class="clearfix">
-							<div class="input">
+						<div class="cleafix">
+							<div class="centered col-lg-5 col-md-6 col-sm-6 col-xs-8">
 								<la:text styleClass="query form-control center-block"
-									property="q" size="50" maxlength="1000"
-									styleId="contentQuery" autocomplete="off" />
+									property="q" size="50" maxlength="1000" styleId="contentQuery"
+									autocomplete="off" />
 							</div>
 						</div>
 						<c:if test="${!empty popularWords}">
-							<div>
+							<div class="clearfix">
 								<p class="popularWordBody ellipsis">
 									<la:message key="labels.search_popular_word_word" />
 									<c:forEach var="item" items="${popularWords}">
@@ -148,7 +148,8 @@
 													key="labels.search_result_sort_content_length_desc" />
 											</la:option>
 											<la:option value="last_modified.asc">
-												<la:message key="labels.search_result_sort_last_modified_asc" />
+												<la:message
+													key="labels.search_result_sort_last_modified_asc" />
 											</la:option>
 											<la:option value="last_modified.desc">
 												<la:message
@@ -159,7 +160,8 @@
 													<la:message key="labels.search_result_sort_click_count_asc" />
 												</la:option>
 												<la:option value="click_count.desc">
-													<la:message key="labels.search_result_sort_click_count_desc" />
+													<la:message
+														key="labels.search_result_sort_click_count_desc" />
 												</la:option>
 											</c:if>
 											<c:if test="${favoriteSupport}">
