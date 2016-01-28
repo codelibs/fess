@@ -58,7 +58,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     @Override
-    public OptionalEntity<SynonymItem> get(final long id) {
+    public synchronized OptionalEntity<SynonymItem> get(final long id) {
         if (synonymItemList == null) {
             reload(null, null);
         }
@@ -254,7 +254,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
-    public void update(final InputStream in) throws IOException {
+    public synchronized void update(final InputStream in) throws IOException {
         try (SynonymUpdater updater = new SynonymUpdater(null)) {
             reload(updater, in);
         }

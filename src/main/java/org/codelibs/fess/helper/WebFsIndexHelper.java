@@ -223,14 +223,12 @@ public class WebFsIndexHelper implements Serializable {
 
             // failure url
             final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
-            if (excludedUrlList != null) {
-                for (final String u : excludedUrlList) {
-                    if (StringUtil.isNotBlank(u)) {
-                        final String urlValue = u.trim();
-                        crawler.addExcludeFilter(urlValue);
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Excluded URL from failures: " + urlValue);
-                        }
+            for (final String u : excludedUrlList) {
+                if (StringUtil.isNotBlank(u)) {
+                    final String urlValue = u.trim();
+                    crawler.addExcludeFilter(urlValue);
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Excluded URL from failures: " + urlValue);
                     }
                 }
             }

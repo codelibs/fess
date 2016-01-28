@@ -59,7 +59,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     }
 
     @Override
-    public OptionalEntity<KuromojiItem> get(final long id) {
+    public synchronized OptionalEntity<KuromojiItem> get(final long id) {
         if (kuromojiItemList == null) {
             reload(null, null);
         }
@@ -182,7 +182,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         return new BufferedInputStream(dictionaryManager.getContentInputStream(this));
     }
 
-    public void update(final InputStream in) throws IOException {
+    public synchronized void update(final InputStream in) throws IOException {
         try (KuromojiUpdater updater = new KuromojiUpdater(null)) {
             reload(updater, in);
         }

@@ -37,6 +37,7 @@ import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,10 +95,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             for (final String path : values) {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
-                    final File[] files = dir.listFiles((FilenameFilter) (file, name) -> isCsvFile(file, name));
-                    for (final File file : files) {
-                        fileList.add(file);
-                    }
+                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName())).forEach(f -> fileList.add(f));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }

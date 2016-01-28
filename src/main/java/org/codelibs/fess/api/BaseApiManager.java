@@ -74,18 +74,20 @@ public abstract class BaseApiManager implements WebApiManager {
             buf.append(contentType);
         }
         buf.append("; charset=");
+        final String enc;
         if (encoding == null) {
             if (LaRequestUtil.getRequest().getCharacterEncoding() == null) {
-                buf.append(Constants.UTF_8);
+                enc = Constants.UTF_8;
             } else {
-                buf.append(LaRequestUtil.getRequest().getCharacterEncoding());
+                enc = LaRequestUtil.getRequest().getCharacterEncoding();
             }
         } else {
-            buf.append(encoding);
+            enc = encoding;
         }
+        buf.append(enc);
         final HttpServletResponse response = LaResponseUtil.getResponse();
         response.setContentType(buf.toString());
-        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), encoding))) {
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), enc))) {
             out.print(text);
         } catch (final IOException e) {
             throw new IORuntimeException(e);

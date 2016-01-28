@@ -132,7 +132,9 @@ public class ScheduledJobService implements Serializable {
             try {
                 unregister(scheduledJob);
             } catch (final Exception e) {
-                logger.debug("Failed to delete Job " + scheduledJob, e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to delete Job " + scheduledJob, e);
+                }
             }
             return;
         }
@@ -206,7 +208,6 @@ public class ScheduledJobService implements Serializable {
             return true;
         }
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String myName = fessConfig.getSchedulerTargetName();
 
         final String[] targets = target.split(",");

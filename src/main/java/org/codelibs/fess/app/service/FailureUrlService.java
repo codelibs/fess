@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -138,7 +139,7 @@ public class FailureUrlService implements Serializable {
         }
 
         if (failureCount < 0) {
-            return null;
+            return Collections.emptyList();
         }
 
         final int count = failureCount;
@@ -147,7 +148,7 @@ public class FailureUrlService implements Serializable {
             cb.query().setErrorCount_GreaterEqual(count);
         });
         if (list.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         Pattern pattern = null;
@@ -174,8 +175,8 @@ public class FailureUrlService implements Serializable {
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
-        final FailureUrlBhv failureUrlBhv = SingletonLaContainer.getComponent(FailureUrlBhv.class);
-        FailureUrl failureUrl = failureUrlBhv.selectEntity(cb -> {
+        final FailureUrlBhv bhv = SingletonLaContainer.getComponent(FailureUrlBhv.class);
+        FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
                 cb.query().setConfigId_Equal(crawlingConfig.getConfigId());
@@ -199,7 +200,7 @@ public class FailureUrlService implements Serializable {
         failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         failureUrl.setThreadName(Thread.currentThread().getName());
 
-        failureUrlBhv.insertOrUpdate(failureUrl);
+        bhv.insertOrUpdate(failureUrl);
     }
 
     private String getStackTrace(final Throwable t) {
