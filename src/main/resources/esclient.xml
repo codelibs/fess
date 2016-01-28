@@ -120,9 +120,6 @@
 		</postConstruct>
 		<!-- fess_log index -->
 		<postConstruct name="addIndexConfig">
-			<arg>"fess_log/event_log"</arg>
-		</postConstruct>
-		<postConstruct name="addIndexConfig">
 			<arg>"fess_log/click_log"</arg>
 		</postConstruct>
 		<postConstruct name="addIndexConfig">

@@ -47,32 +47,6 @@
           }
         }
       },
-      "event_log" : {
-        "_all" : {
-          "enabled" : false
-        },
-        "properties" : {
-          "createdAt" : {
-            "type" : "date",
-            "format" : "date_optional_time"
-          },
-          "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "eventType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
-          "message" : {
-            "type" : "string"
-          },
-          "path" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          }
-        }
-      },
       "click_log" : {
         "_all" : {
           "enabled" : false
