@@ -15,7 +15,10 @@
  */
 package org.codelibs.fess.helper;
 
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -32,6 +35,7 @@ public class QueryHelperTest extends UnitFessTestCase {
         registerMockInstance(fessConfig);
         registerMockInstance(new SystemHelper());
         inject(queryHelper);
+        queryHelper.queryParser = new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
         queryHelper.init();
     }
 

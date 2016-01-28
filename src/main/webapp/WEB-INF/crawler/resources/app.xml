@@ -6,7 +6,7 @@
 	<include path="lastaflute_core.xml"/>
 	<include path="fess.xml" />
 
-	<include path="crawler.xml" />
+	<include path="crawler_es.xml" />
 
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>

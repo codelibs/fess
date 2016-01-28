@@ -32,11 +32,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -93,6 +91,9 @@ public class QueryHelper implements Serializable {
 
     @Resource
     protected KeyMatchHelper keyMatchHelper;
+
+    @Resource
+    protected QueryParser queryParser;
 
     protected Set<String> apiResponseFieldSet;
 
@@ -245,7 +246,6 @@ public class QueryHelper implements Serializable {
     }
 
     public void buildBaseQuery(final QueryContext queryContext, final Consumer<QueryContext> context) {
-        final QueryParser queryParser = getQueryParser();
         try {
             final Query query = queryParser.parse(queryContext.getQueryString());
             final QueryBuilder queryBuilder = convertQuery(queryContext, query);
@@ -260,10 +260,6 @@ public class QueryHelper implements Serializable {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(ActionMessages.GLOBAL_PROPERTY_KEY),
                     "Invalid query: " + queryContext.getQueryString());
         }
-    }
-
-    protected QueryParser getQueryParser() {
-        return new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
     }
 
     protected QueryBuilder convertQuery(final QueryContext context, final Query query) {

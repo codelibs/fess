@@ -55,6 +55,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
+import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -693,7 +694,8 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getExtraQueries() {
-            return request.getParameterValues("ex_q");
+            return StreamUtil.of(request.getParameterValues("ex_q")).filter(q -> StringUtil.isNotBlank(q)).distinct()
+                    .toArray(n -> new String[n]);
         }
 
         @Override
@@ -703,7 +705,8 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getLanguages() {
-            return request.getParameterValues("lang");
+            return StreamUtil.of(request.getParameterValues("lang")).filter(q -> StringUtil.isNotBlank(q)).distinct()
+                    .toArray(n -> new String[n]);
         }
 
         @Override

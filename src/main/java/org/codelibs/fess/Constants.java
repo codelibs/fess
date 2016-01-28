@@ -139,15 +139,12 @@ public class Constants extends CoreLibConstants {
 
     public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
 
-    public static final String AUTH_CIPHER = "authenticationCipher";
-
-    public static final String RETURN_PATH = "org.codelibs.fess.ReturnPath";
-
     public static final String HIGHLIGHT_QUERIES = "org.codelibs.fess.Queries";
 
     public static final String FIELD_LOGS = "org.codelibs.fess.FieldLogs";
 
     public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
     public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     public static final int DONE_STATUS = 9999;

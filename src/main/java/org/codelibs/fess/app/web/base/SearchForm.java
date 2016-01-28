@@ -21,11 +21,13 @@ import java.util.Map;
 
 import javax.validation.constraints.Size;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class SearchForm implements SearchRequestParams, Serializable {
@@ -98,7 +100,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getExtraQueries() {
-        return ex_q;
+        return StreamUtil.of(ex_q).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getLanguages() {
-        return lang;
+        return StreamUtil.of(lang).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
     }
 
     @Override

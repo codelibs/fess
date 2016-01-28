@@ -16,13 +16,16 @@
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
 
-	<component name="authenticationCipher" class="org.codelibs.core.crypto.CachedCipher">
-        <!-- CHANGE THE FOLLOWING KEY -->
-		<property name="key">"1234567890123456"</property>
-	</component>
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
 	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">
+	</component>
+	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser">
+		<arg>org.codelibs.fess.Constants.DEFAULT_FIELD</arg>
+		<arg>
+			<component class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"></component>
+		</arg>
+		<property name="lowercaseExpandedTerms">false</property>
 	</component>
 	<component name="queryHelper" class="org.codelibs.fess.helper.QueryHelper">
 		<property name="defaultFacetInfo">
@@ -30,10 +33,10 @@
 				<property name="minCount">1</property>
 				<property name="field">["label"]</property>
 				<property name="query">[
-					"timestamp:[now/d-1d TO now]",
-					"timestamp:[now/d-7d TO now]",
-					"timestamp:[now/d-1M TO now]",
-					"timestamp:[now/d-1y TO now]",
+					"timestamp:[now/d-1d TO *]",
+					"timestamp:[now/d-7d TO *]",
+					"timestamp:[now/d-1M TO *]",
+					"timestamp:[now/d-1y TO *]",
 					"content_length:[0 TO 9999]",
 					"content_length:[10000 TO 99999]",
 					"content_length:[100000 TO 499999]",
@@ -78,19 +81,19 @@
 					<property name="title">"labels.facet_timestamp_title"</property>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_timestamp_1day"</arg>
-						<arg>"timestamp:[now/d-1d TO now]"</arg>
+						<arg>"timestamp:[now/d-1d TO *]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_timestamp_1week"</arg>
-						<arg>"timestamp:[now/d-7d TO now]"</arg>
+						<arg>"timestamp:[now/d-7d TO *]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_timestamp_1month"</arg>
-						<arg>"timestamp:[now/d-1M TO now]"</arg>
+						<arg>"timestamp:[now/d-1M TO *]"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_timestamp_1year"</arg>
-						<arg>"timestamp:[now/d-1y TO now]"</arg>
+						<arg>"timestamp:[now/d-1y TO *]"</arg>
 					</postConstruct>
 				</component>
 			</arg>

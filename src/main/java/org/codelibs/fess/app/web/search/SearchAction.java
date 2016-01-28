@@ -209,7 +209,8 @@ public class SearchAction extends FessSearchAction {
     protected String getPagingQuery(final SearchForm form) {
         final StringBuilder buf = new StringBuilder(200);
         if (form.ex_q != null) {
-            StreamUtil.of(form.ex_q).filter(q -> StringUtil.isNotBlank(q)).forEach(q -> buf.append("&ex_q=").append(LaFunctions.u(q)));
+            StreamUtil.of(form.ex_q).filter(q -> StringUtil.isNotBlank(q)).distinct()
+                    .forEach(q -> buf.append("&ex_q=").append(LaFunctions.u(q)));
         }
         if (StringUtil.isNotBlank(form.sort)) {
             buf.append("&sort=").append(LaFunctions.u(form.sort));

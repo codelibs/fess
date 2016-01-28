@@ -23,16 +23,6 @@
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
-		<!--
-		<property name="javaCommandPath">"java"</property>
-		<property name="filterPathEncoding">"UTF-8"</property>
-		<property name="useOwnTmpDir">true</property>
-		<property name="baseHelpLink">"http://fess.codelibs.org/{lang}/9.1/admin/"</property>
-		<property name="supportedLanguages">new String[] { "ar", "bg", "ca",
-            "cz", "da", "de", "el", "en", "es", "eu", "fa", "fi", "fr", "ga", "gl",
-            "hi", "hu", "hy", "id", "it", "ja", "lv", "ko", "nl", "no", "pt",
-            "ro", "ru", "sv", "th", "tr", "zh_CN", "zh_TW", "zh" }</property>
-		-->
  		<postConstruct name="addAdminRoles">
  			<arg>["fess"]</arg>
  		</postConstruct>
