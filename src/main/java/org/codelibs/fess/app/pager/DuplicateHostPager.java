@@ -140,10 +140,6 @@ public class DuplicateHostPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public DuplicateHostPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

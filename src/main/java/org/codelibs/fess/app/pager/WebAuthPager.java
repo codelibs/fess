@@ -140,10 +140,6 @@ public class WebAuthPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public WebAuthPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

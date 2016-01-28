@@ -140,10 +140,6 @@ public class LabelTypePager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public LabelTypePager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

@@ -56,12 +56,11 @@ public class AccessContextLogic {
             AppTypeSupplier appTypeSupplier) {
         final AccessContext context = new AccessContext();
         context.setAccessLocalDateTimeProvider(() -> timeManager.currentDateTime());
-        context.setAccessUserProvider(() -> buildAccessUserTrace(resource, userTypeSupplier, userBeanSupplier, appTypeSupplier));
+        context.setAccessUserProvider(() -> buildAccessUserTrace(resource, userTypeSupplier, appTypeSupplier));
         return context;
     }
 
-    private <ID> String buildAccessUserTrace(AccessContextResource resource, UserTypeSupplier userTypeSupplier,
-            UserBeanSupplier userBeanSupplier, AppTypeSupplier appTypeSupplier) {
+    private String buildAccessUserTrace(AccessContextResource resource, UserTypeSupplier userTypeSupplier, AppTypeSupplier appTypeSupplier) {
         final StringBuilder sb = new StringBuilder();
         sb.append(userTypeSupplier.supply().orElse("_"));
         sb.append(",").append(appTypeSupplier.supply()).append(",").append(resource.getModuleName());

@@ -137,10 +137,6 @@ public class ElevateWordPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public ElevateWordPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

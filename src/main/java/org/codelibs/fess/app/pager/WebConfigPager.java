@@ -155,10 +155,6 @@ public class WebConfigPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public WebConfigPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

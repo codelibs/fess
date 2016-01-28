@@ -155,10 +155,6 @@ public class SchedulerPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public SchedulerPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

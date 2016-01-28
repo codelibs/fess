@@ -152,10 +152,6 @@ public class FileConfigPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public FileConfigPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

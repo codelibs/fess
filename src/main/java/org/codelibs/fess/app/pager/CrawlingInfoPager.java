@@ -48,10 +48,6 @@ public class CrawlingInfoPager implements Serializable {
 
     public String createdTime;
 
-    public CrawlingInfoPager() {
-        super();
-    }
-
     public void clear() {
         allRecordCount = 0;
         allPageCount = 0;

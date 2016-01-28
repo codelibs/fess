@@ -146,10 +146,6 @@ public class DataConfigPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public DataConfigPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

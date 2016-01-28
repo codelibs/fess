@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -475,7 +476,7 @@ public class JsonApiManager extends BaseApiManager {
             for (final Map<String, Object> doc : docList) {
                 final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
                 if (urlObj != null) {
-                    urlList.add(urlObj.toString());
+                    urlList.add(urlObj);
                 }
             }
             urlList = favoriteLogService.getUrlList(userCode, urlList);
@@ -587,10 +588,10 @@ public class JsonApiManager extends BaseApiManager {
                 buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
             }
             buf.append('}');
-        } else if (obj instanceof Integer || obj instanceof Long || obj instanceof Float || obj instanceof Double || obj instanceof Short) {
+        } else if (obj instanceof Number) {
             buf.append(obj);
         } else if (obj instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
             buf.append('\"').append(escapeJsonString(sdf.format(obj))).append('\"');
         } else {
             buf.append('\"').append(escapeJsonString(obj.toString())).append('\"');

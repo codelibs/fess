@@ -129,11 +129,13 @@ public class EsApiManager extends BaseApiManager {
                 } else {
                     try (InputStream err = con.getErrorStream()) {
                         logger.error(new String(InputStreamUtil.getBytes(err), Constants.CHARSET_UTF_8));
-                    } catch (final IOException e1) {}
-                    throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-                }
+                    } catch (final IOException e1) {
+                        // ignore
             }
-        });
+            throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+        }
+    }
+}       );
     }
 
     public void setAcceptedRoles(final String[] acceptedRoles) {

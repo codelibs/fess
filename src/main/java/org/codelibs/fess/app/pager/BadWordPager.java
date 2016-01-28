@@ -134,10 +134,6 @@ public class BadWordPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public BadWordPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

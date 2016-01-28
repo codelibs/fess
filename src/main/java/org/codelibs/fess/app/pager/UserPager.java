@@ -47,6 +47,7 @@ public class UserPager implements Serializable {
     public String name;
 
     public String[] roles;
+
     public String[] groups;
 
     public String versionNo;

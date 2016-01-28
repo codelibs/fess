@@ -140,10 +140,6 @@ public class RoleTypePager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public RoleTypePager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

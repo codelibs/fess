@@ -140,10 +140,6 @@ public class ReqHeaderPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public ReqHeaderPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

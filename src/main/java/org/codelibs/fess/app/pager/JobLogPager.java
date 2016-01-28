@@ -137,10 +137,6 @@ public class JobLogPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public JobLogPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

@@ -140,10 +140,6 @@ public class FileAuthPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public FileAuthPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }

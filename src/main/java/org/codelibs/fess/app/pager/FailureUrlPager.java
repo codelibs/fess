@@ -147,10 +147,6 @@ public class FailureUrlPager implements Serializable {
         this.pageNumberList = pageNumberList;
     }
 
-    public FailureUrlPager() {
-        super();
-    }
-
     protected int getDefaultPageSize() {
         return Constants.DEFAULT_ADMIN_PAGE_SIZE;
     }
