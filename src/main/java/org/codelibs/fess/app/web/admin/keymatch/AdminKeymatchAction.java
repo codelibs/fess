@@ -215,14 +215,11 @@ public class AdminKeymatchAction extends FessAdminAction {
     private OptionalEntity<KeyMatch> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new KeyMatch()).map(entity -> {
-                    entity.setCreatedBy(username);
-                    entity.setCreatedTime(currentTime);
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new KeyMatch()).map(entity -> {
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return keyMatchService.getKeyMatch(((EditForm) form).id);

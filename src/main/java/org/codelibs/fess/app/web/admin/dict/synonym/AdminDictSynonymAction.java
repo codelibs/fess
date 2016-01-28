@@ -325,11 +325,8 @@ public class AdminDictSynonymAction extends FessAdminAction {
     private OptionalEntity<SynonymItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                final SynonymItem entity = new SynonymItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
-                return OptionalEntity.of(entity);
-            }
-            break;
+            final SynonymItem entity = new SynonymItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
+            return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return synonymService.getSynonymItem(form.dictId, ((EditForm) form).id);

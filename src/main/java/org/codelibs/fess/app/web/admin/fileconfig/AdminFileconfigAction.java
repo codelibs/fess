@@ -220,14 +220,11 @@ public class AdminFileconfigAction extends FessAdminAction {
     private OptionalEntity<FileConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new FileConfig()).map(entity -> {
-                    entity.setCreatedBy(username);
-                    entity.setCreatedTime(currentTime);
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new FileConfig()).map(entity -> {
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return fileConfigService.getFileConfig(((EditForm) form).id);

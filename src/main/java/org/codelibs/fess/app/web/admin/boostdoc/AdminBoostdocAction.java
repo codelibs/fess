@@ -210,14 +210,11 @@ public class AdminBoostdocAction extends FessAdminAction {
     private OptionalEntity<BoostDocumentRule> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new BoostDocumentRule()).map(entity -> {
-                    entity.setCreatedBy(username);
-                    entity.setCreatedTime(currentTime);
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new BoostDocumentRule()).map(entity -> {
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return boostDocumentRuleService.getBoostDocumentRule(((EditForm) form).id);

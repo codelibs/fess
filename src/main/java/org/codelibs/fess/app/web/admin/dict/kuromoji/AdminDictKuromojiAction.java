@@ -321,11 +321,8 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     private OptionalEntity<KuromojiItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                final KuromojiItem entity = new KuromojiItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
-                return OptionalEntity.of(entity);
-            }
-            break;
+            final KuromojiItem entity = new KuromojiItem(0, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY, StringUtil.EMPTY);
+            return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return kuromojiService.getKuromojiItem(form.dictId, ((EditForm) form).id);

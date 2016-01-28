@@ -224,14 +224,11 @@ public class AdminDataconfigAction extends FessAdminAction {
     private OptionalEntity<DataConfig> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new DataConfig()).map(entity -> {
-                    entity.setCreatedBy(username);
-                    entity.setCreatedTime(currentTime);
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new DataConfig()).map(entity -> {
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return dataConfigService.getDataConfig(((EditForm) form).id);

@@ -296,14 +296,11 @@ public class AdminElevatewordAction extends FessAdminAction {
     private OptionalEntity<ElevateWord> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new ElevateWord()).map(entity -> {
-                    entity.setCreatedBy(username);
-                    entity.setCreatedTime(currentTime);
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new ElevateWord()).map(entity -> {
+                entity.setCreatedBy(username);
+                entity.setCreatedTime(currentTime);
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return elevateWordService.getElevateWord(((EditForm) form).id);

@@ -234,13 +234,10 @@ public class AdminUserAction extends FessAdminAction {
     private OptionalEntity<User> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new User()).map(entity -> {
-                    entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new User()).map(entity -> {
+                entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return userService.getUser(((EditForm) form).id);

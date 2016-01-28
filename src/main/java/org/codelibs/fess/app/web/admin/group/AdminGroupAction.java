@@ -212,13 +212,10 @@ public class AdminGroupAction extends FessAdminAction {
     private OptionalEntity<Group> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            if (form instanceof CreateForm) {
-                return OptionalEntity.of(new Group()).map(entity -> {
-                    entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
-                    return entity;
-                });
-            }
-            break;
+            return OptionalEntity.of(new Group()).map(entity -> {
+                entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                return entity;
+            });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 return groupService.getGroup(((EditForm) form).id);
