@@ -97,7 +97,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
         if (fessConfig.isWebApiPopularWord()) {
-            runtime.registerData("popularWords", popularWordHelper.getWordList(null, null, null, null));// TODO parameters
+            runtime.registerData("popularWords", popularWordHelper.getWordList(null, null, null, null, null));
         }
         return super.hookBefore(runtime);
     }

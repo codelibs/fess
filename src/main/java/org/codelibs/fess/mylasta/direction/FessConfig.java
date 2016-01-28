@@ -506,6 +506,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 0 */
     String SUGGEST_POPULAR_WORD_SEED = "suggest.popular.word.seed";
 
+    /** The key of the configuration. e.g.  */
+    String SUGGEST_POPULAR_WORD_TAGS = "suggest.popular.word.tags";
+
+    /** The key of the configuration. e.g.  */
+    String SUGGEST_POPULAR_WORD_FIELDS = "suggest.popular.word.fields";
+
+    /** The key of the configuration. e.g.  */
+    String SUGGEST_POPULAR_WORD_EXCLUDES = "suggest.popular.word.excludes";
+
     /** The key of the configuration. e.g. 10 */
     String SUGGEST_POPULAR_WORD_SIZE = "suggest.popular.word.size";
 
@@ -2092,6 +2101,51 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSuggestPopularWordSeedAsInteger();
 
     /**
+     * Get the value for the key 'suggest.popular.word.tags'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordTags();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.tags' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordTagsAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordFields();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.excludes'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestPopularWordExcludes();
+
+    /**
+     * Get the value for the key 'suggest.popular.word.excludes' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestPopularWordExcludesAsInteger();
+
+    /**
      * Get the value for the key 'suggest.popular.word.size'. <br>
      * The value is, e.g. 10 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -3054,6 +3108,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getSuggestPopularWordSeedAsInteger() {
             return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_SEED);
+        }
+
+        public String getSuggestPopularWordTags() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_TAGS);
+        }
+
+        public Integer getSuggestPopularWordTagsAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_TAGS);
+        }
+
+        public String getSuggestPopularWordFields() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_FIELDS);
+        }
+
+        public Integer getSuggestPopularWordFieldsAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_FIELDS);
+        }
+
+        public String getSuggestPopularWordExcludes() {
+            return get(FessConfig.SUGGEST_POPULAR_WORD_EXCLUDES);
+        }
+
+        public Integer getSuggestPopularWordExcludesAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_EXCLUDES);
         }
 
         public String getSuggestPopularWordSize() {

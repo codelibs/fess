@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.request.popularwords.PopularWordsRequestBuilder;
 import org.codelibs.fess.util.ComponentUtil;
@@ -50,17 +51,18 @@ public class PopularWordHelper {
                         .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES).build();
     }
 
-    public List<String> getWordList(final String seed, final String[] tags, final String[] fields, final String[] excludes) {
-        final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
-        final String[] roles = roleQueryHelper.build().stream().toArray(n -> new String[n]);
-        return getWordList(seed, tags, roles, fields, excludes);
-    }
-
     public List<String> getWordList(final String seed, final String[] tags, final String[] roles, final String[] fields,
             final String[] excludes) {
+        final String baseSeed = seed != null ? seed : fessConfig.getSuggestPopularWordSeed();
+        final String[] baseTags = tags != null ? tags : fessConfig.getSuggestPopularWordTagsAsArray();
+        final String[] baseRoles =
+                roles != null ? roles : ComponentUtil.getRoleQueryHelper().build().stream().filter(s -> StringUtil.isNotBlank(s))
+                        .toArray(n -> new String[n]);
+        final String[] baseFields = fields != null ? fields : fessConfig.getSuggestPopularWordFieldsAsArray();
+        final String[] baseExcludes = excludes != null ? excludes : fessConfig.getSuggestPopularWordExcludesAsArray();
         try {
             return cache.get(
-                    getCacheKey(seed, tags, roles, fields, excludes),
+                    getCacheKey(baseSeed, baseTags, baseRoles, baseFields, baseExcludes),
                     () -> {
                         final List<String> wordList = new ArrayList<String>();
                         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
@@ -68,13 +70,11 @@ public class PopularWordHelper {
                                 suggestHelper.suggester().popularWords()
                                         .setSize(fessConfig.getSuggestPopularWordSizeAsInteger().intValue())
                                         .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger().intValue());
-                        if (seed != null) {
-                            popularWordsRequestBuilder.setSeed(seed);
-                        }
-                        StreamUtil.of(tags).forEach(tag -> popularWordsRequestBuilder.addTag(tag));
-                        StreamUtil.of(roles).forEach(role -> popularWordsRequestBuilder.addRole(role));
-                        StreamUtil.of(fields).forEach(field -> popularWordsRequestBuilder.addField(field));
-                        StreamUtil.of(excludes).forEach(exclude -> popularWordsRequestBuilder.addExcludeWord(exclude));
+                        popularWordsRequestBuilder.setSeed(baseSeed);
+                        StreamUtil.of(baseTags).forEach(tag -> popularWordsRequestBuilder.addTag(tag));
+                        StreamUtil.of(baseRoles).forEach(role -> popularWordsRequestBuilder.addRole(role));
+                        StreamUtil.of(baseFields).forEach(field -> popularWordsRequestBuilder.addField(field));
+                        StreamUtil.of(baseExcludes).forEach(exclude -> popularWordsRequestBuilder.addExcludeWord(exclude));
                         popularWordsRequestBuilder.execute().then(r -> {
                             r.getItems().stream().forEach(item -> wordList.add(item.getText()));
                         }).error(t -> logger.warn("Failed to generate popular words.", t));

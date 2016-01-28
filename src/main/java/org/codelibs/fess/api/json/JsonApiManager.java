@@ -329,7 +329,7 @@ public class JsonApiManager extends BaseApiManager {
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255);
         try {
-            final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, fields, excludes);
+            final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, null, fields, excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;

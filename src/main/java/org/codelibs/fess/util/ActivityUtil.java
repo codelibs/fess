@@ -15,11 +15,8 @@
  */
 package org.codelibs.fess.util;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 import org.lastaflute.web.util.LaRequestUtil;

@@ -349,4 +349,22 @@ public interface FessProp {
         }
         return params.get(name);
     }
+
+    String getSuggestPopularWordFields();
+
+    public default String[] getSuggestPopularWordFieldsAsArray() {
+        return StreamUtil.of(getSuggestPopularWordFields().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    String getSuggestPopularWordTags();
+
+    public default String[] getSuggestPopularWordTagsAsArray() {
+        return StreamUtil.of(getSuggestPopularWordTags().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    String getSuggestPopularWordExcludes();
+
+    public default String[] getSuggestPopularWordExcludesAsArray() {
+        return StreamUtil.of(getSuggestPopularWordExcludes().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
 }
