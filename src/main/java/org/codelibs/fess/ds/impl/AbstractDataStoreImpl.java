@@ -142,7 +142,9 @@ public abstract class AbstractDataStoreImpl implements DataStore {
     protected void sleep(final long interval) {
         try {
             Thread.sleep(interval);
-        } catch (final Exception e) {}
+        } catch (final Exception e) {
+            // ignore
+        }
     }
 
     protected abstract void storeData(DataConfig dataConfig, IndexUpdateCallback callback, Map<String, String> paramMap,

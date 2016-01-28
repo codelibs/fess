@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -119,7 +120,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected boolean isCsvFile(final File parentFile, final String filename) {
-        final String name = filename.toLowerCase();
+        final String name = filename.toLowerCase(Locale.ROOT);
         for (final String suffix : csvFileSuffixs) {
             if (name.endsWith(suffix)) {
                 return true;

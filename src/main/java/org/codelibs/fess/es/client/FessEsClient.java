@@ -159,6 +159,7 @@ import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.slf4j.Logger;
@@ -410,13 +411,13 @@ public class FessEsClient implements Client {
                                             }
                                         }
                                     } catch (final Exception e) {
-                                        logger.warn("Failed to parse " + dataPath.toString());
+                                        logger.warn("Failed to parse " + dataPath);
                                     }
                                     return StringUtil.EMPTY;
                                 });
                         final BulkResponse response = builder.execute().actionGet();
                         if (response.hasFailures()) {
-                            logger.warn("Failed to register " + dataPath.toString() + ": " + response.buildFailureMessage());
+                            logger.warn("Failed to register " + dataPath + ": " + response.buildFailureMessage());
                         }
                     } catch (final Exception e) {
                         logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
@@ -505,7 +506,7 @@ public class FessEsClient implements Client {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {/* TODO */}));
+        return searchResult.build(requestBuilder, execTime, OptionalEntity.ofNullable(response, () -> {}));
     }
 
     public <T> T search(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
@@ -538,7 +539,7 @@ public class FessEsClient implements Client {
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
-        return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {/* TODO */}));
+        return searchResult.build(searchRequestBuilder, execTime, OptionalEntity.ofNullable(searchResponse, () -> {}));
     }
 
     public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type,
@@ -830,10 +831,19 @@ public class FessEsClient implements Client {
                     if (queryHelper.isFacetField(f)) {
                         final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                         final TermsBuilder termsBuilder = AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
-                        // TODO order
+                        if ("term".equals(facetInfo.sort)) {
+                            termsBuilder.order(Order.term(true));
+                        } else if ("count".equals(facetInfo.sort)) {
+                            termsBuilder.order(Order.count(true));
+                        }
                         if (facetInfo.limit != null) {
-                            // TODO
                             termsBuilder.size(Integer.parseInt(facetInfo.limit));
+                        }
+                        if (facetInfo.minCount != null) {
+                            termsBuilder.minDocCount(Long.parseLong(facetInfo.minCount));
+                        }
+                        if (facetInfo.missing != null) {
+                            termsBuilder.missing(facetInfo.missing);
                         }
                         searchRequestBuilder.addAggregation(termsBuilder);
                     } else {
@@ -848,11 +858,6 @@ public class FessEsClient implements Client {
                             final FilterAggregationBuilder filterBuilder =
                                     AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
                                             facetContext.getQueryBuilder());
-                            // TODO order
-                            if (facetInfo.limit != null) {
-                                // TODO
-                                //    filterBuilder.size(Integer.parseInt(facetInfo .limit));
-                            }
                             searchRequestBuilder.addAggregation(filterBuilder);
                         });
             }

@@ -24,9 +24,6 @@ public class FacetInfo {
     //@Maxbytelength(maxbytelength = 255)
     public String[] query;
 
-    //@Maxbytelength(maxbytelength = 1000)
-    public String prefix;
-
     //@IntegerType
     public String limit;
 
@@ -41,7 +38,7 @@ public class FacetInfo {
 
     @Override
     public String toString() {
-        return "FacetInfo [field=" + Arrays.toString(field) + ", q=" + Arrays.toString(query) + ", prefix=" + prefix + ", limit=" + limit
-                + ", minCount=" + minCount + ", sort=" + sort + ", missing=" + missing + "]";
+        return "FacetInfo [field=" + Arrays.toString(field) + ", q=" + Arrays.toString(query) + ", limit=" + limit + ", minCount="
+                + minCount + ", sort=" + sort + ", missing=" + missing + "]";
     }
 }

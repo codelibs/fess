@@ -53,10 +53,6 @@ public class BadWordService implements Serializable {
     @Resource
     protected BadWordBhv badWordBhv;
 
-    public BadWordService() {
-        super();
-    }
-
     public List<BadWord> getBadWordList(final BadWordPager badWordPager) {
 
         final PagingResultBean<BadWord> badWordList = badWordBhv.selectPage(cb -> {
