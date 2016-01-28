@@ -311,13 +311,10 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     }
 
     protected String getRepositoryPath() {
-        String tempDir = null;
+        final File tempDirFile = (File) LaServletContextUtil.getServletContext().getAttribute(CONTEXT_TEMPDIR_KEY);
+        String tempDir = tempDirFile.getAbsolutePath();
         if (tempDir == null || tempDir.length() == 0) {
-            final File tempDirFile = (File) LaServletContextUtil.getServletContext().getAttribute(CONTEXT_TEMPDIR_KEY);
-            tempDir = tempDirFile.getAbsolutePath();
-            if (tempDir == null || tempDir.length() == 0) {
-                tempDir = System.getProperty(JAVA_IO_TMPDIR_KEY);
-            }
+            tempDir = System.getProperty(JAVA_IO_TMPDIR_KEY);
         }
         return tempDir;
     }

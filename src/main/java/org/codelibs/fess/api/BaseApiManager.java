@@ -18,10 +18,12 @@ package org.codelibs.fess.api;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.exception.IORuntimeException;
+import org.codelibs.fess.Constants;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 
@@ -45,7 +47,7 @@ public abstract class BaseApiManager implements WebApiManager {
         if (formatType == null) {
             return FormatType.SEARCH;
         }
-        final String type = formatType.toUpperCase();
+        final String type = formatType.toUpperCase(Locale.ROOT);
         if (FormatType.SEARCH.name().equals(type)) {
             return FormatType.SEARCH;
         } else if (FormatType.LABEL.name().equals(type)) {
@@ -64,28 +66,27 @@ public abstract class BaseApiManager implements WebApiManager {
         }
     }
 
-    public static void write(final String text, String contentType, String encoding) {
+    public static void write(final String text, final String contentType, final String encoding) {
+        final StringBuilder buf = new StringBuilder(50);
         if (contentType == null) {
-            contentType = "text/plain";
+            buf.append("text/plain");
+        } else {
+            buf.append(contentType);
         }
+        buf.append("; charset=");
         if (encoding == null) {
-            encoding = LaRequestUtil.getRequest().getCharacterEncoding();
-            if (encoding == null) {
-                encoding = "UTF-8";
+            if (LaRequestUtil.getRequest().getCharacterEncoding() == null) {
+                buf.append(Constants.UTF_8);
+            } else {
+                buf.append(LaRequestUtil.getRequest().getCharacterEncoding());
             }
+        } else {
+            buf.append(encoding);
         }
         final HttpServletResponse response = LaResponseUtil.getResponse();
-        response.setContentType(contentType + "; charset=" + encoding);
-        try {
-            PrintWriter out = null;
-            try {
-                out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), encoding));
-                out.print(text);
-            } finally {
-                if (out != null) {
-                    out.close();
-                }
-            }
+        response.setContentType(buf.toString());
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), encoding))) {
+            out.print(text);
         } catch (final IOException e) {
             throw new IORuntimeException(e);
         }
