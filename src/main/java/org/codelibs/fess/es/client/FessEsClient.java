@@ -49,6 +49,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.QueryHelper;
@@ -121,6 +122,7 @@ import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.MultiSearchRequest;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchPhaseExecutionException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -162,6 +164,7 @@ import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuil
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.lastaflute.core.message.UserMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -535,7 +538,12 @@ public class FessEsClient implements Client {
                 }
             }
 
-            searchResponse = searchRequestBuilder.execute().actionGet();
+            try {
+                searchResponse = searchRequestBuilder.execute().actionGet();
+            } catch (SearchPhaseExecutionException e) {
+                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
+                        "Invalid query: " + searchRequestBuilder, e);
+            }
         }
         final long execTime = System.currentTimeMillis() - startTime;
 

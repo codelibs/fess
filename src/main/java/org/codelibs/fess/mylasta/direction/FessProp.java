@@ -367,4 +367,11 @@ public interface FessProp {
     public default String[] getSuggestPopularWordExcludesAsArray() {
         return StreamUtil.of(getSuggestPopularWordExcludes().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
     }
+
+    String getQueryReplaceTermWithPrefixQuery();
+
+    public default boolean getQueryReplaceTermWithPrefixQueryAsBoolean() {
+        return Boolean.valueOf(getQueryReplaceTermWithPrefixQuery());
+    }
+
 }

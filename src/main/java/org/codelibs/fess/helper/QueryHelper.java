@@ -395,7 +395,9 @@ public class QueryHelper implements Serializable {
     protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery) {
         final String field = termQuery.getTerm().field();
         final String text = termQuery.getTerm().text();
-        if (Constants.DEFAULT_FIELD.equals(field)) {
+        if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
+            return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))));
+        } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b));

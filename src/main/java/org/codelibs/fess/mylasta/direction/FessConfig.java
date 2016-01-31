@@ -302,6 +302,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String QUERY_MAX_LENGTH = "query.max.length";
 
+    /** The key of the configuration. e.g. true */
+    String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
+
     /** The key of the configuration. e.g. 1.6 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
@@ -1391,6 +1394,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.replace.term.with.prefix.query'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryReplaceTermWithPrefixQuery();
+
+    /**
+     * Is the property for the key 'query.replace.term.with.prefix.query' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isQueryReplaceTermWithPrefixQuery();
 
     /**
      * Get the value for the key 'query.boost.title'. <br>
@@ -2732,6 +2749,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getQueryMaxLengthAsInteger() {
             return getAsInteger(FessConfig.QUERY_MAX_LENGTH);
+        }
+
+        public String getQueryReplaceTermWithPrefixQuery() {
+            return get(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
+        }
+
+        public boolean isQueryReplaceTermWithPrefixQuery() {
+            return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
         }
 
         public String getQueryBoostTitle() {
