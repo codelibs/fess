@@ -104,6 +104,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         super.setupHtmlData(runtime);
 
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameSearchlist()));
+        runtime.registerData("isProcessRunning", processHelper.isProcessRunning());
     }
 
     // ===================================================================================
@@ -224,10 +225,6 @@ public class AdminSearchlistAction extends FessAdminAction {
             throwValidationError(e.getMessageCode(), () -> asListHtml());
         }
         return asListHtml();
-    }
-
-    public boolean isSolrProcessRunning() {
-        return processHelper.isProcessRunning();
     }
 
     // ===================================================================================

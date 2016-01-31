@@ -26,7 +26,7 @@ public class DeleteForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Size(max = 1000)
-    public String query;
+    public String q;
 
     @Required
     public String docId;
