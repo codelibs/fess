@@ -1312,7 +1312,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     //        } catch (final InvalidQueryException e) {
     //            FessMessages messages = new FessMessages();
     //            e.getMessageCode().message(messages);
-    //            if (!messages.hasMessageOf(ActionMessages.GLOBAL_PROPERTY_KEY, messageCode)) {
+    //            if (!messages.hasMessageOf(UserMessages.GLOBAL_PROPERTY_KEY, messageCode)) {
     //                throw e;
     //            }
     //        }
@@ -1664,7 +1664,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     //        } catch (final InvalidQueryException e) {
     //            FessMessages messages = new FessMessages();
     //            e.getMessageCode().message(messages);
-    //            if (!messages.hasMessageOf(ActionMessages.GLOBAL_PROPERTY_KEY, messageCode)) {
+    //            if (!messages.hasMessageOf(UserMessages.GLOBAL_PROPERTY_KEY, messageCode)) {
     //                throw e;
     //            }
     //        }

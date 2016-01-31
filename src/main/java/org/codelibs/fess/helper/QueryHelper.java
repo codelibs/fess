@@ -66,7 +66,7 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.lastaflute.web.ruts.message.ActionMessages;
+import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
@@ -257,7 +257,7 @@ public class QueryHelper implements Serializable {
             // TODO options query
             context.accept(queryContext);
         } catch (final ParseException e) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(ActionMessages.GLOBAL_PROPERTY_KEY),
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Invalid query: " + queryContext.getQueryString());
         }
     }
@@ -281,8 +281,8 @@ public class QueryHelper implements Serializable {
         } else if (query instanceof MatchAllDocsQuery) {
             return QueryBuilders.matchAllQuery();
         }
-        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(ActionMessages.GLOBAL_PROPERTY_KEY),
-                "Unknown q: " + query.getClass() + " => " + query);
+        throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), "Unknown q: "
+                + query.getClass() + " => " + query);
     }
 
     protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery) {
@@ -402,20 +402,21 @@ public class QueryHelper implements Serializable {
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
-                throw new InvalidQueryException(messages -> messages.addErrorsInvalidQuerySortValue(ActionMessages.GLOBAL_PROPERTY_KEY,
-                        text), "Invalid sort field: " + termQuery);
+                throw new InvalidQueryException(
+                        messages -> messages.addErrorsInvalidQuerySortValue(UserMessages.GLOBAL_PROPERTY_KEY, text), "Invalid sort field: "
+                                + termQuery);
             }
             final String sortField = values[0];
             if (!isSortField(sortField)) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortField(
-                        ActionMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
+                        UserMessages.GLOBAL_PROPERTY_KEY, sortField), "Unsupported sort field: " + termQuery);
             }
             SortOrder sortOrder;
             if (values.length == 2) {
                 sortOrder = SortOrder.DESC.toString().equalsIgnoreCase(values[1]) ? SortOrder.DESC : SortOrder.ASC;
                 if (sortOrder == null) {
                     throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnsupportedSortOrder(
-                            ActionMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
+                            UserMessages.GLOBAL_PROPERTY_KEY, values[1]), "Invalid sort order: " + termQuery);
                 }
             } else {
                 sortOrder = SortOrder.ASC;
@@ -439,7 +440,7 @@ public class QueryHelper implements Serializable {
     private QueryBuilder convertPhraseQuery(QueryContext context, PhraseQuery query) {
         Term[] terms = query.getTerms();
         if (terms.length == 0) {
-            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(ActionMessages.GLOBAL_PROPERTY_KEY),
+            throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Unknown phrase query: " + query);
         }
         final String field = terms[0].field();
