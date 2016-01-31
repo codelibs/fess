@@ -726,7 +726,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.1</version>
+			<version>0.3.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
