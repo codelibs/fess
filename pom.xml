@@ -81,6 +81,7 @@
 		<packaging.fess.lib.dir>${packaging.fess.home.dir}/lib</packaging.fess.lib.dir>
 		<packaging.fess.log.dir>/var/log/fess</packaging.fess.log.dir>
 		<packaging.fess.temp.dir>/var/tmp/fess</packaging.fess.temp.dir>
+		<packaging.fess.extension.dir>${packaging.fess.home.dir}/extension</packaging.fess.extension.dir>
 		<packaging.fess.user>fess</packaging.fess.user>
 		<packaging.fess.group>fess</packaging.fess.group>
 		<packaging.fess.pid.dir>/var/run/fess</packaging.fess.pid.dir>
@@ -450,6 +451,14 @@
 										<include>fess_env_crawler.properties</include>
 										<include>fess_env_suggest.properties</include>
 									</includes>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+							<directory>${packaging.fess.extension.dir}</directory>
+							<sources>
+								<source>
+									<location>${project.basedir}/src/main/assemblies/extension</location>
 								</source>
 							</sources>
 						</mapping>

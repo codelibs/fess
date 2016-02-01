@@ -22,6 +22,10 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<directory>src/main/assemblies/extension</directory>
+			<outputDirectory>fess-${project.version}/extension</outputDirectory>
+		</fileSet>
+		<fileSet>
 			<filtered>false</filtered>
 			<directory>src/main/assemblies/files</directory>
 			<outputDirectory>fess-${project.version}/bin</outputDirectory>
