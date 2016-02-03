@@ -295,10 +295,10 @@ public class QueryHelper implements Serializable {
                     boolQuery.must(queryBuilder);
                     break;
                 case SHOULD:
-                    boolQuery.must(queryBuilder);
+                    boolQuery.should(queryBuilder);
                     break;
                 case MUST_NOT:
-                    boolQuery.must(queryBuilder);
+                    boolQuery.mustNot(queryBuilder);
                     break;
                 default:
                     break;
