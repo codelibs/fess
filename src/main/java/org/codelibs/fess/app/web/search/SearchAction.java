@@ -136,7 +136,7 @@ public class SearchAction extends FessSearchAction {
                         }
                     }
                     RenderDataUtil.register(data, "displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
-                    RenderDataUtil.register(data, "pagingQuery", getPagingQuery(form));
+                    createPagingQuery(form);
                 });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
@@ -206,14 +206,14 @@ public class SearchAction extends FessSearchAction {
         return buf.toString();
     }
 
-    protected String getPagingQuery(final SearchForm form) {
-        final StringBuilder buf = new StringBuilder(200);
+    protected void createPagingQuery(final SearchForm form) {
+        final List<String> pagingQueryList = new ArrayList<>();
         if (form.ex_q != null) {
             StreamUtil.of(form.ex_q).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .forEach(q -> buf.append("&ex_q=").append(LaFunctions.u(q)));
+                    .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q)));
         }
         if (StringUtil.isNotBlank(form.sort)) {
-            buf.append("&sort=").append(LaFunctions.u(form.sort));
+            pagingQueryList.add("sort=" + LaFunctions.u(form.sort));
         }
         if (form.lang != null) {
             final Set<String> langSet = new HashSet<String>();
@@ -231,7 +231,7 @@ public class SearchAction extends FessSearchAction {
             }
             if (!langSet.isEmpty()) {
                 for (final String lang : langSet) {
-                    buf.append("&lang=").append(LaFunctions.u(lang));
+                    pagingQueryList.add("&lang=" + LaFunctions.u(lang));
                 }
             }
         }
@@ -241,14 +241,13 @@ public class SearchAction extends FessSearchAction {
                 if (values != null) {
                     for (final String v : values) {
                         if (StringUtil.isNotBlank(v)) {
-                            buf.append("&fields.").append(LaFunctions.u(entry.getKey())).append('=').append(LaFunctions.u(v));
+                            pagingQueryList.add("fields." + LaFunctions.u(entry.getKey()) + "=" + LaFunctions.u(v));
                         }
                     }
                 }
             }
         }
-
-        return buf.toString();
+        request.setAttribute(Constants.PAGING_QUERY_LIST, pagingQueryList);
     }
 
     protected static class WebRenderData extends SearchRenderData {

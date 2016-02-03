@@ -118,7 +118,7 @@
 							<c:if
 								test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+										href="/search/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
 									</la:link></li>
@@ -134,7 +134,7 @@
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
-									href="/search/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+									href="/search/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>
@@ -158,7 +158,7 @@
 		<ul class="pagination">
 			<c:if test="${existPrevPage}">
 				<li class="prev"><la:link aria-label="Previous"
-						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/prev?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span aria-hidden="true">&laquo;</span>
 						<span class="sr-only"><la:message key="labels.prev_page" /></span>
 					</la:link></li>
@@ -174,12 +174,12 @@
 					<c:if test="${pageNumber < currentPageNumber - 2 || pageNumber > currentPageNumber + 2}">class="hidden-phone"</c:if>
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>>
 					<la:link
-						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
+						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>
 				</li>
 			</c:forEach>
 			<c:if test="${existNextPage}">
 				<li class="next"><la:link aria-label="Next"
-						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${pagingQuery}${fe:facetQuery()}${fe:geoQuery()}">
+						href="/search/next?q=${f:u(q)}&pn=${f:u(currentPageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 						<span class="sr-only"><la:message key="labels.next_page" /></span>
 						<span aria-hidden="true">&raquo;</span>
 					</la:link></li>

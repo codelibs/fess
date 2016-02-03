@@ -73,6 +73,18 @@
 
   <function>
     <description>
+      Returns query parameters for paging.
+    </description>
+    <name>pagingQuery</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String pagingQuery(java.lang.String)</function-signature>
+    <example>
+      ${fe:pagingQuery("ex_q=timestamp:")}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns query parameters for Facet.
     </description>
     <name>facetQuery</name>

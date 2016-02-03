@@ -26,16 +26,20 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
+
+import opennlp.tools.parser.Cons;
 
 public class FessFunctions {
 
@@ -117,6 +121,23 @@ public class FessFunctions {
         final DecimalFormat df = new DecimalFormat(format + unit);
         df.setRoundingMode(RoundingMode.HALF_UP);
         return df.format((double) value / ratio);
+    }
+
+    public static String pagingQuery(final String query) {
+        final HttpServletRequest request = LaRequestUtil.getRequest();
+        @SuppressWarnings("unchecked")
+        List<String> pagingQueryList = (List<String>) request.getAttribute(Constants.PAGING_QUERY_LIST);
+        if (pagingQueryList != null) {
+            final String prefix;
+            if (query != null) {
+                prefix = "ex_q=" + query.split(":")[0] + "%3A";
+            } else {
+                prefix = null;
+            }
+            return pagingQueryList.stream().filter(s -> prefix == null || !s.startsWith(prefix))
+                    .collect(Collectors.joining("&", "&", StringUtil.EMPTY));
+        }
+        return StringUtil.EMPTY;
     }
 
     public static String facetQuery() {
