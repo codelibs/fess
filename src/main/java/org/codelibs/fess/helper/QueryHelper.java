@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -123,8 +122,6 @@ public class QueryHelper implements Serializable {
 
     protected Map<String, String[]> requestParameterMap = new HashMap<>();
 
-    protected Map<String, String> fieldLanguageMap = new HashMap<>();
-
     protected int maxSearchResultOffset = 100000;
 
     protected SortBuilder[] defaultSortBuilders;
@@ -134,8 +131,6 @@ public class QueryHelper implements Serializable {
     protected FacetInfo defaultFacetInfo;
 
     protected GeoInfo defaultGeoInfo;
-
-    protected String defaultQueryLanguage;
 
     protected Map<String, String[]> queryRequestHeaderMap = new HashMap<>();
 
@@ -489,29 +484,10 @@ public class QueryHelper implements Serializable {
     }
 
     protected OptionalThing<String> getQueryLanguage() {
-        if (defaultQueryLanguage != null) {
-            return OptionalEntity.of(defaultQueryLanguage);
+        if (StringUtil.isNotBlank(fessConfig.getQueryDefaultLanguage())) {
+            return OptionalEntity.of(fessConfig.getQueryDefaultLanguage());
         }
-        return LaRequestUtil.getOptionalRequest().map(request -> {
-            final Locale locale = request.getLocale();
-            if (locale == null) {
-                return null;
-            }
-            final String language = locale.getLanguage();
-            final String country = locale.getCountry();
-            if (StringUtil.isNotBlank(language)) {
-                if (StringUtil.isNotBlank(country)) {
-                    final String lang = language + "-" + country;
-                    if (fieldLanguageMap.containsKey(lang)) {
-                        return fieldLanguageMap.get(lang);
-                    }
-                }
-                if (fieldLanguageMap.containsKey(language)) {
-                    return fieldLanguageMap.get(language);
-                }
-            }
-            return null;
-        });
+        return LaRequestUtil.getOptionalRequest().map(request -> fessConfig.getQueryLanguage(request.getLocale()));
 
     }
 
@@ -716,10 +692,6 @@ public class QueryHelper implements Serializable {
         return requestParameterMap.entrySet();
     }
 
-    public void addFieldLanguage(final String lang, final String fieldLang) {
-        fieldLanguageMap.put(lang, fieldLang);
-    }
-
     public int getMaxSearchResultOffset() {
         return maxSearchResultOffset;
     }
@@ -760,14 +732,6 @@ public class QueryHelper implements Serializable {
 
     public void setDefaultGeoInfo(final GeoInfo defaultGeoInfo) {
         this.defaultGeoInfo = defaultGeoInfo;
-    }
-
-    public String getDefaultQueryLanguage() {
-        return defaultQueryLanguage;
-    }
-
-    public void setDefaultQueryLanguage(final String defaultQueryLanguage) {
-        this.defaultQueryLanguage = defaultQueryLanguage;
     }
 
     public Map<String, String[]> getQueryRequestHeaderMap() {

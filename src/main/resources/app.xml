@@ -52,22 +52,6 @@
 				]</property>
 			</component>
 		</property>
-		<postConstruct name="addFieldLanguage">
-			<arg>"zh"</arg>
-			<arg>"cjk"</arg>
-		</postConstruct>
-		<postConstruct name="addFieldLanguage">
-			<arg>"zh_CN"</arg>
-			<arg>"cjk"</arg>
-		</postConstruct>
-		<postConstruct name="addFieldLanguage">
-			<arg>"zh_TW"</arg>
-			<arg>"cjk"</arg>
-		</postConstruct>
-		<postConstruct name="addFieldLanguage">
-			<arg>"ko"</arg>
-			<arg>"cjk"</arg>
-		</postConstruct>
 		<postConstruct name="addHighlightField">
 			<arg>"title"</arg>
 		</postConstruct>

@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -31,6 +32,8 @@ import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 
 public interface FessProp {
+
+    public static final String QUERY_LANGUAGE_MAPPING = "queryLanguageMapping";
 
     public static final String CRAWLER_METADATA_NAME_MAPPING = "crawlerMetadataNameMapping";
 
@@ -374,4 +377,38 @@ public interface FessProp {
         return Boolean.valueOf(getQueryReplaceTermWithPrefixQuery());
     }
 
+    String getQueryLanguageMapping();
+
+    public default String getQueryLanguage(Locale locale) {
+        if (locale == null) {
+            return null;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
+        if (params == null) {
+            params = StreamUtil.of(getQueryLanguageMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
+                String[] values = v.split("=");
+                if (values.length == 2) {
+                    return new Pair<String, String>(values[0], values[1]);
+                }
+                return null;
+            }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+            propMap.put(QUERY_LANGUAGE_MAPPING, params);
+        }
+
+        final String language = locale.getLanguage();
+        final String country = locale.getCountry();
+        if (StringUtil.isNotBlank(language)) {
+            if (StringUtil.isNotBlank(country)) {
+                final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
+                if (params.containsKey(lang)) {
+                    return params.get(lang);
+                }
+            }
+            if (params.containsKey(language)) {
+                return params.get(language);
+            }
+        }
+        return null;
+    }
 }

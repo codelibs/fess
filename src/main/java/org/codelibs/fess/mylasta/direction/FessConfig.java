@@ -305,6 +305,60 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
+    /** The key of the configuration. e.g.  */
+    String QUERY_DEFAULT_LANGUAGE = "query.default.language";
+
+    /** The key of the configuration. e.g. ar=ar
+    bg=bg
+    bn=bn
+    ca=ca
+    cs=cs
+    da=da
+    de=de
+    el=el
+    en=en
+    es=es
+    et=et
+    fa=fa
+    fi=fi
+    fr=fr
+    gu=gu
+    he=he
+    hi=hi
+    hr=hr
+    hu=hu
+    id=id
+    it=it
+    ja=ja
+    ko=ko
+    lt=lt
+    lv=lv
+    mk=mk
+    ml=ml
+    nl=nl
+    no=no
+    pa=pa
+    pl=pl
+    pt=pt
+    ro=ro
+    ru=ru
+    si=si
+    sq=sq
+    sv=sv
+    ta=ta
+    te=te
+    th=th
+    tl=tl
+    tr=tr
+    uk=uk
+    ur=ur
+    vi=vi
+    zh=zh-cn
+    zh-cn=zh-cn
+    zh-tw=zh-tw
+    */
+    String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
+
     /** The key of the configuration. e.g. 1.6 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
@@ -1408,6 +1462,76 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryReplaceTermWithPrefixQuery();
+
+    /**
+     * Get the value for the key 'query.default.language'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryDefaultLanguage();
+
+    /**
+     * Get the value for the key 'query.default.language' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryDefaultLanguageAsInteger();
+
+    /**
+     * Get the value for the key 'query.language.mapping'. <br>
+     * The value is, e.g. ar=ar
+    bg=bg
+    bn=bn
+    ca=ca
+    cs=cs
+    da=da
+    de=de
+    el=el
+    en=en
+    es=es
+    et=et
+    fa=fa
+    fi=fi
+    fr=fr
+    gu=gu
+    he=he
+    hi=hi
+    hr=hr
+    hu=hu
+    id=id
+    it=it
+    ja=ja
+    ko=ko
+    lt=lt
+    lv=lv
+    mk=mk
+    ml=ml
+    nl=nl
+    no=no
+    pa=pa
+    pl=pl
+    pt=pt
+    ro=ro
+    ru=ru
+    si=si
+    sq=sq
+    sv=sv
+    ta=ta
+    te=te
+    th=th
+    tl=tl
+    tr=tr
+    uk=uk
+    ur=ur
+    vi=vi
+    zh=zh-cn
+    zh-cn=zh-cn
+    zh-tw=zh-tw
+    <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryLanguageMapping();
 
     /**
      * Get the value for the key 'query.boost.title'. <br>
@@ -2757,6 +2881,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isQueryReplaceTermWithPrefixQuery() {
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
+        }
+
+        public String getQueryDefaultLanguage() {
+            return get(FessConfig.QUERY_DEFAULT_LANGUAGE);
+        }
+
+        public Integer getQueryDefaultLanguageAsInteger() {
+            return getAsInteger(FessConfig.QUERY_DEFAULT_LANGUAGE);
+        }
+
+        public String getQueryLanguageMapping() {
+            return get(FessConfig.QUERY_LANGUAGE_MAPPING);
         }
 
         public String getQueryBoostTitle() {

@@ -39,8 +39,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 
-import opennlp.tools.parser.Cons;
-
 public class FessFunctions {
 
     private static final String GEO_PREFIX = "geo.";
