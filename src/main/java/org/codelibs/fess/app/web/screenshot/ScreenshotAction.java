@@ -52,6 +52,8 @@ public class ScreenshotAction extends FessSearchAction {
             return redirectToLogin();
         }
 
+        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
+
         final Map<String, Object> doc =
                 fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
                         queryRequestBuilder -> {

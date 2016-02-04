@@ -52,6 +52,8 @@ public class CacheAction extends FessSearchAction {
             return redirectToLogin();
         }
 
+        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
+
         Map<String, Object> doc = null;
         try {
             doc =

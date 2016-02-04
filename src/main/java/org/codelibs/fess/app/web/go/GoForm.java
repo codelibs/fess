@@ -34,4 +34,14 @@ public class GoForm {
     public String queryId;
 
     public Integer order;
+
+    // for error page
+
+    public String q;
+
+    public String num;
+
+    public String sort;
+
+    public String lang;
 }

@@ -17,11 +17,28 @@ package org.codelibs.fess.app.web.screenshot;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 public class ScreenshotForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Required
+    @Size(max = 100)
     public String docId;
 
+    @Required
     public String queryId;
+
+    // for error page
+
+    public String q;
+
+    public String num;
+
+    public String sort;
+
+    public String lang;
 
 }

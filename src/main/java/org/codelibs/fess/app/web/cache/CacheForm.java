@@ -17,13 +17,27 @@ package org.codelibs.fess.app.web.cache;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Size;
+
+import org.lastaflute.web.validation.Required;
+
 public class CacheForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    //@Required(target = "go,cache")
-    //@Maxbytelength(maxbytelength = 100)
+    @Required
+    @Size(max = 100)
     public String docId;
 
     public String[] hq;
+
+    // for error page
+
+    public String q;
+
+    public String num;
+
+    public String sort;
+
+    public String lang;
 
 }
