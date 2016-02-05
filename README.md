@@ -21,7 +21,7 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 
 ### Download
 
-Fess 10.0 rc1 is available.
+Fess 10.0 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
 ### Install/Run Fess
