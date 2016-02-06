@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -46,8 +45,6 @@ public class AdminKeymatchAction extends FessAdminAction {
     private KeyMatchService keyMatchService;
     @Resource
     private KeyMatchPager keyMatchPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

@@ -26,7 +26,6 @@ import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -55,8 +54,6 @@ public class AdminWebconfigAction extends FessAdminAction {
     private RoleTypeService roleTypeService;
     @Resource
     private LabelTypeService labelTypeService;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

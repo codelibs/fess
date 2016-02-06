@@ -24,7 +24,6 @@ import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -49,8 +48,6 @@ public class AdminLabeltypeAction extends FessAdminAction {
     private LabelTypePager labelTypePager;
     @Resource
     private RoleTypeService roleTypeService;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

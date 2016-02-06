@@ -34,7 +34,6 @@ import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.ProcessHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.job.JobManager;
@@ -63,9 +62,6 @@ public class AdminWizardAction extends FessAdminAction {
 
     @Resource
     protected FileConfigService fileConfigService;
-
-    @Resource
-    protected SystemHelper systemHelper;
 
     @Resource
     protected ProcessHelper processHelper;

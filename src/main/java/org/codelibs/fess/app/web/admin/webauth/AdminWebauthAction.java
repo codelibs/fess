@@ -31,7 +31,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -55,9 +54,6 @@ public class AdminWebauthAction extends FessAdminAction {
     private WebAuthenticationService webAuthenticationService;
     @Resource
     private WebAuthPager webAuthPager;
-    @Resource
-    private SystemHelper systemHelper;
-
     @Resource
     protected WebConfigService webConfigService;
 

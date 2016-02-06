@@ -23,14 +23,11 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,13 +40,12 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.crawler.util.CharUtil;
-import org.codelibs.fess.es.config.exentity.RoleType;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.TypicalAction;
+import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -65,19 +61,17 @@ public class SystemHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Set<String> adminRoleSet = new HashSet<>();
+    protected final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
 
-    private final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
-
-    private final AtomicBoolean forceStop = new AtomicBoolean(false);
+    protected final AtomicBoolean forceStop = new AtomicBoolean(false);
 
     protected LoadingCache<String, List<Map<String, String>>> langItemsCache;
 
-    private String filterPathEncoding;
+    protected String filterPathEncoding;
 
-    private String[] supportedLanguages;
+    protected String[] supportedLanguages;
 
-    private List<Runnable> shutdownHookList = new ArrayList<>();
+    protected List<Runnable> shutdownHookList = new ArrayList<>();
 
     @PostConstruct
     public void init() {
@@ -190,7 +184,7 @@ public class SystemHelper implements Serializable {
                 }).orElse(getDefaultHelpLink(url));
     }
 
-    private String getDefaultHelpLink(final String url) {
+    protected String getDefaultHelpLink(final String url) {
         return url.replaceFirst("/\\{lang\\}/", "/").replaceFirst("\\{version\\}", Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
     }
 
@@ -200,29 +194,6 @@ public class SystemHelper implements Serializable {
 
     public String getDesignJspFileName(final String fileName) {
         return designJspFileNameMap.get(fileName);
-    }
-
-    public Set<String> getAdminRoleSet() {
-        return adminRoleSet;
-    }
-
-    public void addAdminRoles(final Collection<String> adminRoles) {
-        adminRoleSet.addAll(adminRoles);
-    }
-
-    public Set<String> getAuthenticatedRoleSet() {
-        final RoleTypeService roleTypeService = SingletonLaContainer.getComponent(RoleTypeService.class);
-        final List<RoleType> roleTypeList = roleTypeService.getRoleTypeList();
-
-        final Set<String> roleList = new HashSet<>(roleTypeList.size() + adminRoleSet.size());
-        for (final RoleType roleType : roleTypeList) {
-            roleList.add(roleType.getValue());
-        }
-
-        // system roles
-        roleList.addAll(adminRoleSet);
-
-        return roleList;
     }
 
     public boolean isForceStop() {
@@ -298,4 +269,7 @@ public class SystemHelper implements Serializable {
         return "Unknown";
     }
 
+    public void setupAdminHtmlData(TypicalAction action, ActionRuntime runtime) {
+        // nothing
+    }
 }

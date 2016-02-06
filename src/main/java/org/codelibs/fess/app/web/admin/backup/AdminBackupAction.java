@@ -20,13 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.codelibs.fess.util.StreamUtil;
@@ -39,9 +36,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author shinsuke
  */
 public class AdminBackupAction extends FessAdminAction {
-
-    @Resource
-    private SystemHelper systemHelper;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {

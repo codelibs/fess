@@ -32,7 +32,6 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalEntity;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
@@ -56,8 +55,6 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     //                                                                           =========
     @Resource
     private DynamicProperties systemProperties;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

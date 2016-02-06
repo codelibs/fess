@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.ProcessHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -43,8 +42,6 @@ public class AdminCrawlinginfoAction extends FessAdminAction {
     private CrawlingInfoService crawlingInfoService;
     @Resource
     private CrawlingInfoPager crawlingInfoPager;
-    @Resource
-    private SystemHelper systemHelper;
     @Resource
     protected ProcessHelper processHelper;
 
