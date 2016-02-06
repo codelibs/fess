@@ -81,28 +81,28 @@ public class Crawler implements Serializable {
     @Resource
     protected DynamicProperties systemProperties;
 
-    protected static class Options {
+    public static class Options {
 
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
-        protected String sessionId;
+        public String sessionId;
 
         @Option(name = "-n", aliases = "--name", metaVar = "name", usage = "Name")
-        protected String name;
+        public String name;
 
         @Option(name = "-w", aliases = "--webConfigIds", metaVar = "webConfigIds", usage = "Web Config IDs")
-        protected String webConfigIds;
+        public String webConfigIds;
 
         @Option(name = "-f", aliases = "--fileConfigIds", metaVar = "fileConfigIds", usage = "File Config IDs")
-        protected String fileConfigIds;
+        public String fileConfigIds;
 
         @Option(name = "-d", aliases = "--dataConfigIds", metaVar = "dataConfigIds", usage = "Data Config IDs")
-        protected String dataConfigIds;
+        public String dataConfigIds;
 
         @Option(name = "-p", aliases = "--properties", metaVar = "properties", usage = "Properties File")
-        protected String propertiesPath;
+        public String propertiesPath;
 
         @Option(name = "-e", aliases = "--expires", metaVar = "expires", usage = "Expires for documents")
-        protected String expires;
+        public String expires;
 
         protected Options() {
             // noghing
@@ -403,7 +403,7 @@ public class Crawler implements Serializable {
         }
     }
 
-    private void writeTimeToSessionInfo(final CrawlingInfoHelper crawlingInfoHelper, final String key) {
+    protected void writeTimeToSessionInfo(final CrawlingInfoHelper crawlingInfoHelper, final String key) {
         if (crawlingInfoHelper != null) {
             final SimpleDateFormat dateFormat = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
             crawlingInfoHelper.putToInfoMap(key, dateFormat.format(new Date()));
