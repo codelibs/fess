@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 import javax.annotation.Resource;
 
 import org.codelibs.fess.app.web.base.FessAdminAction;
@@ -146,7 +149,7 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
         direction.directRequest(createUserLocaleProcessProvider(), createUserTimeZoneProcessProvider());
         direction.directCookie(createCookieResourceProvider());
         direction.directAdjustment(createActionAdjustmentProvider());
-        direction.directMessage(nameList -> nameList.add("fess_message"), "fess_label");
+        direction.directMessage(createMessageNameList(), "fess_label");
         direction.directApiCall(createApiFailureHook());
         direction.directMultipart(() -> new FessMultipartRequestHandler());
         direction.directHtmlRendering(new JspHtmlRenderingProvider() {
@@ -159,6 +162,10 @@ public class FessFwAssistantDirector extends CachedFwAssistantDirector {
                 }
             };
         });
+    }
+
+    protected Consumer<List<String>> createMessageNameList() {
+        return nameList -> nameList.add("fess_message");
     }
 
     protected FessUserLocaleProcessProvider createUserLocaleProcessProvider() {
