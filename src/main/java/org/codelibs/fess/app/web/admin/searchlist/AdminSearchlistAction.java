@@ -31,7 +31,6 @@ import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -56,8 +55,6 @@ public class AdminSearchlistAction extends FessAdminAction {
     // ===================================================================================
     // Attribute
     // =========
-    @Resource
-    private SystemHelper systemHelper;
 
     @Resource
     protected FessEsClient fessEsClient;

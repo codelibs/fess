@@ -31,7 +31,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.config.exentity.DataConfig;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -59,8 +58,6 @@ public class AdminDataconfigAction extends FessAdminAction {
     private LabelTypeService labelTypeService;
     @Resource
     protected DataStoreFactory dataStoreFactory;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

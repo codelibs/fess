@@ -31,7 +31,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
 import org.codelibs.fess.es.config.exentity.FileConfig;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -55,8 +54,6 @@ public class AdminFileauthAction extends FessAdminAction {
     private FileAuthenticationService fileAuthenticationService;
     @Resource
     private FileAuthPager fileAuthenticationPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     @Resource
     protected FileConfigService fileConfigService;

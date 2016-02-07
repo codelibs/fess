@@ -29,12 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
-
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.di.exception.IORuntimeException;
 import org.lastaflute.web.Execute;
@@ -47,9 +44,6 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author Keiichi Watanabe
  */
 public class AdminLogAction extends FessAdminAction {
-
-    @Resource
-    private SystemHelper systemHelper;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {

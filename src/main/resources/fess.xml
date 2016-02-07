@@ -23,9 +23,6 @@
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">
- 		<postConstruct name="addAdminRoles">
- 			<arg>["fess"]</arg>
- 		</postConstruct>
 		<postConstruct name="addDesignJspFileName">
 			<arg>"index"</arg>
 			<arg>"index.jsp"</arg>

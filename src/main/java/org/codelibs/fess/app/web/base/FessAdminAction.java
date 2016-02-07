@@ -17,11 +17,13 @@ package org.codelibs.fess.app.web.base;
 
 import java.util.function.Consumer;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ActivityUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
@@ -40,9 +42,18 @@ public abstract class FessAdminAction extends FessBaseAction {
     //                                                                           Attribute
     //                                                                           =========
 
+    @Resource
+    protected SystemHelper systemHelper;
+
     // ===================================================================================
     //                                                                        Small Helper
     //                                                                        ============
+
+    @Override
+    protected void setupHtmlData(final ActionRuntime runtime) {
+        super.setupHtmlData(runtime);
+        systemHelper.setupAdminHtmlData(this, runtime);
+    }
 
     protected void write(final String path, final byte[] data) {
         LdiFileUtil.write(path, data);

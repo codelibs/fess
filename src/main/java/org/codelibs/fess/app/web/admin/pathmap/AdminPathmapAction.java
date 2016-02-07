@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.PathMapping;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -46,8 +45,6 @@ public class AdminPathmapAction extends FessAdminAction {
     private PathMappingService pathMappingService;
     @Resource
     private PathMapPager pathMapPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

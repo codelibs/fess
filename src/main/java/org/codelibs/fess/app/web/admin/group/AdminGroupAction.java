@@ -25,7 +25,6 @@ import org.codelibs.fess.app.service.GroupService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.user.exentity.Group;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -47,8 +46,6 @@ public class AdminGroupAction extends FessAdminAction {
     private GroupService groupService;
     @Resource
     private GroupPager groupPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

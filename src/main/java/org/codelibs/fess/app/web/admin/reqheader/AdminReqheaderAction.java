@@ -31,7 +31,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -58,8 +57,6 @@ public class AdminReqheaderAction extends FessAdminAction {
     private ReqHeaderPager reqHeaderPager;
     @Resource
     protected WebConfigService webConfigService;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

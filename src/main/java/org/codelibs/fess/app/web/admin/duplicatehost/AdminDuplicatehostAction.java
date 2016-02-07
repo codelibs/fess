@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -45,8 +44,6 @@ public class AdminDuplicatehostAction extends FessAdminAction {
     private DuplicateHostService duplicateHostService;
     @Resource
     private DuplicateHostPager duplicateHostPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

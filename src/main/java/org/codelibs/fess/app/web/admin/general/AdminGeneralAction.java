@@ -27,7 +27,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
@@ -52,8 +51,6 @@ public class AdminGeneralAction extends FessAdminAction {
     //                                                                           =========
     @Resource
     protected DynamicProperties systemProperties;
-    @Resource
-    protected SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

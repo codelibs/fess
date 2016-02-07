@@ -19,7 +19,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.api.es.EsApiManager;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -34,9 +33,6 @@ public class AdminDashboardAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-
-    @Resource
-    protected SystemHelper systemHelper;
 
     @Resource
     protected EsApiManager esApiManager;

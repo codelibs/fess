@@ -23,7 +23,6 @@ import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -44,8 +43,6 @@ public class AdminBoostdocAction extends FessAdminAction {
     private BoostDocumentRuleService boostDocumentRuleService;
     @Resource
     private BoostDocPager boostDocPager;
-    @Resource
-    private SystemHelper systemHelper;
 
     // ===================================================================================
     //                                                                               Hook

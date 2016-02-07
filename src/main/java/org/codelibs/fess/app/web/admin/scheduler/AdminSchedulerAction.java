@@ -26,7 +26,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.helper.ProcessHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -49,8 +48,6 @@ public class AdminSchedulerAction extends FessAdminAction {
     private ScheduledJobService scheduledJobService;
     @Resource
     private SchedulerPager schedulerPager;
-    @Resource
-    private SystemHelper systemHelper;
     @Resource
     protected ProcessHelper processHelper;
 

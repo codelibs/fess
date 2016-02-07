@@ -36,7 +36,6 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.BadWord;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.SuggestHelper;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -58,8 +57,6 @@ public class AdminBadwordAction extends FessAdminAction {
     private BadWordService badWordService;
     @Resource
     private BadWordPager badWordPager;
-    @Resource
-    private SystemHelper systemHelper;
     @Resource
     protected DynamicProperties systemProperties;
     @Resource

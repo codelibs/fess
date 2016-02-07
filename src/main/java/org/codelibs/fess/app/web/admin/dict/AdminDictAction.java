@@ -21,7 +21,6 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.codelibs.fess.dict.DictionaryItem;
 import org.codelibs.fess.dict.DictionaryManager;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -35,8 +34,6 @@ public class AdminDictAction extends FessAdminAction {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
-    protected SystemHelper systemHelper;
     @Resource
     protected DictionaryManager dictionaryManager;
 
