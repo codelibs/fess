@@ -779,7 +779,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search */
     public static final String LABELS_index_form_search_btn = "{labels.index_form_search_btn}";
 
-    /** The key of the message: Fess Search */
+    /** The key of the message: Search */
     public static final String LABELS_index_osdd_title = "{labels.index_osdd_title}";
 
     /** The key of the message: Options */

@@ -102,6 +102,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. jpg,jpeg,gif,png,swf */
     String SUPPORTED_UPLOADED_MEDIA_EXTENTIONS = "supported.uploaded.media.extentions";
 
+    /** The key of the configuration. e.g. license.properties */
+    String SUPPORTED_UPLOADED_FILES = "supported.uploaded.files";
+
     /** The key of the configuration. e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
@@ -803,6 +806,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedUploadedMediaExtentions();
+
+    /**
+     * Get the value for the key 'supported.uploaded.files'. <br>
+     * The value is, e.g. license.properties <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedUploadedFiles();
 
     /**
      * Get the value for the key 'supported.languages'. <br>
@@ -2521,6 +2531,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSupportedUploadedMediaExtentions() {
             return get(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS);
+        }
+
+        public String getSupportedUploadedFiles() {
+            return get(FessConfig.SUPPORTED_UPLOADED_FILES);
         }
 
         public String getSupportedLanguages() {
