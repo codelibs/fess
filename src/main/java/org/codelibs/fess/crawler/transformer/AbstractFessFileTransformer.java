@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
@@ -79,12 +78,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     @Override
     public ResultData transform(final ResponseData responseData) {
-        if (responseData == null || responseData.getResponseBody() == null) {
+        if (responseData == null || !responseData.hasResponseBody()) {
             throw new CrawlingAccessException("No response body.");
         }
 
         final Extractor extractor = getExtractor(responseData);
-        final InputStream in = responseData.getResponseBody();
         final Map<String, String> params = new HashMap<String, String>();
         params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
         final String mimeType = responseData.getMimeType();
@@ -94,7 +92,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Map<String, Object> dataMap = new HashMap<String, Object>();
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
-        try {
+        try (final InputStream in = responseData.getResponseBody()) {
             final ExtractData extractData = extractor.getText(in, params);
             content = extractData.getContent();
             if (fessConfig.isCrawlerDocumentFileIgnoreEmptyContent() && StringUtil.isBlank(content)) {
@@ -148,8 +146,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             final CrawlingAccessException rcae = new CrawlingAccessException("Could not get a text from " + responseData.getUrl(), e);
             rcae.setLogLevel(CrawlingAccessException.WARN);
             throw rcae;
-        } finally {
-            IOUtils.closeQuietly(in);
         }
         if (content == null) {
             content = StringUtil.EMPTY;
@@ -308,7 +304,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // TODO date
-        // TODO lang
+        // lang
+        if (StringUtil.isNotBlank(fessConfig.getCrawlerDocumentFileDefaultLang())) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), fessConfig.getCrawlerDocumentFileDefaultLang());
+        }
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));
         // parentId

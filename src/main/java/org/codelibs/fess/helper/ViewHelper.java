@@ -527,7 +527,7 @@ public class ViewHelper implements Serializable {
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
         response.stream(out -> {
-            try (InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
+            try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);
             } catch (final IOException e) {
                 if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
