@@ -176,6 +176,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT = "crawler.document.file.append.body.content";
 
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_LANG = "crawler.document.file.default.lang";
+
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
 
@@ -1064,6 +1067,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentFileAppendBodyContent();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.lang'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultLang();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.lang' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultLangAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -2671,6 +2689,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentFileAppendBodyContent() {
             return is(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT);
+        }
+
+        public String getCrawlerDocumentFileDefaultLang() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultLangAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
         }
 
         public String getCrawlerDocumentCacheEnable() {
