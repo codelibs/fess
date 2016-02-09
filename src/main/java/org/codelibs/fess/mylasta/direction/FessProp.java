@@ -411,4 +411,12 @@ public interface FessProp {
         }
         return null;
     }
+
+    String getSupportedUploadedFiles();
+
+    public default boolean isSupportedUploadedFile(String name) {
+        return StreamUtil.of(getSuggestPopularWordExcludes().split(",")).filter(s -> StringUtil.isNotBlank(s))
+                .anyMatch(s -> s.equals(name));
+    }
+
 }

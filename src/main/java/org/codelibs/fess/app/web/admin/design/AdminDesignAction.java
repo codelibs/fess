@@ -27,6 +27,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -134,22 +135,26 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), () -> asListHtml());
         }
 
-        String baseDir = null;
+        File uploadFile = null;
         // normalize filename
         if (checkFileType(fileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())) {
-            baseDir = "/images/";
+            uploadFile = new File(getServletContext().getRealPath("/images/" + fileName));
         } else if (checkFileType(fileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedCssExtentionsAsArray())) {
-            baseDir = "/css/";
+            uploadFile = new File(getServletContext().getRealPath("/css/" + fileName));
         } else if (checkFileType(fileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedJsExtentionsAsArray())) {
-            baseDir = "/js/";
+            uploadFile = new File(getServletContext().getRealPath("/js/" + fileName));
+        } else if (fessConfig.isSupportedUploadedFile(fileName) || fessConfig.isSupportedUploadedFile(uploadedFileName)) {
+            uploadFile = ResourceUtil.getResourceAsFileNoException(fileName);
+            if (uploadFile == null) {
+                throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFileName"), () -> asListHtml());
+            }
         } else {
             throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), () -> asListHtml());
         }
 
-        final File uploadFile = new File(getServletContext().getRealPath(baseDir + fileName));
         final File parentFile = uploadFile.getParentFile();
         if (!parentFile.exists() && !parentFile.mkdirs()) {
             logger.warn("Could not create " + parentFile.getAbsolutePath());

@@ -102,6 +102,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. jpg,jpeg,gif,png,swf */
     String SUPPORTED_UPLOADED_MEDIA_EXTENTIONS = "supported.uploaded.media.extentions";
 
+    /** The key of the configuration. e.g. license.properties */
+    String SUPPORTED_UPLOADED_FILES = "supported.uploaded.files";
+
     /** The key of the configuration. e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
@@ -172,6 +175,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT = "crawler.document.file.append.body.content";
+
+    /** The key of the configuration. e.g.  */
+    String CRAWLER_DOCUMENT_FILE_DEFAULT_LANG = "crawler.document.file.default.lang";
 
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
@@ -805,6 +811,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSupportedUploadedMediaExtentions();
 
     /**
+     * Get the value for the key 'supported.uploaded.files'. <br>
+     * The value is, e.g. license.properties <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSupportedUploadedFiles();
+
+    /**
      * Get the value for the key 'supported.languages'. <br>
      * The value is, e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1054,6 +1067,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentFileAppendBodyContent();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.lang'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentFileDefaultLang();
+
+    /**
+     * Get the value for the key 'crawler.document.file.default.lang' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentFileDefaultLangAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.cache.enable'. <br>
@@ -2523,6 +2551,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.SUPPORTED_UPLOADED_MEDIA_EXTENTIONS);
         }
 
+        public String getSupportedUploadedFiles() {
+            return get(FessConfig.SUPPORTED_UPLOADED_FILES);
+        }
+
         public String getSupportedLanguages() {
             return get(FessConfig.SUPPORTED_LANGUAGES);
         }
@@ -2657,6 +2689,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentFileAppendBodyContent() {
             return is(FessConfig.CRAWLER_DOCUMENT_FILE_APPEND_BODY_CONTENT);
+        }
+
+        public String getCrawlerDocumentFileDefaultLang() {
+            return get(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
+        }
+
+        public Integer getCrawlerDocumentFileDefaultLangAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
         }
 
         public String getCrawlerDocumentCacheEnable() {

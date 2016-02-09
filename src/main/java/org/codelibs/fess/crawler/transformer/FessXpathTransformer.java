@@ -16,9 +16,6 @@
 package org.codelibs.fess.crawler.transformer;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,7 +30,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.xml.transform.TransformerException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xpath.objects.XObject;
 import org.codelibs.core.io.InputStreamUtil;
@@ -51,7 +47,6 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
-import org.codelibs.fess.crawler.util.ResponseDataUtil;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -99,88 +94,67 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     @Override
     protected void storeData(final ResponseData responseData, final ResultData resultData) {
-        final File tempFile = ResponseDataUtil.createResponseBodyFile(responseData);
-        try {
-            final DOMParser parser = getDomParser();
-            BufferedInputStream bis = null;
+        final DOMParser parser = getDomParser();
+        try (final BufferedInputStream bis = new BufferedInputStream(responseData.getResponseBody())) {
+            final byte[] bomBytes = new byte[UTF8_BOM_SIZE];
+            bis.mark(UTF8_BOM_SIZE);
+            bis.read(bomBytes); // NOSONAR
+            if (!isUtf8BomBytes(bomBytes)) {
+                bis.reset();
+            }
+            final InputSource is = new InputSource(bis);
+            if (responseData.getCharSet() != null) {
+                is.setEncoding(responseData.getCharSet());
+            }
+            parser.parse(is);
+        } catch (final Exception e) {
+            throw new CrawlingAccessException("Could not parse " + responseData.getUrl(), e);
+        }
+
+        final Document document = parser.getDocument();
+
+        final Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
+        for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
+            final String path = entry.getValue();
             try {
-                bis = new BufferedInputStream(new FileInputStream(tempFile));
-                final byte[] bomBytes = new byte[UTF8_BOM_SIZE];
-                bis.mark(UTF8_BOM_SIZE);
-                bis.read(bomBytes); // NOSONAR
-                if (!isUtf8BomBytes(bomBytes)) {
-                    bis.reset();
+                final XObject xObj = getXPathAPI().eval(document, path);
+                final int type = xObj.getType();
+                switch (type) {
+                case XObject.CLASS_BOOLEAN:
+                    final boolean b = xObj.bool();
+                    putResultDataBody(dataMap, entry.getKey(), Boolean.toString(b));
+                    break;
+                case XObject.CLASS_NUMBER:
+                    final double d = xObj.num();
+                    putResultDataBody(dataMap, entry.getKey(), Double.toString(d));
+                    break;
+                case XObject.CLASS_STRING:
+                    final String str = xObj.str();
+                    putResultDataBody(dataMap, entry.getKey(), str);
+                    break;
+                case XObject.CLASS_NULL:
+                case XObject.CLASS_UNKNOWN:
+                case XObject.CLASS_NODESET:
+                case XObject.CLASS_RTREEFRAG:
+                case XObject.CLASS_UNRESOLVEDVARIABLE:
+                default:
+                    final Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
+                    putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
+                    break;
                 }
-                final InputSource is = new InputSource(bis);
-                if (responseData.getCharSet() != null) {
-                    is.setEncoding(responseData.getCharSet());
-                }
-                parser.parse(is);
-            } catch (final Exception e) {
-                throw new CrawlingAccessException("Could not parse " + responseData.getUrl(), e);
-            } finally {
-                IOUtils.closeQuietly(bis);
-            }
-
-            final Document document = parser.getDocument();
-
-            final Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
-            for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
-                final String path = entry.getValue();
-                try {
-                    final XObject xObj = getXPathAPI().eval(document, path);
-                    final int type = xObj.getType();
-                    switch (type) {
-                    case XObject.CLASS_BOOLEAN:
-                        final boolean b = xObj.bool();
-                        putResultDataBody(dataMap, entry.getKey(), Boolean.toString(b));
-                        break;
-                    case XObject.CLASS_NUMBER:
-                        final double d = xObj.num();
-                        putResultDataBody(dataMap, entry.getKey(), Double.toString(d));
-                        break;
-                    case XObject.CLASS_STRING:
-                        final String str = xObj.str();
-                        putResultDataBody(dataMap, entry.getKey(), str);
-                        break;
-                    case XObject.CLASS_NULL:
-                    case XObject.CLASS_UNKNOWN:
-                    case XObject.CLASS_NODESET:
-                    case XObject.CLASS_RTREEFRAG:
-                    case XObject.CLASS_UNRESOLVEDVARIABLE:
-                    default:
-                        final Node value = getXPathAPI().selectSingleNode(document, entry.getValue());
-                        putResultDataBody(dataMap, entry.getKey(), value != null ? value.getTextContent() : null);
-                        break;
-                    }
-                } catch (final TransformerException e) {
-                    logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue());
-                }
-            }
-
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(tempFile);
-                responseData.setResponseBody(fis);
-                putAdditionalData(dataMap, responseData, document);
-            } catch (final FileNotFoundException e) {
-                logger.warn(tempFile + " does not exist.", e);
-                putAdditionalData(dataMap, responseData, document);
-            } finally {
-                IOUtils.closeQuietly(fis);
-            }
-
-            try {
-                resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
-            } catch (final Exception e) {
-                throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
-            }
-            resultData.setEncoding(charsetName);
-        } finally {
-            if (!tempFile.delete()) {
-                logger.warn("Could not delete a temp file: " + tempFile);
+            } catch (final TransformerException e) {
+                logger.warn("Could not parse a value of " + entry.getKey() + ":" + entry.getValue());
             }
         }
+
+        putAdditionalData(dataMap, responseData, document);
+
+        try {
+            resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
+        } catch (final Exception e) {
+            throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
+        }
+        resultData.setEncoding(charsetName);
     }
 
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {
@@ -243,10 +217,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 if (charSet == null) {
                     charSet = Constants.UTF_8;
                 }
-                try {
+                try (final BufferedInputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                     // cache
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldCache(),
-                            new String(InputStreamUtil.getBytes(responseData.getResponseBody()), charSet));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldCache(), new String(InputStreamUtil.getBytes(is), charSet));
                     putResultDataBody(dataMap, fessConfig.getIndexFieldHasCache(), Constants.TRUE);
                 } catch (final Exception e) {
                     logger.warn("Failed to write a cache: " + sessionId + ":" + responseData, e);

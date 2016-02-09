@@ -161,7 +161,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
             } finally {
                 if (responseData != null) {
-                    IOUtils.closeQuietly(responseData.getResponseBody());
+                    IOUtils.closeQuietly(responseData);
                 }
             }
         }
