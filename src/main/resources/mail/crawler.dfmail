@@ -5,29 +5,29 @@
 subject: [FESS] Crawler completed: /*pmb.hostname*/
 >>>
 --- Server Info ---
-Host Name: /*IF pmb.hostname != null*//*pmb.hostname*//*END*//*IF pmb.hostname == null*/Unknown/*END*/
+Host Name: /*pmb.hostname:orElse('Unknown')*/
 
 --- Web/FileSystem Crawler ---
-Start Time: /*pmb.webFsCrawlStartTime*/
-End Time:   /*pmb.webFsCrawlEndTime*/
-Exec Time:  /*pmb.webFsCrawlExecTime*/ ms
+Start Time: /*pmb.webFsCrawlStartTime:orElse('-')*/
+End Time:   /*pmb.webFsCrawlEndTime:orElse('-')*/
+Exec Time:  /*pmb.webFsCrawlExecTime:orElse('-')*/ ms
 
 --- Web/FileSystem Indexer ---
-Exec Time:  /*pmb.webFsIndexExecTime*/ ms
-Num of Doc: /*pmb.webFsIndexSize*/ docs
+Exec Time:  /*pmb.webFsIndexExecTime:orElse('-')*/ ms
+Num of Doc: /*pmb.webFsIndexSize:orElse('-')*/ docs
 
 --- Data Store Crawler ---
-Start Time: /*pmb.dataCrawlStartTime*/
-End Time:   /*pmb.dataCrawlEndTime*/
-Exec Time:  /*pmb.dataCrawlExecTime*/ ms
+Start Time: /*pmb.dataCrawlStartTime:orElse('-')*/
+End Time:   /*pmb.dataCrawlEndTime:orElse('-')*/
+Exec Time:  /*pmb.dataCrawlExecTime:orElse('-')*/ ms
 
 --- Data Store Indexer ---
-Exec Time:  /*pmb.dataIndexExecTime*/ ms
-Num of Doc: /*pmb.dataFsIndexSize*/ docs
+Exec Time:  /*pmb.dataIndexExecTime:orElse('-')*/ ms
+Num of Doc: /*pmb.dataFsIndexSize:orElse('-')*/ docs
 
 --- Total ---
-Start Time: /*pmb.crawlerStartTime*/
-End Time:   /*pmb.crawlerEndTime*/
-Exec Time:  /*pmb.crawlerExecTime*/ ms
-Status:     /*pmb.status*/
+Start Time: /*pmb.crawlerStartTime:orElse('-')*/
+End Time:   /*pmb.crawlerEndTime:orElse('-')*/
+Exec Time:  /*pmb.crawlerExecTime:orElse('-')*/ ms
+Status:     /*pmb.status:orElse('-')*/
 

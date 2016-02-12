@@ -1,10 +1,11 @@
 /*
  [Crawler Notification]
 */
-subject: [FESS] Status Change: /*pmb.hostname*/
+subject: [FESS] Status Change: /*pmb.hostname:orElse('Unknown')*/
 >>>
 --- Server Info ---
-Host Name: /*IF pmb.hostname != null*//*pmb.hostname*//*END*//*IF pmb.hostname == null*/Unknown/*END*/
+Host Name: /*pmb.hostname:orElse('Unknown')*/
+
 Elasticsearch: /*pmb.server*/
 
 --- Status ---
