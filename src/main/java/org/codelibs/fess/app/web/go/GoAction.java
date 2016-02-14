@@ -60,10 +60,10 @@ public class GoAction extends FessSearchAction {
     //                                                                      ==============
     @Execute
     public ActionResponse index(final GoForm form) throws IOException {
+        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
         if (isLoginRequired()) {
             return redirectToLogin();
         }
-        validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
 
         Map<String, Object> doc = null;
         try {
