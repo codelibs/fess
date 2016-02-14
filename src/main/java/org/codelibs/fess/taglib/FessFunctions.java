@@ -78,11 +78,15 @@ public class FessFunctions {
     }
 
     public static Date parseDate(final String value) {
+        return parseDate(value, Constants.ISO_DATETIME_FORMAT);
+    }
+
+    public static Date parseDate(final String value, String format) {
         if (value == null) {
             return null;
         }
         try {
-            final SimpleDateFormat sdf = new SimpleDateFormat(Constants.ISO_DATETIME_FORMAT);
+            final SimpleDateFormat sdf = new SimpleDateFormat(format);
             sdf.setTimeZone(Constants.TIMEZONE_UTC);
             return sdf.parse(value);
         } catch (final ParseException e) {
