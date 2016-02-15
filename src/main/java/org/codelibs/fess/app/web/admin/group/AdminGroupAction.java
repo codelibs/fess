@@ -32,12 +32,16 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminGroupAction extends FessAdminAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminGroupAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -166,8 +170,13 @@ public class AdminGroupAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(entity -> {
-            groupService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            try {
+                groupService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (Exception e) {
+                logger.error("Failed to add " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+            }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
         });
@@ -180,8 +189,13 @@ public class AdminGroupAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
         getGroup(form).ifPresent(entity -> {
-            groupService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            try {
+                groupService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (Exception e) {
+                logger.error("Failed to update " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+            }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
@@ -195,8 +209,13 @@ public class AdminGroupAction extends FessAdminAction {
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         groupService.getGroup(id).ifPresent(entity -> {
-            groupService.delete(entity);
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            try {
+                groupService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (Exception e) {
+                logger.error("Failed to delete " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+            }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });

@@ -27,6 +27,7 @@ import org.codelibs.fess.es.user.cbean.RoleCB;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -61,6 +62,7 @@ public class RoleService implements Serializable {
     }
 
     public void store(final Role role) {
+        ComponentUtil.getLdapManager().insert(role);
 
         roleBhv.insertOrUpdate(role, op -> {
             op.setRefresh(true);
@@ -69,6 +71,7 @@ public class RoleService implements Serializable {
     }
 
     public void delete(final Role role) {
+        ComponentUtil.getLdapManager().delete(role);
 
         roleBhv.delete(role, op -> {
             op.setRefresh(true);

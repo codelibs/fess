@@ -27,6 +27,7 @@ import org.codelibs.fess.es.user.cbean.GroupCB;
 import org.codelibs.fess.es.user.exbhv.GroupBhv;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -61,6 +62,7 @@ public class GroupService implements Serializable {
     }
 
     public void store(final Group group) {
+        ComponentUtil.getLdapManager().insert(group);
 
         groupBhv.insertOrUpdate(group, op -> {
             op.setRefresh(true);
@@ -69,6 +71,7 @@ public class GroupService implements Serializable {
     }
 
     public void delete(final Group group) {
+        ComponentUtil.getLdapManager().delete(group);
 
         groupBhv.delete(group, op -> {
             op.setRefresh(true);

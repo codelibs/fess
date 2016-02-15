@@ -210,7 +210,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         // content
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), getDocumentContent(responseData, document));
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
-                .isCrawlerDocumentCacheEnable()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+                .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
                 String charSet = responseData.getCharSet();

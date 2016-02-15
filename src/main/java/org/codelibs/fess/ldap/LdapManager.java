@@ -24,6 +24,8 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
@@ -31,10 +33,15 @@ import javax.naming.directory.SearchResult;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.es.user.exentity.Group;
+import org.codelibs.fess.es.user.exentity.Role;
+import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
+import org.lastaflute.core.security.PrimaryCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,20 +50,16 @@ public class LdapManager {
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final String providerUrl = fessConfig.getLdapProviderUrl();
 
-        if (StringUtil.isBlank(providerUrl)) {
+        if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
             return OptionalEntity.empty();
         }
 
         DirContext ctx = null;
         try {
-            final Hashtable<String, String> env = new Hashtable<>();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, fessConfig.getLdapInitialContextFactory());
-            env.put(Context.SECURITY_AUTHENTICATION, fessConfig.getLdapSecurityAuthentication());
-            env.put(Context.PROVIDER_URL, providerUrl);
-            env.put(Context.SECURITY_PRINCIPAL, fessConfig.getLdapSecurityPrincipal(username));
-            env.put(Context.SECURITY_CREDENTIALS, password);
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapInitialContextFactory(), fessConfig.getLdapSecurityAuthentication(),
+                            fessConfig.getLdapProviderUrl(), fessConfig.getLdapSecurityPrincipal(username), password);
             ctx = new InitialDirContext(env);
             if (logger.isDebugEnabled()) {
                 logger.debug("Logged in.", ctx);
@@ -74,6 +77,17 @@ public class LdapManager {
             }
         }
         return OptionalEntity.empty();
+    }
+
+    protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
+            String providerUrl, String principal, String credntials) {
+        final Hashtable<String, String> env = new Hashtable<>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+        env.put(Context.SECURITY_AUTHENTICATION, securityAuthentication);
+        env.put(Context.PROVIDER_URL, providerUrl);
+        env.put(Context.SECURITY_PRINCIPAL, principal);
+        env.put(Context.SECURITY_CREDENTIALS, credntials);
+        return env;
     }
 
     protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
@@ -148,5 +162,175 @@ public class LdapManager {
         }
 
         return roleList.toArray(new String[roleList.size()]);
+    }
+
+    public void insert(User user) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            BasicAttributes entry = new BasicAttributes();
+
+            String entryDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
+
+            addUserAttributes(entry, user, fessConfig);
+
+            Attribute oc = fessConfig.getLdapAdminUserObjectClassAttribute();
+            entry.put(oc);
+
+            // TODO role and group
+
+            ctx.createSubcontext(entryDN, entry);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to add " + user, e);
+        }
+    }
+
+    protected void addUserAttributes(final BasicAttributes entry, final User user, final FessConfig fessConfig) {
+        final PrimaryCipher cipher = ComponentUtil.getComponent(PrimaryCipher.class);
+        entry.put(new BasicAttribute("cn", user.getName()));
+        entry.put(new BasicAttribute("sn", user.getName()));
+        entry.put(new BasicAttribute("userPassword", fessConfig.getLdapAdminDigestAlgorismPrefix() + cipher.oneway(user.getPassword())));
+    }
+
+    public void delete(User user) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            String entryDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
+
+            ctx.destroySubcontext(entryDN);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to delete " + user, e);
+        }
+    }
+
+    public void insert(Role role) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            BasicAttributes entry = new BasicAttributes();
+
+            String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
+
+            addRoleAttributes(entry, role, fessConfig);
+
+            Attribute oc = fessConfig.getLdapAdminRoleObjectClassAttribute();
+            entry.put(oc);
+
+            ctx.createSubcontext(entryDN, entry);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to add " + role, e);
+        }
+    }
+
+    protected void addRoleAttributes(final BasicAttributes entry, final Role user, final FessConfig fessConfig) {
+        // nothing
+    }
+
+    public void delete(Role role) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
+
+            ctx.destroySubcontext(entryDN);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to delete " + role, e);
+        }
+    }
+
+    public void insert(Group group) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            BasicAttributes entry = new BasicAttributes();
+
+            String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
+
+            addGroupAttributes(entry, group, fessConfig);
+
+            Attribute oc = fessConfig.getLdapAdminGroupObjectClassAttribute();
+            entry.put(oc);
+
+            ctx.createSubcontext(entryDN, entry);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to add " + group, e);
+        }
+    }
+
+    protected void addGroupAttributes(final BasicAttributes entry, final Group group, final FessConfig fessConfig) {
+        // nothing
+    }
+
+    public void delete(Group group) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        DirContext ctx = null;
+        try {
+            final Hashtable<String, String> env =
+                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                            fessConfig.getLdapAdminSecurityCredentials());
+            ctx = new InitialDirContext(env);
+
+            String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
+
+            ctx.destroySubcontext(entryDN);
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to delete " + group, e);
+        }
     }
 }

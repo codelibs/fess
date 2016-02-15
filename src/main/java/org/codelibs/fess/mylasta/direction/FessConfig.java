@@ -180,7 +180,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_DOCUMENT_FILE_DEFAULT_LANG = "crawler.document.file.default.lang";
 
     /** The key of the configuration. e.g. true */
-    String CRAWLER_DOCUMENT_CACHE_ENABLE = "crawler.document.cache.enable";
+    String CRAWLER_DOCUMENT_CACHE_ENABLED = "crawler.document.cache.enabled";
 
     /** The key of the configuration. e.g. 2621440 */
     String CRAWLER_DOCUMENT_CACHE_MAX_SIZE = "crawler.document.cache.max.size";
@@ -613,6 +613,45 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. guest */
     String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
+
+    /** The key of the configuration. e.g. true */
+    String LDAP_ADMIN_ENABLED = "ldap.admin.enabled";
+
+    /** The key of the configuration. e.g. com.sun.jndi.ldap.LdapCtxFactory */
+    String LDAP_ADMIN_INITIAL_CONTEXT_FACTORY = "ldap.admin.initial.context.factory";
+
+    /** The key of the configuration. e.g. simple */
+    String LDAP_ADMIN_SECURITY_AUTHENTICATION = "ldap.admin.security.authentication";
+
+    /** The key of the configuration. e.g. ldap://localhost:1389 */
+    String LDAP_ADMIN_PROVIDER_URL = "ldap.admin.provider.url";
+
+    /** The key of the configuration. e.g. cn=Directory Manager */
+    String LDAP_ADMIN_SECURITY_PRINCIPAL = "ldap.admin.security.principal";
+
+    /** The key of the configuration. e.g. password */
+    String LDAP_ADMIN_SECURITY_CREDENTIALS = "ldap.admin.security.credentials";
+
+    /** The key of the configuration. e.g. uid=%s,ou=People,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_USER_SECURITY_PRINCIPAL = "ldap.admin.user.security.principal";
+
+    /** The key of the configuration. e.g. organizationalPerson,top,person,inetOrgPerson */
+    String LDAP_ADMIN_USER_OBJECT_CLASSES = "ldap.admin.user.object.classes";
+
+    /** The key of the configuration. e.g. cn=%s,ou=Role,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_ROLE_SECURITY_PRINCIPAL = "ldap.admin.role.security.principal";
+
+    /** The key of the configuration. e.g. groupOfNames */
+    String LDAP_ADMIN_ROLE_OBJECT_CLASSES = "ldap.admin.role.object.classes";
+
+    /** The key of the configuration. e.g. cn=%s,ou=Group,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_GROUP_SECURITY_PRINCIPAL = "ldap.admin.group.security.principal";
+
+    /** The key of the configuration. e.g. groupOfNames */
+    String LDAP_ADMIN_GROUP_OBJECT_CLASSES = "ldap.admin.group.object.classes";
+
+    /** The key of the configuration. e.g. {SHA256} */
+    String LDAP_ADMIN_DIGEST_ALGORISM_PREFIX = "ldap.admin.digest.algorism.prefix";
 
     /**
      * Get the value of property as {@link String}.
@@ -1084,20 +1123,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getCrawlerDocumentFileDefaultLangAsInteger();
 
     /**
-     * Get the value for the key 'crawler.document.cache.enable'. <br>
+     * Get the value for the key 'crawler.document.cache.enabled'. <br>
      * The value is, e.g. true <br>
      * comment: cache
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getCrawlerDocumentCacheEnable();
+    String getCrawlerDocumentCacheEnabled();
 
     /**
-     * Is the property for the key 'crawler.document.cache.enable' true? <br>
+     * Is the property for the key 'crawler.document.cache.enabled' true? <br>
      * The value is, e.g. true <br>
      * comment: cache
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
-    boolean isCrawlerDocumentCacheEnable();
+    boolean isCrawlerDocumentCacheEnabled();
 
     /**
      * Get the value for the key 'crawler.document.cache.max.size'. <br>
@@ -2455,6 +2494,106 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSuggestRoleFilters();
 
     /**
+     * Get the value for the key 'ldap.admin.enabled'. <br>
+     * The value is, e.g. true <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminEnabled();
+
+    /**
+     * Is the property for the key 'ldap.admin.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * comment: ------
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapAdminEnabled();
+
+    /**
+     * Get the value for the key 'ldap.admin.initial.context.factory'. <br>
+     * The value is, e.g. com.sun.jndi.ldap.LdapCtxFactory <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminInitialContextFactory();
+
+    /**
+     * Get the value for the key 'ldap.admin.security.authentication'. <br>
+     * The value is, e.g. simple <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminSecurityAuthentication();
+
+    /**
+     * Get the value for the key 'ldap.admin.provider.url'. <br>
+     * The value is, e.g. ldap://localhost:1389 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminProviderUrl();
+
+    /**
+     * Get the value for the key 'ldap.admin.security.principal'. <br>
+     * The value is, e.g. cn=Directory Manager <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminSecurityPrincipal();
+
+    /**
+     * Get the value for the key 'ldap.admin.security.credentials'. <br>
+     * The value is, e.g. password <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminSecurityCredentials();
+
+    /**
+     * Get the value for the key 'ldap.admin.user.security.principal'. <br>
+     * The value is, e.g. uid=%s,ou=People,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminUserSecurityPrincipal();
+
+    /**
+     * Get the value for the key 'ldap.admin.user.object.classes'. <br>
+     * The value is, e.g. organizationalPerson,top,person,inetOrgPerson <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminUserObjectClasses();
+
+    /**
+     * Get the value for the key 'ldap.admin.role.security.principal'. <br>
+     * The value is, e.g. cn=%s,ou=Role,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminRoleSecurityPrincipal();
+
+    /**
+     * Get the value for the key 'ldap.admin.role.object.classes'. <br>
+     * The value is, e.g. groupOfNames <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminRoleObjectClasses();
+
+    /**
+     * Get the value for the key 'ldap.admin.group.security.principal'. <br>
+     * The value is, e.g. cn=%s,ou=Group,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminGroupSecurityPrincipal();
+
+    /**
+     * Get the value for the key 'ldap.admin.group.object.classes'. <br>
+     * The value is, e.g. groupOfNames <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminGroupObjectClasses();
+
+    /**
+     * Get the value for the key 'ldap.admin.digest.algorism.prefix'. <br>
+     * The value is, e.g. {SHA256} <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminDigestAlgorismPrefix();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -2699,12 +2838,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_DEFAULT_LANG);
         }
 
-        public String getCrawlerDocumentCacheEnable() {
-            return get(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLE);
+        public String getCrawlerDocumentCacheEnabled() {
+            return get(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLED);
         }
 
-        public boolean isCrawlerDocumentCacheEnable() {
-            return is(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLE);
+        public boolean isCrawlerDocumentCacheEnabled() {
+            return is(FessConfig.CRAWLER_DOCUMENT_CACHE_ENABLED);
         }
 
         public String getCrawlerDocumentCacheMaxSize() {
@@ -3409,6 +3548,62 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSuggestRoleFilters() {
             return get(FessConfig.SUGGEST_ROLE_FILTERS);
+        }
+
+        public String getLdapAdminEnabled() {
+            return get(FessConfig.LDAP_ADMIN_ENABLED);
+        }
+
+        public boolean isLdapAdminEnabled() {
+            return is(FessConfig.LDAP_ADMIN_ENABLED);
+        }
+
+        public String getLdapAdminInitialContextFactory() {
+            return get(FessConfig.LDAP_ADMIN_INITIAL_CONTEXT_FACTORY);
+        }
+
+        public String getLdapAdminSecurityAuthentication() {
+            return get(FessConfig.LDAP_ADMIN_SECURITY_AUTHENTICATION);
+        }
+
+        public String getLdapAdminProviderUrl() {
+            return get(FessConfig.LDAP_ADMIN_PROVIDER_URL);
+        }
+
+        public String getLdapAdminSecurityPrincipal() {
+            return get(FessConfig.LDAP_ADMIN_SECURITY_PRINCIPAL);
+        }
+
+        public String getLdapAdminSecurityCredentials() {
+            return get(FessConfig.LDAP_ADMIN_SECURITY_CREDENTIALS);
+        }
+
+        public String getLdapAdminUserSecurityPrincipal() {
+            return get(FessConfig.LDAP_ADMIN_USER_SECURITY_PRINCIPAL);
+        }
+
+        public String getLdapAdminUserObjectClasses() {
+            return get(FessConfig.LDAP_ADMIN_USER_OBJECT_CLASSES);
+        }
+
+        public String getLdapAdminRoleSecurityPrincipal() {
+            return get(FessConfig.LDAP_ADMIN_ROLE_SECURITY_PRINCIPAL);
+        }
+
+        public String getLdapAdminRoleObjectClasses() {
+            return get(FessConfig.LDAP_ADMIN_ROLE_OBJECT_CLASSES);
+        }
+
+        public String getLdapAdminGroupSecurityPrincipal() {
+            return get(FessConfig.LDAP_ADMIN_GROUP_SECURITY_PRINCIPAL);
+        }
+
+        public String getLdapAdminGroupObjectClasses() {
+            return get(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES);
+        }
+
+        public String getLdapAdminDigestAlgorismPrefix() {
+            return get(FessConfig.LDAP_ADMIN_DIGEST_ALGORISM_PREFIX);
         }
     }
 }

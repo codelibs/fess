@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
+
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
@@ -419,4 +422,45 @@ public interface FessProp {
                 .anyMatch(s -> s.equals(name));
     }
 
+    String getLdapAdminUserObjectClasses();
+
+    public default Attribute getLdapAdminUserObjectClassAttribute() {
+        final Attribute oc = new BasicAttribute("objectClass");
+        StreamUtil.of(getLdapAdminUserObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        return oc;
+    }
+
+    String getLdapAdminUserSecurityPrincipal();
+
+    public default String getLdapAdminUserSecurityPrincipal(final String name) {
+        return String.format(getLdapAdminUserSecurityPrincipal(), name);
+    }
+
+    String getLdapAdminRoleObjectClasses();
+
+    public default Attribute getLdapAdminRoleObjectClassAttribute() {
+        final Attribute oc = new BasicAttribute("objectClass");
+        StreamUtil.of(getLdapAdminRoleObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        return oc;
+    }
+
+    String getLdapAdminRoleSecurityPrincipal();
+
+    public default String getLdapAdminRoleSecurityPrincipal(final String name) {
+        return String.format(getLdapAdminRoleSecurityPrincipal(), name);
+    }
+
+    String getLdapAdminGroupObjectClasses();
+
+    public default Attribute getLdapAdminGroupObjectClassAttribute() {
+        final Attribute oc = new BasicAttribute("objectClass");
+        StreamUtil.of(getLdapAdminGroupObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        return oc;
+    }
+
+    String getLdapAdminGroupSecurityPrincipal();
+
+    public default String getLdapAdminGroupSecurityPrincipal(final String name) {
+        return String.format(getLdapAdminGroupSecurityPrincipal(), name);
+    }
 }

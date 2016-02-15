@@ -40,4 +40,9 @@ public class Group extends BsGroup {
         asDocMeta().id(id);
     }
 
+    @Override
+    public String toString() {
+        return "Group [name=" + name + "]";
+    }
+
 }
