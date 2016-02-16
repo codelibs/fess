@@ -54,6 +54,7 @@
 					<img src="${f:url('/images/logo.png')}"
 						alt="<la:message key="labels.index_title" />" />
 				</h1>
+				<div class="notification">${notification}</div>
 				<div>
 					<la:info id="msg" message="true">
 						<div class="alert-message info">${msg}</div>

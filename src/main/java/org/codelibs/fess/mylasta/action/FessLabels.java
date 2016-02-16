@@ -2022,8 +2022,14 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Account Filter */
     public static final String LABELS_ldap_account_filter = "{labels.ldap_account_filter}";
 
-    /** The key of the message: Send TestMail */
-    public static final String LABELS_send_testmail = "{labels.send_testmail}";
+    /** The key of the message: Login page */
+    public static final String LABELS_notification_login = "{labels.notification_login}";
+
+    /** The key of the message: Search top page */
+    public static final String LABELS_notification_search_top = "{labels.notification_search_top}";
+
+    /** The key of the message: Notification */
+    public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
 
     /** The key of the message: Back Up */
     public static final String LABELS_backup_configuration = "{labels.backup_configuration}";

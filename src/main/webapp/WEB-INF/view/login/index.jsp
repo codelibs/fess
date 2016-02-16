@@ -31,6 +31,7 @@
 			</la:link>
 		</div>
 		<!-- /.login-logo -->
+		<div class="notification">${notification}</div>
 		<div class="login-box-body">
 			<p class="login-box-msg">
 				<la:message key="labels.login" />

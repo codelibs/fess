@@ -15,8 +15,11 @@
  */
 package org.codelibs.fess.app.web;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.SearchForm;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -43,9 +46,12 @@ public class RootAction extends FessSearchAction {
             op.setup(form -> {
                 buildLabelParams(form.fields);
             });
-        }).renderWith(data -> {
-            buildInitParams();
-        });
+        }).renderWith(
+                data -> {
+                    buildInitParams();
+                    RenderDataUtil.register(data, "notification",
+                            systemProperties.getProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY));
+                });
     }
 
 }

@@ -127,4 +127,10 @@ public class EditForm implements Serializable {
 
     @Size(max = 1000)
     public String ldapAccountFilter;
+
+    @Size(max = 3000)
+    public String notificationLogin;
+
+    @Size(max = 3000)
+    public String notificationSearchTop;
 }

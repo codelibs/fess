@@ -48,6 +48,10 @@
 	font-size: 13px;
 }
 
+.notification {
+	text-align: center;
+}
+
 .login-box i, section.content i {
 	margin-right: 0.2em;
 }

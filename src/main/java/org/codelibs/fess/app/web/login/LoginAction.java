@@ -15,10 +15,13 @@
  */
 package org.codelibs.fess.app.web.login;
 
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ActivityUtil;
+import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
@@ -43,7 +46,9 @@ public class LoginAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        return getHtmlResponse().useForm(LoginForm.class);
+        return asHtml(path_Login_IndexJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "notification", systemProperties.getProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY));
+        }).useForm(LoginForm.class);
     }
 
     @Execute
