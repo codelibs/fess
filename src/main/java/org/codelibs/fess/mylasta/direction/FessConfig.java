@@ -650,9 +650,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. groupOfNames */
     String LDAP_ADMIN_GROUP_OBJECT_CLASSES = "ldap.admin.group.object.classes";
 
-    /** The key of the configuration. e.g. {SHA256} */
-    String LDAP_ADMIN_DIGEST_ALGORISM_PREFIX = "ldap.admin.digest.algorism.prefix";
-
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -2587,13 +2584,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAdminGroupObjectClasses();
 
     /**
-     * Get the value for the key 'ldap.admin.digest.algorism.prefix'. <br>
-     * The value is, e.g. {SHA256} <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminDigestAlgorismPrefix();
-
-    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -3600,10 +3590,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getLdapAdminGroupObjectClasses() {
             return get(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES);
-        }
-
-        public String getLdapAdminDigestAlgorismPrefix() {
-            return get(FessConfig.LDAP_ADMIN_DIGEST_ALGORISM_PREFIX);
         }
     }
 }

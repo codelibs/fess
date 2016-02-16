@@ -30,6 +30,8 @@ public class User extends BsUser implements FessUser {
 
     private static final long serialVersionUID = 1L;
 
+    private String originalPassword;
+
     public Long getVersionNo() {
         return asDocMeta().version();
     }
@@ -61,6 +63,15 @@ public class User extends BsUser implements FessUser {
     @Override
     public String toString() {
         return "User [name=" + name + ", roles=" + Arrays.toString(roles) + ", groups=" + Arrays.toString(groups) + "]";
+    }
+
+    public void setOriginalPassword(String originalPassword) {
+        this.originalPassword = originalPassword;
+
+    }
+
+    public String getOriginalPassword() {
+        return originalPassword;
     }
 
 }

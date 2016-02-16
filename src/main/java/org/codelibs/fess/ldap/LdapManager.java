@@ -41,7 +41,6 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
-import org.lastaflute.core.security.PrimaryCipher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,10 +195,9 @@ public class LdapManager {
     }
 
     protected void addUserAttributes(final BasicAttributes entry, final User user, final FessConfig fessConfig) {
-        final PrimaryCipher cipher = ComponentUtil.getComponent(PrimaryCipher.class);
         entry.put(new BasicAttribute("cn", user.getName()));
         entry.put(new BasicAttribute("sn", user.getName()));
-        entry.put(new BasicAttribute("userPassword", fessConfig.getLdapAdminDigestAlgorismPrefix() + cipher.oneway(user.getPassword())));
+        entry.put(new BasicAttribute("userPassword", user.getOriginalPassword()));
     }
 
     public void delete(User user) {
