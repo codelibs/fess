@@ -770,6 +770,27 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Logout */
     public static final String LABELS_logout_button = "{labels.logout_button}";
 
+    /** The key of the message: Profile */
+    public static final String LABELS_PROFILE = "{labels.profile}";
+
+    /** The key of the message: Profile */
+    public static final String LABELS_profile_button = "{labels.profile_button}";
+
+    /** The key of the message: Profile */
+    public static final String LABELS_PROFILE_TITLE = "{labels.profile.title}";
+
+    /** The key of the message: Update */
+    public static final String LABELS_PROFILE_UPDATE = "{labels.profile.update}";
+
+    /** The key of the message: Old Password */
+    public static final String LABELS_PROFILE_placeholder_old_password = "{labels.profile.placeholder_old_password}";
+
+    /** The key of the message: New Password */
+    public static final String LABELS_PROFILE_placeholder_new_password = "{labels.profile.placeholder_new_password}";
+
+    /** The key of the message: Confirm New Password */
+    public static final String LABELS_PROFILE_placeholder_confirm_new_password = "{labels.profile.placeholder_confirm_new_password}";
+
     /** The key of the message: Search */
     public static final String LABELS_TOP_SEARCH = "{labels.top.search}";
 

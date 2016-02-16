@@ -29,6 +29,9 @@
 								aria-expanded="false"> <i class="fa fa-user"></i>${username}
 							</a>
 							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/profile" styleClass="dropdown-item">
+									<la:message key="labels.profile" />
+								</la:link>
 								<la:link href="/logout" styleClass="dropdown-item">
 									<la:message key="labels.logout" />
 								</la:link>

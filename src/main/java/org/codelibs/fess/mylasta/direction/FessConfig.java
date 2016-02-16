@@ -614,7 +614,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. guest */
     String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. false */
     String LDAP_ADMIN_ENABLED = "ldap.admin.enabled";
 
     /** The key of the configuration. e.g. com.sun.jndi.ldap.LdapCtxFactory */
@@ -2495,7 +2495,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'ldap.admin.enabled'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -2503,7 +2503,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Is the property for the key 'ldap.admin.enabled' true? <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * comment: ------
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
