@@ -272,4 +272,20 @@ public class SystemHelper implements Serializable {
     public void setupAdminHtmlData(TypicalAction action, ActionRuntime runtime) {
         // nothing
     }
+
+    public String getSearchRoleByUser(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchUserPrefix(), name);
+    }
+
+    public String getSearchRoleByGroup(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchGroupPrefix(), name);
+    }
+
+    public String getSearchRoleByRole(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchRolePrefix(), name);
+    }
+
+    protected String createSearchRole(final String type, final String name) {
+        return type + name;
+    }
 }

@@ -380,12 +380,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String SMB_ROLE_FROM_FILE = "smb.role.from.file";
 
-    /** The key of the configuration. e.g. true */
-    String SMB_ROLE_AS_USER = "smb.role.as.user";
-
-    /** The key of the configuration. e.g. true */
-    String SMB_ROLE_AS_GROUP = "smb.role.as.group";
-
     /** The key of the configuration. e.g. 1,2 */
     String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
 
@@ -632,23 +626,53 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. password */
     String LDAP_ADMIN_SECURITY_CREDENTIALS = "ldap.admin.security.credentials";
 
-    /** The key of the configuration. e.g. uid=%s,ou=People,dc=fess,dc=codelibs,dc=org */
-    String LDAP_ADMIN_USER_SECURITY_PRINCIPAL = "ldap.admin.user.security.principal";
+    /** The key of the configuration. e.g. uid=%s */
+    String LDAP_ADMIN_USER_FILTER = "ldap.admin.user.filter";
+
+    /** The key of the configuration. e.g. ou=People,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_USER_BASE_DN = "ldap.admin.user.base.dn";
 
     /** The key of the configuration. e.g. organizationalPerson,top,person,inetOrgPerson */
     String LDAP_ADMIN_USER_OBJECT_CLASSES = "ldap.admin.user.object.classes";
 
-    /** The key of the configuration. e.g. cn=%s,ou=Role,dc=fess,dc=codelibs,dc=org */
-    String LDAP_ADMIN_ROLE_SECURITY_PRINCIPAL = "ldap.admin.role.security.principal";
+    /** The key of the configuration. e.g. cn=%s */
+    String LDAP_ADMIN_ROLE_FILTER = "ldap.admin.role.filter";
+
+    /** The key of the configuration. e.g. ou=Role,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_ROLE_BASE_DN = "ldap.admin.role.base.dn";
 
     /** The key of the configuration. e.g. groupOfNames */
     String LDAP_ADMIN_ROLE_OBJECT_CLASSES = "ldap.admin.role.object.classes";
 
-    /** The key of the configuration. e.g. cn=%s,ou=Group,dc=fess,dc=codelibs,dc=org */
-    String LDAP_ADMIN_GROUP_SECURITY_PRINCIPAL = "ldap.admin.group.security.principal";
+    /** The key of the configuration. e.g. cn=%s */
+    String LDAP_ADMIN_GROUP_FILTER = "ldap.admin.group.filter";
+
+    /** The key of the configuration. e.g. ou=Group,dc=fess,dc=codelibs,dc=org */
+    String LDAP_ADMIN_GROUP_BASE_DN = "ldap.admin.group.base.dn";
 
     /** The key of the configuration. e.g. groupOfNames */
     String LDAP_ADMIN_GROUP_OBJECT_CLASSES = "ldap.admin.group.object.classes";
+
+    /** The key of the configuration. e.g. memberOf */
+    String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
+
+    /** The key of the configuration. e.g. true */
+    String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String LDAP_ROLE_SEARCH_GROUP_ENABLED = "ldap.role.search.group.enabled";
+
+    /** The key of the configuration. e.g. true */
+    String LDAP_ROLE_SEARCH_ROLE_ENABLED = "ldap.role.search.role.enabled";
+
+    /** The key of the configuration. e.g. 1 */
+    String LDAP_ROLE_SEARCH_USER_PREFIX = "ldap.role.search.user.prefix";
+
+    /** The key of the configuration. e.g. 2 */
+    String LDAP_ROLE_SEARCH_GROUP_PREFIX = "ldap.role.search.group.prefix";
+
+    /** The key of the configuration. e.g. R */
+    String LDAP_ROLE_SEARCH_ROLE_PREFIX = "ldap.role.search.role.prefix";
 
     /**
      * Get the value of property as {@link String}.
@@ -1676,34 +1700,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isSmbRoleFromFile();
 
     /**
-     * Get the value for the key 'smb.role.as.user'. <br>
-     * The value is, e.g. true <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSmbRoleAsUser();
-
-    /**
-     * Is the property for the key 'smb.role.as.user' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isSmbRoleAsUser();
-
-    /**
-     * Get the value for the key 'smb.role.as.group'. <br>
-     * The value is, e.g. true <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getSmbRoleAsGroup();
-
-    /**
-     * Is the property for the key 'smb.role.as.group' true? <br>
-     * The value is, e.g. true <br>
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isSmbRoleAsGroup();
-
-    /**
      * Get the value for the key 'smb.available.sid.types'. <br>
      * The value is, e.g. 1,2 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2542,11 +2538,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAdminSecurityCredentials();
 
     /**
-     * Get the value for the key 'ldap.admin.user.security.principal'. <br>
-     * The value is, e.g. uid=%s,ou=People,dc=fess,dc=codelibs,dc=org <br>
+     * Get the value for the key 'ldap.admin.user.filter'. <br>
+     * The value is, e.g. uid=%s <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLdapAdminUserSecurityPrincipal();
+    String getLdapAdminUserFilter();
+
+    /**
+     * Get the value for the key 'ldap.admin.user.base.dn'. <br>
+     * The value is, e.g. ou=People,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminUserBaseDn();
 
     /**
      * Get the value for the key 'ldap.admin.user.object.classes'. <br>
@@ -2556,11 +2559,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAdminUserObjectClasses();
 
     /**
-     * Get the value for the key 'ldap.admin.role.security.principal'. <br>
-     * The value is, e.g. cn=%s,ou=Role,dc=fess,dc=codelibs,dc=org <br>
+     * Get the value for the key 'ldap.admin.role.filter'. <br>
+     * The value is, e.g. cn=%s <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLdapAdminRoleSecurityPrincipal();
+    String getLdapAdminRoleFilter();
+
+    /**
+     * Get the value for the key 'ldap.admin.role.base.dn'. <br>
+     * The value is, e.g. ou=Role,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminRoleBaseDn();
 
     /**
      * Get the value for the key 'ldap.admin.role.object.classes'. <br>
@@ -2570,11 +2580,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAdminRoleObjectClasses();
 
     /**
-     * Get the value for the key 'ldap.admin.group.security.principal'. <br>
-     * The value is, e.g. cn=%s,ou=Group,dc=fess,dc=codelibs,dc=org <br>
+     * Get the value for the key 'ldap.admin.group.filter'. <br>
+     * The value is, e.g. cn=%s <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getLdapAdminGroupSecurityPrincipal();
+    String getLdapAdminGroupFilter();
+
+    /**
+     * Get the value for the key 'ldap.admin.group.base.dn'. <br>
+     * The value is, e.g. ou=Group,dc=fess,dc=codelibs,dc=org <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminGroupBaseDn();
 
     /**
      * Get the value for the key 'ldap.admin.group.object.classes'. <br>
@@ -2582,6 +2599,92 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapAdminGroupObjectClasses();
+
+    /**
+     * Get the value for the key 'ldap.memberof.attribute'. <br>
+     * The value is, e.g. memberOf <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapMemberofAttribute();
+
+    /**
+     * Get the value for the key 'ldap.role.search.user.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchUserEnabled();
+
+    /**
+     * Is the property for the key 'ldap.role.search.user.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapRoleSearchUserEnabled();
+
+    /**
+     * Get the value for the key 'ldap.role.search.group.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchGroupEnabled();
+
+    /**
+     * Is the property for the key 'ldap.role.search.group.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapRoleSearchGroupEnabled();
+
+    /**
+     * Get the value for the key 'ldap.role.search.role.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchRoleEnabled();
+
+    /**
+     * Is the property for the key 'ldap.role.search.role.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapRoleSearchRoleEnabled();
+
+    /**
+     * Get the value for the key 'ldap.role.search.user.prefix'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchUserPrefix();
+
+    /**
+     * Get the value for the key 'ldap.role.search.user.prefix' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapRoleSearchUserPrefixAsInteger();
+
+    /**
+     * Get the value for the key 'ldap.role.search.group.prefix'. <br>
+     * The value is, e.g. 2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchGroupPrefix();
+
+    /**
+     * Get the value for the key 'ldap.role.search.group.prefix' as {@link Integer}. <br>
+     * The value is, e.g. 2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapRoleSearchGroupPrefixAsInteger();
+
+    /**
+     * Get the value for the key 'ldap.role.search.role.prefix'. <br>
+     * The value is, e.g. R <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapRoleSearchRolePrefix();
 
     /**
      * The simple implementation for configuration.
@@ -3104,22 +3207,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.SMB_ROLE_FROM_FILE);
         }
 
-        public String getSmbRoleAsUser() {
-            return get(FessConfig.SMB_ROLE_AS_USER);
-        }
-
-        public boolean isSmbRoleAsUser() {
-            return is(FessConfig.SMB_ROLE_AS_USER);
-        }
-
-        public String getSmbRoleAsGroup() {
-            return get(FessConfig.SMB_ROLE_AS_GROUP);
-        }
-
-        public boolean isSmbRoleAsGroup() {
-            return is(FessConfig.SMB_ROLE_AS_GROUP);
-        }
-
         public String getSmbAvailableSidTypes() {
             return get(FessConfig.SMB_AVAILABLE_SID_TYPES);
         }
@@ -3568,28 +3655,88 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LDAP_ADMIN_SECURITY_CREDENTIALS);
         }
 
-        public String getLdapAdminUserSecurityPrincipal() {
-            return get(FessConfig.LDAP_ADMIN_USER_SECURITY_PRINCIPAL);
+        public String getLdapAdminUserFilter() {
+            return get(FessConfig.LDAP_ADMIN_USER_FILTER);
+        }
+
+        public String getLdapAdminUserBaseDn() {
+            return get(FessConfig.LDAP_ADMIN_USER_BASE_DN);
         }
 
         public String getLdapAdminUserObjectClasses() {
             return get(FessConfig.LDAP_ADMIN_USER_OBJECT_CLASSES);
         }
 
-        public String getLdapAdminRoleSecurityPrincipal() {
-            return get(FessConfig.LDAP_ADMIN_ROLE_SECURITY_PRINCIPAL);
+        public String getLdapAdminRoleFilter() {
+            return get(FessConfig.LDAP_ADMIN_ROLE_FILTER);
+        }
+
+        public String getLdapAdminRoleBaseDn() {
+            return get(FessConfig.LDAP_ADMIN_ROLE_BASE_DN);
         }
 
         public String getLdapAdminRoleObjectClasses() {
             return get(FessConfig.LDAP_ADMIN_ROLE_OBJECT_CLASSES);
         }
 
-        public String getLdapAdminGroupSecurityPrincipal() {
-            return get(FessConfig.LDAP_ADMIN_GROUP_SECURITY_PRINCIPAL);
+        public String getLdapAdminGroupFilter() {
+            return get(FessConfig.LDAP_ADMIN_GROUP_FILTER);
+        }
+
+        public String getLdapAdminGroupBaseDn() {
+            return get(FessConfig.LDAP_ADMIN_GROUP_BASE_DN);
         }
 
         public String getLdapAdminGroupObjectClasses() {
             return get(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES);
+        }
+
+        public String getLdapMemberofAttribute() {
+            return get(FessConfig.LDAP_MEMBEROF_ATTRIBUTE);
+        }
+
+        public String getLdapRoleSearchUserEnabled() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
+        }
+
+        public boolean isLdapRoleSearchUserEnabled() {
+            return is(FessConfig.LDAP_ROLE_SEARCH_USER_ENABLED);
+        }
+
+        public String getLdapRoleSearchGroupEnabled() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED);
+        }
+
+        public boolean isLdapRoleSearchGroupEnabled() {
+            return is(FessConfig.LDAP_ROLE_SEARCH_GROUP_ENABLED);
+        }
+
+        public String getLdapRoleSearchRoleEnabled() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED);
+        }
+
+        public boolean isLdapRoleSearchRoleEnabled() {
+            return is(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED);
+        }
+
+        public String getLdapRoleSearchUserPrefix() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_USER_PREFIX);
+        }
+
+        public Integer getLdapRoleSearchUserPrefixAsInteger() {
+            return getAsInteger(FessConfig.LDAP_ROLE_SEARCH_USER_PREFIX);
+        }
+
+        public String getLdapRoleSearchGroupPrefix() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_GROUP_PREFIX);
+        }
+
+        public Integer getLdapRoleSearchGroupPrefixAsInteger() {
+            return getAsInteger(FessConfig.LDAP_ROLE_SEARCH_GROUP_PREFIX);
+        }
+
+        public String getLdapRoleSearchRolePrefix() {
+            return get(FessConfig.LDAP_ROLE_SEARCH_ROLE_PREFIX);
         }
     }
 }

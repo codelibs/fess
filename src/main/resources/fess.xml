@@ -86,7 +86,7 @@
 	</component>
 	<component name="crawlingInfoHelper" class="org.codelibs.fess.helper.CrawlingInfoHelper">
 	</component>
-	<component name="roleQueryHelper" class="org.codelibs.fess.helper.impl.RoleQueryHelperImpl">
+	<component name="roleQueryHelper" class="org.codelibs.fess.helper.RoleQueryHelper">
 		<!-- ex. parameter: fessRoles=123%0aadmin -->
 		<!-- 
 		<property name="parameterKey">"fessRoles"</property>

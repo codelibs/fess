@@ -430,10 +430,21 @@ public interface FessProp {
         return oc;
     }
 
-    String getLdapAdminUserSecurityPrincipal();
+    String getLdapAdminUserFilter();
+
+    public default String getLdapAdminUserFilter(final String name) {
+        return String.format(getLdapAdminUserFilter(), name);
+    }
+
+    String getLdapAdminUserBaseDn();
 
     public default String getLdapAdminUserSecurityPrincipal(final String name) {
-        return String.format(getLdapAdminUserSecurityPrincipal(), name);
+        StringBuilder buf = new StringBuilder(100);
+        buf.append(String.format(getLdapAdminUserFilter(), name));
+        if (StringUtil.isNotBlank(getLdapAdminUserBaseDn())) {
+            buf.append(',').append(getLdapAdminUserBaseDn());
+        }
+        return buf.toString();
     }
 
     String getLdapAdminRoleObjectClasses();
@@ -444,10 +455,21 @@ public interface FessProp {
         return oc;
     }
 
-    String getLdapAdminRoleSecurityPrincipal();
+    String getLdapAdminRoleFilter();
+
+    public default String getLdapAdminRoleFilter(final String name) {
+        return String.format(getLdapAdminRoleFilter(), name);
+    }
+
+    String getLdapAdminRoleBaseDn();
 
     public default String getLdapAdminRoleSecurityPrincipal(final String name) {
-        return String.format(getLdapAdminRoleSecurityPrincipal(), name);
+        StringBuilder buf = new StringBuilder(100);
+        buf.append(String.format(getLdapAdminRoleFilter(), name));
+        if (StringUtil.isNotBlank(getLdapAdminRoleBaseDn())) {
+            buf.append(',').append(getLdapAdminRoleBaseDn());
+        }
+        return buf.toString();
     }
 
     String getLdapAdminGroupObjectClasses();
@@ -458,9 +480,20 @@ public interface FessProp {
         return oc;
     }
 
-    String getLdapAdminGroupSecurityPrincipal();
+    String getLdapAdminGroupFilter();
+
+    public default String getLdapAdminGroupFilter(final String name) {
+        return String.format(getLdapAdminGroupFilter(), name);
+    }
+
+    String getLdapAdminGroupBaseDn();
 
     public default String getLdapAdminGroupSecurityPrincipal(final String name) {
-        return String.format(getLdapAdminGroupSecurityPrincipal(), name);
+        StringBuilder buf = new StringBuilder(100);
+        buf.append(String.format(getLdapAdminGroupFilter(), name));
+        if (StringUtil.isNotBlank(getLdapAdminGroupBaseDn())) {
+            buf.append(',').append(getLdapAdminGroupBaseDn());
+        }
+        return buf.toString();
     }
 }

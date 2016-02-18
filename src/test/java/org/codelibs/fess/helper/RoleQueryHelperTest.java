@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.helper.impl;
+package org.codelibs.fess.helper;
 
 import java.util.Set;
 
@@ -23,20 +23,20 @@ import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.exception.IllegalBlockSizeRuntimeException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
-public class RoleQueryHelperImplTest extends UnitFessTestCase {
-    public RoleQueryHelperImpl roleQueryHelperImpl;
+public class RoleQueryHelperTest extends UnitFessTestCase {
+    public RoleQueryHelper roleQueryHelperImpl;
     public CachedCipher cipher;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        roleQueryHelperImpl = new RoleQueryHelperImpl();
+        roleQueryHelperImpl = new RoleQueryHelper();
         cipher = new CachedCipher();
         cipher.setKey("1234567890123456");
     }
 
     public void test_buildByParameter() {
-        final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
 
         Set<String> roleSet;
 
@@ -92,7 +92,7 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
     }
 
     public void test_buildByHeader() {
-        final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
 
         Set<String> roleSet;
 
@@ -152,7 +152,7 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
     }
 
     public void test_buildByCookie() {
-        final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
 
         Set<String> roleSet;
         Cookie cookie;
@@ -224,7 +224,7 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
     public void test_decodedRoleList() {
 
-        final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
 
         Set<String> roleSet;
         boolean encrypted;
@@ -289,7 +289,7 @@ public class RoleQueryHelperImplTest extends UnitFessTestCase {
 
     public void test_decodedRoleList_withCipher() {
 
-        final RoleQueryHelperImpl roleQueryHelperImpl = new RoleQueryHelperImpl();
+        final RoleQueryHelper roleQueryHelperImpl = new RoleQueryHelper();
         roleQueryHelperImpl.cipher = cipher;
 
         Set<String> roleSet;

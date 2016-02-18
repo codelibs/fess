@@ -2031,6 +2031,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Notification */
     public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
 
+    /** The key of the message: Send TestMail */
+    public static final String LABELS_send_testmail = "{labels.send_testmail}";
+
     /** The key of the message: Back Up */
     public static final String LABELS_backup_configuration = "{labels.backup_configuration}";
 
