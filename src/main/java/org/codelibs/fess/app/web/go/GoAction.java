@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
@@ -27,6 +29,7 @@ import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.error.ErrorAction;
 import org.codelibs.fess.crawler.util.CharUtil;
 import org.codelibs.fess.es.log.exentity.ClickLog;
+import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
@@ -46,6 +49,9 @@ public class GoAction extends FessSearchAction {
     //                                                                            Constant
     //
     private static final Logger logger = LoggerFactory.getLogger(GoAction.class);
+
+    @Resource
+    protected PathMappingHelper pathMappingHelper;
 
     // ===================================================================================
     //                                                                           Attribute
@@ -126,21 +132,22 @@ public class GoAction extends FessSearchAction {
             hash = StringUtil.EMPTY;
         }
 
-        if (isFileSystemPath(url)) {
+        final String targetUrl = pathMappingHelper.replaceUrl(url);
+        if (isFileSystemPath(targetUrl)) {
             if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
                     return viewHelper.asContentResponse(doc);
                 } catch (final Exception e) {
                     logger.debug("Failed to load: " + doc, e);
-                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, url));
+                    saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));
                     return redirect(ErrorAction.class);
                 }
             } else {
-                return HtmlResponse.fromRedirectPathAsIs(url + hash);
+                return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
             }
         } else {
-            return HtmlResponse.fromRedirectPathAsIs(url + hash);
+            return HtmlResponse.fromRedirectPathAsIs(targetUrl + hash);
         }
     }
 

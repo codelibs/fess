@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.es.config.cbean.PathMappingCB;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -63,6 +64,7 @@ public class PathMappingService implements Serializable {
             op.setRefresh(true);
         });
 
+        ComponentUtil.getPathMappingHelper().init();
     }
 
     public void delete(final PathMapping pathMapping) {
@@ -71,6 +73,7 @@ public class PathMappingService implements Serializable {
             op.setRefresh(true);
         });
 
+        ComponentUtil.getPathMappingHelper().init();
     }
 
     public List<PathMapping> getPathMappingList(final Collection<String> processTypeList) {
