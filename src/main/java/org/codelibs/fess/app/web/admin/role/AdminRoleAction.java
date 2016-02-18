@@ -120,26 +120,6 @@ public class AdminRoleAction extends FessAdminAction {
         });
     }
 
-    @Execute
-    public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        final String id = form.id;
-        roleService.getRole(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-        });
-        saveToken();
-        if (form.crudMode.intValue() == CrudMode.EDIT) {
-            // back
-            form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml();
-        } else {
-            form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
-        }
-    }
-
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
@@ -179,25 +159,6 @@ public class AdminRoleAction extends FessAdminAction {
             }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
-        });
-        return redirect(getClass());
-    }
-
-    @Execute
-    public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        getRole(form).ifPresent(entity -> {
-            try {
-                roleService.store(entity);
-                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-            } catch (Exception e) {
-                logger.error("Failed to update " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
-            }
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }

@@ -23,11 +23,14 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
+import org.codelibs.fess.es.user.bsbhv.BsGroupBhv;
 import org.codelibs.fess.es.user.cbean.GroupCB;
 import org.codelibs.fess.es.user.exbhv.GroupBhv;
+import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -40,6 +43,9 @@ public class GroupService implements Serializable {
 
     @Resource
     protected FessConfig fessConfig;
+
+    @Resource
+    protected UserBhv userBhv;
 
     public List<Group> getGroupList(final GroupPager groupPager) {
 
@@ -75,6 +81,13 @@ public class GroupService implements Serializable {
 
         groupBhv.delete(group, op -> {
             op.setRefresh(true);
+        });
+
+        userBhv.selectCursor(cb -> {
+            cb.query().setGroups_Equal(group.getId());
+        }, entity -> {
+            entity.setGroups(StreamUtil.of(entity.getGroups()).filter(s -> !s.equals(group.getId())).toArray(n -> new String[n]));
+            userBhv.insertOrUpdate(entity);
         });
 
     }
