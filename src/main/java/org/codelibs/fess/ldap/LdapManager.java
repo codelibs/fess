@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.naming.Context;
@@ -54,39 +55,8 @@ public class LdapManager {
 
     protected ThreadLocal<DirContextHolder> contextLocal = new ThreadLocal<>();
 
-    public OptionalEntity<FessUser> login(final String username, final String password) {
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-
-        if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
-            return OptionalEntity.empty();
-        }
-
-        DirContext ctx = null;
-        try {
-            final Hashtable<String, String> env =
-                    createEnvironment(fessConfig.getLdapInitialContextFactory(), fessConfig.getLdapSecurityAuthentication(),
-                            fessConfig.getLdapProviderUrl(), fessConfig.getLdapSecurityPrincipal(username), password);
-            ctx = new InitialDirContext(env);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Logged in.", ctx);
-            }
-            return OptionalEntity.of(createLdapUser(username, env));
-        } catch (final NamingException e) {
-            logger.debug("Login failed.", e);
-        } finally {
-            if (ctx != null) {
-                try {
-                    ctx.close();
-                } catch (final NamingException e) {
-                    // ignore
-                }
-            }
-        }
-        return OptionalEntity.empty();
-    }
-
     protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
-            String providerUrl, String principal, String credntials) {
+            final String providerUrl, final String principal, final String credntials) {
         final Hashtable<String, String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
         env.put(Context.SECURITY_AUTHENTICATION, securityAuthentication);
@@ -94,6 +64,39 @@ public class LdapManager {
         env.put(Context.SECURITY_PRINCIPAL, principal);
         env.put(Context.SECURITY_CREDENTIALS, credntials);
         return env;
+    }
+
+    protected Hashtable<String, String> createAdminEnv() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
+                fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+                fessConfig.getLdapAdminSecurityCredentials());
+    }
+
+    protected Hashtable<String, String> createSearchEnv(final String username, final String password) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return createEnvironment(fessConfig.getLdapInitialContextFactory(), fessConfig.getLdapSecurityAuthentication(),
+                fessConfig.getLdapProviderUrl(), fessConfig.getLdapSecurityPrincipal(username), password);
+    }
+
+    public OptionalEntity<FessUser> login(final String username, final String password) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+
+        if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
+            return OptionalEntity.empty();
+        }
+
+        final Hashtable<String, String> env = createSearchEnv(username, password);
+        try (DirContextHolder holder = getDirContext(() -> env)) {
+            final DirContext context = holder.get();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logged in.", context);
+            }
+            return OptionalEntity.of(createLdapUser(username, env));
+        } catch (final Exception e) {
+            logger.debug("Login failed.", e);
+        }
+        return OptionalEntity.empty();
     }
 
     protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
@@ -112,23 +115,25 @@ public class LdapManager {
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
-        search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, result -> {
-            processSearchRoles(result, (entryDn, name) -> {
-                final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
-                if (isRole) {
-                    if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                        roleList.add(systemHelper.getSearchRoleByRole(name));
-                    }
-                } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-                    roleList.add(systemHelper.getSearchRoleByGroup(name));
-                }
-            });
-        });
+        search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() },
+                () -> createSearchEnv(ldapUser.getName(), ldapUser.getPassword()), result -> {
+                    processSearchRoles(result, (entryDn, name) -> {
+                        final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+                        if (isRole) {
+                            if (fessConfig.isLdapRoleSearchRoleEnabled()) {
+                                roleList.add(systemHelper.getSearchRoleByRole(name));
+                            }
+                        } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
+                            roleList.add(systemHelper.getSearchRoleByGroup(name));
+                        }
+                    });
+                });
 
         return roleList.toArray(new String[roleList.size()]);
     }
 
-    protected void processSearchRoles(NamingEnumeration<SearchResult> result, BiConsumer<String, String> consumer) throws NamingException {
+    protected void processSearchRoles(final NamingEnumeration<SearchResult> result, final BiConsumer<String, String> consumer)
+            throws NamingException {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         while (result.hasMoreElements()) {
             final SearchResult srcrslt = result.next();
@@ -171,28 +176,32 @@ public class LdapManager {
         }
     }
 
-    public void insert(User user) {
+    public void insert(final User user) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
-        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()),
-                new String[] { fessConfig.getLdapMemberofAttribute() }, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
+        search(fessConfig.getLdapAdminUserBaseDn(),
+                fessConfig.getLdapAdminUserFilter(user.getName()),
+                new String[] { fessConfig.getLdapMemberofAttribute() },
+                adminEnv,
+                result -> {
                     if (result.hasMore()) {
                         if (user.getOriginalPassword() != null) {
-                            List<ModificationItem> modifyList = new ArrayList<>();
+                            final List<ModificationItem> modifyList = new ArrayList<>();
                             modifyReplaceEntry(modifyList, "userPassword", user.getOriginalPassword());
-                            modify(userDN, modifyList);
+                            modify(userDN, modifyList, adminEnv);
                         }
 
-                        List<String> oldGroupList = new ArrayList<>();
-                        List<String> oldRoleList = new ArrayList<>();
-                        String lowerGroupDn = fessConfig.getLdapAdminGroupBaseDn().toLowerCase(Locale.ROOT);
-                        String lowerRoleDn = fessConfig.getLdapAdminRoleBaseDn().toLowerCase(Locale.ROOT);
+                        final List<String> oldGroupList = new ArrayList<>();
+                        final List<String> oldRoleList = new ArrayList<>();
+                        final String lowerGroupDn = fessConfig.getLdapAdminGroupBaseDn().toLowerCase(Locale.ROOT);
+                        final String lowerRoleDn = fessConfig.getLdapAdminRoleBaseDn().toLowerCase(Locale.ROOT);
                         processSearchRoles(result, (entryDn, name) -> {
-                            String lowerEntryDn = entryDn.toLowerCase(Locale.ROOT);
+                            final String lowerEntryDn = entryDn.toLowerCase(Locale.ROOT);
                             if (lowerEntryDn.indexOf(lowerGroupDn) != -1) {
                                 oldGroupList.add(name);
                             } else if (lowerEntryDn.indexOf(lowerRoleDn) != -1) {
@@ -200,95 +209,107 @@ public class LdapManager {
                             }
                         });
 
-                        List<String> newGroupList = StreamUtil.of(user.getGroupNames()).collect(Collectors.toList());
+                        final List<String> newGroupList = StreamUtil.of(user.getGroupNames()).collect(Collectors.toList());
                         StreamUtil.of(user.getGroupNames()).forEach(name -> {
                             if (oldGroupList.contains(name)) {
                                 oldGroupList.remove(name);
                                 newGroupList.remove(name);
                             }
                         });
-                        oldGroupList.stream().forEach(name -> {
-                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, subResult -> {
-                                if (subResult.hasMore()) {
-                                    List<ModificationItem> modifyList = new ArrayList<>();
-                                    modifyDeleteEntry(modifyList, "member", userDN);
-                                    modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList);
-                                }
-                            });
-                        });
-                        newGroupList.stream().forEach(name -> {
-                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, subResult -> {
-                                if (!subResult.hasMore()) {
-                                    Group group = new Group();
-                                    group.setName(name);
-                                    insert(group);
-                                }
-                                List<ModificationItem> modifyList = new ArrayList<>();
-                                modifyAddEntry(modifyList, "member", userDN);
-                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList);
-                            });
-                        });
+                        oldGroupList.stream().forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (subResult.hasMore()) {
+                                                    final List<ModificationItem> modifyList = new ArrayList<>();
+                                                    modifyDeleteEntry(modifyList, "member", userDN);
+                                                    modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                                }
+                                            });
+                                });
+                        newGroupList.stream().forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (!subResult.hasMore()) {
+                                                    final Group group = new Group();
+                                                    group.setName(name);
+                                                    insert(group);
+                                                }
+                                                final List<ModificationItem> modifyList = new ArrayList<>();
+                                                modifyAddEntry(modifyList, "member", userDN);
+                                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                            });
+                                });
 
-                        List<String> newRoleList = StreamUtil.of(user.getRoleNames()).collect(Collectors.toList());
+                        final List<String> newRoleList = StreamUtil.of(user.getRoleNames()).collect(Collectors.toList());
                         StreamUtil.of(user.getRoleNames()).forEach(name -> {
                             if (oldRoleList.contains(name)) {
                                 oldRoleList.remove(name);
                                 newRoleList.remove(name);
                             }
                         });
-                        oldRoleList.stream().forEach(name -> {
-                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, subResult -> {
-                                if (subResult.hasMore()) {
-                                    List<ModificationItem> modifyList = new ArrayList<>();
-                                    modifyDeleteEntry(modifyList, "member", userDN);
-                                    modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList);
-                                }
-                            });
-                        });
-                        newRoleList.stream().forEach(name -> {
-                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, subResult -> {
-                                if (!subResult.hasMore()) {
-                                    Role role = new Role();
-                                    role.setName(name);
-                                    insert(role);
-                                }
-                                List<ModificationItem> modifyList = new ArrayList<>();
-                                modifyAddEntry(modifyList, "member", userDN);
-                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList);
-                            });
-                        });
+                        oldRoleList.stream().forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (subResult.hasMore()) {
+                                                    final List<ModificationItem> modifyList = new ArrayList<>();
+                                                    modifyDeleteEntry(modifyList, "member", userDN);
+                                                    modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                                }
+                                            });
+                                });
+                        newRoleList.stream().forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (!subResult.hasMore()) {
+                                                    final Role role = new Role();
+                                                    role.setName(name);
+                                                    insert(role);
+                                                }
+                                                final List<ModificationItem> modifyList = new ArrayList<>();
+                                                modifyAddEntry(modifyList, "member", userDN);
+                                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                            });
+                                });
                     } else {
-                        BasicAttributes entry = new BasicAttributes();
+                        final BasicAttributes entry = new BasicAttributes();
                         addUserAttributes(entry, user, fessConfig);
-                        Attribute oc = fessConfig.getLdapAdminUserObjectClassAttribute();
+                        final Attribute oc = fessConfig.getLdapAdminUserObjectClassAttribute();
                         entry.put(oc);
-                        insert(userDN, entry);
+                        insert(userDN, entry, adminEnv);
 
-                        StreamUtil.of(user.getGroupNames()).forEach(name -> {
-                            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, subResult -> {
-                                if (!subResult.hasMore()) {
-                                    Group group = new Group();
-                                    group.setName(name);
-                                    insert(group);
-                                }
-                                List<ModificationItem> modifyList = new ArrayList<>();
-                                modifyAddEntry(modifyList, "member", userDN);
-                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList);
-                            });
-                        });
+                        StreamUtil.of(user.getGroupNames()).forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (!subResult.hasMore()) {
+                                                    final Group group = new Group();
+                                                    group.setName(name);
+                                                    insert(group);
+                                                }
+                                                final List<ModificationItem> modifyList = new ArrayList<>();
+                                                modifyAddEntry(modifyList, "member", userDN);
+                                                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+                                            });
+                                });
 
-                        StreamUtil.of(user.getRoleNames()).forEach(name -> {
-                            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, subResult -> {
-                                if (!subResult.hasMore()) {
-                                    Role role = new Role();
-                                    role.setName(name);
-                                    insert(role);
-                                }
-                                List<ModificationItem> modifyList = new ArrayList<>();
-                                modifyAddEntry(modifyList, "member", userDN);
-                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList);
-                            });
-                        });
+                        StreamUtil.of(user.getRoleNames()).forEach(
+                                name -> {
+                                    search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
+                                            subResult -> {
+                                                if (!subResult.hasMore()) {
+                                                    final Role role = new Role();
+                                                    role.setName(name);
+                                                    insert(role);
+                                                }
+                                                final List<ModificationItem> modifyList = new ArrayList<>();
+                                                modifyAddEntry(modifyList, "member", userDN);
+                                                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+                                            });
+                                });
                     }
                 });
 
@@ -300,15 +321,16 @@ public class LdapManager {
         entry.put(new BasicAttribute("userPassword", user.getOriginalPassword()));
     }
 
-    public void delete(User user) {
+    public void delete(final User user) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
-                delete(fessConfig.getLdapAdminUserSecurityPrincipal(user.getName()));
+                delete(fessConfig.getLdapAdminUserSecurityPrincipal(user.getName()), adminEnv);
             } else {
                 logger.info("{} does not exist in LDAP server.", user.getName());
             }
@@ -316,22 +338,23 @@ public class LdapManager {
 
     }
 
-    public void insert(Role role) {
+    public void insert(final Role role) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
                 logger.info("{} exists in LDAP server.", role.getName());
             } else {
-                String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
-                BasicAttributes entry = new BasicAttributes();
+                final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
+                final BasicAttributes entry = new BasicAttributes();
                 addRoleAttributes(entry, role, fessConfig);
-                Attribute oc = fessConfig.getLdapAdminRoleObjectClassAttribute();
+                final Attribute oc = fessConfig.getLdapAdminRoleObjectClassAttribute();
                 entry.put(oc);
-                insert(entryDN, entry);
+                insert(entryDN, entry, adminEnv);
             }
         });
 
@@ -341,16 +364,17 @@ public class LdapManager {
         // nothing
     }
 
-    public void delete(Role role) {
+    public void delete(final Role role) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(role.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
-                String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
-                delete(entryDN);
+                final String entryDN = fessConfig.getLdapAdminRoleSecurityPrincipal(role.getName());
+                delete(entryDN, adminEnv);
             } else {
                 logger.info("{} does not exist in LDAP server.", role.getName());
             }
@@ -358,22 +382,23 @@ public class LdapManager {
 
     }
 
-    public void insert(Group group) {
+    public void insert(final Group group) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
                 logger.info("{} exists in LDAP server.", group.getName());
             } else {
-                String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
-                BasicAttributes entry = new BasicAttributes();
+                final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
+                final BasicAttributes entry = new BasicAttributes();
                 addGroupAttributes(entry, group.getName(), fessConfig);
-                Attribute oc = fessConfig.getLdapAdminGroupObjectClassAttribute();
+                final Attribute oc = fessConfig.getLdapAdminGroupObjectClassAttribute();
                 entry.put(oc);
-                insert(entryDN, entry);
+                insert(entryDN, entry, adminEnv);
             }
         });
     }
@@ -382,42 +407,44 @@ public class LdapManager {
         // nothing
     }
 
-    public void delete(Group group) {
+    public void delete(final Group group) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
         }
 
-        search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, result -> {
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
-                String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
-                delete(entryDN);
+                final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
+                delete(entryDN, adminEnv);
             } else {
                 logger.info("{} does not exist in LDAP server.", group.getName());
             }
         });
     }
 
-    protected void insert(String entryDN, Attributes entry) {
-        try (DirContextHolder holder = getDirContext()) {
+    protected void insert(final String entryDN, final Attributes entry, final Supplier<Hashtable<String, String>> envSupplier) {
+        try (DirContextHolder holder = getDirContext(envSupplier)) {
             logger.debug("Inserting {}", entryDN);
             holder.get().createSubcontext(entryDN, entry);
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LdapOperationException("Failed to add " + entryDN, e);
         }
     }
 
-    protected void delete(String entryDN) {
-        try (DirContextHolder holder = getDirContext()) {
+    protected void delete(final String entryDN, final Supplier<Hashtable<String, String>> envSupplier) {
+        try (DirContextHolder holder = getDirContext(envSupplier)) {
             logger.debug("Deleting {}", entryDN);
             holder.get().destroySubcontext(entryDN);
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LdapOperationException("Failed to delete " + entryDN, e);
         }
     }
 
-    protected void search(String baseDn, String filter, String[] returningAttrs, SearcConsumer consumer) {
-        try (DirContextHolder holder = getDirContext()) {
+    protected void search(final String baseDn, final String filter, final String[] returningAttrs,
+            final Supplier<Hashtable<String, String>> envSupplier, final SearcConsumer consumer) {
+        try (DirContextHolder holder = getDirContext(envSupplier)) {
             final SearchControls controls = new SearchControls();
             controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
             if (returningAttrs != null) {
@@ -425,33 +452,33 @@ public class LdapManager {
             }
 
             consumer.accept(holder.get().search(baseDn, filter, controls));
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LdapOperationException("Failed to search " + baseDn + " with " + filter, e);
         }
     }
 
-    protected void modifyAddEntry(List<ModificationItem> modifyList, String name, String value) {
-        Attribute attr = new BasicAttribute(name, value);
-        ModificationItem mod = new ModificationItem(DirContext.ADD_ATTRIBUTE, attr);
+    protected void modifyAddEntry(final List<ModificationItem> modifyList, final String name, final String value) {
+        final Attribute attr = new BasicAttribute(name, value);
+        final ModificationItem mod = new ModificationItem(DirContext.ADD_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
-    protected void modifyReplaceEntry(List<ModificationItem> modifyList, String name, String value) {
-        Attribute attr = new BasicAttribute(name, value);
-        ModificationItem mod = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attr);
+    protected void modifyReplaceEntry(final List<ModificationItem> modifyList, final String name, final String value) {
+        final Attribute attr = new BasicAttribute(name, value);
+        final ModificationItem mod = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
-    protected void modifyDeleteEntry(List<ModificationItem> modifyList, String name, String value) {
-        Attribute attr = new BasicAttribute(name, value);
-        ModificationItem mod = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, attr);
+    protected void modifyDeleteEntry(final List<ModificationItem> modifyList, final String name, final String value) {
+        final Attribute attr = new BasicAttribute(name, value);
+        final ModificationItem mod = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, attr);
         modifyList.add(mod);
     }
 
-    protected void modify(String dn, List<ModificationItem> modifyList) {
-        try (DirContextHolder holder = getDirContext()) {
+    protected void modify(final String dn, final List<ModificationItem> modifyList, final Supplier<Hashtable<String, String>> envSupplier) {
+        try (DirContextHolder holder = getDirContext(envSupplier)) {
             holder.get().modifyAttributes(dn, modifyList.toArray(new ModificationItem[modifyList.size()]));
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LdapOperationException("Failed to search " + dn, e);
         }
     }
@@ -460,19 +487,15 @@ public class LdapManager {
         void accept(NamingEnumeration<SearchResult> t) throws NamingException;
     }
 
-    protected DirContextHolder getDirContext() {
+    protected DirContextHolder getDirContext(final Supplier<Hashtable<String, String>> envSupplier) {
         DirContextHolder holder = contextLocal.get();
         if (holder == null) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final Hashtable<String, String> env =
-                    createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
-                            fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
-                            fessConfig.getLdapAdminSecurityCredentials());
+            final Hashtable<String, String> env = envSupplier.get();
             try {
                 holder = new DirContextHolder(new InitialDirContext(env));
                 contextLocal.set(holder);
                 return holder;
-            } catch (NamingException e) {
+            } catch (final NamingException e) {
                 throw new LdapOperationException("Failed to create DirContext.", e);
             }
         } else {
@@ -482,11 +505,11 @@ public class LdapManager {
     }
 
     protected class DirContextHolder implements AutoCloseable {
-        private DirContext context;
+        private final DirContext context;
 
         private int counter = 1;
 
-        protected DirContextHolder(DirContext context) {
+        protected DirContextHolder(final DirContext context) {
             this.context = context;
         }
 
