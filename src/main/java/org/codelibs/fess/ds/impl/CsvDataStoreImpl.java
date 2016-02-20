@@ -234,7 +234,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
 
                 try {
-                    loop = callback.store(dataMap);
+                    loop = callback.store(paramMap, dataMap);
                 } catch (final CrawlingAccessException e) {
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
 

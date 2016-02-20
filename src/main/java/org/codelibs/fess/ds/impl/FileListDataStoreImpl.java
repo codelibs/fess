@@ -143,22 +143,22 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
         }
 
         @Override
-        public boolean store(final Map<String, Object> dataMap) {
+        public boolean store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
             final Object eventType = dataMap.remove(eventTypeField);
 
             if (createEventName.equals(eventType) || modifyEventName.equals(eventType)) {
                 // updated file
-                return addDocument(dataMap);
+                return addDocument(paramMap, dataMap);
             } else if (deleteEventName.equals(eventType)) {
                 // deleted file
-                return deleteDocument(dataMap);
+                return deleteDocument(paramMap, dataMap);
             }
 
             logger.warn("unknown event: " + eventType + ", data: " + dataMap);
             return false;
         }
 
-        protected boolean addDocument(final Map<String, Object> dataMap) {
+        protected boolean addDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             synchronized (indexUpdateCallback) {
                 // required check
@@ -178,7 +178,11 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     final long startTime = System.currentTimeMillis();
                     final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
                     responseData.setExecutionTime(System.currentTimeMillis() - startTime);
-                    responseData.setSessionId((String) dataMap.get(Constants.CRAWLING_INFO_ID));
+                    if (dataMap.containsKey(Constants.SESSION_ID)) {
+                        responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
+                    } else {
+                        responseData.setSessionId((String) paramMap.get(Constants.CRAWLING_INFO_ID));
+                    }
 
                     final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
                     final Rule rule = ruleManager.getRule(responseData);
@@ -208,7 +212,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                                 dataMap.remove(fieldName);
                             }
 
-                            return indexUpdateCallback.store(dataMap);
+                            return indexUpdateCallback.store(paramMap, dataMap);
                         } else {
                             logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: " + responseProcessor
                                     + ", Data: " + dataMap);
@@ -221,7 +225,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
             }
         }
 
-        protected boolean deleteDocument(final Map<String, Object> dataMap) {
+        protected boolean deleteDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleting " + dataMap);

@@ -110,7 +110,7 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
                 }
 
                 try {
-                    loop = callback.store(dataMap);
+                    loop = callback.store(paramMap, dataMap);
                 } catch (final Exception e) {
                     logger.warn("Failed to store data: " + dataMap, e);
                 }

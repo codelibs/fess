@@ -45,7 +45,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
      * @see org.codelibs.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
      */
     @Override
-    public synchronized boolean store(final Map<String, Object> dataMap) {
+    public synchronized boolean store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
