@@ -273,7 +273,13 @@ public class FessMessages extends FessLabels {
     public static final String ERRORS_failed_to_send_testmail = "{errors.failed_to_send_testmail}";
 
     /** The key of the message: Could not find index for backup. */
-    public static final String ERRORS_COULD_NOT_FIND_BACKUP_INDEX = "{errors.could.not.find.backup.index}";
+    public static final String ERRORS_could_not_find_backup_index = "{errors.could_not_find_backup_index}";
+
+    /** The key of the message: The current password is incorrect. */
+    public static final String ERRORS_no_user_for_changing_password = "{errors.no_user_for_changing_password}";
+
+    /** The key of the message: Failed to change your password. */
+    public static final String ERRORS_failed_to_change_password = "{errors.failed_to_change_password}";
 
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
@@ -349,6 +355,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Deleted job logs. */
     public static final String SUCCESS_job_log_delete_all = "{success.job_log_delete_all}";
+
+    /** The key of the message: Changed your password. */
+    public static final String SUCCESS_changed_password = "{success.changed_password}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -1576,7 +1585,7 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.could.not.find.backup.index' with parameters.
+     * Add the created action message for the key 'errors.could_not_find_backup_index' with parameters.
      * <pre>
      * message: Could not find index for backup.
      * </pre>
@@ -1585,7 +1594,35 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCouldNotFindBackupIndex(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_COULD_NOT_FIND_BACKUP_INDEX));
+        add(property, new ActionMessage(ERRORS_could_not_find_backup_index));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.no_user_for_changing_password' with parameters.
+     * <pre>
+     * message: The current password is incorrect.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsNoUserForChangingPassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_no_user_for_changing_password));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_change_password' with parameters.
+     * <pre>
+     * message: Failed to change your password.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToChangePassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_change_password));
         return this;
     }
 
@@ -1948,6 +1985,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessJobLogDeleteAll(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_job_log_delete_all));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.changed_password' with parameters.
+     * <pre>
+     * message: Changed your password.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessChangedPassword(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_changed_password));
         return this;
     }
 

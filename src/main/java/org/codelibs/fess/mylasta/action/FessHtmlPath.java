@@ -317,23 +317,8 @@ public interface FessHtmlPath {
     /** The path of the HTML: /index.jsp */
     HtmlNext path_IndexJsp = new HtmlNext("/index.jsp");
 
-    /** The path of the HTML: /login/footer.jsp */
-    HtmlNext path_Login_FooterJsp = new HtmlNext("/login/footer.jsp");
-
-    /** The path of the HTML: /login/header.jsp */
-    HtmlNext path_Login_HeaderJsp = new HtmlNext("/login/header.jsp");
-
     /** The path of the HTML: /login/index.jsp */
     HtmlNext path_Login_IndexJsp = new HtmlNext("/login/index.jsp");
-
-    /** The path of the HTML: /login/logout.jsp */
-    HtmlNext path_Login_LogoutJsp = new HtmlNext("/login/logout.jsp");
-
-    /** The path of the HTML: /profile/footer.jsp */
-    HtmlNext path_Profile_FooterJsp = new HtmlNext("/profile/footer.jsp");
-
-    /** The path of the HTML: /profile/header.jsp */
-    HtmlNext path_Profile_HeaderJsp = new HtmlNext("/profile/header.jsp");
 
     /** The path of the HTML: /profile/index.jsp */
     HtmlNext path_Profile_IndexJsp = new HtmlNext("/profile/index.jsp");

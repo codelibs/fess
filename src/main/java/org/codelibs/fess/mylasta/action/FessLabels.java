@@ -437,6 +437,15 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Login Required */
     public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
 
+    /** The key of the message: Current Password */
+    public static final String LABELS_OLD_PASSWORD = "{labels.oldPassword}";
+
+    /** The key of the message: New Password */
+    public static final String LABELS_NEW_PASSWORD = "{labels.newPassword}";
+
+    /** The key of the message: New Password(Confirm) */
+    public static final String LABELS_CONFIRM_NEW_PASSWORD = "{labels.confirmNewPassword}";
+
     /** The key of the message: System */
     public static final String LABELS_menu_system = "{labels.menu_system}";
 
@@ -770,7 +779,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Logout */
     public static final String LABELS_logout_button = "{labels.logout_button}";
 
-    /** The key of the message: Profile */
+    /** The key of the message: Change Password */
     public static final String LABELS_PROFILE = "{labels.profile}";
 
     /** The key of the message: Profile */
@@ -782,7 +791,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Update */
     public static final String LABELS_PROFILE_UPDATE = "{labels.profile.update}";
 
-    /** The key of the message: Old Password */
+    /** The key of the message: Back */
+    public static final String LABELS_PROFILE_BACK = "{labels.profile.back}";
+
+    /** The key of the message: Current Password */
     public static final String LABELS_PROFILE_placeholder_old_password = "{labels.profile.placeholder_old_password}";
 
     /** The key of the message: New Password */
@@ -1327,6 +1339,12 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Error Page (BadRequest) */
     public static final String LABELS_design_file_errorBadRequest = "{labels.design_file_errorBadRequest}";
+
+    /** The key of the message: Login Page */
+    public static final String LABELS_design_file_login = "{labels.design_file_login}";
+
+    /** The key of the message: Profile Page */
+    public static final String LABELS_design_file_profile = "{labels.design_file_profile}";
 
     /** The key of the message: Edit JSP File */
     public static final String LABELS_design_title_edit_content = "{labels.design_title_edit_content}";

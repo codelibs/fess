@@ -50,6 +50,8 @@ public class LdapUser implements FessUser {
             final String accountFilter = ComponentUtil.getFessConfig().getLdapAccountFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 roles = ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter);
+            } else {
+                roles = StringUtil.EMPTY_STRINGS;
             }
         }
         return roles;

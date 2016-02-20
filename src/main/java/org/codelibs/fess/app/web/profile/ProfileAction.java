@@ -16,20 +16,24 @@
 
 /**
  * @author Keiichi Watanabe
+ * @author shinsuke
  */
 package org.codelibs.fess.app.web.profile;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
-import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProfileAction extends FessSearchAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProfileAction.class);
 
     // ===================================================================================
     // Constant
@@ -39,7 +43,7 @@ public class ProfileAction extends FessSearchAction {
     // Attribute
     //
     @Resource
-    protected FessLoginAssist fessLoginAssist;
+    private UserService userService;
 
     // ===================================================================================
     // Hook
@@ -51,44 +55,48 @@ public class ProfileAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        if (fessLoginAssist.getSessionUserBean().isPresent()) {
-            return asHtml(path_Profile_IndexJsp).useForm(ProfileForm.class);
-        } else {
-            return redirect(LoginAction.class);
-        }
+        return asIndexHtml();
     }
 
     @Execute
     public HtmlResponse changePassword(final ProfileForm form) {
-        validatePasswordForm(form, () -> index());
-        // TODO
+        VaErrorHook toIndexPage = () -> {
+            form.clearSecurityInfo();
+            return asIndexHtml();
+        };
+        validatePasswordForm(form, toIndexPage);
+        final String username = getUserBean().map(u -> u.getUserId()).get();
+        try {
+            userService.chnagePassword(username, form.newPassword);
+            saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
+        } catch (Exception e) {
+            logger.error("Failed to change password for " + username, e);
+            throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
+        }
         return redirect(getClass());
     }
 
     private void validatePasswordForm(final ProfileForm form, final VaErrorHook validationErrorLambda) {
-        validate(form, messages -> {}, () -> {
-            form.clearSecurityInfo();
-            return index();
+        validate(form, messages -> {}, validationErrorLambda);
+
+        if (!form.newPassword.equals(form.confirmNewPassword)) {
+            form.newPassword = null;
+            form.confirmNewPassword = null;
+            throwValidationError(messages -> {
+                messages.addErrorsInvalidConfirmPassword(GLOBAL);
+            }, validationErrorLambda);
+        }
+
+        fessLoginAssist.findLoginUser(getUserBean().get().getUserId(), form.oldPassword).orElseGet(() -> {
+            throwValidationError(messages -> {
+                messages.addErrorsNoUserForChangingPassword(GLOBAL);
+            }, validationErrorLambda);
+            return null;
         });
-        if (StringUtil.isBlank(form.oldPassword)) {
-            form.clearSecurityInfo();
-            throwValidationError(messages -> {
-                messages.addErrorsBlankPassword("oldPassword");
-            }, validationErrorLambda);
-        }
-        if (StringUtil.isBlank(form.newPassword)) {
-            form.newPassword = null;
-            form.confirmPassword = null;
-            throwValidationError(messages -> {
-                messages.addErrorsBlankPassword("newPassword");
-            }, validationErrorLambda);
-        }
-        if (form.newPassword != null && !form.newPassword.equals(form.confirmPassword)) {
-            form.newPassword = null;
-            form.confirmPassword = null;
-            throwValidationError(messages -> {
-                messages.addErrorsInvalidConfirmPassword("confirmPassword");
-            }, validationErrorLambda);
-        }
+    }
+
+    protected HtmlResponse asIndexHtml() {
+        return getUserBean().map(u -> asHtml(path_Profile_IndexJsp).useForm(ProfileForm.class))
+                .orElseGet(() -> redirect(LoginAction.class));
     }
 }

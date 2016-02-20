@@ -35,9 +35,6 @@
 			<p class="login-box-msg">
 				<la:message key="labels.profile" />
 			</p>
-			<p>
-				Username: ${username}
-			</p>
 			<%-- Message --%>
 			<div>
 				<la:info id="msg" message="false">
@@ -72,23 +69,28 @@
 						<c:set var="ph_confirm_password">
 							<la:message key="labels.profile.placeholder_confirm_new_password" />
 						</c:set>
-						<la:password property="confirmPassword" class="form-control"
+						<la:password property="confirmNewPassword" class="form-control"
 							     placeholder="${ph_confirm_password}" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-3"></div>
+					<div class="col-xs-2"></div>
 					<!-- /.col -->
-					<div class="col-xs-6">
+					<div class="col-xs-8">
+						<la:link href="/"
+							styleClass="btn btn-default">
+							<i class="fa fa-arrow-circle-left"></i>
+							<la:message key="labels.profile.back" />
+						</la:link>
 						<button type="submit" name="changePassword"
-							class="btn btn-primary btn-block btn-flat"
+							class="btn btn-warning"
 							value="<la:message key="labels.profile.update"/>">
-							<i class="fa fa-sign-in"></i>
+							<i class="fa fa-pencil"></i>
 							<la:message key="labels.profile.update" />
 						</button>
 					</div>
 					<!-- /.col -->
-					<div class="col-xs-3"></div>
+					<div class="col-xs-2"></div>
 					<!-- /.col -->
 				</div>
 			</la:form>
@@ -97,7 +99,13 @@
 	</div>
 	<!-- /.login-box -->
 
-	<jsp:include page="footer.jsp" />
+	<footer class="footer bd-footer text-muted" role="contentinfo">
+		<div class="container center">
+			<p class="text-muted">
+				<la:message key="labels.footer.copyright" />
+			</p>
+		</div>
+	</footer>
 
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"

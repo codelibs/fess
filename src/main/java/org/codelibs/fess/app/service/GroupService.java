@@ -23,7 +23,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.GroupPager;
-import org.codelibs.fess.es.user.bsbhv.BsGroupBhv;
 import org.codelibs.fess.es.user.cbean.GroupCB;
 import org.codelibs.fess.es.user.exbhv.GroupBhv;
 import org.codelibs.fess.es.user.exbhv.UserBhv;

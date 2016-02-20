@@ -653,6 +653,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. groupOfNames */
     String LDAP_ADMIN_GROUP_OBJECT_CLASSES = "ldap.admin.group.object.classes";
 
+    /** The key of the configuration. e.g. true */
+    String LDAP_ADMIN_SYNC_PASSWORD = "ldap.admin.sync.password";
+
     /** The key of the configuration. e.g. memberOf */
     String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
 
@@ -2601,6 +2604,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAdminGroupObjectClasses();
 
     /**
+     * Get the value for the key 'ldap.admin.sync.password'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAdminSyncPassword();
+
+    /**
+     * Is the property for the key 'ldap.admin.sync.password' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isLdapAdminSyncPassword();
+
+    /**
      * Get the value for the key 'ldap.memberof.attribute'. <br>
      * The value is, e.g. memberOf <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -3689,6 +3706,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getLdapAdminGroupObjectClasses() {
             return get(FessConfig.LDAP_ADMIN_GROUP_OBJECT_CLASSES);
+        }
+
+        public String getLdapAdminSyncPassword() {
+            return get(FessConfig.LDAP_ADMIN_SYNC_PASSWORD);
+        }
+
+        public boolean isLdapAdminSyncPassword() {
+            return is(FessConfig.LDAP_ADMIN_SYNC_PASSWORD);
         }
 
         public String getLdapMemberofAttribute() {

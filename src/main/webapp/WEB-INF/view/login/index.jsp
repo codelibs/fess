@@ -85,7 +85,13 @@
 	</div>
 	<!-- /.login-box -->
 
-	<jsp:include page="footer.jsp" />
+	<footer class="footer bd-footer text-muted" role="contentinfo">
+		<div class="container center">
+			<p class="text-muted">
+				<la:message key="labels.footer.copyright" />
+			</p>
+		</div>
+	</footer>
 
 	<input type="hidden" id="contextPath" value="${contextPath}" />
 	<script type="text/javascript"

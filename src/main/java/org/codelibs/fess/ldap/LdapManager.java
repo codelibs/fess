@@ -424,6 +424,26 @@ public class LdapManager {
         });
     }
 
+    public void changePassword(String username, String password) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(username);
+        search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(username), null, adminEnv, result -> {
+            if (result.hasMore()) {
+                final List<ModificationItem> modifyList = new ArrayList<>();
+                modifyReplaceEntry(modifyList, "userPassword", password);
+                modify(userDN, modifyList, adminEnv);
+            } else {
+                throw new LdapOperationException("User is not found: " + username);
+            }
+        });
+
+    }
+
     protected void insert(final String entryDN, final Attributes entry, final Supplier<Hashtable<String, String>> envSupplier) {
         try (DirContextHolder holder = getDirContext(envSupplier)) {
             logger.debug("Inserting {}", entryDN);
@@ -537,4 +557,5 @@ public class LdapManager {
             }
         }
     }
+
 }
