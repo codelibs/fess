@@ -121,16 +121,13 @@ public class AdminSearchlistAction extends FessAdminAction {
             // query matches on all documents.
             form.q = Constants.MATCHES_ALL_QUERY;
         }
-        return asListHtml().renderWith(data -> {
-            doSearchInternal(data, form);
-        });
-    }
-
-    private void doSearchInternal(final RenderData data, final ListForm form) {
+        final WebRenderData renderData = new WebRenderData();
         form.initialize();
         try {
-            final WebRenderData renderData = new WebRenderData(data);
             searchService.search(request, form, renderData);
+            return asListHtml().renderWith(data -> {
+                renderData.register(data);
+            });
         } catch (final InvalidQueryException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
@@ -140,10 +137,11 @@ public class AdminSearchlistAction extends FessAdminAction {
             if (logger.isDebugEnabled()) {
                 logger.debug(e.getMessage(), e);
             }
-            throwValidationError(messages -> {
-                messages.addErrorsResultSizeExceeded(GLOBAL);
-            }, () -> asHtml(path_AdminError_AdminErrorJsp));
+            throwValidationError(messages -> messages.addErrorsResultSizeExceeded(GLOBAL), () -> asListHtml());
         }
+
+        throwValidationError(messages -> messages.addErrorsInvalidQueryUnknown(GLOBAL), () -> asListHtml());
+        return null; // ignore
     }
 
     @Execute
@@ -233,94 +231,26 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     protected static class WebRenderData extends SearchRenderData {
-        private final RenderData data;
 
-        WebRenderData(final RenderData data) {
-            this.data = data;
-        }
-
-        @Override
-        public void setDocumentItems(final List<Map<String, Object>> documentItems) {
+        public void register(final RenderData data) {
+            RenderDataUtil.register(data, "queryId", queryId);
             RenderDataUtil.register(data, "documentItems", documentItems);
-            super.setDocumentItems(documentItems);
-        }
-
-        @Override
-        public void setExecTime(final String execTime) {
+            RenderDataUtil.register(data, "facetResponse", facetResponse);
+            RenderDataUtil.register(data, "appendHighlightParams", appendHighlightParams);
             RenderDataUtil.register(data, "execTime", execTime);
-            super.setExecTime(execTime);
-        }
-
-        @Override
-        public void setPageSize(final int pageSize) {
             RenderDataUtil.register(data, "pageSize", pageSize);
-            super.setPageSize(pageSize);
-        }
-
-        @Override
-        public void setCurrentPageNumber(final int currentPageNumber) {
             RenderDataUtil.register(data, "currentPageNumber", currentPageNumber);
-            super.setCurrentPageNumber(currentPageNumber);
-        }
-
-        @Override
-        public void setAllRecordCount(final long allRecordCount) {
             RenderDataUtil.register(data, "allRecordCount", allRecordCount);
-            super.setAllRecordCount(allRecordCount);
-        }
-
-        @Override
-        public void setAllPageCount(final int allPageCount) {
             RenderDataUtil.register(data, "allPageCount", allPageCount);
-            super.setAllPageCount(allPageCount);
-        }
-
-        @Override
-        public void setExistNextPage(final boolean existNextPage) {
             RenderDataUtil.register(data, "existNextPage", existNextPage);
-            super.setExistNextPage(existNextPage);
-        }
-
-        @Override
-        public void setExistPrevPage(final boolean existPrevPage) {
             RenderDataUtil.register(data, "existPrevPage", existPrevPage);
-            super.setExistPrevPage(existPrevPage);
-        }
-
-        @Override
-        public void setCurrentStartRecordNumber(final long currentStartRecordNumber) {
             RenderDataUtil.register(data, "currentStartRecordNumber", currentStartRecordNumber);
-            super.setCurrentStartRecordNumber(currentStartRecordNumber);
-        }
-
-        @Override
-        public void setCurrentEndRecordNumber(final long currentEndRecordNumber) {
             RenderDataUtil.register(data, "currentEndRecordNumber", currentEndRecordNumber);
-            super.setCurrentEndRecordNumber(currentEndRecordNumber);
-        }
-
-        @Override
-        public void setPageNumberList(final List<String> pageNumberList) {
             RenderDataUtil.register(data, "pageNumberList", pageNumberList);
-            super.setPageNumberList(pageNumberList);
-        }
-
-        @Override
-        public void setPartialResults(final boolean partialResults) {
             RenderDataUtil.register(data, "partialResults", partialResults);
-            super.setPartialResults(partialResults);
-        }
-
-        @Override
-        public void setQueryTime(final long queryTime) {
             RenderDataUtil.register(data, "queryTime", queryTime);
-            super.setQueryTime(queryTime);
-        }
-
-        @Override
-        public void setSearchQuery(final String searchQuery) {
             RenderDataUtil.register(data, "searchQuery", searchQuery);
-            super.setSearchQuery(searchQuery);
+            RenderDataUtil.register(data, "requestedTime", requestedTime);
         }
     }
 }

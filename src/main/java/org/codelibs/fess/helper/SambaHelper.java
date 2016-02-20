@@ -51,20 +51,12 @@ public class SambaHelper {
 
     public String getAccountId(final SID sid) {
         if (fessConfig.isAvailableSmbSidType(sid.getType())) {
-            return convert(sid.getType(), sid.getAccountName());
+            return createSearchRole(sid.getType(), sid.getAccountName());
         }
         return null;
     }
 
-    public String getRoleByUser(final String name) {
-        return convert(SID_TYPE_USER, name);
-    }
-
-    public String getRoleByDomainGroup(final String name) {
-        return convert(SID_TYPE_DOM_GRP, name);
-    }
-
-    protected String convert(final int type, final String name) {
+    protected String createSearchRole(final int type, final String name) {
         return type + name;
     }
 }

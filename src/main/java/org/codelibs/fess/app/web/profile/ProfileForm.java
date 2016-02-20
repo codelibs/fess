@@ -13,35 +13,32 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.user.exentity;
-
-import org.codelibs.fess.es.user.bsentity.BsRole;
 
 /**
- * @author FreeGen
+ * @author Keiichi Watanabe
  */
-public class Role extends BsRole {
+package org.codelibs.fess.app.web.profile;
 
+import java.io.Serializable;
+
+import org.hibernate.validator.constraints.NotBlank;
+
+public class ProfileForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public Long getVersionNo() {
-        return asDocMeta().version();
+    @NotBlank
+    public String oldPassword;
+
+    @NotBlank
+    public String newPassword;
+
+    @NotBlank
+    public String confirmNewPassword;
+
+    public void clearSecurityInfo() {
+        oldPassword = null;
+        newPassword = null;
+        confirmNewPassword = null;
     }
 
-    public void setVersionNo(final Long version) {
-        asDocMeta().version(version);
-    }
-
-    public String getId() {
-        return asDocMeta().id();
-    }
-
-    public void setId(final String id) {
-        asDocMeta().id(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Role [name=" + name + "]";
-    }
 }

@@ -96,10 +96,10 @@ public class SearchAction extends FessSearchAction {
     }
 
     protected HtmlResponse doSearch(final SearchForm form) {
+        validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
         if (isLoginRequired()) {
             return redirectToLogin();
         }
-        validate(form, messages -> {}, () -> asHtml(path_SearchJsp));
 
         if (viewHelper.isUseSession()) {
             final HttpSession session = request.getSession(false);

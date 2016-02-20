@@ -52,15 +52,16 @@ public class AccessContextLogic {
     // ===================================================================================
     //                                                                      Create Context
     //                                                                      ==============
-    public AccessContext create(AccessContextResource resource, UserTypeSupplier userTypeSupplier, UserBeanSupplier userBeanSupplier,
-            AppTypeSupplier appTypeSupplier) {
+    public AccessContext create(final AccessContextResource resource, final UserTypeSupplier userTypeSupplier,
+            final UserBeanSupplier userBeanSupplier, final AppTypeSupplier appTypeSupplier) {
         final AccessContext context = new AccessContext();
         context.setAccessLocalDateTimeProvider(() -> timeManager.currentDateTime());
         context.setAccessUserProvider(() -> buildAccessUserTrace(resource, userTypeSupplier, appTypeSupplier));
         return context;
     }
 
-    private String buildAccessUserTrace(AccessContextResource resource, UserTypeSupplier userTypeSupplier, AppTypeSupplier appTypeSupplier) {
+    private String buildAccessUserTrace(final AccessContextResource resource, final UserTypeSupplier userTypeSupplier,
+            final AppTypeSupplier appTypeSupplier) {
         final StringBuilder sb = new StringBuilder();
         sb.append(userTypeSupplier.supply().orElse("_"));
         sb.append(",").append(appTypeSupplier.supply()).append(",").append(resource.getModuleName());

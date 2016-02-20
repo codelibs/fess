@@ -29,6 +29,9 @@
 								aria-expanded="false"> <i class="fa fa-user"></i>${username}
 							</a>
 							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/profile" styleClass="dropdown-item">
+									<la:message key="labels.profile" />
+								</la:link>
 								<la:link href="/logout" styleClass="dropdown-item">
 									<la:message key="labels.logout" />
 								</la:link>
@@ -51,6 +54,7 @@
 					<img src="${f:url('/images/logo.png')}"
 						alt="<la:message key="labels.index_title" />" />
 				</h1>
+				<div class="notification">${notification}</div>
 				<div>
 					<la:info id="msg" message="true">
 						<div class="alert-message info">${msg}</div>

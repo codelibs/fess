@@ -329,6 +329,28 @@
 												styleClass="form-control" />
 										</div>
 									</div>
+									<%-- Nortification --%>
+									<h4><la:message key="labels.general_menu_notification" /></h4>
+									<div class="form-group">
+										<label for="notificationLogin"
+											class="col-sm-3 control-label"><la:message
+												key="labels.notification_login" /></label>
+										<div class="col-sm-9">
+											<la:errors property="notificationLogin" />
+											<la:textarea property="notificationLogin"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="notificationSearchTop"
+											class="col-sm-3 control-label"><la:message
+												key="labels.notification_search_top" /></label>
+										<div class="col-sm-9">
+											<la:errors property="notificationSearchTop" />
+											<la:textarea property="notificationSearchTop"
+												styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

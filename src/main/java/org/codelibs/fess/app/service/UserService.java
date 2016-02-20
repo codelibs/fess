@@ -23,9 +23,13 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.UserPager;
+import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.es.user.cbean.UserCB;
 import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.es.user.exentity.User;
+import org.codelibs.fess.exception.FessUserNotFoundException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -35,6 +39,9 @@ public class UserService implements Serializable {
 
     @Resource
     protected UserBhv userBhv;
+
+    @Resource
+    protected FessLoginAssist fessLoginAssist;
 
     public List<User> getUserList(final UserPager userPager) {
 
@@ -57,6 +64,7 @@ public class UserService implements Serializable {
     }
 
     public void store(final User user) {
+        ComponentUtil.getLdapManager().insert(user);
 
         userBhv.insertOrUpdate(user, op -> {
             op.setRefresh(true);
@@ -64,7 +72,24 @@ public class UserService implements Serializable {
 
     }
 
+    public void chnagePassword(final String username, final String password) {
+        ComponentUtil.getLdapManager().changePassword(username, password);
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isLdapAdminEnabled() && fessConfig.isLdapAdminSyncPassword() || !fessConfig.isLdapAdminEnabled()) {
+            userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
+                final String encodedPassword = fessLoginAssist.encryptPassword(password);
+                entity.setPassword(encodedPassword);
+                userBhv.insertOrUpdate(entity, op -> op.setRefresh(true));
+            }).orElse(() -> {
+                throw new FessUserNotFoundException(username);
+            });
+        }
+
+    }
+
     public void delete(final User user) {
+        ComponentUtil.getLdapManager().delete(user);
 
         userBhv.delete(user, op -> {
             op.setRefresh(true);

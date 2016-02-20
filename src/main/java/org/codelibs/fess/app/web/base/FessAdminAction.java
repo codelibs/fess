@@ -107,7 +107,7 @@ public abstract class FessAdminAction extends FessBaseAction {
     }
 
     @Override
-    public ActionResponse hookBefore(ActionRuntime runtime) {
+    public ActionResponse hookBefore(final ActionRuntime runtime) {
         final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
         final String requestPath = runtime.getRequestPath();
         final String executeName = runtime.getExecuteMethod().getName();
@@ -116,7 +116,7 @@ public abstract class FessAdminAction extends FessBaseAction {
     }
 
     @Override
-    public void hookFinally(ActionRuntime runtime) {
+    public void hookFinally(final ActionRuntime runtime) {
         super.hookFinally(runtime);
     }
 

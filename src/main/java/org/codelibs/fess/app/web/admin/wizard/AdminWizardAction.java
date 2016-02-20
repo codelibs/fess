@@ -288,7 +288,7 @@ public class AdminWizardAction extends FessAdminAction {
         verifyToken(() -> asIndexHtml());
         if (!processHelper.isProcessRunning()) {
             final List<ScheduledJob> scheduledJobList = scheduledJobService.getCrawlerJobList();
-            JobManager jobManager = ComponentUtil.getJobManager();
+            final JobManager jobManager = ComponentUtil.getJobManager();
             for (final ScheduledJob scheduledJob : scheduledJobList) {
                 jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
                     job.launchNow();

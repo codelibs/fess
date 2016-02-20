@@ -61,6 +61,18 @@
 
   <function>
     <description>
+      Returns Date from a given value.
+    </description>
+    <name>parseDateFormat</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.util.Date parseDate(java.lang.String, java.lang.String)</function-signature>
+    <example>
+      ${fe:parseDate(doc.tstamp, "yyyy-MM-dd HH:mm:ss")}
+    </example>
+  </function>
+
+  <function>
+    <description>
       Returns formatted number from a given value.
     </description>
     <name>formatNumber</name>

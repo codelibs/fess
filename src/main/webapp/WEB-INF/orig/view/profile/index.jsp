@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title><la:message key="labels.login.title" /></title>
+<title><la:message key="labels.profile.title" /></title>
 <link href="${f:url('/css/style-base.css')}" rel="stylesheet"
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet" type="text/css" />
@@ -31,10 +31,9 @@
 			</la:link>
 		</div>
 		<!-- /.login-logo -->
-		<div class="notification">${notification}</div>
 		<div class="login-box-body">
 			<p class="login-box-msg">
-				<la:message key="labels.login" />
+				<la:message key="labels.profile" />
 			</p>
 			<%-- Message --%>
 			<div>
@@ -46,37 +45,52 @@
 			<la:form styleId="login" method="post">
 				<div class="form-group has-feedback">
 					<div class="input-group">
-						<span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
-						<c:set var="ph_username">
-							<la:message key="labels.login.placeholder_username" />
+						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+						<c:set var="ph_old_password">
+							<la:message key="labels.profile.placeholder_old_password" />
 						</c:set>
-						<la:text property="username" styleId="username"
-							class="form-control" placeholder="${ph_username}" />
+						<la:password property="oldPassword" class="form-control"
+							placeholder="${ph_old_password}" />
 					</div>
 				</div>
 				<div class="form-group has-feedback">
 					<div class="input-group">
 						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-						<c:set var="ph_password">
-							<la:message key="labels.login.placeholder_password" />
+						<c:set var="ph_new_password">
+							<la:message key="labels.profile.placeholder_new_password" />
 						</c:set>
-						<la:password property="password" class="form-control"
-							placeholder="${ph_password}" />
+						<la:password property="newPassword" class="form-control"
+							     placeholder="${ph_new_password}" />
+					</div>
+				</div>
+				<div class="form-group has-feedback">
+					<div class="input-group">
+						<span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+						<c:set var="ph_confirm_password">
+							<la:message key="labels.profile.placeholder_confirm_new_password" />
+						</c:set>
+						<la:password property="confirmNewPassword" class="form-control"
+							     placeholder="${ph_confirm_password}" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-3"></div>
+					<div class="col-xs-2"></div>
 					<!-- /.col -->
-					<div class="col-xs-6">
-						<button type="submit" name="login"
-							class="btn btn-primary btn-block btn-flat"
-							value="<la:message key="labels.login"/>">
-							<i class="fa fa-sign-in"></i>
-							<la:message key="labels.login" />
+					<div class="col-xs-8">
+						<la:link href="/"
+							styleClass="btn btn-default">
+							<i class="fa fa-arrow-circle-left"></i>
+							<la:message key="labels.profile.back" />
+						</la:link>
+						<button type="submit" name="changePassword"
+							class="btn btn-warning"
+							value="<la:message key="labels.profile.update"/>">
+							<i class="fa fa-pencil"></i>
+							<la:message key="labels.profile.update" />
 						</button>
 					</div>
 					<!-- /.col -->
-					<div class="col-xs-3"></div>
+					<div class="col-xs-2"></div>
 					<!-- /.col -->
 				</div>
 			</la:form>

@@ -82,6 +82,19 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             throw new CrawlingAccessException("No response body.");
         }
 
+        final ResultData resultData = new ResultData();
+        resultData.setTransformerName(getName());
+        try {
+            resultData.setData(SerializeUtil.fromObjectToBinary(generateData(responseData)));
+        } catch (final Exception e) {
+            throw new CrawlingAccessException("Could not serialize object", e);
+        }
+        resultData.setEncoding(fessConfig.getCrawlerCrawlingDataEncoding());
+
+        return resultData;
+    }
+
+    protected Map<String, Object> generateData(final ResponseData responseData) {
         final Extractor extractor = getExtractor(responseData);
         final Map<String, String> params = new HashMap<String, String>();
         params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
@@ -119,7 +132,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 }
                             }
 
-                            Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
+                            final Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
                             if (mapping != null) {
                                 if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getSecond())) {
                                     dataMap.put(mapping.getFirst(), values);
@@ -135,7 +148,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                         } else {
                                             logger.warn("Unknown mapping type: {}={}", key, mapping);
                                         }
-                                    } catch (NumberFormatException e) {
+                                    } catch (final NumberFormatException e) {
                                         logger.warn("Failed to parse " + values[0], e);
                                     }
                                 }
@@ -151,9 +164,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             content = StringUtil.EMPTY;
         }
         final String contentMeta = contentMetaBuf.toString();
-
-        final ResultData resultData = new ResultData();
-        resultData.setTransformerName(getName());
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
@@ -208,7 +218,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), StringUtil.EMPTY);
         }
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
-                .isCrawlerDocumentCacheEnable()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
+                .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
                     && responseData.getContentLength() <= fessConfig.getCrawlerDocumentCacheMaxSizeAsInteger().longValue()) {
 
@@ -335,14 +345,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key));
         }
 
-        try {
-            resultData.setData(SerializeUtil.fromObjectToBinary(dataMap));
-        } catch (final Exception e) {
-            throw new CrawlingAccessException("Could not serialize object: " + url, e);
-        }
-        resultData.setEncoding(fessConfig.getCrawlerCrawlingDataEncoding());
-
-        return resultData;
+        return dataMap;
     }
 
     protected String abbreviate(final String str, final int maxWidth) {

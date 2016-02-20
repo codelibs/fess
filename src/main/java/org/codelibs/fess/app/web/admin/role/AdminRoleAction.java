@@ -32,12 +32,16 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  * @author Keiichi Watanabe
  */
 public class AdminRoleAction extends FessAdminAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminRoleAction.class);
 
     // ===================================================================================
     //                                                                           Attribute
@@ -116,26 +120,6 @@ public class AdminRoleAction extends FessAdminAction {
         });
     }
 
-    @Execute
-    public HtmlResponse edit(final EditForm form) {
-        validate(form, messages -> {}, () -> asListHtml());
-        final String id = form.id;
-        roleService.getRole(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-        });
-        saveToken();
-        if (form.crudMode.intValue() == CrudMode.EDIT) {
-            // back
-            form.crudMode = CrudMode.DETAILS;
-            return asDetailsHtml();
-        } else {
-            form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
-        }
-    }
-
     // -----------------------------------------------------
     //                                               Details
     //                                               -------
@@ -166,24 +150,15 @@ public class AdminRoleAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
         getRole(form).ifPresent(entity -> {
-            roleService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            try {
+                roleService.store(entity);
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to add " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+            }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
-        });
-        return redirect(getClass());
-    }
-
-    @Execute
-    public HtmlResponse update(final EditForm form) {
-        verifyCrudMode(form.crudMode, CrudMode.EDIT);
-        validate(form, messages -> {}, () -> asEditHtml());
-        verifyToken(() -> asEditHtml());
-        getRole(form).ifPresent(entity -> {
-            roleService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -195,8 +170,13 @@ public class AdminRoleAction extends FessAdminAction {
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         roleService.getRole(id).ifPresent(entity -> {
-            roleService.delete(entity);
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            try {
+                roleService.delete(entity);
+                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to delete " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+            }
         }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
         });

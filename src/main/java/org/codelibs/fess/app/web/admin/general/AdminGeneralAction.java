@@ -142,6 +142,8 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.LDAP_SECURITY_PRINCIPAL, form.ldapSecurityPrincipal);
         updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
         updateProperty(Constants.LDAP_ACCOUNT_FILTER, form.ldapAccountFilter);
+        updateProperty(Constants.NOTIFICATION_LOGIN, form.notificationLogin);
+        updateProperty(Constants.NOTIFICATION_SEARCH_TOP, form.notificationSearchTop);
 
         fessConfig.storeSystemProperties();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -185,6 +187,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.ldapSecurityPrincipal = systemProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
         form.ldapBaseDn = systemProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
         form.ldapAccountFilter = systemProperties.getProperty(Constants.LDAP_ACCOUNT_FILTER, StringUtil.EMPTY);
+        form.notificationLogin = systemProperties.getProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
+        form.notificationSearchTop = systemProperties.getProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
     }
 
     private void updateProperty(final String key, final String value) {

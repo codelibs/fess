@@ -35,7 +35,7 @@ public class ScriptExecutorJob implements LaJob {
     private static final Logger logger = LoggerFactory.getLogger(ScriptExecutorJob.class);
 
     @Override
-    public void run(LaJobRuntime runtime) {
+    public void run(final LaJobRuntime runtime) {
         final ScheduledJob scheduledJob = (ScheduledJob) runtime.getParameterMap().get(Constants.SCHEDULED_JOB); // TODO null check
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobManager jobManager = ComponentUtil.getJobManager();

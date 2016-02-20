@@ -110,7 +110,7 @@ public class SystemHelper implements Serializable {
         shutdownHookList.forEach(action -> {
             try {
                 action.run();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to process shutdown task.", e);
             }
         });
@@ -242,20 +242,20 @@ public class SystemHelper implements Serializable {
         }
     }
 
-    public void sleep(int sec) {
+    public void sleep(final int sec) {
         try {
             Thread.sleep(sec * 1000L);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // ignore
         }
     }
 
-    public void addShutdownHook(Runnable hook) {
+    public void addShutdownHook(final Runnable hook) {
         shutdownHookList.add(hook);
     }
 
     public String getHostname() {
-        Map<String, String> env = System.getenv();
+        final Map<String, String> env = System.getenv();
         if (env.containsKey("COMPUTERNAME")) {
             return env.get("COMPUTERNAME");
         } else if (env.containsKey("HOSTNAME")) {
@@ -263,13 +263,29 @@ public class SystemHelper implements Serializable {
         }
         try {
             return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             logger.debug("Unknown hostname.", e);
         }
         return "Unknown";
     }
 
-    public void setupAdminHtmlData(TypicalAction action, ActionRuntime runtime) {
+    public void setupAdminHtmlData(final TypicalAction action, final ActionRuntime runtime) {
         // nothing
+    }
+
+    public String getSearchRoleByUser(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchUserPrefix(), name);
+    }
+
+    public String getSearchRoleByGroup(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchGroupPrefix(), name);
+    }
+
+    public String getSearchRoleByRole(final String name) {
+        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchRolePrefix(), name);
+    }
+
+    protected String createSearchRole(final String type, final String name) {
+        return type + name;
     }
 }

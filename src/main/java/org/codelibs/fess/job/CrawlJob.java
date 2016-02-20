@@ -350,7 +350,7 @@ public class CrawlJob {
             propFile = File.createTempFile("crawler_", ".properties");
             cmdList.add(propFile.getAbsolutePath());
             try (FileOutputStream out = new FileOutputStream(propFile)) {
-                Properties prop = new Properties();
+                final Properties prop = new Properties();
                 prop.putAll(ComponentUtil.getSystemProperties());
                 prop.store(out, cmdList.toString());
             }

@@ -109,7 +109,7 @@ public class ScheduledJobService implements Serializable {
         scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
             op.setRefresh(true);
         });
-        JobManager jobManager = ComponentUtil.getJobManager();
+        final JobManager jobManager = ComponentUtil.getJobManager();
         jobManager.schedule(cron -> register(cron, scheduledJob));
     }
 
@@ -121,7 +121,7 @@ public class ScheduledJobService implements Serializable {
         });
     }
 
-    protected void register(LaCron cron, final ScheduledJob scheduledJob) {
+    protected void register(final LaCron cron, final ScheduledJob scheduledJob) {
         if (scheduledJob == null) {
             throw new ScheduledJobException("No job.");
         }
@@ -146,7 +146,7 @@ public class ScheduledJobService implements Serializable {
         }
 
         final CronParamsSupplier paramsOp = () -> {
-            Map<String, Object> params = new HashMap<>();
+            final Map<String, Object> params = new HashMap<>();
             params.put(Constants.SCHEDULED_JOB, scheduledJob);
             return params;
         };
@@ -162,7 +162,7 @@ public class ScheduledJobService implements Serializable {
                 }
             } else if (StringUtil.isNotBlank(scheduledJob.getCronExpression())) {
                 logger.info("Starting Job " + id + ":" + scheduledJob.getName());
-                String cronExpression = scheduledJob.getCronExpression();
+                final String cronExpression = scheduledJob.getCronExpression();
                 job.reschedule(cronExpression, op -> op.changeNoticeLogToDebug().params(paramsOp));
             }
         }).orElse(
@@ -181,18 +181,18 @@ public class ScheduledJobService implements Serializable {
                 });
     }
 
-    private OptionalThing<LaScheduledJob> findJobByUniqueOf(LaJobUnique jobUnique) {
+    private OptionalThing<LaScheduledJob> findJobByUniqueOf(final LaJobUnique jobUnique) {
         final JobManager jobManager = ComponentUtil.getJobManager();
         try {
             return jobManager.findJobByUniqueOf(jobUnique);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return OptionalThing.empty();
         }
     }
 
     public void unregister(final ScheduledJob scheduledJob) {
         try {
-            JobManager jobManager = ComponentUtil.getJobManager();
+            final JobManager jobManager = ComponentUtil.getJobManager();
             if (jobManager.isSchedulingDone()) {
                 jobManager.findJobByUniqueOf(LaJobUnique.of(scheduledJob.getId())).ifPresent(job -> {
                     job.unschedule();
@@ -222,7 +222,7 @@ public class ScheduledJobService implements Serializable {
         return false;
     }
 
-    public void start(LaCron cron) {
+    public void start(final LaCron cron) {
         scheduledJobBhv.selectCursor(cb -> {
             cb.query().setAvailable_Equal(Constants.T);
             cb.query().addOrderBy_SortOrder_Asc();
@@ -230,7 +230,7 @@ public class ScheduledJobService implements Serializable {
         }, scheduledJob -> {
             try {
                 register(cron, scheduledJob);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to start Job " + scheduledJob.getId(), e);
             }
         });

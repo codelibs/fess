@@ -152,7 +152,7 @@ public class AdminJoblogAction extends FessAdminAction {
     @Execute
     public HtmlResponse deleteall() {
         verifyToken(() -> asListHtml());
-        List<String> jobStatusList = new ArrayList<>();
+        final List<String> jobStatusList = new ArrayList<>();
         jobStatusList.add(Constants.OK);
         jobStatusList.add(Constants.FAIL);
         jobLogService.deleteByJobStatus(jobStatusList);

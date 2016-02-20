@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.user.exentity;
 
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.codelibs.fess.Constants;
@@ -28,6 +29,8 @@ import org.codelibs.fess.util.StreamUtil;
 public class User extends BsUser implements FessUser {
 
     private static final long serialVersionUID = 1L;
+
+    private String originalPassword;
 
     public Long getVersionNo() {
         return asDocMeta().version();
@@ -55,6 +58,20 @@ public class User extends BsUser implements FessUser {
     public String[] getGroupNames() {
         return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
                 .toArray(n -> new String[n]);
+    }
+
+    @Override
+    public String toString() {
+        return "User [name=" + name + ", roles=" + Arrays.toString(roles) + ", groups=" + Arrays.toString(groups) + "]";
+    }
+
+    public void setOriginalPassword(final String originalPassword) {
+        this.originalPassword = originalPassword;
+
+    }
+
+    public String getOriginalPassword() {
+        return originalPassword;
     }
 
 }

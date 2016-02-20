@@ -540,7 +540,7 @@ public class FessEsClient implements Client {
 
             try {
                 searchResponse = searchRequestBuilder.execute().actionGet();
-            } catch (SearchPhaseExecutionException e) {
+            } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
             }

@@ -146,7 +146,7 @@
 	</component>
 	<component name="popularWordHelper" class="org.codelibs.fess.helper.PopularWordHelper">
 	</component>
-	<component name="userInfoHelper" class="org.codelibs.fess.helper.impl.CookieUserInfoHelperImpl">
+	<component name="userInfoHelper" class="org.codelibs.fess.helper.UserInfoHelper">
 	</component>
 	<component name="openSearchHelper" class="org.codelibs.fess.helper.OpenSearchHelper">
 		<property name="osddPath">"/WEB-INF/orig/open-search/osdd.xml"</property>

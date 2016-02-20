@@ -13,35 +13,18 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.user.exentity;
+package org.codelibs.fess.exception;
 
-import org.codelibs.fess.es.user.bsentity.BsRole;
-
-/**
- * @author FreeGen
- */
-public class Role extends BsRole {
+public class LdapOperationException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public Long getVersionNo() {
-        return asDocMeta().version();
+    public LdapOperationException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 
-    public void setVersionNo(final Long version) {
-        asDocMeta().version(version);
+    public LdapOperationException(final String message) {
+        super(message);
     }
 
-    public String getId() {
-        return asDocMeta().id();
-    }
-
-    public void setId(final String id) {
-        asDocMeta().id(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Role [name=" + name + "]";
-    }
 }

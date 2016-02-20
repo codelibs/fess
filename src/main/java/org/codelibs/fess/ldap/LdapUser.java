@@ -17,6 +17,8 @@ package org.codelibs.fess.ldap;
 
 import java.util.Hashtable;
 
+import javax.naming.Context;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.util.ComponentUtil;
@@ -48,6 +50,8 @@ public class LdapUser implements FessUser {
             final String accountFilter = ComponentUtil.getFessConfig().getLdapAccountFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
                 roles = ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter);
+            } else {
+                roles = StringUtil.EMPTY_STRINGS;
             }
         }
         return roles;
@@ -61,5 +65,9 @@ public class LdapUser implements FessUser {
 
     public Hashtable<String, String> getEnvironment() {
         return env;
+    }
+
+    public String getPassword() {
+        return getEnvironment().get(Context.SECURITY_CREDENTIALS);
     }
 }
