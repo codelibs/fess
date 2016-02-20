@@ -465,6 +465,7 @@
 						<!-- dictionary (empty) -->
 						<mapping>
 							<directory>${packaging.fess.dictionary.dir}</directory>
+							<filemode>755</filemode>
 							<username>elasticsearch</username>
 							<groupname>elasticsearch</groupname>
 						</mapping>
