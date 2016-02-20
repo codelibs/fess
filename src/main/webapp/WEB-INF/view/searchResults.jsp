@@ -16,7 +16,7 @@
 <c:if test="${partialResults}">
 	<div class="alert">
 		<p>
-			<la:message key="errors.process_time_is_exceeded" />
+			<la:message key="labels.process_time_is_exceeded" />
 		</p>
 	</div>
 </c:if>
