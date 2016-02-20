@@ -281,9 +281,6 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to change your password. */
     public static final String ERRORS_failed_to_change_password = "{errors.failed_to_change_password}";
 
-    /** The key of the message: The limit of a search time was exceeded. The partial result might be displayed. */
-    public static final String ERRORS_process_time_is_exceeded = "{errors.process_time_is_exceeded}";
-
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1626,20 +1623,6 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToChangePassword(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_change_password));
-        return this;
-    }
-
-    /**
-     * Add the created action message for the key 'errors.process_time_is_exceeded' with parameters.
-     * <pre>
-     * message: The limit of a search time was exceeded. The partial result might be displayed.
-     * </pre>
-     * @param property The property name for the message. (NotNull)
-     * @return this. (NotNull)
-     */
-    public FessMessages addErrorsProcessTimeIsExceeded(String property) {
-        assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_process_time_is_exceeded));
         return this;
     }
 
