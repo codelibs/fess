@@ -155,6 +155,14 @@
 											<la:option value="errorBadRequest">
 												<la:message key="labels.design_file_errorBadRequest" />
 											</la:option>
+											<%-- Login --%>
+											<la:option value="login">
+												<la:message key="labels.design_file_login" />
+											</la:option>
+											<%-- Profile --%>
+											<la:option value="profile">
+												<la:message key="labels.design_file_profile" />
+											</la:option>
 										</la:select>
 									</div>
 								</div>
