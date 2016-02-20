@@ -312,8 +312,8 @@ public class Crawler implements Serializable {
         }
     }
 
-    private String getValueFromMap(Map<String, String> dataMap, String key, String defaultValue) {
-        String value = dataMap.get(key);
+    private String getValueFromMap(final Map<String, String> dataMap, final String key, final String defaultValue) {
+        final String value = dataMap.get(key);
         if (StringUtil.isBlank(value)) {
             return defaultValue;
         }

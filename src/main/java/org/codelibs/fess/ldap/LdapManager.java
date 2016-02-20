@@ -424,7 +424,7 @@ public class LdapManager {
         });
     }
 
-    public void changePassword(String username, String password) {
+    public void changePassword(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;

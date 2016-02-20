@@ -434,8 +434,8 @@ public class QueryHelper implements Serializable {
         }
     }
 
-    private QueryBuilder convertPhraseQuery(QueryContext context, PhraseQuery query) {
-        Term[] terms = query.getTerms();
+    private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query) {
+        final Term[] terms = query.getTerms();
         if (terms.length == 0) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Unknown phrase query: " + query);

@@ -54,7 +54,7 @@ public class AllJobScheduler implements LaJobScheduler {
     protected Class<? extends LaJob> jobClass = ScriptExecutorJob.class;
 
     @Override
-    public void schedule(LaCron cron) {
+    public void schedule(final LaCron cron) {
         scheduledJobService.start(cron);
 
         final String myName = fessConfig.getSchedulerTargetName();

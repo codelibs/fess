@@ -230,7 +230,7 @@ public interface FessProp {
 
     String getJobSystemJobIds();
 
-    public default boolean isSystemJobId(String id) {
+    public default boolean isSystemJobId(final String id) {
         if (StringUtil.isBlank(getJobSystemJobIds())) {
             return false;
         }
@@ -239,7 +239,7 @@ public interface FessProp {
 
     String getSmbAvailableSidTypes();
 
-    public default boolean isAvailableSmbSidType(int sidType) {
+    public default boolean isAvailableSmbSidType(final int sidType) {
         if (StringUtil.isBlank(getSmbAvailableSidTypes())) {
             return false;
         }
@@ -257,7 +257,7 @@ public interface FessProp {
 
     String getOnlineHelpSupportedLangs();
 
-    public default boolean isOnlineHelpSupportedLang(String lang) {
+    public default boolean isOnlineHelpSupportedLang(final String lang) {
         if (StringUtil.isBlank(getOnlineHelpSupportedLangs())) {
             return false;
         }
@@ -291,7 +291,7 @@ public interface FessProp {
 
     String getJobTemplateTitleData();
 
-    public default String getJobTemplateTitle(String type) {
+    public default String getJobTemplateTitle(final String type) {
         if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
             return getJobTemplateTitleWeb();
         } else if (Constants.FILE_CRAWLER_TYPE.equals(type)) {
@@ -307,9 +307,9 @@ public interface FessProp {
     public default Class<? extends LaJob> getSchedulerJobClassAsClass() {
         try {
             @SuppressWarnings("unchecked")
-            Class<? extends LaJob> clazz = (Class<? extends LaJob>) Class.forName(getSchedulerJobClass());
+            final Class<? extends LaJob> clazz = (Class<? extends LaJob>) Class.forName(getSchedulerJobClass());
             return clazz;
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new ClassNotFoundRuntimeException(e);
         }
     }
@@ -322,7 +322,7 @@ public interface FessProp {
 
     String getCrawlerMetadataContentExcludes();
 
-    public default boolean isCrawlerMetadataContentIncluded(String name) {
+    public default boolean isCrawlerMetadataContentIncluded(final String name) {
         Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
         if (patterns == null) {
             patterns =
@@ -335,14 +335,14 @@ public interface FessProp {
 
     String getCrawlerMetadataNameMapping();
 
-    public default Pair<String, String> getCrawlerMetadataNameMapping(String name) {
+    public default Pair<String, String> getCrawlerMetadataNameMapping(final String name) {
         @SuppressWarnings("unchecked")
         Map<String, Pair<String, String>> params = (Map<String, Pair<String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
         if (params == null) {
             params = StreamUtil.of(getCrawlerMetadataNameMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
-                String[] values = v.split("=");
+                final String[] values = v.split("=");
                 if (values.length == 2) {
-                    String[] subValues = values[1].split(":");
+                    final String[] subValues = values[1].split(":");
                     if (subValues.length == 2) {
                         return new Tuple3<String, String, String>(values[0], subValues[0], subValues[1]);
                     } else {
@@ -382,7 +382,7 @@ public interface FessProp {
 
     String getQueryLanguageMapping();
 
-    public default String getQueryLanguage(Locale locale) {
+    public default String getQueryLanguage(final Locale locale) {
         if (locale == null) {
             return null;
         }
@@ -390,7 +390,7 @@ public interface FessProp {
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
             params = StreamUtil.of(getQueryLanguageMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
-                String[] values = v.split("=");
+                final String[] values = v.split("=");
                 if (values.length == 2) {
                     return new Pair<String, String>(values[0], values[1]);
                 }
@@ -417,7 +417,7 @@ public interface FessProp {
 
     String getSupportedUploadedFiles();
 
-    public default boolean isSupportedUploadedFile(String name) {
+    public default boolean isSupportedUploadedFile(final String name) {
         return StreamUtil.of(getSuggestPopularWordExcludes().split(",")).filter(s -> StringUtil.isNotBlank(s))
                 .anyMatch(s -> s.equals(name));
     }
@@ -439,7 +439,7 @@ public interface FessProp {
     String getLdapAdminUserBaseDn();
 
     public default String getLdapAdminUserSecurityPrincipal(final String name) {
-        StringBuilder buf = new StringBuilder(100);
+        final StringBuilder buf = new StringBuilder(100);
         buf.append(String.format(getLdapAdminUserFilter(), name));
         if (StringUtil.isNotBlank(getLdapAdminUserBaseDn())) {
             buf.append(',').append(getLdapAdminUserBaseDn());
@@ -464,7 +464,7 @@ public interface FessProp {
     String getLdapAdminRoleBaseDn();
 
     public default String getLdapAdminRoleSecurityPrincipal(final String name) {
-        StringBuilder buf = new StringBuilder(100);
+        final StringBuilder buf = new StringBuilder(100);
         buf.append(String.format(getLdapAdminRoleFilter(), name));
         if (StringUtil.isNotBlank(getLdapAdminRoleBaseDn())) {
             buf.append(',').append(getLdapAdminRoleBaseDn());
@@ -489,7 +489,7 @@ public interface FessProp {
     String getLdapAdminGroupBaseDn();
 
     public default String getLdapAdminGroupSecurityPrincipal(final String name) {
-        StringBuilder buf = new StringBuilder(100);
+        final StringBuilder buf = new StringBuilder(100);
         buf.append(String.format(getLdapAdminGroupFilter(), name));
         if (StringUtil.isNotBlank(getLdapAdminGroupBaseDn())) {
             buf.append(',').append(getLdapAdminGroupBaseDn());
@@ -499,7 +499,7 @@ public interface FessProp {
 
     String getAuthenticationAdminUsers();
 
-    public default boolean isAdminUser(String username) {
+    public default boolean isAdminUser(final String username) {
         return StreamUtil.of(getAuthenticationAdminUsers().split(",")).anyMatch(s -> s.equals(username));
     }
 

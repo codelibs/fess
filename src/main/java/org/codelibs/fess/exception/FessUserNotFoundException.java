@@ -19,7 +19,7 @@ public class FessUserNotFoundException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public FessUserNotFoundException(String username) {
+    public FessUserNotFoundException(final String username) {
         super("User is not found: " + username);
     }
 

@@ -153,7 +153,7 @@ public class AdminGroupAction extends FessAdminAction {
             try {
                 groupService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to add " + entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
             }
@@ -173,7 +173,7 @@ public class AdminGroupAction extends FessAdminAction {
             try {
                 groupService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to delete " + entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
             }

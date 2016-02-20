@@ -44,8 +44,8 @@ public class ProcessHelper {
         }
     }
 
-    public synchronized JobProcess startProcess(String sessionId, List<String> cmdList, Consumer<ProcessBuilder> pbCall) {
-        ProcessBuilder pb = new ProcessBuilder(cmdList);
+    public synchronized JobProcess startProcess(final String sessionId, final List<String> cmdList, final Consumer<ProcessBuilder> pbCall) {
+        final ProcessBuilder pb = new ProcessBuilder(cmdList);
         pbCall.accept(pb);
         destroyProcess(sessionId);
         JobProcess jobProcess;

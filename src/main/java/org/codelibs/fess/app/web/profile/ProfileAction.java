@@ -60,7 +60,7 @@ public class ProfileAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse changePassword(final ProfileForm form) {
-        VaErrorHook toIndexPage = () -> {
+        final VaErrorHook toIndexPage = () -> {
             form.clearSecurityInfo();
             return asIndexHtml();
         };
@@ -69,7 +69,7 @@ public class ProfileAction extends FessSearchAction {
         try {
             userService.chnagePassword(username, form.newPassword);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Failed to change password for " + username, e);
             throwValidationError(messages -> messages.addErrorsFailedToChangePassword(GLOBAL), toIndexPage);
         }

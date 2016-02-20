@@ -43,10 +43,10 @@ public class WebApiException extends FessSystemException {
         this(statusCode, e.getMessage(), e);
     }
 
-    public void sendError(HttpServletResponse response) {
+    public void sendError(final HttpServletResponse response) {
         try {
             response.sendError(statusCode, getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new FessSystemException("SC:" + statusCode + ": " + getMessage(), e);
         }
     }

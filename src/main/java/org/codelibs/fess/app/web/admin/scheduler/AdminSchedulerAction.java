@@ -354,7 +354,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         return asHtml(path_AdminScheduler_AdminSchedulerEditJsp);
     }
 
-    private HtmlResponse asDetailsHtml(String id) {
+    private HtmlResponse asDetailsHtml(final String id) {
         return asHtml(path_AdminScheduler_AdminSchedulerDetailsJsp).renderWith(data -> {
             RenderDataUtil.register(data, "systemJobId", fessConfig.isSystemJobId(id));
         });

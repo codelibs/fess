@@ -195,7 +195,7 @@ public class AdminUserAction extends FessAdminAction {
             try {
                 userService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to add " + entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
             }
@@ -215,7 +215,7 @@ public class AdminUserAction extends FessAdminAction {
             try {
                 userService.store(entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to update " + entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
             }
@@ -234,7 +234,7 @@ public class AdminUserAction extends FessAdminAction {
             try {
                 userService.delete(entity);
                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to delete " + entity, e);
                 throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
             }

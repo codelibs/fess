@@ -28,8 +28,9 @@ public class ScheduledJob extends BsScheduledJob {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
     public String getScriptType() {
-        String st = super.getScriptType();
+        final String st = super.getScriptType();
         if (StringUtil.isBlank(st)) {
             return "groovy";
         }

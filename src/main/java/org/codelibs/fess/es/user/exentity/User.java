@@ -65,7 +65,7 @@ public class User extends BsUser implements FessUser {
         return "User [name=" + name + ", roles=" + Arrays.toString(roles) + ", groups=" + Arrays.toString(groups) + "]";
     }
 
-    public void setOriginalPassword(String originalPassword) {
+    public void setOriginalPassword(final String originalPassword) {
         this.originalPassword = originalPassword;
 
     }

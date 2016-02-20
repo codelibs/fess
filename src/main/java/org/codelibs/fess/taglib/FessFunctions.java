@@ -81,7 +81,7 @@ public class FessFunctions {
         return parseDate(value, Constants.ISO_DATETIME_FORMAT);
     }
 
-    public static Date parseDate(final String value, String format) {
+    public static Date parseDate(final String value, final String format) {
         if (value == null) {
             return null;
         }
@@ -128,7 +128,7 @@ public class FessFunctions {
     public static String pagingQuery(final String query) {
         final HttpServletRequest request = LaRequestUtil.getRequest();
         @SuppressWarnings("unchecked")
-        List<String> pagingQueryList = (List<String>) request.getAttribute(Constants.PAGING_QUERY_LIST);
+        final List<String> pagingQueryList = (List<String>) request.getAttribute(Constants.PAGING_QUERY_LIST);
         if (pagingQueryList != null) {
             final String prefix;
             if (query != null) {

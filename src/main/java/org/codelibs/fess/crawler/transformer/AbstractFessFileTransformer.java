@@ -132,7 +132,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                 }
                             }
 
-                            Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
+                            final Pair<String, String> mapping = fessConfig.getCrawlerMetadataNameMapping(key);
                             if (mapping != null) {
                                 if (Constants.MAPPING_TYPE_ARRAY.equalsIgnoreCase(mapping.getSecond())) {
                                     dataMap.put(mapping.getFirst(), values);
@@ -148,7 +148,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                                         } else {
                                             logger.warn("Unknown mapping type: {}={}", key, mapping);
                                         }
-                                    } catch (NumberFormatException e) {
+                                    } catch (final NumberFormatException e) {
                                         logger.warn("Failed to parse " + values[0], e);
                                     }
                                 }
