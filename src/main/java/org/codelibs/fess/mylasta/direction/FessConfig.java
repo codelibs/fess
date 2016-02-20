@@ -387,6 +387,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
     /** The key of the configuration. e.g. admin */
+    String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
+
+    /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
     /** The key of the configuration. e.g. guest */
@@ -1726,9 +1729,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexBackupTargets();
 
     /**
-     * Get the value for the key 'authentication.admin.roles'. <br>
+     * Get the value for the key 'authentication.admin.users'. <br>
      * The value is, e.g. admin <br>
      * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getAuthenticationAdminUsers();
+
+    /**
+     * Get the value for the key 'authentication.admin.roles'. <br>
+     * The value is, e.g. admin <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAuthenticationAdminRoles();
@@ -3234,6 +3244,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexBackupTargets() {
             return get(FessConfig.INDEX_BACKUP_TARGETS);
+        }
+
+        public String getAuthenticationAdminUsers() {
+            return get(FessConfig.AUTHENTICATION_ADMIN_USERS);
         }
 
         public String getAuthenticationAdminRoles() {

@@ -496,4 +496,11 @@ public interface FessProp {
         }
         return buf.toString();
     }
+
+    String getAuthenticationAdminUsers();
+
+    public default boolean isAdminUser(String username) {
+        return StreamUtil.of(getAuthenticationAdminUsers().split(",")).anyMatch(s -> s.equals(username));
+    }
+
 }
