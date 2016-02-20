@@ -27,6 +27,7 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.codelibs.fess.validation.UriType;
+import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -51,7 +52,7 @@ public class CreateForm implements Serializable {
     public String name;
 
     @Required
-    @UriType(protocols = { "http:", "https:" })
+    @UriType(protocolType = ProtocolType.WEB)
     @Size(max = 4000)
     public String urls;
 

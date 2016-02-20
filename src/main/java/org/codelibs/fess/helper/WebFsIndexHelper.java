@@ -39,6 +39,7 @@ import org.codelibs.fess.crawler.service.UrlQueueService;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
@@ -134,6 +135,7 @@ public class WebFsIndexHelper implements Serializable {
         }
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final long startTime = System.currentTimeMillis();
 
@@ -184,7 +186,7 @@ public class WebFsIndexHelper implements Serializable {
             for (final String u : urls) {
                 if (StringUtil.isNotBlank(u)) {
                     final String urlValue = u.trim();
-                    if (!urlValue.startsWith("#")) {
+                    if (!urlValue.startsWith("#") && fessConfig.isValidCrawlerWebProtocol(u)) {
                         crawler.addUrl(urlValue);
                         if (logger.isInfoEnabled()) {
                             logger.info("Target URL: " + urlValue);
@@ -288,7 +290,7 @@ public class WebFsIndexHelper implements Serializable {
                 if (StringUtil.isNotBlank(u)) {
                     u = u.trim();
                     if (!u.startsWith("#")) {
-                        if (!u.startsWith("file:") && !u.startsWith("smb:")) {
+                        if (!fessConfig.isValidCrawlerFileProtocol(u)) {
                             if (u.startsWith("/")) {
                                 u = "file:" + u;
                             } else {

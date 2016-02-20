@@ -20,15 +20,22 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class UriTypeValidator implements ConstraintValidator<UriType, String> {
     private String[] protocols;
 
     @Override
     public void initialize(final UriType uriType) {
-        protocols = uriType.protocols();
-        if (protocols == null || protocols.length == 0) {
-            throw new ConstraintDefinitionException("protocols is emtpy.");
+        switch (uriType.protocolType()) {
+        case WEB:
+            protocols = ComponentUtil.getFessConfig().getCrawlerWebProtocolsAsArray();
+            break;
+        case FILE:
+            protocols = ComponentUtil.getFessConfig().getCrawlerFileProtocolsAsArray();
+            break;
+        default:
+            throw new ConstraintDefinitionException("protocolType is emtpy.");
         }
     }
 
@@ -57,5 +64,9 @@ public class UriTypeValidator implements ConstraintValidator<UriType, String> {
             }
         }
         return true;
+    }
+
+    public enum ProtocolType {
+        WEB, FILE;
     }
 }

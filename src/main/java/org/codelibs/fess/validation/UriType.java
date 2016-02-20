@@ -29,13 +29,15 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
+
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 @Constraint(validatedBy = UriTypeValidator.class)
 public @interface UriType {
 
-    String[] protocols();
+    ProtocolType protocolType();
 
     String message() default "{org.lastaflute.validator.constraints.UriType.message}";
 

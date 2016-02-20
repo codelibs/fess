@@ -126,6 +126,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
+    /** The key of the configuration. e.g. http,https */
+    String CRAWLER_WEB_PROTOCOLS = "crawler.web.protocols";
+
+    /** The key of the configuration. e.g. file,smb */
+    String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
+
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
@@ -955,6 +961,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerCrawlingDataEncoding();
+
+    /**
+     * Get the value for the key 'crawler.web.protocols'. <br>
+     * The value is, e.g. http,https <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerWebProtocols();
+
+    /**
+     * Get the value for the key 'crawler.file.protocols'. <br>
+     * The value is, e.g. file,smb <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerFileProtocols();
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
@@ -2852,6 +2872,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getCrawlerCrawlingDataEncoding() {
             return get(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING);
+        }
+
+        public String getCrawlerWebProtocols() {
+            return get(FessConfig.CRAWLER_WEB_PROTOCOLS);
+        }
+
+        public String getCrawlerFileProtocols() {
+            return get(FessConfig.CRAWLER_FILE_PROTOCOLS);
         }
 
         public String getCrawlerMetadataContentExcludes() {
