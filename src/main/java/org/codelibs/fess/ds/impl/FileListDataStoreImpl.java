@@ -178,7 +178,7 @@ public class FileListDataStoreImpl extends CsvDataStoreImpl {
                     final long startTime = System.currentTimeMillis();
                     final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
                     responseData.setExecutionTime(System.currentTimeMillis() - startTime);
-                    responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
+                    responseData.setSessionId((String) dataMap.get(Constants.CRAWLING_INFO_ID));
 
                     final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
                     final Rule rule = ruleManager.getRule(responseData);
