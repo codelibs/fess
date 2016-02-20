@@ -83,6 +83,14 @@
 			<arg>"cache"</arg>
 			<arg>"cache.hbs"</arg>
 		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"login"</arg>
+			<arg>"login/index.jsp"</arg>
+		</postConstruct>
+		<postConstruct name="addDesignJspFileName">
+			<arg>"profile"</arg>
+			<arg>"profile/index.jsp"</arg>
+		</postConstruct>
 	</component>
 	<component name="crawlingInfoHelper" class="org.codelibs.fess.helper.CrawlingInfoHelper">
 	</component>
