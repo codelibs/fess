@@ -87,6 +87,7 @@
 		<packaging.fess.systemd.dir>/usr/lib/systemd/system</packaging.fess.systemd.dir>
 		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
 		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
+		<packaging.fess.dictionary.dir>/var/lib/elasticsearch/config</packaging.fess.dictionary.dir>
 
 	</properties>
 	<build>
@@ -460,6 +461,12 @@
 						<!-- temp (empty) -->
 						<mapping>
 							<directory>${packaging.fess.temp.dir}</directory>
+						</mapping>
+						<!-- dictionary (empty) -->
+						<mapping>
+							<directory>${packaging.fess.dictionary.dir}</directory>
+							<username>elasticsearch</username>
+							<groupname>elasticsearch</groupname>
 						</mapping>
 						<!-- es/plugins -->
 						<mapping>
