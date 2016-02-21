@@ -169,7 +169,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
         final String sessionId = crawlingInfoHelper.getCanonicalSessionId(responseData.getSessionId());
         final PathMappingHelper pathMappingHelper = ComponentUtil.getPathMappingHelper();
-        final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
         final CrawlingConfigHelper crawlingConfigHelper = ComponentUtil.getCrawlingConfigHelper();
         final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(responseData.getSessionId());
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
@@ -293,24 +292,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
-        final List<String> roleTypeList = new ArrayList<String>();
+        final List<String> roleTypeList = getRoleTypes(responseData);
         for (final String roleType : crawlingConfig.getRoleTypeValues()) {
             roleTypeList.add(roleType);
-        }
-        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb://")) {
-            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-            if (aces != null) {
-                for (final ACE item : aces) {
-                    final SID sid = item.getSID();
-                    final String accountId = sambaHelper.getAccountId(sid);
-                    if (accountId != null) {
-                        roleTypeList.add(accountId);
-                    }
-                }
-                if (getLogger().isDebugEnabled()) {
-                    getLogger().debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
-                }
-            }
         }
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // TODO date
@@ -473,6 +457,29 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return getSite(url, encoding);
+    }
+
+    protected List<String> getRoleTypes(final ResponseData responseData) {
+        final List<String> roleTypeList = new ArrayList<>();
+
+        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb://")) {
+            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
+            if (aces != null) {
+                for (final ACE item : aces) {
+                    final SID sid = item.getSID();
+                    final String accountId = sambaHelper.getAccountId(sid);
+                    if (accountId != null) {
+                        roleTypeList.add(accountId);
+                    }
+                }
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                }
+            }
+        }
+
+        return roleTypeList;
     }
 
     @Override
