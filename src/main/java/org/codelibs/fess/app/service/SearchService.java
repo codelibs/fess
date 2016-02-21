@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.service;
 
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.function.Consumer;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
@@ -39,13 +37,8 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
-import org.codelibs.fess.es.log.exentity.SearchLog;
 import org.codelibs.fess.helper.QueryHelper;
-import org.codelibs.fess.helper.RoleQueryHelper;
-import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.helper.UserInfoHelper;
-import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
@@ -85,9 +78,6 @@ public class SearchService {
 
     @Resource
     protected QueryHelper queryHelper;
-
-    @Resource
-    protected UserInfoHelper userInfoHelper;
 
     // ===================================================================================
     //                                                                              Method
@@ -176,7 +166,8 @@ public class SearchService {
 
         // search log
         if (searchLogSupport) {
-            storeSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart, pageSize, queryResponseList);
+            ComponentUtil.getSearchLogHelper().addSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart,
+                    pageSize, queryResponseList);
         }
     }
 
@@ -190,61 +181,6 @@ public class SearchService {
         });
         return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
                 queryContext.getQueryBuilder());
-    }
-
-    protected void storeSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String queryId,
-            final String query, final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
-
-        final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();
-        final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
-        final SearchLog searchLog = new SearchLog();
-
-        if (Constants.TRUE.equals(systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
-            final String userCode = userInfoHelper.getUserCode();
-            if (userCode != null) {
-                searchLog.setUserSessionId(userCode);
-            }
-        }
-
-        searchLog.setRoles(roleQueryHelper.build().stream().toArray(n -> new String[n]));
-        searchLog.setQueryId(queryId);
-        searchLog.setHitCount(queryResponseList.getAllRecordCount());
-        searchLog.setResponseTime(queryResponseList.getExecTime());
-        searchLog.setQueryTime(queryResponseList.getQueryTime());
-        searchLog.setSearchWord(StringUtils.abbreviate(query, 1000));
-        searchLog.setSearchQuery(StringUtils.abbreviate(queryResponseList.getSearchQuery(), 1000));
-        searchLog.setRequestedAt(requestedTime);
-        searchLog.setQueryOffset(pageStart);
-        searchLog.setQueryPageSize(pageSize);
-        ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(user -> {
-            searchLog.setUser(user.getUserId());
-        });
-
-        searchLog.setClientIp(StringUtils.abbreviate(request.getRemoteAddr(), 50));
-        searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
-        searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
-        final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);
-        if (Constants.SEARCH_LOG_ACCESS_TYPE_JSON.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_XML.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_XML);
-        } else if (Constants.SEARCH_LOG_ACCESS_TYPE_OTHER.equals(accessType)) {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_OTHER);
-        } else {
-            searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
-        }
-
-        @SuppressWarnings("unchecked")
-        final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);
-        if (fieldLogMap != null) {
-            for (final Map.Entry<String, List<String>> logEntry : fieldLogMap.entrySet()) {
-                for (final String value : logEntry.getValue()) {
-                    searchLog.addSearchFieldLogValue(logEntry.getKey(), StringUtils.abbreviate(value, 1000));
-                }
-            }
-        }
-
-        searchLogHelper.addSearchLog(searchLog);
     }
 
     public String[] getLanguages(final HttpServletRequest request, final SearchRequestParams params) {
