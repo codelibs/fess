@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.logout;
 
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.login.LoginAction;
-import org.codelibs.fess.util.ActivityUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -42,7 +41,7 @@ public class LogoutAction extends FessSearchAction {
     @Execute
     public HtmlResponse index() {
         final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
-        ActivityUtil.logout(username);
+        activityHelper.logout(getUserBean());
         fessLoginAssist.logout();
         return redirect(LoginAction.class);
     }
