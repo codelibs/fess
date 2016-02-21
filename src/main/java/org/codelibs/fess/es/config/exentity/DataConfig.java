@@ -60,15 +60,15 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(DataConfig.class);
 
-    private static final String S2ROBOT_WEB_HEADER_PREFIX = "crawler.web.header.";
+    private static final String CRAWLER_WEB_HEADER_PREFIX = "crawler.web.header.";
 
-    private static final String S2ROBOT_WEB_AUTH = "crawler.web.auth";
+    private static final String CRAWLER_WEB_AUTH = "crawler.web.auth";
 
-    private static final String S2ROBOT_USERAGENT = "crawler.useragent";
+    private static final String CRAWLER_USERAGENT = "crawler.useragent";
 
-    private static final String S2ROBOT_PARAM_PREFIX = "crawler.param.";
+    private static final String CRAWLER_PARAM_PREFIX = "crawler.param.";
 
-    private static final Object S2ROBOT_FILE_AUTH = "crawler.file.auth";
+    private static final Object CRAWLER_FILE_AUTH = "crawler.file.auth";
 
     private String[] labelTypeIds;
 
@@ -240,29 +240,29 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         // parameters
         for (final Map.Entry<String, String> entry : paramMap.entrySet()) {
             final String key = entry.getKey();
-            if (key.startsWith(S2ROBOT_PARAM_PREFIX)) {
-                factoryParamMap.put(key.substring(S2ROBOT_PARAM_PREFIX.length()), entry.getValue());
+            if (key.startsWith(CRAWLER_PARAM_PREFIX)) {
+                factoryParamMap.put(key.substring(CRAWLER_PARAM_PREFIX.length()), entry.getValue());
             }
         }
 
         // user agent
-        final String userAgent = paramMap.get(S2ROBOT_USERAGENT);
+        final String userAgent = paramMap.get(CRAWLER_USERAGENT);
         if (StringUtil.isNotBlank(userAgent)) {
             factoryParamMap.put(HcHttpClient.USER_AGENT_PROPERTY, userAgent);
         }
 
         // web auth
-        final String webAuthStr = paramMap.get(S2ROBOT_WEB_AUTH);
+        final String webAuthStr = paramMap.get(CRAWLER_WEB_AUTH);
         if (StringUtil.isNotBlank(webAuthStr)) {
             final String[] webAuthNames = webAuthStr.split(",");
             final List<Authentication> basicAuthList = new ArrayList<Authentication>();
             for (final String webAuthName : webAuthNames) {
-                final String scheme = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".scheme");
-                final String hostname = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".host");
-                final String port = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".port");
-                final String realm = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".realm");
-                final String username = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".username");
-                final String password = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".password");
+                final String scheme = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".scheme");
+                final String hostname = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".host");
+                final String port = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".port");
+                final String realm = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".realm");
+                final String username = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".username");
+                final String password = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".password");
 
                 if (StringUtil.isEmpty(username)) {
                     logger.warn("username is empty. webAuth:" + webAuthName);
@@ -305,8 +305,8 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
                 Credentials credentials;
                 if (Constants.NTLM.equals(scheme)) {
-                    final String workstation = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".workstation");
-                    final String domain = paramMap.get(S2ROBOT_WEB_AUTH + "." + webAuthName + ".domain");
+                    final String workstation = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".workstation");
+                    final String domain = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".domain");
                     credentials =
                             new NTCredentials(username, password == null ? StringUtil.EMPTY : password,
                                     workstation == null ? StringUtil.EMPTY : workstation, domain == null ? StringUtil.EMPTY : domain);
@@ -324,12 +324,12 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList =
                 new ArrayList<org.codelibs.fess.crawler.client.http.RequestHeader>();
         int count = 1;
-        String headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
+        String headerName = paramMap.get(CRAWLER_WEB_HEADER_PREFIX + count + ".name");
         while (StringUtil.isNotBlank(headerName)) {
-            final String headerValue = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".value");
+            final String headerValue = paramMap.get(CRAWLER_WEB_HEADER_PREFIX + count + ".value");
             rhList.add(new org.codelibs.fess.crawler.client.http.RequestHeader(headerName, headerValue));
             count++;
-            headerName = paramMap.get(S2ROBOT_WEB_HEADER_PREFIX + count + ".name");
+            headerName = paramMap.get(CRAWLER_WEB_HEADER_PREFIX + count + ".name");
         }
         if (!rhList.isEmpty()) {
             factoryParamMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
@@ -337,18 +337,18 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         }
 
         // file auth
-        final String fileAuthStr = paramMap.get(S2ROBOT_FILE_AUTH);
+        final String fileAuthStr = paramMap.get(CRAWLER_FILE_AUTH);
         if (StringUtil.isNotBlank(fileAuthStr)) {
             final String[] fileAuthNames = fileAuthStr.split(",");
             final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
             for (final String fileAuthName : fileAuthNames) {
-                final String scheme = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".scheme");
+                final String scheme = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".scheme");
                 if (Constants.SAMBA.equals(scheme)) {
-                    final String domain = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".domain");
-                    final String hostname = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".host");
-                    final String port = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".port");
-                    final String username = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".username");
-                    final String password = paramMap.get(S2ROBOT_FILE_AUTH + "." + fileAuthName + ".password");
+                    final String domain = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".domain");
+                    final String hostname = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".host");
+                    final String port = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".port");
+                    final String username = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".username");
+                    final String password = paramMap.get(CRAWLER_FILE_AUTH + "." + fileAuthName + ".password");
 
                     if (StringUtil.isEmpty(username)) {
                         logger.warn("username is empty. fileAuth:" + fileAuthName);

@@ -24,7 +24,6 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.SystemHelper;
-import org.codelibs.fess.util.ActivityUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
@@ -111,7 +110,7 @@ public abstract class FessAdminAction extends FessBaseAction {
         final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
         final String requestPath = runtime.getRequestPath();
         final String executeName = runtime.getExecuteMethod().getName();
-        ActivityUtil.access(username, requestPath, executeName);
+        activityHelper.access(getUserBean(), requestPath, executeName);
         return super.hookBefore(runtime);
     }
 

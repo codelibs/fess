@@ -24,6 +24,7 @@ import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
@@ -55,6 +56,8 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
+    private static final String ACTIVITY_HELPER = "activityHelper";
+
     private static final String LDAP_MANAGER = "ldapManager";
 
     private static final String ROLE_QUERY_HELPER = "roleQueryHelper";
@@ -274,6 +277,10 @@ public final class ComponentUtil {
 
     public static LdapManager getLdapManager() {
         return SingletonLaContainer.getComponent(LDAP_MANAGER);
+    }
+
+    public static ActivityHelper getActivityHelper() {
+        return SingletonLaContainer.getComponent(ACTIVITY_HELPER);
     }
 
     public static RequestManager getRequestManager() {

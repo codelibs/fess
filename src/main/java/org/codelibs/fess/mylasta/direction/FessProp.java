@@ -503,4 +503,25 @@ public interface FessProp {
         return StreamUtil.of(getAuthenticationAdminUsers().split(",")).anyMatch(s -> s.equals(username));
     }
 
+    String getCrawlerWebProtocols();
+
+    public default String[] getCrawlerWebProtocolsAsArray() {
+        return StreamUtil.of(getCrawlerWebProtocols().split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim() + ":")
+                .toArray(n -> new String[n]);
+    }
+
+    public default boolean isValidCrawlerWebProtocol(final String url) {
+        return StreamUtil.of(getCrawlerWebProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
+    }
+
+    String getCrawlerFileProtocols();
+
+    public default String[] getCrawlerFileProtocolsAsArray() {
+        return StreamUtil.of(getCrawlerFileProtocols().split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim() + ":")
+                .toArray(n -> new String[n]);
+    }
+
+    public default boolean isValidCrawlerFileProtocol(final String url) {
+        return StreamUtil.of(getCrawlerFileProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
+    }
 }

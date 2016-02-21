@@ -16,6 +16,8 @@
 	<include path="crawler/client.xml" />
 	<include path="crawler/mimetype.xml" />
 
+	<component name="activityHelper" class="org.codelibs.fess.helper.ActivityHelper">
+	</component>
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
 	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">

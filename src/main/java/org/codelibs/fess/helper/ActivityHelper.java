@@ -13,12 +13,16 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.util;
+package org.codelibs.fess.helper;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import javax.annotation.PostConstruct;
+
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,36 +31,43 @@ import org.slf4j.LoggerFactory;
  * @author shinsuke
  *
  */
-public class ActivityUtil {
-    private static Logger logger = LoggerFactory.getLogger("fess.log.audit");
+public class ActivityHelper {
+    private Logger logger = null;
 
-    public static void login(final String username) {
+    protected String loggerName = "fess.log.audit";
+
+    @PostConstruct
+    public void init() {
+        logger = LoggerFactory.getLogger(loggerName);
+    }
+
+    public void login(final OptionalThing<FessUserBean> user) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("action:");
         buf.append(Action.LOGIN);
         buf.append('\t');
         buf.append("user:");
-        buf.append(username);
+        buf.append(user.map(u -> u.getUserId()).orElse("-"));
         log(buf);
     }
 
-    public static void logout(final String username) {
+    public void logout(final OptionalThing<FessUserBean> user) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("action:");
         buf.append(Action.LOGOUT);
         buf.append('\t');
         buf.append("user:");
-        buf.append(username);
+        buf.append(user.map(u -> u.getUserId()).orElse("-"));
         log(buf);
     }
 
-    public static void access(final String username, final String path, final String execute) {
+    public void access(final OptionalThing<FessUserBean> user, final String path, final String execute) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append("action:");
         buf.append(Action.ACCESS);
         buf.append('\t');
         buf.append("user:");
-        buf.append(username);
+        buf.append(user.map(u -> u.getUserId()).orElse("-"));
         buf.append('\t');
         buf.append("path:");
         buf.append(path);
@@ -66,7 +77,7 @@ public class ActivityUtil {
         log(buf);
     }
 
-    private static void log(final StringBuilder buf) {
+    private void log(final StringBuilder buf) {
         buf.append('\t');
         buf.append("ip:");
         buf.append(getClientIp());
@@ -89,5 +100,9 @@ public class ActivityUtil {
 
     protected enum Action {
         LOGIN, LOGOUT, ACCESS;
+    }
+
+    public void setLoggerName(String loggerName) {
+        this.loggerName = loggerName;
     }
 }

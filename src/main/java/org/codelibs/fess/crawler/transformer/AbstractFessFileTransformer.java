@@ -437,6 +437,29 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         return getHost(url);
     }
 
+    protected List<String> getRoleTypes(final ResponseData responseData) {
+        final List<String> roleTypeList = new ArrayList<>();
+
+        if (fessConfig.isSmbRoleFromFile() && responseData.getUrl().startsWith("smb://")) {
+            final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
+            final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
+            if (aces != null) {
+                for (final ACE item : aces) {
+                    final SID sid = item.getSID();
+                    final String accountId = sambaHelper.getAccountId(sid);
+                    if (accountId != null) {
+                        roleTypeList.add(accountId);
+                    }
+                }
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                }
+            }
+        }
+
+        return roleTypeList;
+    }
+
     protected String getSiteOnFile(final String url, final String encoding) {
         if (StringUtil.isBlank(url)) {
             return StringUtil.EMPTY; // empty

@@ -19,7 +19,7 @@ import java.util.Map;
 
 public interface IndexUpdateCallback {
 
-    boolean store(Map<String, Object> dataMap);
+    boolean store(Map<String, String> paramMap, Map<String, Object> dataMap);
 
     long getDocumentSize();
 

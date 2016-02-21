@@ -16,8 +16,8 @@
 	</component>
 	<component name="crawlingConfigHelper" class="org.codelibs.fess.helper.CrawlingConfigHelper">
 	</component>
-    <component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
-    </component>
+	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
+	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">

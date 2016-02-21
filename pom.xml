@@ -59,7 +59,7 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.5-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.5</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.1.1</suggest.version>
@@ -87,6 +87,7 @@
 		<packaging.fess.systemd.dir>/usr/lib/systemd/system</packaging.fess.systemd.dir>
 		<packaging.fess.systemd.sysctl.dir>/usr/lib/sysctl.d</packaging.fess.systemd.sysctl.dir>
 		<packaging.fess.tmpfilesd.dir>/usr/lib/tmpfiles.d</packaging.fess.tmpfilesd.dir>
+		<packaging.fess.dictionary.dir>/var/lib/elasticsearch/config</packaging.fess.dictionary.dir>
 
 	</properties>
 	<build>
@@ -461,6 +462,13 @@
 						<mapping>
 							<directory>${packaging.fess.temp.dir}</directory>
 						</mapping>
+						<!-- dictionary (empty) -->
+						<mapping>
+							<directory>${packaging.fess.dictionary.dir}</directory>
+							<filemode>755</filemode>
+							<username>elasticsearch</username>
+							<groupname>elasticsearch</groupname>
+						</mapping>
 						<!-- es/plugins -->
 						<mapping>
 							<directory>${packaging.fess.home.dir}/es/plugins</directory>
@@ -616,7 +624,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -637,7 +645,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

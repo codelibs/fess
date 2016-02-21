@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.base;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
+import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
@@ -59,6 +60,9 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Resource
     protected FessConfig fessConfig;
+
+    @Resource
+    protected ActivityHelper activityHelper;
 
     // ===================================================================================
     //                                                                               Hook
