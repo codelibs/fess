@@ -166,8 +166,8 @@ public class SearchService {
 
         // search log
         if (searchLogSupport) {
-            ComponentUtil.getSearchLogHelper().addSearchLog(request, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart,
-                    pageSize, queryResponseList);
+            ComponentUtil.getSearchLogHelper().addSearchLog(DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart, pageSize,
+                    queryResponseList);
         }
     }
 

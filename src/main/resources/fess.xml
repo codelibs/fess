@@ -8,8 +8,6 @@
 	<include path="esflute_user.xml"/>
 	<include path="esflute_log.xml"/>
 
-	<component name="activityHelper" class="org.codelibs.fess.helper.ActivityHelper">
-	</component>
 	<component name="searchLogHelper" class="org.codelibs.fess.helper.SearchLogHelper">
 		<!-- 
 		<property name="userCheckInterval">5 * 60 * 1000</property>
@@ -18,8 +16,8 @@
 	</component>
 	<component name="crawlingConfigHelper" class="org.codelibs.fess.helper.CrawlingConfigHelper">
 	</component>
-    <component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
-    </component>
+	<component name="pathMappingHelper" class="org.codelibs.fess.helper.PathMappingHelper">
+	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
 	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">

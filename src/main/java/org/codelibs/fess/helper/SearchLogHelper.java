@@ -51,6 +51,7 @@ import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
 import org.lastaflute.di.core.SingletonLaContainer;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +76,8 @@ public class SearchLogHelper {
         userInfoCache = new LruHashMap<String, Long>(userInfoCacheSize);
     }
 
-    public void addSearchLog(final HttpServletRequest request, final LocalDateTime requestedTime, final String queryId, final String query,
-            final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
+    public void addSearchLog(final LocalDateTime requestedTime, final String queryId, final String query, final int pageStart,
+            final int pageSize, final QueryResponseList queryResponseList) {
 
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
@@ -103,6 +104,7 @@ public class SearchLogHelper {
             searchLog.setUser(user.getUserId());
         });
 
+        final HttpServletRequest request = LaRequestUtil.getRequest();
         searchLog.setClientIp(StringUtils.abbreviate(request.getRemoteAddr(), 50));
         searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
         searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
