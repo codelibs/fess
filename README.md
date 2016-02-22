@@ -72,3 +72,10 @@ Run package goal and then the release file is created in target/releases.
     $ mvn dbflute:freegen
     $ mvn license:format
 
+## Powered By
+
+* [Lasta Di](https://github.com/lastaflute/lasta-di "Lasta Di"): DI Container
+* [LastaFlute](https://github.com/lastaflute/lastaflute "LastaFlute"): Web Framework
+* [Lasta Job](https://github.com/lastaflute/lasta-job "Lasta Job"): Job Scheduler
+* [Fess Crawler](https://github.com/codelibs/fess-crawler "Fess Crawler"): Web Crawler
+* [Elasticsearch](https://github.com/elastic/elasticsearch "Elasticsearch"): Search Engine
