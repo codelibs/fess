@@ -566,7 +566,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. backup */
     String ONLINE_HELP_NAME_BACKUP = "online.help.name.backup";
 
-    /** The key of the configuration. e.g.  */
+    /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
     /** The key of the configuration. e.g. 0 */
@@ -2304,18 +2304,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'online.help.supported.langs'. <br>
-     * The value is, e.g.  <br>
+     * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpSupportedLangs();
-
-    /**
-     * Get the value for the key 'online.help.supported.langs' as {@link Integer}. <br>
-     * The value is, e.g.  <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getOnlineHelpSupportedLangsAsInteger();
 
     /**
      * Get the value for the key 'suggest.popular.word.seed'. <br>
@@ -3572,10 +3564,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpSupportedLangs() {
             return get(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
-        }
-
-        public Integer getOnlineHelpSupportedLangsAsInteger() {
-            return getAsInteger(FessConfig.ONLINE_HELP_SUPPORTED_LANGS);
         }
 
         public String getSuggestPopularWordSeed() {
