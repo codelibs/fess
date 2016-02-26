@@ -54,6 +54,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.lastaflute.taglib.function.LaFunctions;
 
 public class SearchService {
 
@@ -130,7 +131,7 @@ public class SearchService {
         if (highlightQueries != null) {
             final StringBuilder buf = new StringBuilder(100);
             highlightQueries.stream().forEach(q -> {
-                buf.append("&hq=").append(q);
+                buf.append("&hq=").append(LaFunctions.u(q));
             });
             data.setAppendHighlightParams(buf.toString());
         }
