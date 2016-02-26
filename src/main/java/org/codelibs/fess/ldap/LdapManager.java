@@ -328,9 +328,36 @@ public class LdapManager {
         }
 
         final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
+
+        StreamUtil.of(user.getGroupNames()).forEach(name -> {
+            search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv, subResult -> {
+                if (!subResult.hasMore()) {
+                    final Group group = new Group();
+                    group.setName(name);
+                    insert(group);
+                }
+                final List<ModificationItem> modifyList = new ArrayList<>();
+                modifyDeleteEntry(modifyList, "member", userDN);
+                modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
+            });
+        });
+        StreamUtil.of(user.getRoleNames()).forEach(name -> {
+            search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv, subResult -> {
+                if (!subResult.hasMore()) {
+                    final Role role = new Role();
+                    role.setName(name);
+                    insert(role);
+                }
+                final List<ModificationItem> modifyList = new ArrayList<>();
+                modifyDeleteEntry(modifyList, "member", userDN);
+                modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
+            });
+        });
+
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
             if (result.hasMore()) {
-                delete(fessConfig.getLdapAdminUserSecurityPrincipal(user.getName()), adminEnv);
+                delete(userDN, adminEnv);
             } else {
                 logger.info("{} does not exist in LDAP server.", user.getName());
             }
