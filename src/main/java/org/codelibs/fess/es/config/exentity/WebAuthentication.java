@@ -35,6 +35,8 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.es.config.bsentity.BsWebAuthentication;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
@@ -42,6 +44,9 @@ import org.codelibs.fess.util.ParameterUtil;
 public class WebAuthentication extends BsWebAuthentication {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(WebAuthentication.class);
+
     private WebConfig webConfig;
 
     public Authentication getAuthentication() {
@@ -103,7 +108,11 @@ public class WebAuthentication extends BsWebAuthentication {
     public WebConfig getWebConfig() {
         if (webConfig == null) {
             final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
+            try {
+                webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
+            } catch (Exception e) {
+                logger.warn("Web Config " + getWebConfigId() + " does not exist.", e);
+            }
         }
         return webConfig;
     }

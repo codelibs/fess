@@ -24,7 +24,9 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
+import org.codelibs.fess.es.config.bsbhv.BsWebConfigBhv;
 import org.codelibs.fess.es.config.cbean.WebConfigCB;
+import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
@@ -47,6 +49,9 @@ public class WebConfigService implements Serializable {
     @Resource
     protected WebConfigBhv webConfigBhv;
 
+    @Resource
+    protected WebAuthenticationBhv webAuthenticationBhv;
+
     public List<WebConfig> getWebConfigList(final WebConfigPager webConfigPager) {
 
         final PagingResultBean<WebConfig> webConfigList = webConfigBhv.selectPage(cb -> {
@@ -65,10 +70,23 @@ public class WebConfigService implements Serializable {
 
     public void delete(final WebConfig webConfig) {
 
+        final String webConfigId = webConfig.getId();
+
         webConfigBhv.delete(webConfig, op -> {
             op.setRefresh(true);
         });
 
+        webConfigToLabelBhv.queryDelete(cb -> {
+            cb.query().setWebConfigId_Equal(webConfigId);
+        });
+
+        webConfigToRoleBhv.queryDelete(cb -> {
+            cb.query().setWebConfigId_Equal(webConfigId);
+        });
+
+        webAuthenticationBhv.queryDelete(cb -> {
+            cb.query().setWebConfigId_Equal(webConfigId);
+        });
     }
 
     public List<WebConfig> getAllWebConfigList() {

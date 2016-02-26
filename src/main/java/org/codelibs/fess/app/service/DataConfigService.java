@@ -66,8 +66,18 @@ public class DataConfigService implements Serializable {
 
     public void delete(final DataConfig dataConfig) {
 
+        final String dataConfigId = dataConfig.getId();
+
         dataConfigBhv.delete(dataConfig, op -> {
             op.setRefresh(true);
+        });
+
+        dataConfigToLabelBhv.queryDelete(cb -> {
+            cb.query().setDataConfigId_Equal(dataConfigId);
+        });
+
+        dataConfigToRoleBhv.queryDelete(cb -> {
+            cb.query().setDataConfigId_Equal(dataConfigId);
         });
 
     }

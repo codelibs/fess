@@ -25,6 +25,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.es.config.cbean.FileConfigCB;
+import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
@@ -47,6 +48,9 @@ public class FileConfigService implements Serializable {
     @Resource
     protected FileConfigBhv fileConfigBhv;
 
+    @Resource
+    protected FileAuthenticationBhv fileAuthenticationBhv;
+
     public List<FileConfig> getFileConfigList(final FileConfigPager fileConfigPager) {
 
         final PagingResultBean<FileConfig> fileConfigList = fileConfigBhv.selectPage(cb -> {
@@ -65,10 +69,23 @@ public class FileConfigService implements Serializable {
 
     public void delete(final FileConfig fileConfig) {
 
+        final String fileConfigId = fileConfig.getId();
+
         fileConfigBhv.delete(fileConfig, op -> {
             op.setRefresh(true);
         });
 
+        fileConfigToLabelBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
+
+        fileConfigToRoleBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
+
+        fileAuthenticationBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
     }
 
     public List<FileConfig> getAllFileConfigList() {
