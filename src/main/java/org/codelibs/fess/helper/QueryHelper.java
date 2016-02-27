@@ -423,7 +423,7 @@ public class QueryHelper implements Serializable {
             context.addSorts(SortBuilders.fieldSort(sortField).order(sortOrder));
             return null;
         } else if (INURL_FIELD.equals(field)) {
-            return QueryBuilders.wildcardQuery(field, text).boost(termQuery.getBoost());
+            return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(termQuery.getBoost());
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
