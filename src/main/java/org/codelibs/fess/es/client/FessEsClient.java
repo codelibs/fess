@@ -128,7 +128,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.suggest.SuggestRequest;
 import org.elasticsearch.action.suggest.SuggestRequestBuilder;
 import org.elasticsearch.action.suggest.SuggestResponse;
@@ -454,16 +453,15 @@ public class FessEsClient implements Client {
 
     public int deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
 
-        final SearchResponse response =
-                client.prepareSearch(index).setTypes(type).setSearchType(SearchType.SCAN).setScroll(scrollForDelete).setSize(sizeForDelete)
-                        .setQuery(queryBuilder).execute().actionGet();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        SearchResponse response =
+                client.prepareSearch(index).setTypes(type).setScroll(scrollForDelete).setSize(sizeForDelete)
+                        .addField(fessConfig.getIndexFieldId()).setQuery(queryBuilder).execute().actionGet();
 
         int count = 0;
         String scrollId = response.getScrollId();
         while (scrollId != null) {
-            final SearchResponse scrollResponse = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet();
-            scrollId = scrollResponse.getScrollId();
-            final SearchHits searchHits = scrollResponse.getHits();
+            final SearchHits searchHits = response.getHits();
             final SearchHit[] hits = searchHits.getHits();
             if (hits.length == 0) {
                 scrollId = null;
@@ -479,6 +477,9 @@ public class FessEsClient implements Client {
             if (bulkResponse.hasFailures()) {
                 throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
             }
+
+            response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet();
+            scrollId = response.getScrollId();
         }
         return count;
     }
