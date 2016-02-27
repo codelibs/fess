@@ -24,7 +24,6 @@ import javax.annotation.Resource;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
-import org.codelibs.fess.es.config.bsbhv.BsWebConfigBhv;
 import org.codelibs.fess.es.config.cbean.WebConfigCB;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;

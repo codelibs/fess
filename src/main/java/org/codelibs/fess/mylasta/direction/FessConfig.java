@@ -318,7 +318,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
     /** The key of the configuration. e.g.  */
-    String QUERY_DEFAULT_LANGUAGE = "query.default.language";
+    String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
 
     /** The key of the configuration. e.g. ar=ar
     bg=bg
@@ -1578,19 +1578,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isQueryReplaceTermWithPrefixQuery();
 
     /**
-     * Get the value for the key 'query.default.language'. <br>
+     * Get the value for the key 'query.default.languages'. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getQueryDefaultLanguage();
+    String getQueryDefaultLanguages();
 
     /**
-     * Get the value for the key 'query.default.language' as {@link Integer}. <br>
+     * Get the value for the key 'query.default.languages' as {@link Integer}. <br>
      * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getQueryDefaultLanguageAsInteger();
+    Integer getQueryDefaultLanguagesAsInteger();
 
     /**
      * Get the value for the key 'query.language.mapping'. <br>
@@ -3202,12 +3202,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
         }
 
-        public String getQueryDefaultLanguage() {
-            return get(FessConfig.QUERY_DEFAULT_LANGUAGE);
+        public String getQueryDefaultLanguages() {
+            return get(FessConfig.QUERY_DEFAULT_LANGUAGES);
         }
 
-        public Integer getQueryDefaultLanguageAsInteger() {
-            return getAsInteger(FessConfig.QUERY_DEFAULT_LANGUAGE);
+        public Integer getQueryDefaultLanguagesAsInteger() {
+            return getAsInteger(FessConfig.QUERY_DEFAULT_LANGUAGES);
         }
 
         public String getQueryLanguageMapping() {

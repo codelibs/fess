@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
+import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -380,12 +383,29 @@ public interface FessProp {
         return Boolean.valueOf(getQueryReplaceTermWithPrefixQuery());
     }
 
+    String getQueryDefaultLanguages();
+
     String getQueryLanguageMapping();
 
-    public default String getQueryLanguage(final Locale locale) {
-        if (locale == null) {
-            return null;
+    public default String[] getQueryLanguages(final Enumeration<Locale> locales, final String[] requestLangs) {
+        if (StringUtil.isNotBlank(getQueryDefaultLanguages())) {
+            String[] langs = (String[]) propMap.get("queryDefaultLanguages");
+            if (langs == null) {
+                langs = StreamUtil.of(getQueryDefaultLanguages().split(",")).map(s -> s.trim()).toArray(n -> new String[n]);
+                propMap.put("queryDefaultLanguages", langs);
+
+            }
+            return langs;
         }
+
+        if (requestLangs != null && requestLangs.length != 0) {
+            return requestLangs;
+        }
+
+        if (locales == null) {
+            return StringUtil.EMPTY_STRINGS;
+        }
+
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
@@ -399,20 +419,23 @@ public interface FessProp {
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
 
-        final String language = locale.getLanguage();
-        final String country = locale.getCountry();
-        if (StringUtil.isNotBlank(language)) {
-            if (StringUtil.isNotBlank(country)) {
-                final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
-                if (params.containsKey(lang)) {
-                    return params.get(lang);
+        final Map<String, String> mapping = params;
+        return Collections.list(locales).stream().map(locale -> {
+            final String language = locale.getLanguage();
+            final String country = locale.getCountry();
+            if (StringUtil.isNotBlank(language)) {
+                if (StringUtil.isNotBlank(country)) {
+                    final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
+                    if (mapping.containsKey(lang)) {
+                        return mapping.get(lang);
+                    }
+                }
+                if (mapping.containsKey(language)) {
+                    return mapping.get(language);
                 }
             }
-            if (params.containsKey(language)) {
-                return params.get(language);
-            }
-        }
-        return null;
+            return null;
+        }).filter(l -> l != null).distinct().toArray(n -> new String[n]);
     }
 
     String getSupportedUploadedFiles();
@@ -524,4 +547,5 @@ public interface FessProp {
     public default boolean isValidCrawlerFileProtocol(final String url) {
         return StreamUtil.of(getCrawlerFileProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
     }
+
 }

@@ -372,4 +372,6 @@ public class Constants extends CoreLibConstants {
     public static final String MAPPING_TYPE_DOUBLE = "double";
 
     public static final String PAGING_QUERY_LIST = "pagingQueryList";
+
+    public static final String REQUEST_LANGUAGES = "requestLanguages";
 }

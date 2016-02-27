@@ -121,6 +121,7 @@ public class SearchAction extends FessSearchAction {
             updateSearchParams(form);
             buildLabelParams(form.fields);
             form.lang = searchService.getLanguages(request, form);
+            request.setAttribute(Constants.REQUEST_LANGUAGES, form.lang);
             final WebRenderData renderData = new WebRenderData();
             searchService.search(request, form, renderData);
             return asHtml(path_SearchJsp).renderWith(data -> {

@@ -54,7 +54,6 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.StreamUtil;
-import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -467,16 +466,19 @@ public class QueryHelper implements Serializable {
         final QueryBuilder contentQuery =
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
-        getQueryLanguage().ifPresent(
-                lang -> {
-                    final QueryBuilder titleLangQuery =
-                            builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal()
-                                    .floatValue());
-                    boolQuery.should(titleLangQuery);
-                    final QueryBuilder contentLangQuery =
-                            builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig.getQueryBoostContentLangAsDecimal()
-                                    .floatValue());
-                    boolQuery.should(contentLangQuery);
+        getQueryLanguages().ifPresent(
+                langs -> {
+                    StreamUtil.of(langs).forEach(
+                            lang -> {
+                                final QueryBuilder titleLangQuery =
+                                        builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
+                                                .getQueryBoostTitleLangAsDecimal().floatValue());
+                                boolQuery.should(titleLangQuery);
+                                final QueryBuilder contentLangQuery =
+                                        builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
+                                                .getQueryBoostContentLangAsDecimal().floatValue());
+                                boolQuery.should(contentLangQuery);
+                            });
                 });
         return boolQuery;
     }
@@ -485,12 +487,10 @@ public class QueryHelper implements Serializable {
         QueryBuilder apply(String field, float boost);
     }
 
-    protected OptionalThing<String> getQueryLanguage() {
-        if (StringUtil.isNotBlank(fessConfig.getQueryDefaultLanguage())) {
-            return OptionalEntity.of(fessConfig.getQueryDefaultLanguage());
-        }
-        return LaRequestUtil.getOptionalRequest().map(request -> fessConfig.getQueryLanguage(request.getLocale()));
-
+    protected OptionalThing<String[]> getQueryLanguages() {
+        return LaRequestUtil.getOptionalRequest()
+                .map(request -> fessConfig.getQueryLanguages(request.getLocales(),
+                        (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
     private boolean isSortField(final String field) {
