@@ -25,6 +25,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.WebConfigPager;
 import org.codelibs.fess.es.config.cbean.WebConfigCB;
+import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
@@ -50,6 +51,9 @@ public class WebConfigService implements Serializable {
 
     @Resource
     protected WebAuthenticationBhv webAuthenticationBhv;
+
+    @Resource
+    protected RequestHeaderBhv requestHeaderBhv;
 
     public List<WebConfig> getWebConfigList(final WebConfigPager webConfigPager) {
 
@@ -84,6 +88,10 @@ public class WebConfigService implements Serializable {
         });
 
         webAuthenticationBhv.queryDelete(cb -> {
+            cb.query().setWebConfigId_Equal(webConfigId);
+        });
+
+        requestHeaderBhv.queryDelete(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);
         });
     }
