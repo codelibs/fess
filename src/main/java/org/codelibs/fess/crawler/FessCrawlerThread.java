@@ -59,7 +59,6 @@ public class FessCrawlerThread extends CrawlerThread {
         final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         if (systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
 
-            log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
             final long startTime = System.currentTimeMillis();
 
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -79,30 +78,39 @@ public class FessCrawlerThread extends CrawlerThread {
                 for (final String roleType : crawlingConfig.getRoleTypeValues()) {
                     roleTypeList.add(roleType);
                 }
-                if (fessConfig.isSmbRoleFromFile() && url.startsWith("smb://")) {
-                    // head method
-                    responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
-                    if (responseData == null) {
+                if (url.startsWith("smb://")) {
+                    if (url.endsWith("/")) {
+                        // directory
                         return true;
                     }
-
-                    final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
-                    if (aces != null) {
-                        for (final ACE item : aces) {
-                            final SID sid = item.getSID();
-                            final String accountId = sambaHelper.getAccountId(sid);
-                            if (accountId != null) {
-                                roleTypeList.add(accountId);
-                            }
+                    if (fessConfig.isSmbRoleFromFile()) {
+                        // head method
+                        responseData = client.execute(RequestDataBuilder.newRequestData().head().url(url).build());
+                        if (responseData == null) {
+                            return true;
                         }
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+
+                        final ACE[] aces = (ACE[]) responseData.getMetaDataMap().get(SmbClient.SMB_ACCESS_CONTROL_ENTRIES);
+                        if (aces != null) {
+                            for (final ACE item : aces) {
+                                final SID sid = item.getSID();
+                                final String accountId = sambaHelper.getAccountId(sid);
+                                if (accountId != null) {
+                                    roleTypeList.add(accountId);
+                                }
+                            }
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("smbUrl:" + responseData.getUrl() + " roleType:" + roleTypeList.toString());
+                            }
                         }
                     }
                 }
                 dataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
                 final String id = crawlingInfoHelper.generateId(dataMap);
 
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Searching indexed document: " + id);
+                }
                 final Map<String, Object> document =
                         indexingHelper.getDocument(
                                 fessEsClient,
@@ -129,6 +137,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 if (lastModified == null) {
                     return true;
                 }
+                urlQueue.setLastModified(lastModified.getTime());
+                log(logHelper, LogType.CHECK_LAST_MODIFIED, crawlerContext, urlQueue);
 
                 if (responseData == null) {
                     // head method
@@ -139,6 +149,9 @@ public class FessCrawlerThread extends CrawlerThread {
                 }
 
                 final int httpStatusCode = responseData.getHttpStatusCode();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Accessing document: " + url + ", status: " + httpStatusCode);
+                }
                 if (httpStatusCode == 404) {
                     storeChildUrlsToQueue(urlQueue, getAnchorSet(document.get(fessConfig.getIndexFieldAnchor())));
                     indexingHelper.deleteDocument(fessEsClient, id);
