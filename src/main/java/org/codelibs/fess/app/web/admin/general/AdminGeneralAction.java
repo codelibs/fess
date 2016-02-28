@@ -158,7 +158,7 @@ public class AdminGeneralAction extends FessAdminAction {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
         form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
-        form.crawlingThreadCount = Integer.parseInt(systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5"));
+        form.crawlingThreadCount = getPropertyAsInteger(Constants.CRAWLING_THREAD_COUNT_PROPERTY, 5);
         form.searchLog = systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
         form.userInfo = systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
         form.userFavorite = systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
@@ -196,7 +196,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     private Integer getPropertyAsInteger(final String key, final int defaultValue) {
-        final String value = systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY);
+        final String value = systemProperties.getProperty(key);
         if (value != null) {
             try {
                 return Integer.valueOf(value);
