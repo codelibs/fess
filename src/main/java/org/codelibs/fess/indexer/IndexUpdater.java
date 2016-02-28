@@ -93,8 +93,6 @@ public class IndexUpdater extends Thread {
 
     protected int maxErrorCount = 2;
 
-    protected int unprocessedDocumentSize = 100;
-
     protected List<String> finishedSessionIdList = new ArrayList<>();
 
     private final List<DocBoostMatcher> docBoostMatcherList = new ArrayList<>();
@@ -181,7 +179,7 @@ public class IndexUpdater extends Thread {
                     if (interval > 0) {
                         // sleep
                         try {
-                            Thread.sleep(interval); // 1 min (default)
+                            Thread.sleep(interval); // 10 sec (default)
                         } catch (final InterruptedException e) {
                             logger.warn("Interrupted index update.", e);
                         }
@@ -206,15 +204,9 @@ public class IndexUpdater extends Thread {
                     }
                     while (!arList.isEmpty()) {
                         processAccessResults(docList, accessResultList, arList);
-
                         cleanupAccessResults(accessResultList);
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Getting documents in IndexUpdater queue.");
-                        }
                         arList = getAccessResultList(cb);
                     }
-
                     if (!docList.isEmpty()) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
                     }
@@ -445,10 +437,13 @@ public class IndexUpdater extends Thread {
     }
 
     private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Getting documents in IndexUpdater queue.");
+        }
         final long execTime = System.currentTimeMillis();
         final List<EsAccessResult> arList = ((EsDataService) dataService).getAccessResultList(cb);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!arList.isEmpty()) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final long commitMarginTime = fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue();
             for (final AccessResult<?> ar : arList.toArray(new AccessResult[arList.size()])) {
                 if (ar.getCreateTime().longValue() > execTime - commitMarginTime) {
@@ -460,6 +455,7 @@ public class IndexUpdater extends Thread {
         if (logger.isInfoEnabled()) {
             logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
         }
+        final long unprocessedDocumentSize = fessConfig.getIndexerUnprocessedDocumentSizeAsInteger().longValue();
         if (totalHits > unprocessedDocumentSize) {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopped all crawler threads. " + " You have " + totalHits + " (>" + unprocessedDocumentSize + ") "
@@ -530,10 +526,6 @@ public class IndexUpdater extends Thread {
 
     public void setMaxIndexerErrorCount(final int maxIndexerErrorCount) {
         this.maxIndexerErrorCount = maxIndexerErrorCount;
-    }
-
-    public void setUnprocessedDocumentSize(final int unprocessedDocumentSize) {
-        this.unprocessedDocumentSize = unprocessedDocumentSize;
     }
 
     public void addDocBoostMatcher(final DocBoostMatcher rule) {

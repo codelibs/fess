@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
-import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;

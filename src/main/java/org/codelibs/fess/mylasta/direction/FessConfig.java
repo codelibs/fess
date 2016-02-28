@@ -63,7 +63,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC */
+    -XX:+DisableExplicitGC
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -200,19 +204,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String INDEXER_THREAD_DUMP_ENABLED = "indexer.thread.dump.enabled";
 
+    /** The key of the configuration. e.g. 1000 */
+    String INDEXER_UNPROCESSED_DOCUMENT_SIZE = "indexer.unprocessed.document.size";
+
     /** The key of the configuration. e.g. true */
     String INDEXER_CLICK_COUNT_ENABLED = "indexer.click.count.enabled";
 
     /** The key of the configuration. e.g. true */
     String INDEXER_FAVORITE_COUNT_ENABLED = "indexer.favorite.count.enabled";
 
-    /** The key of the configuration. e.g. 10000 */
+    /** The key of the configuration. e.g. 1000 */
     String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
 
     /** The key of the configuration. e.g. 60 */
     String INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT = "indexer.webfs.max.empty.list.conunt";
 
-    /** The key of the configuration. e.g. 60000 */
+    /** The key of the configuration. e.g. 10000 */
     String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
 
     /** The key of the configuration. e.g. 5 */
@@ -777,7 +784,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC <br>
+    -XX:+DisableExplicitGC
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
@@ -1232,6 +1243,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isIndexerThreadDumpEnabled();
 
     /**
+     * Get the value for the key 'indexer.unprocessed.document.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerUnprocessedDocumentSize();
+
+    /**
+     * Get the value for the key 'indexer.unprocessed.document.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerUnprocessedDocumentSizeAsInteger();
+
+    /**
      * Get the value for the key 'indexer.click.count.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1261,14 +1287,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time'. <br>
-     * The value is, e.g. 10000 <br>
+     * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsCommitMarginTime();
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time' as {@link Integer}. <br>
-     * The value is, e.g. 10000 <br>
+     * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -1291,14 +1317,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.update.interval'. <br>
-     * The value is, e.g. 60000 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsUpdateInterval();
 
     /**
      * Get the value for the key 'indexer.webfs.update.interval' as {@link Integer}. <br>
-     * The value is, e.g. 60000 <br>
+     * The value is, e.g. 10000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
@@ -3008,6 +3034,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isIndexerThreadDumpEnabled() {
             return is(FessConfig.INDEXER_THREAD_DUMP_ENABLED);
+        }
+
+        public String getIndexerUnprocessedDocumentSize() {
+            return get(FessConfig.INDEXER_UNPROCESSED_DOCUMENT_SIZE);
+        }
+
+        public Integer getIndexerUnprocessedDocumentSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_UNPROCESSED_DOCUMENT_SIZE);
         }
 
         public String getIndexerClickCountEnabled() {
