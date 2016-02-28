@@ -445,6 +445,11 @@ public class FessEsClient implements Client {
     @PreDestroy
     public void close() {
         try {
+            client.admin().indices().prepareFlush().setForce(true).execute().actionGet();
+        } catch (Exception e) {
+            logger.warn("Failed to flush indices.", e);
+        }
+        try {
             client.close();
         } catch (final ElasticsearchException e) {
             logger.warn("Failed to close Client: " + client, e);
