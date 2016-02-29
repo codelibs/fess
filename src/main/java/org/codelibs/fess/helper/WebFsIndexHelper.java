@@ -472,20 +472,28 @@ public class WebFsIndexHelper implements Serializable {
         for (final String sid : sessionIdList) {
             // remove config
             crawlingConfigHelper.remove(sid);
+
+            try {
+                // clear url filter
+                SingletonLaContainer.getComponent(UrlFilterService.class).delete(sid);
+            } catch (Exception e) {
+                logger.warn("Failed to delete UrlFilter for " + sid, e);
+            }
+
+            try {
+                // clear queue
+                SingletonLaContainer.getComponent(UrlQueueService.class).delete(sid);
+            } catch (Exception e) {
+                logger.warn("Failed to delete UrlQueue for " + sid, e);
+            }
+
+            try {
+                // clear
+                SingletonLaContainer.getComponent(DataService.class).delete(sid);
+            } catch (Exception e) {
+                logger.warn("Failed to delete AccessResult for " + sid, e);
+            }
         }
-
-        // clear url filter
-        final UrlFilterService urlFilterService = SingletonLaContainer.getComponent(UrlFilterService.class);
-        urlFilterService.deleteAll();
-
-        // clear queue
-        final UrlQueueService urlQueueService = SingletonLaContainer.getComponent(UrlQueueService.class);
-        urlQueueService.deleteAll();
-
-        // clear
-        final DataService dataService = SingletonLaContainer.getComponent(DataService.class);
-        dataService.deleteAll();
-
     }
 
 }
