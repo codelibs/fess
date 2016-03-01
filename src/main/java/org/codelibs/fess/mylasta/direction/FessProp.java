@@ -73,7 +73,11 @@ public interface FessProp {
     }
 
     public default void setSystemProperty(final String key, final String value) {
-        ComponentUtil.getSystemProperties().setProperty(key, value);
+        if (value != null) {
+            ComponentUtil.getSystemProperties().setProperty(key, value);
+        } else {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
     }
 
     public default boolean getSystemPropertyAsBoolean(final String key, final boolean defaultValue) {
