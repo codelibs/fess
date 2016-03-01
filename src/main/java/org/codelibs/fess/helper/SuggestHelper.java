@@ -88,7 +88,7 @@ public class SuggestHelper {
             roleFilterList.add(Pattern.compile(filter));
         });
 
-        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
         suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);

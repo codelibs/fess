@@ -142,7 +142,7 @@ public class IndexingHelper {
 
         final CountResponse countResponse =
                 fessEsClient.prepareCount(fessConfig.getIndexDocumentSearchIndex()).setTypes(fessConfig.getIndexDocumentType())
-                        .setQuery(queryBuilder).execute().actionGet();
+                        .setQuery(queryBuilder).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final long numFound = countResponse.getCount();
         // TODO max threshold
 

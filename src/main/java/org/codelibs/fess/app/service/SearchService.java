@@ -238,7 +238,7 @@ public class SearchService {
             final UpdateRequestBuilder builder =
                     fessEsClient.prepareUpdate(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
-            final UpdateResponse response = builder.execute().actionGet();
+            final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.isCreated();
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to update doc  " + id, e);

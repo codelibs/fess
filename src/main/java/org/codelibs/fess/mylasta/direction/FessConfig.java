@@ -318,6 +318,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. doc */
     String INDEX_DOCUMENT_TYPE = "index.document.type";
 
+    /** The key of the configuration. e.g. 3m */
+    String INDEX_SEARCH_TIMEOUT = "index.search.timeout";
+
+    /** The key of the configuration. e.g. 3m */
+    String INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT = "index.scroll.search.timeout.timeout";
+
+    /** The key of the configuration. e.g. 3m */
+    String INDEX_INDEX_TIMEOUT = "index.index.timeout";
+
+    /** The key of the configuration. e.g. 3m */
+    String INDEX_BULK_TIMEOUT = "index.bulk.timeout";
+
+    /** The key of the configuration. e.g. 3m */
+    String INDEX_DELETE_TIMEOUT = "index.delete.timeout";
+
+    /** The key of the configuration. e.g. 10m */
+    String INDEX_HEALTH_TIMEOUT = "index.health.timeout";
+
+    /** The key of the configuration. e.g. 1m */
+    String INDEX_INDICES_TIMEOUT = "index.indices.timeout";
+
     /** The key of the configuration. e.g. 1000 */
     String QUERY_MAX_LENGTH = "query.max.length";
 
@@ -1571,6 +1592,56 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentType();
+
+    /**
+     * Get the value for the key 'index.search.timeout'. <br>
+     * The value is, e.g. 3m <br>
+     * comment: timeout
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexSearchTimeout();
+
+    /**
+     * Get the value for the key 'index.scroll.search.timeout.timeout'. <br>
+     * The value is, e.g. 3m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexScrollSearchTimeoutTimeout();
+
+    /**
+     * Get the value for the key 'index.index.timeout'. <br>
+     * The value is, e.g. 3m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexIndexTimeout();
+
+    /**
+     * Get the value for the key 'index.bulk.timeout'. <br>
+     * The value is, e.g. 3m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexBulkTimeout();
+
+    /**
+     * Get the value for the key 'index.delete.timeout'. <br>
+     * The value is, e.g. 3m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDeleteTimeout();
+
+    /**
+     * Get the value for the key 'index.health.timeout'. <br>
+     * The value is, e.g. 10m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexHealthTimeout();
+
+    /**
+     * Get the value for the key 'index.indices.timeout'. <br>
+     * The value is, e.g. 1m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexIndicesTimeout();
 
     /**
      * Get the value for the key 'query.max.length'. <br>
@@ -3218,6 +3289,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexDocumentType() {
             return get(FessConfig.INDEX_DOCUMENT_TYPE);
+        }
+
+        public String getIndexSearchTimeout() {
+            return get(FessConfig.INDEX_SEARCH_TIMEOUT);
+        }
+
+        public String getIndexScrollSearchTimeoutTimeout() {
+            return get(FessConfig.INDEX_SCROLL_SEARCH_TIMEOUT_TIMEOUT);
+        }
+
+        public String getIndexIndexTimeout() {
+            return get(FessConfig.INDEX_INDEX_TIMEOUT);
+        }
+
+        public String getIndexBulkTimeout() {
+            return get(FessConfig.INDEX_BULK_TIMEOUT);
+        }
+
+        public String getIndexDeleteTimeout() {
+            return get(FessConfig.INDEX_DELETE_TIMEOUT);
+        }
+
+        public String getIndexHealthTimeout() {
+            return get(FessConfig.INDEX_HEALTH_TIMEOUT);
+        }
+
+        public String getIndexIndicesTimeout() {
+            return get(FessConfig.INDEX_INDICES_TIMEOUT);
         }
 
         public String getQueryMaxLength() {
