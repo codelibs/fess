@@ -76,6 +76,9 @@ ${fe:facetForm()}${fe:geoForm()}
 						<option value="">
 							<la:message key="labels.search_result_select_sort" />
 						</option>
+						<la:option value="score.desc">
+							<la:message key="labels.search_result_sort_score_desc" />
+						</la:option>
 						<la:option value="created.asc">
 							<la:message key="labels.search_result_sort_created_asc" />
 						</la:option>

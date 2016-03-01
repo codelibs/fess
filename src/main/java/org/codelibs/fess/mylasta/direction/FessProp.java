@@ -31,12 +31,22 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 
 public interface FessProp {
+
+    public static final String GROUP_VALUE_PREFIX = "group:";
+
+    public static final String ROLE_VALUE_PREFIX = "role:";
+
+    public static final String DEFAULT_SORT_VALUES = "defaultSortValues";
+
+    public static final String DEFAULT_LABEL_VALUES = "defaultLabelValues";
 
     public static final String QUERY_LANGUAGE_MAPPING = "queryLanguageMapping";
 
@@ -88,6 +98,98 @@ public interface FessProp {
 
     public default void setSystemPropertyAsInt(final String key, final int value) {
         setSystemProperty(key, Integer.toString(value));
+    }
+
+    public default String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_SORT_VALUES);
+        if (map == null) {
+            String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            if (StringUtil.isBlank(value)) {
+                map = Collections.emptyMap();
+            } else {
+                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                    final String[] pair = s.split("=");
+                    if (pair.length == 1) {
+                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                    } else if (pair.length == 2) {
+                        return new Pair<>(pair[1].trim(), pair[0].trim());
+                    }
+                    return null;
+                }).filter(o -> o != null).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+            }
+            propMap.put(DEFAULT_SORT_VALUES, map);
+        }
+        return map
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    if (StringUtil.isEmpty(key)) {
+                        return e.getValue();
+                    }
+                    if (userBean.map(
+                            user -> StreamUtil.of(user.getRoles()).anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s))
+                                    || StreamUtil.of(user.getGroups()).anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))).orElse(false)) {
+                        return e.getValue();
+                    }
+                    return null;
+                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    public default void setDefaultSortValue(final String value) {
+        setSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
+        propMap.remove(DEFAULT_SORT_VALUES);
+    }
+
+    public default String getDefaultSortValue() {
+        return getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, StringUtil.EMPTY);
+    }
+
+    public default String[] getDefaultLabelValues(final OptionalThing<FessUserBean> userBean) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_LABEL_VALUES);
+        if (map == null) {
+            String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            if (StringUtil.isBlank(value)) {
+                map = Collections.emptyMap();
+            } else {
+                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                    final String[] pair = s.split("=");
+                    if (pair.length == 1) {
+                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                    } else if (pair.length == 2) {
+                        return new Pair<>(pair[1].trim(), pair[0].trim());
+                    }
+                    return null;
+                }).filter(o -> o != null).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+            }
+            propMap.put(DEFAULT_LABEL_VALUES, map);
+        }
+        return map
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    if (StringUtil.isEmpty(key)) {
+                        return e.getValue();
+                    }
+                    if (userBean.map(
+                            user -> StreamUtil.of(user.getRoles()).anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s))
+                                    || StreamUtil.of(user.getGroups()).anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))).orElse(false)) {
+                        return e.getValue();
+                    }
+                    return null;
+                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    public default void setDefaultLabelValue(final String value) {
+        setSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
+        propMap.remove(DEFAULT_LABEL_VALUES);
+    }
+
+    public default String getDefaultLabelValue() {
+        return getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
     }
 
     public default void setLoginRequired(final boolean value) {

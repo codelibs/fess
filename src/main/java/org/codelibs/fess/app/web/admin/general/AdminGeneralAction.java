@@ -124,7 +124,8 @@ public class AdminGeneralAction extends FessAdminAction {
         updateProperty(Constants.USER_INFO_PROPERTY, getCheckboxValue(form.userInfo));
         updateProperty(Constants.USER_FAVORITE_PROPERTY, getCheckboxValue(form.userFavorite));
         updateProperty(Constants.WEB_API_JSON_PROPERTY, getCheckboxValue(form.webApiJson));
-        updateProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, form.defaultLabelValue);
+        fessConfig.setDefaultLabelValue(form.defaultLabelValue);
+        fessConfig.setDefaultSortValue(form.defaultSortValue);
         updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, getCheckboxValue(form.appendQueryParameter));
         updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
         updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
@@ -163,7 +164,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.userInfo = systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
         form.userFavorite = systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
         form.webApiJson = systemProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
-        form.defaultLabelValue = systemProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+        form.defaultLabelValue = fessConfig.getDefaultLabelValue();
+        form.defaultSortValue = fessConfig.getDefaultSortValue();
         form.appendQueryParameter = systemProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
         form.ignoreFailureType =
                 systemProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);

@@ -587,6 +587,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: -- Results per page -- */
     public static final String LABELS_search_result_select_num = "{labels.search_result_select_num}";
 
+    /** The key of the message: Score */
+    public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
+
     /** The key of the message: Date (ascending) */
     public static final String LABELS_search_result_sort_created_asc = "{labels.search_result_sort_created_asc}";
 
@@ -955,6 +958,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Default Label Value */
     public static final String LABELS_default_label_value = "{labels.default_label_value}";
+
+    /** The key of the message: Default Sort Value */
+    public static final String LABELS_default_sort_value = "{labels.default_sort_value}";
 
     /** The key of the message: Append Params to URL */
     public static final String LABELS_append_query_param_enabled = "{labels.append_query_param_enabled}";

@@ -51,9 +51,6 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.taglib.function.LaFunctions;
 
 public class SearchService {
@@ -101,18 +98,9 @@ public class SearchService {
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            if (StringUtil.isNotBlank(sortField)) {
-                                final String[] sort = sortField.split("\\.");
-                                final SortBuilder sortBuilder = SortBuilders.fieldSort(sort[0]);
-                                if ("asc".equals(sort[1])) {
-                                    sortBuilder.order(SortOrder.ASC);
-                                } else if ("desc".equals(sort[1])) {
-                                    sortBuilder.order(SortOrder.DESC);
-                                }
-                                searchRequestBuilder.addSort(sortBuilder);
-                            }
-                            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
-                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                            return SearchConditionBuilder.builder(searchRequestBuilder)
+                                    .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
+                                    .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
                                     .responseFields(queryHelper.getResponseFields()).administrativeAccess(params.isAdministrativeAccess())
                                     .build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {

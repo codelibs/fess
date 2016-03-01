@@ -67,6 +67,15 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="defaultSortValue" class="col-sm-3 control-label"><la:message
+												key="labels.default_sort_value" /></label>
+										<div class="col-sm-9">
+											<la:errors property="defaultSortValue" />
+											<la:textarea property="defaultSortValue"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="popularWord" class="col-sm-3 control-label"><la:message
 												key="labels.popular_word_word_enabled" /></label>
 										<div class="col-sm-9">

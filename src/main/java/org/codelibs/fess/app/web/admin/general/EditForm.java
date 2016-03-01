@@ -62,6 +62,9 @@ public class EditForm implements Serializable {
     @Size(max = 1000)
     public String defaultLabelValue;
 
+    @Size(max = 1000)
+    public String defaultSortValue;
+
     @Size(max = 10)
     public String appendQueryParameter;
 

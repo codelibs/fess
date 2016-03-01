@@ -28,6 +28,8 @@
 						href="#searchOptions" class="label label-primary"
 						data-toggle="control-options"> <c:if test="${empty sort}">
 								<la:message key="labels.searchoptions_score" />
+							</c:if> <c:if test="${sort=='score.desc'}">
+								<la:message key="labels.searchoptions_score" />
 							</c:if> <c:if test="${sort=='created.asc'}">
 								<la:message key="labels.search_result_sort_created_asc" />
 							</c:if> <c:if test="${sort=='created.desc'}">

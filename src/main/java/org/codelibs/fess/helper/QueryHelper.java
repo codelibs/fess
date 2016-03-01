@@ -69,6 +69,8 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
 
+    protected static final String SCORE_SORT_VALUE = "score";
+
     protected static final long serialVersionUID = 1L;
 
     protected static final String SCORE_FIELD = "score";
@@ -182,7 +184,7 @@ public class QueryHelper implements Serializable {
         }
         if (supportedSortFields == null) {
             supportedSortFields =
-                    new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
+                    new String[] { SCORE_SORT_VALUE, fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
                             fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
                             fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
         }
@@ -419,7 +421,7 @@ public class QueryHelper implements Serializable {
             } else {
                 sortOrder = SortOrder.ASC;
             }
-            context.addSorts(SortBuilders.fieldSort(sortField).order(sortOrder));
+            context.addSorts(SortBuilders.fieldSort(SCORE_SORT_VALUE.equals(sortField) ? "_score" : sortField).order(sortOrder));
             return null;
         } else if (INURL_FIELD.equals(field)) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(termQuery.getBoost());

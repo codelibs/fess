@@ -118,8 +118,7 @@ public class SearchAction extends FessSearchAction {
         }
 
         try {
-            updateSearchParams(form);
-            buildLabelParams(form.fields);
+            buildFormParams(form);
             form.lang = searchService.getLanguages(request, form);
             request.setAttribute(Constants.REQUEST_LANGUAGES, form.lang);
             final WebRenderData renderData = new WebRenderData();
@@ -171,16 +170,6 @@ public class SearchAction extends FessSearchAction {
         form.start = start;
 
         return doSearch(form);
-    }
-
-    protected void updateSearchParams(final SearchForm form) {
-        if (form.facet == null) {
-            form.facet = queryHelper.getDefaultFacetInfo();
-        }
-
-        if (form.geo == null) {
-            form.geo = queryHelper.getDefaultGeoInfo();
-        }
     }
 
     protected String getDisplayQuery(final SearchForm form, final List<Map<String, String>> labelTypeItems) {
