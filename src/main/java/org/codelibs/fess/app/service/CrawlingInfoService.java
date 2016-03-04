@@ -67,6 +67,9 @@ public class CrawlingInfoService implements Serializable {
     @Resource
     protected CrawlingInfoBhv crawlingInfoBhv;
 
+    @Resource
+    protected FessConfig fessConfig;
+
     public List<CrawlingInfo> getCrawlingInfoList(final CrawlingInfoPager crawlingInfoPager) {
 
         final PagingResultBean<CrawlingInfo> crawlingInfoList = crawlingInfoBhv.selectPage(cb -> {
@@ -145,6 +148,7 @@ public class CrawlingInfoService implements Serializable {
 
             });
 
+            cb.fetchFirst(fessConfig.getPageCrawlingInfoMaxFetchSizeAsInteger());
             cb.specify().columnId();
         });
         if (!crawlingInfoList.isEmpty()) {
@@ -189,6 +193,7 @@ public class CrawlingInfoService implements Serializable {
         return crawlingInfoParamBhv.selectList(cb -> {
             cb.query().setCrawlingInfoId_Equal(id);
             cb.query().addOrderBy_Id_Asc();
+            cb.fetchFirst(fessConfig.getPageCrawlingInfoParamMaxFetchSizeAsInteger());
         });
     }
 
@@ -209,6 +214,7 @@ public class CrawlingInfoService implements Serializable {
         final List<CrawlingInfo> activeSessionList =
                 activeSessionId.isEmpty() ? Collections.emptyList() : crawlingInfoBhv.selectList(cb -> {
                     cb.query().setSessionId_InScope(activeSessionId);
+                    cb.fetchFirst(fessConfig.getPageCrawlingInfoMaxFetchSizeAsInteger());
                     cb.specify().columnId();
                 });
         final List<String> idList = activeSessionList.stream().map(session -> session.getId()).collect(Collectors.toList());

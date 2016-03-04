@@ -71,6 +71,7 @@ public class ElevateWord extends BsElevateWord {
                     labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(labelIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
+                        cb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                     });
                 }
             }

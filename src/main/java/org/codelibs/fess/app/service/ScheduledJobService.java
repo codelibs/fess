@@ -101,6 +101,7 @@ public class ScheduledJobService implements Serializable {
         return scheduledJobBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(fessConfig.getPageScheduledJobMaxFetchSizeAsInteger());
         });
     }
 
@@ -118,6 +119,7 @@ public class ScheduledJobService implements Serializable {
             cb.query().setCrawler_Equal(Constants.T);
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_Name_Asc();
+            cb.fetchFirst(fessConfig.getPageScheduledJobMaxFetchSizeAsInteger());
         });
     }
 

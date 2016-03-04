@@ -463,6 +463,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String PAGE_ROLETYPE_MAX_FETCH_SIZE = "page.roletype.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
+    String PAGE_USER_MAX_FETCH_SIZE = "page.user.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
     String PAGE_ROLE_MAX_FETCH_SIZE = "page.role.max.fetch.size";
 
     /** The key of the configuration. e.g. 1000 */
@@ -470,6 +473,51 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. 100 */
     String PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE = "page.crawling.info.param.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_CRAWLING_INFO_MAX_FETCH_SIZE = "page.crawling.info.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_DATA_CONFIG_MAX_FETCH_SIZE = "page.data.config.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_WEB_CONFIG_MAX_FETCH_SIZE = "page.web.config.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_FILE_CONFIG_MAX_FETCH_SIZE = "page.file.config.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_DUPLICATE_HOST_MAX_FETCH_SIZE = "page.duplicate.host.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_FAILURE_URL_MAX_FETCH_SIZE = "page.failure.url.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_FAVORITE_LOG_MAX_FETCH_SIZE = "page.favorite.log.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_FILE_AUTH_MAX_FETCH_SIZE = "page.file.auth.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_WEB_AUTH_MAX_FETCH_SIZE = "page.web.auth.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_PATH_MAPPING_MAX_FETCH_SIZE = "page.path.mapping.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_REQUEST_HEADER_MAX_FETCH_SIZE = "page.request.header.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE = "page.scheduled.job.max.fetch.size";
+
+    /** The key of the configuration. e.g. 100 */
+    String PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE = "page.search.field.log.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_ELEVATE_WORD_MAX_FETCH_SIZE = "page.elevate.word.max.fetch.size";
+
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_BAD_WORD_MAX_FETCH_SIZE = "page.bad.word.max.fetch.size";
 
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
@@ -2030,6 +2078,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageRoletypeMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.user.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageUserMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.user.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageUserMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'page.role.max.fetch.size'. <br>
      * The value is, e.g. 1000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2073,6 +2136,231 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getPageCrawlingInfoParamMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.crawling.info.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageCrawlingInfoMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.crawling.info.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageCrawlingInfoMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.data.config.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageDataConfigMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.data.config.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageDataConfigMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.web.config.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageWebConfigMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.web.config.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageWebConfigMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.file.config.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageFileConfigMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.file.config.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageFileConfigMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.duplicate.host.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageDuplicateHostMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.duplicate.host.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageDuplicateHostMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.failure.url.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageFailureUrlMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.failure.url.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageFailureUrlMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.favorite.log.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageFavoriteLogMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.favorite.log.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageFavoriteLogMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.file.auth.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageFileAuthMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.file.auth.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageFileAuthMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.web.auth.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageWebAuthMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.web.auth.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageWebAuthMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.path.mapping.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPagePathMappingMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.path.mapping.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPagePathMappingMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.request.header.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageRequestHeaderMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.request.header.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageRequestHeaderMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.scheduled.job.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageScheduledJobMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.scheduled.job.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageScheduledJobMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.search.field.log.max.fetch.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageSearchFieldLogMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.search.field.log.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageSearchFieldLogMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.elevate.word.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageElevateWordMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.elevate.word.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageElevateWordMaxFetchSizeAsInteger();
+
+    /**
+     * Get the value for the key 'page.bad.word.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageBadWordMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.bad.word.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageBadWordMaxFetchSizeAsInteger();
 
     /**
      * Get the value for the key 'paging.search.page.start'. <br>
@@ -3491,6 +3779,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_ROLETYPE_MAX_FETCH_SIZE);
         }
 
+        public String getPageUserMaxFetchSize() {
+            return get(FessConfig.PAGE_USER_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageUserMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_USER_MAX_FETCH_SIZE);
+        }
+
         public String getPageRoleMaxFetchSize() {
             return get(FessConfig.PAGE_ROLE_MAX_FETCH_SIZE);
         }
@@ -3513,6 +3809,126 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPageCrawlingInfoParamMaxFetchSizeAsInteger() {
             return getAsInteger(FessConfig.PAGE_CRAWLING_INFO_PARAM_MAX_FETCH_SIZE);
+        }
+
+        public String getPageCrawlingInfoMaxFetchSize() {
+            return get(FessConfig.PAGE_CRAWLING_INFO_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageCrawlingInfoMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_CRAWLING_INFO_MAX_FETCH_SIZE);
+        }
+
+        public String getPageDataConfigMaxFetchSize() {
+            return get(FessConfig.PAGE_DATA_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageDataConfigMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_DATA_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public String getPageWebConfigMaxFetchSize() {
+            return get(FessConfig.PAGE_WEB_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageWebConfigMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_WEB_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public String getPageFileConfigMaxFetchSize() {
+            return get(FessConfig.PAGE_FILE_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageFileConfigMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_FILE_CONFIG_MAX_FETCH_SIZE);
+        }
+
+        public String getPageDuplicateHostMaxFetchSize() {
+            return get(FessConfig.PAGE_DUPLICATE_HOST_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageDuplicateHostMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_DUPLICATE_HOST_MAX_FETCH_SIZE);
+        }
+
+        public String getPageFailureUrlMaxFetchSize() {
+            return get(FessConfig.PAGE_FAILURE_URL_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageFailureUrlMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_FAILURE_URL_MAX_FETCH_SIZE);
+        }
+
+        public String getPageFavoriteLogMaxFetchSize() {
+            return get(FessConfig.PAGE_FAVORITE_LOG_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageFavoriteLogMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_FAVORITE_LOG_MAX_FETCH_SIZE);
+        }
+
+        public String getPageFileAuthMaxFetchSize() {
+            return get(FessConfig.PAGE_FILE_AUTH_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageFileAuthMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_FILE_AUTH_MAX_FETCH_SIZE);
+        }
+
+        public String getPageWebAuthMaxFetchSize() {
+            return get(FessConfig.PAGE_WEB_AUTH_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageWebAuthMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_WEB_AUTH_MAX_FETCH_SIZE);
+        }
+
+        public String getPagePathMappingMaxFetchSize() {
+            return get(FessConfig.PAGE_PATH_MAPPING_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPagePathMappingMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_PATH_MAPPING_MAX_FETCH_SIZE);
+        }
+
+        public String getPageRequestHeaderMaxFetchSize() {
+            return get(FessConfig.PAGE_REQUEST_HEADER_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageRequestHeaderMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_REQUEST_HEADER_MAX_FETCH_SIZE);
+        }
+
+        public String getPageScheduledJobMaxFetchSize() {
+            return get(FessConfig.PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageScheduledJobMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_SCHEDULED_JOB_MAX_FETCH_SIZE);
+        }
+
+        public String getPageSearchFieldLogMaxFetchSize() {
+            return get(FessConfig.PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageSearchFieldLogMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_SEARCH_FIELD_LOG_MAX_FETCH_SIZE);
+        }
+
+        public String getPageElevateWordMaxFetchSize() {
+            return get(FessConfig.PAGE_ELEVATE_WORD_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageElevateWordMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_ELEVATE_WORD_MAX_FETCH_SIZE);
+        }
+
+        public String getPageBadWordMaxFetchSize() {
+            return get(FessConfig.PAGE_BAD_WORD_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageBadWordMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_BAD_WORD_MAX_FETCH_SIZE);
         }
 
         public String getPagingSearchPageStart() {

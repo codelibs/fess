@@ -26,6 +26,7 @@ import org.codelibs.fess.app.pager.ReqHeaderPager;
 import org.codelibs.fess.es.config.cbean.RequestHeaderCB;
 import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -35,6 +36,9 @@ public class RequestHeaderService implements Serializable {
 
     @Resource
     protected RequestHeaderBhv requestHeaderBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<RequestHeader> getRequestHeaderList(final ReqHeaderPager requestHeaderPager) {
 
@@ -88,6 +92,7 @@ public class RequestHeaderService implements Serializable {
     public List<RequestHeader> getRequestHeaderList(final String webConfigId) {
         return requestHeaderBhv.selectList(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);
+            cb.fetchFirst(fessConfig.getPageRequestHeaderMaxFetchSizeAsInteger());
         });
     }
 

@@ -33,6 +33,7 @@ import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.es.config.exentity.WebConfigToLabel;
 import org.codelibs.fess.es.config.exentity.WebConfigToRole;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -54,6 +55,9 @@ public class WebConfigService implements Serializable {
 
     @Resource
     protected RequestHeaderBhv requestHeaderBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<WebConfig> getWebConfigList(final WebConfigPager webConfigPager) {
 
@@ -117,6 +121,7 @@ public class WebConfigService implements Serializable {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.fetchFirst(fessConfig.getPageWebConfigMaxFetchSizeAsInteger());
         });
 
         return list;
@@ -127,6 +132,7 @@ public class WebConfigService implements Serializable {
 
             final List<WebConfigToRole> wctrtmList = webConfigToRoleBhv.selectList(wctrtmCb -> {
                 wctrtmCb.query().setWebConfigId_Equal(entity.getId());
+                wctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
             });
             if (!wctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
@@ -138,6 +144,7 @@ public class WebConfigService implements Serializable {
 
             final List<WebConfigToLabel> wctltmList = webConfigToLabelBhv.selectList(wctltmCb -> {
                 wctltmCb.query().setWebConfigId_Equal(entity.getId());
+                wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!wctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
@@ -190,6 +197,7 @@ public class WebConfigService implements Serializable {
             if (labelTypeIds != null) {
                 final List<WebConfigToLabel> list = webConfigToLabelBhv.selectList(wctltmCb -> {
                     wctltmCb.query().setWebConfigId_Equal(webConfigId);
+                    wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
                 final List<WebConfigToLabel> newList = new ArrayList<WebConfigToLabel>();
                 final List<WebConfigToLabel> matchedList = new ArrayList<WebConfigToLabel>();
@@ -221,6 +229,7 @@ public class WebConfigService implements Serializable {
             if (roleTypeIds != null) {
                 final List<WebConfigToRole> list = webConfigToRoleBhv.selectList(wctrtmCb -> {
                     wctrtmCb.query().setWebConfigId_Equal(webConfigId);
+                    wctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                 });
                 final List<WebConfigToRole> newList = new ArrayList<WebConfigToRole>();
                 final List<WebConfigToRole> matchedList = new ArrayList<WebConfigToRole>();

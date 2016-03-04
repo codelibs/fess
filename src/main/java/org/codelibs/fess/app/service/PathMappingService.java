@@ -27,6 +27,7 @@ import org.codelibs.fess.app.pager.PathMapPager;
 import org.codelibs.fess.es.config.cbean.PathMappingCB;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -37,6 +38,9 @@ public class PathMappingService implements Serializable {
 
     @Resource
     protected PathMappingBhv pathMappingBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<PathMapping> getPathMappingList(final PathMapPager pathMappingPager) {
 
@@ -81,6 +85,7 @@ public class PathMappingService implements Serializable {
         return pathMappingBhv.selectList(cb -> {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().setProcessType_InScope(processTypeList);
+            cb.fetchFirst(fessConfig.getPagePathMappingMaxFetchSizeAsInteger());
         });
     }
 

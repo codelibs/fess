@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ public class PathMappingHelper implements Serializable {
             cachedPathMappingList = pathMappingBhv.selectList(cb -> {
                 cb.query().addOrderBy_SortOrder_Asc();
                 cb.query().setProcessType_InScope(ptList);
+                cb.fetchFirst(ComponentUtil.getFessConfig().getPagePathMappingMaxFetchSizeAsInteger());
             });
         } catch (final Exception e) {
             logger.warn("Failed to load path mappings.", e);

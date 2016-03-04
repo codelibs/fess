@@ -27,6 +27,7 @@ import org.codelibs.fess.es.log.exbhv.UserInfoBhv;
 import org.codelibs.fess.es.log.exentity.FavoriteLog;
 import org.codelibs.fess.es.log.exentity.UserInfo;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.ListResultBean;
 
 public class FavoriteLogService {
@@ -38,6 +39,9 @@ public class FavoriteLogService {
 
     @Resource
     protected FavoriteLogBhv favoriteLogBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public boolean addUrl(final String userCode, final BiConsumer<UserInfo, FavoriteLog> favoriteLogLambda) {
         return userInfoBhv.selectByPK(userCode).map(userInfo -> {
@@ -57,6 +61,7 @@ public class FavoriteLogService {
             final ListResultBean<FavoriteLog> list = favoriteLogBhv.selectList(cb2 -> {
                 cb2.query().setUserInfoId_Equal(userInfo.getId());
                 cb2.query().setUrl_InScope(urlList);
+                cb2.fetchFirst(fessConfig.getPageFavoriteLogMaxFetchSizeAsInteger());
             });
             if (!list.isEmpty()) {
                 final List<String> newUrlList = new ArrayList<>(list.size());
