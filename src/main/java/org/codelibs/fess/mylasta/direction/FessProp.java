@@ -203,7 +203,7 @@ public interface FessProp {
     public default boolean isLoginRequired() {
         return getSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, false);
     }
-//TODO boolean    
+
     public default void setIncrementalCrawling(final boolean value) {
         setSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
     }
@@ -211,7 +211,7 @@ public interface FessProp {
     public default boolean isIncrementalCrawling() {
         return getSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, true);
     }
-//TODO int
+
     public default void setDayForCleanup(final int value) {
         setSystemPropertyAsInt(Constants.DAY_FOR_CLEANUP_PROPERTY, value);
     }
@@ -267,7 +267,7 @@ public interface FessProp {
     public default boolean isAppendQueryParameter() {
         return getSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, false);
     }
-//TODO String
+
     public default void setIgnoreFailureType(final String value) {
         setSystemProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, value);
     }
@@ -308,7 +308,7 @@ public interface FessProp {
         return getSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
     }
     
-    //TODO int
+
     public default void setPurgeJobLogDay(final int value) {
         setSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, value);
     }
@@ -318,14 +318,13 @@ public interface FessProp {
     }
     
     public default void setPurgeUserInfoDay(final int value) {
-        setSystemPropertyAsInt(Constants.PURGE_BY_BOTS_PROPERTY, value);
+        setSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, value);
     }
     
     public default int getPurgeUserInfoDay() {
-        return getSystemPropertyAsInt(Constants.PURGE_BY_BOTS_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_BY_BOTS));
+        return getSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
     }
     
-    //TODO string
     public default void setPurgeByBots(final String value) {
         setSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, value);
     }
@@ -342,32 +341,56 @@ public interface FessProp {
         return getSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
     }
     
+    public default void setSuggestSearchLog(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, value);
+    }
     
+    public default boolean isSuggestSearchLog() {
+        return getSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, true);
+    }
     
-    //TODO
-
-    public default String getLdapInitialContextFactory() {
-        return getSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+    public default void setSuggestDocuments(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, value);
+    }
+    
+    public default boolean isSuggestDocuments() {
+        return getSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, true);
+    }
+    
+    public default void setPurgeSuggestSearchLogDay(final int value) {
+        setSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, value);
+    }
+    
+    public default int getPurgeSuggestSearchLogDay() {
+        return getSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_SUGGEST_PURGE_DAY));
     }
 
     public default void setLdapInitialContextFactory(final String value) {
         setSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, value);
     }
 
-    public default String getLdapSecurityAuthentication() {
-        return getSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
+    public default String getLdapInitialContextFactory() {
+        return getSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     }
 
     public default void setLdapSecurityAuthentication(final String value) {
         setSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, value);
     }
 
-    public default String getLdapProviderUrl() {
-        return getSystemProperty(Constants.LDAP_PROVIDER_URL);
+    public default String getLdapSecurityAuthentication() {
+        return getSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
     }
 
     public default void setLdapProviderUrl(final String value) {
         setSystemProperty(Constants.LDAP_PROVIDER_URL, value);
+    }
+
+    public default String getLdapProviderUrl() {
+        return getSystemProperty(Constants.LDAP_PROVIDER_URL);
+    }
+
+    public default void setLdapSecurityPrincipal(final String value) {
+        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
     public default String getLdapSecurityPrincipal(final String username) {
@@ -378,24 +401,36 @@ public interface FessProp {
         return getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL);
     }
 
-    public default void setLdapSecurityPrincipal(final String value) {
-        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
+    public default void setLdapBaseDn(final String value) {
+        setSystemProperty(Constants.LDAP_BASE_DN, value);
     }
 
     public default String getLdapBaseDn() {
         return getSystemProperty(Constants.LDAP_BASE_DN);
     }
 
-    public default void setLdapBaseDn(final String value) {
-        setSystemProperty(Constants.LDAP_BASE_DN, value);
+    public default void setLdapAccountFilter(final String value) {
+        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
     }
 
     public default String getLdapAccountFilter() {
         return getSystemProperty(Constants.LDAP_ACCOUNT_FILTER);
     }
 
-    public default void setLdapAccountFilter(final String value) {
-        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
+    public default void setNotificationLogin(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_LOGIN, value);
+    }
+    
+    public default String getNotificationLogin() {
+        return getSystemProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
+    }
+    
+    public default void setNotificationSearchTop(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, value);
+    }
+    
+    public default String getNotificationSearchTop() {
+        return getSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
     }
 
     //
