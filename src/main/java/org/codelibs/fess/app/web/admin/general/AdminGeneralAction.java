@@ -117,34 +117,34 @@ public class AdminGeneralAction extends FessAdminAction {
         });
 
         fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
-        updateProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, getCheckboxValue(form.incrementalCrawling));
-        updateProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, form.dayForCleanup.toString());
-        updateProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, form.crawlingThreadCount.toString());
-        updateProperty(Constants.SEARCH_LOG_PROPERTY, getCheckboxValue(form.searchLog));
-        updateProperty(Constants.USER_INFO_PROPERTY, getCheckboxValue(form.userInfo));
-        updateProperty(Constants.USER_FAVORITE_PROPERTY, getCheckboxValue(form.userFavorite));
-        updateProperty(Constants.WEB_API_JSON_PROPERTY, getCheckboxValue(form.webApiJson));
+        fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
+        fessConfig.setDayForCleanup(form.dayForCleanup);
+        fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
+        fessConfig.setSearchLog(Constants.ON.equalsIgnoreCase(form.searchLog));
+        fessConfig.setUserInfo(Constants.ON.equalsIgnoreCase(form.userInfo));
+        fessConfig.setUserFavorite(Constants.ON.equalsIgnoreCase(form.userFavorite));
+        fessConfig.setWebApiJson(Constants.ON.equalsIgnoreCase(form.webApiJson));
         fessConfig.setDefaultLabelValue(form.defaultLabelValue);
         fessConfig.setDefaultSortValue(form.defaultSortValue);
-        updateProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, getCheckboxValue(form.appendQueryParameter));
-        updateProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, form.ignoreFailureType);
-        updateProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, form.failureCountThreshold.toString());
+        fessConfig.setAppendQueryParameter(Constants.ON.equalsIgnoreCase(form.appendQueryParameter));
+        fessConfig.setIgnoreFailureType(form.ignoreFailureType);
+        fessConfig.setFailureCountThreshold(form.failureCountThreshold);
         fessConfig.setWebApiPopularWord(Constants.ON.equalsIgnoreCase(form.popularWord));
-        updateProperty(Constants.CSV_FILE_ENCODING_PROPERTY, form.csvFileEncoding);
-        updateProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, form.purgeSearchLogDay.toString());
-        updateProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, form.purgeJobLogDay.toString());
-        updateProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, form.purgeUserInfoDay.toString());
-        updateProperty(Constants.PURGE_BY_BOTS_PROPERTY, form.purgeByBots);
-        updateProperty(Constants.NOTIFICATION_TO_PROPERTY, form.notificationTo);
-        updateProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, getCheckboxValue(form.suggestSearchLog));
-        updateProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, getCheckboxValue(form.suggestDocuments));
-        updateProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, form.purgeSuggestSearchLogDay.toString());
-        updateProperty(Constants.LDAP_PROVIDER_URL, form.ldapProviderUrl);
-        updateProperty(Constants.LDAP_SECURITY_PRINCIPAL, form.ldapSecurityPrincipal);
-        updateProperty(Constants.LDAP_BASE_DN, form.ldapBaseDn);
-        updateProperty(Constants.LDAP_ACCOUNT_FILTER, form.ldapAccountFilter);
-        updateProperty(Constants.NOTIFICATION_LOGIN, form.notificationLogin);
-        updateProperty(Constants.NOTIFICATION_SEARCH_TOP, form.notificationSearchTop);
+        fessConfig.setCsvFileEncoding(form.csvFileEncoding);
+        fessConfig.setPurgeSearchLogDay(form.purgeSearchLogDay);
+        fessConfig.setPurgeJobLogDay(form.purgeJobLogDay);
+        fessConfig.setPurgeUserInfoDay(form.purgeUserInfoDay);
+        fessConfig.setPurgeByBots(form.purgeByBots);
+        fessConfig.setNotificationTo(form.notificationTo);
+        fessConfig.setSuggestSearchLog(Constants.ON.equalsIgnoreCase(form.suggestSearchLog));
+        fessConfig.setSuggestDocuments(Constants.ON.equalsIgnoreCase(form.suggestDocuments));
+        fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
+        fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
+        fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
+        fessConfig.setLdapBaseDn(form.ldapBaseDn);
+        fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
+        fessConfig.setNotificationLogin(form.notificationLogin);
+        fessConfig.setNotificationSearchTop(form.notificationSearchTop);
 
         fessConfig.storeSystemProperties();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
@@ -157,40 +157,34 @@ public class AdminGeneralAction extends FessAdminAction {
 
     protected void updateForm(final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
-        form.incrementalCrawling = systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE);
-        form.dayForCleanup = getPropertyAsInteger(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
-        form.crawlingThreadCount = getPropertyAsInteger(Constants.CRAWLING_THREAD_COUNT_PROPERTY, 5);
-        form.searchLog = systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.userInfo = systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE);
-        form.userFavorite = systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE);
-        form.webApiJson = systemProperties.getProperty(Constants.WEB_API_JSON_PROPERTY, Constants.TRUE);
+        form.incrementalCrawling = fessConfig.isIncrementalCrawling() ? Constants.TRUE : Constants.FALSE;
+        form.dayForCleanup = fessConfig.getDayForCleanup();
+        form.crawlingThreadCount = fessConfig.getCrawlingThreadCount();
+        form.searchLog = fessConfig.isSearchLog() ? Constants.TRUE : Constants.FALSE;
+        form.userInfo = fessConfig.isUserInfo() ? Constants.TRUE : Constants.FALSE;
+        form.userFavorite = fessConfig.isUserFavorite() ? Constants.TRUE : Constants.FALSE;
+        form.webApiJson = fessConfig.isWebApiJson() ? Constants.TRUE : Constants.FALSE;
         form.defaultLabelValue = fessConfig.getDefaultLabelValue();
         form.defaultSortValue = fessConfig.getDefaultSortValue();
-        form.appendQueryParameter = systemProperties.getProperty(Constants.APPEND_QUERY_PARAMETER_PROPERTY, Constants.FALSE);
-        form.ignoreFailureType =
-                systemProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-        form.failureCountThreshold = getPropertyAsInteger(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
+        form.appendQueryParameter = fessConfig.isAppendQueryParameter() ? Constants.TRUE : Constants.FALSE;
+        form.ignoreFailureType = fessConfig.getIgnoreFailureType();
+        form.failureCountThreshold = fessConfig.getFailureCountThreshold();
         form.popularWord = fessConfig.isWebApiPopularWord() ? Constants.TRUE : Constants.FALSE;
-        form.csvFileEncoding = systemProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
-        form.purgeSearchLogDay =
-                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
-        form.purgeJobLogDay =
-                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
-        form.purgeUserInfoDay =
-                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY));
-        form.purgeByBots = systemProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
-        form.notificationTo = systemProperties.getProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
-        form.suggestSearchLog = systemProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE);
-        form.suggestDocuments = systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE);
-        form.purgeSuggestSearchLogDay =
-                Integer.parseInt(systemProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
-                        Constants.DEFAULT_SUGGEST_PURGE_DAY));
-        form.ldapProviderUrl = systemProperties.getProperty(Constants.LDAP_PROVIDER_URL, StringUtil.EMPTY);
-        form.ldapSecurityPrincipal = systemProperties.getProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY);
-        form.ldapBaseDn = systemProperties.getProperty(Constants.LDAP_BASE_DN, StringUtil.EMPTY);
-        form.ldapAccountFilter = systemProperties.getProperty(Constants.LDAP_ACCOUNT_FILTER, StringUtil.EMPTY);
-        form.notificationLogin = systemProperties.getProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
-        form.notificationSearchTop = systemProperties.getProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
+        form.csvFileEncoding = fessConfig.getCsvFileEncoding();
+        form.purgeSearchLogDay = fessConfig.getPurgeSearchLogDay();
+        form.purgeJobLogDay = fessConfig.getPurgeJobLogDay();
+        form.purgeUserInfoDay = fessConfig.getPurgeUserInfoDay();
+        form.purgeByBots = fessConfig.getPurgeByBots();
+        form.notificationTo = fessConfig.getNotificationTo();
+        form.suggestSearchLog = fessConfig.isSuggestSearchLog() ? Constants.TRUE : Constants.FALSE;
+        form.suggestDocuments = fessConfig.isSuggestDocuments() ? Constants.TRUE : Constants.FALSE;
+        form.purgeSuggestSearchLogDay = fessConfig.getPurgeSuggestSearchLogDay();
+        form.ldapProviderUrl = fessConfig.getLdapProviderUrl();
+        form.ldapSecurityPrincipal = fessConfig.getLdapSecurityPrincipal();
+        form.ldapBaseDn = fessConfig.getLdapBaseDn();
+        form.ldapAccountFilter = fessConfig.getLdapAccountFilter();
+        form.notificationLogin = fessConfig.getNotificationLogin();
+        form.notificationSearchTop = fessConfig.getNotificationSearchTop();
     }
 
     private void updateProperty(final String key, final String value) {
