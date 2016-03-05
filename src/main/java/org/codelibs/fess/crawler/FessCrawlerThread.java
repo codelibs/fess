@@ -225,9 +225,9 @@ public class FessCrawlerThread extends CrawlerThread {
         }
         final Set<RequestData> urlSet = new HashSet<>(docList.size());
         for (final Map<String, Object> doc : docList) {
-            final Object obj = doc.get(fessConfig.getIndexFieldUrl());
-            if (obj != null) {
-                urlSet.add(RequestDataBuilder.newRequestData().get().url(obj.toString()).build());
+            final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+            if (StringUtil.isNotBlank(url)) {
+                urlSet.add(RequestDataBuilder.newRequestData().get().url(url).build());
             }
         }
         return urlSet;
