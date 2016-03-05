@@ -33,9 +33,9 @@ import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
 import org.codelibs.fess.crawler.interval.FessIntervalController;
-import org.codelibs.fess.crawler.service.DataService;
-import org.codelibs.fess.crawler.service.UrlFilterService;
-import org.codelibs.fess.crawler.service.UrlQueueService;
+import org.codelibs.fess.crawler.service.impl.EsDataService;
+import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
+import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
@@ -469,27 +469,31 @@ public class WebFsIndexHelper implements Serializable {
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME, Long.toString(indexUpdater.getExecuteTime()));
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE, Long.toString(indexUpdater.getDocumentSize()));
 
+        final EsUrlFilterService urlFilterService = SingletonLaContainer.getComponent(EsUrlFilterService.class);
+        final EsUrlQueueService urlQueueService = SingletonLaContainer.getComponent(EsUrlQueueService.class);
+        final EsDataService dataService = SingletonLaContainer.getComponent(EsDataService.class);
         for (final String sid : sessionIdList) {
             // remove config
             crawlingConfigHelper.remove(sid);
 
             try {
                 // clear url filter
-                SingletonLaContainer.getComponent(UrlFilterService.class).delete(sid);
+                urlFilterService.delete(sid);
             } catch (Exception e) {
                 logger.warn("Failed to delete UrlFilter for " + sid, e);
             }
 
             try {
                 // clear queue
-                SingletonLaContainer.getComponent(UrlQueueService.class).delete(sid);
+                urlQueueService.clearCache();
+                urlQueueService.delete(sid);
             } catch (Exception e) {
                 logger.warn("Failed to delete UrlQueue for " + sid, e);
             }
 
             try {
                 // clear
-                SingletonLaContainer.getComponent(DataService.class).delete(sid);
+                dataService.delete(sid);
             } catch (Exception e) {
                 logger.warn("Failed to delete AccessResult for " + sid, e);
             }
