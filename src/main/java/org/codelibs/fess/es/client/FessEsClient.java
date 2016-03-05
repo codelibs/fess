@@ -67,6 +67,7 @@ import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -151,7 +152,6 @@ import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
@@ -308,9 +308,10 @@ public class FessEsClient implements Client {
                 final String configType = values[1];
                 boolean exists = false;
                 try {
-                    client.prepareExists(configIndex).execute().actionGet(fessConfig.getIndexSearchTimeout());
-                    exists = true;
-                } catch (final IndexNotFoundException e) {
+                    IndicesExistsResponse response =
+                            client.admin().indices().prepareExists(configIndex).execute().actionGet(fessConfig.getIndexSearchTimeout());
+                    exists = response.isExists();
+                } catch (final Exception e) {
                     // ignore
             }
             if (!exists) {
@@ -744,12 +745,14 @@ public class FessEsClient implements Client {
         final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
+                @SuppressWarnings("rawtypes")
                 final List<ActionRequest> requests = bulkRequestBuilder.request().requests();
                 final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {
                     for (int i = 0; i < requests.size(); i++) {
                         final BulkItemResponse resp = items[i];
                         if (resp.isFailed() && resp.getFailure() != null) {
+                            @SuppressWarnings("rawtypes")
                             final ActionRequest req = requests.get(i);
                             final Failure failure = resp.getFailure();
                             logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
@@ -1138,31 +1141,37 @@ public class FessEsClient implements Client {
         return client.prepareMultiGet();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ActionFuture<CountResponse> count(final CountRequest request) {
         return client.count(request);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void count(final CountRequest request, final ActionListener<CountResponse> listener) {
         client.count(request, listener);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public CountRequestBuilder prepareCount(final String... indices) {
         return client.prepareCount(indices);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ActionFuture<ExistsResponse> exists(final ExistsRequest request) {
         return client.exists(request);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void exists(final ExistsRequest request, final ActionListener<ExistsResponse> listener) {
         client.exists(request, listener);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ExistsRequestBuilder prepareExists(final String... indices) {
         return client.prepareExists(indices);
@@ -1308,18 +1317,21 @@ public class FessEsClient implements Client {
         return client.settings();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
             final Action<Request, Response, RequestBuilder> action, final Request request) {
         return client.execute(action, request);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
             final Action<Request, Response, RequestBuilder> action, final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
             final Action<Request, Response, RequestBuilder> action) {
