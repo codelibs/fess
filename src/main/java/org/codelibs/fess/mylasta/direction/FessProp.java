@@ -17,8 +17,10 @@ package org.codelibs.fess.mylasta.direction;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -112,15 +114,16 @@ public interface FessProp {
             if (StringUtil.isBlank(value)) {
                 map = Collections.emptyMap();
             } else {
+                final Set<String> keySet = new HashSet<>();
                 map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
                     } else if (pair.length == 2) {
-                        return new Pair<>(pair[1].trim(), pair[0].trim());
+                        return new Pair<>(pair[0].trim(), pair[1].trim());
                     }
                     return null;
-                }).filter(o -> o != null).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
             }
             propMap.put(DEFAULT_SORT_VALUES, map);
         }
@@ -158,15 +161,16 @@ public interface FessProp {
             if (StringUtil.isBlank(value)) {
                 map = Collections.emptyMap();
             } else {
+                final Set<String> keySet = new HashSet<>();
                 map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
                     } else if (pair.length == 2) {
-                        return new Pair<>(pair[1].trim(), pair[0].trim());
+                        return new Pair<>(pair[0].trim(), pair[1].trim());
                     }
                     return null;
-                }).filter(o -> o != null).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
             }
             propMap.put(DEFAULT_LABEL_VALUES, map);
         }

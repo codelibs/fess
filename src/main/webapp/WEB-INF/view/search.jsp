@@ -50,6 +50,8 @@
 								<la:message key="labels.search_result_sort_favorite_count_asc" />
 							</c:if> <c:if test="${sort=='favorite_count.desc'}">
 								<la:message key="labels.search_result_sort_favorite_count_desc" />
+							</c:if> <c:if test="${sort.indexOf(',') >= 0}">
+								<la:message key="labels.search_result_sort_multiple" />
 							</c:if>
 					</a></li>
 					<li><la:message key="labels.searchoptions_menu_num" /> <a

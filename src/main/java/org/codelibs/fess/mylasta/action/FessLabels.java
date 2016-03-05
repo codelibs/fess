@@ -620,6 +620,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Favorite (descending) */
     public static final String LABELS_search_result_sort_favorite_count_desc = "{labels.search_result_sort_favorite_count_desc}";
 
+    /** The key of the message: Multiple */
+    public static final String LABELS_search_result_sort_multiple = "{labels.search_result_sort_multiple}";
+
     /** The key of the message: {0} bytes */
     public static final String LABELS_search_result_size = "{labels.search_result_size}";
 
