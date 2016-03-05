@@ -120,7 +120,11 @@ public interface FessProp {
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
                     } else if (pair.length == 2) {
-                        return new Pair<>(pair[0].trim(), pair[1].trim());
+                        String sortValue = pair[1].trim();
+                        if (StringUtil.isBlank(sortValue) || "score".equals(sortValue)) {
+                            sortValue = "score.desc";
+                        }
+                        return new Pair<>(pair[0].trim(), sortValue);
                     }
                     return null;
                 }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
