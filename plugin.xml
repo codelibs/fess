@@ -24,8 +24,8 @@
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="analysis-ja" />
-			<param name="plugin.version" value="2.1.1" />
-			<param name="plugin.zip.version" value="2.1.1" />
+			<param name="plugin.version" value="2.1.2" />
+			<param name="plugin.zip.version" value="2.1.2" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
@@ -56,8 +56,8 @@
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="2.1.2" />
-			<param name="plugin.zip.version" value="2.1.2" />
+			<param name="plugin.version" value="2.1.3" />
+			<param name="plugin.zip.version" value="2.1.3" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}">

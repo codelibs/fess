@@ -92,6 +92,7 @@ public class SearchLog extends BsSearchLog {
             final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
             searchFieldLogList = searchFieldLogBhv.selectList(cb -> {
                 cb.query().setSearchLogId_Equal(getId());
+                cb.fetchFirst(ComponentUtil.getFessConfig().getPageSearchFieldLogMaxFetchSizeAsInteger());
             });
         }
         return searchFieldLogList;

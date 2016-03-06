@@ -257,6 +257,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Start Pos */
     public static final String LABELS_START = "{labels.start}";
 
+    /** The key of the message: Login Required */
+    public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
+
     /** The key of the message: Thread Name */
     public static final String LABELS_THREAD_NAME = "{labels.threadName}";
 
@@ -380,6 +383,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Geo */
     public static final String LABELS_GEO = "{labels.geo}";
 
+    /** The key of the message: Groups */
+    public static final String LABELS_GROUPS = "{labels.groups}";
+
     /** The key of the message: Hash */
     public static final String LABELS_HASH = "{labels.hash}";
 
@@ -397,6 +403,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Query */
     public static final String LABELS_Q = "{labels.q}";
+
+    /** The key of the message: Roles */
+    public static final String LABELS_ROLES = "{labels.roles}";
 
     /** The key of the message: Suggest Search Log */
     public static final String LABELS_SUGGEST_SEARCH_LOG = "{labels.suggestSearchLog}";
@@ -433,9 +442,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Account Filter */
     public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
-
-    /** The key of the message: Login Required */
-    public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
 
     /** The key of the message: Current Password */
     public static final String LABELS_OLD_PASSWORD = "{labels.oldPassword}";
@@ -587,6 +593,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: -- Results per page -- */
     public static final String LABELS_search_result_select_num = "{labels.search_result_select_num}";
 
+    /** The key of the message: Score */
+    public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
+
     /** The key of the message: Date (ascending) */
     public static final String LABELS_search_result_sort_created_asc = "{labels.search_result_sort_created_asc}";
 
@@ -616,6 +625,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Favorite (descending) */
     public static final String LABELS_search_result_sort_favorite_count_desc = "{labels.search_result_sort_favorite_count_desc}";
+
+    /** The key of the message: Multiple */
+    public static final String LABELS_search_result_sort_multiple = "{labels.search_result_sort_multiple}";
 
     /** The key of the message: {0} bytes */
     public static final String LABELS_search_result_size = "{labels.search_result_size}";
@@ -742,6 +754,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Check the url. */
     public static final String LABELS_check_url = "{labels.check_url}";
+
+    /** The key of the message: Username */
+    public static final String LABELS_user_name = "{labels.user_name}";
 
     /** The key of the message: Login */
     public static final String LABELS_LOGIN = "{labels.login}";
@@ -878,6 +893,12 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: ms */
     public static final String LABELS_MILLISEC = "{labels.millisec}";
 
+    /** The key of the message: Role */
+    public static final String LABELS_role_type = "{labels.role_type}";
+
+    /** The key of the message: Label */
+    public static final String LABELS_label_type = "{labels.label_type}";
+
     /** The key of the message: Create */
     public static final String LABELS_file_crawling_button_create = "{labels.file_crawling_button_create}";
 
@@ -955,6 +976,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Default Label Value */
     public static final String LABELS_default_label_value = "{labels.default_label_value}";
+
+    /** The key of the message: Default Sort Value */
+    public static final String LABELS_default_sort_value = "{labels.default_sort_value}";
 
     /** The key of the message: Append Params to URL */
     public static final String LABELS_append_query_param_enabled = "{labels.append_query_param_enabled}";
@@ -1370,12 +1394,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Script */
     public static final String LABELS_handler_script = "{labels.handler_script}";
 
-    /** The key of the message: Role */
-    public static final String LABELS_role_type = "{labels.role_type}";
-
-    /** The key of the message: Label */
-    public static final String LABELS_label_type = "{labels.label_type}";
-
     /** The key of the message: Create */
     public static final String LABELS_data_crawling_button_create = "{labels.data_crawling_button_create}";
 
@@ -1460,6 +1478,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Type */
     public static final String LABELS_failure_url_search_error_name = "{labels.failure_url_search_error_name}";
 
+    /** The key of the message: URL */
+    public static final String LABELS_failure_url_url = "{labels.failure_url_url}";
+
     /** The key of the message: Last Access */
     public static final String LABELS_failure_url_last_access_time = "{labels.failure_url_last_access_time}";
 
@@ -1498,9 +1519,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Log */
     public static final String LABELS_failure_url_error_log = "{labels.failure_url_error_log}";
-
-    /** The key of the message: URL */
-    public static final String LABELS_failure_url_url = "{labels.failure_url_url}";
 
     /** The key of the message: Web Crawling Configuration */
     public static final String LABELS_failure_url_web_config_name = "{labels.failure_url_web_config_name}";
@@ -1902,9 +1920,6 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Name */
     public static final String LABELS_user_list_name = "{labels.user_list_name}";
 
-    /** The key of the message: Name */
-    public static final String LABELS_user_name = "{labels.user_name}";
-
     /** The key of the message: Password */
     public static final String LABELS_user_password = "{labels.user_password}";
 
@@ -1940,12 +1955,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Group */
     public static final String LABELS_group_title_details = "{labels.group_title_details}";
-
-    /** The key of the message: Roles */
-    public static final String LABELS_ROLES = "{labels.roles}";
-
-    /** The key of the message: Groups */
-    public static final String LABELS_GROUPS = "{labels.groups}";
 
     /** The key of the message: Create */
     public static final String LABELS_crud_button_create = "{labels.crud_button_create}";
@@ -2028,6 +2037,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: LDAP */
     public static final String LABELS_general_menu_ldap = "{labels.general_menu_ldap}";
 
+    /** The key of the message: Notification */
+    public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
+
     /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
@@ -2045,9 +2057,6 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Search top page */
     public static final String LABELS_notification_search_top = "{labels.notification_search_top}";
-
-    /** The key of the message: Notification */
-    public static final String LABELS_general_menu_notification = "{labels.general_menu_notification}";
 
     /** The key of the message: Send TestMail */
     public static final String LABELS_send_testmail = "{labels.send_testmail}";

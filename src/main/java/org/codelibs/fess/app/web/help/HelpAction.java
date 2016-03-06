@@ -47,7 +47,7 @@ public class HelpAction extends FessSearchAction {
 
         return asHtml(path_HelpJsp).useForm(SearchForm.class, op -> {
             op.setup(form -> {
-                buildLabelParams(form.fields);
+                buildFormParams(form);
             });
         }).renderWith(data -> {
             buildInitParams();

@@ -18,6 +18,7 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +61,11 @@ public class SuggestCreator implements Serializable {
         protected Options() {
             // noghing
         }
+
+        @Override
+        public String toString() {
+            return "Options [sessionId=" + sessionId + ", name=" + name + ", propertiesPath=" + propertiesPath + "]";
+        }
     }
 
     public static void main(final String[] args) {
@@ -73,6 +79,17 @@ public class SuggestCreator implements Serializable {
             System.err.println("java " + Crawler.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            try {
+                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: " + s));
+                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: " + e.getKey() + "=" + e.getValue()));
+                System.getenv().entrySet().forEach(e -> logger.debug("Env: " + e.getKey() + "=" + e.getValue()));
+                logger.debug("Option: " + options);
+            } catch (Exception e) {
+                // ignore
+            }
         }
 
         final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);

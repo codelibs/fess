@@ -26,6 +26,7 @@ import org.codelibs.fess.app.pager.FileAuthPager;
 import org.codelibs.fess.es.config.cbean.FileAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -35,6 +36,9 @@ public class FileAuthenticationService implements Serializable {
 
     @Resource
     protected FileAuthenticationBhv fileAuthenticationBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<FileAuthentication> getFileAuthenticationList(final FileAuthPager fileAuthenticationPager) {
 
@@ -88,6 +92,7 @@ public class FileAuthenticationService implements Serializable {
     public List<FileAuthentication> getFileAuthenticationList(final String fileConfigId) {
         return fileAuthenticationBhv.selectList(cb -> {
             cb.query().setFileConfigId_Equal(fileConfigId);
+            cb.fetchFirst(fessConfig.getPageFileAuthMaxFetchSizeAsInteger());
         });
     }
 }

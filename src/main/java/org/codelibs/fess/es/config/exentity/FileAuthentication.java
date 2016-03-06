@@ -18,6 +18,8 @@ package org.codelibs.fess.es.config.exentity;
 import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.es.config.bsentity.BsFileAuthentication;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
@@ -25,6 +27,9 @@ import org.codelibs.fess.util.ComponentUtil;
 public class FileAuthentication extends BsFileAuthentication {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(FileAuthentication.class);
+
     private FileConfig fileConfig;
 
     public String getId() {
@@ -46,7 +51,11 @@ public class FileAuthentication extends BsFileAuthentication {
     public FileConfig getFileConfig() {
         if (fileConfig == null) {
             final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
-            fileConfig = fileConfigService.getFileConfig(getFileConfigId()).get();
+            try {
+                fileConfig = fileConfigService.getFileConfig(getFileConfigId()).get();
+            } catch (Exception e) {
+                logger.warn("File Config " + getFileConfigId() + " does not exist.", e);
+            }
         }
         return fileConfig;
     }

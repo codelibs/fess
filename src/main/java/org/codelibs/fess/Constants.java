@@ -111,6 +111,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String DEFAULT_LABEL_VALUE_PROPERTY = "label.value";
 
+    public static final String DEFAULT_SORT_VALUE_PROPERTY = "sort.value";
+
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 
     public static final String IGNORE_FAILURE_TYPE_PROPERTY = "failure.ignoretype";
@@ -372,4 +374,6 @@ public class Constants extends CoreLibConstants {
     public static final String MAPPING_TYPE_DOUBLE = "double";
 
     public static final String PAGING_QUERY_LIST = "pagingQueryList";
+
+    public static final String REQUEST_LANGUAGES = "requestLanguages";
 }

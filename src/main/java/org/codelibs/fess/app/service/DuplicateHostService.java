@@ -26,6 +26,7 @@ import org.codelibs.fess.app.pager.DuplicateHostPager;
 import org.codelibs.fess.es.config.cbean.DuplicateHostCB;
 import org.codelibs.fess.es.config.exbhv.DuplicateHostBhv;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -35,6 +36,9 @@ public class DuplicateHostService implements Serializable {
 
     @Resource
     protected DuplicateHostBhv duplicateHostBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<DuplicateHost> getDuplicateHostList(final DuplicateHostPager duplicateHostPager) {
 
@@ -78,6 +82,7 @@ public class DuplicateHostService implements Serializable {
             cb.query().addOrderBy_SortOrder_Asc();
             cb.query().addOrderBy_RegularName_Asc();
             cb.query().addOrderBy_DuplicateHostName_Asc();
+            cb.fetchFirst(fessConfig.getPageDuplicateHostMaxFetchSizeAsInteger());
         });
     }
 

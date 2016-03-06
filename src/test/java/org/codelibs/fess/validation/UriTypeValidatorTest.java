@@ -16,7 +16,6 @@
 package org.codelibs.fess.validation;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
-import org.codelibs.fess.validation.UriTypeValidator;
 
 public class UriTypeValidatorTest extends UnitFessTestCase {
     public void test_check_ok() {

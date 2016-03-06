@@ -18,6 +18,7 @@ package org.codelibs.fess.exec;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -140,6 +141,13 @@ public class Crawler implements Serializable {
             return idList;
         }
 
+        @Override
+        public String toString() {
+            return "Options [sessionId=" + sessionId + ", name=" + name + ", webConfigIds=" + webConfigIds + ", fileConfigIds="
+                    + fileConfigIds + ", dataConfigIds=" + dataConfigIds + ", propertiesPath=" + propertiesPath + ", expires=" + expires
+                    + "]";
+        }
+
     }
 
     public static void main(final String[] args) {
@@ -153,6 +161,17 @@ public class Crawler implements Serializable {
             System.err.println("java " + Crawler.class.getCanonicalName() + " [options...] arguments...");
             parser.printUsage(System.err);
             return;
+        }
+
+        if (logger.isDebugEnabled()) {
+            try {
+                ManagementFactory.getRuntimeMXBean().getInputArguments().stream().forEach(s -> logger.debug("Parameter: " + s));
+                System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: " + e.getKey() + "=" + e.getValue()));
+                System.getenv().entrySet().forEach(e -> logger.debug("Env: " + e.getKey() + "=" + e.getValue()));
+                logger.debug("Option: " + options);
+            } catch (Exception e) {
+                // ignore
+            }
         }
 
         final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);

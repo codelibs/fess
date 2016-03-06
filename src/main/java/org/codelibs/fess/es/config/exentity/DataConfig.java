@@ -121,6 +121,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     labelTypeList = labelIdList.isEmpty() ? Collections.emptyList() : labelTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(labelIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
+                        cb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                     });
                 }
             }
@@ -168,6 +169,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                     roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(roleIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
+                        cb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                     });
                 }
             }

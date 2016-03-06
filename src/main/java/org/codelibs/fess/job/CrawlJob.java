@@ -70,7 +70,7 @@ public class CrawlJob {
 
     protected long retryIntervalToDeleteTempDir = 5000;
 
-    protected boolean useLocaleElasticsearch = true;
+    protected boolean useLocalElasticsearch = true;
 
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -129,7 +129,7 @@ public class CrawlJob {
     }
 
     public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
-        this.useLocaleElasticsearch = useLocaleElasticsearch;
+        this.useLocalElasticsearch = useLocaleElasticsearch;
         return this;
     }
 
@@ -274,7 +274,7 @@ public class CrawlJob {
         }
         cmdList.add(buf.toString());
 
-        if (useLocaleElasticsearch) {
+        if (useLocalElasticsearch) {
             final String transportAddresses = System.getProperty(Constants.FESS_ES_TRANSPORT_ADDRESSES);
             if (StringUtil.isNotBlank(transportAddresses)) {
                 cmdList.add("-D" + Constants.FESS_ES_TRANSPORT_ADDRESSES + "=" + transportAddresses);

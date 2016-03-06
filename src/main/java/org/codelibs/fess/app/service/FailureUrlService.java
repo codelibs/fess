@@ -36,6 +36,7 @@ import org.codelibs.fess.es.config.exbhv.FailureUrlBhv;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.FailureUrl;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -51,6 +52,9 @@ public class FailureUrlService implements Serializable {
 
     @Resource
     protected FailureUrlBhv failureUrlBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<FailureUrl> getFailureUrlList(final FailureUrlPager failureUrlPager) {
 
@@ -146,6 +150,7 @@ public class FailureUrlService implements Serializable {
         final ListResultBean<FailureUrl> list = failureUrlBhv.selectList(cb -> {
             cb.query().setConfigId_Equal(configId);
             cb.query().setErrorCount_GreaterEqual(count);
+            cb.fetchFirst(fessConfig.getPageFailureUrlMaxFetchSizeAsInteger());
         });
         if (list.isEmpty()) {
             return Collections.emptyList();

@@ -31,6 +31,7 @@ import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.es.config.exentity.DataConfigToLabel;
 import org.codelibs.fess.es.config.exentity.DataConfigToRole;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -46,6 +47,9 @@ public class DataConfigService implements Serializable {
 
     @Resource
     protected DataConfigBhv dataConfigBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<DataConfig> getDataConfigList(final DataConfigPager dataConfigPager) {
 
@@ -66,8 +70,18 @@ public class DataConfigService implements Serializable {
 
     public void delete(final DataConfig dataConfig) {
 
+        final String dataConfigId = dataConfig.getId();
+
         dataConfigBhv.delete(dataConfig, op -> {
             op.setRefresh(true);
+        });
+
+        dataConfigToLabelBhv.queryDelete(cb -> {
+            cb.query().setDataConfigId_Equal(dataConfigId);
+        });
+
+        dataConfigToRoleBhv.queryDelete(cb -> {
+            cb.query().setDataConfigId_Equal(dataConfigId);
         });
 
     }
@@ -93,6 +107,7 @@ public class DataConfigService implements Serializable {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.fetchFirst(fessConfig.getPageDataConfigMaxFetchSizeAsInteger());
         });
         return list;
     }
@@ -102,6 +117,7 @@ public class DataConfigService implements Serializable {
 
             final List<DataConfigToRole> fctrtmList = dataConfigToRoleBhv.selectList(fctrtmCb -> {
                 fctrtmCb.query().setDataConfigId_Equal(entity.getId());
+                fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
             });
             if (!fctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
@@ -113,6 +129,7 @@ public class DataConfigService implements Serializable {
 
             final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
                 fctltmCb.query().setDataConfigId_Equal(entity.getId());
+                fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!fctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
@@ -166,6 +183,7 @@ public class DataConfigService implements Serializable {
             if (labelTypeIds != null) {
                 final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
                     fctltmCb.query().setDataConfigId_Equal(dataConfigId);
+                    fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
                 final List<DataConfigToLabel> newList = new ArrayList<DataConfigToLabel>();
                 final List<DataConfigToLabel> matchedList = new ArrayList<DataConfigToLabel>();
@@ -197,6 +215,7 @@ public class DataConfigService implements Serializable {
             if (roleTypeIds != null) {
                 final List<DataConfigToRole> fctrtmList = dataConfigToRoleBhv.selectList(fctrtmCb -> {
                     fctrtmCb.query().setDataConfigId_Equal(dataConfigId);
+                    fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                 });
                 final List<DataConfigToRole> newList = new ArrayList<DataConfigToRole>();
                 final List<DataConfigToRole> matchedList = new ArrayList<DataConfigToRole>();

@@ -134,6 +134,7 @@ public class LabelTypeService implements Serializable {
             if (roleTypeIds != null) {
                 final List<LabelToRole> list = labelToRoleBhv.selectList(lttrtmCb -> {
                     lttrtmCb.query().setLabelTypeId_Equal(labelTypeId);
+                    lttrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                 });
                 final List<LabelToRole> newList = new ArrayList<LabelToRole>();
                 final List<LabelToRole> matchedList = new ArrayList<LabelToRole>();
@@ -174,6 +175,7 @@ public class LabelTypeService implements Serializable {
         return labelTypeBhv.selectByPK(id).map(entity -> {
             final List<LabelToRole> wctrtmList = labelToRoleBhv.selectList(wctrtmCb -> {
                 wctrtmCb.query().setLabelTypeId_Equal(entity.getId());
+                wctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
             });
             if (!wctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());

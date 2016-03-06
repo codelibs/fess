@@ -25,12 +25,14 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FileConfigPager;
 import org.codelibs.fess.es.config.cbean.FileConfigCB;
+import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.FileConfigToLabel;
 import org.codelibs.fess.es.config.exentity.FileConfigToRole;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -46,6 +48,12 @@ public class FileConfigService implements Serializable {
 
     @Resource
     protected FileConfigBhv fileConfigBhv;
+
+    @Resource
+    protected FileAuthenticationBhv fileAuthenticationBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<FileConfig> getFileConfigList(final FileConfigPager fileConfigPager) {
 
@@ -65,10 +73,23 @@ public class FileConfigService implements Serializable {
 
     public void delete(final FileConfig fileConfig) {
 
+        final String fileConfigId = fileConfig.getId();
+
         fileConfigBhv.delete(fileConfig, op -> {
             op.setRefresh(true);
         });
 
+        fileConfigToLabelBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
+
+        fileConfigToRoleBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
+
+        fileAuthenticationBhv.queryDelete(cb -> {
+            cb.query().setFileConfigId_Equal(fileConfigId);
+        });
     }
 
     public List<FileConfig> getAllFileConfigList() {
@@ -92,6 +113,7 @@ public class FileConfigService implements Serializable {
             if (idList != null) {
                 cb.query().setId_InScope(idList);
             }
+            cb.fetchFirst(fessConfig.getPageFileConfigMaxFetchSizeAsInteger());
         });
         return list;
     }
@@ -101,6 +123,7 @@ public class FileConfigService implements Serializable {
 
             final List<FileConfigToRole> fctrtmList = fileConfigToRoleBhv.selectList(fctrtmCb -> {
                 fctrtmCb.query().setFileConfigId_Equal(entity.getId());
+                fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
             });
             if (!fctrtmList.isEmpty()) {
                 final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
@@ -112,6 +135,7 @@ public class FileConfigService implements Serializable {
 
             final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
                 fctltmCb.query().setFileConfigId_Equal(entity.getId());
+                fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!fctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
@@ -164,6 +188,7 @@ public class FileConfigService implements Serializable {
             if (labelTypeIds != null) {
                 final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
                     fctltmCb.query().setFileConfigId_Equal(fileConfigId);
+                    fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
                 final List<FileConfigToLabel> newList = new ArrayList<FileConfigToLabel>();
                 final List<FileConfigToLabel> matchedList = new ArrayList<FileConfigToLabel>();
@@ -195,6 +220,7 @@ public class FileConfigService implements Serializable {
             if (roleTypeIds != null) {
                 final List<FileConfigToRole> fctrtmList = fileConfigToRoleBhv.selectList(fctrtmCb -> {
                     fctrtmCb.query().setFileConfigId_Equal(fileConfigId);
+                    fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                 });
                 final List<FileConfigToRole> newList = new ArrayList<FileConfigToRole>();
                 final List<FileConfigToRole> matchedList = new ArrayList<FileConfigToRole>();

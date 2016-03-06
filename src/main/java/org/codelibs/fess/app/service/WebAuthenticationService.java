@@ -26,6 +26,7 @@ import org.codelibs.fess.app.pager.WebAuthPager;
 import org.codelibs.fess.es.config.cbean.WebAuthenticationCB;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -35,6 +36,9 @@ public class WebAuthenticationService implements Serializable {
 
     @Resource
     protected WebAuthenticationBhv webAuthenticationBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<WebAuthentication> getWebAuthenticationList(final WebAuthPager webAuthenticationPager) {
 
@@ -88,6 +92,7 @@ public class WebAuthenticationService implements Serializable {
     public List<WebAuthentication> getWebAuthenticationList(final String webConfigId) {
         return webAuthenticationBhv.selectList(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);
+            cb.fetchFirst(fessConfig.getPageWebAuthMaxFetchSizeAsInteger());
         });
     }
 

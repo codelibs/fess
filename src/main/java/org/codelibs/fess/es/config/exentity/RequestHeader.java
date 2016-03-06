@@ -18,6 +18,8 @@ package org.codelibs.fess.es.config.exentity;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.es.config.bsentity.BsRequestHeader;
 import org.codelibs.fess.util.ComponentUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
@@ -25,6 +27,9 @@ import org.codelibs.fess.util.ComponentUtil;
 public class RequestHeader extends BsRequestHeader {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LoggerFactory.getLogger(RequestHeader.class);
+
     private WebConfig webConfig;
 
     public String getId() {
@@ -50,7 +55,11 @@ public class RequestHeader extends BsRequestHeader {
     public WebConfig getWebConfig() {
         if (webConfig == null) {
             final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
-            webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
+            try {
+                webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
+            } catch (Exception e) {
+                logger.warn("Web Config " + getWebConfigId() + " does not exist.", e);
+            }
         }
         return webConfig;
     }

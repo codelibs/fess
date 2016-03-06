@@ -221,6 +221,7 @@ public class SearchLogHelper {
             final UserInfoBhv userInfoBhv = SingletonLaContainer.getComponent(UserInfoBhv.class);
             userInfoBhv.selectList(cb -> {
                 cb.query().setId_InScope(userInfoMap.keySet());
+                cb.fetchFirst(userInfoMap.size());
             }).forEach(userInfo -> {
                 final String code = userInfo.getId();
                 final UserInfo entity = userInfoMap.get(code);

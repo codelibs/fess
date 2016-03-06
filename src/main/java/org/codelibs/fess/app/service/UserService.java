@@ -43,6 +43,9 @@ public class UserService implements Serializable {
     @Resource
     protected FessLoginAssist fessLoginAssist;
 
+    @Resource
+    protected FessConfig fessConfig;
+
     public List<User> getUserList(final UserPager userPager) {
 
         final PagingResultBean<User> userList = userBhv.selectPage(cb -> {
@@ -113,6 +116,7 @@ public class UserService implements Serializable {
     public List<User> getAvailableUserList() {
         return userBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.fetchFirst(fessConfig.getPageUserMaxFetchSizeAsInteger());
         });
     }
 

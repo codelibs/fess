@@ -15,8 +15,12 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,12 +33,22 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.optional.OptionalThing;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 
 public interface FessProp {
+
+    public static final String GROUP_VALUE_PREFIX = "group:";
+
+    public static final String ROLE_VALUE_PREFIX = "role:";
+
+    public static final String DEFAULT_SORT_VALUES = "defaultSortValues";
+
+    public static final String DEFAULT_LABEL_VALUES = "defaultLabelValues";
 
     public static final String QUERY_LANGUAGE_MAPPING = "queryLanguageMapping";
 
@@ -61,7 +75,11 @@ public interface FessProp {
     }
 
     public default void setSystemProperty(final String key, final String value) {
-        ComponentUtil.getSystemProperties().setProperty(key, value);
+        if (value != null) {
+            ComponentUtil.getSystemProperties().setProperty(key, value);
+        } else {
+            ComponentUtil.getSystemProperties().remove(key);
+        }
     }
 
     public default boolean getSystemPropertyAsBoolean(final String key, final boolean defaultValue) {
@@ -88,12 +106,190 @@ public interface FessProp {
         setSystemProperty(key, Integer.toString(value));
     }
 
+    public default String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_SORT_VALUES);
+        if (map == null) {
+            String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            if (StringUtil.isBlank(value)) {
+                map = Collections.emptyMap();
+            } else {
+                final Set<String> keySet = new HashSet<>();
+                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                    final String[] pair = s.split("=");
+                    if (pair.length == 1) {
+                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                    } else if (pair.length == 2) {
+                        String sortValue = pair[1].trim();
+                        if (StringUtil.isBlank(sortValue) || "score".equals(sortValue)) {
+                            sortValue = "score.desc";
+                        }
+                        return new Pair<>(pair[0].trim(), sortValue);
+                    }
+                    return null;
+                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+            }
+            propMap.put(DEFAULT_SORT_VALUES, map);
+        }
+        return map
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    if (StringUtil.isEmpty(key)) {
+                        return e.getValue();
+                    }
+                    if (userBean.map(
+                            user -> StreamUtil.of(user.getRoles()).anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s))
+                                    || StreamUtil.of(user.getGroups()).anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))).orElse(false)) {
+                        return e.getValue();
+                    }
+                    return null;
+                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    public default void setDefaultSortValue(final String value) {
+        setSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, value);
+        propMap.remove(DEFAULT_SORT_VALUES);
+    }
+
+    public default String getDefaultSortValue() {
+        return getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY, StringUtil.EMPTY);
+    }
+
+    public default String[] getDefaultLabelValues(final OptionalThing<FessUserBean> userBean) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_LABEL_VALUES);
+        if (map == null) {
+            String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            if (StringUtil.isBlank(value)) {
+                map = Collections.emptyMap();
+            } else {
+                final Set<String> keySet = new HashSet<>();
+                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                    final String[] pair = s.split("=");
+                    if (pair.length == 1) {
+                        return new Pair<>(StringUtil.EMPTY, pair[0].trim());
+                    } else if (pair.length == 2) {
+                        return new Pair<>(pair[0].trim(), pair[1].trim());
+                    }
+                    return null;
+                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
+            }
+            propMap.put(DEFAULT_LABEL_VALUES, map);
+        }
+        return map
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    if (StringUtil.isEmpty(key)) {
+                        return e.getValue();
+                    }
+                    if (userBean.map(
+                            user -> StreamUtil.of(user.getRoles()).anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s))
+                                    || StreamUtil.of(user.getGroups()).anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))).orElse(false)) {
+                        return e.getValue();
+                    }
+                    return null;
+                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+    }
+
+    public default void setDefaultLabelValue(final String value) {
+        setSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, value);
+        propMap.remove(DEFAULT_LABEL_VALUES);
+    }
+
+    public default String getDefaultLabelValue() {
+        return getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
+    }
+
     public default void setLoginRequired(final boolean value) {
         setSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, value);
     }
 
     public default boolean isLoginRequired() {
         return getSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, false);
+    }
+
+    public default void setIncrementalCrawling(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
+    }
+
+    public default boolean isIncrementalCrawling() {
+        return getSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, true);
+    }
+
+    public default void setDayForCleanup(final int value) {
+        setSystemPropertyAsInt(Constants.DAY_FOR_CLEANUP_PROPERTY, value);
+    }
+
+    public default int getDayForCleanup() {
+        return getSystemPropertyAsInt(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP);
+    }
+
+    public default void setCrawlingThreadCount(final int value) {
+        setSystemPropertyAsInt(Constants.CRAWLING_THREAD_COUNT_PROPERTY, value);
+    }
+
+    public default int getCrawlingThreadCount() {
+        return getSystemPropertyAsInt(Constants.CRAWLING_THREAD_COUNT_PROPERTY, 5);
+    }
+
+    public default void setSearchLog(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, value);
+    }
+
+    public default boolean isSearchLog() {
+        return getSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, false);
+    }
+
+    public default void setUserInfo(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, value);
+    }
+
+    public default boolean isUserInfo() {
+        return getSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, false);
+    }
+
+    public default void setUserFavorite(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.USER_FAVORITE_PROPERTY, value);
+    }
+
+    public default boolean isUserFavorite() {
+        return getSystemPropertyAsBoolean(Constants.USER_FAVORITE_PROPERTY, false);
+    }
+
+    public default void setWebApiJson(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, value);
+    }
+
+    public default boolean isWebApiJson() {
+        return getSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, false);
+    }
+
+    public default void setAppendQueryParameter(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, value);
+    }
+
+    public default boolean isAppendQueryParameter() {
+        return getSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, false);
+    }
+
+    public default void setIgnoreFailureType(final String value) {
+        setSystemProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, value);
+    }
+
+    public default String getIgnoreFailureType() {
+        return getSystemProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
+    }
+
+    public default void setFailureCountThreshold(final int value) {
+        setSystemPropertyAsInt(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, value);
+    }
+
+    public default int getFailureCountThreshold() {
+        return getSystemPropertyAsInt(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY, Constants.DEFAULT_FAILURE_COUNT);
     }
 
     public default void setWebApiPopularWord(final boolean value) {
@@ -104,28 +300,105 @@ public interface FessProp {
         return getSystemPropertyAsBoolean(Constants.WEB_API_POPULAR_WORD_PROPERTY, true);
     }
 
-    public default String getLdapInitialContextFactory() {
-        return getSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+    public default void setCsvFileEncoding(final String value) {
+        setSystemProperty(Constants.CSV_FILE_ENCODING_PROPERTY, value);
+    }
+
+    public default String getCsvFileEncoding() {
+        return getSystemProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+    }
+
+    public default void setPurgeSearchLogDay(final int value) {
+        setSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, value);
+    }
+
+    public default int getPurgeSearchLogDay() {
+        return getSystemPropertyAsInt(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+    }
+
+    public default void setPurgeJobLogDay(final int value) {
+        setSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, value);
+    }
+
+    public default int getPurgeJobLogDay() {
+        return getSystemPropertyAsInt(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+    }
+
+    public default void setPurgeUserInfoDay(final int value) {
+        setSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, value);
+    }
+
+    public default int getPurgeUserInfoDay() {
+        return getSystemPropertyAsInt(Constants.PURGE_USER_INFO_DAY_PROPERTY, Integer.parseInt(Constants.DEFAULT_PURGE_DAY));
+    }
+
+    public default void setPurgeByBots(final String value) {
+        setSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, value);
+    }
+
+    public default String getPurgeByBots() {
+        return getSystemProperty(Constants.PURGE_BY_BOTS_PROPERTY, Constants.DEFAULT_PURGE_BY_BOTS);
+    }
+
+    public default void setNotificationTo(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, value);
+    }
+
+    public default String getNotificationTo() {
+        return getSystemProperty(Constants.NOTIFICATION_TO_PROPERTY, StringUtil.EMPTY);
+    }
+
+    public default void setSuggestSearchLog(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, value);
+    }
+
+    public default boolean isSuggestSearchLog() {
+        return getSystemPropertyAsBoolean(Constants.SUGGEST_SEARCH_LOG_PROPERTY, true);
+    }
+
+    public default void setSuggestDocuments(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, value);
+    }
+
+    public default boolean isSuggestDocuments() {
+        return getSystemPropertyAsBoolean(Constants.SUGGEST_DOCUMENTS_PROPERTY, true);
+    }
+
+    public default void setPurgeSuggestSearchLogDay(final int value) {
+        setSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY, value);
+    }
+
+    public default int getPurgeSuggestSearchLogDay() {
+        return getSystemPropertyAsInt(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
+                Integer.parseInt(Constants.DEFAULT_SUGGEST_PURGE_DAY));
     }
 
     public default void setLdapInitialContextFactory(final String value) {
         setSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, value);
     }
 
-    public default String getLdapSecurityAuthentication() {
-        return getSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
+    public default String getLdapInitialContextFactory() {
+        return getSystemProperty(Constants.LDAP_INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     }
 
     public default void setLdapSecurityAuthentication(final String value) {
         setSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, value);
     }
 
-    public default String getLdapProviderUrl() {
-        return getSystemProperty(Constants.LDAP_PROVIDER_URL);
+    public default String getLdapSecurityAuthentication() {
+        return getSystemProperty(Constants.LDAP_SECURITY_AUTHENTICATION, "simple");
     }
 
     public default void setLdapProviderUrl(final String value) {
         setSystemProperty(Constants.LDAP_PROVIDER_URL, value);
+    }
+
+    public default String getLdapProviderUrl() {
+        return getSystemProperty(Constants.LDAP_PROVIDER_URL);
+    }
+
+    public default void setLdapSecurityPrincipal(final String value) {
+        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
     public default String getLdapSecurityPrincipal(final String username) {
@@ -136,24 +409,36 @@ public interface FessProp {
         return getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL);
     }
 
-    public default void setLdapSecurityPrincipal(final String value) {
-        setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
+    public default void setLdapBaseDn(final String value) {
+        setSystemProperty(Constants.LDAP_BASE_DN, value);
     }
 
     public default String getLdapBaseDn() {
         return getSystemProperty(Constants.LDAP_BASE_DN);
     }
 
-    public default void setLdapBaseDn(final String value) {
-        setSystemProperty(Constants.LDAP_BASE_DN, value);
+    public default void setLdapAccountFilter(final String value) {
+        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
     }
 
     public default String getLdapAccountFilter() {
         return getSystemProperty(Constants.LDAP_ACCOUNT_FILTER);
     }
 
-    public default void setLdapAccountFilter(final String value) {
-        setSystemProperty(Constants.LDAP_ACCOUNT_FILTER, value);
+    public default void setNotificationLogin(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_LOGIN, value);
+    }
+
+    public default String getNotificationLogin() {
+        return getSystemProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY);
+    }
+
+    public default void setNotificationSearchTop(final String value) {
+        setSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, value);
+    }
+
+    public default String getNotificationSearchTop() {
+        return getSystemProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY);
     }
 
     //
@@ -380,12 +665,29 @@ public interface FessProp {
         return Boolean.valueOf(getQueryReplaceTermWithPrefixQuery());
     }
 
+    String getQueryDefaultLanguages();
+
     String getQueryLanguageMapping();
 
-    public default String getQueryLanguage(final Locale locale) {
-        if (locale == null) {
-            return null;
+    public default String[] getQueryLanguages(final Enumeration<Locale> locales, final String[] requestLangs) {
+        if (StringUtil.isNotBlank(getQueryDefaultLanguages())) {
+            String[] langs = (String[]) propMap.get("queryDefaultLanguages");
+            if (langs == null) {
+                langs = StreamUtil.of(getQueryDefaultLanguages().split(",")).map(s -> s.trim()).toArray(n -> new String[n]);
+                propMap.put("queryDefaultLanguages", langs);
+
+            }
+            return langs;
         }
+
+        if (requestLangs != null && requestLangs.length != 0) {
+            return requestLangs;
+        }
+
+        if (locales == null) {
+            return StringUtil.EMPTY_STRINGS;
+        }
+
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
@@ -399,20 +701,23 @@ public interface FessProp {
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
 
-        final String language = locale.getLanguage();
-        final String country = locale.getCountry();
-        if (StringUtil.isNotBlank(language)) {
-            if (StringUtil.isNotBlank(country)) {
-                final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
-                if (params.containsKey(lang)) {
-                    return params.get(lang);
+        final Map<String, String> mapping = params;
+        return Collections.list(locales).stream().map(locale -> {
+            final String language = locale.getLanguage();
+            final String country = locale.getCountry();
+            if (StringUtil.isNotBlank(language)) {
+                if (StringUtil.isNotBlank(country)) {
+                    final String lang = language.toLowerCase(Locale.ROOT) + "-" + country.toLowerCase(Locale.ROOT);
+                    if (mapping.containsKey(lang)) {
+                        return mapping.get(lang);
+                    }
+                }
+                if (mapping.containsKey(language)) {
+                    return mapping.get(language);
                 }
             }
-            if (params.containsKey(language)) {
-                return params.get(language);
-            }
-        }
-        return null;
+            return null;
+        }).filter(l -> l != null).distinct().toArray(n -> new String[n]);
     }
 
     String getSupportedUploadedFiles();
@@ -524,4 +829,5 @@ public interface FessProp {
     public default boolean isValidCrawlerFileProtocol(final String url) {
         return StreamUtil.of(getCrawlerFileProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
     }
+
 }

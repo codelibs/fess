@@ -44,7 +44,7 @@ public class RootAction extends FessSearchAction {
 
         return asHtml(path_IndexJsp).useForm(SearchForm.class, op -> {
             op.setup(form -> {
-                buildLabelParams(form.fields);
+                buildFormParams(form);
             });
         }).renderWith(
                 data -> {

@@ -67,6 +67,7 @@ import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -128,7 +129,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.suggest.SuggestRequest;
 import org.elasticsearch.action.suggest.SuggestRequestBuilder;
 import org.elasticsearch.action.suggest.SuggestResponse;
@@ -152,7 +152,6 @@ import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
@@ -211,7 +210,8 @@ public class FessEsClient implements Client {
     }
 
     public String getStatus() {
-        return admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
+        return admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout()).getStatus()
+                .name();
     }
 
     public void setRunner(final ElasticsearchClusterRunner runner) {
@@ -308,9 +308,10 @@ public class FessEsClient implements Client {
                 final String configType = values[1];
                 boolean exists = false;
                 try {
-                    client.prepareExists(configIndex).execute().actionGet();
-                    exists = true;
-                } catch (final IndexNotFoundException e) {
+                    IndicesExistsResponse response =
+                            client.admin().indices().prepareExists(configIndex).execute().actionGet(fessConfig.getIndexSearchTimeout());
+                    exists = response.isExists();
+                } catch (final Exception e) {
                     // ignore
             }
             if (!exists) {
@@ -351,7 +352,8 @@ public class FessEsClient implements Client {
                     final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
                     source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
                     final CreateIndexResponse indexResponse =
-                            client.admin().indices().prepareCreate(configIndex).setSource(source).execute().actionGet();
+                            client.admin().indices().prepareCreate(configIndex).setSource(source).execute()
+                                    .actionGet(fessConfig.getIndexIndicesTimeout());
                     if (indexResponse.isAcknowledged()) {
                         logger.info("Created " + configIndex + " index.");
                     } else if (logger.isDebugEnabled()) {
@@ -365,7 +367,7 @@ public class FessEsClient implements Client {
             }
 
             final GetMappingsResponse getMappingsResponse =
-                    client.admin().indices().prepareGetMappings(configIndex).setTypes(configType).execute().actionGet();
+                    client.admin().indices().prepareGetMappings(configIndex).execute().actionGet(fessConfig.getIndexIndicesTimeout());
             final ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.mappings().get(configIndex);
             if (indexMappings == null || !indexMappings.containsKey(configType)) {
                 String source = null;
@@ -375,56 +377,22 @@ public class FessEsClient implements Client {
                 } catch (final Exception e) {
                     logger.warn(mappingFile + " is not found.", e);
                 }
-                final PutMappingResponse putMappingResponse =
-                        client.admin().indices().preparePutMapping(configIndex).setType(configType).setSource(source).execute().actionGet();
-                if (putMappingResponse.isAcknowledged()) {
-                    logger.info("Created " + configIndex + "/" + configType + " mapping.");
-                } else {
-                    logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
-                }
-
-                final String dataPath = indexConfigPath + "/" + configIndex + "/" + configType + ".bulk";
-                if (ResourceUtil.isExist(dataPath)) {
-                    try {
-                        final BulkRequestBuilder builder = client.prepareBulk();
-                        final ObjectMapper mapper = new ObjectMapper();
-                        Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).reduce(
-                                (prev, line) -> {
-                                    try {
-                                        if (StringUtil.isBlank(prev)) {
-                                            final Map<String, Map<String, String>> result =
-                                                    mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
-                                                    });
-                                            if (result.keySet().contains("index")) {
-                                                return line;
-                                            } else if (result.keySet().contains("update")) {
-                                                return line;
-                                            } else if (result.keySet().contains("delete")) {
-                                                return StringUtil.EMPTY;
-                                            }
-                                        } else {
-                                            final Map<String, Map<String, String>> result =
-                                                    mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
-                                                    });
-                                            if (result.keySet().contains("index")) {
-                                                final IndexRequestBuilder requestBuilder =
-                                                        client.prepareIndex(configIndex, configType, result.get("index").get("_id"))
-                                                                .setSource(line);
-                                                builder.add(requestBuilder);
-                                            }
-                                        }
-                                    } catch (final Exception e) {
-                                        logger.warn("Failed to parse " + dataPath);
-                                    }
-                                    return StringUtil.EMPTY;
-                                });
-                        final BulkResponse response = builder.execute().actionGet();
-                        if (response.hasFailures()) {
-                            logger.warn("Failed to register " + dataPath + ": " + response.buildFailureMessage());
-                        }
-                    } catch (final Exception e) {
+                try {
+                    final PutMappingResponse putMappingResponse =
+                            client.admin().indices().preparePutMapping(configIndex).setType(configType).setSource(source).execute()
+                                    .actionGet(fessConfig.getIndexIndicesTimeout());
+                    if (putMappingResponse.isAcknowledged()) {
+                        logger.info("Created " + configIndex + "/" + configType + " mapping.");
+                    } else {
                         logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
                     }
+
+                    final String dataPath = indexConfigPath + "/" + configIndex + "/" + configType + ".bulk";
+                    if (ResourceUtil.isExist(dataPath)) {
+                        insertBulkData(fessConfig, configIndex, configType, dataPath);
+                    }
+                } catch (final Exception e) {
+                    logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.", e);
                 }
             } else if (logger.isDebugEnabled()) {
                 logger.debug(configIndex + "/" + configType + " mapping exists.");
@@ -435,8 +403,52 @@ public class FessEsClient implements Client {
     })  ;
     }
 
+    protected void insertBulkData(final FessConfig fessConfig, final String configIndex, final String configType, final String dataPath) {
+        try {
+            final BulkRequestBuilder builder = client.prepareBulk();
+            final ObjectMapper mapper = new ObjectMapper();
+            Arrays.stream(FileUtil.readUTF8(dataPath).split("\n")).reduce(
+                    (prev, line) -> {
+                        try {
+                            if (StringUtil.isBlank(prev)) {
+                                final Map<String, Map<String, String>> result =
+                                        mapper.readValue(line, new TypeReference<Map<String, Map<String, String>>>() {
+                                        });
+                                if (result.keySet().contains("index")) {
+                                    return line;
+                                } else if (result.keySet().contains("update")) {
+                                    return line;
+                                } else if (result.keySet().contains("delete")) {
+                                    return StringUtil.EMPTY;
+                                }
+                            } else {
+                                final Map<String, Map<String, String>> result =
+                                        mapper.readValue(prev, new TypeReference<Map<String, Map<String, String>>>() {
+                                        });
+                                if (result.keySet().contains("index")) {
+                                    final IndexRequestBuilder requestBuilder =
+                                            client.prepareIndex(configIndex, configType, result.get("index").get("_id")).setSource(line);
+                                    builder.add(requestBuilder);
+                                }
+                            }
+                        } catch (final Exception e) {
+                            logger.warn("Failed to parse " + dataPath);
+                        }
+                        return StringUtil.EMPTY;
+                    });
+            final BulkResponse response = builder.execute().actionGet(fessConfig.getIndexBulkTimeout());
+            if (response.hasFailures()) {
+                logger.warn("Failed to register " + dataPath + ": " + response.buildFailureMessage());
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to create " + configIndex + "/" + configType + " mapping.");
+        }
+    }
+
     private void waitForYellowStatus() {
-        final ClusterHealthResponse response = client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+        final ClusterHealthResponse response =
+                client.admin().cluster().prepareHealth().setWaitForYellowStatus().execute()
+                        .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
         if (logger.isDebugEnabled()) {
             logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
         }
@@ -446,6 +458,12 @@ public class FessEsClient implements Client {
     @PreDestroy
     public void close() {
         try {
+            client.admin().indices().prepareFlush().setForce(true).execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
+        } catch (Exception e) {
+            logger.warn("Failed to flush indices.", e);
+        }
+        try {
             client.close();
         } catch (final ElasticsearchException e) {
             logger.warn("Failed to close Client: " + client, e);
@@ -454,16 +472,16 @@ public class FessEsClient implements Client {
 
     public int deleteByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
 
-        final SearchResponse response =
-                client.prepareSearch(index).setTypes(type).setSearchType(SearchType.SCAN).setScroll(scrollForDelete).setSize(sizeForDelete)
-                        .setQuery(queryBuilder).execute().actionGet();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        SearchResponse response =
+                client.prepareSearch(index).setTypes(type).setScroll(scrollForDelete).setSize(sizeForDelete)
+                        .addField(fessConfig.getIndexFieldId()).setQuery(queryBuilder).execute()
+                        .actionGet(fessConfig.getIndexScrollSearchTimeoutTimeout());
 
         int count = 0;
         String scrollId = response.getScrollId();
         while (scrollId != null) {
-            final SearchResponse scrollResponse = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet();
-            scrollId = scrollResponse.getScrollId();
-            final SearchHits searchHits = scrollResponse.getHits();
+            final SearchHits searchHits = response.getHits();
             final SearchHit[] hits = searchHits.getHits();
             if (hits.length == 0) {
                 scrollId = null;
@@ -475,10 +493,14 @@ public class FessEsClient implements Client {
                 bulkRequest.add(client.prepareDelete(index, type, hit.getId()));
             }
             count += hits.length;
-            final BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+            final BulkResponse bulkResponse = bulkRequest.execute().actionGet(fessConfig.getIndexBulkTimeout());
             if (bulkResponse.hasFailures()) {
                 throw new IllegalBehaviorStateException(bulkResponse.buildFailureMessage());
             }
+
+            response =
+                    client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(fessConfig.getIndexBulkTimeout());
+            scrollId = response.getScrollId();
         }
         return count;
     }
@@ -505,7 +527,7 @@ public class FessEsClient implements Client {
                 }
             }
 
-            response = requestBuilder.execute().actionGet();
+            response = requestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
         }
         final long execTime = System.currentTimeMillis() - startTime;
 
@@ -539,7 +561,7 @@ public class FessEsClient implements Client {
             }
 
             try {
-                searchResponse = searchRequestBuilder.execute().actionGet();
+                searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                         "Invalid query: " + searchRequestBuilder, e);
@@ -667,7 +689,8 @@ public class FessEsClient implements Client {
 
     public boolean update(final String index, final String type, final String id, final String field, final Object value) {
         try {
-            return client.prepareUpdate(index, type, id).setDoc(field, value).execute().actionGet().isCreated();
+            return client.prepareUpdate(index, type, id).setDoc(field, value).execute()
+                    .actionGet(ComponentUtil.getFessConfig().getIndexIndexTimeout()).isCreated();
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to set " + value + " to " + field + " for doc " + id, e);
         }
@@ -710,7 +733,8 @@ public class FessEsClient implements Client {
 
     public PingResponse ping() {
         try {
-            final ClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet();
+            final ClusterHealthResponse response =
+                    client.admin().cluster().prepareHealth().execute().actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
             return new PingResponse(response);
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to process a ping request.", e);
@@ -724,15 +748,17 @@ public class FessEsClient implements Client {
             final Object id = doc.remove(fessConfig.getIndexFieldId());
             bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(doc));
         }
-        final BulkResponse response = bulkRequestBuilder.execute().actionGet();
+        final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
             if (logger.isDebugEnabled()) {
+                @SuppressWarnings("rawtypes")
                 final List<ActionRequest> requests = bulkRequestBuilder.request().requests();
                 final BulkItemResponse[] items = response.getItems();
                 if (requests.size() == items.length) {
                     for (int i = 0; i < requests.size(); i++) {
                         final BulkItemResponse resp = items[i];
                         if (resp.isFailed() && resp.getFailure() != null) {
+                            @SuppressWarnings("rawtypes")
                             final ActionRequest req = requests.get(i);
                             final Failure failure = resp.getFailure();
                             logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
@@ -889,12 +915,13 @@ public class FessEsClient implements Client {
             if (id == null) {
                 // create
                 response =
-                        client.prepareIndex(index, type).setSource(source).setRefresh(true).setOpType(OpType.CREATE).execute().actionGet();
+                        client.prepareIndex(index, type).setSource(source).setRefresh(true).setOpType(OpType.CREATE).execute()
+                                .actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
                 response =
                         client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX).setVersion(version)
-                                .execute().actionGet();
+                                .execute().actionGet(fessConfig.getIndexIndexTimeout());
             }
             return response.isCreated();
         } catch (final ElasticsearchException e) {
@@ -908,7 +935,7 @@ public class FessEsClient implements Client {
             if (version > 0) {
                 builder.setVersion(version);
             }
-            final DeleteResponse response = builder.execute().actionGet();
+            final DeleteResponse response = builder.execute().actionGet(ComponentUtil.getFessConfig().getIndexDeleteTimeout());
             return response.isFound();
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to delete: " + index + "/" + type + "/" + id + "/" + version, e);
@@ -1120,31 +1147,37 @@ public class FessEsClient implements Client {
         return client.prepareMultiGet();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ActionFuture<CountResponse> count(final CountRequest request) {
         return client.count(request);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void count(final CountRequest request, final ActionListener<CountResponse> listener) {
         client.count(request, listener);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public CountRequestBuilder prepareCount(final String... indices) {
         return client.prepareCount(indices);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ActionFuture<ExistsResponse> exists(final ExistsRequest request) {
         return client.exists(request);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void exists(final ExistsRequest request, final ActionListener<ExistsResponse> listener) {
         client.exists(request, listener);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public ExistsRequestBuilder prepareExists(final String... indices) {
         return client.prepareExists(indices);
@@ -1290,18 +1323,21 @@ public class FessEsClient implements Client {
         return client.settings();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
             final Action<Request, Response, RequestBuilder> action, final Request request) {
         return client.execute(action, request);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
             final Action<Request, Response, RequestBuilder> action, final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
             final Action<Request, Response, RequestBuilder> action) {

@@ -33,6 +33,7 @@ import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -56,6 +57,9 @@ public class ElevateWordService implements Serializable {
     @Resource
     protected ElevateWordBhv elevateWordBhv;
 
+    @Resource
+    protected FessConfig fessConfig;
+
     public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 
         final PagingResultBean<ElevateWord> elevateWordList = elevateWordBhv.selectPage(cb -> {
@@ -77,6 +81,7 @@ public class ElevateWordService implements Serializable {
 
             final List<ElevateWordToLabel> wctltmList = elevateWordToLabelBhv.selectList(wctltmCb -> {
                 wctltmCb.query().setElevateWordId_Equal(entity.getId());
+                wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!wctltmList.isEmpty()) {
                 final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
@@ -116,6 +121,7 @@ public class ElevateWordService implements Serializable {
             if (labelTypeIds != null) {
                 final List<ElevateWordToLabel> list = elevateWordToLabelBhv.selectList(wctltmCb -> {
                     wctltmCb.query().setElevateWordId_Equal(elevateWordId);
+                    wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
                 final List<ElevateWordToLabel> newList = new ArrayList<ElevateWordToLabel>();
                 final List<ElevateWordToLabel> matchedList = new ArrayList<ElevateWordToLabel>();

@@ -88,7 +88,7 @@ public class SuggestHelper {
             roleFilterList.add(Pattern.compile(filter));
         });
 
-        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet();
+        fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
         suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
@@ -188,6 +188,7 @@ public class SuggestHelper {
 
         final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageElevateWordMaxFetchSizeAsInteger());
         });
 
         for (final ElevateWord elevateWord : list) {
@@ -200,6 +201,7 @@ public class SuggestHelper {
     public void deleteAllElevateWord() {
         final List<ElevateWord> list = elevateWordBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageElevateWordMaxFetchSizeAsInteger());
         });
 
         for (final ElevateWord elevateWord : list) {
@@ -244,6 +246,7 @@ public class SuggestHelper {
         deleteAllBadWords();
         final List<BadWord> list = badWordBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.fetchFirst(ComponentUtil.getFessConfig().getPageBadWordMaxFetchSizeAsInteger());
         });
         for (final BadWord badWord : list) {
             final String word = badWord.getSuggestWord();

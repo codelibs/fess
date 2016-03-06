@@ -54,7 +54,6 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.StreamUtil;
-import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -69,6 +68,8 @@ import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper implements Serializable {
+
+    protected static final String SCORE_SORT_VALUE = "score";
 
     protected static final long serialVersionUID = 1L;
 
@@ -183,7 +184,7 @@ public class QueryHelper implements Serializable {
         }
         if (supportedSortFields == null) {
             supportedSortFields =
-                    new String[] { fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
+                    new String[] { SCORE_SORT_VALUE, fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
                             fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
                             fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
         }
@@ -307,7 +308,8 @@ public class QueryHelper implements Serializable {
         final String field = wildcardQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(
+                    b * wildcardQuery.getBoost()));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
             return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(wildcardQuery.getBoost());
@@ -315,7 +317,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = wildcardQuery.getTerm().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * wildcardQuery.getBoost()));
         }
     }
 
@@ -323,7 +325,8 @@ public class QueryHelper implements Serializable {
         final String field = prefixQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(
+                    b * prefixQuery.getBoost()));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
             return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(prefixQuery.getBoost());
@@ -331,7 +334,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = prefixQuery.getPrefix().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b * prefixQuery.getBoost()));
         }
     }
 
@@ -342,7 +345,7 @@ public class QueryHelper implements Serializable {
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * fuzzyQuery.getBoost()));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
             return QueryBuilders.fuzzyQuery(field, term.text()).boost(fuzzyQuery.getBoost())
@@ -352,7 +355,7 @@ public class QueryHelper implements Serializable {
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b));
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * fuzzyQuery.getBoost()));
         }
     }
 
@@ -395,7 +398,7 @@ public class QueryHelper implements Serializable {
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * termQuery.getBoost()));
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
@@ -418,10 +421,10 @@ public class QueryHelper implements Serializable {
             } else {
                 sortOrder = SortOrder.ASC;
             }
-            context.addSorts(SortBuilders.fieldSort(sortField).order(sortOrder));
+            context.addSorts(SortBuilders.fieldSort(SCORE_SORT_VALUE.equals(sortField) ? "_score" : sortField).order(sortOrder));
             return null;
         } else if (INURL_FIELD.equals(field)) {
-            return QueryBuilders.wildcardQuery(field, text).boost(termQuery.getBoost());
+            return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(termQuery.getBoost());
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
@@ -430,7 +433,7 @@ public class QueryHelper implements Serializable {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b * termQuery.getBoost()));
         }
     }
 
@@ -445,7 +448,7 @@ public class QueryHelper implements Serializable {
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         StreamUtil.of(texts).forEach(t -> context.addHighlightedQuery(t));
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b));
+        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * query.getBoost()));
     }
 
     private boolean isSearchField(final String field) {
@@ -465,16 +468,19 @@ public class QueryHelper implements Serializable {
         final QueryBuilder contentQuery =
                 builder.apply(fessConfig.getIndexFieldContent(), fessConfig.getQueryBoostContentAsDecimal().floatValue());
         boolQuery.should(contentQuery);
-        getQueryLanguage().ifPresent(
-                lang -> {
-                    final QueryBuilder titleLangQuery =
-                            builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig.getQueryBoostTitleLangAsDecimal()
-                                    .floatValue());
-                    boolQuery.should(titleLangQuery);
-                    final QueryBuilder contentLangQuery =
-                            builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig.getQueryBoostContentLangAsDecimal()
-                                    .floatValue());
-                    boolQuery.should(contentLangQuery);
+        getQueryLanguages().ifPresent(
+                langs -> {
+                    StreamUtil.of(langs).forEach(
+                            lang -> {
+                                final QueryBuilder titleLangQuery =
+                                        builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
+                                                .getQueryBoostTitleLangAsDecimal().floatValue());
+                                boolQuery.should(titleLangQuery);
+                                final QueryBuilder contentLangQuery =
+                                        builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
+                                                .getQueryBoostContentLangAsDecimal().floatValue());
+                                boolQuery.should(contentLangQuery);
+                            });
                 });
         return boolQuery;
     }
@@ -483,12 +489,10 @@ public class QueryHelper implements Serializable {
         QueryBuilder apply(String field, float boost);
     }
 
-    protected OptionalThing<String> getQueryLanguage() {
-        if (StringUtil.isNotBlank(fessConfig.getQueryDefaultLanguage())) {
-            return OptionalEntity.of(fessConfig.getQueryDefaultLanguage());
-        }
-        return LaRequestUtil.getOptionalRequest().map(request -> fessConfig.getQueryLanguage(request.getLocale()));
-
+    protected OptionalThing<String[]> getQueryLanguages() {
+        return LaRequestUtil.getOptionalRequest()
+                .map(request -> fessConfig.getQueryLanguages(request.getLocales(),
+                        (String[]) request.getAttribute(Constants.REQUEST_LANGUAGES)));
     }
 
     private boolean isSortField(final String field) {

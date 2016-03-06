@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.web.base;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -134,25 +133,22 @@ public abstract class FessSearchAction extends FessBaseAction {
         return false;
     }
 
-    protected void buildLabelParams(final Map<String, String[]> fields) {
+    protected void buildFormParams(final SearchForm form) {
+        if (form.facet == null) {
+            form.facet = queryHelper.getDefaultFacetInfo();
+        }
+
+        if (form.geo == null) {
+            form.geo = queryHelper.getDefaultGeoInfo();
+        }
+
         // label
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
 
-        if (!labelTypeItems.isEmpty() && !fields.containsKey(FessSearchAction.LABEL_FIELD)) {
-            final String defaultLabelValue = systemProperties.getProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY, StringUtil.EMPTY);
-            if (StringUtil.isNotBlank(defaultLabelValue)) {
-                final String[] values = defaultLabelValue.split("\n");
-                if (values != null && values.length > 0) {
-                    final List<String> list = new ArrayList<String>(values.length);
-                    for (final String value : values) {
-                        if (StringUtil.isNotBlank(value)) {
-                            list.add(value);
-                        }
-                    }
-                    if (!list.isEmpty()) {
-                        fields.put(FessSearchAction.LABEL_FIELD, list.toArray(new String[list.size()]));
-                    }
-                }
+        if (!labelTypeItems.isEmpty() && !form.fields.containsKey(FessSearchAction.LABEL_FIELD)) {
+            final String[] defaultLabelValues = fessConfig.getDefaultLabelValues(getUserBean());
+            if (defaultLabelValues.length > 0) {
+                form.fields.put(FessSearchAction.LABEL_FIELD, defaultLabelValues);
             }
         }
 
@@ -163,6 +159,14 @@ public abstract class FessSearchAction extends FessBaseAction {
             }
         }
         request.setAttribute(Constants.LABEL_VALUE_MAP, labelMap);
+
+        // sort
+        if (StringUtil.isBlank(form.sort)) {
+            String[] defaultSortValues = fessConfig.getDefaultSortValues(getUserBean());
+            if (defaultSortValues.length > 0) {
+                form.sort = String.join(",", defaultSortValues);
+            }
+        }
     }
 
     protected void buildInitParams() {

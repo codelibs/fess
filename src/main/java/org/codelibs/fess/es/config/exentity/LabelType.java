@@ -67,6 +67,7 @@ public class LabelType extends BsLabelType {
                     roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
                         cb.query().setId_InScope(roleIdList);
                         cb.query().addOrderBy_SortOrder_Asc();
+                        cb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
                     });
                 }
             }

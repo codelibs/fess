@@ -51,9 +51,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
+import org.lastaflute.taglib.function.LaFunctions;
 
 public class SearchService {
 
@@ -100,18 +98,9 @@ public class SearchService {
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            if (StringUtil.isNotBlank(sortField)) {
-                                final String[] sort = sortField.split("\\.");
-                                final SortBuilder sortBuilder = SortBuilders.fieldSort(sort[0]);
-                                if ("asc".equals(sort[1])) {
-                                    sortBuilder.order(SortOrder.ASC);
-                                } else if ("desc".equals(sort[1])) {
-                                    sortBuilder.order(SortOrder.DESC);
-                                }
-                                searchRequestBuilder.addSort(sortBuilder);
-                            }
-                            return SearchConditionBuilder.builder(searchRequestBuilder).query(query).offset(pageStart).size(pageSize)
-                                    .facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
+                            return SearchConditionBuilder.builder(searchRequestBuilder)
+                                    .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
+                                    .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
                                     .responseFields(queryHelper.getResponseFields()).administrativeAccess(params.isAdministrativeAccess())
                                     .build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
@@ -130,7 +119,7 @@ public class SearchService {
         if (highlightQueries != null) {
             final StringBuilder buf = new StringBuilder(100);
             highlightQueries.stream().forEach(q -> {
-                buf.append("&hq=").append(q);
+                buf.append("&hq=").append(LaFunctions.u(q));
             });
             data.setAppendHighlightParams(buf.toString());
         }
@@ -249,7 +238,7 @@ public class SearchService {
             final UpdateRequestBuilder builder =
                     fessEsClient.prepareUpdate(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
-            final UpdateResponse response = builder.execute().actionGet();
+            final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             return response.isCreated();
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to update doc  " + id, e);
