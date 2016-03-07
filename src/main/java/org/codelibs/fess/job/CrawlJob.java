@@ -72,6 +72,8 @@ public class CrawlJob {
 
     protected boolean useLocalElasticsearch = true;
 
+    protected String remoteDebug;
+
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;
@@ -130,6 +132,15 @@ public class CrawlJob {
 
     public CrawlJob useLocaleElasticsearch(final boolean useLocaleElasticsearch) {
         this.useLocalElasticsearch = useLocaleElasticsearch;
+        return this;
+    }
+
+    public CrawlJob remoteDebug() {
+        return remoteDebug("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000");
+    }
+
+    public CrawlJob remoteDebug(String option) {
+        this.remoteDebug = option;
         return this;
     }
 
@@ -314,6 +325,10 @@ public class CrawlJob {
             } else {
                 ownTmpDir = null;
             }
+        }
+
+        if (StringUtil.isNotBlank(remoteDebug)) {
+            StreamUtil.of(remoteDebug.split(" ")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());
