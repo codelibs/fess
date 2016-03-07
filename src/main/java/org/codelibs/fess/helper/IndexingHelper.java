@@ -38,6 +38,9 @@ public class IndexingHelper {
     public long requestInterval = 500;
 
     public void sendDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
+        if (docList.isEmpty()) {
+            return;
+        }
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Sending " + docList.size() + " documents to a server.");

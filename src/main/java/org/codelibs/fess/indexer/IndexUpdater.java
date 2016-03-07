@@ -282,7 +282,8 @@ public class IndexUpdater extends Thread {
     private void processAccessResults(final List<Map<String, Object>> docList, final List<EsAccessResult> accessResultList,
             final List<EsAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger().intValue();
+        final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
+        long contentSize = 0;
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
@@ -329,11 +330,19 @@ public class IndexUpdater extends Thread {
 
                     docList.add(map);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
+                        logger.debug("Added the document(" + contentSize + " bytes). " + "The number of a document cache is "
+                                + docList.size() + ".");
                     }
 
-                    if (docList.size() >= maxDocumentCacheSize) {
+                    if (accessResult.getContentLength() == null) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
+                        contentSize = 0;
+                    } else {
+                        contentSize += accessResult.getContentLength().longValue();
+                        if (contentSize >= maxDocumentRequestSize) {
+                            indexingHelper.sendDocuments(fessEsClient, docList);
+                            contentSize = 0;
+                        }
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {
