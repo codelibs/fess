@@ -242,16 +242,15 @@ public class Crawler implements Serializable {
         try {
             crawlingInfoHelper.store(options.sessionId, true);
             final String dayForCleanupStr;
+            int dayForCleanup = -1;
             if (StringUtil.isNotBlank(options.expires)) {
                 dayForCleanupStr = options.expires;
+                try {
+                    dayForCleanup = Integer.parseInt(dayForCleanupStr);
+                } catch (final NumberFormatException e) {}
             } else {
-                dayForCleanupStr =
-                        systemProperties.getProperty(Constants.DAY_FOR_CLEANUP_PROPERTY, Constants.DEFAULT_DAY_FOR_CLEANUP.toString());
+                dayForCleanup = ComponentUtil.getFessConfig().getDayForCleanup();
             }
-            int dayForCleanup = -1;
-            try {
-                dayForCleanup = Integer.parseInt(dayForCleanupStr);
-            } catch (final NumberFormatException e) {}
             crawlingInfoHelper.updateParams(options.sessionId, options.name, dayForCleanup);
         } catch (final Exception e) {
             logger.warn("Failed to store crawling information.", e);

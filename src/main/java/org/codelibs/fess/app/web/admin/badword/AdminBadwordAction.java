@@ -321,7 +321,7 @@ public class AdminBadwordAction extends FessAdminAction {
     }
 
     private String getCsvEncoding() {
-        return systemProperties.getProperty(Constants.CSV_FILE_ENCODING_PROPERTY, Constants.UTF_8);
+        return fessConfig.getCsvFileEncoding();
     }
 
     // ===================================================================================

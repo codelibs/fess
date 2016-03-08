@@ -94,7 +94,7 @@ public class GoAction extends FessSearchAction {
             return redirect(ErrorAction.class);
         }
 
-        if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+        if (fessConfig.isSearchLog()) {
             final String userSessionId = userInfoHelper.getUserCode();
             if (userSessionId != null) {
                 final SearchLogHelper searchLogHelper = ComponentUtil.getSearchLogHelper();

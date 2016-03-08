@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
@@ -56,8 +54,7 @@ public class FessCrawlerThread extends CrawlerThread {
 
     @Override
     protected boolean isContentUpdated(final CrawlerClient client, final UrlQueue<?> urlQueue) {
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        if (systemProperties.getProperty(Constants.INCREMENTAL_CRAWLING_PROPERTY, Constants.TRUE).equals(Constants.TRUE)) {
+        if (ComponentUtil.getFessConfig().isIncrementalCrawling()) {
 
             final long startTime = System.currentTimeMillis();
 

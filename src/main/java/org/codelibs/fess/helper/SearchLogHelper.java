@@ -83,7 +83,7 @@ public class SearchLogHelper {
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
         final SearchLog searchLog = new SearchLog();
 
-        if (Constants.TRUE.equals(systemProperties.getProperty(Constants.USER_INFO_PROPERTY, Constants.TRUE))) {
+        if (ComponentUtil.getFessConfig().isUserInfo()) {
             final String userCode = userInfoHelper.getUserCode();
             if (userCode != null) {
                 searchLog.setUserSessionId(userCode);
@@ -189,7 +189,7 @@ public class SearchLogHelper {
     }
 
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
-        final String value = systemProperties.getProperty(Constants.PURGE_BY_BOTS_PROPERTY, StringUtil.EMPTY);
+        final String value = ComponentUtil.getFessConfig().getPurgeByBots();
         String[] botNames;
         if (StringUtil.isBlank(value)) {
             botNames = StringUtil.EMPTY_STRINGS;

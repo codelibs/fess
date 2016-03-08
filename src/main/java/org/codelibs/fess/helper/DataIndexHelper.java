@@ -93,13 +93,7 @@ public class DataIndexHelper implements Serializable {
     }
 
     protected void doCrawl(final String sessionId, final List<DataConfig> configList) {
-        int multiprocessCrawlingCount = 5;
-        final String value = systemProperties.getProperty(Constants.CRAWLING_THREAD_COUNT_PROPERTY, "5");
-        try {
-            multiprocessCrawlingCount = Integer.parseInt(value);
-        } catch (final NumberFormatException e) {
-            // NOP
-        }
+        int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
         final long startTime = System.currentTimeMillis();
 

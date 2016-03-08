@@ -46,12 +46,10 @@ public class RootAction extends FessSearchAction {
             op.setup(form -> {
                 buildFormParams(form);
             });
-        }).renderWith(
-                data -> {
-                    buildInitParams();
-                    RenderDataUtil.register(data, "notification",
-                            systemProperties.getProperty(Constants.NOTIFICATION_SEARCH_TOP, StringUtil.EMPTY));
-                });
+        }).renderWith(data -> {
+            buildInitParams();
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationSearchTop());
+        });
     }
 
 }

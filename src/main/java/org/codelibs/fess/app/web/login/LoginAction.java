@@ -46,7 +46,7 @@ public class LoginAction extends FessSearchAction {
     @Execute
     public HtmlResponse index() {
         return asHtml(path_Login_IndexJsp).renderWith(data -> {
-            RenderDataUtil.register(data, "notification", systemProperties.getProperty(Constants.NOTIFICATION_LOGIN, StringUtil.EMPTY));
+            RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
         }).useForm(LoginForm.class);
     }
 
