@@ -151,10 +151,6 @@ public class AdminGeneralAction extends FessAdminAction {
         return redirect(getClass());
     }
 
-    private String getCheckboxValue(final String value) {
-        return Constants.ON.equalsIgnoreCase(value) ? Constants.TRUE : Constants.FALSE;
-    }
-
     protected void updateForm(final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = fessConfig.isIncrementalCrawling() ? Constants.TRUE : Constants.FALSE;
@@ -189,18 +185,6 @@ public class AdminGeneralAction extends FessAdminAction {
 
     private void updateProperty(final String key, final String value) {
         systemProperties.setProperty(key, value == null ? StringUtil.EMPTY : value);
-    }
-
-    private Integer getPropertyAsInteger(final String key, final int defaultValue) {
-        final String value = systemProperties.getProperty(key);
-        if (value != null) {
-            try {
-                return Integer.valueOf(value);
-            } catch (final NumberFormatException e) {
-                // ignore
-            }
-        }
-        return defaultValue;
     }
 
     private List<String> getDayItems() {

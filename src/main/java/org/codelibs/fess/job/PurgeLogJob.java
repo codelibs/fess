@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.job;
 
-import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.app.service.SearchLogService;
@@ -35,7 +33,6 @@ public class PurgeLogJob {
         final SearchLogService searchLogService = ComponentUtil.getComponent(SearchLogService.class);
         final JobLogService jobLogService = ComponentUtil.getComponent(JobLogService.class);
         final UserInfoService userInfoService = ComponentUtil.getComponent(UserInfoService.class);
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
 
         final StringBuilder resultBuf = new StringBuilder();
@@ -50,8 +47,7 @@ public class PurgeLogJob {
 
         // purge search logs
         try {
-            final String value = systemProperties.getProperty(Constants.PURGE_SEARCH_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-            final int days = Integer.parseInt(value);
+            final int days = ComponentUtil.getFessConfig().getPurgeSearchLogDay();
             if (days >= 0) {
                 searchLogService.deleteBefore(days);
             } else {
@@ -64,8 +60,7 @@ public class PurgeLogJob {
 
         // purge job logs
         try {
-            final String value = systemProperties.getProperty(Constants.PURGE_JOB_LOG_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-            final int days = Integer.parseInt(value);
+            final int days = ComponentUtil.getFessConfig().getPurgeJobLogDay();
             if (days >= 0) {
                 jobLogService.deleteBefore(days);
             } else {
@@ -78,8 +73,7 @@ public class PurgeLogJob {
 
         // purge user info
         try {
-            final String value = systemProperties.getProperty(Constants.PURGE_USER_INFO_DAY_PROPERTY, Constants.DEFAULT_PURGE_DAY);
-            final int days = Integer.parseInt(value);
+            final int days = ComponentUtil.getFessConfig().getPurgeUserInfoDay();
             if (days >= 0) {
                 userInfoService.deleteBefore(days);
             } else {

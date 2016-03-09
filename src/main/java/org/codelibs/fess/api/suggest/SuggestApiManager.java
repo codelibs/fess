@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.json.JsonApiManager;
 import org.codelibs.fess.helper.RoleQueryHelper;
@@ -75,10 +74,10 @@ public class SuggestApiManager extends BaseApiManager {
             builder.setSize(parameter.getNum());
 
             builder.addKind(SuggestItem.Kind.USER.toString());
-            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_SEARCH_LOG_PROPERTY, Constants.TRUE))) {
+            if (ComponentUtil.getFessConfig().isSuggestSearchLog()) {
                 builder.addKind(SuggestItem.Kind.QUERY.toString());
             }
-            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+            if (ComponentUtil.getFessConfig().isSuggestDocuments()) {
                 builder.addKind(SuggestItem.Kind.DOCUMENT.toString());
             }
 

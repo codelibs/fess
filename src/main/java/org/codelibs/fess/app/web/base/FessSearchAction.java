@@ -91,8 +91,8 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
-        searchLogSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
-        favoriteSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.USER_FAVORITE_PROPERTY, Constants.FALSE));
+        searchLogSupport = fessConfig.isSearchLog();
+        favoriteSupport = fessConfig.isUserFavorite();
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
         if (fessConfig.isWebApiPopularWord()) {

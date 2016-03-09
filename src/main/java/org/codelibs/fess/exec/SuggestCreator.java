@@ -156,8 +156,7 @@ public class SuggestCreator implements Serializable {
     }
 
     private int create() {
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
-        if (!Constants.TRUE.equals(systemProperties.getProperty(Constants.SUGGEST_DOCUMENTS_PROPERTY, Constants.TRUE))) {
+        if (!ComponentUtil.getFessConfig().isSuggestDocuments()) {
             logger.info("Skip create suggest document.");
             return 0;
         }
@@ -187,13 +186,10 @@ public class SuggestCreator implements Serializable {
 
     private int purge(final LocalDateTime time) {
         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-        final DynamicProperties systemProperties = ComponentUtil.getSystemProperties();
 
         try {
             suggestHelper.purgeDocumentSuggest(time);
-            final long cleanupDay =
-                    Long.parseLong(systemProperties.getProperty(Constants.PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY,
-                            Constants.DEFAULT_SUGGEST_PURGE_DAY));
+            final long cleanupDay = ComponentUtil.getFessConfig().getPurgeSuggestSearchLogDay();
             if (cleanupDay > 0) {
                 suggestHelper.purgeSearchlogSuggest(time.minusDays(cleanupDay));
             }

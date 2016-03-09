@@ -130,17 +130,8 @@ public class FailureUrlService implements Serializable {
     }
 
     public List<String> getExcludedUrlList(final String configId) {
-        final String failureCountStr = systemProperties.getProperty(Constants.FAILURE_COUNT_THRESHOLD_PROPERTY);
-        final String ignoreFailureType =
-                systemProperties.getProperty(Constants.IGNORE_FAILURE_TYPE_PROPERTY, Constants.DEFAULT_IGNORE_FAILURE_TYPE);
-        int failureCount = Constants.DEFAULT_FAILURE_COUNT;
-        if (failureCountStr != null) {
-            try {
-                failureCount = Integer.parseInt(failureCountStr);
-            } catch (final NumberFormatException ignore) {
-                // ignore
-            }
-        }
+        int failureCount = fessConfig.getFailureCountThreshold();
+        final String ignoreFailureType = fessConfig.getIgnoreFailureType();
 
         if (failureCount < 0) {
             return Collections.emptyList();

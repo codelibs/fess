@@ -85,7 +85,7 @@ public class SearchService {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
 
         final long startTime = System.currentTimeMillis();
-        final boolean searchLogSupport = Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_LOG_PROPERTY, Constants.TRUE));
+        final boolean searchLogSupport = fessConfig.isSearchLog();
 
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
