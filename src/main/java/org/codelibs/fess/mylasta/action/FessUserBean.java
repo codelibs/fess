@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.login.TypicalUserBean;
@@ -75,5 +76,26 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
 
     public boolean hasGroups(final String[] acceptedGroups) {
         return StreamUtil.of(user.getGroupNames()).anyMatch(s1 -> StreamUtil.of(acceptedGroups).anyMatch(s2 -> s2.equals(s1)));
+    }
+
+    public static FessUserBean empty() {
+        return new FessUserBean(null) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getUserId() {
+                return "<empty>";
+            }
+
+            @Override
+            public boolean hasRoles(final String[] acceptedRoles) {
+                return true;
+            }
+
+            @Override
+            public String[] getRoles() {
+                return StringUtil.EMPTY_STRINGS;
+            }
+        };
     }
 }

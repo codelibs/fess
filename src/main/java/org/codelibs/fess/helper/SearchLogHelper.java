@@ -48,6 +48,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
 import org.lastaflute.di.core.SingletonLaContainer;
@@ -302,7 +303,7 @@ public class SearchLogHelper {
                 searchService.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId() }).forEach(
+                            new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty())).forEach(
                             doc -> {
                                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                 final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);

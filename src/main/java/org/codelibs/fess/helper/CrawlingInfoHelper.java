@@ -170,6 +170,7 @@ public class CrawlingInfoHelper implements Serializable {
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
                                     .size(maxSessionIdsInList).order(Order.term(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
+                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();

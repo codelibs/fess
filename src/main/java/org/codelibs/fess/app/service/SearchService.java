@@ -39,11 +39,13 @@ import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.client.FessEsClientException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.fess.util.QueryStringBuilder;
 import org.dbflute.optional.OptionalEntity;
+import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -81,7 +83,8 @@ public class SearchService {
     //                                                                              Method
     //                                                                      ==============
 
-    public void search(final HttpServletRequest request, final SearchRequestParams params, final SearchRenderData data) {
+    public void search(final HttpServletRequest request, final SearchRequestParams params, final SearchRenderData data,
+            final OptionalThing<FessUserBean> userBean) {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
 
         final long startTime = System.currentTimeMillis();
@@ -98,6 +101,7 @@ public class SearchService {
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
+                            fessConfig.processSearchPreference(searchRequestBuilder, userBean);
                             return SearchConditionBuilder.builder(searchRequestBuilder)
                                     .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
                                     .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
@@ -212,19 +216,23 @@ public class SearchService {
         return StringUtil.EMPTY_STRINGS;
     }
 
-    public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields) {
+    public OptionalEntity<Map<String, Object>> getDocumentByDocId(final String docId, final String[] fields,
+            final OptionalThing<FessUserBean> userBean) {
         return fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
             builder.addFields(fields);
+            fessConfig.processSearchPreference(builder, userBean);
             return true;
         });
     }
 
-    public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields) {
+    public List<Map<String, Object>> getDocumentListByDocIds(final String[] docIds, final String[] fields,
+            final OptionalThing<FessUserBean> userBean) {
         return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
             builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
             builder.addFields(fields);
+            fessConfig.processSearchPreference(builder, userBean);
             return true;
         });
     }

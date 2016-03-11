@@ -213,7 +213,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String INDEXER_FAVORITE_COUNT_ENABLED = "indexer.favorite.count.enabled";
 
-    /** The key of the configuration. e.g. 1000 */
+    /** The key of the configuration. e.g. 5000 */
     String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
 
     /** The key of the configuration. e.g. 60 */
@@ -1359,14 +1359,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time'. <br>
-     * The value is, e.g. 1000 <br>
+     * The value is, e.g. 5000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsCommitMarginTime();
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time' as {@link Integer}. <br>
-     * The value is, e.g. 1000 <br>
+     * The value is, e.g. 5000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */

@@ -376,4 +376,6 @@ public class Constants extends CoreLibConstants {
     public static final String PAGING_QUERY_LIST = "pagingQueryList";
 
     public static final String REQUEST_LANGUAGES = "requestLanguages";
+
+    public static final String SEARCH_PREFERENCE_PRIMARY = "_primary";
 }

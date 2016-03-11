@@ -51,7 +51,8 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
     //                                                                           =========
     protected final SqlClause _sqlClause = new EsSqlClause(asTableDbName());
     protected int _safetyMaxResultSize;
-    private SearchRequestParams _searchRequestParams = new SearchRequestParams();
+    protected SearchRequestParams _searchRequestParams = new SearchRequestParams();
+    protected String _preference;
 
     // ===================================================================================
     //                                                                             Builder
@@ -597,6 +598,14 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
     //                                                                   =================
     public SearchRequestParams request() {
         return _searchRequestParams;
+    }
+
+    public void setPreference(final String preference) {
+        _preference = preference;
+    }
+
+    public String getPreference() {
+        return _preference;
     }
 
     // ===================================================================================

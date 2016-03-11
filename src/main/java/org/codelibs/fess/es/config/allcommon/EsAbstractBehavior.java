@@ -88,7 +88,11 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected int delegateSelectCountUniquely(final ConditionBean cb) {
         // #pending check response and cast problem
         final SearchRequestBuilder builder = client.prepareSearch(asEsIndex()).setTypes(asEsSearchType());
-        return (int) ((EsAbstractConditionBean) cb).build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits();
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            builder.setPreference(esCb.getPreference());
+        }
+        return (int) esCb.build(builder).execute().actionGet(searchTimeout).getHits().getTotalHits();
     }
 
     @Override
@@ -119,8 +123,12 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         }
         builder.setFrom(from);
         builder.setSize(size);
-        ((EsAbstractConditionBean) cb).request().build(builder);
-        final SearchResponse response = ((EsAbstractConditionBean) cb).build(builder).execute().actionGet(searchTimeout);
+        final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+        if (esCb.getPreference() != null) {
+            builder.setPreference(esCb.getPreference());
+        }
+        esCb.request().build(builder);
+        final SearchResponse response = esCb.build(builder).execute().actionGet(searchTimeout);
 
         final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>();
         final SearchHits searchHits = response.getHits();
@@ -200,8 +208,12 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
             if (response == null) {
                 final SearchRequestBuilder builder =
                         client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForCursor).setSize(sizeForCursor);
-                ((EsAbstractConditionBean) cb).request().build(builder);
-                response = ((EsAbstractConditionBean) cb).build(builder).execute().actionGet(scrollSearchTimeout);
+                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+                if (esCb.getPreference() != null) {
+                    builder.setPreference(esCb.getPreference());
+                }
+                esCb.request().build(builder);
+                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
             } else {
                 final String scrollId = response.getScrollId();
                 response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
@@ -311,8 +323,12 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
             if (response == null) {
                 final SearchRequestBuilder builder =
                         client.prepareSearch(asEsIndex()).setTypes(asEsIndexType()).setScroll(scrollForDelete).setSize(sizeForDelete);
-                ((EsAbstractConditionBean) cb).request().build(builder);
-                response = ((EsAbstractConditionBean) cb).build(builder).execute().actionGet(scrollSearchTimeout);
+                final EsAbstractConditionBean esCb = (EsAbstractConditionBean) cb;
+                if (esCb.getPreference() != null) {
+                    esCb.setPreference(esCb.getPreference());
+                }
+                esCb.request().build(builder);
+                response = esCb.build(builder).execute().actionGet(scrollSearchTimeout);
             } else {
                 final String scrollId = response.getScrollId();
                 response = client.prepareSearchScroll(scrollId).setScroll(scrollForDelete).execute().actionGet(scrollSearchTimeout);
