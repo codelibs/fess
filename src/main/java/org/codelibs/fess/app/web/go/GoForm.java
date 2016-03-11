@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.go;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -44,4 +47,6 @@ public class GoForm {
     public String sort;
 
     public String lang;
+
+    public Map<String, String[]> fields = new HashMap<>();
 }
