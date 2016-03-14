@@ -22,7 +22,7 @@
 	</component>
 	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">
 	</component>
-	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser">
+	<component name="queryParser" class="org.apache.lucene.queryparser.ext.ExtendableQueryParser" instance="prototype">
 		<arg>org.codelibs.fess.Constants.DEFAULT_FIELD</arg>
 		<arg>
 			<component class="org.apache.lucene.analysis.core.WhitespaceAnalyzer"></component>

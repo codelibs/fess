@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.util;
 
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
@@ -57,6 +58,8 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
+    private static final String QUERY_PARSER = "queryParser";
+
     private static final String DOCUMENT_HELPER = "documentHelper";
 
     private static final String ACTIVITY_HELPER = "activityHelper";
@@ -296,6 +299,10 @@ public final class ComponentUtil {
 
     public static DocumentHelper getDocumentHelper() {
         return SingletonLaContainer.getComponent(DOCUMENT_HELPER);
+    }
+
+    public static QueryParser getQueryParser() {
+        return SingletonLaContainer.getComponent(QUERY_PARSER);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {

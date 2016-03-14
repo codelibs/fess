@@ -53,6 +53,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -91,9 +92,6 @@ public class QueryHelper implements Serializable {
 
     @Resource
     protected KeyMatchHelper keyMatchHelper;
-
-    @Resource
-    protected QueryParser queryParser;
 
     protected Set<String> apiResponseFieldSet;
 
@@ -243,7 +241,7 @@ public class QueryHelper implements Serializable {
 
     public void buildBaseQuery(final QueryContext queryContext, final Consumer<QueryContext> context) {
         try {
-            final Query query = queryParser.parse(queryContext.getQueryString());
+            final Query query = getQueryParser().parse(queryContext.getQueryString());
             final QueryBuilder queryBuilder = convertQuery(queryContext, query);
             if (queryBuilder != null) {
                 queryContext.setQueryBuilder(queryBuilder);
@@ -256,6 +254,10 @@ public class QueryHelper implements Serializable {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
                     "Invalid query: " + queryContext.getQueryString());
         }
+    }
+
+    protected QueryParser getQueryParser() {
+        return ComponentUtil.getQueryParser();
     }
 
     protected QueryBuilder convertQuery(final QueryContext context, final Query query) {
