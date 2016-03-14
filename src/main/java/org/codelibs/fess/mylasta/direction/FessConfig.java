@@ -168,9 +168,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. No title. */
     String CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL = "crawler.document.file.no.title.label";
 
-    /** The key of the configuration. e.g. 10 */
-    String CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH = "crawler.document.file.abbreviation.margin.length";
-
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT = "crawler.document.file.ignore.empty.content";
 
@@ -1149,21 +1146,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileNoTitleLabel();
-
-    /**
-     * Get the value for the key 'crawler.document.file.abbreviation.margin.length'. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getCrawlerDocumentFileAbbreviationMarginLength();
-
-    /**
-     * Get the value for the key 'crawler.document.file.abbreviation.margin.length' as {@link Integer}. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.file.ignore.empty.content'. <br>
@@ -3323,14 +3305,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getCrawlerDocumentFileNoTitleLabel() {
             return get(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL);
-        }
-
-        public String getCrawlerDocumentFileAbbreviationMarginLength() {
-            return get(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
-        }
-
-        public Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger() {
-            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
         }
 
         public String getCrawlerDocumentFileIgnoreEmptyContent() {

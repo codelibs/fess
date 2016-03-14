@@ -218,15 +218,6 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
 
     }
 
-    public void test_normalizeContent() {
-        assertEquals("", fessXpathTransformer.normalizeContent(""));
-        assertEquals(" ", fessXpathTransformer.normalizeContent(" "));
-        assertEquals(" ", fessXpathTransformer.normalizeContent("  "));
-        assertEquals(" ", fessXpathTransformer.normalizeContent("\t"));
-        assertEquals(" ", fessXpathTransformer.normalizeContent("\t\t"));
-        assertEquals(" ", fessXpathTransformer.normalizeContent("\t \t"));
-    }
-
     public void test_removeCommentTag() {
         assertEquals("", fessXpathTransformer.removeCommentTag(""));
         assertEquals(" ", fessXpathTransformer.removeCommentTag("<!-- - -->"));

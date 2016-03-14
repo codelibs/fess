@@ -16,7 +16,6 @@
 package org.codelibs.fess.crawler.transformer;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,6 +50,7 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DocumentHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
@@ -174,6 +174,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Date documentExpires = crawlingInfoHelper.getDocumentExpires(crawlingConfig);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
+        final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
@@ -210,12 +211,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             }
             buf.append(contentMeta);
         }
-        final String body = normalizeContent(buf.toString());
-        if (StringUtil.isNotBlank(body)) {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
-        } else {
-            putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), StringUtil.EMPTY);
-        }
+        final String body = documentHelper.getContent(responseData, buf.toString(), dataMap);
+        putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), body);
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
                 .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
             if (responseData.getContentLength() > 0
@@ -228,15 +225,17 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             }
         }
         // digest
-        putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(),
-                Constants.DIGEST_PREFIX
-                        + abbreviate(normalizeContent(content), fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
+        putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(), documentHelper.getDigest(responseData, buf.toString(), dataMap,
+                fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
         // title
         if (!dataMap.containsKey(fessConfig.getIndexFieldTitle())) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(),
-                            abbreviate(body, fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
+                    putResultDataBody(
+                            dataMap,
+                            fessConfig.getIndexFieldTitle(),
+                            documentHelper.getDigest(responseData, body, dataMap,
+                                    fessConfig.getCrawlerDocumentFileMaxTitleLengthAsInteger()));
                 } else {
                     putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
@@ -330,18 +329,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return dataMap;
-    }
-
-    protected String abbreviate(final String str, final int maxWidth) {
-        String newStr = StringUtils.abbreviate(str, maxWidth);
-        try {
-            if (newStr.getBytes(Constants.UTF_8).length > maxWidth + fessConfig.getCrawlerDocumentFileAbbreviationMarginLengthAsInteger()) {
-                newStr = StringUtils.abbreviate(str, maxWidth / 2);
-            }
-        } catch (final UnsupportedEncodingException e) {
-            // NOP
-        }
-        return newStr;
     }
 
     private String getResourceName(final ResponseData responseData) {

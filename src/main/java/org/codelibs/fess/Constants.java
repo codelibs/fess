@@ -218,8 +218,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String INDEXING_TARGET = "indexingTarget";
 
-    public static final String DIGEST_PREFIX = "...";
-
     public static final String BASIC = "BASIC";
 
     public static final String DIGEST = "DIGEST";
