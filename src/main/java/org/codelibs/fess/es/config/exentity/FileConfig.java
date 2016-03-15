@@ -57,9 +57,9 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
-    private List<LabelType> labelTypeList;
+    private volatile List<LabelType> labelTypeList;
 
-    private List<RoleType> roleTypeList;
+    private volatile List<RoleType> roleTypeList;
 
     public FileConfig() {
         super();

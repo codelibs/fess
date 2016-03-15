@@ -57,9 +57,9 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
-    private List<LabelType> labelTypeList;
+    private volatile List<LabelType> labelTypeList;
 
-    private List<RoleType> roleTypeList;
+    private volatile List<RoleType> roleTypeList;
 
     public WebConfig() {
         super();

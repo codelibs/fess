@@ -82,9 +82,9 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private Map<String, String> handlerScriptMap;
 
-    private List<LabelType> labelTypeList;
+    private volatile List<LabelType> labelTypeList;
 
-    private List<RoleType> roleTypeList;
+    private volatile List<RoleType> roleTypeList;
 
     public DataConfig() {
         super();
