@@ -127,6 +127,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_APPEND_DATA = "crawler.document.append.data";
 
+    /** The key of the configuration. e.g. -1 */
+    String CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE = "crawler.document.max.alphanum.term.size";
+
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
@@ -1034,6 +1037,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerDocumentAppendData();
+
+    /**
+     * Get the value for the key 'crawler.document.max.alphanum.term.size'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentMaxAlphanumTermSize();
+
+    /**
+     * Get the value for the key 'crawler.document.max.alphanum.term.size' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentMaxAlphanumTermSizeAsInteger();
 
     /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
@@ -3245,6 +3263,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentAppendData() {
             return is(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
+        }
+
+        public String getCrawlerDocumentMaxAlphanumTermSize() {
+            return get(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE);
+        }
+
+        public Integer getCrawlerDocumentMaxAlphanumTermSizeAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE);
         }
 
         public String getCrawlerCrawlingDataEncoding() {

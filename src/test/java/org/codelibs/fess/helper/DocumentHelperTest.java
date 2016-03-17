@@ -22,15 +22,15 @@ import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.unit.UnitFessTestCase;
 
 public class DocumentHelperTest extends UnitFessTestCase {
-    private DocumentHelper documentHelper;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        documentHelper = new DocumentHelper();
     }
 
     public void test_getContent() {
+        DocumentHelper documentHelper = new DocumentHelper();
+
         ResponseData responseData = new ResponseData();
         Map<String, Object> dataMap = new HashMap<>();
         assertEquals("", documentHelper.getContent(responseData, null, dataMap));
@@ -45,7 +45,31 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("123 abc", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
     }
 
+    public void test_getContent_maxAlphanum() {
+        DocumentHelper documentHelper = new DocumentHelper() {
+            protected int getMaxAlphanumSize() {
+                return 2;
+            }
+        };
+
+        ResponseData responseData = new ResponseData();
+        Map<String, Object> dataMap = new HashMap<>();
+        assertEquals("", documentHelper.getContent(responseData, null, dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, " ", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t \t", dataMap));
+        assertEquals("12 ab", documentHelper.getContent(responseData, " 123 abc ", dataMap));
+        assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
+        assertEquals("12 ab", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
+        assertEquals("12", documentHelper.getContent(responseData, " 123abc ", dataMap));
+    }
+
     public void test_getDigest() {
+        DocumentHelper documentHelper = new DocumentHelper();
+
         ResponseData responseData = new ResponseData();
         Map<String, Object> dataMap = new HashMap<>();
         assertEquals("1234567...", documentHelper.getDigest(responseData, " 1234567890  1234567890  1234567890 ", dataMap, 10));

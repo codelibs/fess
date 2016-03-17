@@ -21,6 +21,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,44 @@ public class DocumentHelper implements Serializable {
         if (content == null) {
             return StringUtil.EMPTY; // empty
         }
-        return content.replaceAll("[\u0000-\u0020\u007f\u3000]+", " ").trim();
+
+        final int maxAlphanumTermSize = getMaxAlphanumSize();
+        final StringBuilder buf = new StringBuilder(content.length());
+        boolean isSpace = false;
+        int alphanumSize = 0;
+        for (int i = 0; i < content.length(); i++) {
+            final char c = content.charAt(i);
+            if ((c >= '\u0000' && c <= '\u0020') || c == '\u007f' || c == '\u3000') {
+                // space
+                if (!isSpace) {
+                    buf.append(' ');
+                    isSpace = true;
+                }
+                alphanumSize = 0;
+            } else if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                // alphanum
+                if (maxAlphanumTermSize >= 0) {
+                    if (alphanumSize < maxAlphanumTermSize) {
+                        buf.append(c);
+                    }
+                    alphanumSize++;
+                } else {
+                    buf.append(c);
+                }
+                isSpace = false;
+            } else {
+                buf.append(c);
+                isSpace = false;
+                alphanumSize = 0;
+            }
+        }
+
+        return buf.toString().trim();
+    }
+
+    protected int getMaxAlphanumSize() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessConfig.getCrawlerDocumentMaxAlphanumTermSizeAsInteger().intValue();
     }
 
     public String getDigest(final ResponseData responseData, final String content, final Map<String, Object> dataMap, final int maxWidth) {
