@@ -41,7 +41,6 @@ import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +146,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, webConfig);
 
             // create crawler
-            final Crawler crawler = SingletonLaContainer.getComponent(Crawler.class);
+            final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
             crawler.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -251,7 +250,7 @@ public class WebFsIndexHelper implements Serializable {
             final String sid = crawlingConfigHelper.store(sessionId, fileConfig);
 
             // create crawler
-            final Crawler crawler = SingletonLaContainer.getComponent(Crawler.class);
+            final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
             crawler.setSessionId(sid);
             sessionIdList.add(sid);
 
@@ -469,9 +468,13 @@ public class WebFsIndexHelper implements Serializable {
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_EXEC_TIME, Long.toString(indexUpdater.getExecuteTime()));
         crawlingInfoHelper.putToInfoMap(Constants.WEB_FS_INDEX_SIZE, Long.toString(indexUpdater.getDocumentSize()));
 
-        final EsUrlFilterService urlFilterService = SingletonLaContainer.getComponent(EsUrlFilterService.class);
-        final EsUrlQueueService urlQueueService = SingletonLaContainer.getComponent(EsUrlQueueService.class);
-        final EsDataService dataService = SingletonLaContainer.getComponent(EsDataService.class);
+        if (systemHelper.isForceStop()) {
+            return;
+        }
+
+        final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+        final EsUrlQueueService urlQueueService = ComponentUtil.getComponent(EsUrlQueueService.class);
+        final EsDataService dataService = ComponentUtil.getComponent(EsDataService.class);
         for (final String sid : sessionIdList) {
             // remove config
             crawlingConfigHelper.remove(sid);

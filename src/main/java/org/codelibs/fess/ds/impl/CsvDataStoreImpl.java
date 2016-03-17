@@ -38,8 +38,8 @@ import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,11 +261,11 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     } else {
                         url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
                     }
-                    final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
+                    final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
                 } catch (final Exception e) {
                     final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
-                    final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
+                    final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
 
                     logger.warn("Crawling Access Exception at : " + dataMap, e);

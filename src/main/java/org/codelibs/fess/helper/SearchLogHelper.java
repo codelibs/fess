@@ -51,7 +51,6 @@ import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +218,7 @@ public class SearchLogHelper {
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<>();
-            final UserInfoBhv userInfoBhv = SingletonLaContainer.getComponent(UserInfoBhv.class);
+            final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
             userInfoBhv.selectList(cb -> {
                 cb.query().setId_InScope(userInfoMap.keySet());
                 cb.fetchFirst(userInfoMap.size());
@@ -268,7 +267,7 @@ public class SearchLogHelper {
         final List<ClickLog> clickLogList = new ArrayList<>();
         for (final ClickLog clickLog : queue) {
             try {
-                final SearchLogBhv searchLogBhv = SingletonLaContainer.getComponent(SearchLogBhv.class);
+                final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
                 searchLogBhv.selectEntity(cb -> {
                     cb.query().setQueryId_Equal(clickLog.getQueryId());
                 }).ifPresent(entity -> {
@@ -290,7 +289,7 @@ public class SearchLogHelper {
         }
         if (!clickLogList.isEmpty()) {
             try {
-                final ClickLogBhv clickLogBhv = SingletonLaContainer.getComponent(ClickLogBhv.class);
+                final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
                 clickLogBhv.batchInsert(clickLogList);
             } catch (final Exception e) {
                 logger.warn("Failed to insert: " + clickLogList, e);

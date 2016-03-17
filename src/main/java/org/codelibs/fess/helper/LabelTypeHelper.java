@@ -32,7 +32,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.es.config.exentity.LabelType;
-import org.lastaflute.di.core.SingletonLaContainer;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class LabelTypeHelper implements Serializable {
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
     protected LabelTypeService getLabelTypeService() {
-        return SingletonLaContainer.getComponent(LabelTypeService.class);
+        return ComponentUtil.getComponent(LabelTypeService.class);
     }
 
     @PostConstruct

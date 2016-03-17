@@ -24,7 +24,7 @@ import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigType;
-import org.lastaflute.di.core.SingletonLaContainer;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,13 +71,13 @@ public class CrawlingConfigHelper implements Serializable {
         }
         switch (configType) {
         case WEB:
-            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
+            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
             return webConfigService.getWebConfig(id).get();
         case FILE:
-            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
             return fileConfigService.getFileConfig(id).get();
         case DATA:
-            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
+            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
             return dataConfigService.getDataConfig(id).get();
         default:
             return null;

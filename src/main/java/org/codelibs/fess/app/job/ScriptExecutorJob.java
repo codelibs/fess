@@ -23,7 +23,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.job.ScheduledJobException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRuntime;
@@ -94,7 +93,7 @@ public class ScriptExecutorJob implements LaJob {
     }
 
     private void storeJobLog(final JobLog jobLog) {
-        final JobLogService jobLogService = SingletonLaContainer.getComponent(JobLogService.class);
+        final JobLogService jobLogService = ComponentUtil.getComponent(JobLogService.class);
         jobLogService.store(jobLog);
     }
 

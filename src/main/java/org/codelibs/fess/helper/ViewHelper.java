@@ -62,7 +62,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -502,20 +501,20 @@ public class ViewHelper implements Serializable {
             logger.debug("configType: " + configType + ", configId: " + configId);
         }
         if (ConfigType.WEB == configType) {
-            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
+            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
             config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.FILE == configType) {
-            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
             config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.DATA == configType) {
-            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
+            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
             config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configId);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-        final CrawlerClientFactory crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
+        final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getComponent(CrawlerClientFactory.class);
         config.initializeClientFactory(crawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {

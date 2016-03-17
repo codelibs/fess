@@ -38,7 +38,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.lastaflute.di.core.SingletonLaContainer;
 
 public class KeyMatchHelper {
     protected volatile Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = Collections.emptyMap();
@@ -56,7 +55,7 @@ public class KeyMatchHelper {
 
     protected void reload(final long interval) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final KeyMatchService keyMatchService = SingletonLaContainer.getComponent(KeyMatchService.class);
+        final KeyMatchService keyMatchService = ComponentUtil.getComponent(KeyMatchService.class);
         final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = new HashMap<>();
         keyMatchService
                 .getAvailableKeyMatchList()

@@ -38,7 +38,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
 import org.dbflute.cbean.result.ListResultBean;
-import org.lastaflute.di.core.SingletonLaContainer;
 
 /**
  * @author FreeGen
@@ -251,7 +250,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     @Override
     public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
-        final FileAuthenticationService fileAuthenticationService = SingletonLaContainer.getComponent(FileAuthenticationService.class);
+        final FileAuthenticationService fileAuthenticationService = ComponentUtil.getComponent(FileAuthenticationService.class);
 
         //  Parameters
         final Map<String, Object> paramMap = new HashMap<String, Object>();

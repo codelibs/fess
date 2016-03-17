@@ -28,7 +28,6 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,7 @@ public class PathMappingHelper implements Serializable {
         ptList.add(Constants.PROCESS_TYPE_BOTH);
 
         try {
-            final PathMappingBhv pathMappingBhv = SingletonLaContainer.getComponent(PathMappingBhv.class);
+            final PathMappingBhv pathMappingBhv = ComponentUtil.getComponent(PathMappingBhv.class);
             cachedPathMappingList = pathMappingBhv.selectList(cb -> {
                 cb.query().addOrderBy_SortOrder_Asc();
                 cb.query().setProcessType_InScope(ptList);

@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
-import org.lastaflute.di.core.SingletonLaContainer;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class DuplicateHostHelper implements Serializable {
 
@@ -36,7 +36,7 @@ public class DuplicateHostHelper implements Serializable {
         if (duplicateHostList == null) {
             duplicateHostList = new ArrayList<DuplicateHost>();
         }
-        final DuplicateHostService duplicateHostService = SingletonLaContainer.getComponent(DuplicateHostService.class);
+        final DuplicateHostService duplicateHostService = ComponentUtil.getComponent(DuplicateHostService.class);
         duplicateHostList.addAll(duplicateHostService.getDuplicateHostList());
     }
 

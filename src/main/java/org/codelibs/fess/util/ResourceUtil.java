@@ -28,7 +28,6 @@ import javax.servlet.ServletContext;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaServletContextUtil;
 
 public class ResourceUtil {
@@ -76,7 +75,7 @@ public class ResourceUtil {
     protected static Path getPath(final String base, final String... names) {
 
         try {
-            final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
+            final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
             final String webinfPath = servletContext.getRealPath("/WEB-INF/" + base);
             if (webinfPath != null) {
                 if (Files.exists(Paths.get(webinfPath))) {

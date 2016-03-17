@@ -41,7 +41,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FailureUrlService implements Serializable {
 
@@ -180,7 +179,7 @@ public class FailureUrlService implements Serializable {
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
-        final FailureUrlBhv bhv = SingletonLaContainer.getComponent(FailureUrlBhv.class);
+        final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
         FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {

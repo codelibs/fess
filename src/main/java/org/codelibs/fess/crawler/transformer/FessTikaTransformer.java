@@ -22,7 +22,6 @@ import org.codelibs.fess.crawler.extractor.Extractor;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class FessTikaTransformer extends AbstractFessFileTransformer {
 
     @Override
     protected Extractor getExtractor(final ResponseData responseData) {
-        final Extractor extractor = SingletonLaContainer.getComponent("tikaExtractor");
+        final Extractor extractor = ComponentUtil.getComponent("tikaExtractor");
         if (extractor == null) {
             throw new FessSystemException("Could not find tikaExtractor.");
         }

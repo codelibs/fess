@@ -37,7 +37,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.StreamUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +120,7 @@ public class SuggestJob {
     protected void executeSuggestCreator() {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
+        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
         final ProcessHelper processHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 

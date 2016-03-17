@@ -25,6 +25,7 @@ import org.codelibs.fess.crawler.service.DataService;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.ds.DataStoreFactory;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.ActivityHelper;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
@@ -54,6 +55,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
@@ -134,6 +136,12 @@ public final class ComponentUtil {
 
     private static final String ELASTICSEARCH_CLIENT = FESS_ES_CLIENT;
 
+    private static IndexingHelper indexingHelper;
+
+    private static CrawlingConfigHelper crawlingConfigHelper;
+
+    private static SystemHelper systemHelper;
+
     private ComponentUtil() {
     }
 
@@ -154,7 +162,10 @@ public final class ComponentUtil {
     }
 
     public static SystemHelper getSystemHelper() {
-        return SingletonLaContainer.getComponent(SYSTEM_HELPER);
+        if (systemHelper == null || HotdeployUtil.isHotdeploy()) {
+            systemHelper = SingletonLaContainer.getComponent(SYSTEM_HELPER);
+        }
+        return systemHelper;
     }
 
     public static ViewHelper getViewHelper() {
@@ -178,7 +189,10 @@ public final class ComponentUtil {
     }
 
     public static CrawlingConfigHelper getCrawlingConfigHelper() {
-        return SingletonLaContainer.getComponent(CRAWLING_CONFIG_HELPER);
+        if (crawlingConfigHelper == null || HotdeployUtil.isHotdeploy()) {
+            crawlingConfigHelper = SingletonLaContainer.getComponent(CRAWLING_CONFIG_HELPER);
+        }
+        return crawlingConfigHelper;
     }
 
     public static CrawlingInfoHelper getCrawlingInfoHelper() {
@@ -242,7 +256,10 @@ public final class ComponentUtil {
     }
 
     public static IndexingHelper getIndexingHelper() {
-        return SingletonLaContainer.getComponent(INDEXING_HELPER);
+        if (indexingHelper == null || HotdeployUtil.isHotdeploy()) {
+            indexingHelper = SingletonLaContainer.getComponent(INDEXING_HELPER);
+        }
+        return indexingHelper;
     }
 
     public static UserInfoHelper getUserInfoHelper() {
@@ -306,11 +323,32 @@ public final class ComponentUtil {
     }
 
     public static <T> T getComponent(final Class<T> clazz) {
-        return SingletonLaContainer.getComponent(clazz);
+        try {
+            return SingletonLaContainer.getComponent(clazz);
+        } catch (NullPointerException e) {
+            throw new ContainerNotAvailableException(e);
+        }
+    }
+
+    public static <T> T getComponent(final String componentName) {
+        try {
+            return SingletonLaContainer.getComponent(componentName);
+        } catch (NullPointerException e) {
+            throw new ContainerNotAvailableException(e);
+        }
     }
 
     public static boolean hasQueryHelper() {
         return SingletonLaContainerFactory.getContainer().hasComponentDef(QUERY_HELPER);
+    }
+
+    public static boolean available() {
+        try {
+            return SingletonLaContainer.getComponent(SYSTEM_HELPER) != null;
+        } catch (Exception e) {
+            // ignore
+        }
+        return false;
     }
 
 }

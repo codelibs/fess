@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
@@ -50,7 +51,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +103,16 @@ public class IndexUpdater extends Thread {
 
     public IndexUpdater() {
         // nothing
+    }
+
+    @PreDestroy
+    public void destroy() {
+        if (!finishCrawling) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Stopping all crawler.");
+            }
+            forceStop();
+        }
     }
 
     public void addFinishedSessionId(final String sessionId) {
@@ -251,13 +261,23 @@ public class IndexUpdater extends Thread {
                     }
 
                 }
+
+                if (!ComponentUtil.available()) {
+                    logger.info("IndexUpdater is terminated.");
+                    forceStop();
+                    break;
+                }
             }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished indexUpdater.");
             }
         } catch (final Throwable t) {
-            logger.error("IndexUpdater is terminated.", t);
+            if (ComponentUtil.available()) {
+                logger.error("IndexUpdater is terminated.", t);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("IndexUpdater is terminated.");
+            }
             forceStop();
         } finally {
             intervalControlHelper.setCrawlerRunning(true);
@@ -303,7 +323,7 @@ public class IndexUpdater extends Thread {
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
                 try {
-                    final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
+                    final Transformer transformer = ComponentUtil.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
                         logger.warn("No transformer: " + accessResultData.getTransformerName());
