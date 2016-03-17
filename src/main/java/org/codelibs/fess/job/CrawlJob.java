@@ -39,7 +39,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.StreamUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,9 @@ public class CrawlJob {
 
     protected boolean useLocalElasticsearch = true;
 
-    protected String remoteDebug;
+    protected String jvmOptions;
+
+    protected String lastaEnv;
 
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -136,11 +137,16 @@ public class CrawlJob {
     }
 
     public CrawlJob remoteDebug() {
-        return remoteDebug("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000");
+        return jvmOptions("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000");
     }
 
-    public CrawlJob remoteDebug(String option) {
-        this.remoteDebug = option;
+    public CrawlJob jvmOptions(String option) {
+        this.jvmOptions = option;
+        return this;
+    }
+
+    public CrawlJob lastaEnv(String env) {
+        this.lastaEnv = env;
         return this;
     }
 
@@ -240,7 +246,7 @@ public class CrawlJob {
     protected void executeCrawler() {
         final List<String> cmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
+        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final ProcessHelper processHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -296,13 +302,15 @@ public class CrawlJob {
             }
         }
 
-        final String lastaEnv = System.getProperty("lasta.env");
-        if (StringUtil.isNotBlank(lastaEnv)) {
-            if (lastaEnv.equals("web")) {
+        final String systemLastaEnv = System.getProperty("lasta.env");
+        if (StringUtil.isNotBlank(systemLastaEnv)) {
+            if (systemLastaEnv.equals("web")) {
                 cmdList.add("-Dlasta.env=crawler");
             } else {
-                cmdList.add("-Dlasta.env=" + lastaEnv);
+                cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
+        } else if (StringUtil.isNotBlank(lastaEnv)) {
+            cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
         cmdList.add("-Dfess.crawler.process=true");
@@ -327,8 +335,8 @@ public class CrawlJob {
             }
         }
 
-        if (StringUtil.isNotBlank(remoteDebug)) {
-            StreamUtil.of(remoteDebug.split(" ")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s));
+        if (StringUtil.isNotBlank(jvmOptions)) {
+            StreamUtil.of(jvmOptions.split(" ")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());
