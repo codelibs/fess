@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FailureUrlService;
@@ -288,7 +289,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             final String value = paramMap.get(SEPARATOR_CHARACTER_PARAM);
             if (StringUtil.isNotBlank(value)) {
                 try {
-                    csvConfig.setSeparator(value.charAt(0));
+                    csvConfig.setSeparator(StringEscapeUtils.unescapeJava(value).charAt(0));
                 } catch (final Exception e) {
                     logger.warn("Failed to load " + SEPARATOR_CHARACTER_PARAM, e);
                 }
