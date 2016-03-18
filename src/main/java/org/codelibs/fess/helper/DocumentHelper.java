@@ -43,7 +43,7 @@ public class DocumentHelper implements Serializable {
         int alphanumSize = 0;
         for (int i = 0; i < content.length(); i++) {
             final char c = content.charAt(i);
-            if ((c >= '\u0000' && c <= '\u0020') || c == '\u007f' || c == '\u3000') {
+            if (Character.isISOControl(c) || c == '\u0020' || c == '\u3000' || c == 65533) {
                 // space
                 if (!isSpace) {
                     buf.append(' ');
