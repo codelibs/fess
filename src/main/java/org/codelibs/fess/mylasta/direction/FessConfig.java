@@ -744,6 +744,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_ADMIN_SYNC_PASSWORD = "ldap.admin.sync.password";
 
+    /** The key of the configuration. e.g. -1 */
+    String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
+
     /** The key of the configuration. e.g. memberOf */
     String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
 
@@ -3043,6 +3046,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapAdminSyncPassword();
 
     /**
+     * Get the value for the key 'ldap.max.username.length'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapMaxUsernameLength();
+
+    /**
+     * Get the value for the key 'ldap.max.username.length' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapMaxUsernameLengthAsInteger();
+
+    /**
      * Get the value for the key 'ldap.memberof.attribute'. <br>
      * The value is, e.g. memberOf <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4319,6 +4337,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isLdapAdminSyncPassword() {
             return is(FessConfig.LDAP_ADMIN_SYNC_PASSWORD);
+        }
+
+        public String getLdapMaxUsernameLength() {
+            return get(FessConfig.LDAP_MAX_USERNAME_LENGTH);
+        }
+
+        public Integer getLdapMaxUsernameLengthAsInteger() {
+            return getAsInteger(FessConfig.LDAP_MAX_USERNAME_LENGTH);
         }
 
         public String getLdapMemberofAttribute() {

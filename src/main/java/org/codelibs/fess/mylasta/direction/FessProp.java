@@ -404,8 +404,19 @@ public interface FessProp {
         setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
+    Integer getLdapMaxUsernameLengthAsInteger();
+
     public default String getLdapSecurityPrincipal(final String username) {
-        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
+        final String value;
+        final int maxLength = getLdapMaxUsernameLengthAsInteger().intValue();
+        if (username == null) {
+            value = StringUtil.EMPTY;
+        } else if (maxLength >= 0 && username.length() > maxLength) {
+            value = username.substring(0, maxLength);
+        } else {
+            value = username;
+        }
+        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), value);
     }
 
     public default String getLdapSecurityPrincipal() {
