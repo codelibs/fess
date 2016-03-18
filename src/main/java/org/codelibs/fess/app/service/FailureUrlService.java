@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -209,7 +209,7 @@ public class FailureUrlService implements Serializable {
 
     private String getStackTrace(final Throwable t) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final StringWriter sw = new StringWriter();
+        final StringBuilderWriter sw = new StringBuilderWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
         return systemHelper.abbreviateLongText(sw.toString());
