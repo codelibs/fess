@@ -46,6 +46,7 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
+import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -345,13 +346,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getSingleNodeValue(final Document document, final String xpath, final boolean pruned) {
-        StringBuilder buf = null;
+        UnsafeStringBuilder buf = null;
         NodeList list = null;
         try {
             list = getXPathAPI().selectNodeList(document, xpath);
             for (int i = 0; i < list.getLength(); i++) {
                 if (buf == null) {
-                    buf = new StringBuilder(1000);
+                    buf = new UnsafeStringBuilder(1000);
                 } else {
                     buf.append(' ');
                 }
@@ -369,7 +370,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         if (buf == null) {
             return null;
         }
-        return buf.toString();
+        return buf.toUnsafeString().trim();
     }
 
     protected Node pruneNode(final Node node) {
@@ -407,7 +408,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String getMultipleNodeValue(final Document document, final String xpath) {
         NodeList nodeList = null;
-        final StringBuilder buf = new StringBuilder(100);
+        final UnsafeStringBuilder buf = new UnsafeStringBuilder(100);
         try {
             nodeList = getXPathAPI().selectNodeList(document, xpath);
             for (int i = 0; i < nodeList.getLength(); i++) {
@@ -418,7 +419,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
         }
-        return buf.toString();
+        return buf.toUnsafeString().trim();
     }
 
     protected String replaceDuplicateHost(final String url) {

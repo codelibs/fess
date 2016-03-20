@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
+import org.apache.commons.io.FileUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.Crawler;
@@ -47,6 +48,7 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocList;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -172,7 +174,7 @@ public class IndexUpdater extends Thread {
                         builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
                     };
 
-            final List<Map<String, Object>> docList = new ArrayList<>();
+            final DocList docList = new DocList();
             final List<EsAccessResult> accessResultList = new ArrayList<>();
 
             long updateTime = System.currentTimeMillis();
@@ -299,11 +301,9 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void processAccessResults(final List<Map<String, Object>> docList, final List<EsAccessResult> accessResultList,
-            final List<EsAccessResult> arList) {
+    private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
-        long contentSize = 0;
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
@@ -319,6 +319,7 @@ public class IndexUpdater extends Thread {
                 continue;
             }
 
+            final long startTime = System.currentTimeMillis();
             final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
@@ -349,19 +350,19 @@ public class IndexUpdater extends Thread {
                     updateDocument(map);
 
                     docList.add(map);
+                    final long processingTime = System.currentTimeMillis() - startTime;
+                    docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document(" + contentSize + " bytes). " + "The number of a document cache is "
-                                + docList.size() + ".");
+                        logger.debug("Added the document(" + FileUtils.byteCountToDisplaySize(docList.getContentSize()) + ", "
+                                + processingTime + "ms). " + "The number of a document cache is " + docList.size() + ".");
                     }
 
                     if (accessResult.getContentLength() == null) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
-                        contentSize = 0;
                     } else {
-                        contentSize += accessResult.getContentLength().longValue();
-                        if (contentSize >= maxDocumentRequestSize) {
+                        docList.addContentSize(accessResult.getContentLength().longValue());
+                        if (docList.getContentSize() >= maxDocumentRequestSize) {
                             indexingHelper.sendDocuments(fessEsClient, docList);
-                            contentSize = 0;
                         }
                     }
                     documentSize++;
@@ -482,15 +483,19 @@ public class IndexUpdater extends Thread {
         }
         final long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
-            logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+            if (totalHits > 0) {
+                logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+            } else {
+                logger.info("Processing no docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+            }
         }
         final long unprocessedDocumentSize = fessConfig.getIndexerUnprocessedDocumentSizeAsInteger().longValue();
-        if (totalHits > unprocessedDocumentSize) {
+        final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
+        if (totalHits > unprocessedDocumentSize && intervalControlHelper.isCrawlerRunning()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopped all crawler threads. " + " You have " + totalHits + " (>" + unprocessedDocumentSize + ") "
                         + " unprocessed docs.");
             }
-            final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.setCrawlerRunning(false);
         }
         return arList;

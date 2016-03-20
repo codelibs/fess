@@ -107,10 +107,9 @@ public class SuggestJob {
 
         try {
             executeSuggestCreator();
-        } catch (final FessSystemException e) {
-            throw e;
         } catch (final Exception e) {
-            throw new FessSystemException("Failed to execute a crawl job.", e);
+            logger.error("Failed to purge user info.", e);
+            resultBuf.append(e.getMessage()).append("\n");
         }
 
         return resultBuf.toString();
@@ -128,7 +127,7 @@ public class SuggestJob {
 
         // -cp
         cmdList.add("-cp");
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(100);
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);

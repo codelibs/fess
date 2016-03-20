@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class DocumentHelper implements Serializable {
         }
 
         final int maxAlphanumTermSize = getMaxAlphanumSize();
-        final StringBuilder buf = new StringBuilder(content.length());
+        final UnsafeStringBuilder buf = new UnsafeStringBuilder(content.length());
         boolean isSpace = false;
         int alphanumSize = 0;
         for (int i = 0; i < content.length(); i++) {
@@ -68,7 +69,7 @@ public class DocumentHelper implements Serializable {
             }
         }
 
-        return buf.toString().trim();
+        return buf.toUnsafeString().trim();
     }
 
     protected int getMaxAlphanumSize() {

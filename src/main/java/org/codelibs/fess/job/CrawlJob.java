@@ -178,7 +178,7 @@ public class CrawlJob {
     }
 
     public String execute() {
-        final StringBuilder resultBuf = new StringBuilder();
+        final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
         if (sessionId == null) { // create session id
@@ -255,7 +255,7 @@ public class CrawlJob {
 
         // -cp
         cmdList.add("-cp");
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(100);
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);

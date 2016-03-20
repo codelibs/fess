@@ -70,7 +70,7 @@ public class InputStreamThread extends Thread {
     }
 
     public String getOutput() {
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(100);
         for (final String value : list) {
             buf.append(value).append("\n");
         }

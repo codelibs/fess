@@ -110,7 +110,7 @@ public class SuggestHelper {
                         return;
                     }
 
-                    final StringBuilder sb = new StringBuilder();
+                    final StringBuilder sb = new StringBuilder(100);
                     final List<String> fields = new ArrayList<>();
                     final List<String> tags = new ArrayList<>();
                     final List<String> roles = new ArrayList<>();

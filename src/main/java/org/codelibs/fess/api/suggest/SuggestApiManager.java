@@ -60,7 +60,7 @@ public class SuggestApiManager extends BaseApiManager {
             ServletException {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
+        final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
 
         try {

@@ -32,7 +32,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -141,7 +140,7 @@ public class JsonApiManager extends BaseApiManager {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         String query = null;
-        final StringBuilder buf = new StringBuilder(1000);
+        final StringBuilder buf = new StringBuilder(1000); // TODO replace response stream
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
         try {
             final SearchRenderData data = new SearchRenderData();
@@ -278,7 +277,7 @@ public class JsonApiManager extends BaseApiManager {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
+        final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
             buf.append("\"record_count\":");
@@ -328,7 +327,7 @@ public class JsonApiManager extends BaseApiManager {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
+        final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, null, fields, excludes);
 
@@ -493,7 +492,7 @@ public class JsonApiManager extends BaseApiManager {
                 }
             }
 
-            final StringBuilder buf = new StringBuilder();
+            final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
             buf.append("\"num\":").append(docIdList.size());
             if (!docIdList.isEmpty()) {
                 buf.append(", \"doc_ids\":[");

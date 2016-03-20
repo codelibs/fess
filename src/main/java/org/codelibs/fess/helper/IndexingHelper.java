@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocList;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -37,7 +39,7 @@ public class IndexingHelper {
 
     public long requestInterval = 500;
 
-    public void sendDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
+    public void sendDocuments(final FessEsClient fessEsClient, final DocList docList) {
         if (docList.isEmpty()) {
             return;
         }
@@ -52,14 +54,29 @@ public class IndexingHelper {
                 fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
             }
             if (logger.isInfoEnabled()) {
-                logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+                final Runtime runtime = Runtime.getRuntime();
+                final long freeBytes = runtime.freeMemory();
+                final long maxBytes = runtime.maxMemory();
+                final long totalBytes = runtime.totalMemory();
+                final long usedBytes = totalBytes - freeBytes;
+                if (docList.getContentSize() > 0) {
+                    logger.info("Sent " + docList.size() + " docs (Doc:{process " + docList.getProcessingTime() + "ms, send "
+                            + (System.currentTimeMillis() - execTime) + "ms, size "
+                            + FileUtils.byteCountToDisplaySize(docList.getContentSize()) + "}, Mem:{used "
+                            + FileUtils.byteCountToDisplaySize(usedBytes) + ", heap " + FileUtils.byteCountToDisplaySize(totalBytes)
+                            + ", max " + FileUtils.byteCountToDisplaySize(maxBytes) + "})");
+                } else {
+                    logger.info("Sent " + docList.size() + " docs (Doc:{send " + (System.currentTimeMillis() - execTime)
+                            + "ms}, Mem:{used " + FileUtils.byteCountToDisplaySize(usedBytes) + ", heap "
+                            + FileUtils.byteCountToDisplaySize(totalBytes) + ", max " + FileUtils.byteCountToDisplaySize(maxBytes) + "})");
+                }
             }
         } finally {
             docList.clear();
         }
     }
 
-    private void deleteOldDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
+    private void deleteOldDocuments(final FessEsClient fessEsClient, final DocList docList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final List<String> docIdList = new ArrayList<>();

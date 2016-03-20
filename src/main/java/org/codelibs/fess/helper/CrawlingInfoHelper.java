@@ -27,6 +27,7 @@ import java.util.Map;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
+import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingInfo;
@@ -187,7 +188,7 @@ public class CrawlingInfoHelper implements Serializable {
     }
 
     private String generateId(final String url, final List<String> roleTypeList) {
-        final StringBuilder buf = new StringBuilder(1000);
+        final UnsafeStringBuilder buf = new UnsafeStringBuilder(1000);
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
@@ -200,7 +201,7 @@ public class CrawlingInfoHelper implements Serializable {
             }
         }
 
-        return normalize(buf.toString());
+        return normalize(buf.toUnsafeString().trim());
     }
 
     private String normalize(final String value) {

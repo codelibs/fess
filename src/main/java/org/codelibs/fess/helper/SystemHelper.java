@@ -152,7 +152,7 @@ public class SystemHelper implements Serializable {
         }
 
         try {
-            final StringBuilder buf = new StringBuilder();
+            final StringBuilder buf = new StringBuilder(path.length() + 100);
             for (int i = 0; i < path.length(); i++) {
                 final char c = path.charAt(i);
                 if (CharUtil.isUrlChar(c) || c == '^' || c == '{' || c == '}' || c == '|' || c == '\\') {

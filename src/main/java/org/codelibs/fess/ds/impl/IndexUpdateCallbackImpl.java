@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.ds.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +27,7 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected volatile long executeTime = 0;
 
-    final List<Map<String, Object>> docList = new ArrayList<>();
+    final DocList docList = new DocList();
 
     /* (non-Javadoc)
      * @see org.codelibs.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
