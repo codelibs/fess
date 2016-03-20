@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components namespace="fessCrawler">
+	<include path="crawler/container.xml" />
+	<component name="tikaExtractor"
+		class="org.codelibs.fess.crawler.extractor.impl.TikaExtractor">
+		<property name="maxCompressionRatio">2</property>
+		<property name="maxUncompressionSize">10000000</property>
+		<property name="maxAlphanumTermSize">20</property>
+	</component>
+</components>
