@@ -24,6 +24,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
+import org.codelibs.fess.util.MemoryUtil;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -54,21 +55,13 @@ public class IndexingHelper {
                 fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
             }
             if (logger.isInfoEnabled()) {
-                final Runtime runtime = Runtime.getRuntime();
-                final long freeBytes = runtime.freeMemory();
-                final long maxBytes = runtime.maxMemory();
-                final long totalBytes = runtime.totalMemory();
-                final long usedBytes = totalBytes - freeBytes;
                 if (docList.getContentSize() > 0) {
                     logger.info("Sent " + docList.size() + " docs (Doc:{process " + docList.getProcessingTime() + "ms, send "
                             + (System.currentTimeMillis() - execTime) + "ms, size "
-                            + FileUtils.byteCountToDisplaySize(docList.getContentSize()) + "}, Mem:{used "
-                            + FileUtils.byteCountToDisplaySize(usedBytes) + ", heap " + FileUtils.byteCountToDisplaySize(totalBytes)
-                            + ", max " + FileUtils.byteCountToDisplaySize(maxBytes) + "})");
+                            + MemoryUtil.byteCountToDisplaySize(docList.getContentSize()) + "}, " + MemoryUtil.getMemoryUsageLog() + ")");
                 } else {
-                    logger.info("Sent " + docList.size() + " docs (Doc:{send " + (System.currentTimeMillis() - execTime)
-                            + "ms}, Mem:{used " + FileUtils.byteCountToDisplaySize(usedBytes) + ", heap "
-                            + FileUtils.byteCountToDisplaySize(totalBytes) + ", max " + FileUtils.byteCountToDisplaySize(maxBytes) + "})");
+                    logger.info("Sent " + docList.size() + " docs (Doc:{send " + (System.currentTimeMillis() - execTime) + "ms}, "
+                            + MemoryUtil.getMemoryUsageLog() + ")");
                 }
             }
         } finally {

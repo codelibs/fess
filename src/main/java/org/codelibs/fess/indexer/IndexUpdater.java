@@ -49,6 +49,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
+import org.codelibs.fess.util.MemoryUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -180,6 +181,7 @@ public class IndexUpdater extends Thread {
             long updateTime = System.currentTimeMillis();
             int errorCount = 0;
             int emptyListCount = 0;
+            long cleanupTime = -1;
             while (!finishCrawling || !accessResultList.isEmpty()) {
                 try {
                     final int sessionIdListSize = finishedSessionIdList.size();
@@ -208,7 +210,7 @@ public class IndexUpdater extends Thread {
 
                     updateTime = System.currentTimeMillis();
 
-                    List<EsAccessResult> arList = getAccessResultList(cb);
+                    List<EsAccessResult> arList = getAccessResultList(cb, cleanupTime);
                     if (arList.isEmpty()) {
                         emptyListCount++;
                     } else {
@@ -216,8 +218,8 @@ public class IndexUpdater extends Thread {
                     }
                     while (!arList.isEmpty()) {
                         processAccessResults(docList, accessResultList, arList);
-                        cleanupAccessResults(accessResultList);
-                        arList = getAccessResultList(cb);
+                        cleanupTime = cleanupAccessResults(accessResultList);
+                        arList = getAccessResultList(cb, cleanupTime);
                     }
                     if (!docList.isEmpty()) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
@@ -353,7 +355,7 @@ public class IndexUpdater extends Thread {
                     final long processingTime = System.currentTimeMillis() - startTime;
                     docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document(" + FileUtils.byteCountToDisplaySize(docList.getContentSize()) + ", "
+                        logger.debug("Added the document(" + MemoryUtil.byteCountToDisplaySize(docList.getContentSize()) + ", "
                                 + processingTime + "ms). " + "The number of a document cache is " + docList.size() + ".");
                     }
 
@@ -452,21 +454,22 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void cleanupAccessResults(final List<EsAccessResult> accessResultList) {
+    private long cleanupAccessResults(final List<EsAccessResult> accessResultList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = System.currentTimeMillis();
             final int size = accessResultList.size();
             dataService.update(accessResultList);
             accessResultList.clear();
+            final long time = System.currentTimeMillis() - execTime;
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated " + size + " access results. The execution time is " + (System.currentTimeMillis() - execTime)
-                        + "ms.");
+                logger.debug("Updated " + size + " access results. The execution time is " + time + "ms.");
             }
+            return time;
         }
-
+        return -1;
     }
 
-    private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb) {
+    private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb, final long cleanupTime) {
         if (logger.isDebugEnabled()) {
             logger.debug("Getting documents in IndexUpdater queue.");
         }
@@ -483,11 +486,21 @@ public class IndexUpdater extends Thread {
         }
         final long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
+            final StringBuilder buf = new StringBuilder(100);
+            buf.append("Processing ");
             if (totalHits > 0) {
-                logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+                buf.append(arList.size()).append('/').append(totalHits).append(" docs (Doc:{access ");
             } else {
-                logger.info("Processing no docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+                buf.append("no docs (Doc:{access ");
             }
+            buf.append(System.currentTimeMillis() - execTime).append("ms");
+            if (cleanupTime >= 0) {
+                buf.append(", cleanup ").append(cleanupTime).append("ms");
+            }
+            buf.append("}, ");
+            buf.append(MemoryUtil.getMemoryUsageLog());
+            buf.append(')');
+            logger.info(buf.toString());
         }
         final long unprocessedDocumentSize = fessConfig.getIndexerUnprocessedDocumentSizeAsInteger().longValue();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
