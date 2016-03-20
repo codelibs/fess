@@ -47,7 +47,7 @@ public class DocumentHelperTest extends UnitFessTestCase {
 
     public void test_getContent_maxAlphanum() {
         DocumentHelper documentHelper = new DocumentHelper() {
-            protected int getMaxAlphanumSize() {
+            protected int getMaxAlphanumTermSize() {
                 return 2;
             }
         };
@@ -65,6 +65,38 @@ public class DocumentHelperTest extends UnitFessTestCase {
         assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
         assertEquals("12 ab", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
         assertEquals("12", documentHelper.getContent(responseData, " 123abc ", dataMap));
+    }
+
+    public void test_getContent_maxSymbol() {
+        DocumentHelper documentHelper = new DocumentHelper() {
+            protected int getMaxSymbolTermSize() {
+                return 2;
+            }
+        };
+
+        ResponseData responseData = new ResponseData();
+        Map<String, Object> dataMap = new HashMap<>();
+        assertEquals("", documentHelper.getContent(responseData, null, dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, " ", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "  ", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t\t", dataMap));
+        assertEquals("", documentHelper.getContent(responseData, "\t \t", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(responseData, " 123 abc ", dataMap));
+        assertEquals("１２３ あいう", documentHelper.getContent(responseData, "　１２３　あいう　", dataMap));
+        assertEquals("123 abc", documentHelper.getContent(responseData, " 123\nabc ", dataMap));
+        assertEquals("123abc", documentHelper.getContent(responseData, " 123abc ", dataMap));
+
+        assertEquals("!!", documentHelper.getContent(responseData, "!!!", dataMap));
+        assertEquals("//", documentHelper.getContent(responseData, "///", dataMap));
+        assertEquals("::", documentHelper.getContent(responseData, ":::", dataMap));
+        assertEquals("@@", documentHelper.getContent(responseData, "@@@", dataMap));
+        assertEquals("[[", documentHelper.getContent(responseData, "[[[", dataMap));
+        assertEquals("``", documentHelper.getContent(responseData, "```", dataMap));
+        assertEquals("{{", documentHelper.getContent(responseData, "{{{", dataMap));
+        assertEquals("~~", documentHelper.getContent(responseData, "~~~", dataMap));
+        assertEquals("!\"", documentHelper.getContent(responseData, "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", dataMap));
     }
 
     public void test_getDigest() {

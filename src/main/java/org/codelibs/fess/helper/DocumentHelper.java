@@ -38,10 +38,12 @@ public class DocumentHelper implements Serializable {
             return StringUtil.EMPTY; // empty
         }
 
-        final int maxAlphanumTermSize = getMaxAlphanumSize();
+        final int maxAlphanumTermSize = getMaxAlphanumTermSize();
+        final int maxSymbolTermSize = getMaxSymbolTermSize();
         final UnsafeStringBuilder buf = new UnsafeStringBuilder(content.length());
         boolean isSpace = false;
         int alphanumSize = 0;
+        int symbolSize = 0;
         for (int i = 0; i < content.length(); i++) {
             final char c = content.charAt(i);
             if (Character.isISOControl(c) || c == '\u0020' || c == '\u3000' || c == 65533) {
@@ -51,6 +53,7 @@ public class DocumentHelper implements Serializable {
                     isSpace = true;
                 }
                 alphanumSize = 0;
+                symbolSize = 0;
             } else if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
                 // alphanum
                 if (maxAlphanumTermSize >= 0) {
@@ -62,19 +65,38 @@ public class DocumentHelper implements Serializable {
                     buf.append(c);
                 }
                 isSpace = false;
+                symbolSize = 0;
+            } else if ((c >= '!' && c <= '/') || (c >= ':' && c <= '@') || (c >= '[' && c <= '`') || (c >= '{' && c <= '~')) {
+                // symbol
+                if (maxSymbolTermSize >= 0) {
+                    if (symbolSize < maxSymbolTermSize) {
+                        buf.append(c);
+                    }
+                    symbolSize++;
+                } else {
+                    buf.append(c);
+                }
+                isSpace = false;
+                alphanumSize = 0;
             } else {
                 buf.append(c);
                 isSpace = false;
                 alphanumSize = 0;
+                symbolSize = 0;
             }
         }
 
         return buf.toUnsafeString().trim();
     }
 
-    protected int getMaxAlphanumSize() {
+    protected int getMaxAlphanumTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.getCrawlerDocumentMaxAlphanumTermSizeAsInteger().intValue();
+    }
+
+    protected int getMaxSymbolTermSize() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessConfig.getCrawlerDocumentMaxSymbolTermSizeAsInteger().intValue();
     }
 
     public String getDigest(final ResponseData responseData, final String content, final Map<String, Object> dataMap, final int maxWidth) {
