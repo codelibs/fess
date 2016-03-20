@@ -71,7 +71,7 @@ public class WebFsIndexHelper implements Serializable {
     @Resource
     protected CrawlingConfigHelper crawlingConfigHelper;
 
-    public long maxAccessCount = 100000;
+    public long maxAccessCount = Long.MAX_VALUE;
 
     public long crawlingExecutionInterval = Constants.DEFAULT_CRAWLING_EXECUTION_INTERVAL;
 
