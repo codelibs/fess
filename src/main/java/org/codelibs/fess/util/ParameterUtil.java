@@ -33,6 +33,8 @@ public class ParameterUtil {
 
     protected static final String CLIENT_PREFIX = "client.";
 
+    protected static final String CONFIG_PREFIX = "config.";
+
     protected static final String FIELD_PREFIX = "field.config.";
 
     protected ParameterUtil() {
@@ -72,12 +74,14 @@ public class ParameterUtil {
 
     public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters) {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
+        final Map<String, String> configConfigMap = new HashMap<>();
         final Map<String, String> clientConfigMap = new HashMap<>();
         final Map<String, String> xpathConfigMap = new HashMap<>();
         final Map<String, String> metaConfigMap = new HashMap<>();
         final Map<String, String> valueConfigMap = new HashMap<>();
         final Map<String, String> scriptConfigMap = new HashMap<>();
         final Map<String, String> fieldConfigMap = new HashMap<>();
+        map.put(ConfigName.CONFIG, configConfigMap);
         map.put(ConfigName.CLIENT, clientConfigMap);
         map.put(ConfigName.XPATH, xpathConfigMap);
         map.put(ConfigName.META, metaConfigMap);
@@ -86,7 +90,9 @@ public class ParameterUtil {
         map.put(ConfigName.FIELD, fieldConfigMap);
         for (final Map.Entry<String, String> entry : ParameterUtil.parse(configParameters).entrySet()) {
             final String key = entry.getKey();
-            if (key.startsWith(CLIENT_PREFIX)) {
+            if (key.startsWith(CONFIG_PREFIX)) {
+                configConfigMap.put(key.substring(CONFIG_PREFIX.length()), entry.getValue());
+            } else if (key.startsWith(CLIENT_PREFIX)) {
                 clientConfigMap.put(key.substring(CLIENT_PREFIX.length()), entry.getValue());
             } else if (key.startsWith(XPATH_PREFIX)) {
                 xpathConfigMap.put(key.substring(XPATH_PREFIX.length()), entry.getValue());

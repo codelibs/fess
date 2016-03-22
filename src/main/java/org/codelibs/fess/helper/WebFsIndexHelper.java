@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -36,6 +37,7 @@ import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.crawler.service.impl.EsDataService;
 import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
 import org.codelibs.fess.crawler.service.impl.EsUrlQueueService;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.indexer.IndexUpdater;
@@ -179,6 +181,18 @@ public class WebFsIndexHelper implements Serializable {
             crawlerContext.setMaxAccessCount(maxCount);
 
             webConfig.initializeClientFactory(crawler.getClientFactory());
+            final Map<String, String> configParamMap = webConfig.getConfigParameterMap(ConfigName.CONFIG);
+
+            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_ALL))) {
+                deleteCrawlData(sid);
+            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_FILTERS))) {
+                final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+                try {
+                    urlFilterService.delete(sid);
+                } catch (Exception e) {
+                    logger.warn("Failed to delete url filters for " + sid);
+                }
+            }
 
             // set urls
             final String[] urls = urlsStr.split("[\r\n]");
@@ -223,13 +237,15 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
-            for (final String u : excludedUrlList) {
-                if (StringUtil.isNotBlank(u)) {
-                    final String urlValue = u.trim();
-                    crawler.addExcludeFilter(urlValue);
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Excluded URL from failures: " + urlValue);
+            if (!Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_IGNORE_FAILURE_URLS))) {
+                final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
+                for (final String u : excludedUrlList) {
+                    if (StringUtil.isNotBlank(u)) {
+                        final String urlValue = u.trim();
+                        crawler.addExcludeFilter(urlValue);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Excluded URL from failures: " + urlValue);
+                        }
                     }
                 }
             }
@@ -282,6 +298,18 @@ public class WebFsIndexHelper implements Serializable {
             crawlerContext.setMaxAccessCount(maxCount);
 
             fileConfig.initializeClientFactory(crawler.getClientFactory());
+            final Map<String, String> configParamMap = fileConfig.getConfigParameterMap(ConfigName.CONFIG);
+
+            if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_ALL))) {
+                deleteCrawlData(sid);
+            } else if (Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_CLEANUP_FILTERS))) {
+                final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+                try {
+                    urlFilterService.delete(sid);
+                } catch (Exception e) {
+                    logger.warn("Failed to delete url filters for " + sid);
+                }
+            }
 
             // set paths
             final String[] paths = pathsStr.split("[\r\n]");
@@ -353,14 +381,16 @@ public class WebFsIndexHelper implements Serializable {
             }
 
             // failure url
-            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileConfig.getConfigId());
-            if (excludedUrlList != null) {
-                for (final String u : excludedUrlList) {
-                    if (StringUtil.isNotBlank(u)) {
-                        final String urlValue = u.trim();
-                        crawler.addExcludeFilter(urlValue);
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Excluded Path from failures: " + urlValue);
+            if (!Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_IGNORE_FAILURE_URLS))) {
+                final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileConfig.getConfigId());
+                if (excludedUrlList != null) {
+                    for (final String u : excludedUrlList) {
+                        if (StringUtil.isNotBlank(u)) {
+                            final String urlValue = u.trim();
+                            crawler.addExcludeFilter(urlValue);
+                            if (logger.isInfoEnabled()) {
+                                logger.info("Excluded Path from failures: " + urlValue);
+                            }
                         }
                     }
                 }
@@ -472,34 +502,38 @@ public class WebFsIndexHelper implements Serializable {
             return;
         }
 
-        final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
-        final EsUrlQueueService urlQueueService = ComponentUtil.getComponent(EsUrlQueueService.class);
-        final EsDataService dataService = ComponentUtil.getComponent(EsDataService.class);
         for (final String sid : sessionIdList) {
             // remove config
             crawlingConfigHelper.remove(sid);
+            deleteCrawlData(sid);
+        }
+    }
 
-            try {
-                // clear url filter
-                urlFilterService.delete(sid);
-            } catch (Exception e) {
-                logger.warn("Failed to delete UrlFilter for " + sid, e);
-            }
+    protected void deleteCrawlData(final String sid) {
+        final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
+        final EsUrlQueueService urlQueueService = ComponentUtil.getComponent(EsUrlQueueService.class);
+        final EsDataService dataService = ComponentUtil.getComponent(EsDataService.class);
 
-            try {
-                // clear queue
-                urlQueueService.clearCache();
-                urlQueueService.delete(sid);
-            } catch (Exception e) {
-                logger.warn("Failed to delete UrlQueue for " + sid, e);
-            }
+        try {
+            // clear url filter
+            urlFilterService.delete(sid);
+        } catch (Exception e) {
+            logger.warn("Failed to delete UrlFilter for " + sid, e);
+        }
 
-            try {
-                // clear
-                dataService.delete(sid);
-            } catch (Exception e) {
-                logger.warn("Failed to delete AccessResult for " + sid, e);
-            }
+        try {
+            // clear queue
+            urlQueueService.clearCache();
+            urlQueueService.delete(sid);
+        } catch (Exception e) {
+            logger.warn("Failed to delete UrlQueue for " + sid, e);
+        }
+
+        try {
+            // clear
+            dataService.delete(sid);
+        } catch (Exception e) {
+            logger.warn("Failed to delete AccessResult for " + sid, e);
         }
     }
 
