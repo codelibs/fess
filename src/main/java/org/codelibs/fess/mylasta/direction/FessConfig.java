@@ -234,6 +234,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5 */
     String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
 
+    /** The key of the configuration. e.g. 10485760 */
+    String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
+
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
 
@@ -1467,6 +1470,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerDataMaxDocumentCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.request.size'. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerDataMaxDocumentRequestSize();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.request.size' as {@link Integer}. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerDataMaxDocumentRequestSizeAsInteger();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -3527,6 +3545,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getIndexerDataMaxDocumentCacheSizeAsInteger() {
             return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE);
+        }
+
+        public String getIndexerDataMaxDocumentRequestSize() {
+            return get(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
+        }
+
+        public Integer getIndexerDataMaxDocumentRequestSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
         }
 
         public String getIndexFieldFavoriteCount() {
