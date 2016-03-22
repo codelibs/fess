@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
-import org.apache.commons.io.FileUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.Crawler;
