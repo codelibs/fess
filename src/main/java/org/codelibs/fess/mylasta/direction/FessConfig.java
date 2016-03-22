@@ -50,7 +50,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC */
+    -XX:+DisableExplicitGC
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
@@ -63,11 +67,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.responseTimeout=30000
-    */
+    -XX:+DisableExplicitGC */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -844,7 +844,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC <br>
+    -XX:+DisableExplicitGC
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -862,11 +866,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.responseTimeout=30000
-    <br>
+    -XX:+DisableExplicitGC <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
