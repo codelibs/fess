@@ -33,6 +33,7 @@ import org.codelibs.fess.app.service.FileConfigService;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.Crawler;
 import org.codelibs.fess.crawler.CrawlerContext;
+import org.codelibs.fess.crawler.CrawlerStatus;
 import org.codelibs.fess.crawler.interval.FessIntervalController;
 import org.codelibs.fess.crawler.service.impl.EsDataService;
 import org.codelibs.fess.crawler.service.impl.EsUrlFilterService;
@@ -446,7 +447,8 @@ public class WebFsIndexHelper implements Serializable {
 
             // check status
             for (int i = 0; i < startedCrawlerNum; i++) {
-                if (!crawlerList.get(i).getCrawlerContext().isRunning() && crawlerStatusList.get(i).equals(Constants.RUNNING)) {
+                if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
+                        && crawlerStatusList.get(i).equals(Constants.RUNNING)) {
                     crawlerList.get(i).awaitTermination();
                     crawlerStatusList.set(i, Constants.DONE);
                     final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
@@ -466,7 +468,8 @@ public class WebFsIndexHelper implements Serializable {
             finishedAll = true;
             for (int i = 0; i < crawlerList.size(); i++) {
                 crawlerList.get(i).awaitTermination(crawlingExecutionInterval);
-                if (!crawlerList.get(i).getCrawlerContext().isRunning() && !crawlerStatusList.get(i).equals(Constants.DONE)) {
+                if (crawlerList.get(i).getCrawlerContext().getStatus() == CrawlerStatus.DONE
+                        && !crawlerStatusList.get(i).equals(Constants.DONE)) {
                     crawlerStatusList.set(i, Constants.DONE);
                     final String sid = crawlerList.get(i).getCrawlerContext().getSessionId();
                     indexUpdater.addFinishedSessionId(sid);
