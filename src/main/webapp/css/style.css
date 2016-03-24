@@ -281,12 +281,12 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	#result .info {
 		display: none;
 	}
-	body.search #searchOptions {
+	body.search #searchOptions, body.help #searchOptions {
 		width: 100%;
 		right: -100%;
 	}
-	body.search #searchOptions active {
-		left: 0;
+	body.search #searchOptions.active, body.help #searchOptions.active {
+		right: 0;
 	}
 }
 
