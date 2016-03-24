@@ -242,29 +242,32 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 
 /* Large desktop */
 @media ( min-width : 74.9em) {
-	.visible-phone {
+	.visible-xs {
 		display: none !important;
 	}
 }
 
 /* Large devices (desktops, less than 75em) */
 @media ( max-width : 74.9em) {
-	.visible-phone {
+	.visible-xs {
 		display: none !important;
-	}
-	.br-tablet {
-		display: block;
 	}
 }
 
 /* Medium devices (tablets, less than 62em) */
 @media ( max-width : 61.9em) {
+	.visible-xs {
+		display: none !important;
+	}
 }
 
 /* Small devices (landscape phones, less than 48em) */
 @media ( max-width : 47.9em) {
-	.br-phone {
+	.br-xs {
 		display: block;
+	}
+	.hidden-xs {
+		display: none !important;
 	}
 	.mainLogo img {
 		width: 200px;
@@ -292,7 +295,7 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 
 /* Extra small devices (portrait phones, less than 34em) */
 @media ( max-width : 360px) {
-	.br-phone {
+	.br-xs {
 		display: block;
 	}
 	.mainLogo img {
