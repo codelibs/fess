@@ -257,7 +257,11 @@ public class DataIndexHelper implements Serializable {
             }
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final QueryBuilder queryBuilder =
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
+                    QueryBuilders
+                            .boolQuery()
+                            .must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
+                            .must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).lte("now"))
+                                    .should(QueryBuilders.missingQuery(fessConfig.getIndexFieldExpires())))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
                 ComponentUtil.getElasticsearchClient().deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
