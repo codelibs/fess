@@ -219,8 +219,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 5000 */
     String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
 
-    /** The key of the configuration. e.g. 60 */
-    String INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT = "indexer.webfs.max.empty.list.conunt";
+    /** The key of the configuration. e.g. 360 */
+    String INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT = "indexer.webfs.max.empty.list.count";
 
     /** The key of the configuration. e.g. 10000 */
     String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
@@ -1397,19 +1397,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getIndexerWebfsCommitMarginTimeAsInteger();
 
     /**
-     * Get the value for the key 'indexer.webfs.max.empty.list.conunt'. <br>
-     * The value is, e.g. 60 <br>
+     * Get the value for the key 'indexer.webfs.max.empty.list.count'. <br>
+     * The value is, e.g. 360 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getIndexerWebfsMaxEmptyListConunt();
+    String getIndexerWebfsMaxEmptyListCount();
 
     /**
-     * Get the value for the key 'indexer.webfs.max.empty.list.conunt' as {@link Integer}. <br>
-     * The value is, e.g. 60 <br>
+     * Get the value for the key 'indexer.webfs.max.empty.list.count' as {@link Integer}. <br>
+     * The value is, e.g. 360 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getIndexerWebfsMaxEmptyListConuntAsInteger();
+    Integer getIndexerWebfsMaxEmptyListCountAsInteger();
 
     /**
      * Get the value for the key 'indexer.webfs.update.interval'. <br>
@@ -3507,12 +3507,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME);
         }
 
-        public String getIndexerWebfsMaxEmptyListConunt() {
-            return get(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        public String getIndexerWebfsMaxEmptyListCount() {
+            return get(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT);
         }
 
-        public Integer getIndexerWebfsMaxEmptyListConuntAsInteger() {
-            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        public Integer getIndexerWebfsMaxEmptyListCountAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT);
         }
 
         public String getIndexerWebfsUpdateInterval() {

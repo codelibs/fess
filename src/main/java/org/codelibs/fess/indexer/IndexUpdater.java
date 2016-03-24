@@ -156,7 +156,7 @@ public class IndexUpdater extends Thread {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long updateInterval = fessConfig.getIndexerWebfsUpdateIntervalAsInteger().longValue();
-        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListConuntAsInteger().intValue();
+        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListCountAsInteger().intValue();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final Consumer<SearchRequestBuilder> cb =
