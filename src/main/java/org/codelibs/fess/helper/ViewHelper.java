@@ -78,6 +78,10 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper implements Serializable {
 
+    private static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
+
+    private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
+
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
@@ -477,7 +481,16 @@ public class ViewHelper implements Serializable {
     public Object getSitePath(final Map<String, Object> docMap) {
         final Object urlLink = docMap.get("urlLink");
         if (urlLink != null) {
-            return StringUtils.abbreviate(urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""), sitePathLength);
+            final String returnUrl;
+            final String url = urlLink.toString();
+            if (LOCAL_PATH_PATTERN.matcher(url).find() || SHARED_FOLDER_PATTERN.matcher(url).find()) {
+                returnUrl = url.replaceFirst("^file:/+", "");
+            } else if (url.startsWith("file:")) {
+                returnUrl = url.replaceFirst("^file:/+", "/");
+            } else {
+                returnUrl = url.replaceFirst("^[a-zA-Z0-9]*:/+", "");
+            }
+            return StringUtils.abbreviate(returnUrl, sitePathLength);
         }
         return null;
     }
