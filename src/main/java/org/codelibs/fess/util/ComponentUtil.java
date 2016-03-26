@@ -19,6 +19,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.WebApiManagerFactory;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.EsAccessResult;
 import org.codelibs.fess.crawler.extractor.ExtractorFactory;
 import org.codelibs.fess.crawler.service.DataService;
@@ -60,6 +61,7 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
+
     private static final String QUERY_PARSER = "queryParser";
 
     private static final String DOCUMENT_HELPER = "documentHelper";
@@ -320,6 +322,10 @@ public final class ComponentUtil {
 
     public static QueryParser getQueryParser() {
         return getComponent(QUERY_PARSER);
+    }
+
+    public static CrawlerClientFactory getCrawlerClientFactory() {
+        return getComponent(CrawlerClientFactory.class);
     }
 
     public static <T> T getComponent(final Class<T> clazz) {
