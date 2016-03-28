@@ -17,6 +17,7 @@ package org.codelibs.fess.helper;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -30,12 +31,15 @@ public class QueryHelperTest extends UnitFessTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        queryHelper = new QueryHelper();
+        queryHelper = new QueryHelper() {
+            protected QueryParser getQueryParser() {
+                return new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
+            }
+        };
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         registerMockInstance(fessConfig);
         registerMockInstance(new SystemHelper());
         inject(queryHelper);
-        queryHelper.queryParser = new ExtendableQueryParser(Constants.DEFAULT_FIELD, new WhitespaceAnalyzer());
         queryHelper.init();
     }
 

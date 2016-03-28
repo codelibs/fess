@@ -32,7 +32,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.LabelTypeService;
 import org.codelibs.fess.es.config.exentity.LabelType;
-import org.lastaflute.di.core.SingletonLaContainer;
+import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class LabelTypeHelper implements Serializable {
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
     protected LabelTypeService getLabelTypeService() {
-        return SingletonLaContainer.getComponent(LabelTypeService.class);
+        return ComponentUtil.getComponent(LabelTypeService.class);
     }
 
     @PostConstruct
@@ -185,7 +185,7 @@ public class LabelTypeHelper implements Serializable {
             this.value = value;
 
             if (StringUtil.isNotBlank(includedPaths)) {
-                final StringBuilder buf = new StringBuilder();
+                final StringBuilder buf = new StringBuilder(100);
                 char split = 0;
                 for (final String path : includedPaths.split("\n")) {
                     if (split == 0) {
@@ -199,7 +199,7 @@ public class LabelTypeHelper implements Serializable {
             }
 
             if (StringUtil.isNotBlank(excludedPaths)) {
-                final StringBuilder buf = new StringBuilder();
+                final StringBuilder buf = new StringBuilder(100);
                 char split = 0;
                 for (final String path : excludedPaths.split("\n")) {
                     if (split == 0) {

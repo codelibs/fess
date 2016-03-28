@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
+import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.exception.ClassNotFoundRuntimeException;
 import org.codelibs.core.lang.StringUtil;
@@ -37,8 +38,10 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
+import org.lastaflute.web.util.LaRequestUtil;
 
 public interface FessProp {
 
@@ -401,8 +404,19 @@ public interface FessProp {
         setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
+    Integer getLdapMaxUsernameLengthAsInteger();
+
     public default String getLdapSecurityPrincipal(final String username) {
-        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), username);
+        final String value;
+        final int maxLength = getLdapMaxUsernameLengthAsInteger().intValue();
+        if (username == null) {
+            value = StringUtil.EMPTY;
+        } else if (maxLength >= 0 && username.length() > maxLength) {
+            value = username.substring(0, maxLength);
+        } else {
+            value = username;
+        }
+        return String.format(getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, StringUtil.EMPTY), value);
     }
 
     public default String getLdapSecurityPrincipal() {
@@ -828,6 +842,25 @@ public interface FessProp {
 
     public default boolean isValidCrawlerFileProtocol(final String url) {
         return StreamUtil.of(getCrawlerFileProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
+    }
+
+    public default void processSearchPreference(SearchRequestBuilder searchRequestBuilder, OptionalThing<FessUserBean> userBean) {
+        userBean.map(user -> {
+            if (user.hasRoles(getAuthenticationAdminRolesAsArray())) {
+                return Constants.SEARCH_PREFERENCE_PRIMARY;
+            }
+            return user.getUserId();
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {
+            HttpSession session = r.getSession(false);
+            if (session != null) {
+                return session.getId();
+            }
+            final String preference = r.getParameter("preference");
+            if (preference != null) {
+                return Integer.toString(preference.hashCode());
+            }
+            return null;
+        }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
     }
 
 }

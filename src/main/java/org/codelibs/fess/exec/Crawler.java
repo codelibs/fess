@@ -36,6 +36,7 @@ import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.app.service.PathMappingService;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.DataIndexHelper;
 import org.codelibs.fess.helper.DuplicateHostHelper;
@@ -49,7 +50,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.lastaflute.core.mail.Postbox;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,17 +194,25 @@ public class Crawler implements Serializable {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Destroying LaContainer..");
                     }
-                    SingletonLaContainerFactory.destroy();
+                    destroyContainer();
                 }
+
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
 
             exitCode = process(options);
+        } catch (final ContainerNotAvailableException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Crawler is stopped.", e);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("Crawler is stopped.");
+            }
+            exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
             logger.error("Crawler does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
-            SingletonLaContainerFactory.destroy();
+            destroyContainer();
         }
 
         if (exitCode != Constants.EXIT_OK) {
@@ -212,8 +220,14 @@ public class Crawler implements Serializable {
         }
     }
 
+    private static void destroyContainer() {
+        synchronized (SingletonLaContainerFactory.class) {
+            SingletonLaContainerFactory.destroy();
+        }
+    }
+
     private static int process(final Options options) {
-        final Crawler crawler = SingletonLaContainer.getComponent(Crawler.class);
+        final Crawler crawler = ComponentUtil.getComponent(Crawler.class);
 
         if (StringUtil.isBlank(options.sessionId)) {
             // use a default session id

@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocList;
+import org.codelibs.fess.util.MemoryUtil;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -37,7 +39,10 @@ public class IndexingHelper {
 
     public long requestInterval = 500;
 
-    public void sendDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
+    public void sendDocuments(final FessEsClient fessEsClient, final DocList docList) {
+        if (docList.isEmpty()) {
+            return;
+        }
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Sending " + docList.size() + " documents to a server.");
@@ -49,14 +54,21 @@ public class IndexingHelper {
                 fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
             }
             if (logger.isInfoEnabled()) {
-                logger.info("Sent " + docList.size() + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+                if (docList.getContentSize() > 0) {
+                    logger.info("Sent " + docList.size() + " docs (Doc:{process " + docList.getProcessingTime() + "ms, send "
+                            + (System.currentTimeMillis() - execTime) + "ms, size "
+                            + MemoryUtil.byteCountToDisplaySize(docList.getContentSize()) + "}, " + MemoryUtil.getMemoryUsageLog() + ")");
+                } else {
+                    logger.info("Sent " + docList.size() + " docs (Doc:{send " + (System.currentTimeMillis() - execTime) + "ms}, "
+                            + MemoryUtil.getMemoryUsageLog() + ")");
+                }
             }
         } finally {
             docList.clear();
         }
     }
 
-    private void deleteOldDocuments(final FessEsClient fessEsClient, final List<Map<String, Object>> docList) {
+    private void deleteOldDocuments(final FessEsClient fessEsClient, final DocList docList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final List<String> docIdList = new ArrayList<>();

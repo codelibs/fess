@@ -218,8 +218,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String INDEXING_TARGET = "indexingTarget";
 
-    public static final String DIGEST_PREFIX = "...";
-
     public static final String BASIC = "BASIC";
 
     public static final String DIGEST = "DIGEST";
@@ -376,4 +374,12 @@ public class Constants extends CoreLibConstants {
     public static final String PAGING_QUERY_LIST = "pagingQueryList";
 
     public static final String REQUEST_LANGUAGES = "requestLanguages";
+
+    public static final String SEARCH_PREFERENCE_PRIMARY = "_primary";
+
+    public static final String CONFIG_IGNORE_FAILURE_URLS = "ignore.failureUrls";
+
+    public static final String CONFIG_CLEANUP_FILTERS = "cleanup.urlFilters";
+
+    public static final String CONFIG_CLEANUP_ALL = "cleanup.all";
 }

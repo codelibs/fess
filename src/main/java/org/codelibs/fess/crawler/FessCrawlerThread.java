@@ -36,6 +36,7 @@ import org.codelibs.fess.crawler.entity.UrlQueue;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
@@ -72,7 +73,8 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<String>();
-                for (final String roleType : crawlingConfig.getRoleTypeValues()) {
+                final String[] roleTypeValues = crawlingConfig.getRoleTypeValues();
+                for (final String roleType : roleTypeValues) {
                     roleTypeList.add(roleType);
                 }
                 if (url.startsWith("smb://")) {
@@ -181,8 +183,15 @@ public class FessCrawlerThread extends CrawlerThread {
     protected void storeChildUrlsToQueue(final UrlQueue<?> urlQueue, final Set<RequestData> childUrlSet) {
         if (childUrlSet != null) {
             // add an url
-            storeChildUrls(childUrlSet.stream().filter(rd -> StringUtil.isNotBlank(rd.getUrl())).collect(Collectors.toSet()),
-                    urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
+            try {
+                storeChildUrls(childUrlSet.stream().filter(rd -> StringUtil.isNotBlank(rd.getUrl())).collect(Collectors.toSet()),
+                        urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
+            } catch (Throwable t) {
+                if (!ComponentUtil.available()) {
+                    throw new ContainerNotAvailableException(t);
+                }
+                throw t;
+            }
         }
     }
 

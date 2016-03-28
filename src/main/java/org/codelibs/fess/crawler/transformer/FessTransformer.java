@@ -100,13 +100,6 @@ public interface FessTransformer {
         return StringUtils.abbreviate(url, getMaxSiteLength());
     }
 
-    public default String normalizeContent(final String content) {
-        if (content == null) {
-            return StringUtil.EMPTY; // empty
-        }
-        return content.replaceAll("\\s+", " ");
-    }
-
     public default void putResultDataBody(final Map<String, Object> dataMap, final String key, final Object value) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (fessConfig.getIndexFieldUrl().equals(key)) {

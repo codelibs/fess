@@ -109,7 +109,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
 
     }
 
-    protected Object convertValue(final String template, final Map<String, String> paramMap) {
+    protected <T> Object convertValue(final String template, final Map<String, T> paramMap) {
         if (StringUtil.isEmpty(template)) {
             return StringUtil.EMPTY;
         }

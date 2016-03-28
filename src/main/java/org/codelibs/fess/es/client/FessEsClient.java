@@ -475,8 +475,8 @@ public class FessEsClient implements Client {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         SearchResponse response =
                 client.prepareSearch(index).setTypes(type).setScroll(scrollForDelete).setSize(sizeForDelete)
-                        .addField(fessConfig.getIndexFieldId()).setQuery(queryBuilder).execute()
-                        .actionGet(fessConfig.getIndexScrollSearchTimeoutTimeout());
+                        .addField(fessConfig.getIndexFieldId()).setQuery(queryBuilder).setPreference(Constants.SEARCH_PREFERENCE_PRIMARY)
+                        .execute().actionGet(fessConfig.getIndexScrollSearchTimeoutTimeout());
 
         int count = 0;
         String scrollId = response.getScrollId();

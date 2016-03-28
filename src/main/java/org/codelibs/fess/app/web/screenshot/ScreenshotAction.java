@@ -59,6 +59,7 @@ public class ScreenshotAction extends FessSearchAction {
                             final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                             queryRequestBuilder.setQuery(termQuery);
                             queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                            fessConfig.processSearchPreference(queryRequestBuilder, getUserBean());
                             return true;
                         }).orElse(null);
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);

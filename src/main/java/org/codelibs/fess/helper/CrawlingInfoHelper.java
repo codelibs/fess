@@ -27,6 +27,7 @@ import java.util.Map;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
+import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingInfo;
@@ -40,7 +41,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class CrawlingInfoHelper implements Serializable {
     public int maxSessionIdsInList;
 
     protected CrawlingInfoService getCrawlingInfoService() {
-        return SingletonLaContainer.getComponent(CrawlingInfoService.class);
+        return ComponentUtil.getComponent(CrawlingInfoService.class);
     }
 
     public String getCanonicalSessionId(final String sessionId) {
@@ -170,6 +170,7 @@ public class CrawlingInfoHelper implements Serializable {
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
                                     .size(maxSessionIdsInList).order(Order.term(false));
                     queryRequestBuilder.addAggregation(termsBuilder);
+                    queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
                     final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
@@ -187,7 +188,7 @@ public class CrawlingInfoHelper implements Serializable {
     }
 
     private String generateId(final String url, final List<String> roleTypeList) {
-        final StringBuilder buf = new StringBuilder(1000);
+        final UnsafeStringBuilder buf = new UnsafeStringBuilder(1000);
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
@@ -200,7 +201,7 @@ public class CrawlingInfoHelper implements Serializable {
             }
         }
 
-        return normalize(buf.toString());
+        return normalize(buf.toUnsafeString().trim());
     }
 
     private String normalize(final String value) {

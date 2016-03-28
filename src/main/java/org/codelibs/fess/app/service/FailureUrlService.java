@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -41,7 +41,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
-import org.lastaflute.di.core.SingletonLaContainer;
 
 public class FailureUrlService implements Serializable {
 
@@ -171,7 +170,7 @@ public class FailureUrlService implements Serializable {
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
-        final FailureUrlBhv bhv = SingletonLaContainer.getComponent(FailureUrlBhv.class);
+        final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
         FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
@@ -201,7 +200,7 @@ public class FailureUrlService implements Serializable {
 
     private String getStackTrace(final Throwable t) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
-        final StringWriter sw = new StringWriter();
+        final StringBuilderWriter sw = new StringBuilderWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         t.printStackTrace(pw);
         return systemHelper.abbreviateLongText(sw.toString());

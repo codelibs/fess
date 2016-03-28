@@ -79,6 +79,7 @@ public class GoAction extends FessSearchAction {
                                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                                 queryRequestBuilder.setQuery(termQuery);
                                 queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId());
+                                fessConfig.processSearchPreference(queryRequestBuilder, getUserBean());
                                 return true;
                             }).orElse(null);
         } catch (final Exception e) {

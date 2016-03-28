@@ -59,7 +59,7 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.6</crawler.version>
+		<crawler.version>1.0.7</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.1.1</suggest.version>
@@ -769,7 +769,12 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.3</version>
+			<version>0.3.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

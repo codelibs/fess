@@ -42,20 +42,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
     -server
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC */
-    String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
-
-    /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -server
-    -Xmx256m
+    -Xmx512m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
@@ -68,6 +55,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.responseTimeout=30000
     */
+    String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
+
+    /** The key of the configuration. e.g. -Djava.awt.headless=true
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -127,6 +127,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String CRAWLER_DOCUMENT_APPEND_DATA = "crawler.document.append.data";
 
+    /** The key of the configuration. e.g. 20 */
+    String CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE = "crawler.document.max.alphanum.term.size";
+
+    /** The key of the configuration. e.g. 10 */
+    String CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE = "crawler.document.max.symbol.term.size";
+
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
@@ -167,9 +173,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. No title. */
     String CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL = "crawler.document.file.no.title.label";
-
-    /** The key of the configuration. e.g. 10 */
-    String CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH = "crawler.document.file.abbreviation.margin.length";
 
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_FILE_IGNORE_EMPTY_CONTENT = "crawler.document.file.ignore.empty.content";
@@ -213,20 +216,26 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String INDEXER_FAVORITE_COUNT_ENABLED = "indexer.favorite.count.enabled";
 
-    /** The key of the configuration. e.g. 1000 */
+    /** The key of the configuration. e.g. 5000 */
     String INDEXER_WEBFS_COMMIT_MARGIN_TIME = "indexer.webfs.commit.margin.time";
 
-    /** The key of the configuration. e.g. 60 */
-    String INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT = "indexer.webfs.max.empty.list.conunt";
+    /** The key of the configuration. e.g. 360 */
+    String INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT = "indexer.webfs.max.empty.list.count";
 
     /** The key of the configuration. e.g. 10000 */
     String INDEXER_WEBFS_UPDATE_INTERVAL = "indexer.webfs.update.interval";
 
-    /** The key of the configuration. e.g. 5 */
+    /** The key of the configuration. e.g. 100 */
     String INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE = "indexer.webfs.max.document.cache.size";
+
+    /** The key of the configuration. e.g. 10485760 */
+    String INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE = "indexer.webfs.max.document.request.size";
 
     /** The key of the configuration. e.g. 5 */
     String INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE = "indexer.data.max.document.cache.size";
+
+    /** The key of the configuration. e.g. 10485760 */
+    String INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE = "indexer.data.max.document.request.size";
 
     /** The key of the configuration. e.g. favorite_count */
     String INDEX_FIELD_favorite_count = "index.field.favorite_count";
@@ -741,6 +750,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String LDAP_ADMIN_SYNC_PASSWORD = "ldap.admin.sync.password";
 
+    /** The key of the configuration. e.g. -1 */
+    String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
+
     /** The key of the configuration. e.g. memberOf */
     String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
 
@@ -827,7 +839,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * Get the value for the key 'jvm.crawler.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
     -server
-    -Xmx256m
+    -Xmx512m
     -XX:MaxMetaspaceSize=128m
     -XX:CompressedClassSpaceSize=32m
     -XX:-UseGCOverheadLimit
@@ -835,7 +847,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC <br>
+    -XX:+DisableExplicitGC
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -853,11 +869,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.responseTimeout=30000
-    <br>
+    -XX:+DisableExplicitGC <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
@@ -1036,6 +1048,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isCrawlerDocumentAppendData();
 
     /**
+     * Get the value for the key 'crawler.document.max.alphanum.term.size'. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentMaxAlphanumTermSize();
+
+    /**
+     * Get the value for the key 'crawler.document.max.alphanum.term.size' as {@link Integer}. <br>
+     * The value is, e.g. 20 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentMaxAlphanumTermSizeAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.max.symbol.term.size'. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentMaxSymbolTermSize();
+
+    /**
+     * Get the value for the key 'crawler.document.max.symbol.term.size' as {@link Integer}. <br>
+     * The value is, e.g. 10 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getCrawlerDocumentMaxSymbolTermSizeAsInteger();
+
+    /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
      * The value is, e.g. UTF-8 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -1146,21 +1188,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentFileNoTitleLabel();
-
-    /**
-     * Get the value for the key 'crawler.document.file.abbreviation.margin.length'. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getCrawlerDocumentFileAbbreviationMarginLength();
-
-    /**
-     * Get the value for the key 'crawler.document.file.abbreviation.margin.length' as {@link Integer}. <br>
-     * The value is, e.g. 10 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.file.ignore.empty.content'. <br>
@@ -1356,33 +1383,33 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time'. <br>
-     * The value is, e.g. 1000 <br>
+     * The value is, e.g. 5000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsCommitMarginTime();
 
     /**
      * Get the value for the key 'indexer.webfs.commit.margin.time' as {@link Integer}. <br>
-     * The value is, e.g. 1000 <br>
+     * The value is, e.g. 5000 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerWebfsCommitMarginTimeAsInteger();
 
     /**
-     * Get the value for the key 'indexer.webfs.max.empty.list.conunt'. <br>
-     * The value is, e.g. 60 <br>
+     * Get the value for the key 'indexer.webfs.max.empty.list.count'. <br>
+     * The value is, e.g. 360 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getIndexerWebfsMaxEmptyListConunt();
+    String getIndexerWebfsMaxEmptyListCount();
 
     /**
-     * Get the value for the key 'indexer.webfs.max.empty.list.conunt' as {@link Integer}. <br>
-     * The value is, e.g. 60 <br>
+     * Get the value for the key 'indexer.webfs.max.empty.list.count' as {@link Integer}. <br>
+     * The value is, e.g. 360 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
-    Integer getIndexerWebfsMaxEmptyListConuntAsInteger();
+    Integer getIndexerWebfsMaxEmptyListCountAsInteger();
 
     /**
      * Get the value for the key 'indexer.webfs.update.interval'. <br>
@@ -1401,18 +1428,33 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size'. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexerWebfsMaxDocumentCacheSize();
 
     /**
      * Get the value for the key 'indexer.webfs.max.document.cache.size' as {@link Integer}. <br>
-     * The value is, e.g. 5 <br>
+     * The value is, e.g. 100 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerWebfsMaxDocumentCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.document.request.size'. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerWebfsMaxDocumentRequestSize();
+
+    /**
+     * Get the value for the key 'indexer.webfs.max.document.request.size' as {@link Integer}. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerWebfsMaxDocumentRequestSizeAsInteger();
 
     /**
      * Get the value for the key 'indexer.data.max.document.cache.size'. <br>
@@ -1428,6 +1470,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getIndexerDataMaxDocumentCacheSizeAsInteger();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.request.size'. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexerDataMaxDocumentRequestSize();
+
+    /**
+     * Get the value for the key 'indexer.data.max.document.request.size' as {@link Integer}. <br>
+     * The value is, e.g. 10485760 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexerDataMaxDocumentRequestSizeAsInteger();
 
     /**
      * Get the value for the key 'index.field.favorite_count'. <br>
@@ -3025,6 +3082,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapAdminSyncPassword();
 
     /**
+     * Get the value for the key 'ldap.max.username.length'. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapMaxUsernameLength();
+
+    /**
+     * Get the value for the key 'ldap.max.username.length' as {@link Integer}. <br>
+     * The value is, e.g. -1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getLdapMaxUsernameLengthAsInteger();
+
+    /**
      * Get the value for the key 'ldap.memberof.attribute'. <br>
      * The value is, e.g. memberOf <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -3247,6 +3319,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.CRAWLER_DOCUMENT_APPEND_DATA);
         }
 
+        public String getCrawlerDocumentMaxAlphanumTermSize() {
+            return get(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE);
+        }
+
+        public Integer getCrawlerDocumentMaxAlphanumTermSizeAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MAX_ALPHANUM_TERM_SIZE);
+        }
+
+        public String getCrawlerDocumentMaxSymbolTermSize() {
+            return get(FessConfig.CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE);
+        }
+
+        public Integer getCrawlerDocumentMaxSymbolTermSizeAsInteger() {
+            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE);
+        }
+
         public String getCrawlerCrawlingDataEncoding() {
             return get(FessConfig.CRAWLER_CRAWLING_DATA_ENCODING);
         }
@@ -3305,14 +3393,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getCrawlerDocumentFileNoTitleLabel() {
             return get(FessConfig.CRAWLER_DOCUMENT_FILE_NO_TITLE_LABEL);
-        }
-
-        public String getCrawlerDocumentFileAbbreviationMarginLength() {
-            return get(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
-        }
-
-        public Integer getCrawlerDocumentFileAbbreviationMarginLengthAsInteger() {
-            return getAsInteger(FessConfig.CRAWLER_DOCUMENT_FILE_ABBREVIATION_MARGIN_LENGTH);
         }
 
         public String getCrawlerDocumentFileIgnoreEmptyContent() {
@@ -3427,12 +3507,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_WEBFS_COMMIT_MARGIN_TIME);
         }
 
-        public String getIndexerWebfsMaxEmptyListConunt() {
-            return get(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        public String getIndexerWebfsMaxEmptyListCount() {
+            return get(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT);
         }
 
-        public Integer getIndexerWebfsMaxEmptyListConuntAsInteger() {
-            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_CONUNT);
+        public Integer getIndexerWebfsMaxEmptyListCountAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_EMPTY_LIST_COUNT);
         }
 
         public String getIndexerWebfsUpdateInterval() {
@@ -3451,12 +3531,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_CACHE_SIZE);
         }
 
+        public String getIndexerWebfsMaxDocumentRequestSize() {
+            return get(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE);
+        }
+
+        public Integer getIndexerWebfsMaxDocumentRequestSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_WEBFS_MAX_DOCUMENT_REQUEST_SIZE);
+        }
+
         public String getIndexerDataMaxDocumentCacheSize() {
             return get(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE);
         }
 
         public Integer getIndexerDataMaxDocumentCacheSizeAsInteger() {
             return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_CACHE_SIZE);
+        }
+
+        public String getIndexerDataMaxDocumentRequestSize() {
+            return get(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
+        }
+
+        public Integer getIndexerDataMaxDocumentRequestSizeAsInteger() {
+            return getAsInteger(FessConfig.INDEXER_DATA_MAX_DOCUMENT_REQUEST_SIZE);
         }
 
         public String getIndexFieldFavoriteCount() {
@@ -4293,6 +4389,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isLdapAdminSyncPassword() {
             return is(FessConfig.LDAP_ADMIN_SYNC_PASSWORD);
+        }
+
+        public String getLdapMaxUsernameLength() {
+            return get(FessConfig.LDAP_MAX_USERNAME_LENGTH);
+        }
+
+        public Integer getLdapMaxUsernameLengthAsInteger() {
+            return getAsInteger(FessConfig.LDAP_MAX_USERNAME_LENGTH);
         }
 
         public String getLdapMemberofAttribute() {

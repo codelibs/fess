@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 
 import com.orangesignal.csv.CsvConfig;
 
+@Deprecated
+// replace with CsvListDataStoreImpl
 public class FileListDataStoreImpl extends CsvDataStoreImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(FileListDataStoreImpl.class);

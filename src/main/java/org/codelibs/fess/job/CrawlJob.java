@@ -39,7 +39,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
 import org.codelibs.fess.util.StreamUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +70,10 @@ public class CrawlJob {
     protected long retryIntervalToDeleteTempDir = 5000;
 
     protected boolean useLocalElasticsearch = true;
+
+    protected String jvmOptions;
+
+    protected String lastaEnv;
 
     public CrawlJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
@@ -133,6 +136,20 @@ public class CrawlJob {
         return this;
     }
 
+    public CrawlJob remoteDebug() {
+        return jvmOptions("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000");
+    }
+
+    public CrawlJob jvmOptions(String option) {
+        this.jvmOptions = option;
+        return this;
+    }
+
+    public CrawlJob lastaEnv(String env) {
+        this.lastaEnv = env;
+        return this;
+    }
+
     public String execute(final JobExecutor jobExecutor) {
         jobExecutor(jobExecutor);
         return execute();
@@ -161,7 +178,7 @@ public class CrawlJob {
     }
 
     public String execute() {
-        final StringBuilder resultBuf = new StringBuilder();
+        final StringBuilder resultBuf = new StringBuilder(100);
         final boolean runAll = webConfigIds == null && fileConfigIds == null && dataConfigIds == null;
 
         if (sessionId == null) { // create session id
@@ -229,7 +246,7 @@ public class CrawlJob {
     protected void executeCrawler() {
         final List<String> cmdList = new ArrayList<String>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
-        final ServletContext servletContext = SingletonLaContainer.getComponent(ServletContext.class);
+        final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final ProcessHelper processHelper = ComponentUtil.getJobHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -238,7 +255,7 @@ public class CrawlJob {
 
         // -cp
         cmdList.add("-cp");
-        final StringBuilder buf = new StringBuilder();
+        final StringBuilder buf = new StringBuilder(100);
         final String confPath = System.getProperty(Constants.FESS_CONF_PATH);
         if (StringUtil.isNotBlank(confPath)) {
             buf.append(confPath);
@@ -285,13 +302,15 @@ public class CrawlJob {
             }
         }
 
-        final String lastaEnv = System.getProperty("lasta.env");
-        if (StringUtil.isNotBlank(lastaEnv)) {
-            if (lastaEnv.equals("web")) {
+        final String systemLastaEnv = System.getProperty("lasta.env");
+        if (StringUtil.isNotBlank(systemLastaEnv)) {
+            if (systemLastaEnv.equals("web")) {
                 cmdList.add("-Dlasta.env=crawler");
             } else {
-                cmdList.add("-Dlasta.env=" + lastaEnv);
+                cmdList.add("-Dlasta.env=" + systemLastaEnv);
             }
+        } else if (StringUtil.isNotBlank(lastaEnv)) {
+            cmdList.add("-Dlasta.env=" + lastaEnv);
         }
 
         cmdList.add("-Dfess.crawler.process=true");
@@ -314,6 +333,10 @@ public class CrawlJob {
             } else {
                 ownTmpDir = null;
             }
+        }
+
+        if (StringUtil.isNotBlank(jvmOptions)) {
+            StreamUtil.of(jvmOptions.split(" ")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());

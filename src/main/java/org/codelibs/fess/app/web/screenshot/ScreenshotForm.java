@@ -16,6 +16,8 @@
 package org.codelibs.fess.app.web.screenshot;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.validation.constraints.Size;
 
@@ -41,4 +43,5 @@ public class ScreenshotForm implements Serializable {
 
     public String lang;
 
+    public Map<String, String[]> fields = new HashMap<>();
 }

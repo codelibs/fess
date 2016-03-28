@@ -30,6 +30,14 @@ public class StreamUtil {
         }
     }
 
+    public static Stream<String> splitOf(final String value, final String regex) {
+        if (value != null) {
+            return Arrays.stream(value.split(regex));
+        } else {
+            return Collections.<String> emptyList().stream();
+        }
+    }
+
     public static <K, V> Stream<Map.Entry<K, V>> of(final Map<K, V> map) {
         if (map != null) {
             return map.entrySet().stream();

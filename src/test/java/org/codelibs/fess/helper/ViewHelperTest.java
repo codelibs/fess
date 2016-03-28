@@ -118,6 +118,11 @@ public class ViewHelperTest extends UnitFessTestCase {
         docMap.put("urlLink", urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
+        urlLink = "://www.qwerty.jp";
+        sitePath = "www.qwerty.jp";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
         urlLink = "www.google.com";
         sitePath = "www.google.com";
         docMap.put("urlLink", urlLink);
@@ -128,8 +133,23 @@ public class ViewHelperTest extends UnitFessTestCase {
         docMap.put("urlLink", urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
+        urlLink = "file:/home/user/";
+        sitePath = "/home/user/";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
         urlLink = "file://home/user/";
-        sitePath = "home/user/";
+        sitePath = "/home/user/";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "file://c:/home/user/";
+        sitePath = "c:/home/user/";
+        docMap.put("urlLink", urlLink);
+        assertEquals(sitePath, viewHelper.getSitePath(docMap));
+
+        urlLink = "file://1.2.3.4/user/";
+        sitePath = "1.2.3.4/user/";
         docMap.put("urlLink", urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
     }

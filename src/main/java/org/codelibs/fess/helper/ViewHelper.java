@@ -62,7 +62,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -78,6 +77,10 @@ import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper implements Serializable {
+
+    private static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
+
+    private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
     private static final long serialVersionUID = 1L;
 
@@ -478,7 +481,16 @@ public class ViewHelper implements Serializable {
     public Object getSitePath(final Map<String, Object> docMap) {
         final Object urlLink = docMap.get("urlLink");
         if (urlLink != null) {
-            return StringUtils.abbreviate(urlLink.toString().replaceFirst("^[a-zA-Z0-9]*:/?/*", ""), sitePathLength);
+            final String returnUrl;
+            final String url = urlLink.toString();
+            if (LOCAL_PATH_PATTERN.matcher(url).find() || SHARED_FOLDER_PATTERN.matcher(url).find()) {
+                returnUrl = url.replaceFirst("^file:/+", "");
+            } else if (url.startsWith("file:")) {
+                returnUrl = url.replaceFirst("^file:/+", "/");
+            } else {
+                returnUrl = url.replaceFirst("^[a-zA-Z0-9]*:/+", "");
+            }
+            return StringUtils.abbreviate(returnUrl, sitePathLength);
         }
         return null;
     }
@@ -502,20 +514,20 @@ public class ViewHelper implements Serializable {
             logger.debug("configType: " + configType + ", configId: " + configId);
         }
         if (ConfigType.WEB == configType) {
-            final WebConfigService webConfigService = SingletonLaContainer.getComponent(WebConfigService.class);
+            final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
             config = webConfigService.getWebConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.FILE == configType) {
-            final FileConfigService fileConfigService = SingletonLaContainer.getComponent(FileConfigService.class);
+            final FileConfigService fileConfigService = ComponentUtil.getComponent(FileConfigService.class);
             config = fileConfigService.getFileConfig(crawlingConfigHelper.getId(configId)).get();
         } else if (ConfigType.DATA == configType) {
-            final DataConfigService dataConfigService = SingletonLaContainer.getComponent(DataConfigService.class);
+            final DataConfigService dataConfigService = ComponentUtil.getComponent(DataConfigService.class);
             config = dataConfigService.getDataConfig(crawlingConfigHelper.getId(configId)).get();
         }
         if (config == null) {
             throw new FessSystemException("No crawlingConfig: " + configId);
         }
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-        final CrawlerClientFactory crawlerClientFactory = SingletonLaContainer.getComponent(CrawlerClientFactory.class);
+        final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getComponent(CrawlerClientFactory.class);
         config.initializeClientFactory(crawlerClientFactory);
         final CrawlerClient client = crawlerClientFactory.getClient(url);
         if (client == null) {

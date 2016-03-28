@@ -30,12 +30,12 @@ import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.EsClient;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,20 +112,33 @@ public class SuggestCreator implements Serializable {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Destroying LaContainer..");
                     }
-                    SingletonLaContainerFactory.destroy();
+                    destroyContainer();
                 }
             };
             Runtime.getRuntime().addShutdownHook(shutdownCallback);
             exitCode = process(options);
+        } catch (final ContainerNotAvailableException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Crawler is stopped.", e);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("Crawler is stopped.");
+            }
+            exitCode = Constants.EXIT_FAIL;
         } catch (final Throwable t) {
             logger.error("Suggest creator does not work correctly.", t);
             exitCode = Constants.EXIT_FAIL;
         } finally {
-            SingletonLaContainerFactory.destroy();
+            destroyContainer();
         }
 
         logger.info("Finished suggestCreator.");
         System.exit(exitCode);
+    }
+
+    private static void destroyContainer() {
+        synchronized (SingletonLaContainerFactory.class) {
+            SingletonLaContainerFactory.destroy();
+        }
     }
 
     private static int process(final Options options) {
@@ -146,7 +159,7 @@ public class SuggestCreator implements Serializable {
             }
         }
 
-        final SuggestCreator creator = SingletonLaContainer.getComponent(SuggestCreator.class);
+        final SuggestCreator creator = ComponentUtil.getComponent(SuggestCreator.class);
         final LocalDateTime startTime = LocalDateTime.now();
         int ret = creator.create();
         if (ret == 0) {

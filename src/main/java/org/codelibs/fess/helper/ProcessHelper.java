@@ -40,7 +40,14 @@ public class ProcessHelper {
     @PreDestroy
     public void destroy() {
         for (final String sessionId : runningProcessMap.keySet()) {
-            destroyProcess(sessionId);
+            if (logger.isInfoEnabled()) {
+                logger.info("Stopping process " + sessionId);
+            }
+            if (destroyProcess(sessionId)) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Stopped process " + sessionId);
+                }
+            }
         }
     }
 
@@ -58,16 +65,16 @@ public class ProcessHelper {
         }
     }
 
-    public void destroyProcess(final String sessionId) {
+    public boolean destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
-        destroyProcess(jobProcess);
+        return destroyProcess(jobProcess);
     }
 
     public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
     }
 
-    protected void destroyProcess(final JobProcess jobProcess) {
+    protected boolean destroyProcess(final JobProcess jobProcess) {
         if (jobProcess != null) {
             final InputStreamThread ist = jobProcess.getInputStreamThread();
             try {
@@ -104,10 +111,12 @@ public class ProcessHelper {
             }
             try {
                 process.destroy();
+                return true;
             } catch (final Exception e) {
                 logger.error("Could not destroy a process correctly.", e);
             }
         }
+        return false;
     }
 
     public Set<String> getRunningSessionIdSet() {

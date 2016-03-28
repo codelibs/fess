@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
@@ -46,11 +47,12 @@ import org.codelibs.fess.helper.SearchLogHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocList;
+import org.codelibs.fess.util.MemoryUtil;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,6 +107,16 @@ public class IndexUpdater extends Thread {
         // nothing
     }
 
+    @PreDestroy
+    public void destroy() {
+        if (!finishCrawling) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Stopping all crawler.");
+            }
+            forceStop();
+        }
+    }
+
     public void addFinishedSessionId(final String sessionId) {
         synchronized (finishedSessionIdList) {
             finishedSessionIdList.add(sessionId);
@@ -144,7 +156,7 @@ public class IndexUpdater extends Thread {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long updateInterval = fessConfig.getIndexerWebfsUpdateIntervalAsInteger().longValue();
-        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListConuntAsInteger().intValue();
+        final int maxEmptyListCount = fessConfig.getIndexerWebfsMaxEmptyListCountAsInteger().intValue();
         final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
         try {
             final Consumer<SearchRequestBuilder> cb =
@@ -162,12 +174,13 @@ public class IndexUpdater extends Thread {
                         builder.addSort(EsAccessResult.CREATE_TIME, SortOrder.ASC);
                     };
 
-            final List<Map<String, Object>> docList = new ArrayList<>();
+            final DocList docList = new DocList();
             final List<EsAccessResult> accessResultList = new ArrayList<>();
 
             long updateTime = System.currentTimeMillis();
             int errorCount = 0;
             int emptyListCount = 0;
+            long cleanupTime = -1;
             while (!finishCrawling || !accessResultList.isEmpty()) {
                 try {
                     final int sessionIdListSize = finishedSessionIdList.size();
@@ -196,7 +209,7 @@ public class IndexUpdater extends Thread {
 
                     updateTime = System.currentTimeMillis();
 
-                    List<EsAccessResult> arList = getAccessResultList(cb);
+                    List<EsAccessResult> arList = getAccessResultList(cb, cleanupTime);
                     if (arList.isEmpty()) {
                         emptyListCount++;
                     } else {
@@ -204,8 +217,8 @@ public class IndexUpdater extends Thread {
                     }
                     while (!arList.isEmpty()) {
                         processAccessResults(docList, accessResultList, arList);
-                        cleanupAccessResults(accessResultList);
-                        arList = getAccessResultList(cb);
+                        cleanupTime = cleanupAccessResults(accessResultList);
+                        arList = getAccessResultList(cb, cleanupTime);
                     }
                     if (!docList.isEmpty()) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
@@ -251,13 +264,23 @@ public class IndexUpdater extends Thread {
                     }
 
                 }
+
+                if (!ComponentUtil.available()) {
+                    logger.info("IndexUpdater is terminated.");
+                    forceStop();
+                    break;
+                }
             }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished indexUpdater.");
             }
         } catch (final Throwable t) {
-            logger.error("IndexUpdater is terminated.", t);
+            if (ComponentUtil.available()) {
+                logger.error("IndexUpdater is terminated.", t);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("IndexUpdater is terminated.");
+            }
             forceStop();
         } finally {
             intervalControlHelper.setCrawlerRunning(true);
@@ -279,10 +302,9 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void processAccessResults(final List<Map<String, Object>> docList, final List<EsAccessResult> accessResultList,
-            final List<EsAccessResult> arList) {
+    private void processAccessResults(final DocList docList, final List<EsAccessResult> accessResultList, final List<EsAccessResult> arList) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final int maxDocumentCacheSize = fessConfig.getIndexerWebfsMaxDocumentCacheSizeAsInteger().intValue();
+        final long maxDocumentRequestSize = fessConfig.getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
         for (final EsAccessResult accessResult : arList) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Indexing " + accessResult.getUrl());
@@ -298,11 +320,12 @@ public class IndexUpdater extends Thread {
                 continue;
             }
 
+            final long startTime = System.currentTimeMillis();
             final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
             if (accessResultData != null) {
                 accessResult.setAccessResultData(null);
                 try {
-                    final Transformer transformer = SingletonLaContainer.getComponent(accessResultData.getTransformerName());
+                    final Transformer transformer = ComponentUtil.getComponent(accessResultData.getTransformerName());
                     if (transformer == null) {
                         // no transformer
                         logger.warn("No transformer: " + accessResultData.getTransformerName());
@@ -328,12 +351,20 @@ public class IndexUpdater extends Thread {
                     updateDocument(map);
 
                     docList.add(map);
+                    final long processingTime = System.currentTimeMillis() - startTime;
+                    docList.addProcessingTime(processingTime);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Added the document. " + "The number of a document cache is " + docList.size() + ".");
+                        logger.debug("Added the document(" + MemoryUtil.byteCountToDisplaySize(docList.getContentSize()) + ", "
+                                + processingTime + "ms). " + "The number of a document cache is " + docList.size() + ".");
                     }
 
-                    if (docList.size() >= maxDocumentCacheSize) {
+                    if (accessResult.getContentLength() == null) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
+                    } else {
+                        docList.addContentSize(accessResult.getContentLength().longValue());
+                        if (docList.getContentSize() >= maxDocumentRequestSize) {
+                            indexingHelper.sendDocuments(fessEsClient, docList);
+                        }
                     }
                     documentSize++;
                     if (logger.isDebugEnabled()) {
@@ -422,21 +453,22 @@ public class IndexUpdater extends Thread {
         }
     }
 
-    private void cleanupAccessResults(final List<EsAccessResult> accessResultList) {
+    private long cleanupAccessResults(final List<EsAccessResult> accessResultList) {
         if (!accessResultList.isEmpty()) {
             final long execTime = System.currentTimeMillis();
             final int size = accessResultList.size();
             dataService.update(accessResultList);
             accessResultList.clear();
+            final long time = System.currentTimeMillis() - execTime;
             if (logger.isDebugEnabled()) {
-                logger.debug("Updated " + size + " access results. The execution time is " + (System.currentTimeMillis() - execTime)
-                        + "ms.");
+                logger.debug("Updated " + size + " access results. The execution time is " + time + "ms.");
             }
+            return time;
         }
-
+        return -1;
     }
 
-    private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb) {
+    private List<EsAccessResult> getAccessResultList(final Consumer<SearchRequestBuilder> cb, final long cleanupTime) {
         if (logger.isDebugEnabled()) {
             logger.debug("Getting documents in IndexUpdater queue.");
         }
@@ -453,15 +485,29 @@ public class IndexUpdater extends Thread {
         }
         final long totalHits = ((EsResultList<EsAccessResult>) arList).getTotalHits();
         if (logger.isInfoEnabled()) {
-            logger.info("Processing " + arList.size() + "/" + totalHits + " docs (" + (System.currentTimeMillis() - execTime) + "ms)");
+            final StringBuilder buf = new StringBuilder(100);
+            buf.append("Processing ");
+            if (totalHits > 0) {
+                buf.append(arList.size()).append('/').append(totalHits).append(" docs (Doc:{access ");
+            } else {
+                buf.append("no docs (Doc:{access ");
+            }
+            buf.append(System.currentTimeMillis() - execTime).append("ms");
+            if (cleanupTime >= 0) {
+                buf.append(", cleanup ").append(cleanupTime).append("ms");
+            }
+            buf.append("}, ");
+            buf.append(MemoryUtil.getMemoryUsageLog());
+            buf.append(')');
+            logger.info(buf.toString());
         }
         final long unprocessedDocumentSize = fessConfig.getIndexerUnprocessedDocumentSizeAsInteger().longValue();
-        if (totalHits > unprocessedDocumentSize) {
+        final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
+        if (totalHits > unprocessedDocumentSize && intervalControlHelper.isCrawlerRunning()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopped all crawler threads. " + " You have " + totalHits + " (>" + unprocessedDocumentSize + ") "
                         + " unprocessed docs.");
             }
-            final IntervalControlHelper intervalControlHelper = ComponentUtil.getIntervalControlHelper();
             intervalControlHelper.setCrawlerRunning(false);
         }
         return arList;

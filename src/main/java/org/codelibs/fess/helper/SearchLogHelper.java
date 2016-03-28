@@ -48,9 +48,9 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -218,7 +218,7 @@ public class SearchLogHelper {
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());
             final List<UserInfo> updateList = new ArrayList<>();
-            final UserInfoBhv userInfoBhv = SingletonLaContainer.getComponent(UserInfoBhv.class);
+            final UserInfoBhv userInfoBhv = ComponentUtil.getComponent(UserInfoBhv.class);
             userInfoBhv.selectList(cb -> {
                 cb.query().setId_InScope(userInfoMap.keySet());
                 cb.fetchFirst(userInfoMap.size());
@@ -267,7 +267,7 @@ public class SearchLogHelper {
         final List<ClickLog> clickLogList = new ArrayList<>();
         for (final ClickLog clickLog : queue) {
             try {
-                final SearchLogBhv searchLogBhv = SingletonLaContainer.getComponent(SearchLogBhv.class);
+                final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
                 searchLogBhv.selectEntity(cb -> {
                     cb.query().setQueryId_Equal(clickLog.getQueryId());
                 }).ifPresent(entity -> {
@@ -289,7 +289,7 @@ public class SearchLogHelper {
         }
         if (!clickLogList.isEmpty()) {
             try {
-                final ClickLogBhv clickLogBhv = SingletonLaContainer.getComponent(ClickLogBhv.class);
+                final ClickLogBhv clickLogBhv = ComponentUtil.getComponent(ClickLogBhv.class);
                 clickLogBhv.batchInsert(clickLogList);
             } catch (final Exception e) {
                 logger.warn("Failed to insert: " + clickLogList, e);
@@ -302,7 +302,7 @@ public class SearchLogHelper {
                 searchService.bulkUpdate(builder -> {
                     final FessConfig fessConfig = ComponentUtil.getFessConfig();
                     searchService.getDocumentListByDocIds(clickCountMap.keySet().toArray(new String[clickCountMap.size()]),
-                            new String[] { fessConfig.getIndexFieldDocId() }).forEach(
+                            new String[] { fessConfig.getIndexFieldDocId() }, OptionalThing.of(FessUserBean.empty())).forEach(
                             doc -> {
                                 final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
                                 final String docId = DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class);

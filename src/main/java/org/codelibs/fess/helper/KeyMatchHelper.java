@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.misc.Pair;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.KeyMatchService;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
@@ -37,7 +38,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.lastaflute.di.core.SingletonLaContainer;
 
 public class KeyMatchHelper {
     protected volatile Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = Collections.emptyMap();
@@ -55,7 +55,7 @@ public class KeyMatchHelper {
 
     protected void reload(final long interval) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final KeyMatchService keyMatchService = SingletonLaContainer.getComponent(KeyMatchService.class);
+        final KeyMatchService keyMatchService = ComponentUtil.getComponent(KeyMatchService.class);
         final Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = new HashMap<>();
         keyMatchService
                 .getAvailableKeyMatchList()
@@ -93,8 +93,8 @@ public class KeyMatchHelper {
                         fessConfig.getIndexDocumentSearchIndex(),
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
-                            return SearchConditionBuilder.builder(searchRequestBuilder).administrativeAccess(true)
-                                    .size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
+                            return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY))
+                                    .administrativeAccess(true).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
                                     .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
                         });
         return documentList;

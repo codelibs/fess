@@ -16,7 +16,6 @@
 package org.codelibs.fess.api.json;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +56,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.codelibs.fess.util.StreamUtil;
+import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -140,12 +140,12 @@ public class JsonApiManager extends BaseApiManager {
         int status = 0;
         String errMsg = StringUtil.EMPTY;
         String query = null;
-        final StringBuilder buf = new StringBuilder(1000);
+        final StringBuilder buf = new StringBuilder(1000); // TODO replace response stream
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
         try {
             final SearchRenderData data = new SearchRenderData();
             final SearchApiRequestParams params = new SearchApiRequestParams(request, fessConfig);
-            searchService.search(request, params, data);
+            searchService.search(request, params, data, OptionalThing.empty());
             query = params.getQuery();
             final String execTime = data.getExecTime();
             final String queryTime = Long.toString(data.getQueryTime());
@@ -277,7 +277,7 @@ public class JsonApiManager extends BaseApiManager {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
+        final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
             buf.append("\"record_count\":");
@@ -327,7 +327,7 @@ public class JsonApiManager extends BaseApiManager {
 
         int status = 0;
         String errMsg = StringUtil.EMPTY;
-        final StringBuilder buf = new StringBuilder(255);
+        final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, null, fields, excludes);
 
@@ -379,52 +379,53 @@ public class JsonApiManager extends BaseApiManager {
                 throw new WebApiException(6, "No searched urls.");
             }
 
-            searchService.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }).ifPresent(doc -> {
-                final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-                final String userCode = userInfoHelper.getUserCode();
+            searchService.getDocumentByDocId(docId, new String[] { fessConfig.getIndexFieldUrl() }, OptionalThing.empty())
+                    .ifPresent(doc -> {
+                        final String favoriteUrl = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
+                        final String userCode = userInfoHelper.getUserCode();
 
-                if (StringUtil.isBlank(userCode)) {
-                    throw new WebApiException(2, "No user session.");
-                } else if (StringUtil.isBlank(favoriteUrl)) {
-                    throw new WebApiException(2, "URL is null.");
-                }
+                        if (StringUtil.isBlank(userCode)) {
+                            throw new WebApiException(2, "No user session.");
+                        } else if (StringUtil.isBlank(favoriteUrl)) {
+                            throw new WebApiException(2, "URL is null.");
+                        }
 
-                boolean found = false;
-                for (final String id : docIds) {
-                    if (docId.equals(id)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    throw new WebApiException(5, "Not found: " + favoriteUrl);
-                }
+                        boolean found = false;
+                        for (final String id : docIds) {
+                            if (docId.equals(id)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            throw new WebApiException(5, "Not found: " + favoriteUrl);
+                        }
 
-                if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
-                    favoriteLog.setUserInfoId(userInfo.getId());
-                    favoriteLog.setUrl(favoriteUrl);
-                    favoriteLog.setDocId(docId);
-                    favoriteLog.setQueryId(queryId);
-                    favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
-                })) {
-                    throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
-                }
+                        if (!favoriteLogService.addUrl(userCode, (userInfo, favoriteLog) -> {
+                            favoriteLog.setUserInfoId(userInfo.getId());
+                            favoriteLog.setUrl(favoriteUrl);
+                            favoriteLog.setDocId(docId);
+                            favoriteLog.setQueryId(queryId);
+                            favoriteLog.setCreatedAt(systemHelper.getCurrentTimeAsLocalDateTime());
+                        })) {
+                            throw new WebApiException(4, "Failed to add url: " + favoriteUrl);
+                        }
 
-                final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
-                searchService.update(id, builder -> {
-                    final Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
-                    builder.setScript(script);
-                    final Map<String, Object> upsertMap = new HashMap<>();
-                    upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
-                    builder.setUpsert(upsertMap);
-                    builder.setRefresh(true);
-                });
+                        final String id = DocumentUtil.getValue(doc, fessConfig.getIndexFieldId(), String.class);
+                        searchService.update(id, builder -> {
+                            final Script script = new Script("ctx._source." + fessConfig.getIndexFieldFavoriteCount() + "+=1");
+                            builder.setScript(script);
+                            final Map<String, Object> upsertMap = new HashMap<>();
+                            upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
+                            builder.setUpsert(upsertMap);
+                            builder.setRefresh(true);
+                        });
 
-                writeJsonResponse(0, "\"result\":\"ok\"", null);
+                        writeJsonResponse(0, "\"result\":\"ok\"", null);
 
-            }).orElse(() -> {
-                throw new WebApiException(6, "Not found: " + docId);
-            });
+                    }).orElse(() -> {
+                        throw new WebApiException(6, "Not found: " + docId);
+                    });
 
         } catch (final Exception e) {
             int status;
@@ -471,7 +472,7 @@ public class JsonApiManager extends BaseApiManager {
                     searchService.getDocumentListByDocIds(
                             docIds,
                             new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
-                                    fessConfig.getIndexFieldFavoriteCount() });
+                                    fessConfig.getIndexFieldFavoriteCount() }, OptionalThing.empty());
             List<String> urlList = new ArrayList<>(docList.size());
             for (final Map<String, Object> doc : docList) {
                 final String urlObj = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
@@ -491,7 +492,7 @@ public class JsonApiManager extends BaseApiManager {
                 }
             }
 
-            final StringBuilder buf = new StringBuilder();
+            final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
             buf.append("\"num\":").append(docIdList.size());
             if (!docIdList.isEmpty()) {
                 buf.append(", \"doc_ids\":[");
@@ -601,7 +602,7 @@ public class JsonApiManager extends BaseApiManager {
 
     protected static String escapeJsonString(final String str) {
 
-        final StringWriter out = new StringWriter(str.length() * 2);
+        final StringBuilder out = new StringBuilder(str.length() * 2);
         int sz;
         sz = str.length();
         for (int i = 0; i < sz; i++) {
@@ -609,59 +610,59 @@ public class JsonApiManager extends BaseApiManager {
 
             // handle unicode
             if (ch > 0xfff) {
-                out.write("\\u");
-                out.write(hex(ch));
+                out.append("\\u");
+                out.append(hex(ch));
             } else if (ch > 0xff) {
-                out.write("\\u0");
-                out.write(hex(ch));
+                out.append("\\u0");
+                out.append(hex(ch));
             } else if (ch > 0x7f) {
-                out.write("\\u00");
-                out.write(hex(ch));
+                out.append("\\u00");
+                out.append(hex(ch));
             } else if (ch < 32) {
                 switch (ch) {
                 case '\b':
-                    out.write('\\');
-                    out.write('b');
+                    out.append('\\');
+                    out.append('b');
                     break;
                 case '\n':
-                    out.write('\\');
-                    out.write('n');
+                    out.append('\\');
+                    out.append('n');
                     break;
                 case '\t':
-                    out.write('\\');
-                    out.write('t');
+                    out.append('\\');
+                    out.append('t');
                     break;
                 case '\f':
-                    out.write('\\');
-                    out.write('f');
+                    out.append('\\');
+                    out.append('f');
                     break;
                 case '\r':
-                    out.write('\\');
-                    out.write('r');
+                    out.append('\\');
+                    out.append('r');
                     break;
                 default:
                     if (ch > 0xf) {
-                        out.write("\\u00");
-                        out.write(hex(ch));
+                        out.append("\\u00");
+                        out.append(hex(ch));
                     } else {
-                        out.write("\\u000");
-                        out.write(hex(ch));
+                        out.append("\\u000");
+                        out.append(hex(ch));
                     }
                     break;
                 }
             } else {
                 switch (ch) {
                 case '"':
-                    out.write("\\u0022");
+                    out.append("\\u0022");
                     break;
                 case '\\':
-                    out.write("\\u005C");
+                    out.append("\\u005C");
                     break;
                 case '/':
-                    out.write("\\u002F");
+                    out.append("\\u002F");
                     break;
                 default:
-                    out.write(ch);
+                    out.append(ch);
                     break;
                 }
             }

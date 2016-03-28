@@ -22,8 +22,8 @@ import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
 import org.codelibs.fess.crawler.helper.impl.LogHelperImpl;
 import org.codelibs.fess.crawler.log.LogType;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +32,12 @@ public class CrawlerLogHelper extends LogHelperImpl {
 
     @Override
     public void log(final LogType key, final Object... objs) {
+        if (!ComponentUtil.available()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("container was destroyed.");
+            }
+            return;
+        }
         try {
             switch (key) {
             case CRAWLING_ACCESS_EXCEPTION: {
@@ -66,7 +72,18 @@ public class CrawlerLogHelper extends LogHelperImpl {
             default:
                 break;
             }
+        } catch (final ContainerNotAvailableException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("container was destroyed.");
+            }
+            return;
         } catch (final Exception e) {
+            if (!ComponentUtil.available()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("container was destroyed.");
+                }
+                return;
+            }
             logger.warn("Failed to store a failure url.", e);
         }
 
@@ -78,7 +95,7 @@ public class CrawlerLogHelper extends LogHelperImpl {
         final CrawlingConfig crawlingConfig = getCrawlingConfig(crawlerContext.getSessionId());
         final String url = urlQueue.getUrl();
 
-        final FailureUrlService failureUrlService = SingletonLaContainer.getComponent(FailureUrlService.class);
+        final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
         failureUrlService.store(crawlingConfig, errorName, url, e);
     }
 
