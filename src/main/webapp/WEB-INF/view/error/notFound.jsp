@@ -10,8 +10,10 @@
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet"
 	type="text/css" />
+<link href="/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css" />
 </head>
-<body>
+<body class="error">
 	<jsp:include page="header.jsp" />
 	<div class="container">
 		<div class="content">
@@ -33,5 +35,7 @@
 	<script type="text/javascript"
 		src="${f:url('/js/jquery-2.1.4.min.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/search.js')}"></script>
 </body>
 </html>
