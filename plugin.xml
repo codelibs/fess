@@ -17,7 +17,7 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="analysis-kuromoji-neologd" />
 			<param name="plugin.version" value="2.2.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.2.0-20160328.131916-4" />
+			<param name="plugin.zip.version" value="2.2.0-20160329.212628-6" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
@@ -41,7 +41,7 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="configsync" />
 			<param name="plugin.version" value="2.2.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.2.0-20160328.140530-2" />
+			<param name="plugin.zip.version" value="2.2.0-20160329.133546-3" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
