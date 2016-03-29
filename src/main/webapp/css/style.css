@@ -291,12 +291,21 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 	body.search #searchOptions.active, body.help #searchOptions.active, body.error #searchOptions.active {
 		right: 0;
 	}
+	.description {
+		overflow: hidden !important;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+	}
 }
 
 /* Extra small devices (portrait phones, less than 34em) */
 @media ( max-width : 360px) {
 	.br-xs {
 		display: block;
+	}
+	.hidden-xs {
+		display: none !important;
 	}
 	.mainLogo img {
 		width: 200px;
@@ -323,6 +332,12 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 	}
 	#footer {
 		font-size: 65%;
+	}
+	.description {
+		overflow: hidden !important;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
 	}
 }
 
