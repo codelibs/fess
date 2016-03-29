@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="search" method="get" styleId="searchForm" role="search">
+<la:form action="/search" method="get" styleId="searchForm" role="search">
 ${fe:facetForm()}${fe:geoForm()}
 <nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
 		<la:link styleClass="navbar-brand" href="/">

@@ -215,7 +215,7 @@ ul.searchOptionLabels li {
 	vertical-align: middle;
 }
 
-body.search #searchOptions, body.help #searchOptions {
+body.search #searchOptions, body.help #searchOptions, body.error #searchOptions {
 	position: fixed;
 	top: 0;
 	padding-top: 72px;
@@ -227,7 +227,7 @@ body.search #searchOptions, body.help #searchOptions {
 	transition: all .4s ease 0s;
 }
 
-body.search #searchOptions.active, body.help #searchOptions.active {
+body.search #searchOptions.active, body.help #searchOptions.active,  body.error #searchOptions.active {
 	right: 0;
 }
 
@@ -284,12 +284,18 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	#result .info {
 		display: none;
 	}
-	body.search #searchOptions, body.help #searchOptions {
+	body.search #searchOptions, body.help #searchOptions, body.error #searchOptions {
 		width: 100%;
 		right: -100%;
 	}
-	body.search #searchOptions.active, body.help #searchOptions.active {
+	body.search #searchOptions.active, body.help #searchOptions.active, body.error #searchOptions.active {
 		right: 0;
+	}
+	.description {
+		overflow: hidden !important;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
 	}
 }
 
@@ -297,6 +303,9 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 @media ( max-width : 360px) {
 	.br-xs {
 		display: block;
+	}
+	.hidden-xs {
+		display: none !important;
 	}
 	.mainLogo img {
 		width: 200px;
@@ -323,6 +332,12 @@ body.search #searchOptions.active, body.help #searchOptions.active {
 	}
 	#footer {
 		font-size: 65%;
+	}
+	.description {
+		overflow: hidden !important;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
 	}
 }
 
