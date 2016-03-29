@@ -10,7 +10,7 @@
 	type="text/css" />
 <link href="${f:url('/css/style.css')}" rel="stylesheet"
 	type="text/css" />
-<link href="/css/font-awesome.min.css"
+<link href="${f:url('/css/font-awesome.min.css')}"
 	rel="stylesheet" type="text/css" />
 </head>
 <body class="error">
