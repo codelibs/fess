@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -97,6 +99,11 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
                     StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName())).forEach(f -> fileList.add(f));
+                    Collections.sort(fileList, new Comparator<File>() {
+                        public int compare(File f1, File f2) {
+                            return (int) (f1.lastModified() - f2.lastModified());
+                        }
+                    });
                 } else {
                     logger.warn(path + " is not a directory.");
                 }
