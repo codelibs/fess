@@ -98,12 +98,8 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             for (final String path : values) {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
-                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName())).forEach(f -> fileList.add(f));
-                    Collections.sort(fileList, new Comparator<File>() {
-                        public int compare(File f1, File f2) {
-                            return (int) (f1.lastModified() - f2.lastModified());
-                        }
-                    });
+                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName()))
+                            .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(f -> fileList.add(f));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }
