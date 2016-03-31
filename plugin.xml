@@ -25,7 +25,7 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="analysis-ja" />
 			<param name="plugin.version" value="2.2.1-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.2.1-20160328.132245-4" />
+			<param name="plugin.zip.version" value="2.2.1-20160331.095327-5" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
