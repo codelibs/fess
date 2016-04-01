@@ -57,7 +57,7 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name" value="langfield" />
 			<param name="plugin.version" value="2.2.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.2.0-20160328.213316-1" />
+			<param name="plugin.zip.version" value="2.2.0-20160401.135727-2" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}">
