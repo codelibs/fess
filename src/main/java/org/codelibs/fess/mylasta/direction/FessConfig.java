@@ -780,6 +780,108 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. givenName */
     String LDAP_ATTR_GIVEN_NAME = "ldap.attr.givenName";
 
+    /** The key of the configuration. e.g. employeeNumber */
+    String LDAP_ATTR_EMPLOYEE_NUMBER = "ldap.attr.employeeNumber";
+
+    /** The key of the configuration. e.g. mail */
+    String LDAP_ATTR_MAIL = "ldap.attr.mail";
+
+    /** The key of the configuration. e.g. telephoneNumber */
+    String LDAP_ATTR_TELEPHONE_NUMBER = "ldap.attr.telephoneNumber";
+
+    /** The key of the configuration. e.g. homePhone */
+    String LDAP_ATTR_HOME_PHONE = "ldap.attr.homePhone";
+
+    /** The key of the configuration. e.g. homePostalAddress */
+    String LDAP_ATTR_HOME_POSTAL_ADDRESS = "ldap.attr.homePostalAddress";
+
+    /** The key of the configuration. e.g. labeledURI */
+    String LDAP_ATTR_LABELEDURI = "ldap.attr.labeledURI";
+
+    /** The key of the configuration. e.g. roomNumber */
+    String LDAP_ATTR_ROOM_NUMBER = "ldap.attr.roomNumber";
+
+    /** The key of the configuration. e.g. description */
+    String LDAP_ATTR_DESCRIPTION = "ldap.attr.description";
+
+    /** The key of the configuration. e.g. title */
+    String LDAP_ATTR_TITLE = "ldap.attr.title";
+
+    /** The key of the configuration. e.g. pager */
+    String LDAP_ATTR_PAGER = "ldap.attr.pager";
+
+    /** The key of the configuration. e.g. street */
+    String LDAP_ATTR_STREET = "ldap.attr.street";
+
+    /** The key of the configuration. e.g. postalCode */
+    String LDAP_ATTR_POSTAL_CODE = "ldap.attr.postalCode";
+
+    /** The key of the configuration. e.g. physicalDeliveryOfficeName */
+    String LDAP_ATTR_PHYSICAL_DELIVERY_OFFICE_NAME = "ldap.attr.physicalDeliveryOfficeName";
+
+    /** The key of the configuration. e.g. destinationIndicator */
+    String LDAP_ATTR_DESTINATION_INDICATOR = "ldap.attr.destinationIndicator";
+
+    /** The key of the configuration. e.g. internationaliSDNNumber */
+    String LDAP_ATTR_INTERNATIONALISDN_NUMBER = "ldap.attr.internationaliSDNNumber";
+
+    /** The key of the configuration. e.g. st */
+    String LDAP_ATTR_STATE = "ldap.attr.state";
+
+    /** The key of the configuration. e.g. employeeType */
+    String LDAP_ATTR_EMPLOYEE_TYPE = "ldap.attr.employeeType";
+
+    /** The key of the configuration. e.g. facsimileTelephoneNumber */
+    String LDAP_ATTR_FACSIMILE_TELEPHONE_NUMBER = "ldap.attr.facsimileTelephoneNumber";
+
+    /** The key of the configuration. e.g. postOfficeBox */
+    String LDAP_ATTR_POST_OFFICE_BOX = "ldap.attr.postOfficeBox";
+
+    /** The key of the configuration. e.g. initials */
+    String LDAP_ATTR_INITIALS = "ldap.attr.initials";
+
+    /** The key of the configuration. e.g. carLicense */
+    String LDAP_ATTR_CAR_LICENSE = "ldap.attr.carLicense";
+
+    /** The key of the configuration. e.g. mobile */
+    String LDAP_ATTR_MOBILE = "ldap.attr.mobile";
+
+    /** The key of the configuration. e.g. postalAddress */
+    String LDAP_ATTR_POSTAL_ADDRESS = "ldap.attr.postalAddress";
+
+    /** The key of the configuration. e.g. l */
+    String LDAP_ATTR_CITY = "ldap.attr.city";
+
+    /** The key of the configuration. e.g. teletexTerminalIdentifier */
+    String LDAP_ATTR_TELETEX_TERMINAL_IDENTIFIER = "ldap.attr.teletexTerminalIdentifier";
+
+    /** The key of the configuration. e.g. x121Address */
+    String LDAP_ATTR_X121_ADDRESS = "ldap.attr.x121Address";
+
+    /** The key of the configuration. e.g. businessCategory */
+    String LDAP_ATTR_BUSINESS_CATEGORY = "ldap.attr.businessCategory";
+
+    /** The key of the configuration. e.g. registeredAddress */
+    String LDAP_ATTR_REGISTERED_ADDRESS = "ldap.attr.registeredAddress";
+
+    /** The key of the configuration. e.g. displayName */
+    String LDAP_ATTR_DISPLAY_NAME = "ldap.attr.displayName";
+
+    /** The key of the configuration. e.g. preferredLanguage */
+    String LDAP_ATTR_PREFERRED_LANGUAGE = "ldap.attr.preferredLanguage";
+
+    /** The key of the configuration. e.g. departmentNumber */
+    String LDAP_ATTR_DEPARTMENT_NUMBER = "ldap.attr.departmentNumber";
+
+    /** The key of the configuration. e.g. uidNumber */
+    String LDAP_ATTR_UID_NUMBER = "ldap.attr.uidNumber";
+
+    /** The key of the configuration. e.g. gidNumber */
+    String LDAP_ATTR_GID_NUMBER = "ldap.attr.gidNumber";
+
+    /** The key of the configuration. e.g. homeDirectory */
+    String LDAP_ATTR_HOME_DIRECTORY = "ldap.attr.homeDirectory";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -3203,6 +3305,244 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAttrGivenName();
 
     /**
+     * Get the value for the key 'ldap.attr.employeeNumber'. <br>
+     * The value is, e.g. employeeNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrEmployeeNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.mail'. <br>
+     * The value is, e.g. mail <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrMail();
+
+    /**
+     * Get the value for the key 'ldap.attr.telephoneNumber'. <br>
+     * The value is, e.g. telephoneNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrTelephoneNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.homePhone'. <br>
+     * The value is, e.g. homePhone <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrHomePhone();
+
+    /**
+     * Get the value for the key 'ldap.attr.homePostalAddress'. <br>
+     * The value is, e.g. homePostalAddress <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrHomePostalAddress();
+
+    /**
+     * Get the value for the key 'ldap.attr.labeledURI'. <br>
+     * The value is, e.g. labeledURI <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrLabeleduri();
+
+    /**
+     * Get the value for the key 'ldap.attr.roomNumber'. <br>
+     * The value is, e.g. roomNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrRoomNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.description'. <br>
+     * The value is, e.g. description <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrDescription();
+
+    /**
+     * Get the value for the key 'ldap.attr.title'. <br>
+     * The value is, e.g. title <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrTitle();
+
+    /**
+     * Get the value for the key 'ldap.attr.pager'. <br>
+     * The value is, e.g. pager <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPager();
+
+    /**
+     * Get the value for the key 'ldap.attr.street'. <br>
+     * The value is, e.g. street <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrStreet();
+
+    /**
+     * Get the value for the key 'ldap.attr.postalCode'. <br>
+     * The value is, e.g. postalCode <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPostalCode();
+
+    /**
+     * Get the value for the key 'ldap.attr.physicalDeliveryOfficeName'. <br>
+     * The value is, e.g. physicalDeliveryOfficeName <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPhysicalDeliveryOfficeName();
+
+    /**
+     * Get the value for the key 'ldap.attr.destinationIndicator'. <br>
+     * The value is, e.g. destinationIndicator <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrDestinationIndicator();
+
+    /**
+     * Get the value for the key 'ldap.attr.internationaliSDNNumber'. <br>
+     * The value is, e.g. internationaliSDNNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrInternationalisdnNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.state'. <br>
+     * The value is, e.g. st <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrState();
+
+    /**
+     * Get the value for the key 'ldap.attr.employeeType'. <br>
+     * The value is, e.g. employeeType <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrEmployeeType();
+
+    /**
+     * Get the value for the key 'ldap.attr.facsimileTelephoneNumber'. <br>
+     * The value is, e.g. facsimileTelephoneNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrFacsimileTelephoneNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.postOfficeBox'. <br>
+     * The value is, e.g. postOfficeBox <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPostOfficeBox();
+
+    /**
+     * Get the value for the key 'ldap.attr.initials'. <br>
+     * The value is, e.g. initials <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrInitials();
+
+    /**
+     * Get the value for the key 'ldap.attr.carLicense'. <br>
+     * The value is, e.g. carLicense <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrCarLicense();
+
+    /**
+     * Get the value for the key 'ldap.attr.mobile'. <br>
+     * The value is, e.g. mobile <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrMobile();
+
+    /**
+     * Get the value for the key 'ldap.attr.postalAddress'. <br>
+     * The value is, e.g. postalAddress <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPostalAddress();
+
+    /**
+     * Get the value for the key 'ldap.attr.city'. <br>
+     * The value is, e.g. l <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrCity();
+
+    /**
+     * Get the value for the key 'ldap.attr.teletexTerminalIdentifier'. <br>
+     * The value is, e.g. teletexTerminalIdentifier <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrTeletexTerminalIdentifier();
+
+    /**
+     * Get the value for the key 'ldap.attr.x121Address'. <br>
+     * The value is, e.g. x121Address <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrX121Address();
+
+    /**
+     * Get the value for the key 'ldap.attr.businessCategory'. <br>
+     * The value is, e.g. businessCategory <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrBusinessCategory();
+
+    /**
+     * Get the value for the key 'ldap.attr.registeredAddress'. <br>
+     * The value is, e.g. registeredAddress <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrRegisteredAddress();
+
+    /**
+     * Get the value for the key 'ldap.attr.displayName'. <br>
+     * The value is, e.g. displayName <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrDisplayName();
+
+    /**
+     * Get the value for the key 'ldap.attr.preferredLanguage'. <br>
+     * The value is, e.g. preferredLanguage <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrPreferredLanguage();
+
+    /**
+     * Get the value for the key 'ldap.attr.departmentNumber'. <br>
+     * The value is, e.g. departmentNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrDepartmentNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.uidNumber'. <br>
+     * The value is, e.g. uidNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrUidNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.gidNumber'. <br>
+     * The value is, e.g. gidNumber <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrGidNumber();
+
+    /**
+     * Get the value for the key 'ldap.attr.homeDirectory'. <br>
+     * The value is, e.g. homeDirectory <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrHomeDirectory();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -4473,6 +4813,142 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getLdapAttrGivenName() {
             return get(FessConfig.LDAP_ATTR_GIVEN_NAME);
+        }
+
+        public String getLdapAttrEmployeeNumber() {
+            return get(FessConfig.LDAP_ATTR_EMPLOYEE_NUMBER);
+        }
+
+        public String getLdapAttrMail() {
+            return get(FessConfig.LDAP_ATTR_MAIL);
+        }
+
+        public String getLdapAttrTelephoneNumber() {
+            return get(FessConfig.LDAP_ATTR_TELEPHONE_NUMBER);
+        }
+
+        public String getLdapAttrHomePhone() {
+            return get(FessConfig.LDAP_ATTR_HOME_PHONE);
+        }
+
+        public String getLdapAttrHomePostalAddress() {
+            return get(FessConfig.LDAP_ATTR_HOME_POSTAL_ADDRESS);
+        }
+
+        public String getLdapAttrLabeleduri() {
+            return get(FessConfig.LDAP_ATTR_LABELEDURI);
+        }
+
+        public String getLdapAttrRoomNumber() {
+            return get(FessConfig.LDAP_ATTR_ROOM_NUMBER);
+        }
+
+        public String getLdapAttrDescription() {
+            return get(FessConfig.LDAP_ATTR_DESCRIPTION);
+        }
+
+        public String getLdapAttrTitle() {
+            return get(FessConfig.LDAP_ATTR_TITLE);
+        }
+
+        public String getLdapAttrPager() {
+            return get(FessConfig.LDAP_ATTR_PAGER);
+        }
+
+        public String getLdapAttrStreet() {
+            return get(FessConfig.LDAP_ATTR_STREET);
+        }
+
+        public String getLdapAttrPostalCode() {
+            return get(FessConfig.LDAP_ATTR_POSTAL_CODE);
+        }
+
+        public String getLdapAttrPhysicalDeliveryOfficeName() {
+            return get(FessConfig.LDAP_ATTR_PHYSICAL_DELIVERY_OFFICE_NAME);
+        }
+
+        public String getLdapAttrDestinationIndicator() {
+            return get(FessConfig.LDAP_ATTR_DESTINATION_INDICATOR);
+        }
+
+        public String getLdapAttrInternationalisdnNumber() {
+            return get(FessConfig.LDAP_ATTR_INTERNATIONALISDN_NUMBER);
+        }
+
+        public String getLdapAttrState() {
+            return get(FessConfig.LDAP_ATTR_STATE);
+        }
+
+        public String getLdapAttrEmployeeType() {
+            return get(FessConfig.LDAP_ATTR_EMPLOYEE_TYPE);
+        }
+
+        public String getLdapAttrFacsimileTelephoneNumber() {
+            return get(FessConfig.LDAP_ATTR_FACSIMILE_TELEPHONE_NUMBER);
+        }
+
+        public String getLdapAttrPostOfficeBox() {
+            return get(FessConfig.LDAP_ATTR_POST_OFFICE_BOX);
+        }
+
+        public String getLdapAttrInitials() {
+            return get(FessConfig.LDAP_ATTR_INITIALS);
+        }
+
+        public String getLdapAttrCarLicense() {
+            return get(FessConfig.LDAP_ATTR_CAR_LICENSE);
+        }
+
+        public String getLdapAttrMobile() {
+            return get(FessConfig.LDAP_ATTR_MOBILE);
+        }
+
+        public String getLdapAttrPostalAddress() {
+            return get(FessConfig.LDAP_ATTR_POSTAL_ADDRESS);
+        }
+
+        public String getLdapAttrCity() {
+            return get(FessConfig.LDAP_ATTR_CITY);
+        }
+
+        public String getLdapAttrTeletexTerminalIdentifier() {
+            return get(FessConfig.LDAP_ATTR_TELETEX_TERMINAL_IDENTIFIER);
+        }
+
+        public String getLdapAttrX121Address() {
+            return get(FessConfig.LDAP_ATTR_X121_ADDRESS);
+        }
+
+        public String getLdapAttrBusinessCategory() {
+            return get(FessConfig.LDAP_ATTR_BUSINESS_CATEGORY);
+        }
+
+        public String getLdapAttrRegisteredAddress() {
+            return get(FessConfig.LDAP_ATTR_REGISTERED_ADDRESS);
+        }
+
+        public String getLdapAttrDisplayName() {
+            return get(FessConfig.LDAP_ATTR_DISPLAY_NAME);
+        }
+
+        public String getLdapAttrPreferredLanguage() {
+            return get(FessConfig.LDAP_ATTR_PREFERRED_LANGUAGE);
+        }
+
+        public String getLdapAttrDepartmentNumber() {
+            return get(FessConfig.LDAP_ATTR_DEPARTMENT_NUMBER);
+        }
+
+        public String getLdapAttrUidNumber() {
+            return get(FessConfig.LDAP_ATTR_UID_NUMBER);
+        }
+
+        public String getLdapAttrGidNumber() {
+            return get(FessConfig.LDAP_ATTR_GID_NUMBER);
+        }
+
+        public String getLdapAttrHomeDirectory() {
+            return get(FessConfig.LDAP_ATTR_HOME_DIRECTORY);
         }
     }
 }

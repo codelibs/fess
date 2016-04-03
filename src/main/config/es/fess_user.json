@@ -17,10 +17,6 @@
           "enabled" : false
         },
         "properties" : {
-          "groups" : {
-            "type" : "string",
-            "index" : "not_analyzed"
-          },
           "name" : {
             "type" : "string",
             "index" : "not_analyzed"
@@ -34,6 +30,144 @@
             "index" : "not_analyzed"
           },
           "givenName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "employeeNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "mail" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "telephoneNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "homePhone" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "homePostalAddress" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "labeledURI" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "roomNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "description" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "title" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "pager" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "street" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "postalCode" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "physicalDeliveryOfficeName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "destinationIndicator" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "internationaliSDNNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "state" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "employeeType" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "facsimileTelephoneNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "postOfficeBox" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "initials" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "carLicense" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "mobile" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "postalAddress" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "city" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "teletexTerminalIdentifier" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "x121Address" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "businessCategory" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "registeredAddress" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "displayName" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "preferredLanguage" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "departmentNumber" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "uidNumber" : {
+            "type" : "long"
+          },
+          "gidNumber" : {
+            "type" : "long"
+          },
+          "homeDirectory" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
+          "groups" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
