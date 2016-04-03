@@ -74,7 +74,7 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+										<label for="surname" class="col-sm-3 control-label"><la:message
 												key="labels.user_surname" /></label>
 										<div class="col-sm-9">
 											<la:errors property="surname" />
@@ -82,7 +82,7 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="name" class="col-sm-3 control-label"><la:message
+										<label for="givenName" class="col-sm-3 control-label"><la:message
 												key="labels.user_given_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="givenName" />
