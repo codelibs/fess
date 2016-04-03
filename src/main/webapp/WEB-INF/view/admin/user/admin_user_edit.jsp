@@ -90,6 +90,14 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="mail" class="col-sm-3 control-label"><la:message
+												key="labels.user_mail" /></label>
+										<div class="col-sm-9">
+											<la:errors property="mail" />
+											<la:text property="mail" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="roles" class="col-sm-3 control-label"><la:message
 												key="labels.roles" /></label>
 										<div class="col-sm-9">

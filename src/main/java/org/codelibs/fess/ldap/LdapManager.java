@@ -359,6 +359,11 @@ public class LdapManager {
                 .ifPresent(s -> modifyReplaceEntry(modifyList, attrGivenName, s))
                 .orElse(() -> getAttributeValueList(result, attrGivenName).stream().forEach(
                         v -> modifyDeleteEntry(modifyList, attrGivenName, v)));
+        final String attrMail = fessConfig.getLdapAttrMail();
+        OptionalUtil.ofNullable(user.getMail()).filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrMail, s))
+                .orElse(() -> getAttributeValueList(result, attrMail).stream().forEach(v -> modifyDeleteEntry(modifyList, attrMail, v)));
+
         modify(userDN, modifyList, adminEnv);
     }
 
@@ -370,6 +375,8 @@ public class LdapManager {
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrSurname(), s)));
         OptionalUtil.ofNullable(user.getGivenName()).filter(s -> StringUtil.isNotBlank(s))
                 .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGivenName(), s)));
+        OptionalUtil.ofNullable(user.getMail()).filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrMail(), s)));
     }
 
     public void delete(final User user) {

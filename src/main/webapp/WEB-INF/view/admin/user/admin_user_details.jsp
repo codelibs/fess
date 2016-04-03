@@ -59,6 +59,10 @@
 												<td>${f:h(givenName)}<la:hidden property="givenName" /></td>
 											</tr>
 											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_mail" /></th>
+												<td>${f:h(mail)}<la:hidden property="mail" /></td>
+											</tr>
+											<tr>
 												<th><la:message key="labels.roles" /></th>
 												<td><c:forEach var="rt" varStatus="s"
 														items="${roleItems}">

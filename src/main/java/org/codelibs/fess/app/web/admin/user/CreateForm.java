@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.Email;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -49,6 +50,10 @@ public class CreateForm implements Serializable {
 
     @Size(max = 1000)
     public String givenName;
+
+    @Email
+    @Size(max = 1000)
+    public String mail;
 
     public String[] roles;
 
