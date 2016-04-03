@@ -15,6 +15,14 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "surname": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "givenName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "groups": {
         "type": "string",
         "index": "not_analyzed"

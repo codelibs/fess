@@ -16,6 +16,7 @@
 package org.codelibs.fess.ldap;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -45,6 +46,7 @@ import org.codelibs.fess.exception.LdapOperationException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.OptionalUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
@@ -176,6 +178,32 @@ public class LdapManager {
         }
     }
 
+    protected List<Object> getAttributeValueList(final NamingEnumeration<SearchResult> result, final String name) {
+        try {
+            while (result.hasMoreElements()) {
+                final SearchResult srcrslt = result.next();
+                final Attributes attrs = srcrslt.getAttributes();
+
+                final Attribute attr = attrs.get(name);
+                if (attr == null) {
+                    continue;
+                }
+
+                final List<Object> attrList = new ArrayList<>();
+                for (int i = 0; i < attr.size(); i++) {
+                    final Object attrValue = attr.get(i);
+                    if (attrValue != null) {
+                        attrList.add(attrValue);
+                    }
+                }
+                return attrList;
+            }
+            return Collections.emptyList();
+        } catch (NamingException e) {
+            throw new LdapOperationException("Failed to parse attribute values for " + name, e);
+        }
+    }
+
     public void insert(final User user) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
@@ -190,11 +218,7 @@ public class LdapManager {
                 adminEnv,
                 result -> {
                     if (result.hasMore()) {
-                        if (user.getOriginalPassword() != null) {
-                            final List<ModificationItem> modifyList = new ArrayList<>();
-                            modifyReplaceEntry(modifyList, "userPassword", user.getOriginalPassword());
-                            modify(userDN, modifyList, adminEnv);
-                        }
+                        modifyUserAttributes(user, adminEnv, userDN, result, fessConfig);
 
                         final List<String> oldGroupList = new ArrayList<>();
                         final List<String> oldRoleList = new ArrayList<>();
@@ -208,7 +232,6 @@ public class LdapManager {
                                 oldRoleList.add(name);
                             }
                         });
-
                         final List<String> newGroupList = StreamUtil.of(user.getGroupNames()).collect(Collectors.toList());
                         StreamUtil.of(user.getGroupNames()).forEach(name -> {
                             if (oldGroupList.contains(name)) {
@@ -315,10 +338,38 @@ public class LdapManager {
 
     }
 
+    protected void modifyUserAttributes(final User user, final Supplier<Hashtable<String, String>> adminEnv, final String userDN,
+            final NamingEnumeration<SearchResult> result, final FessConfig fessConfig) {
+        final List<ModificationItem> modifyList = new ArrayList<>();
+        if (user.getOriginalPassword() != null) {
+            modifyReplaceEntry(modifyList, "userPassword", user.getOriginalPassword());
+        }
+
+        final String attrSurname = fessConfig.getLdapAttrSurname();
+        OptionalUtil
+                .ofNullable(user.getSurname())
+                .filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrSurname, s))
+                .orElse(() -> getAttributeValueList(result, attrSurname).stream().forEach(
+                        v -> modifyDeleteEntry(modifyList, attrSurname, v)));
+        final String attrGivenName = fessConfig.getLdapAttrGivenName();
+        OptionalUtil
+                .ofNullable(user.getGivenName())
+                .filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrGivenName, s))
+                .orElse(() -> getAttributeValueList(result, attrGivenName).stream().forEach(
+                        v -> modifyDeleteEntry(modifyList, attrGivenName, v)));
+        modify(userDN, modifyList, adminEnv);
+    }
+
     protected void addUserAttributes(final BasicAttributes entry, final User user, final FessConfig fessConfig) {
         entry.put(new BasicAttribute("cn", user.getName()));
-        entry.put(new BasicAttribute("sn", user.getName()));
         entry.put(new BasicAttribute("userPassword", user.getOriginalPassword()));
+
+        OptionalUtil.ofNullable(user.getSurname()).filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrSurname(), s)));
+        OptionalUtil.ofNullable(user.getGivenName()).filter(s -> StringUtil.isNotBlank(s))
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGivenName(), s)));
     }
 
     public void delete(final User user) {
@@ -516,7 +567,7 @@ public class LdapManager {
         modifyList.add(mod);
     }
 
-    protected void modifyDeleteEntry(final List<ModificationItem> modifyList, final String name, final String value) {
+    protected void modifyDeleteEntry(final List<ModificationItem> modifyList, final String name, final Object value) {
         final Attribute attr = new BasicAttribute(name, value);
         final ModificationItem mod = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, attr);
         modifyList.add(mod);

@@ -82,6 +82,8 @@ public class UserDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((User) et).getGroups(), (et, vl) -> ((User) et).setGroups((String[]) vl), "groups");
         setupEpg(_epgMap, et -> ((User) et).getName(), (et, vl) -> ((User) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((User) et).getPassword(), (et, vl) -> ((User) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et -> ((User) et).getSurname(), (et, vl) -> ((User) et).setSurname(DfTypeUtil.toString(vl)), "surname");
+        setupEpg(_epgMap, et -> ((User) et).getGivenName(), (et, vl) -> ((User) et).setGivenName(DfTypeUtil.toString(vl)), "givenName");
         setupEpg(_epgMap, et -> ((User) et).getRoles(), (et, vl) -> ((User) et).setRoles((String[]) vl), "roles");
     }
 
@@ -125,6 +127,10 @@ public class UserDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSurname = cci("surname", "surname", null, null, String.class, "surname", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnGivenName = cci("givenName", "givenName", null, null, String.class, "givenName", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
 
@@ -140,6 +146,14 @@ public class UserDbm extends AbstractDBMeta {
         return _columnPassword;
     }
 
+    public ColumnInfo columnSurname() {
+        return _columnSurname;
+    }
+
+    public ColumnInfo columnGivenName() {
+        return _columnGivenName;
+    }
+
     public ColumnInfo columnRoles() {
         return _columnRoles;
     }
@@ -149,6 +163,8 @@ public class UserDbm extends AbstractDBMeta {
         ls.add(columnGroups());
         ls.add(columnName());
         ls.add(columnPassword());
+        ls.add(columnSurname());
+        ls.add(columnGivenName());
         ls.add(columnRoles());
         return ls;
     }

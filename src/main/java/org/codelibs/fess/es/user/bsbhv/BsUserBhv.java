@@ -77,6 +77,8 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
             result.setGroups(toStringArray(source.get("groups")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setPassword(DfTypeUtil.toString(source.get("password")));
+            result.setSurname(DfTypeUtil.toString(source.get("surname")));
+            result.setGivenName(DfTypeUtil.toString(source.get("givenName")));
             result.setRoles(toStringArray(source.get("roles")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {

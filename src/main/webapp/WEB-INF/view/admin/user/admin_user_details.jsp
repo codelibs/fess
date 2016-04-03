@@ -51,6 +51,14 @@
 												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
 											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_surname" /></th>
+												<td>${f:h(surname)}<la:hidden property="surname" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_given_name" /></th>
+												<td>${f:h(givenName)}<la:hidden property="givenName" /></td>
+											</tr>
+											<tr>
 												<th><la:message key="labels.roles" /></th>
 												<td><c:forEach var="rt" varStatus="s"
 														items="${roleItems}">

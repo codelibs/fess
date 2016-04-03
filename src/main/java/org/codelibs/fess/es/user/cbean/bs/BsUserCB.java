@@ -170,6 +170,14 @@ public class BsUserCB extends EsAbstractConditionBean {
             doColumn("password");
         }
 
+        public void columnSurname() {
+            doColumn("surname");
+        }
+
+        public void columnGivenName() {
+            doColumn("givenName");
+        }
+
         public void columnRoles() {
             doColumn("roles");
         }

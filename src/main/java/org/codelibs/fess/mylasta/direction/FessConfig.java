@@ -774,6 +774,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. R */
     String LDAP_ROLE_SEARCH_ROLE_PREFIX = "ldap.role.search.role.prefix";
 
+    /** The key of the configuration. e.g. sn */
+    String LDAP_ATTR_SURNAME = "ldap.attr.surname";
+
+    /** The key of the configuration. e.g. givenName */
+    String LDAP_ATTR_GIVEN_NAME = "ldap.attr.givenName";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -3183,6 +3189,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapRoleSearchRolePrefix();
 
     /**
+     * Get the value for the key 'ldap.attr.surname'. <br>
+     * The value is, e.g. sn <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrSurname();
+
+    /**
+     * Get the value for the key 'ldap.attr.givenName'. <br>
+     * The value is, e.g. givenName <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getLdapAttrGivenName();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -4445,6 +4465,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getLdapRoleSearchRolePrefix() {
             return get(FessConfig.LDAP_ROLE_SEARCH_ROLE_PREFIX);
+        }
+
+        public String getLdapAttrSurname() {
+            return get(FessConfig.LDAP_ATTR_SURNAME);
+        }
+
+        public String getLdapAttrGivenName() {
+            return get(FessConfig.LDAP_ATTR_GIVEN_NAME);
         }
     }
 }

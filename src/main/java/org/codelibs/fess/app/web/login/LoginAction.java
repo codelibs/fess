@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.mylasta.action.FessUserBean;

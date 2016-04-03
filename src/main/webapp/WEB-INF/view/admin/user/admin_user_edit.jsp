@@ -74,6 +74,22 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.user_surname" /></label>
+										<div class="col-sm-9">
+											<la:errors property="surname" />
+											<la:text property="surname" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.user_given_name" /></label>
+										<div class="col-sm-9">
+											<la:errors property="givenName" />
+											<la:text property="givenName" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="roles" class="col-sm-3 control-label"><la:message
 												key="labels.roles" /></label>
 										<div class="col-sm-9">

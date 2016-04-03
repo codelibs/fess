@@ -46,6 +46,12 @@ public class BsUser extends EsAbstractEntity {
     /** password */
     protected String password;
 
+    /** surname */
+    protected String surname;
+
+    /** givenName */
+    protected String givenName;
+
     /** roles */
     protected String[] roles;
 
@@ -79,6 +85,12 @@ public class BsUser extends EsAbstractEntity {
         if (password != null) {
             sourceMap.put("password", password);
         }
+        if (surname != null) {
+            sourceMap.put("surname", surname);
+        }
+        if (givenName != null) {
+            sourceMap.put("givenName", givenName);
+        }
         if (roles != null) {
             sourceMap.put("roles", roles);
         }
@@ -94,6 +106,8 @@ public class BsUser extends EsAbstractEntity {
         sb.append(dm).append(groups);
         sb.append(dm).append(name);
         sb.append(dm).append(password);
+        sb.append(dm).append(surname);
+        sb.append(dm).append(givenName);
         sb.append(dm).append(roles);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
@@ -133,6 +147,26 @@ public class BsUser extends EsAbstractEntity {
     public void setPassword(String value) {
         registerModifiedProperty("password");
         this.password = value;
+    }
+
+    public String getSurname() {
+        checkSpecifiedProperty("surname");
+        return convertEmptyToNull(surname);
+    }
+
+    public void setSurname(String value) {
+        registerModifiedProperty("surname");
+        this.surname = value;
+    }
+
+    public String getGivenName() {
+        checkSpecifiedProperty("givenName");
+        return convertEmptyToNull(givenName);
+    }
+
+    public void setGivenName(String value) {
+        registerModifiedProperty("givenName");
+        this.givenName = value;
     }
 
     public String[] getRoles() {

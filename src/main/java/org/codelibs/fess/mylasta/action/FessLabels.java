@@ -2070,6 +2070,18 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: The limit of a search time was exceeded. The partial result might be displayed. */
     public static final String LABELS_process_time_is_exceeded = "{labels.process_time_is_exceeded}";
 
+    /** The key of the message: First Name */
+    public static final String LABELS_user_given_name = "{labels.user_given_name}";
+
+    /** The key of the message: First Name */
+    public static final String LABELS_GIVEN_NAME = "{labels.givenName}";
+
+    /** The key of the message: Last Name */
+    public static final String LABELS_user_surname = "{labels.user_surname}";
+
+    /** The key of the message: Last Name */
+    public static final String LABELS_SURAME = "{labels.surame}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

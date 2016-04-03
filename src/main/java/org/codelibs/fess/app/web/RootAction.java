@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web;
 
-import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.util.RenderDataUtil;

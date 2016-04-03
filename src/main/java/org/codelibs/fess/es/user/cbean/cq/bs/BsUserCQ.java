@@ -673,6 +673,338 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setSurname_Equal(String surname) {
+        setSurname_Term(surname, null);
+    }
+
+    public void setSurname_Equal(String surname, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setSurname_Term(surname, opLambda);
+    }
+
+    public void setSurname_Term(String surname) {
+        setSurname_Term(surname, null);
+    }
+
+    public void setSurname_Term(String surname, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_NotEqual(String surname) {
+        setSurname_NotTerm(surname, null);
+    }
+
+    public void setSurname_NotEqual(String surname, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setSurname_NotTerm(surname, opLambda);
+    }
+
+    public void setSurname_NotTerm(String surname) {
+        setSurname_NotTerm(surname, null);
+    }
+
+    public void setSurname_NotTerm(String surname, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("surname", surname));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_Terms(Collection<String> surnameList) {
+        setSurname_Terms(surnameList, null);
+    }
+
+    public void setSurname_Terms(Collection<String> surnameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("surname", surnameList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_InScope(Collection<String> surnameList) {
+        setSurname_Terms(surnameList, null);
+    }
+
+    public void setSurname_InScope(Collection<String> surnameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setSurname_Terms(surnameList, opLambda);
+    }
+
+    public void setSurname_Match(String surname) {
+        setSurname_Match(surname, null);
+    }
+
+    public void setSurname_Match(String surname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_MatchPhrase(String surname) {
+        setSurname_MatchPhrase(surname, null);
+    }
+
+    public void setSurname_MatchPhrase(String surname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_MatchPhrasePrefix(String surname) {
+        setSurname_MatchPhrasePrefix(surname, null);
+    }
+
+    public void setSurname_MatchPhrasePrefix(String surname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_Fuzzy(String surname) {
+        setSurname_Fuzzy(surname, null);
+    }
+
+    public void setSurname_Fuzzy(String surname, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_Prefix(String surname) {
+        setSurname_Prefix(surname, null);
+    }
+
+    public void setSurname_Prefix(String surname, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_GreaterThan(String surname) {
+        setSurname_GreaterThan(surname, null);
+    }
+
+    public void setSurname_GreaterThan(String surname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("surname", ConditionKey.CK_GREATER_THAN, surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_LessThan(String surname) {
+        setSurname_LessThan(surname, null);
+    }
+
+    public void setSurname_LessThan(String surname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("surname", ConditionKey.CK_LESS_THAN, surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_GreaterEqual(String surname) {
+        setSurname_GreaterEqual(surname, null);
+    }
+
+    public void setSurname_GreaterEqual(String surname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("surname", ConditionKey.CK_GREATER_EQUAL, surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSurname_LessEqual(String surname) {
+        setSurname_LessEqual(surname, null);
+    }
+
+    public void setSurname_LessEqual(String surname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("surname", ConditionKey.CK_LESS_EQUAL, surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsUserCQ addOrderBy_Surname_Asc() {
+        regOBA("surname");
+        return this;
+    }
+
+    public BsUserCQ addOrderBy_Surname_Desc() {
+        regOBD("surname");
+        return this;
+    }
+
+    public void setGivenName_Equal(String givenName) {
+        setGivenName_Term(givenName, null);
+    }
+
+    public void setGivenName_Equal(String givenName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setGivenName_Term(givenName, opLambda);
+    }
+
+    public void setGivenName_Term(String givenName) {
+        setGivenName_Term(givenName, null);
+    }
+
+    public void setGivenName_Term(String givenName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_NotEqual(String givenName) {
+        setGivenName_NotTerm(givenName, null);
+    }
+
+    public void setGivenName_NotEqual(String givenName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setGivenName_NotTerm(givenName, opLambda);
+    }
+
+    public void setGivenName_NotTerm(String givenName) {
+        setGivenName_NotTerm(givenName, null);
+    }
+
+    public void setGivenName_NotTerm(String givenName, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("givenName", givenName));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_Terms(Collection<String> givenNameList) {
+        setGivenName_Terms(givenNameList, null);
+    }
+
+    public void setGivenName_Terms(Collection<String> givenNameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("givenName", givenNameList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_InScope(Collection<String> givenNameList) {
+        setGivenName_Terms(givenNameList, null);
+    }
+
+    public void setGivenName_InScope(Collection<String> givenNameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setGivenName_Terms(givenNameList, opLambda);
+    }
+
+    public void setGivenName_Match(String givenName) {
+        setGivenName_Match(givenName, null);
+    }
+
+    public void setGivenName_Match(String givenName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_MatchPhrase(String givenName) {
+        setGivenName_MatchPhrase(givenName, null);
+    }
+
+    public void setGivenName_MatchPhrase(String givenName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_MatchPhrasePrefix(String givenName) {
+        setGivenName_MatchPhrasePrefix(givenName, null);
+    }
+
+    public void setGivenName_MatchPhrasePrefix(String givenName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_Fuzzy(String givenName) {
+        setGivenName_Fuzzy(givenName, null);
+    }
+
+    public void setGivenName_Fuzzy(String givenName, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_Prefix(String givenName) {
+        setGivenName_Prefix(givenName, null);
+    }
+
+    public void setGivenName_Prefix(String givenName, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_GreaterThan(String givenName) {
+        setGivenName_GreaterThan(givenName, null);
+    }
+
+    public void setGivenName_GreaterThan(String givenName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("givenName", ConditionKey.CK_GREATER_THAN, givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_LessThan(String givenName) {
+        setGivenName_LessThan(givenName, null);
+    }
+
+    public void setGivenName_LessThan(String givenName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("givenName", ConditionKey.CK_LESS_THAN, givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_GreaterEqual(String givenName) {
+        setGivenName_GreaterEqual(givenName, null);
+    }
+
+    public void setGivenName_GreaterEqual(String givenName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("givenName", ConditionKey.CK_GREATER_EQUAL, givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_LessEqual(String givenName) {
+        setGivenName_LessEqual(givenName, null);
+    }
+
+    public void setGivenName_LessEqual(String givenName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("givenName", ConditionKey.CK_LESS_EQUAL, givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsUserCQ addOrderBy_GivenName_Asc() {
+        regOBA("givenName");
+        return this;
+    }
+
+    public BsUserCQ addOrderBy_GivenName_Desc() {
+        regOBD("givenName");
+        return this;
+    }
+
     public void setRoles_Equal(String roles) {
         setRoles_Term(roles, null);
     }
