@@ -137,27 +137,10 @@ $.fn.suggestor = function(setting) {
 					var str = reslist[i];
 					var chkCorrectWord = true;
 
-					/*
-					//suggestionの子要素かチェック
-					var parentEle = $(reslist[i]).closest("arr");
-					if(typeof parentEle === "undefined") {
-						continue;
-					} else if($(parentEle).attr("name") != "suggestion") {
-						continue;
-					}
-					*/
-
-					//すでに同じ文字が表示されてないかチェック。ゴミ抜き
-					if(str === $textArea.val()) {
-						chkCorrectWord = false;
-					//} else if(0 != str.indexOf($textArea.val())) {
-					//	chkCorrectWord = false;
-					} else {
-						var $tmpli = $($olEle.children("li"));
-						for(var j=0;j<$tmpli.size();j++) {
-							if(str == $($tmpli.get(j)).html()) {
-								chkCorrectWord = false;
-							}
+					var $tmpli = $($olEle.children("li"));
+					for(var j=0;j<$tmpli.size();j++) {
+						if(str == $($tmpli.get(j)).html()) {
+							chkCorrectWord = false;
 						}
 					}
 
