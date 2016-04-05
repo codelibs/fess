@@ -63,6 +63,138 @@
 												<td>${f:h(mail)}<la:hidden property="mail" /></td>
 											</tr>
 											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_employeeNumber" /></th>
+												<td>${f:h(employeeNumber)}<la:hidden property="employeeNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_telephoneNumber" /></th>
+												<td>${f:h(telephoneNumber)}<la:hidden property="telephoneNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_homePhone" /></th>
+												<td>${f:h(homePhone)}<la:hidden property="homePhone" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_homePostalAddress" /></th>
+												<td>${f:h(homePostalAddress)}<la:hidden property="homePostalAddress" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_labeledURI" /></th>
+												<td>${f:h(labeledURI)}<la:hidden property="labeledURI" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_roomNumber" /></th>
+												<td>${f:h(roomNumber)}<la:hidden property="roomNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_description" /></th>
+												<td>${f:h(description)}<la:hidden property="description" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_title" /></th>
+												<td>${f:h(title)}<la:hidden property="title" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_pager" /></th>
+												<td>${f:h(pager)}<la:hidden property="pager" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_street" /></th>
+												<td>${f:h(street)}<la:hidden property="street" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_postalCode" /></th>
+												<td>${f:h(postalCode)}<la:hidden property="postalCode" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_physicalDeliveryOfficeName" /></th>
+												<td>${f:h(physicalDeliveryOfficeName)}<la:hidden property="physicalDeliveryOfficeName" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_destinationIndicator" /></th>
+												<td>${f:h(destinationIndicator)}<la:hidden property="destinationIndicator" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_internationaliSDNNumber" /></th>
+												<td>${f:h(internationaliSDNNumber)}<la:hidden property="internationaliSDNNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_state" /></th>
+												<td>${f:h(state)}<la:hidden property="state" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_employeeType" /></th>
+												<td>${f:h(facsimileTelephoneNumber)}<la:hidden property="employeeType" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_facsimileTelephoneNumber" /></th>
+												<td>${f:h(facsimileTelephoneNumber)}<la:hidden property="facsimileTelephoneNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_postOfficeBox" /></th>
+												<td>${f:h(postOfficeBox)}<la:hidden property="postOfficeBox" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_initials" /></th>
+												<td>${f:h(initials)}<la:hidden property="initials" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_carLicense" /></th>
+												<td>${f:h(carLicense)}<la:hidden property="carLicense" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_mobile" /></th>
+												<td>${f:h(mobile)}<la:hidden property="mobile" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_postalAddress" /></th>
+												<td>${f:h(postalAddress)}<la:hidden property="postalAddress" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_city" /></th>
+												<td>${f:h(city)}<la:hidden property="city" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_teletexTerminalIdentifier" /></th>
+												<td>${f:h(teletexTerminalIdentifier)}<la:hidden property="teletexTerminalIdentifier" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_x121Address" /></th>
+												<td>${f:h(x121Address)}<la:hidden property="x121Address" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_businessCategory" /></th>
+												<td>${f:h(businessCategory)}<la:hidden property="businessCategory" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_registeredAddress" /></th>
+												<td>${f:h(registeredAddress)}<la:hidden property="registeredAddress" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_displayName" /></th>
+												<td>${f:h(displayName)}<la:hidden property="displayName" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_preferredLanguage" /></th>
+												<td>${f:h(preferredLanguage)}<la:hidden property="preferredLanguage" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_departmentNumber" /></th>
+												<td>${f:h(departmentNumber)}<la:hidden property="departmentNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_uidNumber" /></th>
+												<td>${f:h(uidNumber)}<la:hidden property="uidNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_gidNumber" /></th>
+												<td>${f:h(gidNumber)}<la:hidden property="gidNumber" /></td>
+											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.user_homeDirectory" /></th>
+												<td>${f:h(homeDirectory)}<la:hidden property="homeDirectory" /></td>
+											</tr>
+											<tr>
 												<th><la:message key="labels.roles" /></th>
 												<td><c:forEach var="rt" varStatus="s"
 														items="${roleItems}">
