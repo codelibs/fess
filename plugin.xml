@@ -15,6 +15,7 @@
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-kuromoji-neologd" />
 			<param name="plugin.version" value="2.2.0" />
 			<param name="plugin.zip.version" value="2.2.0" />
@@ -23,6 +24,7 @@
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-ja" />
 			<param name="plugin.version" value="2.2.1" />
 			<param name="plugin.zip.version" value="2.2.1" />
@@ -31,6 +33,7 @@
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-synonym" />
 			<param name="plugin.version" value="2.2.0" />
 			<param name="plugin.zip.version" value="2.2.0" />
@@ -39,6 +42,7 @@
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
 			<param name="plugin.version" value="2.2.0" />
 			<param name="plugin.zip.version" value="2.2.0" />
@@ -47,14 +51,25 @@
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
 			<param name="plugin.version" value="2.2.0" />
 			<param name="plugin.zip.version" value="2.2.0" />
+		</antcall>
+		<!-- groovy -->
+		<antcall target="install.plugin">
+			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="plugin.groupId" value="org/elasticsearch/module" />
+			<param name="plugin.name.prefix" value="" />
+			<param name="plugin.name" value="lang-groovy" />
+			<param name="plugin.version" value="2.2.2" />
+			<param name="plugin.zip.version" value="2.2.2" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
 			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
+			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
 			<param name="plugin.version" value="2.2.0" />
 			<param name="plugin.zip.version" value="2.2.0" />
@@ -70,9 +85,9 @@
 
 	<target name="install.plugin">
 		<get dest="${target.dir}">
-			<url url="${repo.url}/${plugin.groupId}/elasticsearch-${plugin.name}/${plugin.version}/elasticsearch-${plugin.name}-${plugin.zip.version}.zip" />
+			<url url="${repo.url}/${plugin.groupId}/${plugin.name.prefix}${plugin.name}/${plugin.version}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
 		</get>
-		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/elasticsearch-${plugin.name}-${plugin.zip.version}.zip" />
+		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
 	</target>
 
 	<target name="remove.jars" if="with.fess">
@@ -81,6 +96,7 @@
 				<include name="dataformat/poi-*" />
 				<include name="dataformat/xmlbeans-*" />
 				<include name="dataformat/stax-api-*" />
+				<include name="lang-groovy/groovy-*" />
 			</fileset>
 		</delete>
 	</target>
