@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -702,7 +701,16 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            return Collections.emptyMap();
+            Map<String, String[]> fields = new HashMap<>();
+            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith("fields.")) {
+                    String[] value = StreamUtil.of(entry.getValue()).filter(q -> StringUtil.isNotBlank(q)).distinct()
+                    .toArray(n -> new String[n]);
+                    fields.put(key.substring("fields.".length()), value);
+                }
+            }
+            return fields;
         }
 
         @Override
