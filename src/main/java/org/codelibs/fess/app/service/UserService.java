@@ -75,7 +75,7 @@ public class UserService implements Serializable {
 
     }
 
-    public void chnagePassword(final String username, final String password) {
+    public void changePassword(final String username, final String password) {
         ComponentUtil.getLdapManager().changePassword(username, password);
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
