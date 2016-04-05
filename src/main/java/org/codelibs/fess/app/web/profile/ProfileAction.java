@@ -67,7 +67,7 @@ public class ProfileAction extends FessSearchAction {
         validatePasswordForm(form, toIndexPage);
         final String username = getUserBean().map(u -> u.getUserId()).get();
         try {
-            userService.chnagePassword(username, form.newPassword);
+            userService.changePassword(username, form.newPassword);
             saveInfo(messages -> messages.addSuccessChangedPassword(GLOBAL));
         } catch (final Exception e) {
             logger.error("Failed to change password for " + username, e);
