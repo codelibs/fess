@@ -73,7 +73,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         }
 
         logger.warn("unknown event: " + eventType + ", data: " + dataMap);
-        return false;
+        // don't stop crawling
+        return true;
     }
 
     protected String getParamValue(Map<String, String> paramMap, String key, String defaultValue) {

@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,7 +98,8 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             for (final String path : values) {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
-                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName())).forEach(f -> fileList.add(f));
+                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName()))
+                            .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(f -> fileList.add(f));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }
@@ -263,7 +266,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     }
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
-                } catch (final Exception e) {
+                } catch (final Exception | OutOfMemoryError e) {
                     final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
