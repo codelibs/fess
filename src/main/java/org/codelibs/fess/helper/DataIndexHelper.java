@@ -220,6 +220,15 @@ public class DataIndexHelper implements Serializable {
         @Override
         public void run() {
             running = true;
+            try {
+                process();
+            } finally {
+                running = false;
+                finished = true;
+            }
+        }
+
+        protected void process() {
             final DataStoreFactory dataStoreFactory = ComponentUtil.getDataStoreFactory();
             dataStore = dataStoreFactory.getDataStore(dataConfig.getHandlerName());
             if (dataStore == null) {
@@ -236,8 +245,6 @@ public class DataIndexHelper implements Serializable {
                     deleteOldDocs();
                 }
             }
-            running = false;
-            finished = true;
         }
 
         private void deleteOldDocs() {
