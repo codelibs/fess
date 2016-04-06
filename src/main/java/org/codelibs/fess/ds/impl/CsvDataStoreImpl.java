@@ -266,7 +266,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     }
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
-                } catch (final Exception e) {
+                } catch (final Exception | OutOfMemoryError e) {
                     final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);

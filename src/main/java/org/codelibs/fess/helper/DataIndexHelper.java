@@ -233,7 +233,7 @@ public class DataIndexHelper implements Serializable {
             } else {
                 try {
                     dataStore.store(dataConfig, indexUpdateCallback, initParamMap);
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     logger.error("Failed to process a data crawling: " + dataConfig.getName(), e);
                     ComponentUtil.getComponent(FailureUrlService.class).store(dataConfig, e.getClass().getCanonicalName(),
                             dataConfig.getConfigId() + ":" + dataConfig.getName(), e);
