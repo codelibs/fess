@@ -15,22 +15,22 @@
  */
 package org.codelibs.fess.job.impl;
 
-import org.codelibs.fess.job.JobExecutor;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
+import org.codelibs.fess.job.JobExecutor;
+import org.codelibs.fess.util.GroovyUtil;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public class GroovyExecutor extends JobExecutor {
 
     @Override
     public Object execute(final String script) {
-        final Binding binding = new Binding();
-        binding.setVariable("container", SingletonLaContainerFactory.getContainer());
-        binding.setVariable("executor", this);
+        Map<String, Object> params = new HashMap<>();
+        params.put("container", SingletonLaContainerFactory.getContainer());
+        params.put("executor", this);
 
-        final GroovyShell shell = new GroovyShell(binding);
-        return shell.evaluate(script);
+        return GroovyUtil.evaluate(script, params);
     }
 
 }

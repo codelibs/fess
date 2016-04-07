@@ -62,6 +62,9 @@ JAVA_OPTS="$JAVA_OPTS -XX:+DisableExplicitGC"
 # Ensure UTF-8 encoding by default (e.g. filenames)
 JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 
+# Use Groovy ClassValue
+JAVA_OPTS="$JAVA_OPTS -Dgroovy.use.classvalue=true"
+
 # Application Configuration
 if [ "x$APP_NAME" = "x" ]; then
   APP_NAME=fess

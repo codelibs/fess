@@ -18,11 +18,9 @@ package org.codelibs.fess.indexer;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.BoostDocumentRule;
+import org.codelibs.fess.util.GroovyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 
 public class DocBoostMatcher {
     private static final Logger logger = LoggerFactory.getLogger(DocBoostMatcher.class);
@@ -46,18 +44,9 @@ public class DocBoostMatcher {
             return false;
         }
 
-        try {
-            final Object value = new GroovyShell(new Binding(map)).evaluate(matchExpression);
-
-            if (value instanceof Boolean) {
-                return ((Boolean) value).booleanValue();
-            }
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to evaluate \"" + matchExpression + "\" for " + map, e);
-            } else {
-                logger.warn("Failed to evaluate \"" + matchExpression + "\".");
-            }
+        final Object value = GroovyUtil.evaluate(matchExpression, map);
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
         }
 
         return false;
@@ -68,22 +57,17 @@ public class DocBoostMatcher {
             return 0.0f;
         }
 
-        try {
-            final Object value = new GroovyShell(new Binding(map)).evaluate(boostExpression);
-
-            if (value instanceof Integer) {
-                return ((Integer) value).floatValue();
-            } else if (value instanceof Long) {
-                return ((Long) value).floatValue();
-            } else if (value instanceof Float) {
-                return ((Float) value).floatValue();
-            } else if (value instanceof Double) {
-                return ((Double) value).floatValue();
-            } else if (value != null) {
-                return Float.parseFloat(value.toString());
-            }
-        } catch (final Exception e) {
-            logger.warn("Failed to parse a doc for boost: " + map, e);
+        final Object value = GroovyUtil.evaluate(boostExpression, map);
+        if (value instanceof Integer) {
+            return ((Integer) value).floatValue();
+        } else if (value instanceof Long) {
+            return ((Long) value).floatValue();
+        } else if (value instanceof Float) {
+            return ((Float) value).floatValue();
+        } else if (value instanceof Double) {
+            return ((Double) value).floatValue();
+        } else if (value != null) {
+            return Float.parseFloat(value.toString());
         }
 
         return 0.0f;

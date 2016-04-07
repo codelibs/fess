@@ -24,10 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.GroovyUtil;
 import org.slf4j.Logger;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 
 public interface FessTransformer {
 
@@ -159,16 +157,11 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        try {
-            final Object value = new GroovyShell(new Binding(paramMap)).evaluate(template);
-            if (value == null) {
-                return null;
-            }
-            return value.toString();
-        } catch (final Exception e) {
-            getLogger().warn("Invalid value format: " + template, e);
+        final Object value = GroovyUtil.evaluate(template, paramMap);
+        if (value == null) {
             return null;
         }
+        return value.toString();
     }
 
     public default int getMaxSiteLength() {
