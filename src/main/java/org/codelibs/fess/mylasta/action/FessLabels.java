@@ -2082,6 +2082,210 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Last Name */
     public static final String LABELS_SURAME = "{labels.surame}";
 
+    /** The key of the message: E-mail */
+    public static final String LABELS_user_mail = "{labels.user_mail}";
+
+    /** The key of the message: E-mail */
+    public static final String LABELS_MAIL = "{labels.mail}";
+
+    /** The key of the message: employeeNumber */
+    public static final String LABELS_user_employeeNumber = "{labels.user_employeeNumber}";
+
+    /** The key of the message: employeeNumber */
+    public static final String LABELS_EMPLOYEE_NUMBER = "{labels.employeeNumber}";
+
+    /** The key of the message: telephoneNumber */
+    public static final String LABELS_user_telephoneNumber = "{labels.user_telephoneNumber}";
+
+    /** The key of the message: telephoneNumber */
+    public static final String LABELS_TELEPHONE_NUMBER = "{labels.telephoneNumber}";
+
+    /** The key of the message: homePhone */
+    public static final String LABELS_user_homePhone = "{labels.user_homePhone}";
+
+    /** The key of the message: homePhone */
+    public static final String LABELS_HOME_PHONE = "{labels.homePhone}";
+
+    /** The key of the message: homePostalAddress */
+    public static final String LABELS_user_homePostalAddress = "{labels.user_homePostalAddress}";
+
+    /** The key of the message: homePostalAddress */
+    public static final String LABELS_HOME_POSTAL_ADDRESS = "{labels.homePostalAddress}";
+
+    /** The key of the message: labeledURI */
+    public static final String LABELS_user_labeledURI = "{labels.user_labeledURI}";
+
+    /** The key of the message: labeledURI */
+    public static final String LABELS_LABELEDURI = "{labels.labeledURI}";
+
+    /** The key of the message: roomNumber */
+    public static final String LABELS_user_roomNumber = "{labels.user_roomNumber}";
+
+    /** The key of the message: roomNumber */
+    public static final String LABELS_ROOM_NUMBER = "{labels.roomNumber}";
+
+    /** The key of the message: description */
+    public static final String LABELS_user_description = "{labels.user_description}";
+
+    /** The key of the message: description */
+    public static final String LABELS_DESCRIPTION = "{labels.description}";
+
+    /** The key of the message: title */
+    public static final String LABELS_user_title = "{labels.user_title}";
+
+    /** The key of the message: title */
+    public static final String LABELS_TITLE = "{labels.title}";
+
+    /** The key of the message: pager */
+    public static final String LABELS_user_pager = "{labels.user_pager}";
+
+    /** The key of the message: pager */
+    public static final String LABELS_PAGER = "{labels.pager}";
+
+    /** The key of the message: street */
+    public static final String LABELS_user_street = "{labels.user_street}";
+
+    /** The key of the message: street */
+    public static final String LABELS_STREET = "{labels.street}";
+
+    /** The key of the message: postalCode */
+    public static final String LABELS_user_postalCode = "{labels.user_postalCode}";
+
+    /** The key of the message: postalCode */
+    public static final String LABELS_POSTAL_CODE = "{labels.postalCode}";
+
+    /** The key of the message: physicalDeliveryOfficeName */
+    public static final String LABELS_user_physicalDeliveryOfficeName = "{labels.user_physicalDeliveryOfficeName}";
+
+    /** The key of the message: physicalDeliveryOfficeName */
+    public static final String LABELS_PHYSICAL_DELIVERY_OFFICE_NAME = "{labels.physicalDeliveryOfficeName}";
+
+    /** The key of the message: destinationIndicator */
+    public static final String LABELS_user_destinationIndicator = "{labels.user_destinationIndicator}";
+
+    /** The key of the message: destinationIndicator */
+    public static final String LABELS_DESTINATION_INDICATOR = "{labels.destinationIndicator}";
+
+    /** The key of the message: internationaliSDNNumber */
+    public static final String LABELS_user_internationaliSDNNumber = "{labels.user_internationaliSDNNumber}";
+
+    /** The key of the message: internationaliSDNNumber */
+    public static final String LABELS_INTERNATIONALISDN_NUMBER = "{labels.internationaliSDNNumber}";
+
+    /** The key of the message: state */
+    public static final String LABELS_user_state = "{labels.user_state}";
+
+    /** The key of the message: state */
+    public static final String LABELS_STATE = "{labels.state}";
+
+    /** The key of the message: employeeType */
+    public static final String LABELS_user_employeeType = "{labels.user_employeeType}";
+
+    /** The key of the message: employeeType */
+    public static final String LABELS_EMPLOYEE_TYPE = "{labels.employeeType}";
+
+    /** The key of the message: facsimileTelephoneNumber */
+    public static final String LABELS_user_facsimileTelephoneNumber = "{labels.user_facsimileTelephoneNumber}";
+
+    /** The key of the message: facsimileTelephoneNumber */
+    public static final String LABELS_FACSIMILE_TELEPHONE_NUMBER = "{labels.facsimileTelephoneNumber}";
+
+    /** The key of the message: postOfficeBox */
+    public static final String LABELS_user_postOfficeBox = "{labels.user_postOfficeBox}";
+
+    /** The key of the message: postOfficeBox */
+    public static final String LABELS_POST_OFFICE_BOX = "{labels.postOfficeBox}";
+
+    /** The key of the message: initials */
+    public static final String LABELS_user_initials = "{labels.user_initials}";
+
+    /** The key of the message: initials */
+    public static final String LABELS_INITIALS = "{labels.initials}";
+
+    /** The key of the message: carLicense */
+    public static final String LABELS_user_carLicense = "{labels.user_carLicense}";
+
+    /** The key of the message: carLicense */
+    public static final String LABELS_CAR_LICENSE = "{labels.carLicense}";
+
+    /** The key of the message: mobile */
+    public static final String LABELS_user_mobile = "{labels.user_mobile}";
+
+    /** The key of the message: mobile */
+    public static final String LABELS_MOBILE = "{labels.mobile}";
+
+    /** The key of the message: postalAddress */
+    public static final String LABELS_user_postalAddress = "{labels.user_postalAddress}";
+
+    /** The key of the message: postalAddress */
+    public static final String LABELS_POSTAL_ADDRESS = "{labels.postalAddress}";
+
+    /** The key of the message: city */
+    public static final String LABELS_user_city = "{labels.user_city}";
+
+    /** The key of the message: city */
+    public static final String LABELS_CITY = "{labels.city}";
+
+    /** The key of the message: teletexTerminalIdentifier */
+    public static final String LABELS_user_teletexTerminalIdentifier = "{labels.user_teletexTerminalIdentifier}";
+
+    /** The key of the message: teletexTerminalIdentifier */
+    public static final String LABELS_TELETEX_TERMINAL_IDENTIFIER = "{labels.teletexTerminalIdentifier}";
+
+    /** The key of the message: x121Address */
+    public static final String LABELS_user_x121Address = "{labels.user_x121Address}";
+
+    /** The key of the message: x121Address */
+    public static final String LABELS_X121_ADDRESS = "{labels.x121Address}";
+
+    /** The key of the message: businessCategory */
+    public static final String LABELS_user_businessCategory = "{labels.user_businessCategory}";
+
+    /** The key of the message: businessCategory */
+    public static final String LABELS_BUSINESS_CATEGORY = "{labels.businessCategory}";
+
+    /** The key of the message: registeredAddress */
+    public static final String LABELS_user_registeredAddress = "{labels.user_registeredAddress}";
+
+    /** The key of the message: registeredAddress */
+    public static final String LABELS_REGISTERED_ADDRESS = "{labels.registeredAddress}";
+
+    /** The key of the message: displayName */
+    public static final String LABELS_user_displayName = "{labels.user_displayName}";
+
+    /** The key of the message: displayName */
+    public static final String LABELS_DISPLAY_NAME = "{labels.displayName}";
+
+    /** The key of the message: preferredLanguage */
+    public static final String LABELS_user_preferredLanguage = "{labels.user_preferredLanguage}";
+
+    /** The key of the message: preferredLanguage */
+    public static final String LABELS_PREFERRED_LANGUAGE = "{labels.preferredLanguage}";
+
+    /** The key of the message: departmentNumber */
+    public static final String LABELS_user_departmentNumber = "{labels.user_departmentNumber}";
+
+    /** The key of the message: departmentNumber */
+    public static final String LABELS_DEPARTMENT_NUMBER = "{labels.departmentNumber}";
+
+    /** The key of the message: uidNumber */
+    public static final String LABELS_user_uidNumber = "{labels.user_uidNumber}";
+
+    /** The key of the message: uidNumber */
+    public static final String LABELS_UID_NUMBER = "{labels.uidNumber}";
+
+    /** The key of the message: gidNumber */
+    public static final String LABELS_user_gidNumber = "{labels.user_gidNumber}";
+
+    /** The key of the message: gidNumber */
+    public static final String LABELS_GID_NUMBER = "{labels.gidNumber}";
+
+    /** The key of the message: homeDirectory */
+    public static final String LABELS_user_homeDirectory = "{labels.user_homeDirectory}";
+
+    /** The key of the message: homeDirectory */
+    public static final String LABELS_HOME_DIRECTORY = "{labels.homeDirectory}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

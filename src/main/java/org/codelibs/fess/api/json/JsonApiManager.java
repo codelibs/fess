@@ -705,8 +705,8 @@ public class JsonApiManager extends BaseApiManager {
             for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith("fields.")) {
-                    String[] value = StreamUtil.of(entry.getValue()).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .toArray(n -> new String[n]);
+                    String[] value =
+                            StreamUtil.of(entry.getValue()).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
                     fields.put(key.substring("fields.".length()), value);
                 }
             }

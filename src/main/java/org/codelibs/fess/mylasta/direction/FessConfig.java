@@ -51,9 +51,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:-OmitStackTraceInFastThrow
     -Djcifs.smb.client.connTimeout=60000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
     */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
@@ -67,7 +69,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC */
+    -XX:+DisableExplicitGC
+    -Dgroovy.use.classvalue=true
+    */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -956,9 +960,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:-OmitStackTraceInFastThrow
     -Djcifs.smb.client.connTimeout=60000
     -Djcifs.smb.client.soTimeout=35000
     -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
     <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -977,7 +983,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:CMSInitiatingOccupancyFraction=75
     -XX:+UseParNewGC
     -XX:+UseTLAB
-    -XX:+DisableExplicitGC <br>
+    -XX:+DisableExplicitGC
+    -Dgroovy.use.classvalue=true
+    <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
