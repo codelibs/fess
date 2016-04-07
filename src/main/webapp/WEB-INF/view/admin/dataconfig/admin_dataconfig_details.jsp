@@ -121,7 +121,7 @@
 								<div class="box-footer">
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 									<la:link styleClass="btn btn-success"
-										href="/admin/scheduler/createnewjob/data_crawling/${f:u(id)}/${f:u(name)}">
+										href="/admin/scheduler/createnewjob/data_crawling/${f:u(id)}/${fe:base64(name)}">
 										<i class="fa fa-plus-circle"></i>
 										<la:message key="labels.data_crawling_button_create_job" />
 									</la:link>

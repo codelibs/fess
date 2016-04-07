@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Base64Util;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetQueryView;
 import org.codelibs.fess.helper.ViewHelper;
@@ -216,4 +218,10 @@ public class FessFunctions {
         return query;
     }
 
+    public static String base64(final String value) {
+        if (value == null) {
+            return StringUtil.EMPTY;
+        }
+        return Base64.getEncoder().encodeToString(value.getBytes(Constants.CHARSET_UTF_8));
+    }
 }

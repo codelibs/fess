@@ -179,4 +179,16 @@
     </example>
   </function>
 
+  <function>
+    <description>
+      Returns base64 encoded value.
+    </description>
+    <name>base64</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>java.lang.String base64(java.lang.String)</function-signature>
+    <example>
+      ${fe:base64(value)}
+    </example>
+  </function>
+
 </taglib>

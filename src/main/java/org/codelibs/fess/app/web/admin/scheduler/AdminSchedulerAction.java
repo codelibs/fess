@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.web.admin.scheduler;
 
 import java.text.MessageFormat;
+import java.util.Base64;
 
 import javax.annotation.Resource;
 
@@ -121,7 +122,8 @@ public class AdminSchedulerAction extends FessAdminAction {
                 scheduledJobForm.crawler = Constants.ON;
                 scheduledJobForm.available = Constants.ON;
                 scheduledJobForm.cronExpression = null;
-                scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), name);
+                final String decodedName = new String(Base64.getUrlDecoder().decode(name), Constants.CHARSET_UTF_8);
+                scheduledJobForm.name = MessageFormat.format(fessConfig.getJobTemplateTitle(type), decodedName);
                 final String[] ids = new String[] { "", "", "" };
                 if (Constants.WEB_CRAWLER_TYPE.equals(type)) {
                     ids[0] = "\"" + id + "\"";
