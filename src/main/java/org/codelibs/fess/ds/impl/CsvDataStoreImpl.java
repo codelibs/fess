@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,7 +89,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
         if (StringUtil.isBlank(value)) {
             value = paramMap.get(CSV_DIRS_PARAM);
             if (StringUtil.isBlank(value)) {
-                throw new DataStoreException("csvFiles is empty");
+                throw new DataStoreException(CSV_FILES_PARAM + " and " + CSV_DIRS_PARAM + " are blank.");
             }
             logger.info(CSV_DIRS_PARAM + "=" + value);
             final String[] values = value.split(",");
@@ -116,8 +114,8 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
             }
         }
-        if (fileList.isEmpty()) {
-            throw new DataStoreException("csvFiles is empty");
+        if (fileList.isEmpty() && logger.isDebugEnabled()) {
+            logger.debug("No csv files in " + value);
         }
         return fileList;
     }
