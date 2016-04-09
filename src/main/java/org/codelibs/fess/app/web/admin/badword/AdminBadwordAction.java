@@ -219,12 +219,18 @@ public class AdminBadwordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getBadWord(form).ifPresent(entity -> {
-            badWordService.store(entity);
-            suggestHelper.addBadWord(entity.getSuggestWord());
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+        getBadWord(form).ifPresent(
+                entity -> {
+                    try {
+                        badWordService.store(entity);
+                        suggestHelper.addBadWord(entity.getSuggestWord());
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -234,11 +240,17 @@ public class AdminBadwordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getBadWord(form).ifPresent(entity -> {
-            badWordService.store(entity);
-            suggestHelper.storeAllBadWords();
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getBadWord(form).ifPresent(
+                entity -> {
+                    try {
+                        badWordService.store(entity);
+                        suggestHelper.storeAllBadWords();
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -250,13 +262,22 @@ public class AdminBadwordAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        badWordService.getBadWord(id).ifPresent(entity -> {
-            badWordService.delete(entity);
-            suggestHelper.deleteBadWord(entity.getSuggestWord());
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
+        badWordService
+                .getBadWord(id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                badWordService.delete(entity);
+                                suggestHelper.deleteBadWord(entity.getSuggestWord());
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (Exception e) {
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asDetailsHtml());
+                            }
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                });
         return redirect(getClass());
     }
 

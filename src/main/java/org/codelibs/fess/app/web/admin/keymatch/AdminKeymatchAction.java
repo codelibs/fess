@@ -169,7 +169,7 @@ public class AdminKeymatchAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
             ComponentUtil.getKeyMatchHelper().update();
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }

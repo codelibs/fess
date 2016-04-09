@@ -278,7 +278,7 @@ public class AdminDictSynonymAction extends FessAdminAction {
             synonymService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
         }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }

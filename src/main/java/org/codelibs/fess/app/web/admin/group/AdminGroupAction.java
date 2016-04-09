@@ -149,16 +149,18 @@ public class AdminGroupAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getGroup(form).ifPresent(entity -> {
-            try {
-                groupService.store(entity);
-                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-            } catch (final Exception e) {
-                logger.error("Failed to add " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
-            }
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+        getGroup(form).ifPresent(
+                entity -> {
+                    try {
+                        groupService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        logger.error("Failed to add " + entity, e);
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -169,17 +171,22 @@ public class AdminGroupAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        groupService.getGroup(id).ifPresent(entity -> {
-            try {
-                groupService.delete(entity);
-                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-            } catch (final Exception e) {
-                logger.error("Failed to delete " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-            }
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
+        groupService
+                .getGroup(id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                groupService.delete(entity);
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (final Exception e) {
+                                logger.error("Failed to delete " + entity, e);
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asDetailsHtml());
+                            }
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                });
         return redirect(getClass());
     }
 

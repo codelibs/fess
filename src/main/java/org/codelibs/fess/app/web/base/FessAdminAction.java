@@ -66,6 +66,16 @@ public abstract class FessAdminAction extends FessBaseAction {
         return LaServletContextUtil.getServletContext();
     }
 
+    protected String buildThrowableMessage(Throwable t) {
+        StringBuilder buf = new StringBuilder(100);
+        Throwable current = t;
+        while (current != null) {
+            buf.append(current.getLocalizedMessage()).append(' ');
+            current = current.getCause();
+        }
+        return buf.toString();
+    }
+
     // ===================================================================================
     //                                                                            Document
     //                                                                            ========
@@ -107,7 +117,6 @@ public abstract class FessAdminAction extends FessBaseAction {
 
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) {
-        final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
         final String requestPath = runtime.getRequestPath();
         final String executeName = runtime.getExecuteMethod().getName();
         activityHelper.access(getUserBean(), requestPath, executeName);

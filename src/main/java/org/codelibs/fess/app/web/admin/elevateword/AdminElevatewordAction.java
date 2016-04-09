@@ -233,7 +233,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                             entity.getTargetRole(), entity.getBoost());
                     saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                 }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL), () -> asEditHtml());
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
     }

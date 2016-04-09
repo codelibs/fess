@@ -300,7 +300,16 @@ public class FessMessages extends FessLabels {
     public static final String ERRORS_crud_invalid_mode = "{errors.crud_invalid_mode}";
 
     /** The key of the message: Failed to create a new data. */
+    public static final String ERRORS_crud_failed_to_create_instance = "{errors.crud_failed_to_create_instance}";
+
+    /** The key of the message: Failed to create a new data. ({0}) */
     public static final String ERRORS_crud_failed_to_create_crud_table = "{errors.crud_failed_to_create_crud_table}";
+
+    /** The key of the message: Failed to update the data. ({0}) */
+    public static final String ERRORS_crud_failed_to_update_crud_table = "{errors.crud_failed_to_update_crud_table}";
+
+    /** The key of the message: Failed to delete the data. ({0}) */
+    public static final String ERRORS_crud_failed_to_delete_crud_table = "{errors.crud_failed_to_delete_crud_table}";
 
     /** The key of the message: Could not find the data({0}). */
     public static final String ERRORS_crud_could_not_find_crud_table = "{errors.crud_could_not_find_crud_table}";
@@ -1716,16 +1725,61 @@ public class FessMessages extends FessLabels {
     }
 
     /**
-     * Add the created action message for the key 'errors.crud_failed_to_create_crud_table' with parameters.
+     * Add the created action message for the key 'errors.crud_failed_to_create_instance' with parameters.
      * <pre>
      * message: Failed to create a new data.
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorsCrudFailedToCreateCrudTable(String property) {
+    public FessMessages addErrorsCrudFailedToCreateInstance(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_create_crud_table));
+        add(property, new ActionMessage(ERRORS_crud_failed_to_create_instance));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_create_crud_table' with parameters.
+     * <pre>
+     * message: Failed to create a new data. ({0})
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToCreateCrudTable(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_create_crud_table, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_update_crud_table' with parameters.
+     * <pre>
+     * message: Failed to update the data. ({0})
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToUpdateCrudTable(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_update_crud_table, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.crud_failed_to_delete_crud_table' with parameters.
+     * <pre>
+     * message: Failed to delete the data. ({0})
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCrudFailedToDeleteCrudTable(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_crud_failed_to_delete_crud_table, arg0));
         return this;
     }
 
