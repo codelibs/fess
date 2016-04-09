@@ -18,6 +18,8 @@
 
 	<component name="activityHelper" class="org.codelibs.fess.helper.ActivityHelper">
 	</component>
+	<component name="jobHelper" class="org.codelibs.fess.helper.JobHelper">
+	</component>
 	<component name="labelTypeHelper" class="org.codelibs.fess.helper.LabelTypeHelper">
 	</component>
 	<component name="keyMatchHelper" class="org.codelibs.fess.helper.KeyMatchHelper">

@@ -35,6 +35,7 @@ import org.codelibs.fess.helper.DuplicateHostHelper;
 import org.codelibs.fess.helper.FileTypeHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
+import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
@@ -100,7 +101,9 @@ public final class ComponentUtil {
 
     private static final String WEB_API_MANAGER_FACTORY = "webApiManagerFactory";
 
-    private static final String JOB_HELPER = "processHelper";
+    private static final String PROCESS_HELPER = "processHelper";
+
+    private static final String JOB_HELPER = "jobHelper";
 
     private static final String DUPLICATE_HOST_HELPER = "duplicateHostHelper";
 
@@ -213,7 +216,11 @@ public final class ComponentUtil {
         return getComponent(DUPLICATE_HOST_HELPER);
     }
 
-    public static ProcessHelper getJobHelper() {
+    public static ProcessHelper getProcessHelper() {
+        return getComponent(PROCESS_HELPER);
+    }
+
+    public static JobHelper getJobHelper() {
         return getComponent(JOB_HELPER);
     }
 
