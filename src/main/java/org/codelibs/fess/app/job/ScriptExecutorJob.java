@@ -15,10 +15,11 @@
  */
 package org.codelibs.fess.app.job;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.service.JobLogService;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
+import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.job.ScheduledJobException;
@@ -35,13 +36,32 @@ public class ScriptExecutorJob implements LaJob {
 
     @Override
     public void run(final LaJobRuntime runtime) {
-        final ScheduledJob scheduledJob = (ScheduledJob) runtime.getParameterMap().get(Constants.SCHEDULED_JOB); // TODO null check
+        if (!runtime.getParameterMap().containsKey(Constants.SCHEDULED_JOB)) {
+            logger.warn(Constants.SCHEDULED_JOB + " is empty.");
+            return;
+        }
+
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final JobManager jobManager = ComponentUtil.getJobManager();
+        final ScheduledJob scheduledJob = (ScheduledJob) runtime.getParameterMap().get(Constants.SCHEDULED_JOB);
+        final String id = scheduledJob.getId();
+        final String target = scheduledJob.getTarget();
+        if (!isTarget(target)) {
+            logger.info("Ignore Job " + id + ":" + scheduledJob.getName() + " because of not target: " + scheduledJob.getTarget());
+            return;
+        }
+
+        final JobHelper jobHelper = ComponentUtil.getJobHelper();
+        if (!jobHelper.isAvailable(id)) {
+            logger.info("Job " + id + " is unavailable. Unregistering this job.");
+            jobHelper.unregister(scheduledJob);
+            return;
+        }
+
         final JobLog jobLog = new JobLog(scheduledJob);
         final String scriptType = scheduledJob.getScriptType();
         final String script = scheduledJob.getScriptData();
-        final String id = scheduledJob.getId();
+
         final JobExecutor jobExecutor = ComponentUtil.getJobExecutor(scriptType);
         if (jobExecutor == null) {
             throw new ScheduledJobException("No jobExecutor: " + scriptType);
@@ -56,7 +76,7 @@ public class ScriptExecutorJob implements LaJob {
 
         try {
             if (scheduledJob.isLoggingEnabled()) {
-                storeJobLog(jobLog);
+                jobHelper.store(jobLog);
             }
 
             if (logger.isDebugEnabled()) {
@@ -87,14 +107,28 @@ public class ScriptExecutorJob implements LaJob {
                 logger.debug("jobLog: " + jobLog);
             }
             if (scheduledJob.isLoggingEnabled()) {
-                storeJobLog(jobLog);
+                jobHelper.store(jobLog);
             }
         }
     }
 
-    private void storeJobLog(final JobLog jobLog) {
-        final JobLogService jobLogService = ComponentUtil.getComponent(JobLogService.class);
-        jobLogService.store(jobLog);
+    protected boolean isTarget(final String target) {
+        if (StringUtil.isBlank(target)) {
+            return true;
+        }
+
+        final String myName = ComponentUtil.getFessConfig().getSchedulerTargetName();
+
+        final String[] targets = target.split(",");
+        for (String name : targets) {
+            name = name.trim();
+            if (Constants.DEFAULT_JOB_TARGET.equalsIgnoreCase(name)) {
+                return true;
+            } else if (StringUtil.isNotBlank(myName) && myName.equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

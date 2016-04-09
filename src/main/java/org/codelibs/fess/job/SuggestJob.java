@@ -102,7 +102,7 @@ public class SuggestJob {
         }
         resultBuf.append("Session Id: ").append(sessionId).append("\n");
         if (jobExecutor != null) {
-            jobExecutor.addShutdownListener(() -> ComponentUtil.getJobHelper().destroyProcess(sessionId));
+            jobExecutor.addShutdownListener(() -> ComponentUtil.getProcessHelper().destroyProcess(sessionId));
         }
 
         try {
@@ -120,7 +120,7 @@ public class SuggestJob {
         final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
-        final ProcessHelper processHelper = ComponentUtil.getJobHelper();
+        final ProcessHelper processHelper = ComponentUtil.getProcessHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         cmdList.add(fessConfig.getJavaCommandPath());

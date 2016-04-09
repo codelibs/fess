@@ -18,10 +18,12 @@ package org.codelibs.fess.app.job;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutManager;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.logic.AccessContextLogic;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.es.config.exbhv.JobLogBhv;
+import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -31,8 +33,12 @@ import org.lastaflute.job.LaCron;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.LaJobRunner;
 import org.lastaflute.job.LaJobScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AllJobScheduler implements LaJobScheduler {
+
+    private static final Logger logger = LoggerFactory.getLogger(AllJobScheduler.class);
 
     protected static final String APP_TYPE = "JOB";
 
@@ -51,10 +57,16 @@ public class AllJobScheduler implements LaJobScheduler {
     @Resource
     private SystemHelper systemHelper;
 
+    @Resource
+    private JobHelper jobHelper;
+
     protected Class<? extends LaJob> jobClass = ScriptExecutorJob.class;
+
+    protected long schedulerTime;
 
     @Override
     public void schedule(final LaCron cron) {
+        schedulerTime = System.currentTimeMillis();
         scheduledJobService.start(cron);
 
         final String myName = fessConfig.getSchedulerTargetName();
@@ -65,6 +77,23 @@ public class AllJobScheduler implements LaJobScheduler {
             });
         }
 
+        TimeoutManager.getInstance().addTimeoutTarget(() -> {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Updating scheduled jobs. time:" + schedulerTime);
+            }
+            final long now = System.currentTimeMillis();
+            scheduledJobService.getScheduledJobListAfter(schedulerTime).forEach(scheduledJob -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Updating job schedule:" + scheduledJob.getName());
+                }
+                try {
+                    jobHelper.register(scheduledJob);
+                } catch (Exception e) {
+                    logger.warn("Failed to update schdule " + scheduledJob, e);
+                }
+            });
+            schedulerTime = now;
+        }, fessConfig.getSchedulerMonitorIntervalAsInteger(), true);
     }
 
     @Override
@@ -74,4 +103,7 @@ public class AllJobScheduler implements LaJobScheduler {
         });
     }
 
+    public void setJobClass(Class<? extends LaJob> jobClass) {
+        this.jobClass = jobClass;
+    }
 }

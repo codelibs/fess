@@ -552,6 +552,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. QUIT */
     String SCHEDULER_CONCURRENT_EXEC_MODE = "scheduler.concurrent.exec.mode";
 
+    /** The key of the configuration. e.g. 30 */
+    String SCHEDULER_MONITOR_INTERVAL = "scheduler.monitor.interval";
+
     /** The key of the configuration. e.g. http://fess.codelibs.org/{lang}/{version}/admin/ */
     String ONLINE_HELP_BASE_LINK = "online.help.base.link";
 
@@ -2513,6 +2516,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getSchedulerConcurrentExecMode();
 
     /**
+     * Get the value for the key 'scheduler.monitor.interval'. <br>
+     * The value is, e.g. 30 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSchedulerMonitorInterval();
+
+    /**
+     * Get the value for the key 'scheduler.monitor.interval' as {@link Integer}. <br>
+     * The value is, e.g. 30 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSchedulerMonitorIntervalAsInteger();
+
+    /**
      * Get the value for the key 'online.help.base.link'. <br>
      * The value is, e.g. http://fess.codelibs.org/{lang}/{version}/admin/ <br>
      * comment: ------
@@ -4073,6 +4091,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSchedulerConcurrentExecMode() {
             return get(FessConfig.SCHEDULER_CONCURRENT_EXEC_MODE);
+        }
+
+        public String getSchedulerMonitorInterval() {
+            return get(FessConfig.SCHEDULER_MONITOR_INTERVAL);
+        }
+
+        public Integer getSchedulerMonitorIntervalAsInteger() {
+            return getAsInteger(FessConfig.SCHEDULER_MONITOR_INTERVAL);
         }
 
         public String getOnlineHelpBaseLink() {
