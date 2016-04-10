@@ -112,6 +112,10 @@ public abstract class AbstractDataStoreImpl implements DataStore {
             return StringUtil.EMPTY;
         }
 
+        if (paramMap.containsKey(template)) {
+            return paramMap.get(template);
+        }
+
         return GroovyUtil.evaluate(template, paramMap);
     }
 
