@@ -44,7 +44,6 @@ public class CreateForm implements Serializable {
     @Size(max = 100)
     public String confirmPassword;
 
-    @Required
     @Size(max = 1000)
     public String surname;
 
