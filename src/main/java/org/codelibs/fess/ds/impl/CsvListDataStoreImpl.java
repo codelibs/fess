@@ -18,10 +18,11 @@ package org.codelibs.fess.ds.impl;
 import java.io.File;
 import java.util.Map;
 
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
-import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +52,23 @@ public class CsvListDataStoreImpl extends CsvDataStoreImpl {
     @Override
     protected void storeData(final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
-
+        int nThreads = 1;
+        if (paramMap.containsKey(Constants.NUM_OF_THREADS)) {
+            try {
+                nThreads = Integer.parseInt(paramMap.get(Constants.NUM_OF_THREADS));
+            } catch (NumberFormatException e) {
+                logger.warn(Constants.NUM_OF_THREADS + " is not int value.", e);
+            }
+        }
         final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getCrawlerClientFactory();
         dataConfig.initializeClientFactory(crawlerClientFactory);
-        final FileListIndexUpdateCallbackImpl fileListIndexUpdateCallback =
-                new FileListIndexUpdateCallbackImpl(callback, crawlerClientFactory);
-        super.storeData(dataConfig, fileListIndexUpdateCallback, paramMap, scriptMap, defaultDataMap);
-        fileListIndexUpdateCallback.commit();
+        try (final FileListIndexUpdateCallbackImpl fileListIndexUpdateCallback =
+                new FileListIndexUpdateCallbackImpl(callback, crawlerClientFactory, nThreads)) {
+            super.storeData(dataConfig, fileListIndexUpdateCallback, paramMap, scriptMap, defaultDataMap);
+            fileListIndexUpdateCallback.commit();
+        } catch (Exception e) {
+            throw new DataStoreException(e);
+        }
     }
 
     @Override

@@ -18,6 +18,10 @@ package org.codelibs.fess.ds.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.fess.Constants;
@@ -32,9 +36,9 @@ import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
 import org.codelibs.fess.crawler.rule.Rule;
 import org.codelibs.fess.crawler.rule.RuleManager;
 import org.codelibs.fess.crawler.transformer.Transformer;
-import org.codelibs.fess.ds.DataStoreCrawlingException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -43,7 +47,7 @@ import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
+public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(FileListIndexUpdateCallbackImpl.class);
 
     protected IndexUpdateCallback indexUpdateCallback;
@@ -54,40 +58,51 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     protected int maxDeleteDocumentCacheSize = 100;
 
-    protected FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback, final CrawlerClientFactory crawlerClientFactory) {
+    private ExecutorService executor;
+
+    protected FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback,
+            final CrawlerClientFactory crawlerClientFactory, final int nThreads) {
         this.indexUpdateCallback = indexUpdateCallback;
         this.crawlerClientFactory = crawlerClientFactory;
+        executor = newFixedThreadPool(nThreads < 1 ? 1 : nThreads);
+    }
+
+    protected ExecutorService newFixedThreadPool(int nThreads) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executor Thread Pool: " + nThreads);
+        }
+        return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(nThreads),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Override
-    public boolean store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
-        final Object eventType = dataMap.remove(getParamValue(paramMap, "field.event_type", "event_type"));
-
-        if (getParamValue(paramMap, "event.create", "create").equals(eventType)
-                || getParamValue(paramMap, "event.modify", "modify").equals(eventType)) {
-            // updated file
-            return addDocument(paramMap, dataMap);
-        } else if (getParamValue(paramMap, "event.delete", "delete").equals(eventType)) {
-            // deleted file
-            return deleteDocument(paramMap, dataMap);
-        }
-
-        logger.warn("unknown event: " + eventType + ", data: " + dataMap);
-        // don't stop crawling
-        return true;
+    public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+        executor.execute(() -> {
+            final Object eventType = dataMap.remove(getParamValue(paramMap, "field.event_type", "event_type"));
+            if (getParamValue(paramMap, "event.create", "create").equals(eventType)
+                    || getParamValue(paramMap, "event.modify", "modify").equals(eventType)) {
+                // updated file
+                addDocument(paramMap, dataMap);
+            } else if (getParamValue(paramMap, "event.delete", "delete").equals(eventType)) {
+                // deleted file
+                deleteDocument(paramMap, dataMap);
+            } else {
+                logger.warn("unknown event: " + eventType + ", data: " + dataMap);
+            }
+        });
     }
 
     protected String getParamValue(Map<String, String> paramMap, String key, String defaultValue) {
         return paramMap.getOrDefault(key, defaultValue);
     }
 
-    protected boolean addDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    protected void addDocument(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         synchronized (indexUpdateCallback) {
             // required check
             if (!dataMap.containsKey(fessConfig.getIndexFieldUrl()) || dataMap.get(fessConfig.getIndexFieldUrl()) == null) {
                 logger.warn("Could not add a doc. Invalid data: " + dataMap);
-                return false;
+                return;
             }
 
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
@@ -95,7 +110,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 final CrawlerClient client = crawlerClientFactory.getClient(url);
                 if (client == null) {
                     logger.warn("CrawlerClient is null. Data: " + dataMap);
-                    return false;
+                    return;
                 }
 
                 final long startTime = System.currentTimeMillis();
@@ -111,7 +126,6 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                 final Rule rule = ruleManager.getRule(responseData);
                 if (rule == null) {
                     logger.warn("No url rule. Data: " + dataMap);
-                    return false;
                 } else {
                     responseData.setRuleId(rule.getRuleId());
                     final ResponseProcessor responseProcessor = rule.getResponseProcessor();
@@ -138,11 +152,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
                         }
                         StreamUtil.of(ignoreFields).map(s -> s.trim()).forEach(s -> dataMap.remove(s));
 
-                        return indexUpdateCallback.store(paramMap, dataMap);
+                        indexUpdateCallback.store(paramMap, dataMap);
                     } else {
                         logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: " + responseProcessor
                                 + ", Data: " + dataMap);
-                        return false;
                     }
                 }
             } catch (final Exception e) {
@@ -211,5 +224,18 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     public void setMaxDeleteDocumentCacheSize(int maxDeleteDocumentCacheSize) {
         this.maxDeleteDocumentCacheSize = maxDeleteDocumentCacheSize;
+    }
+
+    @Override
+    public void close() throws Exception {
+        try {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Shutting down thread executor.");
+            }
+            executor.shutdown();
+            executor.awaitTermination(60, TimeUnit.SECONDS);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

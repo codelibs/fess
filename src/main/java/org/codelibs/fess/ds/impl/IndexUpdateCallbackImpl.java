@@ -22,7 +22,7 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.SearchLogHelper;
@@ -54,7 +54,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
      * @see org.codelibs.fess.ds.impl.IndexUpdateCallback#store(java.util.Map)
      */
     @Override
-    public boolean store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
+    public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
@@ -66,7 +66,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         //   required check
         final Object urlObj = dataMap.get(fessConfig.getIndexFieldUrl());
         if (urlObj == null) {
-            throw new FessSystemException("url is null. dataMap=" + dataMap);
+            throw new DataStoreException("url is null. dataMap=" + dataMap);
         }
 
         final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
@@ -112,7 +112,6 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
             logger.debug("The number of an added document is " + documentSize.get() + ".");
         }
 
-        return true;
     }
 
     @Override

@@ -13,22 +13,33 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.ds;
+package org.codelibs.fess.exception;
 
-import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 
-public class DataStoreException extends FessSystemException {
+public class DataStoreCrawlingException extends CrawlingAccessException {
+
     private static final long serialVersionUID = 1L;
 
-    public DataStoreException(final String message, final Throwable cause) {
-        super(message, cause);
+    private final String url;
+
+    private boolean abort;
+
+    public DataStoreCrawlingException(final String url, final String message, final Exception e) {
+        this(url, message, e, false);
     }
 
-    public DataStoreException(final String message) {
-        super(message);
+    public DataStoreCrawlingException(final String url, final String message, final Exception e, final boolean abort) {
+        super(message, e);
+        this.url = url;
+        this.abort = abort;
     }
 
-    public DataStoreException(final Throwable cause) {
-        super(cause);
+    public String getUrl() {
+        return url;
+    }
+
+    public boolean aborted() {
+        return abort;
     }
 }

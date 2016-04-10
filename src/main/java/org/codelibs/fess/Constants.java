@@ -218,6 +218,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String INDEXING_TARGET = "indexingTarget";
 
+    public static final String NUM_OF_THREADS = "numOfThreads";
+
     public static final String BASIC = "BASIC";
 
     public static final String DIGEST = "DIGEST";

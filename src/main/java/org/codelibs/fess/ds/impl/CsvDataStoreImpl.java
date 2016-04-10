@@ -34,10 +34,10 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FailureUrlService;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.exception.MultipleCrawlingAccessException;
-import org.codelibs.fess.ds.DataStoreCrawlingException;
-import org.codelibs.fess.ds.DataStoreException;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.exception.DataStoreCrawlingException;
+import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
@@ -236,7 +236,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
 
                 try {
-                    loop = callback.store(paramMap, dataMap);
+                    callback.store(paramMap, dataMap);
                 } catch (final CrawlingAccessException e) {
                     logger.warn("Crawling Access Exception at : " + dataMap, e);
 
@@ -258,7 +258,11 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
 
                     String url;
                     if (target instanceof DataStoreCrawlingException) {
-                        url = ((DataStoreCrawlingException) target).getUrl();
+                        DataStoreCrawlingException dce = (DataStoreCrawlingException) target;
+                        url = dce.getUrl();
+                        if (dce.aborted()) {
+                            loop = false;
+                        }
                     } else {
                         url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
                     }
