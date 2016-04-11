@@ -30,6 +30,7 @@ import org.codelibs.fess.helper.CrawlingInfoHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.GroovyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,16 +115,11 @@ public abstract class AbstractDataStoreImpl implements DataStore {
             return StringUtil.EMPTY;
         }
 
-        try {
-            final Object value = new GroovyShell(new Binding(paramMap)).evaluate(template);
-            if (value == null) {
-                return null;
-            }
-            return value;
-        } catch (final Exception e) {
-            logger.warn("Invalid value format: " + template + " => " + paramMap, e);
-            return null;
+        if (paramMap.containsKey(template)) {
+            return paramMap.get(template);
         }
+
+        return GroovyUtil.evaluate(template, paramMap);
     }
 
     protected long getReadInterval(final Map<String, String> paramMap) {
