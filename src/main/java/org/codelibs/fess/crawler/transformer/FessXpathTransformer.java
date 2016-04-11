@@ -185,6 +185,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final String mimeType = responseData.getMimeType();
 
         final Map<String, String> fieldConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.FIELD);
+        final Map<String, String> xpathConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.XPATH);
 
         String urlEncoding;
         final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
@@ -204,13 +205,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             putResultDataBody(dataMap, fessConfig.getIndexFieldExpires(), documentExpires);
         }
         // lang
-        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlLangXpath(), true));
+        final String lang = systemHelper.normalizeLang(getSingleNodeValue(document, getLangXpath(fessConfig, xpathConfigMap), true));
         if (lang != null) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldLang(), lang);
         }
         // title
         // content
-        final String body = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlContentXpath(), prunedContent);
+        final String body = getSingleNodeValue(document, getContentXpath(fessConfig, xpathConfigMap), prunedContent);
         putResultDataBody(dataMap, fessConfig.getIndexFieldContent(), documentHelper.getContent(responseData, body, dataMap));
         if ((Constants.TRUE.equalsIgnoreCase(fieldConfigMap.get(fessConfig.getIndexFieldCache())) || fessConfig
                 .isCrawlerDocumentCacheEnabled()) && fessConfig.isSupportedDocumentCacheMimetypes(mimeType)) {
@@ -233,7 +234,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             }
         }
         // digest
-        final String digest = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlDigestXpath(), false);
+        final String digest = getSingleNodeValue(document, getDigestXpath(fessConfig, xpathConfigMap), false);
         if (StringUtil.isNotBlank(digest)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(), digest);
         } else {
@@ -301,18 +302,41 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         }
 
         // from config
-        final Map<String, String> xpathConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.XPATH);
         final Map<String, String> scriptConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.SCRIPT);
-        for (final Map.Entry<String, String> entry : xpathConfigMap.entrySet()) {
-            final String key = entry.getKey();
-            final String value = getSingleNodeValue(document, entry.getValue(), true);
+        xpathConfigMap.entrySet().stream().filter(e -> !e.getKey().startsWith("default.")).forEach(e -> {
+            final String key = e.getKey();
+            final String value = getSingleNodeValue(document, e.getValue(), true);
             putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key));
+        });
+        crawlingConfig.getConfigParameterMap(ConfigName.VALUE).entrySet().stream().forEach(e -> {
+            final String key = e.getKey();
+            final String value = e.getValue();
+            putResultDataWithTemplate(dataMap, key, value, scriptConfigMap.get(key));
+        });
+    }
+
+    protected String getLangXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
+        String xpath = xpathConfigMap.get("default.lang");
+        if (StringUtil.isNotBlank(xpath)) {
+            return xpath;
         }
-        final Map<String, String> valueConfigMap = crawlingConfig.getConfigParameterMap(ConfigName.VALUE);
-        for (final Map.Entry<String, String> entry : valueConfigMap.entrySet()) {
-            final String key = entry.getKey();
-            putResultDataWithTemplate(dataMap, key, entry.getValue(), scriptConfigMap.get(key));
+        return fessConfig.getCrawlerDocumentHtmlLangXpath();
+    }
+
+    protected String getContentXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
+        String xpath = xpathConfigMap.get("default.content");
+        if (StringUtil.isNotBlank(xpath)) {
+            return xpath;
         }
+        return fessConfig.getCrawlerDocumentHtmlContentXpath();
+    }
+
+    protected String getDigestXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
+        String xpath = xpathConfigMap.get("default.digest");
+        if (StringUtil.isNotBlank(xpath)) {
+            return xpath;
+        }
+        return fessConfig.getCrawlerDocumentHtmlDigestXpath();
     }
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
