@@ -322,6 +322,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. filetype */
     String INDEX_FIELD_FILETYPE = "index.field.filetype";
 
+    /** The key of the configuration. e.g. content_title */
+    String RESPONSE_FIELD_content_title = "response.field.content_title";
+
+    /** The key of the configuration. e.g. content_description */
+    String RESPONSE_FIELD_content_description = "response.field.content_description";
+
+    /** The key of the configuration. e.g. url_link */
+    String RESPONSE_FIELD_url_link = "response.field.url_link";
+
+    /** The key of the configuration. e.g. site_path */
+    String RESPONSE_FIELD_site_path = "response.field.site_path";
+
     /** The key of the configuration. e.g. fess */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
 
@@ -1794,6 +1806,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldFiletype();
+
+    /**
+     * Get the value for the key 'response.field.content_title'. <br>
+     * The value is, e.g. content_title <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseFieldContentTitle();
+
+    /**
+     * Get the value for the key 'response.field.content_description'. <br>
+     * The value is, e.g. content_description <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseFieldContentDescription();
+
+    /**
+     * Get the value for the key 'response.field.url_link'. <br>
+     * The value is, e.g. url_link <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseFieldUrlLink();
+
+    /**
+     * Get the value for the key 'response.field.site_path'. <br>
+     * The value is, e.g. site_path <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getResponseFieldSitePath();
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
@@ -4047,6 +4087,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexFieldFiletype() {
             return get(FessConfig.INDEX_FIELD_FILETYPE);
+        }
+
+        public String getResponseFieldContentTitle() {
+            return get(FessConfig.RESPONSE_FIELD_content_title);
+        }
+
+        public String getResponseFieldContentDescription() {
+            return get(FessConfig.RESPONSE_FIELD_content_description);
+        }
+
+        public String getResponseFieldUrlLink() {
+            return get(FessConfig.RESPONSE_FIELD_url_link);
+        }
+
+        public String getResponseFieldSitePath() {
+            return get(FessConfig.RESPONSE_FIELD_site_path);
         }
 
         public String getIndexDocumentSearchIndex() {

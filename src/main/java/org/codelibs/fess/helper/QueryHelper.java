@@ -187,7 +187,8 @@ public class QueryHelper implements Serializable {
                             fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
         }
         if (apiResponseFieldSet == null) {
-            setApiResponseFields(new String[] { "urlLink", "contentDescription", fessConfig.getIndexFieldId(),
+            setApiResponseFields(new String[] { fessConfig.getResponseFieldContentDescription(), fessConfig.getResponseFieldContentTitle(),
+                    fessConfig.getResponseFieldSitePath(), fessConfig.getResponseFieldUrlLink(), fessConfig.getIndexFieldId(),
                     fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(),
                     fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(),
                     fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),

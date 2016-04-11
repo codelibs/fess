@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.helper.ViewHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.text.Text;
@@ -129,10 +130,11 @@ public class QueryResponseList implements List<Map<String, Object>> {
                     // ContentTitle
                     final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                     if (viewHelper != null) {
-                        docMap.put("contentTitle", viewHelper.getContentTitle(docMap));
-                        docMap.put("contentDescription", viewHelper.getContentDescription(docMap));
-                        docMap.put("urlLink", viewHelper.getUrlLink(docMap));
-                        docMap.put("sitePath", viewHelper.getSitePath(docMap));
+                        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+                        docMap.put(fessConfig.getResponseFieldContentTitle(), viewHelper.getContentTitle(docMap));
+                        docMap.put(fessConfig.getResponseFieldContentDescription(), viewHelper.getContentDescription(docMap));
+                        docMap.put(fessConfig.getResponseFieldUrlLink(), viewHelper.getUrlLink(docMap));
+                        docMap.put(fessConfig.getResponseFieldSitePath(), viewHelper.getSitePath(docMap));
                     }
 
                     parent.add(docMap);
