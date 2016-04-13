@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -318,5 +319,18 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    @Override
+    public String toString() {
+        return "WebConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
+                + ", includedDocUrlPatterns=" + Arrays.toString(includedDocUrlPatterns) + ", excludedDocUrlPatterns="
+                + Arrays.toString(excludedDocUrlPatterns) + ", configParameterMap=" + configParameterMap + ", labelTypeList="
+                + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available + ", boost=" + boost + ", configParameter="
+                + configParameter + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", depth=" + depth + ", excludedDocUrls="
+                + excludedDocUrls + ", excludedUrls=" + excludedUrls + ", includedDocUrls=" + includedDocUrls + ", includedUrls="
+                + includedUrls + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive + ", maxAccessCount=" + maxAccessCount
+                + ", name=" + name + ", numOfThread=" + numOfThread + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy
+                + ", updatedTime=" + updatedTime + ", urls=" + urls + ", userAgent=" + userAgent + ", docMeta=" + docMeta + "]";
     }
 }

@@ -40,4 +40,9 @@ public class ClickLog extends BsClickLog {
         asDocMeta().version(version);
     }
 
+    @Override
+    public String toString() {
+        return "ClickLog [queryRequestedAt=" + queryRequestedAt + ", requestedAt=" + requestedAt + ", queryId=" + queryId + ", docId="
+                + docId + ", userSessionId=" + userSessionId + ", url=" + url + ", order=" + order + ", docMeta=" + docMeta + "]";
+    }
 }

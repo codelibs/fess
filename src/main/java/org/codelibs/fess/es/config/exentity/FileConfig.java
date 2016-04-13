@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -309,5 +310,18 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    @Override
+    public String toString() {
+        return "FileConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
+                + ", includedDocPathPatterns=" + Arrays.toString(includedDocPathPatterns) + ", excludedDocPathPatterns="
+                + Arrays.toString(excludedDocPathPatterns) + ", configParameterMap=" + configParameterMap + ", labelTypeList="
+                + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available + ", boost=" + boost + ", configParameter="
+                + configParameter + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", depth=" + depth
+                + ", excludedDocPaths=" + excludedDocPaths + ", excludedPaths=" + excludedPaths + ", includedDocPaths=" + includedDocPaths
+                + ", includedPaths=" + includedPaths + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive
+                + ", maxAccessCount=" + maxAccessCount + ", name=" + name + ", numOfThread=" + numOfThread + ", paths=" + paths
+                + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
     }
 }

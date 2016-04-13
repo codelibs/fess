@@ -63,4 +63,11 @@ public class RequestHeader extends BsRequestHeader {
         }
         return webConfig;
     }
+
+    @Override
+    public String toString() {
+        return "RequestHeader [webConfig=" + webConfig + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", name=" + name
+                + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", value=" + value + ", webConfigId=" + webConfigId
+                + ", docMeta=" + docMeta + "]";
+    }
 }

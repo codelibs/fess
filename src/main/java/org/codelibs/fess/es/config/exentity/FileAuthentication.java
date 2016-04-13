@@ -59,4 +59,12 @@ public class FileAuthentication extends BsFileAuthentication {
         }
         return fileConfig;
     }
+
+    @Override
+    public String toString() {
+        return "FileAuthentication [fileConfig=" + fileConfig + ", createdBy=" + createdBy + ", createdTime=" + createdTime
+                + ", fileConfigId=" + fileConfigId + ", hostname=" + hostname + ", parameters=" + parameters + ", port=" + port
+                + ", protocolScheme=" + protocolScheme + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", username="
+                + username + ", docMeta=" + docMeta + "]";
+    }
 }

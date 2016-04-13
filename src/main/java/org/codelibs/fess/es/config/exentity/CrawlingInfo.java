@@ -58,4 +58,10 @@ public class CrawlingInfo extends BsCrawlingInfo {
     public List<CrawlingInfoParam> getCrawlingInfoParamList() {
         return crawlingInfoParamList;
     }
+
+    @Override
+    public String toString() {
+        return "CrawlingInfo [crawlingInfoParamList=" + crawlingInfoParamList + ", createdTime=" + createdTime + ", expiredTime="
+                + expiredTime + ", name=" + name + ", sessionId=" + sessionId + ", docMeta=" + docMeta + "]";
+    }
 }

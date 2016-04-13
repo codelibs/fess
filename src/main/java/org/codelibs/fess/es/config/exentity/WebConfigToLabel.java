@@ -39,4 +39,9 @@ public class WebConfigToLabel extends BsWebConfigToLabel {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "WebConfigToLabel [labelTypeId=" + labelTypeId + ", webConfigId=" + webConfigId + ", docMeta=" + docMeta + "]";
+    }
 }

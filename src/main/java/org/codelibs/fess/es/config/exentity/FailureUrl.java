@@ -39,4 +39,11 @@ public class FailureUrl extends BsFailureUrl {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "FailureUrl [configId=" + configId + ", errorCount=" + errorCount + ", errorLog=" + errorLog + ", errorName=" + errorName
+                + ", lastAccessTime=" + lastAccessTime + ", threadName=" + threadName + ", url=" + url + ", docMeta=" + docMeta + "]";
+    }
+
 }

@@ -67,4 +67,10 @@ public class CrawlingInfoParam extends BsCrawlingInfoParam {
         return message;
     }
 
+    @Override
+    public String toString() {
+        return "CrawlingInfoParam [crawlingInfo=" + crawlingInfo + ", crawlingInfoId=" + crawlingInfoId + ", createdTime=" + createdTime
+                + ", key=" + key + ", value=" + value + ", docMeta=" + docMeta + "]";
+    }
+
 }

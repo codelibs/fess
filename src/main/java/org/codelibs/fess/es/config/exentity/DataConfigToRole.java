@@ -39,4 +39,9 @@ public class DataConfigToRole extends BsDataConfigToRole {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "DataConfigToRole [dataConfigId=" + dataConfigId + ", roleTypeId=" + roleTypeId + ", docMeta=" + docMeta + "]";
+    }
 }

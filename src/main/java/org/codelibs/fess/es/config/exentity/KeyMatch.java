@@ -39,4 +39,11 @@ public class KeyMatch extends BsKeyMatch {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "KeyMatch [boost=" + boost + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", maxSize=" + maxSize
+                + ", query=" + query + ", term=" + term + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta="
+                + docMeta + "]";
+    }
 }

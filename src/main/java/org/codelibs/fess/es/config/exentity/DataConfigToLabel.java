@@ -39,4 +39,10 @@ public class DataConfigToLabel extends BsDataConfigToLabel {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "DataConfigToLabel [dataConfigId=" + dataConfigId + ", labelTypeId=" + labelTypeId + ", docMeta=" + docMeta + "]";
+    }
+
 }

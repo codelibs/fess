@@ -39,4 +39,10 @@ public class RoleType extends BsRoleType {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "RoleType [createdBy=" + createdBy + ", createdTime=" + createdTime + ", name=" + name + ", sortOrder=" + sortOrder
+                + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", value=" + value + ", docMeta=" + docMeta + "]";
+    }
 }

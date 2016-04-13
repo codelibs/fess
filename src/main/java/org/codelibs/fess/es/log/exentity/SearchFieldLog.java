@@ -39,4 +39,9 @@ public class SearchFieldLog extends BsSearchFieldLog {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "SearchFieldLog [name=" + name + ", searchLogId=" + searchLogId + ", value=" + value + ", docMeta=" + docMeta + "]";
+    }
 }
