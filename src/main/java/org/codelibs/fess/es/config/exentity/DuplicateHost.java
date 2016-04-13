@@ -45,4 +45,11 @@ public class DuplicateHost extends BsDuplicateHost {
         return url.replaceFirst("://" + targetStr + "$", "://" + getRegularName()).replaceFirst("://" + targetStr + "([:/])",
                 "://" + getRegularName() + "$1");
     }
+
+    @Override
+    public String toString() {
+        return "DuplicateHost [createdBy=" + createdBy + ", createdTime=" + createdTime + ", duplicateHostName=" + duplicateHostName
+                + ", regularName=" + regularName + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime
+                + ", docMeta=" + docMeta + "]";
+    }
 }

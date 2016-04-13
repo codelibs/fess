@@ -39,4 +39,10 @@ public class FavoriteLog extends BsFavoriteLog {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "FavoriteLog [createdAt=" + createdAt + ", url=" + url + ", docId=" + docId + ", queryId=" + queryId + ", userInfoId="
+                + userInfoId + ", docMeta=" + docMeta + "]";
+    }
 }

@@ -39,4 +39,9 @@ public class ElevateWordToLabel extends BsElevateWordToLabel {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "ElevateWordToLabel [elevateWordId=" + elevateWordId + ", labelTypeId=" + labelTypeId + ", docMeta=" + docMeta + "]";
+    }
 }

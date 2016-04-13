@@ -39,4 +39,11 @@ public class BadWord extends BsBadWord {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "BadWord [createdBy=" + createdBy + ", createdTime=" + createdTime + ", suggestWord=" + suggestWord + ", targetLabel="
+                + targetLabel + ", targetRole=" + targetRole + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta="
+                + docMeta + "]";
+    }
 }

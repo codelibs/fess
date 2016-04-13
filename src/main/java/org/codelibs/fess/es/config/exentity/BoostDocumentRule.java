@@ -39,4 +39,11 @@ public class BoostDocumentRule extends BsBoostDocumentRule {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "BoostDocumentRule [boostExpr=" + boostExpr + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", sortOrder="
+                + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", urlExpr=" + urlExpr + ", docMeta=" + docMeta
+                + "]";
+    }
 }

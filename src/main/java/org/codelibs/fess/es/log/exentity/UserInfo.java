@@ -39,4 +39,9 @@ public class UserInfo extends BsUserInfo {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "UserInfo [createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", docMeta=" + docMeta + "]";
+    }
 }

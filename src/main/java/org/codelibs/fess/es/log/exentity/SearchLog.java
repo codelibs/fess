@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.log.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.codelibs.core.lang.StringUtil;
@@ -104,4 +105,13 @@ public class SearchLog extends BsSearchLog {
         super.setUserInfoId(value);
     }
 
+    @Override
+    public String toString() {
+        return "SearchLog [searchFieldLogList=" + searchFieldLogList + ", userInfo=" + userInfo + ", accessType=" + accessType + ", user="
+                + user + ", roles=" + Arrays.toString(roles) + ", queryId=" + queryId + ", clientIp=" + clientIp + ", hitCount=" + hitCount
+                + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", referer=" + referer + ", requestedAt="
+                + requestedAt + ", responseTime=" + responseTime + ", queryTime=" + queryTime + ", searchWord=" + searchWord
+                + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId=" + userSessionId + ", docMeta=" + docMeta
+                + "]";
+    }
 }

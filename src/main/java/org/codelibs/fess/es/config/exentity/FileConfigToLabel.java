@@ -39,4 +39,9 @@ public class FileConfigToLabel extends BsFileConfigToLabel {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "FileConfigToLabel [fileConfigId=" + fileConfigId + ", labelTypeId=" + labelTypeId + ", docMeta=" + docMeta + "]";
+    }
 }

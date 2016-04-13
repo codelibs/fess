@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,5 +99,13 @@ public class LabelType extends BsLabelType {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    @Override
+    public String toString() {
+        return "LabelType [roleTypeIds=" + Arrays.toString(roleTypeIds) + ", roleTypeList=" + roleTypeList + ", createdBy=" + createdBy
+                + ", createdTime=" + createdTime + ", excludedPaths=" + excludedPaths + ", includedPaths=" + includedPaths + ", name="
+                + name + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", value=" + value
+                + ", docMeta=" + docMeta + "]";
     }
 }

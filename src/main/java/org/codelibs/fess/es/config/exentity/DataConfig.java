@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -415,5 +416,16 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "DataConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
+                + ", includedDocPathPatterns=" + Arrays.toString(includedDocPathPatterns) + ", excludedDocPathPatterns="
+                + Arrays.toString(excludedDocPathPatterns) + ", handlerParameterMap=" + handlerParameterMap + ", handlerScriptMap="
+                + handlerScriptMap + ", labelTypeList=" + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available
+                + ", boost=" + boost + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", handlerName=" + handlerName
+                + ", handlerParameter=" + handlerParameter + ", handlerScript=" + handlerScript + ", name=" + name + ", sortOrder="
+                + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
     }
 }

@@ -39,4 +39,9 @@ public class FileConfigToRole extends BsFileConfigToRole {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "FileConfigToRole [fileConfigId=" + fileConfigId + ", roleTypeId=" + roleTypeId + ", docMeta=" + docMeta + "]";
+    }
 }

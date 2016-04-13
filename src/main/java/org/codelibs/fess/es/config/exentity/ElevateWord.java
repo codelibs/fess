@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -102,5 +103,13 @@ public class ElevateWord extends BsElevateWord {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    @Override
+    public String toString() {
+        return "ElevateWord [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", labelTypeList=" + labelTypeList + ", boost=" + boost
+                + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", reading=" + reading + ", suggestWord=" + suggestWord
+                + ", targetLabel=" + targetLabel + ", targetRole=" + targetRole + ", updatedBy=" + updatedBy + ", updatedTime="
+                + updatedTime + ", docMeta=" + docMeta + "]";
     }
 }

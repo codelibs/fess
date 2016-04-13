@@ -39,4 +39,9 @@ public class LabelToRole extends BsLabelToRole {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "LabelToRole [labelTypeId=" + labelTypeId + ", roleTypeId=" + roleTypeId + ", docMeta=" + docMeta + "]";
+    }
 }

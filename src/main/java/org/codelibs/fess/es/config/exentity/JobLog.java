@@ -62,4 +62,11 @@ public class JobLog extends BsJobLog {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "JobLog [scheduledJob=" + scheduledJob + ", endTime=" + endTime + ", jobName=" + jobName + ", jobStatus=" + jobStatus
+                + ", scriptData=" + scriptData + ", scriptResult=" + scriptResult + ", scriptType=" + scriptType + ", startTime="
+                + startTime + ", target=" + target + ", docMeta=" + docMeta + "]";
+    }
 }

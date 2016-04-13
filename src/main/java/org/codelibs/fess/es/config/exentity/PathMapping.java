@@ -51,4 +51,11 @@ public class PathMapping extends BsPathMapping {
         }
         return regexPattern.matcher(input);
     }
+
+    @Override
+    public String toString() {
+        return "PathMapping [regexPattern=" + regexPattern + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", processType="
+                + processType + ", regex=" + regex + ", replacement=" + replacement + ", sortOrder=" + sortOrder + ", updatedBy="
+                + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+    }
 }

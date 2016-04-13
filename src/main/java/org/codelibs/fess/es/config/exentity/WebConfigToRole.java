@@ -39,4 +39,9 @@ public class WebConfigToRole extends BsWebConfigToRole {
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
     }
+
+    @Override
+    public String toString() {
+        return "WebConfigToRole [roleTypeId=" + roleTypeId + ", webConfigId=" + webConfigId + ", docMeta=" + docMeta + "]";
+    }
 }
