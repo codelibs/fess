@@ -163,10 +163,16 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getDuplicateHost(form).ifPresent(entity -> {
-            duplicateHostService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getDuplicateHost(form).ifPresent(
+                entity -> {
+                    try {
+                        duplicateHostService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -177,10 +183,16 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getDuplicateHost(form).ifPresent(entity -> {
-            duplicateHostService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getDuplicateHost(form).ifPresent(
+                entity -> {
+                    try {
+                        duplicateHostService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -192,12 +204,21 @@ public class AdminDuplicatehostAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        duplicateHostService.getDuplicateHost(id).ifPresent(entity -> {
-            duplicateHostService.delete(entity);
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
+        duplicateHostService
+                .getDuplicateHost(id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                duplicateHostService.delete(entity);
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (Exception e) {
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asEditHtml());
+                            }
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                });
         return redirect(getClass());
     }
 

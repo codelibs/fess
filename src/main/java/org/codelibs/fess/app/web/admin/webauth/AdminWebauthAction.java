@@ -178,10 +178,16 @@ public class AdminWebauthAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getWebAuthentication(form).ifPresent(entity -> {
-            webAuthenticationService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getWebAuthentication(form).ifPresent(
+                entity -> {
+                    try {
+                        webAuthenticationService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -192,10 +198,16 @@ public class AdminWebauthAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getWebAuthentication(form).ifPresent(entity -> {
-            webAuthenticationService.store(entity);
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getWebAuthentication(form).ifPresent(
+                entity -> {
+                    try {
+                        webAuthenticationService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -207,12 +219,21 @@ public class AdminWebauthAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        webAuthenticationService.getWebAuthentication(id).ifPresent(entity -> {
-            webAuthenticationService.delete(entity);
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
+        webAuthenticationService
+                .getWebAuthentication(id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                webAuthenticationService.delete(entity);
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (Exception e) {
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asEditHtml());
+                            }
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                });
         return redirect(getClass());
     }
 

@@ -228,10 +228,15 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyToken(() -> asEditHtml());
         getElevateWord(form).ifPresent(
                 entity -> {
-                    elevateWordService.store(entity);
-                    suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                            entity.getTargetRole(), entity.getBoost());
-                    saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    try {
+                        elevateWordService.store(entity);
+                        suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
+                                entity.getTargetRole(), entity.getBoost());
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
                 }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
@@ -243,12 +248,18 @@ public class AdminElevatewordAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getElevateWord(form).ifPresent(entity -> {
-            elevateWordService.store(entity);
-            suggestHelper.deleteAllElevateWord();
-            suggestHelper.storeAllElevateWords();
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
+        getElevateWord(form).ifPresent(
+                entity -> {
+                    try {
+                        elevateWordService.store(entity);
+                        suggestHelper.deleteAllElevateWord();
+                        suggestHelper.storeAllElevateWords();
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -260,13 +271,22 @@ public class AdminElevatewordAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        elevateWordService.getElevateWord(id).ifPresent(entity -> {
-            elevateWordService.delete(entity);
-            suggestHelper.deleteElevateWord(entity.getSuggestWord());
-            saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-        });
+        elevateWordService
+                .getElevateWord(id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                elevateWordService.delete(entity);
+                                suggestHelper.deleteElevateWord(entity.getSuggestWord());
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (Exception e) {
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asEditHtml());
+                            }
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
+                });
         return redirect(getClass());
     }
 
