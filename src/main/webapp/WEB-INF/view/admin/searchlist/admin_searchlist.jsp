@@ -80,16 +80,16 @@
 												<c:forEach var="doc" varStatus="s" items="${documentItems}">
 													<li class="col-sm-12">
 														<h3 class="title">
-															<a href="${doc.urlLink}">${f:h(doc.contentTitle)}</a>
+															<a href="${doc.url_link}">${f:h(doc.content_title)}</a>
 														</h3>
 														<div class="body col-sm-11">
-															${doc.contentDescription}</div>
+															${doc.content_description}</div>
 														<button type="button"
 															class="btn btn-xs btn-danger col-sm-1"
 															data-toggle="modal" data-target="#confirmToDelete"
 															data-docid="${f:u(doc.doc_id)}"
-															data-title="${f:h(doc.contentTitle)}"
-															data-url="${f:h(doc.urlLink)}"
+															data-title="${f:h(doc.content_title)}"
+															data-url="${f:h(doc.url_link)}"
 															<c:if test="${crawlerProcessRunning}">disable</c:if>>
 															<i class="fa fa-trash"></i>
 															<la:message key="labels.search_list_button_delete" />

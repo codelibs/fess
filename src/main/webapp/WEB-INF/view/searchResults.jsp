@@ -28,13 +28,13 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title ellipsis">
-						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}"
-							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.contentTitle)}</a>
+						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
+							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 					</h3>
 					<div class="body">
-						<div class="description">${doc.contentDescription}</div>
+						<div class="description">${doc.content_description}</div>
 						<div class="site ellipsis">
-							<cite>${f:h(doc.sitePath)}</cite>
+							<cite>${f:h(doc.site_path)}</cite>
 							<c:if test="${doc.has_cache=='true'}">
 								<small class="hidden-md-down"> <la:link
 										href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
