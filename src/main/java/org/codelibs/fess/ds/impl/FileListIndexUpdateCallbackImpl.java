@@ -91,15 +91,14 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             }
 
             final String url = dataMap.get(fessConfig.getIndexFieldUrl()).toString();
-            try {
-                final CrawlerClient client = crawlerClientFactory.getClient(url);
-                if (client == null) {
-                    logger.warn("CrawlerClient is null. Data: " + dataMap);
-                    return false;
-                }
+            final CrawlerClient client = crawlerClientFactory.getClient(url);
+            if (client == null) {
+                logger.warn("CrawlerClient is null. Data: " + dataMap);
+                return false;
+            }
 
-                final long startTime = System.currentTimeMillis();
-                final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
+            final long startTime = System.currentTimeMillis();
+            try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
                 responseData.setExecutionTime(System.currentTimeMillis() - startTime);
                 if (dataMap.containsKey(Constants.SESSION_ID)) {
                     responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
