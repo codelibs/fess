@@ -36,6 +36,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PhraseQuery;
@@ -243,7 +244,7 @@ public class QueryHelper implements Serializable {
     public void buildBaseQuery(final QueryContext queryContext, final Consumer<QueryContext> context) {
         try {
             final Query query = getQueryParser().parse(queryContext.getQueryString());
-            final QueryBuilder queryBuilder = convertQuery(queryContext, query);
+            final QueryBuilder queryBuilder = convertQuery(queryContext, query, 1.0f);
             if (queryBuilder != null) {
                 queryContext.setQueryBuilder(queryBuilder);
             } else {
@@ -253,7 +254,7 @@ public class QueryHelper implements Serializable {
             context.accept(queryContext);
         } catch (final ParseException e) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
-                    "Invalid query: " + queryContext.getQueryString());
+                    "Invalid query: " + queryContext.getQueryString(), e);
         }
     }
 
@@ -261,33 +262,36 @@ public class QueryHelper implements Serializable {
         return ComponentUtil.getQueryParser();
     }
 
-    protected QueryBuilder convertQuery(final QueryContext context, final Query query) {
+    protected QueryBuilder convertQuery(final QueryContext context, final Query query, final float boost) {
         if (query instanceof TermQuery) {
-            return convertTermQuery(context, (TermQuery) query);
+            return convertTermQuery(context, (TermQuery) query, boost);
         } else if (query instanceof TermRangeQuery) {
-            return convertTermRangeQuery(context, (TermRangeQuery) query);
+            return convertTermRangeQuery(context, (TermRangeQuery) query, boost);
         } else if (query instanceof PhraseQuery) {
-            return convertPhraseQuery(context, (PhraseQuery) query);
+            return convertPhraseQuery(context, (PhraseQuery) query, boost);
         } else if (query instanceof FuzzyQuery) {
-            return convertFuzzyQuery(context, (FuzzyQuery) query);
+            return convertFuzzyQuery(context, (FuzzyQuery) query, boost);
         } else if (query instanceof PrefixQuery) {
-            return convertPrefixQuery(context, (PrefixQuery) query);
+            return convertPrefixQuery(context, (PrefixQuery) query, boost);
         } else if (query instanceof WildcardQuery) {
-            return convertWildcardQuery(context, (WildcardQuery) query);
+            return convertWildcardQuery(context, (WildcardQuery) query, boost);
         } else if (query instanceof BooleanQuery) {
             final BooleanQuery booleanQuery = (BooleanQuery) query;
-            return convertBooleanQuery(context, booleanQuery);
+            return convertBooleanQuery(context, booleanQuery, boost);
         } else if (query instanceof MatchAllDocsQuery) {
             return QueryBuilders.matchAllQuery();
+        } else if (query instanceof BoostQuery) {
+            final BoostQuery boostQuery = (BoostQuery) query;
+            return convertQuery(context, boostQuery.getQuery(), boostQuery.getBoost());
         }
         throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), "Unknown q: "
                 + query.getClass() + " => " + query);
     }
 
-    protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery) {
+    protected QueryBuilder convertBooleanQuery(final QueryContext context, final BooleanQuery booleanQuery, final float boost) {
         final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         for (final BooleanClause clause : booleanQuery.clauses()) {
-            final QueryBuilder queryBuilder = convertQuery(context, clause.getQuery());
+            final QueryBuilder queryBuilder = convertQuery(context, clause.getQuery(), boost);
             if (queryBuilder != null) {
                 switch (clause.getOccur()) {
                 case MUST:
@@ -307,62 +311,59 @@ public class QueryHelper implements Serializable {
         return boolQuery;
     }
 
-    protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery) {
+    protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
         final String field = wildcardQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(
-                    b * wildcardQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(wildcardQuery.getBoost());
+            return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(boost);
         } else {
             final String origQuery = wildcardQuery.getTerm().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * wildcardQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
         }
     }
 
-    protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery) {
+    protected QueryBuilder convertPrefixQuery(final QueryContext context, final PrefixQuery prefixQuery, final float boost) {
         final String field = prefixQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(
-                    b * prefixQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(prefixQuery.getBoost());
+            return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(boost);
         } else {
             final String origQuery = prefixQuery.getPrefix().toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b * prefixQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b * boost));
         }
     }
 
-    protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery) {
+    protected QueryBuilder convertFuzzyQuery(final QueryContext context, final FuzzyQuery fuzzyQuery, final float boost) {
         final Term term = fuzzyQuery.getTerm();
         final String field = term.field();
         // TODO fuzzy value
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, term.text());
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, term.text())
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * fuzzyQuery.getBoost()));
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, term.text());
-            return QueryBuilders.fuzzyQuery(field, term.text()).boost(fuzzyQuery.getBoost())
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
+            return QueryBuilders.fuzzyQuery(field, term.text()).boost(boost).fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits()));
         } else {
             final String origQuery = fuzzyQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.fuzzyQuery(f, origQuery)
-                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * fuzzyQuery.getBoost()));
+                    .fuzziness(Fuzziness.fromEdits(fuzzyQuery.getMaxEdits())).boost(b * boost));
         }
     }
 
-    protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery) {
+    protected QueryBuilder convertTermRangeQuery(final QueryContext context, final TermRangeQuery termRangeQuery, final float boost) {
         final String field = termRangeQuery.getField();
         if (isSearchField(field)) {
             context.addFieldLog(field, termRangeQuery.toString(field));
@@ -383,7 +384,7 @@ public class QueryHelper implements Serializable {
                     rangeQuery.lt(max.utf8ToString());
                 }
             }
-            rangeQuery.boost(termRangeQuery.getBoost());
+            rangeQuery.boost(boost);
             return rangeQuery;
         } else {
             final String origQuery = termRangeQuery.toString();
@@ -393,15 +394,15 @@ public class QueryHelper implements Serializable {
         }
     }
 
-    protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery) {
+    protected QueryBuilder convertTermQuery(final QueryContext context, final TermQuery termQuery, final float boost) {
         final String field = termQuery.getTerm().field();
         final String text = termQuery.getTerm().text();
         if (fessConfig.getQueryReplaceTermWithPrefixQueryAsBoolean() && text.length() > 1 && text.endsWith("*")) {
-            return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))));
+            return convertPrefixQuery(context, new PrefixQuery(new Term(field, text.substring(0, text.length() - 1))), boost);
         } else if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * termQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
         } else if ("sort".equals(field)) {
             final String[] values = text.split("\\.");
             if (values.length > 2) {
@@ -427,20 +428,20 @@ public class QueryHelper implements Serializable {
             context.addSorts(SortBuilders.fieldSort(SCORE_SORT_VALUE.equals(sortField) ? "_score" : sortField).order(sortOrder));
             return null;
         } else if (INURL_FIELD.equals(field)) {
-            return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(termQuery.getBoost());
+            return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return QueryBuilders.matchPhraseQuery(field, text).boost(termQuery.getBoost());
+            return QueryBuilders.matchPhraseQuery(field, text).boost(boost);
         } else {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
             context.addHighlightedQuery(origQuery);
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b * termQuery.getBoost()));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, origQuery).boost(b * boost));
         }
     }
 
-    private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query) {
+    private QueryBuilder convertPhraseQuery(final QueryContext context, final PhraseQuery query, final float boost) {
         final Term[] terms = query.getTerms();
         if (terms.length == 0) {
             throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -451,7 +452,7 @@ public class QueryHelper implements Serializable {
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
         StreamUtil.of(texts).forEach(t -> context.addHighlightedQuery(t));
-        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * query.getBoost()));
+        return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
     }
 
     private boolean isSearchField(final String field) {
