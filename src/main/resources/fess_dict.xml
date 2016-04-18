@@ -17,6 +17,11 @@
 		class="org.codelibs.fess.dict.synonym.SynonymCreator">
 	</component>
 	<component name="userDictCreator"
+		class="org.codelibs.fess.dict.seunjeon.SeunjeonCreator">
+	</component>
+	<!-- 
+	<component name="userDictCreator"
 		class="org.codelibs.fess.dict.kuromoji.KuromojiCreator">
 	</component>
+	 -->
 </components>

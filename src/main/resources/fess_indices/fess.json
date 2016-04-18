@@ -105,6 +105,10 @@
           "discard_punctuation": false,
           "reload_interval":"1m"
         },
+        "seunjeon_default_tokenizer": {
+            "type": "seunjeon_tokenizer",
+            "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
+        },
         "unigram_synonym_tokenizer": {
           "type": "ngram_synonym",
           "n": "1",
@@ -144,6 +148,10 @@
             "lowercase",
             "possessive_stemmer_en_filter"
           ]
+        },
+        "korean_analyzer": {
+          "type": "custom",
+          "tokenizer":"seunjeon_default_tokenizer"
         },
         "empty_analyzer": {
           "type": "custom",

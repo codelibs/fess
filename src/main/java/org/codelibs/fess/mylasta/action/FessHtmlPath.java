@@ -107,6 +107,21 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/synonym/admin_dict_synonym_upload.jsp */
     HtmlNext path_AdminDictSynonym_AdminDictSynonymUploadJsp = new HtmlNext("/admin/dict/synonym/admin_dict_synonym_upload.jsp");
 
+    /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon.jsp */
+    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon.jsp");
+    
+    /** The path of the HTML: /admin/dict/synonym/admin_dict_seunjeon_details.jsp */
+    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonDetailsJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_details.jsp");
+
+    /** The path of the HTML: /admin/dict/synonym/admin_dict_seunjeon_download.jsp */
+    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonDownloadJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_download.jsp");
+
+    /** The path of the HTML: /admin/dict/synonym/admin_dict_seunjeon_edit.jsp */
+    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonEditJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/synonym/admin_dict_seunjeon_upload.jsp */
+    HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonUploadJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon_upload.jsp");
+    
     /** The path of the HTML: /admin/duplicatehost/admin_duplicatehost.jsp */
     HtmlNext path_AdminDuplicatehost_AdminDuplicatehostJsp = new HtmlNext("/admin/duplicatehost/admin_duplicatehost.jsp");
 

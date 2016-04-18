@@ -210,7 +210,7 @@
           "match": "*_ko",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "korean_analyzer"
           }
         }
       },
@@ -449,7 +449,7 @@
       "content": {
         "type": "langstring",
         "lang_field": "lang",
-        "analyzer": "standard_analyzer",
+        "analyzer": "korean_analyzer",
         "term_vector": "with_positions_offsets"
       },
       "content_length": {
@@ -520,7 +520,7 @@
       "title": {
         "type": "langstring",
         "lang_field": "lang",
-        "analyzer": "standard_analyzer",
+        "analyzer": "korean_analyzer",
         "term_vector": "with_positions_offsets"
       },
       "url": {

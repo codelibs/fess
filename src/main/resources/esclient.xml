@@ -22,6 +22,10 @@
 			<arg>"fess"</arg>
 			<arg>"ja/kuromoji.txt"</arg>
 		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
+			<arg>"ko/seunjeon.txt"</arg>
+		</postConstruct>
 		<!-- fess index -->
 		<postConstruct name="addIndexConfig">
 			<arg>"fess/doc"</arg>
