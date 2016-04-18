@@ -688,6 +688,15 @@ public class JsonApiManager extends BaseApiManager {
             this.fessConfig = fessConfig;
         }
 
+        private String[] simplifyArray(String[] values) {
+            return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct()
+                    .toArray(n -> new String[n]);
+        }
+
+        private String[] getParamValueArray(String param) {
+            return simplifyArray(request.getParameterValues(param));
+        }
+
         @Override
         public String getQuery() {
             return request.getParameter("q");
@@ -695,8 +704,7 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getExtraQueries() {
-            return StreamUtil.of(request.getParameterValues("ex_q")).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .toArray(n -> new String[n]);
+            return getParamValueArray("ex_q");
         }
 
         @Override
@@ -705,8 +713,7 @@ public class JsonApiManager extends BaseApiManager {
             for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith("fields.")) {
-                    String[] value =
-                            StreamUtil.of(entry.getValue()).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
+                    String[] value = simplifyArray(entry.getValue());
                     fields.put(key.substring("fields.".length()), value);
                 }
             }
@@ -715,8 +722,7 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getLanguages() {
-            return StreamUtil.of(request.getParameterValues("lang")).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .toArray(n -> new String[n]);
+            return getParamValueArray("lang");
         }
 
         @Override
@@ -726,7 +732,10 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public FacetInfo getFacetInfo() {
-            return null;
+            FacetInfo facetInfo = new FacetInfo();
+            facetInfo.field = getParamValueArray("facet.field");
+            facetInfo.query = getParamValueArray("facet.query");
+            return facetInfo;
         }
 
         @Override
