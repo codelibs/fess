@@ -214,12 +214,11 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                         }
                         final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                         failureUrlService.store(dataConfig, errorName, url, target);
-                    } catch (final Exception e) {
+                    } catch (final Throwable t) {
+                        logger.warn("Crawling Access Exception at : " + dataMap, t);
                         final String url = hit.getIndex() + "/" + hit.getType() + "/" + hit.getId();
                         final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
-                        failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
-
-                        logger.warn("Crawling Access Exception at : " + dataMap, e);
+                        failureUrlService.store(dataConfig, t.getClass().getCanonicalName(), url, t);
                     }
 
                     if (bulkRequest != null) {

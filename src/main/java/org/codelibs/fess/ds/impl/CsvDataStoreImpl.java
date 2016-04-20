@@ -268,12 +268,11 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     }
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
                     failureUrlService.store(dataConfig, errorName, url, target);
-                } catch (final Exception | OutOfMemoryError e) {
+                } catch (final Throwable t) {
+                    logger.warn("Crawling Access Exception at : " + dataMap, t);
                     final String url = csvFile.getAbsolutePath() + ":" + csvReader.getLineNumber();
                     final FailureUrlService failureUrlService = ComponentUtil.getComponent(FailureUrlService.class);
-                    failureUrlService.store(dataConfig, e.getClass().getCanonicalName(), url, e);
-
-                    logger.warn("Crawling Access Exception at : " + dataMap, e);
+                    failureUrlService.store(dataConfig, t.getClass().getCanonicalName(), url, t);
                 }
 
                 if (readInterval > 0) {
