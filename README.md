@@ -72,6 +72,22 @@ Run package goal and then the release file is created in target/releases.
     $ mvn dbflute:freegen
     $ mvn license:format
 
+## Localization
+
+Fess is internationalized software, and supports the following languages at the moment:
+
+* English
+* Japanese
+
+If you want to add labels/messages for your language, please translate properties file and then rename to fess\_*_[lang].properties.
+
+* [fess_label_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_label_en.properties)
+* [fess_message_en.properties](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_message_en.properties)
+
+For search/index analyzer, if [doc.json](https://github.com/codelibs/fess/blob/master/src/main/resources/fess_indices/fess/doc.json) contains lang\_[lang] for your language, please modify analyzer for your language. For more details about elasticsearch's analyzer, see [Analyzers](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-analyzers.html).
+
+We are waiting for pull requests of your language.
+
 ## Powered By
 
 * [Lasta Di](https://github.com/lastaflute/lasta-di "Lasta Di"): DI Container
