@@ -822,6 +822,15 @@ public interface FessProp {
         return StreamUtil.of(getAuthenticationAdminUsers().split(",")).anyMatch(s -> s.equals(username));
     }
 
+    boolean isLdapAdminEnabled();
+
+    public default boolean isLdapAdminEnabled(final String username) {
+        if (isAdminUser(username)) {
+            return false;
+        }
+        return isLdapAdminEnabled();
+    }
+
     String getCrawlerWebProtocols();
 
     public default String[] getCrawlerWebProtocolsAsArray() {

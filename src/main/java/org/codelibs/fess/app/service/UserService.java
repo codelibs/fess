@@ -63,7 +63,10 @@ public class UserService implements Serializable {
     }
 
     public OptionalEntity<User> getUser(final String id) {
-        return userBhv.selectByPK(id);
+        return userBhv.selectByPK(id).map(u -> {
+            ComponentUtil.getLdapManager().apply(u);
+            return u;
+        });
     }
 
     public void store(final User user) {
@@ -79,7 +82,7 @@ public class UserService implements Serializable {
         ComponentUtil.getLdapManager().changePassword(username, password);
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.isLdapAdminEnabled() && fessConfig.isLdapAdminSyncPassword() || !fessConfig.isLdapAdminEnabled()) {
+        if (fessConfig.isLdapAdminEnabled(username) && fessConfig.isLdapAdminSyncPassword()) {
             userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
                 final String encodedPassword = fessLoginAssist.encryptPassword(password);
                 entity.setPassword(encodedPassword);
