@@ -689,8 +689,7 @@ public class JsonApiManager extends BaseApiManager {
         }
 
         private String[] simplifyArray(String[] values) {
-            return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .toArray(n -> new String[n]);
+            return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
         }
 
         private String[] getParamValueArray(String param) {
