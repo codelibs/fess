@@ -145,11 +145,11 @@ public class CreateForm implements Serializable {
     @Size(max = 1000)
     public String departmentNumber;
 
-    @Size(max = 1000)
-    public String uidNumber;
+    @ValidateTypeFailure
+    public Long uidNumber;
 
-    @Size(max = 1000)
-    public String gidNumber;
+    @ValidateTypeFailure
+    public Long gidNumber;
 
     @Size(max = 1000)
     public String homeDirectory;

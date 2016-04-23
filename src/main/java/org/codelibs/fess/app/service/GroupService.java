@@ -63,7 +63,10 @@ public class GroupService implements Serializable {
     }
 
     public OptionalEntity<Group> getGroup(final String id) {
-        return groupBhv.selectByPK(id);
+        return groupBhv.selectByPK(id).map(g -> {
+            ComponentUtil.getLdapManager().apply(g);
+            return g;
+        });
     }
 
     public void store(final Group group) {

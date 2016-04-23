@@ -10,6 +10,9 @@
       "name": {
         "type": "string",
         "index": "not_analyzed"
+      },
+      "gidNumber" : {
+        "type" : "long"
       }
     }
   }

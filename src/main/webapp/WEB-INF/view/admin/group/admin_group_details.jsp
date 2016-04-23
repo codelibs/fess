@@ -52,54 +52,16 @@
 														key="labels.group_name" /></th>
 												<td>${f:h(name)}<la:hidden property="name" /></td>
 											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.group_gidNumber" /></th>
+												<td>${f:h(gidNumber)}<la:hidden property="gidNumber" /></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-default" name="list" value="back">
-										<i class="fa fa-arrow-circle-left"></i>
-										<la:message key="labels.crud_button_back" />
-									</button>
-									<button type="button" class="btn btn-danger" name="delete"
-										data-toggle="modal" data-target="#confirmToDelete"
-										value="<la:message key="labels.crud_button_delete" />">
-										<i class="fa fa-trash"></i>
-										<la:message key="labels.crud_button_delete" />
-									</button>
-									<div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
-										role="dialog">
-										<div class="modal-dialog">
-											<div class="modal-content">
-												<div class="modal-header">
-													<button type="button" class="close" data-dismiss="modal"
-														aria-label="Close">
-														<span aria-hidden="true">×</span>
-													</button>
-													<h4 class="modal-title">
-														<la:message key="labels.crud_title_delete" />
-													</h4>
-												</div>
-												<div class="modal-body">
-													<p>
-														<la:message key="labels.crud_delete_confirmation" />
-													</p>
-												</div>
-												<div class="modal-footer">
-													<button type="button" class="btn btn-outline pull-left"
-														data-dismiss="modal">
-														<la:message key="labels.crud_button_cancel" />
-													</button>
-													<button type="submit" class="btn btn-outline btn-danger"
-														name="delete"
-														value="<la:message key="labels.crud_button_delete" />">
-														<i class="fa fa-trash"></i>
-														<la:message key="labels.crud_button_delete" />
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
 								<!-- /.box-footer -->
 							</div>

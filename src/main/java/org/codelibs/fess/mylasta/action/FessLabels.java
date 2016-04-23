@@ -728,7 +728,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: {0} results */
     public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
 
-    /** The key of the message: Languages */
+    /** The key of the message: Preferred Languages */
     public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
 
     /** The key of the message: Labels */
@@ -773,7 +773,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Labels */
     public static final String LABELS_index_label = "{labels.index_label}";
 
-    /** The key of the message: Languages */
+    /** The key of the message: Preferred Languages */
     public static final String LABELS_index_lang = "{labels.index_lang}";
 
     /** The key of the message: Sort */
@@ -2276,6 +2276,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: gidNumber */
     public static final String LABELS_user_gidNumber = "{labels.user_gidNumber}";
+
+    /** The key of the message: gidNumber */
+    public static final String LABELS_group_gidNumber = "{labels.group_gidNumber}";
 
     /** The key of the message: gidNumber */
     public static final String LABELS_GID_NUMBER = "{labels.gidNumber}";

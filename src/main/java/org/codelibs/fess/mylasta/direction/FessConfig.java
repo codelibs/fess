@@ -3273,6 +3273,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'ldap.memberof.attribute'. <br>
      * The value is, e.g. memberOf <br>
+     * comment: Active Directory
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getLdapMemberofAttribute();

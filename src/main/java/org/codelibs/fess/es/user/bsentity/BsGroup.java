@@ -40,6 +40,9 @@ public class BsGroup extends EsAbstractEntity {
     /** name */
     protected String name;
 
+    /** gidNumber */
+    protected Long gidNumber;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -64,6 +67,9 @@ public class BsGroup extends EsAbstractEntity {
         if (name != null) {
             sourceMap.put("name", name);
         }
+        if (gidNumber != null) {
+            sourceMap.put("gidNumber", gidNumber);
+        }
         return sourceMap;
     }
 
@@ -74,6 +80,7 @@ public class BsGroup extends EsAbstractEntity {
     protected String doBuildColumnString(String dm) {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(name);
+        sb.append(dm).append(gidNumber);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -92,5 +99,15 @@ public class BsGroup extends EsAbstractEntity {
     public void setName(String value) {
         registerModifiedProperty("name");
         this.name = value;
+    }
+
+    public Long getGidNumber() {
+        checkSpecifiedProperty("gidNumber");
+        return gidNumber;
+    }
+
+    public void setGidNumber(Long value) {
+        registerModifiedProperty("gidNumber");
+        this.gidNumber = value;
     }
 }

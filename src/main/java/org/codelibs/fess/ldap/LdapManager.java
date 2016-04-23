@@ -843,7 +843,7 @@ public class LdapManager {
 
     }
 
-    public void insert(final Group group) {
+    public void apply(Group group) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
@@ -852,11 +852,26 @@ public class LdapManager {
         final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
         search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {
+                setAttributeValue(result, fessConfig.getLdapAttrGidNumber(), o -> group.setGidNumber(DfTypeUtil.toLong(o)));
+            }
+        });
+    }
+
+    public void insert(final Group group) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (!fessConfig.isLdapAdminEnabled()) {
+            return;
+        }
+
+        final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
+        final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
+        search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(group.getName()), null, adminEnv, result -> {
+            if (!result.isEmpty()) {
                 logger.info("{} exists in LDAP server.", group.getName());
+                modifyGroupAttributes(group, adminEnv, entryDN, result, fessConfig);
             } else {
-                final String entryDN = fessConfig.getLdapAdminGroupSecurityPrincipal(group.getName());
                 final BasicAttributes entry = new BasicAttributes();
-                addGroupAttributes(entry, group.getName(), fessConfig);
+                addGroupAttributes(entry, group, fessConfig);
                 final Attribute oc = fessConfig.getLdapAdminGroupObjectClassAttribute();
                 entry.put(oc);
                 insert(entryDN, entry, adminEnv);
@@ -864,8 +879,24 @@ public class LdapManager {
         });
     }
 
-    protected void addGroupAttributes(final BasicAttributes entry, final String name, final FessConfig fessConfig) {
-        // nothing
+    protected void modifyGroupAttributes(Group group, Supplier<Hashtable<String, String>> adminEnv, String entryDN,
+            List<SearchResult> result, FessConfig fessConfig) {
+        final List<ModificationItem> modifyList = new ArrayList<>();
+
+        final String attrGidNumber = fessConfig.getLdapAttrGidNumber();
+        OptionalUtil
+                .ofNullable(group.getGidNumber())
+                .filter(s -> StringUtil.isNotBlank(s.toString()))
+                .ifPresent(s -> modifyReplaceEntry(modifyList, attrGidNumber, s.toString()))
+                .orElse(() -> getAttributeValueList(result, attrGidNumber).stream().forEach(
+                        v -> modifyDeleteEntry(modifyList, attrGidNumber, v)));
+
+        modify(entryDN, modifyList, adminEnv);
+    }
+
+    protected void addGroupAttributes(final BasicAttributes entry, final Group group, final FessConfig fessConfig) {
+        OptionalUtil.ofNullable(group.getGidNumber()).filter(s -> StringUtil.isNotBlank(s.toString()))
+                .ifPresent(s -> entry.put(new BasicAttribute(fessConfig.getLdapAttrGidNumber(), s)));
     }
 
     public void delete(final Group group) {
@@ -957,6 +988,9 @@ public class LdapManager {
     }
 
     protected void modify(final String dn, final List<ModificationItem> modifyList, final Supplier<Hashtable<String, String>> envSupplier) {
+        if (modifyList.isEmpty()) {
+            return;
+        }
         try (DirContextHolder holder = getDirContext(envSupplier)) {
             holder.get().modifyAttributes(dn, modifyList.toArray(new ModificationItem[modifyList.size()]));
         } catch (final NamingException e) {

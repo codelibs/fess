@@ -37,6 +37,9 @@ public class CreateForm implements Serializable {
     @Size(max = 100)
     public String name;
 
+    @ValidateTypeFailure
+    public Long gidNumber;
+
     public void initialize() {
     }
 }
