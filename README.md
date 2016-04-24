@@ -39,6 +39,11 @@ For the details, see [Installation Guide](http://fess.codelibs.org/10.0/install/
 
 You can register crawling targets on Web/File System/Data Store of admin pages, and then start Crawler on Scheduler page manually.
 
+## Fess on Docker Hub
+
+We provide Docker image on Docker Hub. 
+For more details, see [Public Repository](https://hub.docker.com/r/codelibs/fess/).
+
 ## Development Information
 
 ### Get Source Code
