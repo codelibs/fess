@@ -14,6 +14,9 @@
 		<postConstruct name="add">
 			<arg>suggestApiManager</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>gsaApiManager</arg>
+		</postConstruct>
 	</component>
 
 	<component name="jsonApiManager" class="org.codelibs.fess.api.json.JsonApiManager">
@@ -21,6 +24,8 @@
 	<component name="esApiManager" class="org.codelibs.fess.api.es.EsApiManager">
 	</component>
 	<component name="suggestApiManager" class="org.codelibs.fess.api.suggest.SuggestApiManager">
+	</component>
+	<component name="gsaApiManager" class="org.codelibs.fess.api.gsa.GsaApiManager">
 	</component>
 
 </components>

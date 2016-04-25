@@ -105,6 +105,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String WEB_API_SUGGEST_PROPERTY = "web.api.suggest";
 
+    public static final String WEB_API_GSA_PROPERTY = "web.api.gsa";
+
     public static final String WEB_API_POPULAR_WORD_PROPERTY = "web.api.popularword";
 
     public static final String WEB_DESIGN_EDITOR_PROPERTY = "design.editor";
@@ -384,4 +386,6 @@ public class Constants extends CoreLibConstants {
     public static final String CONFIG_CLEANUP_FILTERS = "cleanup.urlFilters";
 
     public static final String CONFIG_CLEANUP_ALL = "cleanup.all";
+
+    public static final String GSA_API_VERSION = "3.2";
 }
