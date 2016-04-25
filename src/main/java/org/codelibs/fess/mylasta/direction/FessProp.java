@@ -271,6 +271,10 @@ public interface FessProp {
         return getSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, false);
     }
 
+    public default boolean isWebApiGsa() {
+        return getSystemPropertyAsBoolean(Constants.WEB_API_GSA_PROPERTY, false);
+    }
+
     public default void setAppendQueryParameter(final boolean value) {
         setSystemPropertyAsBoolean(Constants.APPEND_QUERY_PARAMETER_PROPERTY, value);
     }
