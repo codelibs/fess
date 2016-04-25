@@ -67,7 +67,7 @@
 					styleId="searchForm">
 					${fe:facetForm()}${fe:geoForm()}
 					<fieldset>
-						<div class="cleafix">
+						<div class="clearfix">
 							<div class="centered col-lg-5 col-md-6 col-sm-6 col-xs-8">
 								<la:text styleClass="query form-control center-block"
 									property="q" size="50" maxlength="1000" styleId="contentQuery"
