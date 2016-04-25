@@ -105,7 +105,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final String execTime = data.getExecTime();
             final long allRecordCount = data.getAllRecordCount();
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
-            
+
             final List<String> getFields = new ArrayList<String>();
             // meta tags should be returned
             final String getFieldsParam = (String) request.getParameter("getfields");
@@ -364,6 +364,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             return getParameterMap().get(name);
         }
     }
+
     protected static class SearchApiRequestParams implements SearchRequestParams {
 
         private final HttpServletRequest request;
