@@ -451,8 +451,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
-    /** The key of the configuration. e.g. guest */
-    String SEARCH_DEFAULT_ROLES = "search.default.roles";
+    /** The key of the configuration. e.g. {role}guest */
+    String ROLE_SEARCH_DEFAULT_PERMISSIONS = "role.search.default.permissions";
+
+    /** The key of the configuration. e.g. 1 */
+    String ROLE_SEARCH_USER_PREFIX = "role.search.user.prefix";
+
+    /** The key of the configuration. e.g. 2 */
+    String ROLE_SEARCH_GROUP_PREFIX = "role.search.group.prefix";
+
+    /** The key of the configuration. e.g. R */
+    String ROLE_SEARCH_ROLE_PREFIX = "role.search.role.prefix";
 
     /** The key of the configuration. e.g. / */
     String COOKIE_DEFAULT_PATH = "cookie.default.path";
@@ -582,9 +591,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. reqheader */
     String ONLINE_HELP_NAME_REQHEADER = "online.help.name.reqheader";
-
-    /** The key of the configuration. e.g. roletype */
-    String ONLINE_HELP_NAME_ROLETYPE = "online.help.name.roletype";
 
     /** The key of the configuration. e.g. synonym */
     String ONLINE_HELP_NAME_DICT_SYNONYM = "online.help.name.dict.synonym";
@@ -783,15 +789,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_ROLE_ENABLED = "ldap.role.search.role.enabled";
-
-    /** The key of the configuration. e.g. 1 */
-    String LDAP_ROLE_SEARCH_USER_PREFIX = "ldap.role.search.user.prefix";
-
-    /** The key of the configuration. e.g. 2 */
-    String LDAP_ROLE_SEARCH_GROUP_PREFIX = "ldap.role.search.group.prefix";
-
-    /** The key of the configuration. e.g. R */
-    String LDAP_ROLE_SEARCH_ROLE_PREFIX = "ldap.role.search.role.prefix";
 
     /** The key of the configuration. e.g. sn */
     String LDAP_ATTR_SURNAME = "ldap.attr.surname";
@@ -2125,11 +2122,48 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getAuthenticationAdminRoles();
 
     /**
-     * Get the value for the key 'search.default.roles'. <br>
-     * The value is, e.g. guest <br>
+     * Get the value for the key 'role.search.default.permissions'. <br>
+     * The value is, e.g. {role}guest <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getSearchDefaultRoles();
+    String getRoleSearchDefaultPermissions();
+
+    /**
+     * Get the value for the key 'role.search.user.prefix'. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchUserPrefix();
+
+    /**
+     * Get the value for the key 'role.search.user.prefix' as {@link Integer}. <br>
+     * The value is, e.g. 1 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRoleSearchUserPrefixAsInteger();
+
+    /**
+     * Get the value for the key 'role.search.group.prefix'. <br>
+     * The value is, e.g. 2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchGroupPrefix();
+
+    /**
+     * Get the value for the key 'role.search.group.prefix' as {@link Integer}. <br>
+     * The value is, e.g. 2 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRoleSearchGroupPrefixAsInteger();
+
+    /**
+     * Get the value for the key 'role.search.role.prefix'. <br>
+     * The value is, e.g. R <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchRolePrefix();
 
     /**
      * Get the value for the key 'cookie.default.path'. <br>
@@ -2714,13 +2748,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameReqheader();
-
-    /**
-     * Get the value for the key 'online.help.name.roletype'. <br>
-     * The value is, e.g. roletype <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getOnlineHelpNameRoletype();
 
     /**
      * Get the value for the key 'online.help.name.dict.synonym'. <br>
@@ -3319,43 +3346,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isLdapRoleSearchRoleEnabled();
-
-    /**
-     * Get the value for the key 'ldap.role.search.user.prefix'. <br>
-     * The value is, e.g. 1 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapRoleSearchUserPrefix();
-
-    /**
-     * Get the value for the key 'ldap.role.search.user.prefix' as {@link Integer}. <br>
-     * The value is, e.g. 1 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getLdapRoleSearchUserPrefixAsInteger();
-
-    /**
-     * Get the value for the key 'ldap.role.search.group.prefix'. <br>
-     * The value is, e.g. 2 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapRoleSearchGroupPrefix();
-
-    /**
-     * Get the value for the key 'ldap.role.search.group.prefix' as {@link Integer}. <br>
-     * The value is, e.g. 2 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     * @throws NumberFormatException When the property is not integer.
-     */
-    Integer getLdapRoleSearchGroupPrefixAsInteger();
-
-    /**
-     * Get the value for the key 'ldap.role.search.role.prefix'. <br>
-     * The value is, e.g. R <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapRoleSearchRolePrefix();
 
     /**
      * Get the value for the key 'ldap.attr.surname'. <br>
@@ -4234,8 +4224,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.AUTHENTICATION_ADMIN_ROLES);
         }
 
-        public String getSearchDefaultRoles() {
-            return get(FessConfig.SEARCH_DEFAULT_ROLES);
+        public String getRoleSearchDefaultPermissions() {
+            return get(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS);
+        }
+
+        public String getRoleSearchUserPrefix() {
+            return get(FessConfig.ROLE_SEARCH_USER_PREFIX);
+        }
+
+        public Integer getRoleSearchUserPrefixAsInteger() {
+            return getAsInteger(FessConfig.ROLE_SEARCH_USER_PREFIX);
+        }
+
+        public String getRoleSearchGroupPrefix() {
+            return get(FessConfig.ROLE_SEARCH_GROUP_PREFIX);
+        }
+
+        public Integer getRoleSearchGroupPrefixAsInteger() {
+            return getAsInteger(FessConfig.ROLE_SEARCH_GROUP_PREFIX);
+        }
+
+        public String getRoleSearchRolePrefix() {
+            return get(FessConfig.ROLE_SEARCH_ROLE_PREFIX);
         }
 
         public String getCookieDefaultPath() {
@@ -4540,10 +4550,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameReqheader() {
             return get(FessConfig.ONLINE_HELP_NAME_REQHEADER);
-        }
-
-        public String getOnlineHelpNameRoletype() {
-            return get(FessConfig.ONLINE_HELP_NAME_ROLETYPE);
         }
 
         public String getOnlineHelpNameDictSynonym() {
@@ -4876,26 +4882,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isLdapRoleSearchRoleEnabled() {
             return is(FessConfig.LDAP_ROLE_SEARCH_ROLE_ENABLED);
-        }
-
-        public String getLdapRoleSearchUserPrefix() {
-            return get(FessConfig.LDAP_ROLE_SEARCH_USER_PREFIX);
-        }
-
-        public Integer getLdapRoleSearchUserPrefixAsInteger() {
-            return getAsInteger(FessConfig.LDAP_ROLE_SEARCH_USER_PREFIX);
-        }
-
-        public String getLdapRoleSearchGroupPrefix() {
-            return get(FessConfig.LDAP_ROLE_SEARCH_GROUP_PREFIX);
-        }
-
-        public Integer getLdapRoleSearchGroupPrefixAsInteger() {
-            return getAsInteger(FessConfig.LDAP_ROLE_SEARCH_GROUP_PREFIX);
-        }
-
-        public String getLdapRoleSearchRolePrefix() {
-            return get(FessConfig.LDAP_ROLE_SEARCH_ROLE_PREFIX);
         }
 
         public String getLdapAttrSurname() {

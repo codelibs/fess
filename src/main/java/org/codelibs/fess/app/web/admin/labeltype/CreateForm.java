@@ -22,10 +22,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -37,8 +35,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 public class CreateForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    public String[] roleTypeIds;
 
     @ValidateTypeFailure
     public Integer crudMode;
@@ -58,6 +54,9 @@ public class CreateForm implements Serializable {
     @Size(max = 4000)
     public String excludedPaths;
 
+    @Size(max = 4000)
+    public String permissions;
+
     @Min(value = 0)
     @Max(value = 2147483647)
     @ValidateTypeFailure
@@ -76,9 +75,6 @@ public class CreateForm implements Serializable {
         sortOrder = 0;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-        final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
-        if (StringUtil.isNotBlank(roles)) {
-            roleTypeIds = StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]);
-        }
+        permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();
     }
 }

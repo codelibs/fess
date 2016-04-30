@@ -222,6 +222,10 @@ public class BsFileConfigCB extends EsAbstractConditionBean {
             doColumn("paths");
         }
 
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }

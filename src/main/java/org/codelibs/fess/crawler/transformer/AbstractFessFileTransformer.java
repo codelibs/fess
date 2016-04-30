@@ -59,6 +59,7 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,9 +295,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
         final List<String> roleTypeList = getRoleTypes(responseData);
-        for (final String roleType : crawlingConfig.getRoleTypeValues()) {
-            roleTypeList.add(roleType);
-        }
+        StreamUtil.of(crawlingConfig.getPermissions()).forEach(p -> roleTypeList.add(p));
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // TODO date
         // lang

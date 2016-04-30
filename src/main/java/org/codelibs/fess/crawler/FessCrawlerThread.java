@@ -44,6 +44,7 @@ import org.codelibs.fess.helper.SambaHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,10 +74,7 @@ public class FessCrawlerThread extends CrawlerThread {
                 final Map<String, Object> dataMap = new HashMap<String, Object>();
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
                 final List<String> roleTypeList = new ArrayList<String>();
-                final String[] roleTypeValues = crawlingConfig.getRoleTypeValues();
-                for (final String roleType : roleTypeValues) {
-                    roleTypeList.add(roleType);
-                }
+                StreamUtil.of(crawlingConfig.getPermissions()).forEach(p -> roleTypeList.add(p));
                 if (url.startsWith("smb://")) {
                     if (url.endsWith("/")) {
                         // directory

@@ -15,8 +15,12 @@
  */
 package org.codelibs.fess.app.web.admin.labeltype;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.annotation.Resource;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.LabelTypePager;
 import org.codelibs.fess.app.service.LabelTypeService;
@@ -24,7 +28,9 @@ import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.LabelType;
+import org.codelibs.fess.util.PermissionUtil;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -124,11 +130,20 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
         final String id = form.id;
-        labelTypeService.getLabelType(id).ifPresent(entity -> {
-            copyBeanToBean(entity, form, op -> {});
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-        });
+        labelTypeService
+                .getLabelType(id)
+                .ifPresent(
+                        entity -> {
+                            copyBeanToBean(entity, form, copyOp -> {
+                                copyOp.excludeNull();
+                                copyOp.exclude("permissions");
+                            });
+                            form.permissions =
+                                    StreamUtil.of(entity.getPermissions()).map(s -> PermissionUtil.decode(s))
+                                            .filter(s -> StringUtil.isNotBlank(s)).distinct().collect(Collectors.joining("\n"));
+                        }).orElse(() -> {
+                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
+                });
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -147,18 +162,30 @@ public class AdminLabeltypeAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                labelTypeService.getLabelType(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
+        return asHtml(path_AdminLabeltype_AdminLabeltypeDetailsJsp).useForm(
+                EditForm.class,
+                op -> {
+                    op.setup(form -> {
+                        labelTypeService
+                                .getLabelType(id)
+                                .ifPresent(
+                                        entity -> {
+                                            copyBeanToBean(entity, form, copyOp -> {
+                                                copyOp.excludeNull();
+                                                copyOp.exclude("permissions");
+                                            });
+                                            form.permissions =
+                                                    StreamUtil.of(entity.getPermissions()).map(s -> PermissionUtil.decode(s))
+                                                            .filter(s -> StringUtil.isNotBlank(s)).distinct()
+                                                            .collect(Collectors.joining("\n"));
+                                            form.crudMode = crudMode;
+                                        })
+                                .orElse(() -> {
+                                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                                            () -> asListHtml());
+                                });
                     });
-                    form.crudMode = crudMode;
-                }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-                });
-            });
-        }).renderWith(data -> {
+                }).renderWith(data -> {
             registerRoleTypeItems(data);
         });
     }
@@ -256,12 +283,19 @@ public class AdminLabeltypeAction extends FessAdminAction {
     protected OptionalEntity<LabelType> getLabelType(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(form, username, currentTime).map(entity -> {
-            entity.setUpdatedBy(username);
-            entity.setUpdatedTime(currentTime);
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            return entity;
-        });
+        return getEntity(form, username, currentTime).map(
+                entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    copyBeanToBean(
+                            form,
+                            entity,
+                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
+                                    n -> new String[n])));
+                    entity.setPermissions(StreamUtil.of(form.permissions.split("\n")).map(s -> PermissionUtil.encode(s))
+                            .filter(s -> StringUtil.isNotBlank(s)).distinct().toArray(n -> new String[n]));
+                    return entity;
+                });
     }
 
     protected void registerRoleTypeItems(final RenderData data) {

@@ -17,10 +17,13 @@ package org.codelibs.fess.es.user.exentity;
 
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.stream.Stream;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.bsentity.BsUser;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 
 /**
@@ -50,14 +53,20 @@ public class User extends BsUser implements FessUser {
 
     @Override
     public String[] getRoleNames() {
-        return StreamUtil.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8))
-                .toArray(n -> new String[n]);
+        return getRoleStream().toArray(n -> new String[n]);
+    }
+
+    protected Stream<String> getRoleStream() {
+        return StreamUtil.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8));
     }
 
     @Override
     public String[] getGroupNames() {
-        return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8))
-                .toArray(n -> new String[n]);
+        return getGroupStream().toArray(n -> new String[n]);
+    }
+
+    private Stream<String> getGroupStream() {
+        return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8));
     }
 
     @Override
@@ -72,6 +81,15 @@ public class User extends BsUser implements FessUser {
 
     public String getOriginalPassword() {
         return originalPassword;
+    }
+
+    @Override
+    public String[] getPermissions() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return Stream.concat(
+                Stream.of(fessConfig.getRoleSearchUserPrefix() + getName()),
+                Stream.concat(getRoleStream().map(s -> fessConfig.getRoleSearchRolePrefix() + s),
+                        getGroupStream().map(s -> fessConfig.getRoleSearchGroupPrefix() + s))).toArray(n -> new String[n]);
     }
 
 }

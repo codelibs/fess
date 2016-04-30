@@ -59,6 +59,7 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,9 +287,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
-        for (final String roleType : crawlingConfig.getRoleTypeValues()) {
-            roleTypeList.add(roleType);
-        }
+        StreamUtil.of(crawlingConfig.getPermissions()).forEach(p -> roleTypeList.add(p));
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // id
         putResultDataBody(dataMap, fessConfig.getIndexFieldId(), crawlingInfoHelper.generateId(dataMap));

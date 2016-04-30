@@ -52,6 +52,9 @@ public class BsLabelType extends EsAbstractEntity {
     /** name */
     protected String name;
 
+    /** permissions */
+    protected String[] permissions;
+
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -100,6 +103,9 @@ public class BsLabelType extends EsAbstractEntity {
         if (name != null) {
             sourceMap.put("name", name);
         }
+        if (permissions != null) {
+            sourceMap.put("permissions", permissions);
+        }
         if (sortOrder != null) {
             sourceMap.put("sortOrder", sortOrder);
         }
@@ -126,6 +132,7 @@ public class BsLabelType extends EsAbstractEntity {
         sb.append(dm).append(excludedPaths);
         sb.append(dm).append(includedPaths);
         sb.append(dm).append(name);
+        sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
@@ -188,6 +195,16 @@ public class BsLabelType extends EsAbstractEntity {
     public void setName(String value) {
         registerModifiedProperty("name");
         this.name = value;
+    }
+
+    public String[] getPermissions() {
+        checkSpecifiedProperty("permissions");
+        return permissions;
+    }
+
+    public void setPermissions(String[] value) {
+        registerModifiedProperty("permissions");
+        this.permissions = value;
     }
 
     public Integer getSortOrder() {

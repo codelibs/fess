@@ -70,14 +70,8 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.role_type" /></th>
-												<td><c:forEach var="rt" varStatus="s"
-														items="${roleTypeItems}">
-														<c:forEach var="rtid" varStatus="s" items="${roleTypeIds}">
-															<c:if test="${rtid==rt.id}">
-																${f:h(rt.name)}<br />
-															</c:if>
-														</c:forEach>
-													</c:forEach></td>
+												<td>${f:br(f:h(permissions))}<la:hidden
+														property="permissions" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.sortOrder" /></th>

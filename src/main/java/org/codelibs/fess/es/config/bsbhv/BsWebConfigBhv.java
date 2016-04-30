@@ -89,6 +89,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
             result.setMaxAccessCount(DfTypeUtil.toLong(source.get("maxAccessCount")));
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));
+            result.setPermissions(toStringArray(source.get("permissions")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));

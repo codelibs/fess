@@ -32,9 +32,7 @@ import org.codelibs.fess.crawler.client.http.Authentication;
 import org.codelibs.fess.crawler.client.http.HcHttpClient;
 import org.codelibs.fess.es.config.bsentity.BsWebConfig;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
@@ -49,8 +47,6 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     private String[] labelTypeIds;
 
-    private String[] roleTypeIds;
-
     protected volatile Pattern[] includedDocUrlPatterns;
 
     protected volatile Pattern[] excludedDocUrlPatterns;
@@ -58,8 +54,6 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
     private volatile List<LabelType> labelTypeList;
-
-    private volatile List<RoleType> roleTypeList;
 
     public WebConfig() {
         super();
@@ -115,57 +109,6 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
             labelValueList.add(labelType.getValue());
         }
         return labelValueList.toArray(new String[labelValueList.size()]);
-    }
-
-    /* (non-Javadoc)
-     * @see org.codelibs.fess.db.exentity.CrawlingConfig#getRoleTypeIds()
-     */
-    public String[] getRoleTypeIds() {
-        if (roleTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return roleTypeIds;
-    }
-
-    public void setRoleTypeIds(final String[] roleTypeIds) {
-        this.roleTypeIds = roleTypeIds;
-    }
-
-    public List<RoleType> getRoleTypeList() {
-        if (roleTypeList == null) {
-            synchronized (this) {
-                if (roleTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final WebConfigToRoleBhv webConfigToRoleBhv = ComponentUtil.getComponent(WebConfigToRoleBhv.class);
-                    final ListResultBean<WebConfigToRole> mappingList = webConfigToRoleBhv.selectList(cb -> {
-                        cb.query().setWebConfigId_Equal(getId());
-                        cb.specify().columnRoleTypeId();
-                        cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> roleIdList = new ArrayList<>();
-                    for (final WebConfigToRole mapping : mappingList) {
-                        roleIdList.add(mapping.getRoleTypeId());
-                    }
-                    final RoleTypeBhv roleTypeBhv = ComponentUtil.getComponent(RoleTypeBhv.class);
-                    roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(roleIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return roleTypeList;
-    }
-
-    @Override
-    public String[] getRoleTypeValues() {
-        final List<RoleType> list = getRoleTypeList();
-        final List<String> roleValueList = new ArrayList<>(list.size());
-        for (final RoleType roleType : list) {
-            roleValueList.add(roleType.getValue());
-        }
-        return roleValueList.toArray(new String[roleValueList.size()]);
     }
 
     @Override
@@ -323,14 +266,12 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     @Override
     public String toString() {
-        return "WebConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
-                + ", includedDocUrlPatterns=" + Arrays.toString(includedDocUrlPatterns) + ", excludedDocUrlPatterns="
-                + Arrays.toString(excludedDocUrlPatterns) + ", configParameterMap=" + configParameterMap + ", labelTypeList="
-                + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available + ", boost=" + boost + ", configParameter="
-                + configParameter + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", depth=" + depth + ", excludedDocUrls="
-                + excludedDocUrls + ", excludedUrls=" + excludedUrls + ", includedDocUrls=" + includedDocUrls + ", includedUrls="
-                + includedUrls + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive + ", maxAccessCount=" + maxAccessCount
-                + ", name=" + name + ", numOfThread=" + numOfThread + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy
-                + ", updatedTime=" + updatedTime + ", urls=" + urls + ", userAgent=" + userAgent + ", docMeta=" + docMeta + "]";
+        return "WebConfig [available=" + available + ", boost=" + boost + ", configParameter=" + configParameter + ", createdBy="
+                + createdBy + ", createdTime=" + createdTime + ", depth=" + depth + ", excludedDocUrls=" + excludedDocUrls
+                + ", excludedUrls=" + excludedUrls + ", includedDocUrls=" + includedDocUrls + ", includedUrls=" + includedUrls
+                + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive + ", maxAccessCount=" + maxAccessCount + ", name=" + name
+                + ", numOfThread=" + numOfThread + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder
+                + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", urls=" + urls + ", userAgent=" + userAgent + "]";
     }
+
 }

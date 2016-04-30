@@ -82,6 +82,7 @@ public abstract class BsDataConfigBhv extends EsAbstractBehavior<DataConfig, Dat
             result.setHandlerParameter(DfTypeUtil.toString(source.get("handlerParameter")));
             result.setHandlerScript(DfTypeUtil.toString(source.get("handlerScript")));
             result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setPermissions(toStringArray(source.get("permissions")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));

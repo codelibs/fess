@@ -25,4 +25,5 @@ public interface FessUser extends Serializable {
 
     String[] getGroupNames();
 
+    String[] getPermissions();
 }

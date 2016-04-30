@@ -35,7 +35,6 @@ import org.codelibs.fess.es.config.exentity.ScheduledJob;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.job.key.LaJobUnique;
 import org.lastaflute.web.Execute;
@@ -174,10 +173,7 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setUpdatedTime(now);
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
-                final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
-                if (StringUtil.isNotBlank(roles)) {
-                    wConfig.setRoleTypeIds(StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]));
-                }
+                wConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray());
 
                 webConfigService.store(wConfig);
 
@@ -205,10 +201,7 @@ public class AdminWizardAction extends FessAdminAction {
                 fConfig.setUpdatedBy(username);
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
-                final String roles = ComponentUtil.getFessConfig().getSearchDefaultRoles();
-                if (StringUtil.isNotBlank(roles)) {
-                    fConfig.setRoleTypeIds(StreamUtil.of(roles.split(",")).map(role -> role.trim()).toArray(n -> new String[n]));
-                }
+                fConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray());
 
                 fileConfigService.store(fConfig);
             }

@@ -93,6 +93,8 @@ public class DataConfigDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerScript(),
                 (et, vl) -> ((DataConfig) et).setHandlerScript(DfTypeUtil.toString(vl)), "handlerScript");
         setupEpg(_epgMap, et -> ((DataConfig) et).getName(), (et, vl) -> ((DataConfig) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getPermissions(), (et, vl) -> ((DataConfig) et).setPermissions((String[]) vl),
+                "permissions");
         setupEpg(_epgMap, et -> ((DataConfig) et).getSortOrder(), (et, vl) -> ((DataConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
         setupEpg(_epgMap, et -> ((DataConfig) et).getUpdatedBy(), (et, vl) -> ((DataConfig) et).setUpdatedBy(DfTypeUtil.toString(vl)),
@@ -151,6 +153,8 @@ public class DataConfigDbm extends AbstractDBMeta {
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
             0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
+            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -190,6 +194,10 @@ public class DataConfigDbm extends AbstractDBMeta {
         return _columnName;
     }
 
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
+    }
+
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
@@ -212,6 +220,7 @@ public class DataConfigDbm extends AbstractDBMeta {
         ls.add(columnHandlerParameter());
         ls.add(columnHandlerScript());
         ls.add(columnName());
+        ls.add(columnPermissions());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

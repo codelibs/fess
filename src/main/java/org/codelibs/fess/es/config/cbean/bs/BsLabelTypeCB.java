@@ -178,6 +178,10 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
             doColumn("name");
         }
 
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }

@@ -56,6 +56,10 @@
       "available": {
         "type": "boolean"
       },
+      "permissions": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "sortOrder": {
         "type": "integer"
       },

@@ -274,15 +274,15 @@ public class SystemHelper implements Serializable {
     }
 
     public String getSearchRoleByUser(final String name) {
-        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchUserPrefix(), name);
+        return createSearchRole(ComponentUtil.getFessConfig().getRoleSearchUserPrefix(), name);
     }
 
     public String getSearchRoleByGroup(final String name) {
-        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchGroupPrefix(), name);
+        return createSearchRole(ComponentUtil.getFessConfig().getRoleSearchGroupPrefix(), name);
     }
 
     public String getSearchRoleByRole(final String name) {
-        return createSearchRole(ComponentUtil.getFessConfig().getLdapRoleSearchRolePrefix(), name);
+        return createSearchRole(ComponentUtil.getFessConfig().getRoleSearchRolePrefix(), name);
     }
 
     protected String createSearchRole(final String type, final String name) {

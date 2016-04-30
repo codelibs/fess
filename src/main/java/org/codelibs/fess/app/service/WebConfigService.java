@@ -29,10 +29,8 @@ import org.codelibs.fess.es.config.exbhv.RequestHeaderBhv;
 import org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.WebConfig;
 import org.codelibs.fess.es.config.exentity.WebConfigToLabel;
-import org.codelibs.fess.es.config.exentity.WebConfigToRole;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -43,9 +41,6 @@ public class WebConfigService implements Serializable {
 
     @Resource
     protected WebConfigToLabelBhv webConfigToLabelBhv;
-
-    @Resource
-    protected WebConfigToRoleBhv webConfigToRoleBhv;
 
     @Resource
     protected WebConfigBhv webConfigBhv;
@@ -84,10 +79,6 @@ public class WebConfigService implements Serializable {
         });
 
         webConfigToLabelBhv.queryDelete(cb -> {
-            cb.query().setWebConfigId_Equal(webConfigId);
-        });
-
-        webConfigToRoleBhv.queryDelete(cb -> {
             cb.query().setWebConfigId_Equal(webConfigId);
         });
 
@@ -130,18 +121,6 @@ public class WebConfigService implements Serializable {
     public OptionalEntity<WebConfig> getWebConfig(final String id) {
         return webConfigBhv.selectByPK(id).map(entity -> {
 
-            final List<WebConfigToRole> wctrtmList = webConfigToRoleBhv.selectList(wctrtmCb -> {
-                wctrtmCb.query().setWebConfigId_Equal(entity.getId());
-                wctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-            });
-            if (!wctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(wctrtmList.size());
-                for (final WebConfigToRole mapping : wctrtmList) {
-                    roleTypeIds.add(mapping.getRoleTypeId());
-                }
-                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
-            }
-
             final List<WebConfigToLabel> wctltmList = webConfigToLabelBhv.selectList(wctltmCb -> {
                 wctltmCb.query().setWebConfigId_Equal(entity.getId());
                 wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
@@ -160,7 +139,6 @@ public class WebConfigService implements Serializable {
     public void store(final WebConfig webConfig) {
         final boolean isNew = webConfig.getId() == null;
         final String[] labelTypeIds = webConfig.getLabelTypeIds();
-        final String[] roleTypeIds = webConfig.getRoleTypeIds();
 
         webConfigBhv.insertOrUpdate(webConfig, op -> {
             op.setRefresh(true);
@@ -177,18 +155,6 @@ public class WebConfigService implements Serializable {
                     wctltmList.add(mapping);
                 }
                 webConfigToLabelBhv.batchInsert(wctltmList, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<WebConfigToRole> wctrtmList = new ArrayList<WebConfigToRole>();
-                for (final String id : roleTypeIds) {
-                    final WebConfigToRole mapping = new WebConfigToRole();
-                    mapping.setWebConfigId(webConfigId);
-                    mapping.setRoleTypeId(id);
-                    wctrtmList.add(mapping);
-                }
-                webConfigToRoleBhv.batchInsert(wctrtmList, op -> {
                     op.setRefresh(true);
                 });
             }
@@ -223,38 +189,6 @@ public class WebConfigService implements Serializable {
                     op.setRefresh(true);
                 });
                 webConfigToLabelBhv.batchDelete(list, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<WebConfigToRole> list = webConfigToRoleBhv.selectList(wctrtmCb -> {
-                    wctrtmCb.query().setWebConfigId_Equal(webConfigId);
-                    wctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                });
-                final List<WebConfigToRole> newList = new ArrayList<WebConfigToRole>();
-                final List<WebConfigToRole> matchedList = new ArrayList<WebConfigToRole>();
-                for (final String id : roleTypeIds) {
-                    boolean exist = false;
-                    for (final WebConfigToRole mapping : list) {
-                        if (mapping.getRoleTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final WebConfigToRole mapping = new WebConfigToRole();
-                        mapping.setWebConfigId(webConfigId);
-                        mapping.setRoleTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                list.removeAll(matchedList);
-                webConfigToRoleBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
-                });
-                webConfigToRoleBhv.batchDelete(list, op -> {
                     op.setRefresh(true);
                 });
             }

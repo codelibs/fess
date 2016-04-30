@@ -36,6 +36,7 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.PermissionUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -874,6 +875,18 @@ public interface FessProp {
             }
             return null;
         }).ifPresent(p -> searchRequestBuilder.setPreference(p)));
+    }
+
+    String getRoleSearchDefaultPermissions();
+
+    public default String[] getSearchDefaultPermissionsAsArray() {
+        return StreamUtil.of(getRoleSearchDefaultPermissions().split(",")).map(p -> PermissionUtil.encode(p))
+                .filter(s -> StringUtil.isNotBlank(s)).distinct().toArray(n -> new String[n]);
+    }
+
+    public default String getSearchDefaultDisplayPermission() {
+        return StreamUtil.of(getRoleSearchDefaultPermissions().split(",")).filter(s -> StringUtil.isNotBlank(s)).distinct()
+                .collect(Collectors.joining("\n"));
     }
 
 }

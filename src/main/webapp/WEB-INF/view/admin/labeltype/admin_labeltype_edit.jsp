@@ -79,16 +79,12 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="roleTypeIds" class="col-sm-3 control-label"><la:message
+										<label for="permissions" class="col-sm-3 control-label"><la:message
 												key="labels.role_type" /></label>
 										<div class="col-sm-9">
-											<la:errors property="roleTypeIds" />
-											<la:select property="roleTypeIds" multiple="true"
-												styleClass="form-control">
-												<c:forEach var="rt" varStatus="s" items="${roleTypeItems}">
-													<la:option value="${f:u(rt.id)}">${f:h(rt.name)}</la:option>
-												</c:forEach>
-											</la:select>
+											<la:errors property="permissions" />
+											<la:textarea property="permissions" styleClass="form-control"
+												rows="5" />
 										</div>
 									</div>
 									<div class="form-group">

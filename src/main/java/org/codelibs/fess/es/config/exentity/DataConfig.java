@@ -42,9 +42,7 @@ import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.es.config.bsentity.BsDataConfig;
 import org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ParameterUtil;
@@ -73,8 +71,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     private String[] labelTypeIds;
 
-    private String[] roleTypeIds;
-
     protected Pattern[] includedDocPathPatterns;
 
     protected Pattern[] excludedDocPathPatterns;
@@ -84,8 +80,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     private Map<String, String> handlerScriptMap;
 
     private volatile List<LabelType> labelTypeList;
-
-    private volatile List<RoleType> roleTypeList;
 
     public DataConfig() {
         super();
@@ -138,54 +132,6 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             labelValueList.add(labelType.getValue());
         }
         return labelValueList.toArray(new String[labelValueList.size()]);
-    }
-
-    public String[] getRoleTypeIds() {
-        if (roleTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return roleTypeIds;
-    }
-
-    public void setRoleTypeIds(final String[] roleTypeIds) {
-        this.roleTypeIds = roleTypeIds;
-    }
-
-    public List<RoleType> getRoleTypeList() {
-        if (roleTypeList == null) {
-            synchronized (this) {
-                if (roleTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final DataConfigToRoleBhv dataConfigToRoleBhv = ComponentUtil.getComponent(DataConfigToRoleBhv.class);
-                    final ListResultBean<DataConfigToRole> mappingList = dataConfigToRoleBhv.selectList(cb -> {
-                        cb.query().setDataConfigId_Equal(getId());
-                        cb.specify().columnRoleTypeId();
-                        cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> roleIdList = new ArrayList<>();
-                    for (final DataConfigToRole mapping : mappingList) {
-                        roleIdList.add(mapping.getRoleTypeId());
-                    }
-                    final RoleTypeBhv roleTypeBhv = ComponentUtil.getComponent(RoleTypeBhv.class);
-                    roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(roleIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return roleTypeList;
-    }
-
-    @Override
-    public String[] getRoleTypeValues() {
-        final List<RoleType> list = getRoleTypeList();
-        final List<String> roleValueList = new ArrayList<>(list.size());
-        for (final RoleType roleType : list) {
-            roleValueList.add(roleType.getValue());
-        }
-        return roleValueList.toArray(new String[roleValueList.size()]);
     }
 
     @Override
@@ -420,12 +366,10 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
 
     @Override
     public String toString() {
-        return "DataConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
-                + ", includedDocPathPatterns=" + Arrays.toString(includedDocPathPatterns) + ", excludedDocPathPatterns="
-                + Arrays.toString(excludedDocPathPatterns) + ", handlerParameterMap=" + handlerParameterMap + ", handlerScriptMap="
-                + handlerScriptMap + ", labelTypeList=" + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available
-                + ", boost=" + boost + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", handlerName=" + handlerName
-                + ", handlerParameter=" + handlerParameter + ", handlerScript=" + handlerScript + ", name=" + name + ", sortOrder="
-                + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+        return "DataConfig [available=" + available + ", boost=" + boost + ", createdBy=" + createdBy + ", createdTime=" + createdTime
+                + ", handlerName=" + handlerName + ", handlerParameter=" + handlerParameter + ", handlerScript=" + handlerScript
+                + ", name=" + name + ", permissions=" + Arrays.toString(permissions) + ", sortOrder=" + sortOrder + ", updatedBy="
+                + updatedBy + ", updatedTime=" + updatedTime + "]";
     }
+
 }

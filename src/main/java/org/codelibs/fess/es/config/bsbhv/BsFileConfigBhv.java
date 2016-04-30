@@ -90,6 +90,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setNumOfThread(DfTypeUtil.toInteger(source.get("numOfThread")));
             result.setPaths(DfTypeUtil.toString(source.get("paths")));
+            result.setPermissions(toStringArray(source.get("permissions")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));

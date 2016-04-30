@@ -155,13 +155,6 @@
 							<span><la:message key="labels.menu_duplicate_host" /></span>
 						</la:link></li>
 
-					<li
-						<c:if test="${param.menuType=='roleType'}">class="active"</c:if>><la:link
-							href="/admin/roletype/">
-							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_role_type" /></span>
-						</la:link></li>
-
 				</ul></li>
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='user'}">active</c:if>"><a

@@ -27,10 +27,8 @@ import org.codelibs.fess.app.pager.DataConfigPager;
 import org.codelibs.fess.es.config.cbean.DataConfigCB;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exbhv.DataConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.es.config.exentity.DataConfigToLabel;
-import org.codelibs.fess.es.config.exentity.DataConfigToRole;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -38,9 +36,6 @@ import org.dbflute.optional.OptionalEntity;
 public class DataConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Resource
-    protected DataConfigToRoleBhv dataConfigToRoleBhv;
 
     @Resource
     protected DataConfigToLabelBhv dataConfigToLabelBhv;
@@ -80,10 +75,6 @@ public class DataConfigService implements Serializable {
             cb.query().setDataConfigId_Equal(dataConfigId);
         });
 
-        dataConfigToRoleBhv.queryDelete(cb -> {
-            cb.query().setDataConfigId_Equal(dataConfigId);
-        });
-
     }
 
     public List<DataConfig> getAllDataConfigList() {
@@ -115,18 +106,6 @@ public class DataConfigService implements Serializable {
     public OptionalEntity<DataConfig> getDataConfig(final String id) {
         return dataConfigBhv.selectByPK(id).map(entity -> {
 
-            final List<DataConfigToRole> fctrtmList = dataConfigToRoleBhv.selectList(fctrtmCb -> {
-                fctrtmCb.query().setDataConfigId_Equal(entity.getId());
-                fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-            });
-            if (!fctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
-                for (final DataConfigToRole mapping : fctrtmList) {
-                    roleTypeIds.add(mapping.getRoleTypeId());
-                }
-                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
-            }
-
             final List<DataConfigToLabel> fctltmList = dataConfigToLabelBhv.selectList(fctltmCb -> {
                 fctltmCb.query().setDataConfigId_Equal(entity.getId());
                 fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
@@ -146,7 +125,6 @@ public class DataConfigService implements Serializable {
     public void store(final DataConfig dataConfig) {
         final boolean isNew = dataConfig.getId() == null;
         final String[] labelTypeIds = dataConfig.getLabelTypeIds();
-        final String[] roleTypeIds = dataConfig.getRoleTypeIds();
 
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
             op.setRefresh(true);
@@ -163,18 +141,6 @@ public class DataConfigService implements Serializable {
                     fctltmList.add(mapping);
                 }
                 dataConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<DataConfigToRole> fctrtmList = new ArrayList<DataConfigToRole>();
-                for (final String roleTypeId : roleTypeIds) {
-                    final DataConfigToRole mapping = new DataConfigToRole();
-                    mapping.setDataConfigId(dataConfigId);
-                    mapping.setRoleTypeId(roleTypeId);
-                    fctrtmList.add(mapping);
-                }
-                dataConfigToRoleBhv.batchInsert(fctrtmList, op -> {
                     op.setRefresh(true);
                 });
             }
@@ -209,38 +175,6 @@ public class DataConfigService implements Serializable {
                     op.setRefresh(true);
                 });
                 dataConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<DataConfigToRole> fctrtmList = dataConfigToRoleBhv.selectList(fctrtmCb -> {
-                    fctrtmCb.query().setDataConfigId_Equal(dataConfigId);
-                    fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                });
-                final List<DataConfigToRole> newList = new ArrayList<DataConfigToRole>();
-                final List<DataConfigToRole> matchedList = new ArrayList<DataConfigToRole>();
-                for (final String id : roleTypeIds) {
-                    boolean exist = false;
-                    for (final DataConfigToRole mapping : fctrtmList) {
-                        if (mapping.getRoleTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final DataConfigToRole mapping = new DataConfigToRole();
-                        mapping.setDataConfigId(dataConfigId);
-                        mapping.setRoleTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                fctrtmList.removeAll(matchedList);
-                dataConfigToRoleBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
-                });
-                dataConfigToRoleBhv.batchDelete(fctrtmList, op -> {
                     op.setRefresh(true);
                 });
             }

@@ -54,7 +54,7 @@ public class LabelTypeHelper implements Serializable {
 
     @PostConstruct
     public void init() {
-        final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeListWithRoles();
+        final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
     }
 

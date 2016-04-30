@@ -31,9 +31,7 @@ import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.es.config.bsentity.BsFileConfig;
 import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
-import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -49,8 +47,6 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     private String[] labelTypeIds;
 
-    private String[] roleTypeIds;
-
     protected volatile Pattern[] includedDocPathPatterns;
 
     protected volatile Pattern[] excludedDocPathPatterns;
@@ -58,8 +54,6 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
     private volatile List<LabelType> labelTypeList;
-
-    private volatile List<RoleType> roleTypeList;
 
     public FileConfig() {
         super();
@@ -112,54 +106,6 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
             labelValueList.add(labelType.getValue());
         }
         return labelValueList.toArray(new String[labelValueList.size()]);
-    }
-
-    public String[] getRoleTypeIds() {
-        if (roleTypeIds == null) {
-            return StringUtil.EMPTY_STRINGS;
-        }
-        return roleTypeIds;
-    }
-
-    public void setRoleTypeIds(final String[] roleTypeIds) {
-        this.roleTypeIds = roleTypeIds;
-    }
-
-    public List<RoleType> getRoleTypeList() {
-        if (roleTypeList == null) {
-            synchronized (this) {
-                if (roleTypeList == null) {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final FileConfigToRoleBhv fileConfigToRoleBhv = ComponentUtil.getComponent(FileConfigToRoleBhv.class);
-                    final ListResultBean<FileConfigToRole> mappingList = fileConfigToRoleBhv.selectList(cb -> {
-                        cb.query().setFileConfigId_Equal(getId());
-                        cb.specify().columnRoleTypeId();
-                        cb.paging(fessConfig.getPageRoletypeMaxFetchSizeAsInteger().intValue(), 1);
-                    });
-                    final List<String> roleIdList = new ArrayList<>();
-                    for (final FileConfigToRole mapping : mappingList) {
-                        roleIdList.add(mapping.getRoleTypeId());
-                    }
-                    final RoleTypeBhv roleTypeBhv = ComponentUtil.getComponent(RoleTypeBhv.class);
-                    roleTypeList = roleIdList.isEmpty() ? Collections.emptyList() : roleTypeBhv.selectList(cb -> {
-                        cb.query().setId_InScope(roleIdList);
-                        cb.query().addOrderBy_SortOrder_Asc();
-                        cb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                    });
-                }
-            }
-        }
-        return roleTypeList;
-    }
-
-    @Override
-    public String[] getRoleTypeValues() {
-        final List<RoleType> list = getRoleTypeList();
-        final List<String> roleValueList = new ArrayList<>(list.size());
-        for (final RoleType roleType : list) {
-            roleValueList.add(roleType.getValue());
-        }
-        return roleValueList.toArray(new String[roleValueList.size()]);
     }
 
     @Override
@@ -314,14 +260,12 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     @Override
     public String toString() {
-        return "FileConfig [labelTypeIds=" + Arrays.toString(labelTypeIds) + ", roleTypeIds=" + Arrays.toString(roleTypeIds)
-                + ", includedDocPathPatterns=" + Arrays.toString(includedDocPathPatterns) + ", excludedDocPathPatterns="
-                + Arrays.toString(excludedDocPathPatterns) + ", configParameterMap=" + configParameterMap + ", labelTypeList="
-                + labelTypeList + ", roleTypeList=" + roleTypeList + ", available=" + available + ", boost=" + boost + ", configParameter="
-                + configParameter + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", depth=" + depth
-                + ", excludedDocPaths=" + excludedDocPaths + ", excludedPaths=" + excludedPaths + ", includedDocPaths=" + includedDocPaths
-                + ", includedPaths=" + includedPaths + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive
-                + ", maxAccessCount=" + maxAccessCount + ", name=" + name + ", numOfThread=" + numOfThread + ", paths=" + paths
-                + ", sortOrder=" + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+        return "FileConfig [available=" + available + ", boost=" + boost + ", configParameter=" + configParameter + ", createdBy="
+                + createdBy + ", createdTime=" + createdTime + ", depth=" + depth + ", excludedDocPaths=" + excludedDocPaths
+                + ", excludedPaths=" + excludedPaths + ", includedDocPaths=" + includedDocPaths + ", includedPaths=" + includedPaths
+                + ", intervalTime=" + intervalTime + ", timeToLive=" + timeToLive + ", maxAccessCount=" + maxAccessCount + ", name=" + name
+                + ", numOfThread=" + numOfThread + ", paths=" + paths + ", permissions=" + Arrays.toString(permissions) + ", sortOrder="
+                + sortOrder + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + "]";
     }
+
 }

@@ -85,6 +85,9 @@ public class BsFileConfig extends EsAbstractEntity {
     /** paths */
     protected String paths;
 
+    /** permissions */
+    protected String[] permissions;
+
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -163,6 +166,9 @@ public class BsFileConfig extends EsAbstractEntity {
         if (paths != null) {
             sourceMap.put("paths", paths);
         }
+        if (permissions != null) {
+            sourceMap.put("permissions", permissions);
+        }
         if (sortOrder != null) {
             sourceMap.put("sortOrder", sortOrder);
         }
@@ -197,6 +203,7 @@ public class BsFileConfig extends EsAbstractEntity {
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
         sb.append(dm).append(paths);
+        sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
@@ -368,6 +375,16 @@ public class BsFileConfig extends EsAbstractEntity {
     public void setPaths(String value) {
         registerModifiedProperty("paths");
         this.paths = value;
+    }
+
+    public String[] getPermissions() {
+        checkSpecifiedProperty("permissions");
+        return permissions;
+    }
+
+    public void setPermissions(String[] value) {
+        registerModifiedProperty("permissions");
+        this.permissions = value;
     }
 
     public Integer getSortOrder() {

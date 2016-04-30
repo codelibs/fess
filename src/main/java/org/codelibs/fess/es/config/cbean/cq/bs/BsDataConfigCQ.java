@@ -1470,6 +1470,172 @@ public abstract class BsDataConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setPermissions_Equal(String permissions) {
+        setPermissions_Term(permissions, null);
+    }
+
+    public void setPermissions_Equal(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setPermissions_Term(permissions, opLambda);
+    }
+
+    public void setPermissions_Term(String permissions) {
+        setPermissions_Term(permissions, null);
+    }
+
+    public void setPermissions_Term(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_NotEqual(String permissions) {
+        setPermissions_NotTerm(permissions, null);
+    }
+
+    public void setPermissions_NotEqual(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPermissions_NotTerm(permissions, opLambda);
+    }
+
+    public void setPermissions_NotTerm(String permissions) {
+        setPermissions_NotTerm(permissions, null);
+    }
+
+    public void setPermissions_NotTerm(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("permissions", permissions));
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Terms(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
+    }
+
+    public void setPermissions_Terms(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("permissions", permissionsList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_InScope(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
+    }
+
+    public void setPermissions_InScope(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setPermissions_Terms(permissionsList, opLambda);
+    }
+
+    public void setPermissions_Match(String permissions) {
+        setPermissions_Match(permissions, null);
+    }
+
+    public void setPermissions_Match(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_MatchPhrase(String permissions) {
+        setPermissions_MatchPhrase(permissions, null);
+    }
+
+    public void setPermissions_MatchPhrase(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_MatchPhrasePrefix(String permissions) {
+        setPermissions_MatchPhrasePrefix(permissions, null);
+    }
+
+    public void setPermissions_MatchPhrasePrefix(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Fuzzy(String permissions) {
+        setPermissions_Fuzzy(permissions, null);
+    }
+
+    public void setPermissions_Fuzzy(String permissions, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Prefix(String permissions) {
+        setPermissions_Prefix(permissions, null);
+    }
+
+    public void setPermissions_Prefix(String permissions, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_GreaterThan(String permissions) {
+        setPermissions_GreaterThan(permissions, null);
+    }
+
+    public void setPermissions_GreaterThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_THAN, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_LessThan(String permissions) {
+        setPermissions_LessThan(permissions, null);
+    }
+
+    public void setPermissions_LessThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_THAN, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_GreaterEqual(String permissions) {
+        setPermissions_GreaterEqual(permissions, null);
+    }
+
+    public void setPermissions_GreaterEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_LessEqual(String permissions) {
+        setPermissions_LessEqual(permissions, null);
+    }
+
+    public void setPermissions_LessEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsDataConfigCQ addOrderBy_Permissions_Asc() {
+        regOBA("permissions");
+        return this;
+    }
+
+    public BsDataConfigCQ addOrderBy_Permissions_Desc() {
+        regOBD("permissions");
+        return this;
+    }
+
     public void setSortOrder_Equal(Integer sortOrder) {
         setSortOrder_Term(sortOrder, null);
     }

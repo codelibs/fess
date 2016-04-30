@@ -54,6 +54,10 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
     // ===================================================================================
     //                                                                            Accessor
     //                                                                            ========
+    public String[] getPermissions() {
+        return user.getPermissions();
+    }
+
     public String[] getRoles() {
         return user.getRoleNames();
     }

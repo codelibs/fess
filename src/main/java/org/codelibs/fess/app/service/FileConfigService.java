@@ -28,10 +28,8 @@ import org.codelibs.fess.es.config.cbean.FileConfigCB;
 import org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv;
-import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.config.exentity.FileConfig;
 import org.codelibs.fess.es.config.exentity.FileConfigToLabel;
-import org.codelibs.fess.es.config.exentity.FileConfigToRole;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -39,9 +37,6 @@ import org.dbflute.optional.OptionalEntity;
 public class FileConfigService implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Resource
-    protected FileConfigToRoleBhv fileConfigToRoleBhv;
 
     @Resource
     protected FileConfigToLabelBhv fileConfigToLabelBhv;
@@ -83,10 +78,6 @@ public class FileConfigService implements Serializable {
             cb.query().setFileConfigId_Equal(fileConfigId);
         });
 
-        fileConfigToRoleBhv.queryDelete(cb -> {
-            cb.query().setFileConfigId_Equal(fileConfigId);
-        });
-
         fileAuthenticationBhv.queryDelete(cb -> {
             cb.query().setFileConfigId_Equal(fileConfigId);
         });
@@ -121,18 +112,6 @@ public class FileConfigService implements Serializable {
     public OptionalEntity<FileConfig> getFileConfig(final String id) {
         return fileConfigBhv.selectByPK(id).map(entity -> {
 
-            final List<FileConfigToRole> fctrtmList = fileConfigToRoleBhv.selectList(fctrtmCb -> {
-                fctrtmCb.query().setFileConfigId_Equal(entity.getId());
-                fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-            });
-            if (!fctrtmList.isEmpty()) {
-                final List<String> roleTypeIds = new ArrayList<String>(fctrtmList.size());
-                for (final FileConfigToRole mapping : fctrtmList) {
-                    roleTypeIds.add(mapping.getRoleTypeId());
-                }
-                entity.setRoleTypeIds(roleTypeIds.toArray(new String[roleTypeIds.size()]));
-            }
-
             final List<FileConfigToLabel> fctltmList = fileConfigToLabelBhv.selectList(fctltmCb -> {
                 fctltmCb.query().setFileConfigId_Equal(entity.getId());
                 fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
@@ -151,7 +130,6 @@ public class FileConfigService implements Serializable {
     public void store(final FileConfig fileConfig) {
         final boolean isNew = fileConfig.getId() == null;
         final String[] labelTypeIds = fileConfig.getLabelTypeIds();
-        final String[] roleTypeIds = fileConfig.getRoleTypeIds();
 
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
             op.setRefresh(true);
@@ -168,18 +146,6 @@ public class FileConfigService implements Serializable {
                     fctltmList.add(mapping);
                 }
                 fileConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<FileConfigToRole> fctrtmList = new ArrayList<FileConfigToRole>();
-                for (final String roleTypeId : roleTypeIds) {
-                    final FileConfigToRole mapping = new FileConfigToRole();
-                    mapping.setFileConfigId(fileConfigId);
-                    mapping.setRoleTypeId(roleTypeId);
-                    fctrtmList.add(mapping);
-                }
-                fileConfigToRoleBhv.batchInsert(fctrtmList, op -> {
                     op.setRefresh(true);
                 });
             }
@@ -214,38 +180,6 @@ public class FileConfigService implements Serializable {
                     op.setRefresh(true);
                 });
                 fileConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefresh(true);
-                });
-            }
-            if (roleTypeIds != null) {
-                final List<FileConfigToRole> fctrtmList = fileConfigToRoleBhv.selectList(fctrtmCb -> {
-                    fctrtmCb.query().setFileConfigId_Equal(fileConfigId);
-                    fctrtmCb.fetchFirst(fessConfig.getPageRoletypeMaxFetchSizeAsInteger());
-                });
-                final List<FileConfigToRole> newList = new ArrayList<FileConfigToRole>();
-                final List<FileConfigToRole> matchedList = new ArrayList<FileConfigToRole>();
-                for (final String id : roleTypeIds) {
-                    boolean exist = false;
-                    for (final FileConfigToRole mapping : fctrtmList) {
-                        if (mapping.getRoleTypeId().equals(id)) {
-                            exist = true;
-                            matchedList.add(mapping);
-                            break;
-                        }
-                    }
-                    if (!exist) {
-                        // new
-                        final FileConfigToRole mapping = new FileConfigToRole();
-                        mapping.setFileConfigId(fileConfigId);
-                        mapping.setRoleTypeId(id);
-                        newList.add(mapping);
-                    }
-                }
-                fctrtmList.removeAll(matchedList);
-                fileConfigToRoleBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
-                });
-                fileConfigToRoleBhv.batchDelete(fctrtmList, op -> {
                     op.setRefresh(true);
                 });
             }

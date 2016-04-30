@@ -218,6 +218,10 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
             doColumn("numOfThread");
         }
 
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
         public void columnSortOrder() {
             doColumn("sortOrder");
         }

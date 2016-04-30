@@ -16,12 +16,15 @@
 package org.codelibs.fess.ldap;
 
 import java.util.Hashtable;
+import java.util.stream.Stream;
 
 import javax.naming.Context;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
 
 public class LdapUser implements FessUser {
 
@@ -31,7 +34,7 @@ public class LdapUser implements FessUser {
 
     protected String name;
 
-    protected String[] roles = null;
+    protected String[] permissions = null;
 
     public LdapUser(final Hashtable<String, String> env, final String name) {
         this.env = env;
@@ -44,23 +47,35 @@ public class LdapUser implements FessUser {
     }
 
     @Override
-    public String[] getRoleNames() {
-        if (roles == null) {
+    public String[] getPermissions() {
+        if (permissions == null) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final String baseDn = ComponentUtil.getFessConfig().getLdapBaseDn();
             final String accountFilter = ComponentUtil.getFessConfig().getLdapAccountFilter();
             if (StringUtil.isNotBlank(baseDn) && StringUtil.isNotBlank(accountFilter)) {
-                roles = ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter);
+                permissions =
+                        Stream.concat(Stream.of(fessConfig.getRoleSearchUserPrefix() + getName()),
+                                StreamUtil.of(ComponentUtil.getLdapManager().getRoles(this, baseDn, accountFilter))).toArray(
+                                n -> new String[n]);
             } else {
-                roles = StringUtil.EMPTY_STRINGS;
+                permissions = StringUtil.EMPTY_STRINGS;
             }
         }
-        return roles;
+        return permissions;
+    }
+
+    @Override
+    public String[] getRoleNames() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return StreamUtil.of(getPermissions()).filter(s -> s.startsWith(fessConfig.getRoleSearchRolePrefix())).map(s -> s.substring(1))
+                .toArray(n -> new String[n]);
     }
 
     @Override
     public String[] getGroupNames() {
-        // TODO
-        return StringUtil.EMPTY_STRINGS;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return StreamUtil.of(getPermissions()).filter(s -> s.startsWith(fessConfig.getRoleSearchGroupPrefix())).map(s -> s.substring(1))
+                .toArray(n -> new String[n]);
     }
 
     public Hashtable<String, String> getEnvironment() {

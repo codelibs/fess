@@ -29,7 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.servlet.request.RequestManager;
@@ -73,10 +75,9 @@ public class RoleQueryHelper {
 
     @PostConstruct
     public void init() {
-        StreamUtil.of(ComponentUtil.getFessConfig().getSearchDefaultRoles().split(",")).filter(name -> StringUtil.isNotBlank(name))
-                .forEach(name -> {
-                    defaultRoleList.add(name);
-                });
+        StreamUtil.of(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray()).forEach(name -> {
+            defaultRoleList.add(name);
+        });
     }
 
     public Set<String> build() {
@@ -103,9 +104,11 @@ public class RoleQueryHelper {
             roleList.addAll(buildByCookieNameMapping(request));
         }
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RequestManager requestManager = ComponentUtil.getRequestManager();
-        requestManager.findUserBean(FessUserBean.class).ifPresent(
-                fessUserBean -> StreamUtil.of(fessUserBean.getRoles()).forEach(roleList::add));
+        requestManager.findUserBean(FessUserBean.class)
+                .ifPresent(fessUserBean -> StreamUtil.of(fessUserBean.getPermissions()).forEach(roleList::add))
+                .orElse(() -> roleList.add(fessConfig.getRoleSearchUserPrefix() + Constants.GUEST_USER));
 
         if (defaultRoleList != null) {
             roleList.addAll(defaultRoleList);

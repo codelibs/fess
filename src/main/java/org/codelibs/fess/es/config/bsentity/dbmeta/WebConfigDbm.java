@@ -106,6 +106,8 @@ public class WebConfigDbm extends AbstractDBMeta {
         setupEpg(_epgMap, et -> ((WebConfig) et).getName(), (et, vl) -> ((WebConfig) et).setName(DfTypeUtil.toString(vl)), "name");
         setupEpg(_epgMap, et -> ((WebConfig) et).getNumOfThread(), (et, vl) -> ((WebConfig) et).setNumOfThread(DfTypeUtil.toInteger(vl)),
                 "numOfThread");
+        setupEpg(_epgMap, et -> ((WebConfig) et).getPermissions(), (et, vl) -> ((WebConfig) et).setPermissions((String[]) vl),
+                "permissions");
         setupEpg(_epgMap, et -> ((WebConfig) et).getSortOrder(), (et, vl) -> ((WebConfig) et).setSortOrder(DfTypeUtil.toInteger(vl)),
                 "sortOrder");
         setupEpg(_epgMap, et -> ((WebConfig) et).getUpdatedBy(), (et, vl) -> ((WebConfig) et).setUpdatedBy(DfTypeUtil.toString(vl)),
@@ -181,6 +183,8 @@ public class WebConfigDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnNumOfThread = cci("numOfThread", "numOfThread", null, null, Integer.class, "numOfThread", null,
             false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
+            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
@@ -252,6 +256,10 @@ public class WebConfigDbm extends AbstractDBMeta {
         return _columnNumOfThread;
     }
 
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
+    }
+
     public ColumnInfo columnSortOrder() {
         return _columnSortOrder;
     }
@@ -289,6 +297,7 @@ public class WebConfigDbm extends AbstractDBMeta {
         ls.add(columnMaxAccessCount());
         ls.add(columnName());
         ls.add(columnNumOfThread());
+        ls.add(columnPermissions());
         ls.add(columnSortOrder());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());

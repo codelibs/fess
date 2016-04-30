@@ -82,6 +82,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** numOfThread */
     protected Integer numOfThread;
 
+    /** permissions */
+    protected String[] permissions;
+
     /** sortOrder */
     protected Integer sortOrder;
 
@@ -163,6 +166,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (numOfThread != null) {
             sourceMap.put("numOfThread", numOfThread);
         }
+        if (permissions != null) {
+            sourceMap.put("permissions", permissions);
+        }
         if (sortOrder != null) {
             sourceMap.put("sortOrder", sortOrder);
         }
@@ -202,6 +208,7 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(maxAccessCount);
         sb.append(dm).append(name);
         sb.append(dm).append(numOfThread);
+        sb.append(dm).append(permissions);
         sb.append(dm).append(sortOrder);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
@@ -365,6 +372,16 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setNumOfThread(Integer value) {
         registerModifiedProperty("numOfThread");
         this.numOfThread = value;
+    }
+
+    public String[] getPermissions() {
+        checkSpecifiedProperty("permissions");
+        return permissions;
+    }
+
+    public void setPermissions(String[] value) {
+        registerModifiedProperty("permissions");
+        this.permissions = value;
     }
 
     public Integer getSortOrder() {

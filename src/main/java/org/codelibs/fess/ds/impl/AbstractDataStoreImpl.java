@@ -31,6 +31,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GroovyUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,9 +86,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         defaultDataMap.put(fessConfig.getIndexFieldLabel(), labelTypeList);
         // role: roleType
         final List<String> roleTypeList = new ArrayList<String>();
-        for (final String roleType : config.getRoleTypeValues()) {
-            roleTypeList.add(roleType);
-        }
+        StreamUtil.of(config.getPermissions()).forEach(p -> roleTypeList.add(p));
         defaultDataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
         // mimetype
         defaultDataMap.put(fessConfig.getIndexFieldMimetype(), mimeType);

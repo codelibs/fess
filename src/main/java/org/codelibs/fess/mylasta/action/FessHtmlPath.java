@@ -224,15 +224,6 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/role/admin_role_edit.jsp */
     HtmlNext path_AdminRole_AdminRoleEditJsp = new HtmlNext("/admin/role/admin_role_edit.jsp");
 
-    /** The path of the HTML: /admin/roletype/admin_roletype.jsp */
-    HtmlNext path_AdminRoletype_AdminRoletypeJsp = new HtmlNext("/admin/roletype/admin_roletype.jsp");
-
-    /** The path of the HTML: /admin/roletype/admin_roletype_details.jsp */
-    HtmlNext path_AdminRoletype_AdminRoletypeDetailsJsp = new HtmlNext("/admin/roletype/admin_roletype_details.jsp");
-
-    /** The path of the HTML: /admin/roletype/admin_roletype_edit.jsp */
-    HtmlNext path_AdminRoletype_AdminRoletypeEditJsp = new HtmlNext("/admin/roletype/admin_roletype_edit.jsp");
-
     /** The path of the HTML: /admin/scheduler/admin_scheduler.jsp */
     HtmlNext path_AdminScheduler_AdminSchedulerJsp = new HtmlNext("/admin/scheduler/admin_scheduler.jsp");
 
