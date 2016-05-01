@@ -29,7 +29,8 @@ import org.codelibs.fess.app.service.RoleTypeService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.FileConfig;
-import org.codelibs.fess.util.PermissionUtil;
+import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
@@ -140,8 +141,9 @@ public class AdminFileconfigAction extends FessAdminAction {
                                 copyOp.excludeNull();
                                 copyOp.exclude("permissions");
                             });
+                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
-                                    StreamUtil.of(entity.getPermissions()).map(s -> PermissionUtil.decode(s))
+                                    StreamUtil.of(entity.getPermissions()).map(s -> permissionHelper.decode(s))
                                             .filter(s -> StringUtil.isNotBlank(s)).distinct().collect(Collectors.joining("\n"));
                         }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
@@ -176,8 +178,9 @@ public class AdminFileconfigAction extends FessAdminAction {
                                                 copyOp.excludeNull();
                                                 copyOp.exclude("permissions");
                                             });
+                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                                             form.permissions =
-                                                    StreamUtil.of(entity.getPermissions()).map(s -> PermissionUtil.decode(s))
+                                                    StreamUtil.of(entity.getPermissions()).map(s -> permissionHelper.decode(s))
                                                             .filter(s -> StringUtil.isNotBlank(s)).distinct()
                                                             .collect(Collectors.joining("\n"));
                                             form.crudMode = crudMode;
@@ -293,7 +296,8 @@ public class AdminFileconfigAction extends FessAdminAction {
                             entity,
                             op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
                                     n -> new String[n])));
-                    entity.setPermissions(StreamUtil.of(form.permissions.split("\n")).map(s -> PermissionUtil.encode(s))
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    entity.setPermissions(StreamUtil.of(form.permissions.split("\n")).map(s -> permissionHelper.encode(s))
                             .filter(s -> StringUtil.isNotBlank(s)).distinct().toArray(n -> new String[n]));
                     return entity;
                 });

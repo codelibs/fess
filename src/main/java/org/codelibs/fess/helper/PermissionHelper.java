@@ -13,26 +13,22 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.util;
+package org.codelibs.fess.helper;
 
 import java.util.Locale;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
-public class PermissionUtil {
-    private static final String ROLE_PREFIX = "{role}";
+public class PermissionHelper {
+    protected String rolePrefix = "{role}";
 
-    private static final String GROUP_PREFIX = "{group}";
+    protected String groupPrefix = "{group}";
 
-    private static final String USER_PREFIX = "{user}";
+    protected String userPrefix = "{user}";
 
-    private PermissionUtil() {
-        // nothing
-    }
-
-    public static String encode(final String value) {
+    public String encode(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
         }
@@ -40,29 +36,41 @@ public class PermissionUtil {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String permission = value.trim();
         final String lower = permission.toLowerCase(Locale.ROOT);
-        if (lower.startsWith(USER_PREFIX) && permission.length() > USER_PREFIX.length()) {
-            return systemHelper.getSearchRoleByUser(permission.substring(USER_PREFIX.length()));
-        } else if (lower.startsWith(GROUP_PREFIX) && permission.length() > GROUP_PREFIX.length()) {
-            return systemHelper.getSearchRoleByGroup(permission.substring(GROUP_PREFIX.length()));
-        } else if (lower.startsWith(ROLE_PREFIX) && permission.length() > ROLE_PREFIX.length()) {
-            return systemHelper.getSearchRoleByRole(permission.substring(ROLE_PREFIX.length()));
+        if (lower.startsWith(userPrefix) && permission.length() > userPrefix.length()) {
+            return systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
+        } else if (lower.startsWith(groupPrefix) && permission.length() > groupPrefix.length()) {
+            return systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
+        } else if (lower.startsWith(rolePrefix) && permission.length() > rolePrefix.length()) {
+            return systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
         }
         return permission;
     }
 
-    public static String decode(String value) {
+    public String decode(String value) {
         if (StringUtil.isBlank(value)) {
             return null;
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (value.startsWith(fessConfig.getRoleSearchUserPrefix()) && value.length() > 1) {
-            return USER_PREFIX + value.substring(1);
+            return userPrefix + value.substring(1);
         } else if (value.startsWith(fessConfig.getRoleSearchGroupPrefix()) && value.length() > 1) {
-            return GROUP_PREFIX + value.substring(1);
+            return groupPrefix + value.substring(1);
         } else if (value.startsWith(fessConfig.getRoleSearchRolePrefix()) && value.length() > 1) {
-            return ROLE_PREFIX + value.substring(1);
+            return rolePrefix + value.substring(1);
         }
         return value;
+    }
+
+    public void setRolePrefix(String rolePrefix) {
+        this.rolePrefix = rolePrefix;
+    }
+
+    public void setGroupPrefix(String groupPrefix) {
+        this.groupPrefix = groupPrefix;
+    }
+
+    public void setUserPrefix(String userPrefix) {
+        this.userPrefix = userPrefix;
     }
 }

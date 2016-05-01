@@ -22,6 +22,8 @@
 	</component>
 	<component name="processHelper" class="org.codelibs.fess.helper.ProcessHelper">
 	</component>
+	<component name="permissionHelper" class="org.codelibs.fess.helper.PermissionHelper">
+	</component>
 	<component name="sambaHelper" class="org.codelibs.fess.helper.SambaHelper">
 	</component>
 	<component name="systemHelper" class="org.codelibs.fess.helper.SystemHelper">

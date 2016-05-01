@@ -39,6 +39,7 @@ import org.codelibs.fess.helper.JobHelper;
 import org.codelibs.fess.helper.KeyMatchHelper;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
@@ -62,6 +63,8 @@ import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
 
 public final class ComponentUtil {
+
+    private static final String PERMISSION_HELPER = "permissionHelper";
 
     private static final String QUERY_PARSER = "queryParser";
 
@@ -329,6 +332,10 @@ public final class ComponentUtil {
 
     public static QueryParser getQueryParser() {
         return getComponent(QUERY_PARSER);
+    }
+
+    public static PermissionHelper getPermissionHelper() {
+        return getComponent(PERMISSION_HELPER);
     }
 
     public static CrawlerClientFactory getCrawlerClientFactory() {
