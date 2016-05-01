@@ -281,6 +281,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to change your password. */
     public static final String ERRORS_failed_to_change_password = "{errors.failed_to_change_password}";
 
+    /** The key of the message: Unknown version information. */
+    public static final String ERRORS_unknown_version_for_upgrade = "{errors.unknown_version_for_upgrade}";
+
+    /** The key of the message: Failed to upgrade from {0}. */
+    public static final String ERRORS_failed_to_upgrade_from = "{errors.failed_to_upgrade_from}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -367,6 +373,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Changed your password. */
     public static final String SUCCESS_changed_password = "{success.changed_password}";
+
+    /** The key of the message: Upgraded data. */
+    public static final String SUCCESS_upgrade_from = "{success.upgrade_from}";
 
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
@@ -1636,6 +1645,35 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.unknown_version_for_upgrade' with parameters.
+     * <pre>
+     * message: Unknown version information.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsUnknownVersionForUpgrade(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_unknown_version_for_upgrade));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_upgrade_from' with parameters.
+     * <pre>
+     * message: Failed to upgrade from {0}.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUpgradeFrom(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_upgrade_from, arg0));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.invalid_query_unknown' with parameters.
      * <pre>
      * message: The given query has unknown condition.
@@ -2053,6 +2091,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessChangedPassword(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_changed_password));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upgrade_from' with parameters.
+     * <pre>
+     * message: Upgraded data.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUpgradeFrom(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_upgrade_from));
         return this;
     }
 

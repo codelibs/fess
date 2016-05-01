@@ -676,6 +676,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. backup */
     String ONLINE_HELP_NAME_BACKUP = "online.help.name.backup";
 
+    /** The key of the configuration. e.g. upgrade */
+    String ONLINE_HELP_NAME_UPGRADE = "online.help.name.upgrade";
+
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -2946,6 +2949,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameBackup();
 
     /**
+     * Get the value for the key 'online.help.name.upgrade'. <br>
+     * The value is, e.g. upgrade <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameUpgrade();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4662,6 +4672,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameBackup() {
             return get(FessConfig.ONLINE_HELP_NAME_BACKUP);
+        }
+
+        public String getOnlineHelpNameUpgrade() {
+            return get(FessConfig.ONLINE_HELP_NAME_UPGRADE);
         }
 
         public String getOnlineHelpSupportedLangs() {

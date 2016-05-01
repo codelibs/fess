@@ -2283,6 +2283,21 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: homeDirectory */
     public static final String LABELS_HOME_DIRECTORY = "{labels.homeDirectory}";
 
+    /** The key of the message: Upgrade */
+    public static final String LABELS_upgrade_title_configuration = "{labels.upgrade_title_configuration}";
+
+    /** The key of the message: Data Migration */
+    public static final String LABELS_upgrade_data_migration = "{labels.upgrade_data_migration}";
+
+    /** The key of the message: Start */
+    public static final String LABELS_upgrade_start_button = "{labels.upgrade_start_button}";
+
+    /** The key of the message: Version */
+    public static final String LABELS_TARGET_VERSION = "{labels.targetVersion}";
+
+    /** The key of the message: Version From */
+    public static final String LABELS_target_version = "{labels.target_version}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)
