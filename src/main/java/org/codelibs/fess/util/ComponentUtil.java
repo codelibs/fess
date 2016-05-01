@@ -132,8 +132,6 @@ public final class ComponentUtil {
 
     private static final String CRAWLER_PROPERTIES = "systemProperties";
 
-    private static final String PROPERTIES_SUFFIX = "Properties";
-
     private static final String QUERY_RESPONSE_LIST = "queryResponseList";
 
     private static final String JOB_EXECUTOR_SUFFIX = "JobExecutor";
@@ -159,10 +157,6 @@ public final class ComponentUtil {
 
     public static QueryResponseList getQueryResponseList() {
         return getComponent(QUERY_RESPONSE_LIST);
-    }
-
-    public static DynamicProperties getSolrGroupProperties(final String groupName) {
-        return getComponent(groupName + PROPERTIES_SUFFIX);
     }
 
     public static DynamicProperties getSystemProperties() {

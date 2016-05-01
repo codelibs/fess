@@ -178,7 +178,7 @@ public class ViewHelper implements Serializable {
                 if (useHighlight) {
                     return escapeHighlight(text);
                 } else {
-                    return highlight(LaFunctions.h(StringUtils.abbreviate(removeSolrHighlightTag(text), size)), queries);
+                    return highlight(LaFunctions.h(StringUtils.abbreviate(removeHighlightTag(text), size)), queries);
                 }
             }
         }
@@ -191,7 +191,7 @@ public class ViewHelper implements Serializable {
                 .replaceAll(escapedHighlightPost, originalHighlightTagPost);
     }
 
-    protected String removeSolrHighlightTag(final String str) {
+    protected String removeHighlightTag(final String str) {
         return str.replaceAll(originalHighlightTagPre, StringUtil.EMPTY).replaceAll(originalHighlightTagPost, StringUtil.EMPTY);
     }
 
