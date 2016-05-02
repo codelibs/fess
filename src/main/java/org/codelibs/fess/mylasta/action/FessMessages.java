@@ -284,7 +284,7 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Unknown version information. */
     public static final String ERRORS_unknown_version_for_upgrade = "{errors.unknown_version_for_upgrade}";
 
-    /** The key of the message: Failed to upgrade from {0}. */
+    /** The key of the message: Failed to upgrade from {0}: {1} */
     public static final String ERRORS_failed_to_upgrade_from = "{errors.failed_to_upgrade_from}";
 
     /** The key of the message: The given query has unknown condition. */
@@ -1661,15 +1661,16 @@ public class FessMessages extends FessLabels {
     /**
      * Add the created action message for the key 'errors.failed_to_upgrade_from' with parameters.
      * <pre>
-     * message: Failed to upgrade from {0}.
+     * message: Failed to upgrade from {0}: {1}
      * </pre>
      * @param property The property name for the message. (NotNull)
      * @param arg0 The parameter arg0 for message. (NotNull)
+     * @param arg1 The parameter arg1 for message. (NotNull)
      * @return this. (NotNull)
      */
-    public FessMessages addErrorsFailedToUpgradeFrom(String property, String arg0) {
+    public FessMessages addErrorsFailedToUpgradeFrom(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upgrade_from, arg0));
+        add(property, new ActionMessage(ERRORS_failed_to_upgrade_from, arg0, arg1));
         return this;
     }
 

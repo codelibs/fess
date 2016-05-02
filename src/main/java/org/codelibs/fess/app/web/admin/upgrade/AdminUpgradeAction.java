@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.fess.app.web.base.FessAdminAction;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
@@ -33,6 +34,9 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -79,6 +83,9 @@ public class AdminUpgradeAction extends FessAdminAction {
     @Resource
     protected DataConfigBhv dataConfigBhv;
 
+    @Resource
+    protected FessEsClient fessEsClient;
+
     // ===================================================================================
     //                                                                               Hook
     //                                                                              ======
@@ -119,7 +126,19 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private void upgradeFrom10_0() {
 
+        IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String configIndex = ".fess_config";
+
         try {
+            addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
+                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, configIndex, "web_config", "permissions",
+                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, configIndex, "file_config", "permissions",
+                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, configIndex, "data_config", "permissions",
+                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+
             final Map<String, List<String>> mapping = new HashMap<>();
             labelToRoleBhv.selectList(cb -> cb.query().addOrderBy_LabelTypeId_Asc()).forEach(e -> {
                 List<String> list = mapping.get(e.getLabelTypeId());
@@ -226,7 +245,19 @@ public class AdminUpgradeAction extends FessAdminAction {
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
         } catch (Exception e) {
             logger.warn("Failed to upgrade data.", e);
-            saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0"));
+            saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));
+        }
+    }
+
+    private void addFieldMapping(IndicesAdminClient indicesClient, final String index, final String type, final String field,
+            final String source) {
+        GetFieldMappingsResponse gfmResponse =
+                indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
+        if (gfmResponse.fieldMappings(index, type, field).isNull()) {
+            PutMappingResponse pmResponse = indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
+            if (!pmResponse.isAcknowledged()) {
+                logger.warn("Failed to add " + field + " to " + index + "/" + type);
+            }
         }
     }
 
