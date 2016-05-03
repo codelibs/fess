@@ -39,8 +39,8 @@ fi
 # The following variables can be overwritten in $DEFAULT
 
 # Run Fess as this user ID and group ID
-FESS_USER=fess
-FESS_GROUP=fess
+FESS_USER=${packaging.fess.user}
+FESS_GROUP=${packaging.fess.group}
 
 # The first existing directory is used for JAVA_HOME (if JAVA_HOME is not defined in $DEFAULT)
 JDK_DIRS="/usr/lib/jvm/java-8-oracle/ /usr/lib/jvm/j2sdk1.8-oracle/ /usr/lib/jvm/jdk-7-oracle-x64 /usr/lib/jvm/java-7-oracle /usr/lib/jvm/j2sdk1.7-oracle/ /usr/lib/jvm/java-7-openjdk /usr/lib/jvm/java-7-openjdk-amd64/ /usr/lib/jvm/java-7-openjdk-armhf /usr/lib/jvm/java-7-openjdk-i386/ /usr/lib/jvm/default-java"
@@ -54,7 +54,7 @@ done
 export JAVA_HOME
 
 # Directory where the Fess binary distribution resides
-FESS_HOME=/usr/share/$NAME
+FESS_HOME=${packaging.fess.home.dir}
 
 # Heap size defaults to 256m min, 1g max
 # Set FESS_HEAP_SIZE to 50% of available RAM, but no more than 31g
@@ -76,10 +76,13 @@ MAX_OPEN_FILES=65535
 #MAX_LOCKED_MEMORY=
 
 # Fess log directory
-#LOG_DIR=/var/log/$NAME
+LOG_DIR=${packaging.fess.log.dir}
 
 # Fess data directory
-#DATA_DIR=/var/lib/$NAME
+DATA_DIR=${packaging.fess.var.dir}
+
+# Fess configuration directory
+CONF_DIR=${packaging.fess.conf.dir}
 
 # Maximum number of VMA (Virtual Memory Areas) a process can own
 MAX_MAP_COUNT=262144
@@ -88,7 +91,7 @@ MAX_MAP_COUNT=262144
 #FESS_GC_LOG_FILE=/var/log/fess/gc.log
 
 # Fess PID file directory
-PID_DIR="${packaging.fess.pid.dir}"
+PID_DIR=${packaging.fess.pid.dir}
 
 # End of variables that can be overwritten in $DEFAULT
 
@@ -100,7 +103,7 @@ fi
 # Define other required variables
 PID_FILE="$PID_DIR/$NAME.pid"
 DAEMON=$FESS_HOME/bin/fess
-DAEMON_OPTS="-d -p $PID_FILE --default.config=$CONF_FILE --default.path.home=$FESS_HOME --default.path.logs=$LOG_DIR --default.path.data=$DATA_DIR"
+DAEMON_OPTS="-d -p $PID_FILE --default.path.conf=$CONF_DIR --default.path.home=$FESS_HOME --default.path.logs=$LOG_DIR --default.path.data=$DATA_DIR"
 
 export FESS_HEAP_SIZE
 export FESS_HEAP_NEWSIZE
@@ -165,7 +168,7 @@ case "$1" in
 	fi
 
 	# Start Daemon
-	start-stop-daemon --start -b --user "$FESS_USER" -c "$FESS_USER" --pidfile "$PID_FILE" --exec $DAEMON -- $DAEMON_OPTS
+	start-stop-daemon -d $FESS_HOME --start -b --user "$FESS_USER" -c "$FESS_USER" --pidfile "$PID_FILE" --exec $DAEMON -- $DAEMON_OPTS
 	return=$?
 	if [ $return -eq 0 ]
 	then
@@ -222,3 +225,4 @@ case "$1" in
 esac
 
 exit 0
+

@@ -59,7 +59,7 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.9-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.8-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.1.4-SNAPSHOT</suggest.version>
@@ -71,7 +71,7 @@
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.4.4-B-SNAPSHOT</tomcat.boot.version>
 
-		<!-- RPM build -->
+		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
 		<packaging.fess.app.dir>${packaging.fess.home.dir}/app</packaging.fess.app.dir>
 		<packaging.fess.bin.dir>${packaging.fess.home.dir}/bin</packaging.fess.bin.dir>
@@ -267,6 +267,50 @@
 				<version>2.6</version>
 				<executions>
 					<execution>
+						<id>copy-resources-deb</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-packaging/deb/</outputDirectory>
+							<filters>
+								<filter>${project.basedir}/src/packaging/common/packaging.properties</filter>
+								<filter>${project.basedir}/src/packaging/deb/packaging.properties</filter>
+							</filters>
+							<resources>
+								<resource>
+									<directory>src/packaging/common/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>packaging.properties</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>src/packaging/deb/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>packaging.properties</exclude>
+									</excludes>
+								</resource>
+								<resource>
+									<directory>${project.basedir}</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>bin/fess</include>
+										<include>bin/fess.in.sh</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-resources-rpm</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -334,6 +378,259 @@
 						<goals>
 							<goal>single</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- deb -->
+			<plugin>
+				<artifactId>jdeb</artifactId>
+				<groupId>org.vafer</groupId>
+				<version>1.4</version>
+				<configuration>
+					<deb>${project.build.directory}/releases/${project.artifactId}-${project.version}.deb</deb>
+					<controlDir>${project.build.directory}/generated-packaging/deb/scripts</controlDir>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jdeb</goal>
+						</goals>
+						<configuration>
+							<!--
+							<signPackage>${deb.sign}</signPackage>
+							<keyring>${gpg.keyring}</keyring>
+							<key>${gpg.key}</key>
+							<passphrase>${gpg.passphrase}</passphrase>
+							<signMethod>${deb.sign.method}</signMethod>
+							-->
+							<dataSet>
+								<!-- Add app directory -->
+								<data>
+									<type>directory</type>
+									<src>${project.build.directory}/fess</src>
+									<excludes>**/fess_config.properties,**/fess_env*.properties</excludes>
+									<mapper>
+										<type>perm</type>
+										<prefix>${packaging.fess.app.dir}</prefix>
+										<filemode>755</filemode>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add libs -->
+								<data>
+									<type>directory</type>
+									<src>${project.build.directory}/tomcat-lib</src>
+									<mapper>
+										<type>perm</type>
+										<prefix>${packaging.fess.lib.dir}/classes</prefix>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<data>
+									<type>file</type>
+                  <src>${project.build.directory}/fess/WEB-INF/classes/org/codelibs/fess/FessBoot.class</src>
+                  <dst>${packaging.fess.lib.dir}/classes/org/codelibs/fess/FessBoot.class</dst>
+									<mapper>
+										<type>perm</type>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add configuration files -->
+								<data>
+									<type>files</type>
+                  <paths>
+                    <path>${project.basedir}/src/main/assemblies/files/tomcat_config.properties</path>
+                    <path>${project.basedir}/src/main/assemblies/files/logging.properties</path>
+                  </paths>
+                  <dst>${packaging.fess.conf.dir}</dst>
+									<mapper>
+										<type>perm</type>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<data>
+									<type>files</type>
+                  <paths>
+                    <path>${project.build.directory}/fess/WEB-INF/classes/fess_config.properties</path>
+                    <path>${project.build.directory}/fess/WEB-INF/classes/fess_env_crawler.properties</path>
+                    <path>${project.build.directory}/fess/WEB-INF/classes/fess_env_suggest.properties</path>
+                    <path>${project.build.directory}/fess/WEB-INF/classes/fess_env_web.properties</path>
+                  </paths>
+                  <dst>${packaging.fess.conf.dir}</dst>
+									<mapper>
+										<type>perm</type>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add extensions -->
+								<data>
+									<type>directory</type>
+									<src>${project.basedir}/src/main/assemblies/extension</src>
+									<mapper>
+										<type>perm</type>
+										<prefix>${packaging.fess.extension.dir}</prefix>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add var directory -->
+								<data>
+									<type>template</type>
+									<paths>
+										<path>${packaging.fess.var.dir}</path>
+									</paths>
+									<mapper>
+										<type>perm</type>
+										<dirmode>755</dirmode>
+										<user>${packaging.fess.user}</user>
+										<group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add bin directory -->
+								<data>
+									<type>files</type>
+                  <paths>
+                    <path>${project.basedir}/src/main/assemblies/files/fess</path>
+                    <path>${project.basedir}/src/main/assemblies/files/fess.in.sh</path>
+                  </paths>
+                  <dst>${packaging.fess.bin.dir}</dst>
+									<mapper>
+										<type>perm</type>
+										<filemode>755</filemode>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add log and temp directories -->
+								<data>
+									<type>template</type>
+									<paths>
+										<path>${packaging.fess.log.dir}</path>
+										<path>${packaging.fess.temp.dir}</path>
+									</paths>
+									<mapper>
+										<type>perm</type>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add dictionary directory -->
+								<data>
+									<type>template</type>
+									<paths>
+										<path>${packaging.fess.dictionary.dir}</path>
+									</paths>
+									<mapper>
+										<type>perm</type>
+										<user>elasticsearch</user>
+										<group>elasticsearch</group>
+									</mapper>
+								</data>
+								<!-- Add elasicsearch plugins directory-->
+								<data>
+									<type>directory</type>
+									<src>${project.basedir}/plugins</src>
+									<mapper>
+										<type>perm</type>
+										<prefix>${packaging.fess.home.dir}/es/plugins</prefix>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add environment vars file -->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/env/fess</src>
+                  <dst>/etc/default/fess</dst>
+									<mapper>
+										<type>perm</type>
+										<user>root</user>
+										<group>root</group>
+									</mapper>
+								</data>
+								<!-- Add init.d files	-->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/init.d/fess</src>
+                  <dst>/etc/init.d/fess</dst>
+									<mapper>
+										<type>perm</type>
+										<filemode>755</filemode>
+										<user>root</user>
+										<group>root</group>
+									</mapper>
+								</data>
+								<!-- Adds systemd file -->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/systemd/fess.service</src>
+									<dst>${packaging.fess.systemd.dir}/fess.service</dst>
+								</data>
+								<!-- Adds systemd/sysctl.d configuration file -->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/systemd/sysctl/fess.conf</src>
+									<dst>${packaging.fess.systemd.sysctl.dir}/fess.conf</dst>
+								</data>
+								<!-- Adds systemd/tmpfiles.d configuration file -->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/systemd/fess.conf</src>
+									<dst>${packaging.fess.tmpfilesd.dir}/fess.conf</dst>
+								</data>
+								<!-- Add lintian files -->
+								<data>
+									<type>directory</type>
+									<src>${project.build.directory}/generated-packaging/deb/lintian</src>
+									<excludes>.DS_Store</excludes>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/share/lintian/overrides</prefix>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add readme files -->
+								<data>
+									<type>files</type>
+                  <paths>
+                    <path>${project.basedir}/LICENSE</path>
+                    <path>${project.basedir}/README.md</path>
+                  </paths>
+                  <dst>${packaging.fess.home.dir}</dst>
+									<mapper>
+										<type>perm</type>
+                    <user>${packaging.fess.user}</user>
+                    <group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+								<!-- Add license files -->
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/generated-packaging/deb/copyright</src>
+									<dst>/usr/share/doc/fess/copyright</dst>
+								</data>
+								<!-- Adds and sets permission on default directories -->
+								<data>
+									<type>template</type>
+									<paths>
+										<path>${packaging.fess.pid.dir}</path>
+									</paths>
+									<mapper>
+										<type>perm</type>
+										<user>${packaging.fess.user}</user>
+										<group>${packaging.fess.group}</group>
+									</mapper>
+								</data>
+							</dataSet>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
