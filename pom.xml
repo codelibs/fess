@@ -59,7 +59,7 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.8-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.9-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.1.4-SNAPSHOT</suggest.version>
