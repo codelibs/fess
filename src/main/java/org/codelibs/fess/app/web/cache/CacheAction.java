@@ -25,6 +25,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +79,11 @@ public class CacheAction extends FessSearchAction {
             return redirect(ErrorAction.class);
         }
 
-        return asStream(DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class)).contentType("text/html; charset=UTF-8")
-                .data(content.getBytes(Constants.CHARSET_UTF_8));
+        StreamResponse response =
+                asStream(DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class)).contentType("text/html; charset=UTF-8")
+                        .data(content.getBytes(Constants.CHARSET_UTF_8));
+        response.headerContentDispositionInline(); // TODO will be fixed in lastaflute
+        return response;
     }
 
 }

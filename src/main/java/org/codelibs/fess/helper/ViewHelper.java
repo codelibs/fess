@@ -78,6 +78,12 @@ import com.ibm.icu.text.SimpleDateFormat;
 
 public class ViewHelper implements Serializable {
 
+    private static final String HL_CACHE = "hl_cache";
+
+    private static final String QUERIES = "queries";
+
+    private static final String CACHE_MSG = "cache_msg";
+
     private static final Pattern LOCAL_PATH_PATTERN = Pattern.compile("^file:/+[a-zA-Z]:");
 
     private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
@@ -141,22 +147,14 @@ public class ViewHelper implements Serializable {
         }
     }
 
-    private String getString(final Map<String, Object> doc, final String key) {
-        final Object value = doc.get(key);
-        if (value == null) {
-            return null;
-        }
-        return value.toString();
-    }
-
     public String getContentTitle(final Map<String, Object> document) {
         final int size = titleLength;
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         String title;
-        if (StringUtil.isNotBlank(getString(document, fessConfig.getIndexFieldTitle()))) {
-            title = getString(document, fessConfig.getIndexFieldTitle());
+        if (StringUtil.isNotBlank(DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class))) {
+            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
         } else {
-            title = getString(document, fessConfig.getIndexFieldUrl());
+            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
         }
         return StringUtils.abbreviate(title, size);
     }
@@ -173,7 +171,7 @@ public class ViewHelper implements Serializable {
         final int size = descriptionLength;
 
         for (final String field : highlightedFields) {
-            final String text = getString(document, field);
+            final String text = DocumentUtil.getValue(document, field, String.class);
             if (StringUtil.isNotBlank(text)) {
                 if (useHighlight) {
                     return escapeHighlight(text);
@@ -211,7 +209,7 @@ public class ViewHelper implements Serializable {
 
     public String getUrlLink(final Map<String, Object> document) {
         // file protocol
-        String url = getString(document, "url");
+        String url = DocumentUtil.getValue(document, "url", String.class);
 
         if (url == null) {
             // TODO should redirect to a invalid page?
@@ -310,7 +308,7 @@ public class ViewHelper implements Serializable {
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
         if (Constants.TRUE.equals(systemProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
-            final String mimetype = getString(document, fessConfig.getIndexFieldMimetype());
+            final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {
                     return appendPDFSearchWord(url);
@@ -406,6 +404,7 @@ public class ViewHelper implements Serializable {
         if (url == null) {
             url = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
+        doc.put(fessConfig.getResponseFieldUrlLink(), getUrlLink(doc));
         String createdStr;
         final Date created = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCreated(), Date.class);
         if (created != null) {
@@ -414,10 +413,10 @@ public class ViewHelper implements Serializable {
         } else {
             createdStr = ComponentUtil.getMessageManager().getMessage(locale, "labels.search_unknown");
         }
-        doc.put("cacheMsg",
+        doc.put(CACHE_MSG,
                 ComponentUtil.getMessageManager().getMessage(locale, "labels.search_cache_msg", new Object[] { url, createdStr }));
 
-        doc.put("queries", queries);
+        doc.put(QUERIES, queries);
 
         String cache = DocumentUtil.getValue(doc, fessConfig.getIndexFieldCache(), String.class);
         if (cache != null) {
@@ -427,13 +426,13 @@ public class ViewHelper implements Serializable {
             }
             cache = pathMappingHelper.replaceUrls(cache);
             if (queries != null && queries.length > 0) {
-                doc.put("hlCache", replaceHighlightQueries(cache, queries));
+                doc.put(HL_CACHE, replaceHighlightQueries(cache, queries));
             } else {
-                doc.put("hlCache", cache);
+                doc.put(HL_CACHE, cache);
             }
         } else {
             doc.put(fessConfig.getIndexFieldCache(), StringUtil.EMPTY);
-            doc.put("hlCache", StringUtil.EMPTY);
+            doc.put(HL_CACHE, StringUtil.EMPTY);
         }
 
         try {
