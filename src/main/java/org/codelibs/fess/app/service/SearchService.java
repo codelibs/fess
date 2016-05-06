@@ -83,8 +83,7 @@ public class SearchService {
     //                                                                              Method
     //                                                                      ==============
 
-    public void search(final HttpServletRequest request, final SearchRequestParams params, final SearchRenderData data,
-            final OptionalThing<FessUserBean> userBean) {
+    public void search(final SearchRequestParams params, final SearchRenderData data, final OptionalThing<FessUserBean> userBean) {
         final long requestedTime = systemHelper.getCurrentTimeAsLong();
 
         final long startTime = System.currentTimeMillis();
@@ -119,7 +118,7 @@ public class SearchService {
         data.setFacetResponse(queryResponseList.getFacetResponse());
 
         @SuppressWarnings("unchecked")
-        final Set<String> highlightQueries = (Set<String>) request.getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final Set<String> highlightQueries = (Set<String>) params.getAttribute(Constants.HIGHLIGHT_QUERIES);
         if (highlightQueries != null) {
             final StringBuilder buf = new StringBuilder(100);
             highlightQueries.stream().forEach(q -> {
@@ -129,7 +128,7 @@ public class SearchService {
         }
 
         queryResponseList.setExecTime(System.currentTimeMillis() - startTime);
-        final NumberFormat nf = NumberFormat.getInstance(request.getLocale());
+        final NumberFormat nf = NumberFormat.getInstance(params.getLocale());
         nf.setMaximumIntegerDigits(2);
         nf.setMaximumFractionDigits(2);
         String execTime;

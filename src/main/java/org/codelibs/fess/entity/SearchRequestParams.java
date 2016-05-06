@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.entity;
 
+import java.util.Locale;
 import java.util.Map;
 
 public interface SearchRequestParams {
@@ -38,5 +39,9 @@ public interface SearchRequestParams {
     boolean isAdministrativeAccess();
 
     String[] getExtraQueries();
+
+    Object getAttribute(String name);
+
+    Locale getLocale();
 
 }

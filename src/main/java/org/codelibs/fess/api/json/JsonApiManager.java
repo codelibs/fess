@@ -143,8 +143,8 @@ public class JsonApiManager extends BaseApiManager {
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
         try {
             final SearchRenderData data = new SearchRenderData();
-            final SearchApiRequestParams params = new SearchApiRequestParams(request, fessConfig);
-            searchService.search(request, params, data, OptionalThing.empty());
+            final JsonRequestParams params = new JsonRequestParams(request, fessConfig);
+            searchService.search(params, data, OptionalThing.empty());
             query = params.getQuery();
             final String execTime = data.getExecTime();
             final String queryTime = Long.toString(data.getQueryTime());
@@ -673,7 +673,7 @@ public class JsonApiManager extends BaseApiManager {
         return Integer.toHexString(ch).toUpperCase();
     }
 
-    protected static class SearchApiRequestParams implements SearchRequestParams {
+    protected static class JsonRequestParams implements SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -683,7 +683,7 @@ public class JsonApiManager extends BaseApiManager {
 
         private int pageSize = -1;
 
-        protected SearchApiRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
+        protected JsonRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
         }
@@ -786,6 +786,16 @@ public class JsonApiManager extends BaseApiManager {
         @Override
         public boolean isAdministrativeAccess() {
             return false;
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            return request.getAttribute(name);
+        }
+
+        @Override
+        public Locale getLocale() {
+            return Locale.ROOT;
         }
 
     }

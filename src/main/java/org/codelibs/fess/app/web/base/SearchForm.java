@@ -17,6 +17,7 @@ package org.codelibs.fess.app.web.base;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.validation.constraints.Size;
@@ -28,6 +29,7 @@ import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.StreamUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class SearchForm implements SearchRequestParams, Serializable {
@@ -133,4 +135,13 @@ public class SearchForm implements SearchRequestParams, Serializable {
         return false;
     }
 
+    @Override
+    public Object getAttribute(String name) {
+        return LaRequestUtil.getRequest().getAttribute(name);
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LaRequestUtil.getRequest().getLocale();
+    }
 }

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -99,8 +100,8 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         boolean xmlDtd = false;
         try {
             final SearchRenderData data = new SearchRenderData();
-            final SearchApiRequestParams params = new SearchApiRequestParams(request, fessConfig);
-            searchService.search(request, params, data, OptionalThing.empty());
+            final GsaRequestParams params = new GsaRequestParams(request, fessConfig);
+            searchService.search(params, data, OptionalThing.empty());
             query = params.getQuery();
             final String execTime = data.getExecTime();
             final long allRecordCount = data.getAllRecordCount();
@@ -365,7 +366,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
     }
 
-    protected static class SearchApiRequestParams implements SearchRequestParams {
+    protected static class GsaRequestParams implements SearchRequestParams {
 
         private final HttpServletRequest request;
 
@@ -375,7 +376,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         private int pageSize = -1;
 
-        protected SearchApiRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
+        protected GsaRequestParams(final HttpServletRequest request, final FessConfig fessConfig) {
             this.request = request;
             this.fessConfig = fessConfig;
         }
@@ -518,6 +519,16 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         @Override
         public boolean isAdministrativeAccess() {
             return false;
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            return request.getAttribute(name);
+        }
+
+        @Override
+        public Locale getLocale() {
+            return Locale.ROOT;
         }
 
     }
