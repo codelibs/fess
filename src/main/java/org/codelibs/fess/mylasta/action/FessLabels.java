@@ -1584,6 +1584,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Samba */
     public static final String LABELS_file_auth_scheme_samba = "{labels.file_auth_scheme_samba}";
 
+    /** The key of the message: FTP */
+    public static final String LABELS_file_auth_scheme_ftp = "{labels.file_auth_scheme_ftp}";
+
     /** The key of the message: {0}/{1} ({2} items) */
     public static final String LABELS_pagination_page_guide_msg = "{labels.pagination_page_guide_msg}";
 

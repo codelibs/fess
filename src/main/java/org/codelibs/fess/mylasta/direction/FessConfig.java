@@ -143,7 +143,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http,https */
     String CRAWLER_WEB_PROTOCOLS = "crawler.web.protocols";
 
-    /** The key of the configuration. e.g. file,smb */
+    /** The key of the configuration. e.g. file,smb,ftp */
     String CRAWLER_FILE_PROTOCOLS = "crawler.file.protocols";
 
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
@@ -1224,7 +1224,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.file.protocols'. <br>
-     * The value is, e.g. file,smb <br>
+     * The value is, e.g. file,smb,ftp <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerFileProtocols();

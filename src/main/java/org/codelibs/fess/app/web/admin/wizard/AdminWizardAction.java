@@ -252,7 +252,7 @@ public class AdminWizardAction extends FessAdminAction {
     }
 
     protected String convertCrawlingPath(final String path) {
-        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:")) {
+        if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("smb:") || path.startsWith("ftp:")) {
             return path;
         }
 

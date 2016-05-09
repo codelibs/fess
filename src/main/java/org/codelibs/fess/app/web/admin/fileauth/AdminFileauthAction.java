@@ -276,6 +276,7 @@ public class AdminFileauthAction extends FessAdminAction {
         final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_auth_scheme_samba"), Constants.SAMBA));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_auth_scheme_ftp"), Constants.FTP));
         RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 

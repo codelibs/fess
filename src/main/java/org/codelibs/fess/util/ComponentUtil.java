@@ -126,6 +126,8 @@ public final class ComponentUtil {
 
     private static final String SAMBA_HELPER = "sambaHelper";
 
+    private static final String FTP_HELPER = "ftpHelper";
+
     private static final String VIEW_HELPER = "viewHelper";
 
     private static final String SYSTEM_HELPER = "systemHelper";

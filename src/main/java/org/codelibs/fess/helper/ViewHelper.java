@@ -216,16 +216,18 @@ public class ViewHelper implements Serializable {
             return "#";
         }
 
-        final boolean isSmbUrl = url.startsWith("smb:");
+        final boolean isFileUrl = url.startsWith("smb:") || url.startsWith("ftp:");
 
         // replacing url with mapping data
         url = pathMappingHelper.replaceUrl(url);
 
         if (url.startsWith("smb:")) {
             url = url.replace("smb:", "file:");
+        } else if (url.startsWith("ftp:")) {
+            url = url.replace("ftp:", "file:");
         }
 
-        if (url.startsWith("http:") && isSmbUrl) {
+        if (url.startsWith("http:") && isFileUrl) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             for (final char c : url.toCharArray()) {
                 if (CharUtil.isUrlChar(c)) {

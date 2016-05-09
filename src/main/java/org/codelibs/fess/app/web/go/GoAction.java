@@ -153,6 +153,6 @@ public class GoAction extends FessSearchAction {
     }
 
     protected boolean isFileSystemPath(final String url) {
-        return url.startsWith("file:") || url.startsWith("smb:");
+        return url.startsWith("file:") || url.startsWith("smb:") || url.startsWith("ftp:");
     }
 }

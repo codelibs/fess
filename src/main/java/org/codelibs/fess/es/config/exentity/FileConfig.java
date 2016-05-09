@@ -27,6 +27,8 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.FileAuthenticationService;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.ftp.FtpAuthentication;
+import org.codelibs.fess.crawler.client.ftp.FtpClient;
 import org.codelibs.fess.crawler.client.smb.SmbAuthentication;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
 import org.codelibs.fess.es.config.bsentity.BsFileConfig;
@@ -210,7 +212,8 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
         // auth params
         final List<FileAuthentication> fileAuthList = fileAuthenticationService.getFileAuthenticationList(getId());
-        final List<SmbAuthentication> smbAuthList = new ArrayList<SmbAuthentication>();
+        final List<SmbAuthentication> smbAuthList = new ArrayList<>();
+        final List<FtpAuthentication> ftpAuthList = new ArrayList<>();
         for (final FileAuthentication fileAuth : fileAuthList) {
             if (Constants.SAMBA.equals(fileAuth.getProtocolScheme())) {
                 final SmbAuthentication smbAuth = new SmbAuthentication();
@@ -222,9 +225,17 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
                 smbAuth.setUsername(fileAuth.getUsername());
                 smbAuth.setPassword(fileAuth.getPassword());
                 smbAuthList.add(smbAuth);
+            } else if (Constants.FTP.equals(fileAuth.getProtocolScheme())) {
+                final FtpAuthentication ftpAuth = new FtpAuthentication();
+                ftpAuth.setServer(fileAuth.getHostname());
+                ftpAuth.setPort(fileAuth.getPort());
+                ftpAuth.setUsername(fileAuth.getUsername());
+                ftpAuth.setPassword(fileAuth.getPassword());
+                ftpAuthList.add(ftpAuth);
             }
         }
         paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
+        paramMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
 
     }
 
