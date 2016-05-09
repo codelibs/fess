@@ -190,12 +190,12 @@ public class AdminGeneralAction extends FessAdminAction {
     private List<String> getDayItems() {
         final List<String> items = new ArrayList<String>();
         for (int i = 0; i < 32; i++) {
-            items.add(Integer.valueOf(i).toString());
+            items.add(Integer.toString(i));
         }
         for (int i = 40; i < 370; i += 10) {
-            items.add(Integer.valueOf(i).toString());
+            items.add(Integer.toString(i));
         }
-        items.add(Integer.valueOf(365).toString());
+        items.add(Integer.toString(365));
         return items;
     }
 
