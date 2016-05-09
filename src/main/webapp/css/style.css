@@ -215,7 +215,7 @@ ul.searchOptionLabels li {
 	vertical-align: middle;
 }
 
-body.search #searchOptions, body.help #searchOptions, body.error #searchOptions {
+body.search .control-options, body.help .control-options, body.error .control-options {
 	position: fixed;
 	top: 0;
 	padding-top: 72px;
@@ -227,7 +227,7 @@ body.search #searchOptions, body.help #searchOptions, body.error #searchOptions 
 	transition: all .4s ease 0s;
 }
 
-body.search #searchOptions.active, body.help #searchOptions.active,  body.error #searchOptions.active {
+body.search .control-optionss.active, body.help .control-options.active,  body.error .control-options.active {
 	right: 0;
 }
 
