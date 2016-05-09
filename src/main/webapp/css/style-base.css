@@ -179,6 +179,7 @@ input {
 input[type="checkbox"],
 input[type="radio"] {
   -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
           box-sizing: border-box;
   padding: 0;
 }
@@ -192,12 +193,13 @@ input[type="search"] {
   -webkit-box-sizing: content-box;
           box-sizing: content-box;
   -webkit-appearance: textfield;
+       -o-appearance: textfield;
 }
 
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration {
   -webkit-appearance: none;
-}
+}     -webkit-appearance: nownw
 
 fieldset {
   padding: .35em .625em .75em;
@@ -294,6 +296,7 @@ th {
 
 html {
   -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
           box-sizing: border-box;
 }
 
@@ -468,6 +471,7 @@ legend {
 
 input[type="search"] {
   -webkit-appearance: none;
+     -moz-appearance: none;
 }
 
 output {
@@ -674,6 +678,7 @@ mark,
   border: 1px solid #ddd;
   border-radius: .25rem;
   -webkit-transition: all .2s ease-in-out;
+     -moz-transition: all .2s ease-in-out;
        -o-transition: all .2s ease-in-out;
           transition: all .2s ease-in-out;
 }
@@ -2845,6 +2850,7 @@ input[type="button"].btn-block {
 .fade {
   opacity: 0;
   -webkit-transition: opacity .15s linear;
+     -moz-transition: opacity .15s linear;
        -o-transition: opacity .15s linear;
           transition: opacity .15s linear;
 }
@@ -2866,12 +2872,15 @@ input[type="button"].btn-block {
   height: 0;
   overflow: hidden;
   -webkit-transition-timing-function: ease;
+     -moz-transition-timing-function: ease;
        -o-transition-timing-function: ease;
           transition-timing-function: ease;
   -webkit-transition-duration: .35s;
+     -moz-transition-duration: .35s;
        -o-transition-duration: .35s;
           transition-duration: .35s;
   -webkit-transition-property: height;
+     -moz-transition-property: height;
        -o-transition-property: height;
           transition-property: height;
 }
@@ -3451,6 +3460,7 @@ input[type="button"].btn-block {
   border-color: #51a7e8;
   outline: none;
   -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .075), 0 0 5px rgba(81, 167, 232, .5);
+     -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .075), 0 0 5px rgba(81, 167, 232, .5);
           box-shadow: inset 0 1px 2px rgba(0, 0, 0, .075), 0 0 5px rgba(81, 167, 232, .5);
 }
 
@@ -3501,6 +3511,7 @@ input[type="button"].btn-block {
   border: .075rem solid #ddd;
   border-radius: .25rem;
   -webkit-box-shadow: inset 0 .2rem .4rem rgba(0, 0, 0, .05);
+     -moz-box-shadow: inset 0 .2rem .4rem rgba(0, 0, 0, .05);
           box-shadow: inset 0 .2rem .4rem rgba(0, 0, 0, .05);
 }
 
@@ -3527,6 +3538,7 @@ input[type="button"].btn-block {
 
 .file input:focus ~ .file-custom {
   -webkit-box-shadow: 0 0 0 .075rem #fff, 0 0 0 .2rem #0074d9;
+     -moz-box-shadow: 0 0 0 .075rem #fff, 0 0 0 .2rem #0074d9;
           box-shadow: 0 0 0 .075rem #fff, 0 0 0 .2rem #0074d9;
 }
 
@@ -4079,9 +4091,11 @@ input[type="button"].btn-block {
 .card-columns {
   -webkit-column-count: 3;
      -moz-column-count: 3;
+      -ms-column-count: 3;
           column-count: 3;
   -webkit-column-gap: 1.25rem;
      -moz-column-gap: 1.25rem;
+      -ms-column-gap: 1.25rem;
           column-gap: 1.25rem;
 }
 
@@ -4600,6 +4614,7 @@ a.label:hover {
 
 .progress-animated[value]::-webkit-progress-value {
   -webkit-animation: progress-bar-stripes 2s linear infinite;
+     -moz-animation: progress-bar-stripes 2s linear infinite;
           animation: progress-bar-stripes 2s linear infinite;
 }
 
@@ -4610,6 +4625,7 @@ a.label:hover {
 @media screen and (min-width: 0 \0) {
   .progress-animated .progress-bar-striped {
     -webkit-animation: progress-bar-stripes 2s linear infinite;
+       -moz-animation: progress-bar-stripes 2s linear infinite;
          -o-animation: progress-bar-stripes 2s linear infinite;
             animation: progress-bar-stripes 2s linear infinite;
   }
@@ -5053,9 +5069,11 @@ button.close {
 
 .modal.fade .modal-dialog {
   -webkit-transition: -webkit-transform .3s ease-out;
+     -moz-transition: -webkit-transform .3s ease-out;
        -o-transition:      -o-transform .3s ease-out;
           transition:         transform .3s ease-out;
   -webkit-transform: translate(0, -25%);
+     -moz-transform: translate(0, -25%);
       -ms-transform: translate(0, -25%);
        -o-transform: translate(0, -25%);
           transform: translate(0, -25%);
@@ -5063,6 +5081,7 @@ button.close {
 
 .modal.in .modal-dialog {
   -webkit-transform: translate(0, 0);
+     -moz-transform: translate(0, 0);
       -ms-transform: translate(0, 0);
        -o-transform: translate(0, 0);
           transform: translate(0, 0);
@@ -5464,6 +5483,7 @@ button.close {
   position: relative;
   display: none;
   -webkit-transition: .6s ease-in-out left;
+     -moz-transition: .6s ease-in-out left;
        -o-transition: .6s ease-in-out left;
           transition: .6s ease-in-out left;
 }
@@ -5476,6 +5496,7 @@ button.close {
 @media all and (transform-3d), (-webkit-transform-3d) {
   .carousel-inner > .carousel-item {
     -webkit-transition: -webkit-transform .6s ease-in-out;
+       -moz-transition: -webkit-transform .6s ease-in-out;
          -o-transition:      -o-transform .6s ease-in-out;
             transition:         transform .6s ease-in-out;
 
@@ -5488,12 +5509,18 @@ button.close {
   .carousel-inner > .carousel-item.active.right {
     left: 0;
     -webkit-transform: translate3d(100%, 0, 0);
+       -moz-transform: translate3d(100%, 0, 0);
+        -ms-transform: translate3d(100%, 0, 0);
+         -o-transform: translate3d(100%, 0, 0);
             transform: translate3d(100%, 0, 0);
   }
   .carousel-inner > .carousel-item.prev,
   .carousel-inner > .carousel-item.active.left {
     left: 0;
     -webkit-transform: translate3d(-100%, 0, 0);
+       -moz-transform: translate3d(-100%, 0, 0);
+        -ms-transform: translate3d(-100%, 0, 0);
+         -o-transform: translate3d(-100%, 0, 0);
             transform: translate3d(-100%, 0, 0);
   }
   .carousel-inner > .carousel-item.next.left,
@@ -5501,6 +5528,9 @@ button.close {
   .carousel-inner > .carousel-item.active {
     left: 0;
     -webkit-transform: translate3d(0, 0, 0);
+       -moz-transform: translate3d(0, 0, 0);
+        -ms-transform: translate3d(0, 0, 0);
+         -o-transform: translate3d(0, 0, 0);
             transform: translate3d(0, 0, 0);
   }
 }
