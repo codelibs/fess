@@ -297,10 +297,12 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 		right: 0;
 	}
 	.description {
-		overflow: hidden !important;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
+		-moz-box-orient: vertical;
+		-ms-box-orient: vertical;
 		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		display: -webkit-box;
+		overflow: hidden !important;
 	}
 }
 
@@ -340,10 +342,12 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 		font-size: 65%;
 	}
 	.description {
-		overflow: hidden !important;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
+		-moz-box-orient: vertical;
+		-ms-box-orient: vertical;
 		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		display: -webkit-box;
+		overflow: hidden !important;
 	}
 }
 
