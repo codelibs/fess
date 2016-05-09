@@ -42,7 +42,7 @@ public class CrawlingConfigForm implements Serializable {
     public Integer depth;
 
     @Min(value = 0)
-    @Max(value = 9223372036854775807l)
+    @Max(value = 9223372036854775807L)
     @ValidateTypeFailure
     public Long maxAccessCount;
 
