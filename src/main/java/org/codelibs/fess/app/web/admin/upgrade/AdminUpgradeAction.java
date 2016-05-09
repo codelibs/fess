@@ -116,7 +116,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         });
         verifyToken(() -> asIndexHtml());
 
-        if (form.targetVersion.equals("10.0")) {
+        if ("10.0".equals(form.targetVersion)) {
             upgradeFrom10_0();
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
