@@ -4,7 +4,7 @@ $(function() {
 	$('.form-group .has-error').first().next('input,select,textarea').focus();
 
 	$("section.content input").keypress(function(e) {
-		if (e.which == 13) {
+		if (e.which === 13) {
 			var $submitButton = $('input#submit, button#submit');
 			if ($submitButton.size() > 0) {
 				$submitButton[0].submit();
@@ -33,5 +33,5 @@ $(function() {
 		$(this).find('.modal-body #delete-doc-title').text(title);
 		$(this).find('.modal-body #delete-doc-url').text(url);
 		$(this).find('.modal-footer input#docId').val(docId);
-	})
+	});
 });

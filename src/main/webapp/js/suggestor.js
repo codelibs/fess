@@ -112,7 +112,7 @@ $.fn.suggestor = function(setting) {
 
 
 		createAutoCompleteList: function(obj) {
-			if(obj.response.status != 0) {
+			if(obj.response.status !== 0) {
 				$boxElement.css("display","none");
 				return;
 			}
