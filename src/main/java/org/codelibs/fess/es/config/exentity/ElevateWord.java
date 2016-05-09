@@ -37,7 +37,7 @@ public class ElevateWord extends BsElevateWord {
 
     private String[] labelTypeIds;
 
-    private List<LabelType> labelTypeList;
+    private volatile List<LabelType> labelTypeList;
 
     /* (non-Javadoc)
      * @see org.codelibs.fess.db.exentity.CrawlingConfig#getLabelTypeIds()

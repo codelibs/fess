@@ -36,7 +36,7 @@ public class LabelType extends BsLabelType {
     private static final long serialVersionUID = 1L;
     private String[] roleTypeIds;
 
-    private List<RoleType> roleTypeList;
+    private volatile List<RoleType> roleTypeList;
 
     public String[] getRoleTypeIds() {
         if (roleTypeIds == null) {
