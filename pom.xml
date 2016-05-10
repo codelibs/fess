@@ -44,7 +44,7 @@
 		<lasta.taglib.version>0.7.0</lasta.taglib.version>
 		<lasta.job.version>0.2.2</lasta.job.version>
 		<servlet.version>3.1.0</servlet.version>
-		<jsp.version>2.3.1</jsp.version>
+		<jsp.version>2.3.2</jsp.version>
 		<mailflute.version>0.5.1</mailflute.version>
 
 		<!-- Partner Library -->
