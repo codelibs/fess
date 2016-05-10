@@ -120,8 +120,7 @@ public class FessMailDeliveryDepartmentCreator {
         asyncManager.async(new ConcurrentAsyncCall() {
             @Override
             public void callback() {
-                Thread thrd = new Thread(runnable);
-                thrd.start();
+                runnable.run();
             }
 
             @Override
