@@ -146,5 +146,4 @@ public class SeunjeonItem extends DictionaryItem {
         }
     }
 
-
 }

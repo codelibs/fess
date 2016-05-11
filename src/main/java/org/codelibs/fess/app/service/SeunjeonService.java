@@ -59,7 +59,7 @@ public class SeunjeonService {
     }
 
     public void store(final String dictId, final SeunjeonItem seunjeonItem) {
-    	getSeunjeonFile(dictId).ifPresent(file -> {
+        getSeunjeonFile(dictId).ifPresent(file -> {
             if (seunjeonItem.getId() == 0) {
                 file.insert(seunjeonItem);
             } else {
@@ -69,7 +69,7 @@ public class SeunjeonService {
     }
 
     public void delete(final String dictId, final SeunjeonItem seunjeonItem) {
-    	getSeunjeonFile(dictId).ifPresent(file -> {
+        getSeunjeonFile(dictId).ifPresent(file -> {
             file.delete(seunjeonItem);
         });
     }
