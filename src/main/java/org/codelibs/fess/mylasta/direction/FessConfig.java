@@ -727,7 +727,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String SUGGEST_POPULAR_WORD_CACHE_EXPIRE = "suggest.popular.word.cache.expire";
 
-    /** The key of the configuration. e.g. guest */
+    /** The key of the configuration. e.g. Rguest */
     String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
 
     /** The key of the configuration. e.g. false */
@@ -3159,7 +3159,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'suggest.role.filters'. <br>
-     * The value is, e.g. guest <br>
+     * The value is, e.g. Rguest <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSuggestRoleFilters();
