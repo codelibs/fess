@@ -215,10 +215,21 @@ public class IndexUpdater extends Thread {
                     } else {
                         emptyListCount = 0; // reset
                     }
-                    while (!arList.isEmpty()) {
-                        processAccessResults(docList, accessResultList, arList);
-                        cleanupTime = cleanupAccessResults(accessResultList);
+                    long hitCount = ((EsResultList<EsAccessResult>) arList).getTotalHits();
+                    while (hitCount > 0) {
+                        if (arList.isEmpty()) {
+                            try {
+                                Thread.sleep(fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue());
+                            } catch (Exception e) {
+                                // ignore
+                            }
+                            cleanupTime = -1;
+                        } else {
+                            processAccessResults(docList, accessResultList, arList);
+                            cleanupTime = cleanupAccessResults(accessResultList);
+                        }
                         arList = getAccessResultList(cb, cleanupTime);
+                        hitCount = ((EsResultList<EsAccessResult>) arList).getTotalHits();
                     }
                     if (!docList.isEmpty()) {
                         indexingHelper.sendDocuments(fessEsClient, docList);
