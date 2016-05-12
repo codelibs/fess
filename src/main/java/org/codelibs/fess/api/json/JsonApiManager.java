@@ -726,7 +726,11 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public GeoInfo getGeoInfo() {
-            return null;
+            GeoInfo geoInfo = new GeoInfo();
+            geoInfo.latitude = request.getParameter("geo.latitude");
+            geoInfo.longitude = request.getParameter("geo.longitude");
+            geoInfo.distance = request.getParameter("geo.distance");
+            return geoInfo;
         }
 
         @Override
