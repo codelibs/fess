@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.codelibs.core.beans.util.BeanUtil;
+import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -66,6 +67,7 @@ import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
@@ -345,10 +347,9 @@ public class FessEsClient implements Client {
                     logger.warn("Failed to flush config files.", e);
                 }
 
-                String source = null;
                 final String indexConfigFile = indexConfigPath + "/" + configIndex + ".json";
                 try {
-                    source = FileUtil.readUTF8(indexConfigFile);
+                    String source = FileUtil.readUTF8(indexConfigFile);
                     final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
                     source = source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath);
                     final CreateIndexResponse indexResponse =
@@ -363,6 +364,31 @@ public class FessEsClient implements Client {
                     // ignore
                 } catch (final Exception e) {
                     logger.warn(indexConfigFile + " is not found.", e);
+                }
+
+                // alias
+                final String aliasConfigDirPath = indexConfigPath + "/" + configIndex + "/alias";
+                try {
+                    File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+                    if (aliasConfigDir.isDirectory()) {
+                        StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
+                                f -> {
+                                    final String aliasName = f.getName().replaceFirst(".json$", "");
+                                    final String source = FileUtil.readUTF8(f);
+                                    IndicesAliasesResponse response =
+                                            client.admin().indices().prepareAliases().addAlias(configIndex, aliasName, source).execute()
+                                                    .actionGet(fessConfig.getIndexIndicesTimeout());
+                                    if (response.isAcknowledged()) {
+                                        logger.info("Created " + aliasName + " alias for " + configIndex);
+                                    } else if (logger.isDebugEnabled()) {
+                                        logger.debug("Failed to create " + aliasName + " alias for " + configIndex);
+                                    }
+                                });
+                    }
+                } catch (ResourceNotFoundRuntimeException e) {
+                    // ignore
+                } catch (Exception e) {
+                    logger.warn(aliasConfigDirPath + " is not found.", e);
                 }
             }
 

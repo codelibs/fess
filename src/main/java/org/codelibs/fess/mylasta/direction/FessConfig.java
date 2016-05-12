@@ -442,7 +442,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1,2 */
     String SMB_AVAILABLE_SID_TYPES = "smb.available.sid.types";
 
-    /** The key of the configuration. e.g. .fess_config,.fess_user */
+    /** The key of the configuration. e.g. .fess_basic_config,.fess_config,.fess_user */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
     /** The key of the configuration. e.g. admin */
@@ -2106,7 +2106,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.backup.targets'. <br>
-     * The value is, e.g. .fess_config,.fess_user <br>
+     * The value is, e.g. .fess_basic_config,.fess_config,.fess_user <br>
      * comment: backup
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */

@@ -1,0 +1,11 @@
+{
+  "bool": {
+    "must_not": [
+      {
+        "type": {
+          "value": "failure_url"
+        }
+      }
+    ]
+  }
+}
