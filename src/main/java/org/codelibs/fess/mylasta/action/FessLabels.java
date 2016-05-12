@@ -1755,6 +1755,45 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Synonym File */
     public static final String LABELS_dict_synonym_file = "{labels.dict_synonym_file}";
 
+    /** The key of the message: Seunjeon List */
+    public static final String LABELS_dict_seunjeon_configuration = "{labels.dict_seunjeon_configuration}";
+
+    /** The key of the message: Seunjeon List */
+    public static final String LABELS_dict_seunjeon_title = "{labels.dict_seunjeon_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_seunjeon_list_link = "{labels.dict_seunjeon_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_seunjeon_link_create = "{labels.dict_seunjeon_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_seunjeon_link_edit = "{labels.dict_seunjeon_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_seunjeon_link_delete = "{labels.dict_seunjeon_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_seunjeon_link_details = "{labels.dict_seunjeon_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_seunjeon_link_download = "{labels.dict_seunjeon_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_seunjeon_link_upload = "{labels.dict_seunjeon_link_upload}";
+
+    /** The key of the message: Source */
+    public static final String LABELS_dict_seunjeon_source = "{labels.dict_seunjeon_source}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_seunjeon_button_download = "{labels.dict_seunjeon_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_seunjeon_button_upload = "{labels.dict_seunjeon_button_upload}";
+
+    /** The key of the message: Seunjeon File */
+    public static final String LABELS_dict_seunjeon_file = "{labels.dict_seunjeon_file}";
+
     /** The key of the message: Kuromoji List */
     public static final String LABELS_dict_kuromoji_configuration = "{labels.dict_kuromoji_configuration}";
 

@@ -18,8 +18,6 @@ package org.codelibs.fess.app.web.admin.dict.seunjeon;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -34,6 +32,7 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.seunjeon.SeunjeonItem;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -45,6 +44,7 @@ import org.lastaflute.web.validation.VaErrorHook;
 
 /**
  * @author nocode
+ * @author shinsuke
  */
 public class AdminDictSeunjeonAction extends FessAdminAction {
 
@@ -144,7 +144,6 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
                 .getSeunjeonItem(form.dictId, form.id)
                 .ifPresent(entity -> {
                     form.inputs = entity.getInputsValue();
-                    form.outputs = entity.getOutputsValue();
                 })
                 .orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
@@ -176,7 +175,6 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
                                 .getSeunjeonItem(dictId, id)
                                 .ifPresent(entity -> {
                                     form.inputs = entity.getInputsValue();
-                                    form.outputs = entity.getOutputsValue();
                                 })
                                 .orElse(() -> {
                                     throwValidationError(
@@ -321,7 +319,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
     private OptionalEntity<SeunjeonItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            final SeunjeonItem entity = new SeunjeonItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY_STRINGS);
+            final SeunjeonItem entity = new SeunjeonItem(0, StringUtil.EMPTY_STRINGS);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
@@ -339,9 +337,6 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
             final String[] newInputs = splitLine(form.inputs);
             validateSeunjeonString(newInputs, "inputs", hook);
             entity.setNewInputs(newInputs);
-            final String[] newOutputs = splitLine(form.outputs);
-            validateSeunjeonString(newOutputs, "outputs", hook);
-            entity.setNewOutputs(newOutputs);
             return entity;
         });
     }
@@ -361,32 +356,14 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         if (values.length == 0) {
             return;
         }
-        for (final String value : values) {
-            if (value.indexOf(',') >= 0) {
-                throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
-                }, hook);
-            }
-            if (value.indexOf("=>") >= 0) {
-                throwValidationError(messages -> {
-                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
-                }, hook);
-            }
-        }
+        // TODO validation
     }
 
     private String[] splitLine(final String value) {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }
-        final String[] values = value.split("[\r\n]");
-        final List<String> list = new ArrayList<>(values.length);
-        for (final String line : values) {
-            if (StringUtil.isNotBlank(line)) {
-                list.add(line.trim());
-            }
-        }
-        return list.toArray(new String[list.size()]);
+        return StreamUtil.of(value.split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim()).toArray(n -> new String[n]);
     }
 
     // ===================================================================================

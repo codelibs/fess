@@ -24,25 +24,15 @@ import org.codelibs.fess.dict.DictionaryItem;
 public class SeunjeonItem extends DictionaryItem {
     private final String[] inputs;
 
-    private final String[] outputs;
-
     private String[] newInputs;
 
-    private String[] newOutputs;
-
-    public SeunjeonItem(final long id, final String[] inputs, final String[] outputs) {
+    public SeunjeonItem(final long id, final String[] inputs) {
         this.id = id;
         this.inputs = inputs;
-        this.outputs = outputs;
-        Arrays.sort(inputs);
-        if (inputs != outputs) {
-            Arrays.sort(outputs);
-        }
 
         if (id == 0) {
             // create
             newInputs = inputs;
-            newOutputs = outputs;
         }
     }
 
@@ -54,14 +44,6 @@ public class SeunjeonItem extends DictionaryItem {
         this.newInputs = newInputs;
     }
 
-    public String[] getNewOutputs() {
-        return newOutputs;
-    }
-
-    public void setNewOutputs(final String[] newOutputs) {
-        this.newOutputs = newOutputs;
-    }
-
     public String[] getInputs() {
         return inputs;
     }
@@ -70,41 +52,15 @@ public class SeunjeonItem extends DictionaryItem {
         if (inputs == null) {
             return StringUtil.EMPTY;
         }
-        return String.join("\n", inputs);
-    }
-
-    public String[] getOutputs() {
-        return outputs;
-    }
-
-    public String getOutputsValue() {
-        if (outputs == null) {
-            return StringUtil.EMPTY;
-        }
-        return String.join("\n", outputs);
+        return String.join(",", inputs);
     }
 
     public boolean isUpdated() {
-        return newInputs != null && newOutputs != null;
+        return newInputs != null;
     }
 
     public boolean isDeleted() {
         return isUpdated() && newInputs.length == 0;
-    }
-
-    public void sort() {
-        if (inputs != null) {
-            Arrays.sort(inputs);
-        }
-        if (outputs != null) {
-            Arrays.sort(outputs);
-        }
-        if (newInputs != null) {
-            Arrays.sort(newInputs);
-        }
-        if (newOutputs != null) {
-            Arrays.sort(newOutputs);
-        }
     }
 
     @Override
@@ -112,7 +68,6 @@ public class SeunjeonItem extends DictionaryItem {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(inputs);
-        result = prime * result + Arrays.hashCode(outputs);
         return result;
     }
 
@@ -128,12 +83,7 @@ public class SeunjeonItem extends DictionaryItem {
             return false;
         }
         final SeunjeonItem other = (SeunjeonItem) obj;
-        sort();
-        other.sort();
         if (!Arrays.equals(inputs, other.inputs)) {
-            return false;
-        }
-        if (!Arrays.equals(outputs, other.outputs)) {
             return false;
         }
         return true;
@@ -141,23 +91,14 @@ public class SeunjeonItem extends DictionaryItem {
 
     @Override
     public String toString() {
-        return "SynonymItem [id=" + id + ", inputs=" + Arrays.toString(inputs) + ", outputs=" + Arrays.toString(outputs) + ", newInputs="
-                + Arrays.toString(newInputs) + ", newOutputs=" + Arrays.toString(newOutputs) + "]";
+        return "SynonymItem [id=" + id + ", inputs=" + Arrays.toString(inputs) + ", newInputs=" + Arrays.toString(newInputs) + "]";
     }
 
     public String toLineString() {
         if (isUpdated()) {
-            if (Arrays.equals(newInputs, newOutputs)) {
-                return StringUtils.join(newInputs, ",");
-            } else {
-                return StringUtils.join(newInputs, ",") + "=>" + StringUtils.join(newOutputs, ",");
-            }
+            return StringUtils.join(newInputs, ",");
         } else {
-            if (Arrays.equals(inputs, outputs)) {
-                return StringUtils.join(inputs, ",");
-            } else {
-                return StringUtils.join(inputs, ",") + "=>" + StringUtils.join(outputs, ",");
-            }
+            return StringUtils.join(inputs, ",");
         }
     }
 

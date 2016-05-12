@@ -40,10 +40,6 @@ public class CreateForm implements Serializable {
     @Size(max = 1000)
     public String inputs;
 
-    @Required
-    @Size(max = 1000)
-    public String outputs;
-
     public void initialize() {
         crudMode = CrudMode.CREATE;
     }

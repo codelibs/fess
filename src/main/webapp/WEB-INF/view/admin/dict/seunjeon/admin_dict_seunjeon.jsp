@@ -85,7 +85,6 @@
 												<thead>
 													<tr>
 														<th><la:message key="labels.dict_seunjeon_source" /></th>
-														<th><la:message key="labels.dict_seunjeon_target" /></th>
 													</tr>
 												</thead>
 												<tbody>
@@ -93,8 +92,7 @@
 														items="${seunjeonItemItems}">
 														<tr
 															data-href="${contextPath}/admin/dict/seunjeon/details/${f:u(dictId)}/4/${f:u(data.id)}">
-															<td>${f:h(data.inputs)}</td>
-															<td>${f:h(data.outputs)}</td>
+															<td>${f:h(data.inputsValue)}</td>
 														</tr>
 													</c:forEach>
 												</tbody>

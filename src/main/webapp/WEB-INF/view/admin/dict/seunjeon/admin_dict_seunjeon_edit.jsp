@@ -96,16 +96,7 @@
 												key="labels.dict_seunjeon_source" /></label>
 										<div class="col-sm-9">
 											<la:errors property="inputs" />
-											<la:textarea property="inputs" rows="5"
-												styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="outputs" class="col-sm-3 control-label"><la:message
-												key="labels.dict_seunjeon_target" /></label>
-										<div class="col-sm-9">
-											<la:errors property="outputs" />
-											<la:textarea property="outputs" rows="5"
+											<la:text property="inputs"
 												styleClass="form-control" />
 										</div>
 									</div>

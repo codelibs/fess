@@ -107,7 +107,6 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
     public synchronized void delete(final SeunjeonItem item) {
         final SeunjeonItem SeunjeonItem = item;
         SeunjeonItem.setNewInputs(StringUtil.EMPTY_STRINGS);
-        SeunjeonItem.setNewOutputs(StringUtil.EMPTY_STRINGS);
         try (SynonymUpdater updater = new SynonymUpdater(item)) {
             reload(updater, null);
         }
@@ -127,60 +126,24 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
                     continue; // ignore empty lines and comments
                 }
 
-                String inputs[];
-                String outputs[];
+                final List<String> inputStrings = split(line, ",");
+                String[] inputs = new String[inputStrings.size()];
+                for (int i = 0; i < inputs.length; i++) {
+                    inputs[i] = unescape(inputStrings.get(i)).trim();
+                }
 
-                final List<String> sides = split(line, "=>");
-                if (sides.size() > 1) { // explicit mapping
-                    if (sides.size() != 2) {
-                        throw new DictionaryException("more than one explicit mapping specified on the same line");
-                    }
-                    final List<String> inputStrings = split(sides.get(0), ",");
-                    inputs = new String[inputStrings.size()];
-                    for (int i = 0; i < inputs.length; i++) {
-                        inputs[i] = unescape(inputStrings.get(i)).trim();
-                    }
-
-                    final List<String> outputStrings = split(sides.get(1), ",");
-                    outputs = new String[outputStrings.size()];
-                    for (int i = 0; i < outputs.length; i++) {
-                        outputs[i] = unescape(outputStrings.get(i)).trim();
-                    }
-
-                    if (inputs.length > 0 && outputs.length > 0) {
-                        id++;
-                        final SeunjeonItem item = new SeunjeonItem(id, inputs, outputs);
-                        if (updater != null) {
-                            final SeunjeonItem newItem = updater.write(item);
-                            if (newItem != null) {
-                                itemList.add(newItem);
-                            } else {
-                                id--;
-                            }
+                if (inputs.length > 0) {
+                    id++;
+                    final SeunjeonItem item = new SeunjeonItem(id, inputs);
+                    if (updater != null) {
+                        final SeunjeonItem newItem = updater.write(item);
+                        if (newItem != null) {
+                            itemList.add(newItem);
                         } else {
-                            itemList.add(item);
+                            id--;
                         }
-                    }
-                } else {
-                    final List<String> inputStrings = split(line, ",");
-                    inputs = new String[inputStrings.size()];
-                    for (int i = 0; i < inputs.length; i++) {
-                        inputs[i] = unescape(inputStrings.get(i)).trim();
-                    }
-
-                    if (inputs.length > 0) {
-                        id++;
-                        final SeunjeonItem item = new SeunjeonItem(id, inputs, inputs);
-                        if (updater != null) {
-                            final SeunjeonItem newItem = updater.write(item);
-                            if (newItem != null) {
-                                itemList.add(newItem);
-                            } else {
-                                id--;
-                            }
-                        } else {
-                            itemList.add(item);
-                        }
+                    } else {
+                        itemList.add(item);
                     }
                 }
             }
@@ -297,13 +260,12 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new SeunjeonItem(item.getId(), item.getNewInputs(), item.getNewOutputs());
+                                return new SeunjeonItem(item.getId(), item.getNewInputs());
                             } else {
                                 return null;
                             }
                         } finally {
                             item.setNewInputs(null);
-                            item.setNewOutputs(null);
                         }
                     } else {
                         throw new DictionaryException("Seunjeon file was updated: old=" + oldItem + " : new=" + item);

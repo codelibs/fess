@@ -99,11 +99,7 @@
 											<tr>
 												<th><la:message
 														key="labels.dict_seunjeon_source" /></th>
-												<td>${f:br(f:h(inputs))}<la:hidden property="inputs" /></td>
-											</tr>
-											<tr>
-												<th><la:message key="labels.dict_seunjeon_target" /></th>
-												<td>${f:br(f:h(outputs))}<la:hidden property="outputs" /></td>
+												<td>${f:h(inputs)}<la:hidden property="inputs" /></td>
 											</tr>
 										</tbody>
 									</table>
