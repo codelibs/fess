@@ -595,14 +595,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. synonym */
     String ONLINE_HELP_NAME_DICT_SYNONYM = "online.help.name.dict.synonym";
 
-    /** The key of the configuration. e.g. seunjeon */
-    String ONLINE_HELP_NAME_DICT_SEUNJEON = "online.help.name.dict.seunjeon";
-
     /** The key of the configuration. e.g. dict */
     String ONLINE_HELP_NAME_DICT = "online.help.name.dict";
 
     /** The key of the configuration. e.g. kuromoji */
     String ONLINE_HELP_NAME_DICT_KUROMOJI = "online.help.name.dict.kuromoji";
+
+    /** The key of the configuration. e.g. seunjeon */
+    String ONLINE_HELP_NAME_DICT_SEUNJEON = "online.help.name.dict.seunjeon";
 
     /** The key of the configuration. e.g. webconfig */
     String ONLINE_HELP_NAME_WEBCONFIG = "online.help.name.webconfig";
@@ -2763,13 +2763,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameDictSynonym();
 
     /**
-     * Get the value for the key 'online.help.name.dict.seunjeon'. <br>
-     * The value is, e.g. seunjeon <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getOnlineHelpNameDictSeunjeon();
-
-    /**
      * Get the value for the key 'online.help.name.dict'. <br>
      * The value is, e.g. dict <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2782,6 +2775,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictKuromoji();
+
+    /**
+     * Get the value for the key 'online.help.name.dict.seunjeon'. <br>
+     * The value is, e.g. seunjeon <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictSeunjeon();
 
     /**
      * Get the value for the key 'online.help.name.webconfig'. <br>
@@ -4576,16 +4576,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ONLINE_HELP_NAME_DICT_SYNONYM);
         }
 
-        public String getOnlineHelpNameDictSeunjeon() {
-            return get(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON);
-        }
-
         public String getOnlineHelpNameDict() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT);
         }
 
         public String getOnlineHelpNameDictKuromoji() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT_KUROMOJI);
+        }
+
+        public String getOnlineHelpNameDictSeunjeon() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON);
         }
 
         public String getOnlineHelpNameWebconfig() {

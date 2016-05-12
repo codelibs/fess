@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="plugin" basedir=".">
-	<property name="elasticsearch.version" value="2.3.2" />
 	<property name="plugins.dir" value="${basedir}/plugins" />
 	<property name="target.dir" value="${basedir}/target/plugins" />
 
@@ -84,6 +83,12 @@
 			<param name="plugin.version" value="${elasticsearch.version}.0" />
 			<param name="plugin.zip.version" value="${elasticsearch.version}.0" />
 		</antcall>
+		<jar destfile="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-${elasticsearch.version}.jar">
+			<zipfileset
+				src="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-assembly-${elasticsearch.version}.0.jar"
+				excludes="org/slf4j/**"/>
+		</jar>
+		<delete file="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-assembly-${elasticsearch.version}.0.jar"/>
 		<!-- kopf -->
 		<get dest="${target.dir}">
 			<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />

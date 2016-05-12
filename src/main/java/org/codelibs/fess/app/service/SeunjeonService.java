@@ -27,8 +27,6 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.seunjeon.SeunjeonFile;
 import org.codelibs.fess.dict.seunjeon.SeunjeonItem;
-import org.codelibs.fess.dict.synonym.SynonymFile;
-import org.codelibs.fess.dict.synonym.SynonymItem;
 import org.dbflute.optional.OptionalEntity;
 
 public class SeunjeonService {

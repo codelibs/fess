@@ -9,7 +9,7 @@
 			<arg>kuromojiDictCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
-			<arg>seunjeonCreator</arg>
+			<arg>seunjeonDictCreator</arg>
 		</postConstruct>
 		<postConstruct name="addCreator">
 			<arg>synonymCreator</arg>
