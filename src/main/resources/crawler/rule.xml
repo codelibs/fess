@@ -97,7 +97,7 @@
 		<property name="allRequired">true</property>
 		<postConstruct name="addRule">
 			<arg>"url"</arg>
-			<arg>"file:.*"</arg>
+			<arg>"(file|smb|ftp):.*"</arg>
 		</postConstruct>
 		<postConstruct name="addRule">
 			<arg>"mimeType"</arg>
@@ -108,6 +108,9 @@
 + "|application/rdf+xml"
 + "|application/pdf"
 + "|application/x-freemind"
++ "|application/lha"
++ "|application/x-lha"
++ "|application/x-lha-compressed"
 + "|text/xml"
 + "|text/xml-external-parsed-entity"
 + "|text/html)"
