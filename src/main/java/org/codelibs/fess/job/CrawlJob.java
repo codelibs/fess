@@ -43,8 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CrawlJob {
-    private static final String XDEBUG_XRUNJDWP_TRANSPORT_DT_SOCKET_SERVER_Y_SUSPEND_Y_ADDRESS_127_0_0_1_8000 =
-            "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000";
+    private static final String REMOTE_DEBUG_OPTIONS = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000";
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlJob.class);
 
@@ -140,7 +139,7 @@ public class CrawlJob {
     }
 
     public CrawlJob remoteDebug() {
-        return jvmOptions(XDEBUG_XRUNJDWP_TRANSPORT_DT_SOCKET_SERVER_Y_SUSPEND_Y_ADDRESS_127_0_0_1_8000);
+        return jvmOptions(REMOTE_DEBUG_OPTIONS);
     }
 
     public CrawlJob jvmOptions(String option) {
