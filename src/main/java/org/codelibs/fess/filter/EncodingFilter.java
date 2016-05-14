@@ -39,7 +39,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.lastaflute.web.servlet.filter.LastaPrepareFilter;
 
 public class EncodingFilter implements Filter {
-    public static String ENCODING_MAP = "encodingRules";
+    public static final String ENCODING_MAP = "encodingRules";
 
     protected Map<String, String> encodingMap = new ConcurrentHashMap<>();
 
