@@ -128,8 +128,18 @@ public class AdminUpgradeAction extends FessAdminAction {
 
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String configIndex = ".fess_config";
+        final String userIndex = ".fess_user";
+        final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String docType = fessConfig.getIndexDocumentType();
 
         try {
+            // file
+            // TODO seunjeon
+
+            // alias
+            // TODO .fess_basic_config
+
+            // update mapping
             addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
                     "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, configIndex, "web_config", "permissions",
@@ -138,7 +148,10 @@ public class AdminUpgradeAction extends FessAdminAction {
                     "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, configIndex, "data_config", "permissions",
                     "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "group", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, docIndex, docType, "location", "{\"properties\":{\"location\":{\"type\":\"geo_point\"}}}");
 
+            // data migration
             final Map<String, List<String>> mapping = new HashMap<>();
             labelToRoleBhv.selectList(cb -> cb.query().addOrderBy_LabelTypeId_Asc()).forEach(e -> {
                 List<String> list = mapping.get(e.getLabelTypeId());
