@@ -115,7 +115,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
         final Document document = parser.getDocument();
 
-        final Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
+        final Map<String, Object> dataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
             final String path = entry.getValue();
             try {
@@ -278,7 +278,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         //  boost
         putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
-        final Set<String> labelTypeSet = new HashSet<String>();
+        final Set<String> labelTypeSet = new HashSet<>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
@@ -286,7 +286,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
-        final List<String> roleTypeList = new ArrayList<String>();
+        final List<String> roleTypeList = new ArrayList<>();
         StreamUtil.of(crawlingConfig.getPermissions()).forEach(p -> roleTypeList.add(p));
         putResultDataBody(dataMap, fessConfig.getIndexFieldRole(), roleTypeList);
         // id
@@ -315,7 +315,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getLangXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        String xpath = xpathConfigMap.get("default.lang");
+        final String xpath = xpathConfigMap.get("default.lang");
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -323,7 +323,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getContentXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        String xpath = xpathConfigMap.get("default.content");
+        final String xpath = xpathConfigMap.get("default.content");
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -331,7 +331,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getDigestXpath(final FessConfig fessConfig, final Map<String, String> xpathConfigMap) {
-        String xpath = xpathConfigMap.get("default.digest");
+        final String xpath = xpathConfigMap.get("default.digest");
         if (StringUtil.isNotBlank(xpath)) {
             return xpath;
         }
@@ -398,8 +398,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected Node pruneNode(final Node node) {
         final NodeList nodeList = node.getChildNodes();
-        final List<Node> childNodeList = new ArrayList<Node>();
-        final List<Node> removedNodeList = new ArrayList<Node>();
+        final List<Node> childNodeList = new ArrayList<>();
+        final List<Node> removedNodeList = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node childNode = nodeList.item(i);
             if (isPrunedTag(childNode.getNodeName())) {

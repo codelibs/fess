@@ -21,7 +21,7 @@ import java.util.Map;
 public class FacetQueryView {
     protected String title;
 
-    protected Map<String, String> queryMap = new LinkedHashMap<String, String>();
+    protected Map<String, String> queryMap = new LinkedHashMap<>();
 
     public String getTitle() {
         return title;

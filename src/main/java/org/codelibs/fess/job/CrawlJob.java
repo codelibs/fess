@@ -142,12 +142,12 @@ public class CrawlJob {
         return jvmOptions(REMOTE_DEBUG_OPTIONS);
     }
 
-    public CrawlJob jvmOptions(String option) {
+    public CrawlJob jvmOptions(final String option) {
         this.jvmOptions = option;
         return this;
     }
 
-    public CrawlJob lastaEnv(String env) {
+    public CrawlJob lastaEnv(final String env) {
         this.lastaEnv = env;
         return this;
     }
@@ -246,7 +246,7 @@ public class CrawlJob {
     }
 
     protected void executeCrawler() {
-        final List<String> cmdList = new ArrayList<String>();
+        final List<String> cmdList = new ArrayList<>();
         final String cpSeparator = SystemUtils.IS_OS_WINDOWS ? ";" : ":";
         final ServletContext servletContext = ComponentUtil.getComponent(ServletContext.class);
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();

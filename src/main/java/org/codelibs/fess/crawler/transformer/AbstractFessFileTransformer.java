@@ -98,13 +98,13 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     protected Map<String, Object> generateData(final ResponseData responseData) {
         final Extractor extractor = getExtractor(responseData);
-        final Map<String, String> params = new HashMap<String, String>();
+        final Map<String, String> params = new HashMap<>();
         params.put(TikaMetadataKeys.RESOURCE_NAME_KEY, getResourceName(responseData));
         final String mimeType = responseData.getMimeType();
         params.put(HttpHeaders.CONTENT_TYPE, mimeType);
         params.put(HttpHeaders.CONTENT_ENCODING, responseData.getCharSet());
         final UnsafeStringBuilder contentMetaBuf = new UnsafeStringBuilder(1000);
-        final Map<String, Object> dataMap = new HashMap<String, Object>();
+        final Map<String, Object> dataMap = new HashMap<>();
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
         try (final InputStream in = responseData.getResponseBody()) {
@@ -286,7 +286,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         //  boost
         putResultDataBody(dataMap, fessConfig.getIndexFieldBoost(), crawlingConfig.getDocumentBoost());
         // label: labelType
-        final Set<String> labelTypeSet = new HashSet<String>();
+        final Set<String> labelTypeSet = new HashSet<>();
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
@@ -485,7 +485,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     public void addMetaContentMapping(final String metaname, final String dynamicField) {
         if (metaContentMapping == null) {
-            metaContentMapping = new HashMap<String, String>();
+            metaContentMapping = new HashMap<>();
         }
         metaContentMapping.put(metaname, dynamicField);
     }

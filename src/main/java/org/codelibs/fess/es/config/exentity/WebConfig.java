@@ -145,7 +145,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
         if (includedDocUrlPatterns == null) {
             if (StringUtil.isNotBlank(getIncludedDocUrls())) {
-                final List<Pattern> urlPatterList = new ArrayList<Pattern>();
+                final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getIncludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
@@ -160,7 +160,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
         if (excludedDocUrlPatterns == null) {
             if (StringUtil.isNotBlank(getExcludedDocUrls())) {
-                final List<Pattern> urlPatterList = new ArrayList<Pattern>();
+                final List<Pattern> urlPatterList = new ArrayList<>();
                 final String[] urls = getExcludedDocUrls().split("[\r\n]");
                 for (final String u : urls) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
@@ -202,7 +202,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         final RequestHeaderService requestHeaderService = ComponentUtil.getComponent(RequestHeaderService.class);
 
         // HttpClient Parameters
-        final Map<String, Object> paramMap = new HashMap<String, Object>();
+        final Map<String, Object> paramMap = new HashMap<>();
         clientFactory.setInitParameterMap(paramMap);
 
         final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);
@@ -216,7 +216,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         }
 
         final List<WebAuthentication> webAuthList = webAuthenticationService.getWebAuthenticationList(getId());
-        final List<Authentication> basicAuthList = new ArrayList<Authentication>();
+        final List<Authentication> basicAuthList = new ArrayList<>();
         for (final WebAuthentication webAuth : webAuthList) {
             basicAuthList.add(webAuth.getAuthentication());
         }
@@ -224,8 +224,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
         // request header
         final List<RequestHeader> requestHeaderList = requestHeaderService.getRequestHeaderList(getId());
-        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList =
-                new ArrayList<org.codelibs.fess.crawler.client.http.RequestHeader>();
+        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList = new ArrayList<>();
         for (final RequestHeader requestHeader : requestHeaderList) {
             rhList.add(requestHeader.getCrawlerRequestHeader());
         }

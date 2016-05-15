@@ -66,8 +66,8 @@ public abstract class FessAdminAction extends FessBaseAction {
         return LaServletContextUtil.getServletContext();
     }
 
-    protected String buildThrowableMessage(Throwable t) {
-        StringBuilder buf = new StringBuilder(100);
+    protected String buildThrowableMessage(final Throwable t) {
+        final StringBuilder buf = new StringBuilder(100);
         Throwable current = t;
         while (current != null) {
             buf.append(current.getLocalizedMessage()).append(' ');

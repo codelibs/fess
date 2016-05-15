@@ -117,7 +117,7 @@ public class FileConfigService implements Serializable {
                 fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<>(fctltmList.size());
                 for (final FileConfigToLabel mapping : fctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
@@ -138,7 +138,7 @@ public class FileConfigService implements Serializable {
         if (isNew) {
             // Insert
             if (labelTypeIds != null) {
-                final List<FileConfigToLabel> fctltmList = new ArrayList<FileConfigToLabel>();
+                final List<FileConfigToLabel> fctltmList = new ArrayList<>();
                 for (final String labelTypeId : labelTypeIds) {
                     final FileConfigToLabel mapping = new FileConfigToLabel();
                     mapping.setFileConfigId(fileConfigId);
@@ -156,8 +156,8 @@ public class FileConfigService implements Serializable {
                     fctltmCb.query().setFileConfigId_Equal(fileConfigId);
                     fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
-                final List<FileConfigToLabel> newList = new ArrayList<FileConfigToLabel>();
-                final List<FileConfigToLabel> matchedList = new ArrayList<FileConfigToLabel>();
+                final List<FileConfigToLabel> newList = new ArrayList<>();
+                final List<FileConfigToLabel> matchedList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     boolean exist = false;
                     for (final FileConfigToLabel mapping : fctltmList) {

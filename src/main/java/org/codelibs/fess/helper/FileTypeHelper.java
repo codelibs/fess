@@ -24,7 +24,7 @@ public class FileTypeHelper {
 
     protected String defaultValue = "others";
 
-    protected Map<String, String> mimetypeMap = new HashMap<String, String>();
+    protected Map<String, String> mimetypeMap = new HashMap<>();
 
     public void add(final String mimetype, final String filetype) {
         mimetypeMap.put(mimetype, filetype);

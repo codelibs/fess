@@ -61,7 +61,7 @@ public class SystemHelper implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected final Map<String, String> designJspFileNameMap = new HashMap<String, String>();
+    protected final Map<String, String> designJspFileNameMap = new HashMap<>();
 
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
 

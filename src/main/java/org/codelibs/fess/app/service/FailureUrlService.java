@@ -129,7 +129,7 @@ public class FailureUrlService implements Serializable {
     }
 
     public List<String> getExcludedUrlList(final String configId) {
-        int failureCount = fessConfig.getFailureCountThreshold();
+        final int failureCount = fessConfig.getFailureCountThreshold();
         final String ignoreFailureType = fessConfig.getIgnoreFailureType();
 
         if (failureCount < 0) {
@@ -150,7 +150,7 @@ public class FailureUrlService implements Serializable {
         if (StringUtil.isNotBlank(ignoreFailureType)) {
             pattern = Pattern.compile(ignoreFailureType);
         }
-        final List<String> urlList = new ArrayList<String>();
+        final List<String> urlList = new ArrayList<>();
         for (final FailureUrl failureUrl : list) {
             if (pattern != null) {
                 if (!pattern.matcher(failureUrl.getUrl()).matches()) {

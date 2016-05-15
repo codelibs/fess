@@ -125,13 +125,13 @@ public class ViewHelper implements Serializable {
 
     protected boolean useSession = true;
 
-    private final Map<String, String> pageCacheMap = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> pageCacheMap = new ConcurrentHashMap<>();
 
-    private final Map<String, String> initFacetParamMap = new HashMap<String, String>();
+    private final Map<String, String> initFacetParamMap = new HashMap<>();
 
-    private final Map<String, String> initGeoParamMap = new HashMap<String, String>();
+    private final Map<String, String> initGeoParamMap = new HashMap<>();
 
-    private final List<FacetQueryView> facetQueryViewList = new ArrayList<FacetQueryView>();
+    private final List<FacetQueryView> facetQueryViewList = new ArrayList<>();
 
     public String cacheTemplateName = "cache";
 

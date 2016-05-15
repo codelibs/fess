@@ -79,7 +79,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         }
 
         final String outputPath = outputFile.getAbsolutePath();
-        final List<String> cmdList = new ArrayList<String>();
+        final List<String> cmdList = new ArrayList<>();
         for (final String value : commandList) {
             cmdList.add(value.replace("${url}", url).replace("${outputFile}", outputPath));
         }

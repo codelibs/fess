@@ -126,8 +126,6 @@ public final class ComponentUtil {
 
     private static final String SAMBA_HELPER = "sambaHelper";
 
-    private static final String FTP_HELPER = "ftpHelper";
-
     private static final String VIEW_HELPER = "viewHelper";
 
     private static final String SYSTEM_HELPER = "systemHelper";
@@ -341,7 +339,7 @@ public final class ComponentUtil {
     public static <T> T getComponent(final Class<T> clazz) {
         try {
             return SingletonLaContainer.getComponent(clazz);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             throw new ContainerNotAvailableException(e);
         }
     }
@@ -349,7 +347,7 @@ public final class ComponentUtil {
     public static <T> T getComponent(final String componentName) {
         try {
             return SingletonLaContainer.getComponent(componentName);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             throw new ContainerNotAvailableException(e);
         }
     }
@@ -361,7 +359,7 @@ public final class ComponentUtil {
     public static boolean available() {
         try {
             return SingletonLaContainer.getComponent(SYSTEM_HELPER) != null;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // ignore
         }
         return false;

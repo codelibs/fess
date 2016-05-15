@@ -27,6 +27,7 @@ public class DocList extends ArrayList<Map<String, Object>> {
 
     private long processingTime = 0;
 
+    @Override
     public void clear() {
         super.clear();
         contentSize = 0;
@@ -37,7 +38,7 @@ public class DocList extends ArrayList<Map<String, Object>> {
         return contentSize;
     }
 
-    public void addContentSize(long contentSize) {
+    public void addContentSize(final long contentSize) {
         this.contentSize += contentSize;
     }
 
@@ -45,7 +46,7 @@ public class DocList extends ArrayList<Map<String, Object>> {
         return processingTime;
     }
 
-    public void addProcessingTime(long processingTime) {
+    public void addProcessingTime(final long processingTime) {
         this.processingTime += processingTime;
     }
 

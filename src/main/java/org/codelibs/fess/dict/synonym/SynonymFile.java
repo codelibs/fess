@@ -78,7 +78,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
         }
 
         if (offset >= synonymItemList.size() || offset < 0) {
-            return new PagingList<SynonymItem>(Collections.<SynonymItem> emptyList(), offset, size, synonymItemList.size());
+            return new PagingList<>(Collections.<SynonymItem> emptyList(), offset, size, synonymItemList.size());
         }
 
         int toIndex = offset + size;
@@ -86,7 +86,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
             toIndex = synonymItemList.size();
         }
 
-        return new PagingList<SynonymItem>(synonymItemList.subList(offset, toIndex), offset, size, synonymItemList.size());
+        return new PagingList<>(synonymItemList.subList(offset, toIndex), offset, size, synonymItemList.size());
     }
 
     @Override
@@ -114,7 +114,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     protected void reload(final SynonymUpdater updater, final InputStream in) {
-        final List<SynonymItem> itemList = new ArrayList<SynonymItem>();
+        final List<SynonymItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
@@ -197,7 +197,7 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
     }
 
     private static List<String> split(final String s, final String separator) {
-        final List<String> list = new ArrayList<String>(2);
+        final List<String> list = new ArrayList<>(2);
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         final int end = s.length();

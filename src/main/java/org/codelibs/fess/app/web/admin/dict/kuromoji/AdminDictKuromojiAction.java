@@ -275,7 +275,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                     try {
                         kuromojiService.store(form.dictId, entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -295,7 +295,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                     try {
                         kuromojiService.store(form.dictId, entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -317,7 +317,7 @@ public class AdminDictKuromojiAction extends FessAdminAction {
                             try {
                                 kuromojiService.delete(form.dictId, entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());

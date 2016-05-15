@@ -19,7 +19,7 @@ import org.dbflute.optional.OptionalEntity;
 
 public class OptionalUtil {
 
-    public static <T> OptionalEntity<T> ofNullable(T entity) {
+    public static <T> OptionalEntity<T> ofNullable(final T entity) {
         return OptionalEntity.ofNullable(entity, () -> {});
     }
 

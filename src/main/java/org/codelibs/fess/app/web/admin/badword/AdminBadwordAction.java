@@ -225,7 +225,7 @@ public class AdminBadwordAction extends FessAdminAction {
                         badWordService.store(entity);
                         suggestHelper.addBadWord(entity.getSuggestWord());
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -246,7 +246,7 @@ public class AdminBadwordAction extends FessAdminAction {
                         badWordService.store(entity);
                         suggestHelper.storeAllBadWords();
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -270,7 +270,7 @@ public class AdminBadwordAction extends FessAdminAction {
                                 badWordService.delete(entity);
                                 suggestHelper.deleteBadWord(entity.getSuggestWord());
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asDetailsHtml());

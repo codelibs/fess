@@ -287,7 +287,7 @@ public class CrawlingInfoService implements Serializable {
         @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
         try {
-            final List<String> list = new ArrayList<String>();
+            final List<String> list = new ArrayList<>();
             list.add("SessionId");
             list.add("SessionCreatedTime");
             list.add("Key");
@@ -300,7 +300,7 @@ public class CrawlingInfoService implements Serializable {
             }, new EntityRowHandler<CrawlingInfoParam>() {
                 @Override
                 public void handle(final CrawlingInfoParam entity) {
-                    final List<String> list = new ArrayList<String>();
+                    final List<String> list = new ArrayList<>();
                     entity.getCrawlingInfo().ifPresent(crawlingInfo -> {
                         addToList(list, crawlingInfo.getSessionId());
                         addToList(list, crawlingInfo.getCreatedTime());

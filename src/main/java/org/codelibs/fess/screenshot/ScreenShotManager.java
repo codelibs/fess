@@ -54,13 +54,13 @@ public class ScreenShotManager {
 
     public int screenShotPathCacheSize = 10;
 
-    private final List<ScreenShotGenerator> generatorList = new ArrayList<ScreenShotGenerator>();
+    private final List<ScreenShotGenerator> generatorList = new ArrayList<>();
 
     public String imageExtention = "png";
 
     public int splitSize = 5;
 
-    private final BlockingQueue<ScreenShotTask> screenShotTaskQueue = new LinkedBlockingQueue<ScreenShotTask>();
+    private final BlockingQueue<ScreenShotTask> screenShotTaskQueue = new LinkedBlockingQueue<>();
 
     private boolean generating;
 
@@ -141,7 +141,7 @@ public class ScreenShotManager {
 
     public void storeRequest(final String queryId, final List<Map<String, Object>> documentItems) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Map<String, String> dataMap = new HashMap<String, String>(documentItems.size());
+        final Map<String, String> dataMap = new HashMap<>(documentItems.size());
         for (final Map<String, Object> docMap : documentItems) {
             final String docid = (String) docMap.get(fessConfig.getIndexFieldDocId());
             final String screenShotPath = getImageFilename(docMap);
@@ -174,7 +174,7 @@ public class ScreenShotManager {
         Map<String, Map<String, String>> screenShotPathCache =
                 (Map<String, Map<String, String>>) session.getAttribute(Constants.SCREEN_SHOT_PATH_CACHE);
         if (screenShotPathCache == null) {
-            screenShotPathCache = new LruHashMap<String, Map<String, String>>(screenShotPathCacheSize);
+            screenShotPathCache = new LruHashMap<>(screenShotPathCacheSize);
             session.setAttribute(Constants.SCREEN_SHOT_PATH_CACHE, screenShotPathCache);
         }
         return screenShotPathCache;

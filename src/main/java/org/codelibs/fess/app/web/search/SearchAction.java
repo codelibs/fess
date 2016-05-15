@@ -177,7 +177,7 @@ public class SearchAction extends FessSearchAction {
         buf.append(form.q);
         if (!form.fields.isEmpty() && form.fields.containsKey(LABEL_FIELD)) {
             final String[] values = form.fields.get(LABEL_FIELD);
-            final List<String> labelList = new ArrayList<String>();
+            final List<String> labelList = new ArrayList<>();
             if (values != null) {
                 for (final String v : values) {
                     labelList.add(v);
@@ -206,7 +206,7 @@ public class SearchAction extends FessSearchAction {
             pagingQueryList.add("sort=" + LaFunctions.u(form.sort));
         }
         if (form.lang != null) {
-            final Set<String> langSet = new HashSet<String>();
+            final Set<String> langSet = new HashSet<>();
             for (final String lang : form.lang) {
                 if (StringUtil.isNotBlank(lang) && lang.length() < 1000) {
                     if (Constants.ALL_LANGUAGES.equals(lang)) {

@@ -107,6 +107,7 @@ public class IndexUpdater extends Thread {
         // nothing
     }
 
+    @Override
     @PreDestroy
     public void destroy() {
         if (!finishCrawling) {
@@ -220,7 +221,7 @@ public class IndexUpdater extends Thread {
                         if (arList.isEmpty()) {
                             try {
                                 Thread.sleep(fessConfig.getIndexerWebfsCommitMarginTimeAsInteger().longValue());
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 // ignore
                             }
                             cleanupTime = -1;

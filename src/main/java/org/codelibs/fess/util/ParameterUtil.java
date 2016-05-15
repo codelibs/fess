@@ -42,7 +42,7 @@ public class ParameterUtil {
     }
 
     public static Map<String, String> parse(final String value) {
-        final Map<String, String> paramMap = new HashMap<String, String>();
+        final Map<String, String> paramMap = new HashMap<>();
         if (value != null) {
             final String[] lines = value.split("[\r\n]");
             for (final String line : lines) {

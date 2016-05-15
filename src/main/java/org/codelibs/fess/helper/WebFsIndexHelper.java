@@ -128,16 +128,16 @@ public class WebFsIndexHelper implements Serializable {
     }
 
     protected void doCrawl(final String sessionId, final List<WebConfig> webConfigList, final List<FileConfig> fileConfigList) {
-        int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
+        final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final long startTime = System.currentTimeMillis();
 
-        final List<String> sessionIdList = new ArrayList<String>();
+        final List<String> sessionIdList = new ArrayList<>();
         crawlerList.clear();
-        final List<String> crawlerStatusList = new ArrayList<String>();
+        final List<String> crawlerStatusList = new ArrayList<>();
         // Web
         for (final WebConfig webConfig : webConfigList) {
             final String sid = crawlingConfigHelper.store(sessionId, webConfig);
@@ -184,7 +184,7 @@ public class WebFsIndexHelper implements Serializable {
                 final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.warn("Failed to delete url filters for " + sid);
                 }
             }
@@ -301,7 +301,7 @@ public class WebFsIndexHelper implements Serializable {
                 final EsUrlFilterService urlFilterService = ComponentUtil.getComponent(EsUrlFilterService.class);
                 try {
                     urlFilterService.delete(sid);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.warn("Failed to delete url filters for " + sid);
                 }
             }
@@ -514,7 +514,7 @@ public class WebFsIndexHelper implements Serializable {
         try {
             // clear url filter
             urlFilterService.delete(sid);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to delete UrlFilter for " + sid, e);
         }
 
@@ -522,14 +522,14 @@ public class WebFsIndexHelper implements Serializable {
             // clear queue
             urlQueueService.clearCache();
             urlQueueService.delete(sid);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to delete UrlQueue for " + sid, e);
         }
 
         try {
             // clear
             dataService.delete(sid);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to delete AccessResult for " + sid, e);
         }
     }

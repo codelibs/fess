@@ -30,9 +30,9 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import com.google.common.io.BaseEncoding;
 
 public class FacetResponse {
-    protected Map<String, Long> queryCountMap = new LinkedHashMap<String, Long>();
+    protected Map<String, Long> queryCountMap = new LinkedHashMap<>();
 
-    protected List<Field> fieldList = new ArrayList<FacetResponse.Field>();
+    protected List<Field> fieldList = new ArrayList<>();
 
     public FacetResponse(final Aggregations aggregations) {
         aggregations

@@ -107,7 +107,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public GeoInfo getGeoInfo() {
-        GeoInfo geoInfo = createGeoInfo(LaRequestUtil.getRequest());
+        final GeoInfo geoInfo = createGeoInfo(LaRequestUtil.getRequest());
         if (geoInfo != null) {
             return geoInfo;
         }
@@ -130,7 +130,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
     }
 
     @Override
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         return LaRequestUtil.getRequest().getAttribute(name);
     }
 

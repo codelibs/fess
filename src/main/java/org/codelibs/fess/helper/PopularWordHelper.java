@@ -64,7 +64,7 @@ public class PopularWordHelper {
             return cache.get(
                     getCacheKey(baseSeed, baseTags, baseRoles, baseFields, baseExcludes),
                     () -> {
-                        final List<String> wordList = new ArrayList<String>();
+                        final List<String> wordList = new ArrayList<>();
                         final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
                         final PopularWordsRequestBuilder popularWordsRequestBuilder =
                                 suggestHelper.suggester().popularWords()

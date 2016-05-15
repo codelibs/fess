@@ -49,43 +49,43 @@ public interface SearchRequestParams {
 
     Locale getLocale();
 
-    public default String[] simplifyArray(String[] values) {
+    public default String[] simplifyArray(final String[] values) {
         return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
     }
 
-    public default String[] getParamValueArray(HttpServletRequest request, String param) {
+    public default String[] getParamValueArray(final HttpServletRequest request, final String param) {
         return simplifyArray(request.getParameterValues(param));
     }
 
-    public default FacetInfo createFacetInfo(HttpServletRequest request) {
-        String[] fields = getParamValueArray(request, "facet.field");
-        String[] queries = getParamValueArray(request, "facet.query");
+    public default FacetInfo createFacetInfo(final HttpServletRequest request) {
+        final String[] fields = getParamValueArray(request, "facet.field");
+        final String[] queries = getParamValueArray(request, "facet.query");
         if (fields.length == 0 && queries.length == 0) {
             return null;
         }
-        FacetInfo facetInfo = new FacetInfo();
+        final FacetInfo facetInfo = new FacetInfo();
         facetInfo.field = fields;
         facetInfo.query = queries;
-        String sizeStr = request.getParameter("facet.size");
+        final String sizeStr = request.getParameter("facet.size");
         if (StringUtil.isNotBlank(sizeStr)) {
             facetInfo.size = Integer.parseInt(sizeStr);
         }
-        String minDocCountStr = request.getParameter("facet.minDocCount");
+        final String minDocCountStr = request.getParameter("facet.minDocCount");
         if (StringUtil.isNotBlank(minDocCountStr)) {
             facetInfo.minDocCount = Long.parseLong(minDocCountStr);
         }
-        String sort = request.getParameter("facet.sort");
+        final String sort = request.getParameter("facet.sort");
         if (StringUtil.isNotBlank(sort)) {
             facetInfo.sort = sort;
         }
-        String missing = request.getParameter("facet.missing");
+        final String missing = request.getParameter("facet.missing");
         if (StringUtil.isNotBlank(missing)) {
             facetInfo.missing = missing;
         }
         return facetInfo;
     }
 
-    public default GeoInfo createGeoInfo(HttpServletRequest request) {
+    public default GeoInfo createGeoInfo(final HttpServletRequest request) {
         return new GeoInfo(request);
     }
 }

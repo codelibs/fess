@@ -170,7 +170,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                         keyMatchService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                         ComponentUtil.getKeyMatchHelper().update();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -191,7 +191,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                         keyMatchService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
                         ComponentUtil.getKeyMatchHelper().update();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -215,7 +215,7 @@ public class AdminKeymatchAction extends FessAdminAction {
                                 keyMatchService.delete(entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                                 ComponentUtil.getKeyMatchHelper().update();
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());

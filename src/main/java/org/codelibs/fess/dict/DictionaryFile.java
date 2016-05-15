@@ -241,7 +241,7 @@ public abstract class DictionaryFile<T extends DictionaryItem> {
             if (endPage > allPageCount) {
                 endPage = allPageCount;
             }
-            final List<Integer> pageNumberList = new ArrayList<Integer>();
+            final List<Integer> pageNumberList = new ArrayList<>();
             for (int i = startPage; i <= endPage; i++) {
                 pageNumberList.add(i);
             }

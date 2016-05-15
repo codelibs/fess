@@ -82,7 +82,7 @@ public class AdminGeneralAction extends FessAdminAction {
         });
 
         final String[] toAddresses = form.notificationTo.split(",");
-        final Map<String, Object> dataMap = new HashMap<String, Object>();
+        final Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("hostname", systemHelper.getHostname());
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -188,7 +188,7 @@ public class AdminGeneralAction extends FessAdminAction {
     }
 
     private List<String> getDayItems() {
-        final List<String> items = new ArrayList<String>();
+        final List<String> items = new ArrayList<>();
         for (int i = 0; i < 32; i++) {
             items.add(Integer.toString(i));
         }

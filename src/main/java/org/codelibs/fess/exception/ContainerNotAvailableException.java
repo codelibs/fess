@@ -19,7 +19,7 @@ public class ContainerNotAvailableException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public ContainerNotAvailableException(Throwable cause) {
+    public ContainerNotAvailableException(final Throwable cause) {
         super(cause);
     }
 

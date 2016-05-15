@@ -114,7 +114,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_SORT_VALUES);
         if (map == null) {
-            String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
+            final String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
             if (StringUtil.isBlank(value)) {
                 map = Collections.emptyMap();
             } else {
@@ -165,7 +165,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_LABEL_VALUES);
         if (map == null) {
-            String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
+            final String value = getSystemProperty(Constants.DEFAULT_LABEL_VALUE_PROPERTY);
             if (StringUtil.isBlank(value)) {
                 map = Collections.emptyMap();
             } else {
@@ -645,9 +645,9 @@ public interface FessProp {
                 if (values.length == 2) {
                     final String[] subValues = values[1].split(":");
                     if (subValues.length == 2) {
-                        return new Tuple3<String, String, String>(values[0], subValues[0], subValues[1]);
+                        return new Tuple3<>(values[0], subValues[0], subValues[1]);
                     } else {
-                        return new Tuple3<String, String, String>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
+                        return new Tuple3<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
                     }
                 }
                 return null;
@@ -710,7 +710,7 @@ public interface FessProp {
             params = StreamUtil.of(getQueryLanguageMapping().split("\n")).filter(StringUtil::isNotBlank).map(v -> {
                 final String[] values = v.split("=");
                 if (values.length == 2) {
-                    return new Pair<String, String>(values[0], values[1]);
+                    return new Pair<>(values[0], values[1]);
                 }
                 return null;
             }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond()));
@@ -854,14 +854,14 @@ public interface FessProp {
         return StreamUtil.of(getCrawlerFileProtocolsAsArray()).anyMatch(s -> url.startsWith(s));
     }
 
-    public default void processSearchPreference(SearchRequestBuilder searchRequestBuilder, OptionalThing<FessUserBean> userBean) {
+    public default void processSearchPreference(final SearchRequestBuilder searchRequestBuilder, final OptionalThing<FessUserBean> userBean) {
         userBean.map(user -> {
             if (user.hasRoles(getAuthenticationAdminRolesAsArray())) {
                 return Constants.SEARCH_PREFERENCE_PRIMARY;
             }
             return user.getUserId();
         }).ifPresent(p -> searchRequestBuilder.setPreference(p)).orElse(() -> LaRequestUtil.getOptionalRequest().map(r -> {
-            HttpSession session = r.getSession(false);
+            final HttpSession session = r.getSession(false);
             if (session != null) {
                 return session.getId();
             }

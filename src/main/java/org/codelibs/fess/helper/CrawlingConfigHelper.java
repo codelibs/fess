@@ -34,7 +34,7 @@ public class CrawlingConfigHelper implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlingConfigHelper.class);
 
-    protected final Map<String, CrawlingConfig> crawlingConfigMap = new ConcurrentHashMap<String, CrawlingConfig>();
+    protected final Map<String, CrawlingConfig> crawlingConfigMap = new ConcurrentHashMap<>();
 
     protected int count = 1;
 

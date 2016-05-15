@@ -310,7 +310,7 @@ public class FessEsClient implements Client {
                 final String configType = values[1];
                 boolean exists = false;
                 try {
-                    IndicesExistsResponse response =
+                    final IndicesExistsResponse response =
                             client.admin().indices().prepareExists(configIndex).execute().actionGet(fessConfig.getIndexSearchTimeout());
                     exists = response.isExists();
                 } catch (final Exception e) {
@@ -369,13 +369,13 @@ public class FessEsClient implements Client {
                 // alias
                 final String aliasConfigDirPath = indexConfigPath + "/" + configIndex + "/alias";
                 try {
-                    File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+                    final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
                     if (aliasConfigDir.isDirectory()) {
                         StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
                                 f -> {
                                     final String aliasName = f.getName().replaceFirst(".json$", "");
                                     final String source = FileUtil.readUTF8(f);
-                                    IndicesAliasesResponse response =
+                                    final IndicesAliasesResponse response =
                                             client.admin().indices().prepareAliases().addAlias(configIndex, aliasName, source).execute()
                                                     .actionGet(fessConfig.getIndexIndicesTimeout());
                                     if (response.isAcknowledged()) {
@@ -385,9 +385,9 @@ public class FessEsClient implements Client {
                                     }
                                 });
                     }
-                } catch (ResourceNotFoundRuntimeException e) {
+                } catch (final ResourceNotFoundRuntimeException e) {
                     // ignore
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.warn(aliasConfigDirPath + " is not found.", e);
                 }
             }
@@ -486,7 +486,7 @@ public class FessEsClient implements Client {
         try {
             client.admin().indices().prepareFlush().setForce(true).execute()
                     .actionGet(ComponentUtil.getFessConfig().getIndexIndicesTimeout());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to flush indices.", e);
         }
         try {

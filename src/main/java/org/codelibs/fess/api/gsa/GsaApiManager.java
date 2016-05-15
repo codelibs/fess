@@ -106,9 +106,9 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final long allRecordCount = data.getAllRecordCount();
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
 
-            final List<String> getFields = new ArrayList<String>();
+            final List<String> getFields = new ArrayList<>();
             // meta tags should be returned
-            final String getFieldsParam = (String) request.getParameter("getfields");
+            final String getFieldsParam = request.getParameter("getfields");
             if (StringUtil.isNotBlank(getFieldsParam)) {
                 getFields.addAll(Arrays.asList(getFieldsParam.split("\\.")));
             }
@@ -116,7 +116,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             if ("xml".equals(request.getParameter("output"))) {
                 xmlDtd = true;
             }
-            StringBuilder requestUri = new StringBuilder(request.getRequestURI());
+            final StringBuilder requestUri = new StringBuilder(request.getRequestURI());
             if (request.getQueryString() != null) {
                 requestUri.append("?").append(request.getQueryString());
             }
@@ -190,7 +190,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     buf.append("</NB>");
                 }
                 long recordNumber = startNumber;
-                for (Map<String, Object> document : documentItems) {
+                for (final Map<String, Object> document : documentItems) {
                     buf.append("<R N=\"");
                     buf.append(recordNumber);
                     buf.append("\">");
@@ -198,7 +198,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     document.put("UE", url);
                     document.put("U", URLDecoder.decode(url, Constants.UTF_8));
                     document.put("T", document.remove("title"));
-                    float score = Float.parseFloat((String) document.remove("boost"));
+                    final float score = Float.parseFloat((String) document.remove("boost"));
                     document.put("RK", (int) (score * 10));
                     document.put("S", ((String) document.remove("content_description")).replaceAll("<(/*)em>", "<$1b>"));
                     document.put("LANG", document.remove("lang"));
@@ -240,7 +240,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                     } else {
                         charset = (String) document.remove("contentType_s");
                         if (StringUtil.isNotBlank(charset)) {
-                            Matcher m = Pattern.compile(".*;\\s*charset=(.+)").matcher(charset);
+                            final Matcher m = Pattern.compile(".*;\\s*charset=(.+)").matcher(charset);
                             if (m.matches()) {
                                 charset = m.group(1);
                                 buf.append(charset);
@@ -327,7 +327,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
     static class WrappedWebApiRequest extends WebApiRequest {
         private Map<String, String[]> parameters;
-        private Map<String, String[]> extraParameters;
+        private final Map<String, String[]> extraParameters;
 
         public WrappedWebApiRequest(final HttpServletRequest request, final String servletPath, final Map<String, String[]> extraParams) {
             super(request, servletPath);
@@ -336,7 +336,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String getParameter(final String name) {
-            String[] values = getParameterMap().get(name);
+            final String[] values = getParameterMap().get(name);
             if (values != null) {
                 return values[0];
             }
@@ -346,7 +346,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         @Override
         public Map<String, String[]> getParameterMap() {
             if (parameters == null) {
-                parameters = new HashMap<String, String[]>();
+                parameters = new HashMap<>();
                 parameters.putAll(super.getParameterMap());
                 // Parameter of the same key will be overwritten
                 parameters.putAll(extraParameters);
@@ -410,11 +410,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            Map<String, String[]> fields = new HashMap<>();
-            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-                String key = entry.getKey();
+            final Map<String, String[]> fields = new HashMap<>();
+            for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                final String key = entry.getKey();
                 if (key.startsWith("fields.")) {
-                    String[] value = simplifyArray(entry.getValue());
+                    final String[] value = simplifyArray(entry.getValue());
                     fields.put(key.substring("fields.".length()), value);
                 }
             }
@@ -510,7 +510,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
 
         @Override
-        public Object getAttribute(String name) {
+        public Object getAttribute(final String name) {
             return request.getAttribute(name);
         }
 

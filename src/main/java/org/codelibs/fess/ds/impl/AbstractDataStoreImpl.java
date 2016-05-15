@@ -61,7 +61,7 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         final Map<String, String> paramMap = initParamMap;
 
         // default values
-        final Map<String, Object> defaultDataMap = new HashMap<String, Object>();
+        final Map<String, Object> defaultDataMap = new HashMap<>();
 
         // cid
         final String configId = config.getConfigId();
@@ -79,13 +79,13 @@ public abstract class AbstractDataStoreImpl implements DataStore {
         // boost
         defaultDataMap.put(fessConfig.getIndexFieldBoost(), config.getBoost().toString());
         // label: labelType
-        final List<String> labelTypeList = new ArrayList<String>();
+        final List<String> labelTypeList = new ArrayList<>();
         for (final String labelType : config.getLabelTypeValues()) {
             labelTypeList.add(labelType);
         }
         defaultDataMap.put(fessConfig.getIndexFieldLabel(), labelTypeList);
         // role: roleType
-        final List<String> roleTypeList = new ArrayList<String>();
+        final List<String> roleTypeList = new ArrayList<>();
         StreamUtil.of(config.getPermissions()).forEach(p -> roleTypeList.add(p));
         defaultDataMap.put(fessConfig.getIndexFieldRole(), roleTypeList);
         // mimetype

@@ -74,7 +74,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     //                                                                        ============
 
     protected void registerEnvItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<String, String> entry : System.getenv().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
@@ -82,7 +82,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     }
 
     protected void registerPropItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
@@ -90,7 +90,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     }
 
     protected void registerFessPropItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
             itemList.add(createItem(entry.getKey(), entry.getValue()));
         }
@@ -98,7 +98,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     }
 
     protected void registerBugReportItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         for (final String label : bugReportLabels) {
             itemList.add(createPropItem(label));
         }
@@ -124,7 +124,7 @@ public class AdminSysteminfoAction extends FessAdminAction {
     }
 
     protected Map<String, String> createItem(final Object label, final Object value) {
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label != null ? label.toString() : StringUtil.EMPTY);
         map.put(Constants.ITEM_VALUE, value != null ? value.toString() : StringUtil.EMPTY);
         return map;

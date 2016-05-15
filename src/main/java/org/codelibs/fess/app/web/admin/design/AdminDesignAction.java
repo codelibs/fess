@@ -86,7 +86,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
 
     private List<String> loadFileNameItems() {
         final File baseDir = new File(getServletContext().getRealPath("/"));
-        final List<String> fileNameItems = new ArrayList<String>();
+        final List<String> fileNameItems = new ArrayList<>();
         final List<File> fileList = getAccessibleFileList(baseDir);
         final int length = baseDir.getAbsolutePath().length();
         for (final File file : fileList) {
@@ -281,7 +281,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     private List<File> getAccessibleFileList(final File baseDir) {
-        final List<File> fileList = new ArrayList<File>();
+        final List<File> fileList = new ArrayList<>();
         fileList.addAll(FileUtils.listFiles(new File(baseDir, "images"), fessConfig.getSupportedUploadedMediaExtentionsAsArray(), true));
         fileList.addAll(FileUtils.listFiles(new File(baseDir, "css"), fessConfig.getSupportedUploadedCssExtentionsAsArray(), true));
         fileList.addAll(FileUtils.listFiles(new File(baseDir, "js"), fessConfig.getSupportedUploadedJsExtentionsAsArray(), true));

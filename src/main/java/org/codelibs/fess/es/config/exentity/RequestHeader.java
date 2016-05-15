@@ -57,7 +57,7 @@ public class RequestHeader extends BsRequestHeader {
             final WebConfigService webConfigService = ComponentUtil.getComponent(WebConfigService.class);
             try {
                 webConfig = webConfigService.getWebConfig(getWebConfigId()).get();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Web Config " + getWebConfigId() + " does not exist.", e);
             }
         }

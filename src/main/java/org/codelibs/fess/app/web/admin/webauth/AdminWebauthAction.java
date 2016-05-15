@@ -183,7 +183,7 @@ public class AdminWebauthAction extends FessAdminAction {
                     try {
                         webAuthenticationService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -203,7 +203,7 @@ public class AdminWebauthAction extends FessAdminAction {
                     try {
                         webAuthenticationService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -226,7 +226,7 @@ public class AdminWebauthAction extends FessAdminAction {
                             try {
                                 webAuthenticationService.delete(entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());
@@ -271,7 +271,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     protected void registerProtocolSchemeItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
@@ -280,7 +280,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     protected void registerWebConfigItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
         for (final WebConfig webConfig : webConfigList) {
             itemList.add(createItem(webConfig.getName(), webConfig.getId().toString()));
@@ -289,7 +289,7 @@ public class AdminWebauthAction extends FessAdminAction {
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
         map.put(Constants.ITEM_VALUE, value);
         return map;

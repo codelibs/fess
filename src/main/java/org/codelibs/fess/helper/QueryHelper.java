@@ -748,7 +748,7 @@ public class QueryHelper implements Serializable {
         }
 
         final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
-        final Map<String, String[]> queryParamMap = new HashMap<String, String[]>();
+        final Map<String, String[]> queryParamMap = new HashMap<>();
         for (final Map.Entry<String, String[]> entry : queryRequestHeaderMap.entrySet()) {
             final String[] values = entry.getValue();
             final String[] newValues = new String[values.length];

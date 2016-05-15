@@ -79,7 +79,7 @@ public class CacheAction extends FessSearchAction {
             return redirect(ErrorAction.class);
         }
 
-        StreamResponse response =
+        final StreamResponse response =
                 asStream(DocumentUtil.getValue(doc, fessConfig.getIndexFieldDocId(), String.class)).contentType("text/html; charset=UTF-8")
                         .data(content.getBytes(Constants.CHARSET_UTF_8));
         response.headerContentDispositionInline(); // TODO will be fixed in lastaflute

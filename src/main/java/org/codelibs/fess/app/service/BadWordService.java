@@ -163,7 +163,7 @@ public class BadWordService implements Serializable {
             }, new EntityRowHandler<BadWord>() {
                 @Override
                 public void handle(final BadWord entity) {
-                    final List<String> list = new ArrayList<String>();
+                    final List<String> list = new ArrayList<>();
                     addToList(list, entity.getSuggestWord());
                     try {
                         csvWriter.writeValues(list);

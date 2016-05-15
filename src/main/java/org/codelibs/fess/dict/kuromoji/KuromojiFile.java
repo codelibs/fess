@@ -79,7 +79,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
         }
 
         if (offset >= kuromojiItemList.size() || offset < 0) {
-            return new PagingList<KuromojiItem>(Collections.<KuromojiItem> emptyList(), offset, size, kuromojiItemList.size());
+            return new PagingList<>(Collections.<KuromojiItem> emptyList(), offset, size, kuromojiItemList.size());
         }
 
         int toIndex = offset + size;
@@ -87,7 +87,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             toIndex = kuromojiItemList.size();
         }
 
-        return new PagingList<KuromojiItem>(kuromojiItemList.subList(offset, toIndex), offset, size, kuromojiItemList.size());
+        return new PagingList<>(kuromojiItemList.subList(offset, toIndex), offset, size, kuromojiItemList.size());
     }
 
     @Override
@@ -114,7 +114,7 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
     }
 
     protected void reload(final KuromojiUpdater updater, final InputStream in) {
-        final List<KuromojiItem> itemList = new ArrayList<KuromojiItem>();
+        final List<KuromojiItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;

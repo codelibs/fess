@@ -37,7 +37,7 @@ public class PathMappingHelper implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PathMappingHelper.class);
 
-    private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<String, List<PathMapping>>();
+    private final Map<String, List<PathMapping>> pathMappingMap = new HashMap<>();
 
     volatile List<PathMapping> cachedPathMappingList = null;
 

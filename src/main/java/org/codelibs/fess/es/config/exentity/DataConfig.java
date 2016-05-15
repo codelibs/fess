@@ -185,7 +185,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     public void initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
         final Map<String, String> paramMap = getHandlerParameterMap();
 
-        final Map<String, Object> factoryParamMap = new HashMap<String, Object>();
+        final Map<String, Object> factoryParamMap = new HashMap<>();
         crawlerClientFactory.setInitParameterMap(factoryParamMap);
 
         // parameters
@@ -206,7 +206,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         final String webAuthStr = paramMap.get(CRAWLER_WEB_AUTH);
         if (StringUtil.isNotBlank(webAuthStr)) {
             final String[] webAuthNames = webAuthStr.split(",");
-            final List<Authentication> basicAuthList = new ArrayList<Authentication>();
+            final List<Authentication> basicAuthList = new ArrayList<>();
             for (final String webAuthName : webAuthNames) {
                 final String scheme = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".scheme");
                 final String hostname = paramMap.get(CRAWLER_WEB_AUTH + "." + webAuthName + ".host");
@@ -272,8 +272,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
         }
 
         // request header
-        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList =
-                new ArrayList<org.codelibs.fess.crawler.client.http.RequestHeader>();
+        final List<org.codelibs.fess.crawler.client.http.RequestHeader> rhList = new ArrayList<>();
         int count = 1;
         String headerName = paramMap.get(CRAWLER_WEB_HEADER_PREFIX + count + ".name");
         while (StringUtil.isNotBlank(headerName)) {

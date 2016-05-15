@@ -211,7 +211,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                     try {
                         dataConfigService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -231,7 +231,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                     try {
                         dataConfigService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -254,7 +254,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                             try {
                                 dataConfigService.delete(entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());
@@ -313,9 +313,9 @@ public class AdminDataconfigAction extends FessAdminAction {
 
     protected void registerHandlerNames(final RenderData data) {
         final List<String> dataStoreNameList = dataStoreFactory.getDataStoreNameList();
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         for (final String name : dataStoreNameList) {
-            final Map<String, String> map = new HashMap<String, String>();
+            final Map<String, String> map = new HashMap<>();
             map.put(Constants.ITEM_LABEL, name);
             map.put(Constants.ITEM_VALUE, name);
             itemList.add(map);

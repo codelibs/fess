@@ -102,7 +102,7 @@ public class ActivityHelper {
         LOGIN, LOGOUT, ACCESS;
     }
 
-    public void setLoggerName(String loggerName) {
+    public void setLoggerName(final String loggerName) {
         this.loggerName = loggerName;
     }
 }

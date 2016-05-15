@@ -88,7 +88,7 @@ public class AllJobScheduler implements LaJobScheduler {
                 }
                 try {
                     jobHelper.register(scheduledJob);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.warn("Failed to update schdule " + scheduledJob, e);
                 }
             });
@@ -103,7 +103,7 @@ public class AllJobScheduler implements LaJobScheduler {
         });
     }
 
-    public void setJobClass(Class<? extends LaJob> jobClass) {
+    public void setJobClass(final Class<? extends LaJob> jobClass) {
         this.jobClass = jobClass;
     }
 }

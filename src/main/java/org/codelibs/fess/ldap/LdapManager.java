@@ -111,7 +111,7 @@ public class LdapManager {
     public String[] getRoles(final LdapUser ldapUser, final String bindDn, final String accountFilter) {
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final List<String> roleList = new ArrayList<String>();
+        final List<String> roleList = new ArrayList<>();
 
         if (fessConfig.isLdapRoleSearchUserEnabled()) {
             roleList.add(systemHelper.getSearchRoleByUser(ldapUser.getName()));
@@ -180,7 +180,7 @@ public class LdapManager {
     }
 
     protected void setAttributeValue(final List<SearchResult> result, final String name, final Consumer<Object> consumer) {
-        List<Object> attrList = getAttributeValueList(result, name);
+        final List<Object> attrList = getAttributeValueList(result, name);
         if (!attrList.isEmpty()) {
             consumer.accept(attrList.get(0));
         }
@@ -206,7 +206,7 @@ public class LdapManager {
                 return attrList;
             }
             return Collections.emptyList();
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new LdapOperationException("Failed to parse attribute values for " + name, e);
         }
     }
@@ -843,7 +843,7 @@ public class LdapManager {
 
     }
 
-    public void apply(Group group) {
+    public void apply(final Group group) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled()) {
             return;
@@ -879,8 +879,8 @@ public class LdapManager {
         });
     }
 
-    protected void modifyGroupAttributes(Group group, Supplier<Hashtable<String, String>> adminEnv, String entryDN,
-            List<SearchResult> result, FessConfig fessConfig) {
+    protected void modifyGroupAttributes(final Group group, final Supplier<Hashtable<String, String>> adminEnv, final String entryDN,
+            final List<SearchResult> result, final FessConfig fessConfig) {
         final List<ModificationItem> modifyList = new ArrayList<>();
 
         final String attrGidNumber = fessConfig.getLdapAttrGidNumber();

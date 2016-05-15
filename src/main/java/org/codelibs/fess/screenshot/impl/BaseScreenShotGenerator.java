@@ -28,7 +28,7 @@ public abstract class BaseScreenShotGenerator implements ScreenShotGenerator {
     @Resource
     protected ServletContext application;
 
-    protected final Map<String, String> conditionMap = new HashMap<String, String>();
+    protected final Map<String, String> conditionMap = new HashMap<>();
 
     public int directoryNameLength = 5;
 

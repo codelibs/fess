@@ -145,7 +145,7 @@ public abstract class FessSearchAction extends FessBaseAction {
             }
         }
 
-        final Map<String, String> labelMap = new LinkedHashMap<String, String>();
+        final Map<String, String> labelMap = new LinkedHashMap<>();
         if (!labelTypeItems.isEmpty()) {
             for (final Map<String, String> map : labelTypeItems) {
                 labelMap.put(map.get(Constants.ITEM_VALUE), map.get(Constants.ITEM_LABEL));
@@ -155,7 +155,7 @@ public abstract class FessSearchAction extends FessBaseAction {
 
         // sort
         if (StringUtil.isBlank(form.sort)) {
-            String[] defaultSortValues = fessConfig.getDefaultSortValues(getUserBean());
+            final String[] defaultSortValues = fessConfig.getDefaultSortValues(getUserBean());
             if (defaultSortValues.length > 0) {
                 form.sort = String.join(",", defaultSortValues);
             }

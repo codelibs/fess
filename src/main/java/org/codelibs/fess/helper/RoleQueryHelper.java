@@ -218,7 +218,7 @@ public class RoleQueryHelper {
 
     public void addCookieNameMapping(final String cookieName, final String roleName) {
         if (cookieNameMap == null) {
-            cookieNameMap = new HashMap<String, String>();
+            cookieNameMap = new HashMap<>();
         }
         cookieNameMap.put(cookieName, roleName);
     }

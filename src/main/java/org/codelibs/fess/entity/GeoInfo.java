@@ -36,7 +36,7 @@ public class GeoInfo {
 
     private QueryBuilder builder;
 
-    public GeoInfo(HttpServletRequest request) {
+    public GeoInfo(final HttpServletRequest request) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String[] geoFields = fessConfig.getQueryGeoFieldsAsArray();
@@ -48,9 +48,9 @@ public class GeoInfo {
                 .forEach(
                         e -> {
                             final String key = e.getKey();
-                            for (String geoField : geoFields) {
+                            for (final String geoField : geoFields) {
                                 if (key.startsWith("geo." + geoField + ".")) {
-                                    String distanceKey = key.replaceFirst(".point$", ".distance");
+                                    final String distanceKey = key.replaceFirst(".point$", ".distance");
                                     final String distance = request.getParameter(distanceKey);
                                     if (StringUtil.isNotBlank(distance)) {
                                         StreamUtil.of(e.getValue()).forEach(
@@ -60,14 +60,14 @@ public class GeoInfo {
                                                         list = new ArrayList<>();
                                                         geoMap.put(geoField, list);
                                                     }
-                                                    String[] values = pt.split(",");
+                                                    final String[] values = pt.split(",");
                                                     if (values.length == 2) {
                                                         try {
-                                                            double lat = Double.parseDouble(values[0]);
-                                                            double lon = Double.parseDouble(values[1]);
+                                                            final double lat = Double.parseDouble(values[0]);
+                                                            final double lon = Double.parseDouble(values[1]);
                                                             list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).lat(lat)
                                                                     .lon(lon));
-                                                        } catch (Exception ex) {
+                                                        } catch (final Exception ex) {
                                                             throw new InvalidQueryException(messages -> messages
                                                                     .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), ex
                                                                     .getLocalizedMessage());
@@ -84,11 +84,11 @@ public class GeoInfo {
                             }
                         });
 
-        QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
+        final QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
             if (list.size() == 1) {
                 return list.get(0);
             } else if (list.size() > 1) {
-                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 list.forEach(q -> boolQuery.should(q));
                 return boolQuery;
             }
@@ -98,7 +98,7 @@ public class GeoInfo {
         if (queryBuilders.length == 1) {
             builder = queryBuilders[0];
         } else if (queryBuilders.length > 1) {
-            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
             StreamUtil.of(queryBuilders).forEach(q -> boolQuery.must(q));
             builder = boolQuery;
         }

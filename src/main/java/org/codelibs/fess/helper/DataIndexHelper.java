@@ -92,16 +92,16 @@ public class DataIndexHelper implements Serializable {
     }
 
     protected void doCrawl(final String sessionId, final List<DataConfig> configList) {
-        int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
+        final int multiprocessCrawlingCount = ComponentUtil.getFessConfig().getCrawlingThreadCount();
 
         final long startTime = System.currentTimeMillis();
 
         final IndexUpdateCallback indexUpdateCallback = ComponentUtil.getComponent(IndexUpdateCallback.class);
 
-        final List<String> sessionIdList = new ArrayList<String>();
-        final Map<String, String> initParamMap = new HashMap<String, String>();
+        final List<String> sessionIdList = new ArrayList<>();
+        final Map<String, String> initParamMap = new HashMap<>();
         dataCrawlingThreadList.clear();
-        final List<String> dataCrawlingThreadStatusList = new ArrayList<String>();
+        final List<String> dataCrawlingThreadStatusList = new ArrayList<>();
         for (final DataConfig dataConfig : configList) {
             final String sid = crawlingConfigHelper.store(sessionId, dataConfig);
             sessionIdList.add(sid);

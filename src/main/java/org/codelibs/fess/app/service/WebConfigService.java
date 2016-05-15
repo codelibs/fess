@@ -126,7 +126,7 @@ public class WebConfigService implements Serializable {
                 wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!wctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<>(wctltmList.size());
                 for (final WebConfigToLabel mapping : wctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
@@ -147,7 +147,7 @@ public class WebConfigService implements Serializable {
         if (isNew) {
             // Insert
             if (labelTypeIds != null) {
-                final List<WebConfigToLabel> wctltmList = new ArrayList<WebConfigToLabel>();
+                final List<WebConfigToLabel> wctltmList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     final WebConfigToLabel mapping = new WebConfigToLabel();
                     mapping.setWebConfigId(webConfigId);
@@ -165,8 +165,8 @@ public class WebConfigService implements Serializable {
                     wctltmCb.query().setWebConfigId_Equal(webConfigId);
                     wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
-                final List<WebConfigToLabel> newList = new ArrayList<WebConfigToLabel>();
-                final List<WebConfigToLabel> matchedList = new ArrayList<WebConfigToLabel>();
+                final List<WebConfigToLabel> newList = new ArrayList<>();
+                final List<WebConfigToLabel> matchedList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     boolean exist = false;
                     for (final WebConfigToLabel mapping : list) {

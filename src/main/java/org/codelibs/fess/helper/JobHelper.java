@@ -121,12 +121,12 @@ public class JobHelper {
         }
     }
 
-    public boolean isAvailable(String id) {
+    public boolean isAvailable(final String id) {
         return ComponentUtil.getComponent(ScheduledJobBhv.class).selectByPK(id).filter(e -> Boolean.TRUE.equals(e.getAvailable()))
                 .isPresent();
     }
 
-    public void store(JobLog jobLog) {
+    public void store(final JobLog jobLog) {
         ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
             op.setRefresh(true);
         });

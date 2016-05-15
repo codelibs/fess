@@ -25,7 +25,7 @@ public class WebApiManagerFactory {
     protected WebApiManager[] webApiManagers = new WebApiManager[0];
 
     public void add(final WebApiManager webApiManager) {
-        final List<WebApiManager> list = new ArrayList<WebApiManager>();
+        final List<WebApiManager> list = new ArrayList<>();
         for (final WebApiManager manager : webApiManagers) {
             list.add(manager);
         }

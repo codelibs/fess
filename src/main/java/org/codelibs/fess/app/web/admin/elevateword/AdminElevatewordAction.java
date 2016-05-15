@@ -233,7 +233,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
                                 entity.getTargetRole(), entity.getBoost());
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -255,7 +255,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         suggestHelper.deleteAllElevateWord();
                         suggestHelper.storeAllElevateWords();
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -279,7 +279,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                                 elevateWordService.delete(entity);
                                 suggestHelper.deleteElevateWord(entity.getSuggestWord());
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());

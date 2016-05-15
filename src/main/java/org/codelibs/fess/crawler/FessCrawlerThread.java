@@ -71,9 +71,9 @@ public class FessCrawlerThread extends CrawlerThread {
             ResponseData responseData = null;
             try {
                 final CrawlingConfig crawlingConfig = crawlingConfigHelper.get(crawlerContext.getSessionId());
-                final Map<String, Object> dataMap = new HashMap<String, Object>();
+                final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.put(fessConfig.getIndexFieldUrl(), url);
-                final List<String> roleTypeList = new ArrayList<String>();
+                final List<String> roleTypeList = new ArrayList<>();
                 StreamUtil.of(crawlingConfig.getPermissions()).forEach(p -> roleTypeList.add(p));
                 if (url.startsWith("smb://")) {
                     if (url.endsWith("/")) {
@@ -184,7 +184,7 @@ public class FessCrawlerThread extends CrawlerThread {
             try {
                 storeChildUrls(childUrlSet.stream().filter(rd -> StringUtil.isNotBlank(rd.getUrl())).collect(Collectors.toSet()),
                         urlQueue.getUrl(), urlQueue.getDepth() != null ? urlQueue.getDepth() + 1 : 1);
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 if (!ComponentUtil.available()) {
                     throw new ContainerNotAvailableException(t);
                 }
@@ -197,7 +197,7 @@ public class FessCrawlerThread extends CrawlerThread {
     protected Set<RequestData> getAnchorSet(final Object obj) {
         List<String> anchorList;
         if (obj instanceof String) {
-            anchorList = new ArrayList<String>();
+            anchorList = new ArrayList<>();
             anchorList.add(obj.toString());
         } else if (obj instanceof List<?>) {
             anchorList = (List<String>) obj;

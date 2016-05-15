@@ -85,7 +85,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
 
     protected List<File> getCsvFileList(final Map<String, String> paramMap) {
         String value = paramMap.get(CSV_FILES_PARAM);
-        final List<File> fileList = new ArrayList<File>();
+        final List<File> fileList = new ArrayList<>();
         if (StringUtil.isBlank(value)) {
             value = paramMap.get(CSV_DIRS_PARAM);
             if (StringUtil.isBlank(value)) {
@@ -186,9 +186,9 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             List<String> list;
             boolean loop = true;
             while ((list = csvReader.readValues()) != null && loop && alive) {
-                final Map<String, Object> dataMap = new HashMap<String, Object>();
+                final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.putAll(defaultDataMap);
-                final Map<String, String> resultMap = new LinkedHashMap<String, String>();
+                final Map<String, String> resultMap = new LinkedHashMap<>();
                 resultMap.putAll(paramMap);
                 resultMap.put("csvfile", csvFile.getAbsolutePath());
                 resultMap.put("csvfilename", csvFile.getName());
@@ -258,7 +258,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
 
                     String url;
                     if (target instanceof DataStoreCrawlingException) {
-                        DataStoreCrawlingException dce = (DataStoreCrawlingException) target;
+                        final DataStoreCrawlingException dce = (DataStoreCrawlingException) target;
                         url = dce.getUrl();
                         if (dce.aborted()) {
                             loop = false;

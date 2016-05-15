@@ -44,7 +44,7 @@ public class LabelTypeHelper implements Serializable {
     @Resource
     protected RoleQueryHelper roleQueryHelper;
 
-    protected volatile List<LabelTypeItem> labelTypeItemList = new ArrayList<LabelTypeItem>();
+    protected volatile List<LabelTypeItem> labelTypeItemList = new ArrayList<>();
 
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
@@ -63,7 +63,7 @@ public class LabelTypeHelper implements Serializable {
     }
 
     private void buildLabelTypeItems(final List<LabelType> labelTypeList) {
-        final List<LabelTypeItem> itemList = new ArrayList<LabelTypeItem>();
+        final List<LabelTypeItem> itemList = new ArrayList<>();
         for (final LabelType labelType : labelTypeList) {
             final LabelTypeItem item = new LabelTypeItem();
             item.setLabel(labelType.getName());
@@ -79,11 +79,11 @@ public class LabelTypeHelper implements Serializable {
             init();
         }
 
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         final Set<String> roleSet = roleQueryHelper.build();
         if (roleSet.isEmpty()) {
             for (final LabelTypeItem item : labelTypeItemList) {
-                final Map<String, String> map = new HashMap<String, String>(2);
+                final Map<String, String> map = new HashMap<>(2);
                 map.put(Constants.ITEM_LABEL, item.getLabel());
                 map.put(Constants.ITEM_VALUE, item.getValue());
                 itemList.add(map);
@@ -92,7 +92,7 @@ public class LabelTypeHelper implements Serializable {
             for (final LabelTypeItem item : labelTypeItemList) {
                 for (final String roleValue : roleSet) {
                     if (item.getRoleValueList().contains(roleValue)) {
-                        final Map<String, String> map = new HashMap<String, String>(2);
+                        final Map<String, String> map = new HashMap<>(2);
                         map.put(Constants.ITEM_LABEL, item.getLabel());
                         map.put(Constants.ITEM_VALUE, item.getValue());
                         itemList.add(map);
@@ -110,7 +110,7 @@ public class LabelTypeHelper implements Serializable {
             synchronized (this) {
                 if (labelTypePatternList == null) {
                     final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeList();
-                    final List<LabelTypePattern> list = new ArrayList<LabelTypePattern>();
+                    final List<LabelTypePattern> list = new ArrayList<>();
                     for (final LabelType labelType : labelTypeList) {
                         final String includedPaths = labelType.getIncludedPaths();
                         final String excludedPaths = labelType.getExcludedPaths();
@@ -132,7 +132,7 @@ public class LabelTypeHelper implements Serializable {
             return Collections.emptySet();
         }
 
-        final Set<String> valueSet = new HashSet<String>();
+        final Set<String> valueSet = new HashSet<>();
         for (final LabelTypePattern pattern : labelTypePatternList) {
             if (pattern.match(path)) {
                 valueSet.add(pattern.getValue());

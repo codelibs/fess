@@ -34,7 +34,7 @@ public class DuplicateHostHelper implements Serializable {
     @PostConstruct
     public void init() {
         if (duplicateHostList == null) {
-            duplicateHostList = new ArrayList<DuplicateHost>();
+            duplicateHostList = new ArrayList<>();
         }
         final DuplicateHostService duplicateHostService = ComponentUtil.getComponent(DuplicateHostService.class);
         duplicateHostList.addAll(duplicateHostService.getDuplicateHostList());
@@ -46,7 +46,7 @@ public class DuplicateHostHelper implements Serializable {
 
     public void add(final DuplicateHost duplicateHost) {
         if (duplicateHostList == null) {
-            duplicateHostList = new ArrayList<DuplicateHost>();
+            duplicateHostList = new ArrayList<>();
         }
         duplicateHostList.add(duplicateHost);
     }

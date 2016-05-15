@@ -74,7 +74,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
     protected long queryTime;
 
     public QueryResponseList() {
-        parent = new ArrayList<Map<String, Object>>();
+        parent = new ArrayList<>();
     }
 
     // for testing
@@ -96,7 +96,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
                 final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
                 final String hlPrefix = queryHelper.getHighlightPrefix();
                 for (final SearchHit searchHit : searchHits.getHits()) {
-                    final Map<String, Object> docMap = new HashMap<String, Object>();
+                    final Map<String, Object> docMap = new HashMap<>();
                     if (searchHit.getSource() == null) {
                         searchHit.getFields().forEach((key, value) -> {
                             docMap.put(key, value.getValue());
@@ -170,7 +170,7 @@ public class QueryResponseList implements List<Map<String, Object>> {
         if (endPageRangeSize > allPageCount) {
             endPageRangeSize = allPageCount;
         }
-        pageNumberList = new ArrayList<String>();
+        pageNumberList = new ArrayList<>();
         for (int i = startPageRangeSize; i <= endPageRangeSize; i++) {
             pageNumberList.add(String.valueOf(i));
         }

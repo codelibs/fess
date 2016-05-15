@@ -185,7 +185,7 @@ public class AdminFileauthAction extends FessAdminAction {
                     try {
                         fileAuthenticationService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -205,7 +205,7 @@ public class AdminFileauthAction extends FessAdminAction {
                     try {
                         fileAuthenticationService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
                                 () -> asEditHtml());
                     }
@@ -228,7 +228,7 @@ public class AdminFileauthAction extends FessAdminAction {
                             try {
                                 fileAuthenticationService.delete(entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 throwValidationError(
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());
@@ -273,7 +273,7 @@ public class AdminFileauthAction extends FessAdminAction {
     }
 
     protected void registerProtocolSchemeItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         final Locale locale = LaRequestUtil.getRequest().getLocale();
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_auth_scheme_samba"), Constants.SAMBA));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.file_auth_scheme_ftp"), Constants.FTP));
@@ -281,7 +281,7 @@ public class AdminFileauthAction extends FessAdminAction {
     }
 
     protected void registerFileConfigItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<Map<String, String>>();
+        final List<Map<String, String>> itemList = new ArrayList<>();
         final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList(false, false, false, null);
         for (final FileConfig fileConfig : fileConfigList) {
             itemList.add(createItem(fileConfig.getName(), fileConfig.getId().toString()));
@@ -290,7 +290,7 @@ public class AdminFileauthAction extends FessAdminAction {
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
         map.put(Constants.ITEM_VALUE, value);
         return map;

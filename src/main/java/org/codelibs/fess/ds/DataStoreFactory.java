@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class DataStoreFactory {
-    protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<String, DataStore>();
+    protected Map<String, DataStore> dataStoreMap = new LinkedHashMap<>();
 
     public void add(final String name, final DataStore dataStore) {
         if (name == null || dataStore == null) {
@@ -37,7 +37,7 @@ public class DataStoreFactory {
 
     public List<String> getDataStoreNameList() {
         final Set<String> nameSet = dataStoreMap.keySet();
-        final List<String> nameList = new ArrayList<String>();
+        final List<String> nameList = new ArrayList<>();
         nameList.addAll(nameSet);
         return nameList;
     }

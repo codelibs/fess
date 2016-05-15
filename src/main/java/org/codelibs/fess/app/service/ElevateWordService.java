@@ -84,7 +84,7 @@ public class ElevateWordService implements Serializable {
                 wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!wctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(wctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<>(wctltmList.size());
                 for (final ElevateWordToLabel mapping : wctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
@@ -105,7 +105,7 @@ public class ElevateWordService implements Serializable {
         if (isNew) {
             // Insert
             if (labelTypeIds != null) {
-                final List<ElevateWordToLabel> wctltmList = new ArrayList<ElevateWordToLabel>();
+                final List<ElevateWordToLabel> wctltmList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     final ElevateWordToLabel mapping = new ElevateWordToLabel();
                     mapping.setElevateWordId(elevateWordId);
@@ -123,8 +123,8 @@ public class ElevateWordService implements Serializable {
                     wctltmCb.query().setElevateWordId_Equal(elevateWordId);
                     wctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
-                final List<ElevateWordToLabel> newList = new ArrayList<ElevateWordToLabel>();
-                final List<ElevateWordToLabel> matchedList = new ArrayList<ElevateWordToLabel>();
+                final List<ElevateWordToLabel> newList = new ArrayList<>();
+                final List<ElevateWordToLabel> matchedList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     boolean exist = false;
                     for (final ElevateWordToLabel mapping : list) {
@@ -236,7 +236,7 @@ public class ElevateWordService implements Serializable {
         @SuppressWarnings("resource")
         final CsvWriter csvWriter = new CsvWriter(writer, cfg);
         try {
-            final List<String> list = new ArrayList<String>();
+            final List<String> list = new ArrayList<>();
             list.add("SuggestWord");
             list.add("Reading");
             list.add("Role");
@@ -249,7 +249,7 @@ public class ElevateWordService implements Serializable {
             }, new EntityRowHandler<ElevateWord>() {
                 @Override
                 public void handle(final ElevateWord entity) {
-                    final List<String> list = new ArrayList<String>();
+                    final List<String> list = new ArrayList<>();
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
                     addToList(list, entity.getTargetRole());

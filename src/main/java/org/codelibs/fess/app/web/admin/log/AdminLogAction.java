@@ -75,7 +75,7 @@ public class AdminLogAction extends FessAdminAction {
     }
 
     private List<Map<String, Object>> getLogFileItems() {
-        final List<Map<String, Object>> logFileItems = new ArrayList<Map<String, Object>>();
+        final List<Map<String, Object>> logFileItems = new ArrayList<>();
         final String logFilePath = systemHelper.getLogFilePath();
         if (StringUtil.isNotBlank(logFilePath)) {
             final Path logDirPath = Paths.get(logFilePath);

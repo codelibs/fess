@@ -32,7 +32,7 @@ public final class MemoryUtil {
                 + byteCountToDisplaySize(maxBytes) + "}";
     }
 
-    public static String byteCountToDisplaySize(long size) {
+    public static String byteCountToDisplaySize(final long size) {
         return FileUtils.byteCountToDisplaySize(size).replace(" ", StringUtil.EMPTY);
     }
 }

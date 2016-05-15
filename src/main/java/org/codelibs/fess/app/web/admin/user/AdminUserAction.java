@@ -287,7 +287,7 @@ public class AdminUserAction extends FessAdminAction {
     }
 
     protected Map<String, String> createItem(final String label, final String value) {
-        final Map<String, String> map = new HashMap<String, String>(2);
+        final Map<String, String> map = new HashMap<>(2);
         map.put(Constants.ITEM_LABEL, label);
         map.put(Constants.ITEM_VALUE, value);
         return map;

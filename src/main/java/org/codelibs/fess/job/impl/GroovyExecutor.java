@@ -26,7 +26,7 @@ public class GroovyExecutor extends JobExecutor {
 
     @Override
     public Object execute(final String script) {
-        Map<String, Object> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put("container", SingletonLaContainerFactory.getContainer());
         params.put("executor", this);
 

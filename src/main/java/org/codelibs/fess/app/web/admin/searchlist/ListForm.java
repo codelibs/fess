@@ -133,7 +133,7 @@ public class ListForm implements SearchRequestParams, Serializable {
     }
 
     @Override
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         return LaRequestUtil.getRequest().getAttribute(name);
     }
 

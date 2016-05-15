@@ -40,7 +40,7 @@ public class LogoutAction extends FessSearchAction {
 
     @Execute
     public HtmlResponse index() {
-        final String username = getUserBean().map(u -> u.getUserId()).orElse("-");
+        getUserBean().map(u -> u.getUserId()).orElse("-");
         activityHelper.logout(getUserBean());
         fessLoginAssist.logout();
         return redirect(LoginAction.class);

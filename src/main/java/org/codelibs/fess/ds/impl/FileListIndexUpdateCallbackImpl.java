@@ -54,11 +54,11 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
 
     protected CrawlerClientFactory crawlerClientFactory;
 
-    protected List<String> deleteIdList = new ArrayList<String>(100);
+    protected List<String> deleteIdList = new ArrayList<>(100);
 
     protected int maxDeleteDocumentCacheSize = 100;
 
-    private ExecutorService executor;
+    private final ExecutorService executor;
 
     protected FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback,
             final CrawlerClientFactory crawlerClientFactory, final int nThreads) {
@@ -67,7 +67,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         executor = newFixedThreadPool(nThreads < 1 ? 1 : nThreads);
     }
 
-    protected ExecutorService newFixedThreadPool(int nThreads) {
+    protected ExecutorService newFixedThreadPool(final int nThreads) {
         if (logger.isDebugEnabled()) {
             logger.debug("Executor Thread Pool: " + nThreads);
         }
@@ -92,7 +92,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         });
     }
 
-    protected String getParamValue(Map<String, String> paramMap, String key, String defaultValue) {
+    protected String getParamValue(final Map<String, String> paramMap, final String key, final String defaultValue) {
         return paramMap.getOrDefault(key, defaultValue);
     }
 
@@ -118,7 +118,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
                 if (dataMap.containsKey(Constants.SESSION_ID)) {
                     responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
                 } else {
-                    responseData.setSessionId((String) paramMap.get(Constants.CRAWLING_INFO_ID));
+                    responseData.setSessionId(paramMap.get(Constants.CRAWLING_INFO_ID));
                 }
 
                 final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
@@ -221,7 +221,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         return indexUpdateCallback.getExecuteTime();
     }
 
-    public void setMaxDeleteDocumentCacheSize(int maxDeleteDocumentCacheSize) {
+    public void setMaxDeleteDocumentCacheSize(final int maxDeleteDocumentCacheSize) {
         this.maxDeleteDocumentCacheSize = maxDeleteDocumentCacheSize;
     }
 

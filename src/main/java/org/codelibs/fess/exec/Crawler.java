@@ -169,7 +169,7 @@ public class Crawler implements Serializable {
                 System.getProperties().entrySet().stream().forEach(e -> logger.debug("Property: " + e.getKey() + "=" + e.getValue()));
                 System.getenv().entrySet().forEach(e -> logger.debug("Env: " + e.getKey() + "=" + e.getValue()));
                 logger.debug("Option: " + options);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // ignore
             }
         }

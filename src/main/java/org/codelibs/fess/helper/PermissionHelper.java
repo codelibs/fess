@@ -46,7 +46,7 @@ public class PermissionHelper {
         return permission;
     }
 
-    public String decode(String value) {
+    public String decode(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
         }
@@ -62,15 +62,15 @@ public class PermissionHelper {
         return value;
     }
 
-    public void setRolePrefix(String rolePrefix) {
+    public void setRolePrefix(final String rolePrefix) {
         this.rolePrefix = rolePrefix;
     }
 
-    public void setGroupPrefix(String groupPrefix) {
+    public void setGroupPrefix(final String groupPrefix) {
         this.groupPrefix = groupPrefix;
     }
 
-    public void setUserPrefix(String userPrefix) {
+    public void setUserPrefix(final String userPrefix) {
         this.userPrefix = userPrefix;
     }
 }

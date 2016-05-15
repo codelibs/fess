@@ -146,7 +146,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
         if (includedDocPathPatterns == null) {
             if (StringUtil.isNotBlank(getIncludedDocPaths())) {
-                final List<Pattern> pathPatterList = new ArrayList<Pattern>();
+                final List<Pattern> pathPatterList = new ArrayList<>();
                 final String[] paths = getIncludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
@@ -161,7 +161,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
         if (excludedDocPathPatterns == null) {
             if (StringUtil.isNotBlank(getExcludedDocPaths())) {
-                final List<Pattern> pathPatterList = new ArrayList<Pattern>();
+                final List<Pattern> pathPatterList = new ArrayList<>();
                 final String[] paths = getExcludedDocPaths().split("[\r\n]");
                 for (final String u : paths) {
                     if (StringUtil.isNotBlank(u) && !u.trim().startsWith("#")) {
@@ -202,7 +202,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         final FileAuthenticationService fileAuthenticationService = ComponentUtil.getComponent(FileAuthenticationService.class);
 
         //  Parameters
-        final Map<String, Object> paramMap = new HashMap<String, Object>();
+        final Map<String, Object> paramMap = new HashMap<>();
         clientFactory.setInitParameterMap(paramMap);
 
         final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);

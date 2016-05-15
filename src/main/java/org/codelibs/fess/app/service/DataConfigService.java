@@ -111,7 +111,7 @@ public class DataConfigService implements Serializable {
                 fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
             });
             if (!fctltmList.isEmpty()) {
-                final List<String> labelTypeIds = new ArrayList<String>(fctltmList.size());
+                final List<String> labelTypeIds = new ArrayList<>(fctltmList.size());
                 for (final DataConfigToLabel mapping : fctltmList) {
                     labelTypeIds.add(mapping.getLabelTypeId());
                 }
@@ -133,7 +133,7 @@ public class DataConfigService implements Serializable {
         if (isNew) {
             // Insert
             if (labelTypeIds != null) {
-                final List<DataConfigToLabel> fctltmList = new ArrayList<DataConfigToLabel>();
+                final List<DataConfigToLabel> fctltmList = new ArrayList<>();
                 for (final String labelTypeId : labelTypeIds) {
                     final DataConfigToLabel mapping = new DataConfigToLabel();
                     mapping.setDataConfigId(dataConfigId);
@@ -151,8 +151,8 @@ public class DataConfigService implements Serializable {
                     fctltmCb.query().setDataConfigId_Equal(dataConfigId);
                     fctltmCb.fetchFirst(fessConfig.getPageLabeltypeMaxFetchSizeAsInteger());
                 });
-                final List<DataConfigToLabel> newList = new ArrayList<DataConfigToLabel>();
-                final List<DataConfigToLabel> matchedList = new ArrayList<DataConfigToLabel>();
+                final List<DataConfigToLabel> newList = new ArrayList<>();
+                final List<DataConfigToLabel> matchedList = new ArrayList<>();
                 for (final String id : labelTypeIds) {
                     boolean exist = false;
                     for (final DataConfigToLabel mapping : fctltmList) {

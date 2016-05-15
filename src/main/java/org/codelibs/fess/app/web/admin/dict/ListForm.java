@@ -26,5 +26,5 @@ public class ListForm implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Map<String, String> searchParams = new HashMap<String, String>();
+    public Map<String, String> searchParams = new HashMap<>();
 }

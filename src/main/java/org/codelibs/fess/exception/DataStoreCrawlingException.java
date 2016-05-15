@@ -23,7 +23,7 @@ public class DataStoreCrawlingException extends CrawlingAccessException {
 
     private final String url;
 
-    private boolean abort;
+    private final boolean abort;
 
     public DataStoreCrawlingException(final String url, final String message, final Exception e) {
         this(url, message, e, false);

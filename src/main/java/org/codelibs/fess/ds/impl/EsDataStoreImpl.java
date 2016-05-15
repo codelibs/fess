@@ -90,14 +90,14 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                         .build();
         logger.info("Connecting to " + hostsStr + " with [" + settings.toDelimitedString(',') + "]");
         final InetSocketTransportAddress[] addresses = StreamUtil.of(hostsStr.split(",")).map(h -> {
-            String[] values = h.trim().split(":");
+            final String[] values = h.trim().split(":");
             try {
                 if (values.length == 1) {
                     return new InetSocketTransportAddress(InetAddress.getByName(values[0]), 9300);
                 } else if (values.length == 2) {
                     return new InetSocketTransportAddress(InetAddress.getByName(values[0]), Integer.parseInt(values[1]));
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to parse address: " + h, e);
             }
             return null;
@@ -151,7 +151,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                         break;
                     }
 
-                    final Map<String, Object> dataMap = new HashMap<String, Object>();
+                    final Map<String, Object> dataMap = new HashMap<>();
                     dataMap.putAll(defaultDataMap);
                     final Map<String, Object> resultMap = new LinkedHashMap<>();
                     resultMap.putAll(paramMap);
@@ -204,7 +204,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
 
                         String url;
                         if (target instanceof DataStoreCrawlingException) {
-                            DataStoreCrawlingException dce = (DataStoreCrawlingException) target;
+                            final DataStoreCrawlingException dce = (DataStoreCrawlingException) target;
                             url = dce.getUrl();
                             if (dce.aborted()) {
                                 loop = false;

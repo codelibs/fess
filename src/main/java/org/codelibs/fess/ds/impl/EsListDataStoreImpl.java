@@ -36,7 +36,7 @@ public class EsListDataStoreImpl extends EsDataStoreImpl {
         if (paramMap.containsKey(Constants.NUM_OF_THREADS)) {
             try {
                 nThreads = Integer.parseInt(paramMap.get(Constants.NUM_OF_THREADS));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 logger.warn(Constants.NUM_OF_THREADS + " is not int value.", e);
             }
         }
@@ -46,7 +46,7 @@ public class EsListDataStoreImpl extends EsDataStoreImpl {
                 new FileListIndexUpdateCallbackImpl(callback, crawlerClientFactory, nThreads)) {
             super.storeData(dataConfig, fileListIndexUpdateCallback, paramMap, scriptMap, defaultDataMap);
             fileListIndexUpdateCallback.commit();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new DataStoreException(e);
         }
     }

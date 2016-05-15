@@ -81,7 +81,7 @@ public class CrawlingInfoHelper implements Serializable {
         }
 
         if (infoMap != null) {
-            final List<CrawlingInfoParam> crawlingInfoParamList = new ArrayList<CrawlingInfoParam>();
+            final List<CrawlingInfoParam> crawlingInfoParamList = new ArrayList<>();
             for (final Map.Entry<String, String> entry : infoMap.entrySet()) {
                 final CrawlingInfoParam crawlingInfoParam = new CrawlingInfoParam();
                 crawlingInfoParam.setCrawlingInfoId(crawlingInfo.getId());
@@ -144,7 +144,7 @@ public class CrawlingInfoHelper implements Serializable {
 
     public Map<String, String> getInfoMap(final String sessionId) {
         final List<CrawlingInfoParam> crawlingInfoParamList = getCrawlingInfoService().getLastCrawlingInfoParamList(sessionId);
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         for (final CrawlingInfoParam crawlingInfoParam : crawlingInfoParamList) {
             map.put(crawlingInfoParam.getKey(), crawlingInfoParam.getValue());
         }
@@ -173,11 +173,11 @@ public class CrawlingInfoHelper implements Serializable {
                     queryRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY);
                     return true;
                 }, (queryRequestBuilder, execTime, searchResponse) -> {
-                    final List<Map<String, String>> sessionIdList = new ArrayList<Map<String, String>>();
+                    final List<Map<String, String>> sessionIdList = new ArrayList<>();
                     searchResponse.ifPresent(response -> {
                         final Terms terms = response.getAggregations().get(fessConfig.getIndexFieldSegment());
                         for (final Bucket bucket : terms.getBuckets()) {
-                            final Map<String, String> map = new HashMap<String, String>(2);
+                            final Map<String, String> map = new HashMap<>(2);
                             map.put(fessConfig.getIndexFieldSegment(), bucket.getKey().toString());
                             map.put(FACET_COUNT_KEY, Long.toString(bucket.getDocCount()));
                             sessionIdList.add(map);

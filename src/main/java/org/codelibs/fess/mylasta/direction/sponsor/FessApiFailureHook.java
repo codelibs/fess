@@ -71,7 +71,7 @@ public class FessApiFailureHook implements ApiFailureHook { // #change_it for ha
     //                                                                        Assist Logic
     //                                                                        ============
     protected JsonResponse<TooSimpleFailureBean> asJson(final TooSimpleFailureBean bean) {
-        return new JsonResponse<TooSimpleFailureBean>(bean);
+        return new JsonResponse<>(bean);
     }
 
     protected TooSimpleFailureBean createFailureBean(final ApiFailureResource resource) {

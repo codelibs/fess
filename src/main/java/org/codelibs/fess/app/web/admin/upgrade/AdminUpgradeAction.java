@@ -126,7 +126,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private void upgradeFrom10_0() {
 
-        IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String configIndex = ".fess_config";
 
         try {
@@ -243,18 +243,19 @@ public class AdminUpgradeAction extends FessAdminAction {
                     });
 
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to upgrade data.", e);
             saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));
         }
     }
 
-    private void addFieldMapping(IndicesAdminClient indicesClient, final String index, final String type, final String field,
+    private void addFieldMapping(final IndicesAdminClient indicesClient, final String index, final String type, final String field,
             final String source) {
-        GetFieldMappingsResponse gfmResponse =
+        final GetFieldMappingsResponse gfmResponse =
                 indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
         if (gfmResponse.fieldMappings(index, type, field).isNull()) {
-            PutMappingResponse pmResponse = indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
+            final PutMappingResponse pmResponse =
+                    indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
             if (!pmResponse.isAcknowledged()) {
                 logger.warn("Failed to add " + field + " to " + index + "/" + type);
             }

@@ -26,7 +26,7 @@ public class IntervalControlHelper {
 
     public long crawlerWaitMillis = 10000;
 
-    protected List<IntervalRule> ruleList = new ArrayList<IntervalRule>();
+    protected List<IntervalRule> ruleList = new ArrayList<>();
 
     public void checkCrawlerStatus() {
         while (!crawlerRunning) {
@@ -102,7 +102,7 @@ public class IntervalControlHelper {
             toHours = tints[0];
             toMinutes = tints[1];
             final String[] values = days.split(",");
-            final List<Integer> list = new ArrayList<Integer>();
+            final List<Integer> list = new ArrayList<>();
             for (final String value : values) {
                 try {
                     list.add(Integer.parseInt(value.trim()));

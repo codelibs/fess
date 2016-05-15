@@ -699,11 +699,11 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public Map<String, String[]> getFields() {
-            Map<String, String[]> fields = new HashMap<>();
-            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-                String key = entry.getKey();
+            final Map<String, String[]> fields = new HashMap<>();
+            for (final Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                final String key = entry.getKey();
                 if (key.startsWith("fields.")) {
-                    String[] value = simplifyArray(entry.getValue());
+                    final String[] value = simplifyArray(entry.getValue());
                     fields.put(key.substring("fields.".length()), value);
                 }
             }
@@ -777,7 +777,7 @@ public class JsonApiManager extends BaseApiManager {
         }
 
         @Override
-        public Object getAttribute(String name) {
+        public Object getAttribute(final String name) {
             return request.getAttribute(name);
         }
 

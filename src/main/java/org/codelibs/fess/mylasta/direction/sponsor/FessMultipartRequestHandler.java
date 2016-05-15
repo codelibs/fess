@@ -160,9 +160,9 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                      Handling Parts
     //                                                                      ==============
     protected void prepareElementsHash() {
-        elementsText = new Hashtable<String, String[]>();
-        elementsFile = new Hashtable<String, MultipartFormFile>();
-        elementsAll = new Hashtable<String, Object>();
+        elementsText = new Hashtable<>();
+        elementsFile = new Hashtable<>();
+        elementsAll = new Hashtable<>();
     }
 
     protected List<FileItem> parseRequest(final HttpServletRequest request, final ServletFileUpload upload) throws FileUploadException {

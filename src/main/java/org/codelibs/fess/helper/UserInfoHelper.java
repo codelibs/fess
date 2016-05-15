@@ -113,7 +113,7 @@ public class UserInfoHelper {
         if (session != null) {
             final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-            final List<String> docIdList = new ArrayList<String>();
+            final List<String> docIdList = new ArrayList<>();
             for (final Map<String, Object> map : documentItems) {
                 final Object docId = map.get(fessConfig.getIndexFieldDocId());
                 if (docId != null && docId.toString().length() > 0) {
@@ -144,7 +144,7 @@ public class UserInfoHelper {
         @SuppressWarnings("unchecked")
         Map<String, String[]> resultDocIdsCache = (Map<String, String[]>) session.getAttribute(Constants.RESULT_DOC_ID_CACHE);
         if (resultDocIdsCache == null) {
-            resultDocIdsCache = new LruHashMap<String, String[]>(resultDocIdsCacheSize);
+            resultDocIdsCache = new LruHashMap<>(resultDocIdsCacheSize);
             session.setAttribute(Constants.RESULT_DOC_ID_CACHE, resultDocIdsCache);
         }
         return resultDocIdsCache;

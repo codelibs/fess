@@ -65,15 +65,15 @@ public class SearchLogHelper {
 
     public int userInfoCacheSize = 1000;
 
-    protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
+    protected volatile Queue<SearchLog> searchLogQueue = new ConcurrentLinkedQueue<>();
 
-    protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
+    protected volatile Queue<ClickLog> clickLogQueue = new ConcurrentLinkedQueue<>();
 
     protected Map<String, Long> userInfoCache;
 
     @PostConstruct
     public void init() {
-        userInfoCache = new LruHashMap<String, Long>(userInfoCacheSize);
+        userInfoCache = new LruHashMap<>(userInfoCacheSize);
     }
 
     public void addSearchLog(final LocalDateTime requestedTime, final String queryId, final String query, final int pageStart,
@@ -139,13 +139,13 @@ public class SearchLogHelper {
     public void storeSearchLog() {
         if (!searchLogQueue.isEmpty()) {
             final Queue<SearchLog> queue = searchLogQueue;
-            searchLogQueue = new ConcurrentLinkedQueue<SearchLog>();
+            searchLogQueue = new ConcurrentLinkedQueue<>();
             processSearchLogQueue(queue);
         }
 
         if (!clickLogQueue.isEmpty()) {
             final Queue<ClickLog> queue = clickLogQueue;
-            clickLogQueue = new ConcurrentLinkedQueue<ClickLog>();
+            clickLogQueue = new ConcurrentLinkedQueue<>();
             processClickLogQueue(queue);
         }
     }

@@ -78,7 +78,7 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
         }
 
         if (offset >= seunjeonItemList.size() || offset < 0) {
-            return new PagingList<SeunjeonItem>(Collections.<SeunjeonItem> emptyList(), offset, size, seunjeonItemList.size());
+            return new PagingList<>(Collections.<SeunjeonItem> emptyList(), offset, size, seunjeonItemList.size());
         }
 
         int toIndex = offset + size;
@@ -86,7 +86,7 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
             toIndex = seunjeonItemList.size();
         }
 
-        return new PagingList<SeunjeonItem>(seunjeonItemList.subList(offset, toIndex), offset, size, seunjeonItemList.size());
+        return new PagingList<>(seunjeonItemList.subList(offset, toIndex), offset, size, seunjeonItemList.size());
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
     }
 
     protected void reload(final SynonymUpdater updater, final InputStream in) {
-        final List<SeunjeonItem> itemList = new ArrayList<SeunjeonItem>();
+        final List<SeunjeonItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
@@ -127,7 +127,7 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
                 }
 
                 final List<String> inputStrings = split(line, ",");
-                String[] inputs = new String[inputStrings.size()];
+                final String[] inputs = new String[inputStrings.size()];
                 for (int i = 0; i < inputs.length; i++) {
                     inputs[i] = unescape(inputStrings.get(i)).trim();
                 }
@@ -160,7 +160,7 @@ public class SeunjeonFile extends DictionaryFile<SeunjeonItem> {
     }
 
     private static List<String> split(final String s, final String separator) {
-        final List<String> list = new ArrayList<String>(2);
+        final List<String> list = new ArrayList<>(2);
         StringBuilder sb = new StringBuilder();
         int pos = 0;
         final int end = s.length();
