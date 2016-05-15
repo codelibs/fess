@@ -493,6 +493,9 @@
         "type": "date",
         "format": "date_optional_time"
       },
+      "location": {
+        "type": "geo_point"
+      },
       "mimetype": {
         "type": "string",
         "index": "not_analyzed"
