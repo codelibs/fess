@@ -119,7 +119,7 @@ public interface FessProp {
                 map = Collections.emptyMap();
             } else {
                 final Set<String> keySet = new HashSet<>();
-                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                map = StreamUtil.of(value.split("\n")).filter(StringUtil::isNotBlank).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
@@ -149,7 +149,7 @@ public interface FessProp {
                         return e.getValue();
                     }
                     return null;
-                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+                }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     public default void setDefaultSortValue(final String value) {
@@ -170,7 +170,7 @@ public interface FessProp {
                 map = Collections.emptyMap();
             } else {
                 final Set<String> keySet = new HashSet<>();
-                map = StreamUtil.of(value.split("\n")).filter(s -> StringUtil.isNotBlank(s)).map(s -> {
+                map = StreamUtil.of(value.split("\n")).filter(StringUtil::isNotBlank).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
@@ -196,7 +196,7 @@ public interface FessProp {
                         return e.getValue();
                     }
                     return null;
-                }).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+                }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     public default void setDefaultLabelValue(final String value) {
@@ -556,7 +556,7 @@ public interface FessProp {
     String getSupportedLanguages();
 
     public default String[] getSupportedLanguagesAsArray() {
-        return StreamUtil.of(getSupportedLanguages().split(",")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+        return StreamUtil.of(getSupportedLanguages().split(",")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getOnlineHelpSupportedLangs();
@@ -565,28 +565,25 @@ public interface FessProp {
         if (StringUtil.isBlank(getOnlineHelpSupportedLangs())) {
             return false;
         }
-        return StreamUtil.of(getOnlineHelpSupportedLangs().split(",")).filter(s -> StringUtil.isNotBlank(s)).anyMatch(s -> s.equals(lang));
+        return StreamUtil.of(getOnlineHelpSupportedLangs().split(",")).filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(lang));
     }
 
     String getSupportedUploadedJsExtentions();
 
     public default String[] getSupportedUploadedJsExtentionsAsArray() {
-        return StreamUtil.of(getSupportedUploadedJsExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
-                .toArray(n -> new String[n]);
+        return StreamUtil.of(getSupportedUploadedJsExtentions().split(",")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getSupportedUploadedCssExtentions();
 
     public default String[] getSupportedUploadedCssExtentionsAsArray() {
-        return StreamUtil.of(getSupportedUploadedCssExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
-                .toArray(n -> new String[n]);
+        return StreamUtil.of(getSupportedUploadedCssExtentions().split(",")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getSupportedUploadedMediaExtentions();
 
     public default String[] getSupportedUploadedMediaExtentionsAsArray() {
-        return StreamUtil.of(getSupportedUploadedMediaExtentions().split(",")).filter(s -> StringUtil.isNotBlank(s))
-                .toArray(n -> new String[n]);
+        return StreamUtil.of(getSupportedUploadedMediaExtentions().split(",")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getJobTemplateTitleWeb();
@@ -630,7 +627,7 @@ public interface FessProp {
         Pattern[] patterns = (Pattern[]) propMap.get(CRAWLER_METADATA_CONTENT_EXCLUDES);
         if (patterns == null) {
             patterns =
-                    StreamUtil.of(getCrawlerMetadataContentExcludes().split(",")).filter(v -> StringUtil.isNotBlank(v))
+                    StreamUtil.of(getCrawlerMetadataContentExcludes().split(",")).filter(StringUtil::isNotBlank)
                             .map(v -> Pattern.compile(v)).toArray(n -> new Pattern[n]);
             propMap.put(CRAWLER_METADATA_CONTENT_EXCLUDES, patterns);
         }
@@ -643,7 +640,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, Pair<String, String>> params = (Map<String, Pair<String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
         if (params == null) {
-            params = StreamUtil.of(getCrawlerMetadataNameMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
+            params = StreamUtil.of(getCrawlerMetadataNameMapping().split("\n")).filter(StringUtil::isNotBlank).map(v -> {
                 final String[] values = v.split("=");
                 if (values.length == 2) {
                     final String[] subValues = values[1].split(":");
@@ -663,19 +660,19 @@ public interface FessProp {
     String getSuggestPopularWordFields();
 
     public default String[] getSuggestPopularWordFieldsAsArray() {
-        return StreamUtil.of(getSuggestPopularWordFields().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+        return StreamUtil.of(getSuggestPopularWordFields().split("\n")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getSuggestPopularWordTags();
 
     public default String[] getSuggestPopularWordTagsAsArray() {
-        return StreamUtil.of(getSuggestPopularWordTags().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+        return StreamUtil.of(getSuggestPopularWordTags().split("\n")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getSuggestPopularWordExcludes();
 
     public default String[] getSuggestPopularWordExcludesAsArray() {
-        return StreamUtil.of(getSuggestPopularWordExcludes().split("\n")).filter(s -> StringUtil.isNotBlank(s)).toArray(n -> new String[n]);
+        return StreamUtil.of(getSuggestPopularWordExcludes().split("\n")).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
     String getQueryReplaceTermWithPrefixQuery();
@@ -710,7 +707,7 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
-            params = StreamUtil.of(getQueryLanguageMapping().split("\n")).filter(v -> StringUtil.isNotBlank(v)).map(v -> {
+            params = StreamUtil.of(getQueryLanguageMapping().split("\n")).filter(StringUtil::isNotBlank).map(v -> {
                 final String[] values = v.split("=");
                 if (values.length == 2) {
                     return new Pair<String, String>(values[0], values[1]);
@@ -742,15 +739,14 @@ public interface FessProp {
     String getSupportedUploadedFiles();
 
     public default boolean isSupportedUploadedFile(final String name) {
-        return StreamUtil.of(getSuggestPopularWordExcludes().split(",")).filter(s -> StringUtil.isNotBlank(s))
-                .anyMatch(s -> s.equals(name));
+        return StreamUtil.of(getSuggestPopularWordExcludes().split(",")).filter(StringUtil::isNotBlank).anyMatch(s -> s.equals(name));
     }
 
     String getLdapAdminUserObjectClasses();
 
     public default Attribute getLdapAdminUserObjectClassAttribute() {
         final Attribute oc = new BasicAttribute("objectClass");
-        StreamUtil.of(getLdapAdminUserObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        StreamUtil.of(getLdapAdminUserObjectClasses().split(",")).filter(StringUtil::isNotBlank).forEach(s -> oc.add(s.trim()));
         return oc;
     }
 
@@ -775,7 +771,7 @@ public interface FessProp {
 
     public default Attribute getLdapAdminRoleObjectClassAttribute() {
         final Attribute oc = new BasicAttribute("objectClass");
-        StreamUtil.of(getLdapAdminRoleObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        StreamUtil.of(getLdapAdminRoleObjectClasses().split(",")).filter(StringUtil::isNotBlank).forEach(s -> oc.add(s.trim()));
         return oc;
     }
 
@@ -800,7 +796,7 @@ public interface FessProp {
 
     public default Attribute getLdapAdminGroupObjectClassAttribute() {
         final Attribute oc = new BasicAttribute("objectClass");
-        StreamUtil.of(getLdapAdminGroupObjectClasses().split(",")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> oc.add(s.trim()));
+        StreamUtil.of(getLdapAdminGroupObjectClasses().split(",")).filter(StringUtil::isNotBlank).forEach(s -> oc.add(s.trim()));
         return oc;
     }
 
@@ -839,7 +835,7 @@ public interface FessProp {
     String getCrawlerWebProtocols();
 
     public default String[] getCrawlerWebProtocolsAsArray() {
-        return StreamUtil.of(getCrawlerWebProtocols().split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim() + ":")
+        return StreamUtil.of(getCrawlerWebProtocols().split(",")).filter(StringUtil::isNotBlank).map(s -> s.trim() + ":")
                 .toArray(n -> new String[n]);
     }
 
@@ -850,7 +846,7 @@ public interface FessProp {
     String getCrawlerFileProtocols();
 
     public default String[] getCrawlerFileProtocolsAsArray() {
-        return StreamUtil.of(getCrawlerFileProtocols().split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim() + ":")
+        return StreamUtil.of(getCrawlerFileProtocols().split(",")).filter(StringUtil::isNotBlank).map(s -> s.trim() + ":")
                 .toArray(n -> new String[n]);
     }
 
@@ -882,12 +878,18 @@ public interface FessProp {
     public default String[] getSearchDefaultPermissionsAsArray() {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         return StreamUtil.of(getRoleSearchDefaultPermissions().split(",")).map(p -> permissionHelper.encode(p))
-                .filter(s -> StringUtil.isNotBlank(s)).distinct().toArray(n -> new String[n]);
+                .filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]);
     }
 
     public default String getSearchDefaultDisplayPermission() {
-        return StreamUtil.of(getRoleSearchDefaultPermissions().split(",")).filter(s -> StringUtil.isNotBlank(s)).distinct()
+        return StreamUtil.of(getRoleSearchDefaultPermissions().split(",")).filter(StringUtil::isNotBlank).distinct()
                 .collect(Collectors.joining("\n"));
+    }
+
+    String getQueryGeoFields();
+
+    public default String[] getQueryGeoFieldsAsArray() {
+        return StreamUtil.of(getQueryGeoFields().split(",")).map(s -> s.trim()).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
     }
 
 }

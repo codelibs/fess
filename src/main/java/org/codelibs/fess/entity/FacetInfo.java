@@ -18,27 +18,22 @@ package org.codelibs.fess.entity;
 import java.util.Arrays;
 
 public class FacetInfo {
-    //@Maxbytelength(maxbytelength = 255)
     public String[] field;
 
-    //@Maxbytelength(maxbytelength = 255)
     public String[] query;
 
-    //@IntegerType
-    public String limit;
+    public Integer size;
 
-    //@IntegerType
-    public String minCount;
+    public Long minDocCount;
 
-    //@Maxbytelength(maxbytelength = 255)
     public String sort;
 
-    //@Maxbytelength(maxbytelength = 10)
     public String missing;
 
     @Override
     public String toString() {
-        return "FacetInfo [field=" + Arrays.toString(field) + ", q=" + Arrays.toString(query) + ", limit=" + limit + ", minCount="
-                + minCount + ", sort=" + sort + ", missing=" + missing + "]";
+        return "FacetInfo [field=" + Arrays.toString(field) + ", query=" + Arrays.toString(query) + ", size=" + size + ", minDocCount="
+                + minDocCount + ", sort=" + sort + ", missing=" + missing + "]";
     }
+
 }

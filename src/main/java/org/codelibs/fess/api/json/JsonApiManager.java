@@ -54,7 +54,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
@@ -688,14 +687,6 @@ public class JsonApiManager extends BaseApiManager {
             this.fessConfig = fessConfig;
         }
 
-        private String[] simplifyArray(String[] values) {
-            return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
-        }
-
-        private String[] getParamValueArray(String param) {
-            return simplifyArray(request.getParameterValues(param));
-        }
-
         @Override
         public String getQuery() {
             return request.getParameter("q");
@@ -703,7 +694,7 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getExtraQueries() {
-            return getParamValueArray("ex_q");
+            return getParamValueArray(request, "ex_q");
         }
 
         @Override
@@ -721,24 +712,17 @@ public class JsonApiManager extends BaseApiManager {
 
         @Override
         public String[] getLanguages() {
-            return getParamValueArray("lang");
+            return getParamValueArray(request, "lang");
         }
 
         @Override
         public GeoInfo getGeoInfo() {
-            GeoInfo geoInfo = new GeoInfo();
-            geoInfo.latitude = request.getParameter("geo.latitude");
-            geoInfo.longitude = request.getParameter("geo.longitude");
-            geoInfo.distance = request.getParameter("geo.distance");
-            return geoInfo;
+            return createGeoInfo(request);
         }
 
         @Override
         public FacetInfo getFacetInfo() {
-            FacetInfo facetInfo = new FacetInfo();
-            facetInfo.field = getParamValueArray("facet.field");
-            facetInfo.query = getParamValueArray("facet.query");
-            return facetInfo;
+            return createFacetInfo(request);
         }
 
         @Override

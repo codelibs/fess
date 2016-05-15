@@ -15,91 +15,98 @@
  */
 package org.codelibs.fess.entity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.codelibs.core.lang.StringUtil;
-import org.elasticsearch.common.unit.DistanceUnit;
+import org.codelibs.fess.exception.InvalidQueryException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.StreamUtil;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.lastaflute.core.message.UserMessages;
 
 public class GeoInfo {
-    //@Mask(mask = "-?([0-9]+|[0-9]+\\.[0-9]+)")
-    //@Maxbytelength(maxbytelength = 20)
-    public String latitude;
-
-    //@Mask(mask = "-?([0-9]+|[0-9]+\\.[0-9]+)")
-    //@Maxbytelength(maxbytelength = 20)
-    public String longitude;
-
-    //@Mask(mask = "-?([0-9]+|[0-9]+\\.[0-9]+)")
-    //@Maxbytelength(maxbytelength = 20)
-    public String distance;
-
-    private boolean isInit = false;
 
     private QueryBuilder builder;
 
-    private void init() {
-        if (!isInit) {
-            isInit = true;
+    public GeoInfo(HttpServletRequest request) {
 
-            if (StringUtil.isBlank(latitude) || StringUtil.isBlank(longitude) || StringUtil.isBlank(distance)) {
-                clear();
-                return;
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String[] geoFields = fessConfig.getQueryGeoFieldsAsArray();
+        final Map<String, List<QueryBuilder>> geoMap = new HashMap<>();
+
+        StreamUtil
+                .of(request.getParameterMap())
+                .filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point"))
+                .forEach(
+                        e -> {
+                            final String key = e.getKey();
+                            for (String geoField : geoFields) {
+                                if (key.startsWith("geo." + geoField + ".")) {
+                                    String distanceKey = key.replaceFirst(".point$", ".distance");
+                                    final String distance = request.getParameter(distanceKey);
+                                    if (StringUtil.isNotBlank(distance)) {
+                                        StreamUtil.of(e.getValue()).forEach(
+                                                pt -> {
+                                                    List<QueryBuilder> list = geoMap.get(geoField);
+                                                    if (list == null) {
+                                                        list = new ArrayList<>();
+                                                        geoMap.put(geoField, list);
+                                                    }
+                                                    String[] values = pt.split(",");
+                                                    if (values.length == 2) {
+                                                        try {
+                                                            double lat = Double.parseDouble(values[0]);
+                                                            double lon = Double.parseDouble(values[1]);
+                                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).lat(lat)
+                                                                    .lon(lon));
+                                                        } catch (Exception ex) {
+                                                            throw new InvalidQueryException(messages -> messages
+                                                                    .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), ex
+                                                                    .getLocalizedMessage());
+                                                        }
+                                                    } else {
+                                                        throw new InvalidQueryException(messages -> messages
+                                                                .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
+                                                                "Invalid geo point: " + pt);
+                                                    }
+                                                });
+                                    }
+                                    break;
+                                }
+                            }
+                        });
+
+        QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
+            if (list.size() == 1) {
+                return list.get(0);
+            } else if (list.size() > 1) {
+                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+                list.forEach(q -> boolQuery.should(q));
+                return boolQuery;
             }
+            return null;
+        }).filter(q -> q != null).toArray(n -> new QueryBuilder[n]);
 
-            try {
-                final double dist = Double.parseDouble(distance);
-                double lat = Double.parseDouble(latitude);
-                double lon = Double.parseDouble(longitude);
-
-                if (dist <= 0) {
-                    clear();
-                    return;
-                }
-
-                if (lat > 90) {
-                    lat = 90;
-                } else if (lat < -90) {
-                    lat = -90;
-                }
-
-                if (lon > 180) {
-                    lon = lon % 360;
-                    if (lon > 180) {
-                        lon -= 360;
-                    }
-                } else if (lon < -180) {
-                    lon = lon % 360;
-                    if (lon < -180) {
-                        lon += 360;
-                    }
-                }
-
-                builder = QueryBuilders.geoDistanceQuery("geo_info").distance(dist, DistanceUnit.KILOMETERS).lat(lat).lon(lon);
-            } catch (final NumberFormatException e) {
-                clear();
-            }
+        if (queryBuilders.length == 1) {
+            builder = queryBuilders[0];
+        } else if (queryBuilders.length > 1) {
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            StreamUtil.of(queryBuilders).forEach(q -> boolQuery.must(q));
+            builder = boolQuery;
         }
-    }
 
-    private void clear() {
-        latitude = null;
-        longitude = null;
-        distance = null;
-        builder = null;
-    }
-
-    public boolean isAvailable() {
-        init();
-        return builder != null;
     }
 
     public QueryBuilder toQueryBuilder() {
-        init();
         return builder;
     }
 
-    @Override
-    public String toString() {
-        return "GeoInfo [latitude=" + latitude + ", longitude=" + longitude + ", distance=" + distance + ", isInit=" + isInit + "]";
-    }
 }

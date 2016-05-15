@@ -57,16 +57,6 @@ public class SearchForm implements SearchRequestParams, Serializable {
     @ValidateTypeFailure
     public Integer pn;
 
-    // response redirect
-
-    // geo
-
-    public GeoInfo geo;
-
-    // facet
-
-    public FacetInfo facet;
-
     // advance
 
     @Override
@@ -117,12 +107,16 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public GeoInfo getGeoInfo() {
-        return geo;
+        GeoInfo geoInfo = createGeoInfo(LaRequestUtil.getRequest());
+        if (geoInfo != null) {
+            return geoInfo;
+        }
+        return ComponentUtil.getQueryHelper().getDefaultGeoInfo();
     }
 
     @Override
     public FacetInfo getFacetInfo() {
-        return facet;
+        return ComponentUtil.getQueryHelper().getDefaultFacetInfo();
     }
 
     @Override

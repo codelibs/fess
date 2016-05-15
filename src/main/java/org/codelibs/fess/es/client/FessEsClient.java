@@ -865,7 +865,7 @@ public class FessEsClient implements Client {
                     context.skipRoleQuery();
                 }
                 // geo
-                    if (geoInfo != null && geoInfo.isAvailable()) {
+                    if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
                         context.addQuery(boolQuery -> {
                             boolQuery.filter(geoInfo.toQueryBuilder());
                         });
@@ -896,11 +896,11 @@ public class FessEsClient implements Client {
                         } else if ("count".equals(facetInfo.sort)) {
                             termsBuilder.order(Order.count(true));
                         }
-                        if (facetInfo.limit != null) {
-                            termsBuilder.size(Integer.parseInt(facetInfo.limit));
+                        if (facetInfo.size != null) {
+                            termsBuilder.size(facetInfo.size);
                         }
-                        if (facetInfo.minCount != null) {
-                            termsBuilder.minDocCount(Long.parseLong(facetInfo.minCount));
+                        if (facetInfo.minDocCount != null) {
+                            termsBuilder.minDocCount(facetInfo.minDocCount);
                         }
                         if (facetInfo.missing != null) {
                             termsBuilder.missing(facetInfo.missing);

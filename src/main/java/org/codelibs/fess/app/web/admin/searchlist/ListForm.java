@@ -75,14 +75,6 @@ public class ListForm implements SearchRequestParams, Serializable {
         return fields;
     }
 
-    // geo
-
-    public GeoInfo geo;
-
-    // facet
-
-    public FacetInfo facet;
-
     @Override
     public int getStartPosition() {
         if (start == null) {
@@ -110,12 +102,12 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     @Override
     public GeoInfo getGeoInfo() {
-        return geo;
+        return null;
     }
 
     @Override
     public FacetInfo getFacetInfo() {
-        return facet;
+        return null;
     }
 
     @Override

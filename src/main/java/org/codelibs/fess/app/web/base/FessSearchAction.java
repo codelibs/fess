@@ -134,13 +134,6 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected void buildFormParams(final SearchForm form) {
-        if (form.facet == null) {
-            form.facet = queryHelper.getDefaultFacetInfo();
-        }
-
-        if (form.geo == null) {
-            form.geo = queryHelper.getDefaultGeoInfo();
-        }
 
         // label
         final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();

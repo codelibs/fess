@@ -51,7 +51,6 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -381,14 +380,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             this.fessConfig = fessConfig;
         }
 
-        private String[] simplifyArray(String[] values) {
-            return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
-        }
-
-        private String[] getParamValueArray(String param) {
-            return simplifyArray(request.getParameterValues(param));
-        }
-
         @Override
         public String getQuery() {
             return request.getParameter("q");
@@ -414,7 +405,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
                 extraParams.put("additional", (String[]) additional.toArray(new String[additional.size()]));
             }
             */
-            return getParamValueArray("ex_q");
+            return getParamValueArray(request, "ex_q");
         }
 
         @Override
@@ -432,20 +423,17 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
 
         @Override
         public String[] getLanguages() {
-            return getParamValueArray("lang");
+            return getParamValueArray(request, "lang");
         }
 
         @Override
         public GeoInfo getGeoInfo() {
-            return null;
+            return createGeoInfo(request);
         }
 
         @Override
         public FacetInfo getFacetInfo() {
-            FacetInfo facetInfo = new FacetInfo();
-            facetInfo.field = getParamValueArray("facet.field");
-            facetInfo.query = getParamValueArray("facet.query");
-            return facetInfo;
+            return createFacetInfo(request);
         }
 
         @Override

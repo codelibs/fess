@@ -367,6 +367,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String QUERY_MAX_LENGTH = "query.max.length";
 
+    /** The key of the configuration. e.g. location */
+    String QUERY_GEO_FIELDS = "query.geo.fields";
+
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
@@ -1926,6 +1929,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getQueryMaxLengthAsInteger();
+
+    /**
+     * Get the value for the key 'query.geo.fields'. <br>
+     * The value is, e.g. location <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryGeoFields();
 
     /**
      * Get the value for the key 'query.replace.term.with.prefix.query'. <br>
@@ -4162,6 +4172,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getQueryMaxLengthAsInteger() {
             return getAsInteger(FessConfig.QUERY_MAX_LENGTH);
+        }
+
+        public String getQueryGeoFields() {
+            return get(FessConfig.QUERY_GEO_FIELDS);
         }
 
         public String getQueryReplaceTermWithPrefixQuery() {

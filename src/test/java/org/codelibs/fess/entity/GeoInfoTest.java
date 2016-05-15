@@ -16,119 +16,41 @@
 package org.codelibs.fess.entity;
 
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.dbflute.utflute.mocklet.MockletHttpServletRequest;
 
 public class GeoInfoTest extends UnitFessTestCase {
 
-    public void test_0_0_10() {
-        final String latitude = "0";
-        final String lonitude = "0";
-        final String distance = "10";
+    public void test_34_150_10() {
+        MockletHttpServletRequest request = getMockRequest();
+        request.setParameter("geo.location.point", "34,150");
+        request.setParameter("geo.location.distance", "10km");
 
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[0.0,0.0],\"distance\":\"10.0km\"}}";
+        final GeoInfo geoInfo = new GeoInfo(request);
+        String result = "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":\"10km\"}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
-    public void test_90_180_10() {
-        final String latitude = "90";
-        final String lonitude = "180";
-        final String distance = "10";
+    public void test_34_150_10_x() {
+        MockletHttpServletRequest request = getMockRequest();
+        request.setParameter("geo.location.x.point", "34,150");
+        request.setParameter("geo.location.x.distance", "10km");
 
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[180.0,90.0],\"distance\":\"10.0km\"}}";
+        final GeoInfo geoInfo = new GeoInfo(request);
+        String result = "{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":\"10km\"}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
     }
 
-    public void test_91_181_10() {
-        final String latitude = "91";
-        final String lonitude = "181";
-        final String distance = "10";
+    public void test_34_150_10_2() {
+        MockletHttpServletRequest request = getMockRequest();
+        request.setParameter("geo.location.1.point", "34,150");
+        request.setParameter("geo.location.1.distance", "10km");
+        request.setParameter("geo.location.2.point", "35,151");
+        request.setParameter("geo.location.2.distance", "1km");
 
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[-179.0,90.0],\"distance\":\"10.0km\"}}";
+        final GeoInfo geoInfo = new GeoInfo(request);
+        String result =
+                "{\"bool\":{\"should\":[{\"geo_distance\":{\"location\":[151.0,35.0],\"distance\":\"1km\"}},{\"geo_distance\":{\"location\":[150.0,34.0],\"distance\":\"10km\"}}]}}";
         assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
-    }
-
-    public void test_91_361_10() {
-        final String latitude = "91";
-        final String lonitude = "361";
-        final String distance = "100";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[1.0,90.0],\"distance\":\"100.0km\"}}";
-        assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
-    }
-
-    public void test__90__180_10() {
-        final String latitude = "-90";
-        final String lonitude = "-180";
-        final String distance = "10";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[-180.0,-90.0],\"distance\":\"10.0km\"}}";
-        assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
-    }
-
-    public void test__91__181_10() {
-        final String latitude = "-91";
-        final String lonitude = "-181";
-        final String distance = "10";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[179.0,-90.0],\"distance\":\"10.0km\"}}";
-        assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
-    }
-
-    public void test__91__361_10() {
-        final String latitude = "-91";
-        final String lonitude = "-361";
-        final String distance = "100";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertTrue(geoInfo.isAvailable());
-        String result = "{\"geo_distance\":{\"geo_info\":[-1.0,-90.0],\"distance\":\"100.0km\"}}";
-        assertEquals(result, geoInfo.toQueryBuilder().toString().replaceAll("[ \n]", ""));
-    }
-
-    public void test_0_0_0() {
-        final String latitude = "0";
-        final String lonitude = "0";
-        final String distance = "0";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertFalse(geoInfo.isAvailable());
-    }
-
-    public void test_x_0_0() {
-        final String latitude = "x";
-        final String lonitude = "0";
-        final String distance = "10";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertFalse(geoInfo.isAvailable());
-    }
-
-    public void test_0_x_0() {
-        final String latitude = "0";
-        final String lonitude = "x";
-        final String distance = "10";
-
-        final GeoInfo geoInfo = create(latitude, lonitude, distance);
-        assertFalse(geoInfo.isAvailable());
-    }
-
-    private GeoInfo create(final String latitude, final String longitude, final String distance) {
-        final GeoInfo geoInfo = new GeoInfo();
-        geoInfo.latitude = latitude;
-        geoInfo.longitude = longitude;
-        geoInfo.distance = distance;
-        return geoInfo;
     }
 
 }
