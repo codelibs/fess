@@ -153,6 +153,7 @@ public class JsonApiManager extends BaseApiManager {
             final String allPageCount = Integer.toString(data.getAllPageCount());
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
+            final GeoInfo geoInfo = params.getGeoInfo();
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
@@ -255,6 +256,18 @@ public class JsonApiManager extends BaseApiManager {
                     buf.append(']');
                 }
             }
+            // geo
+            if (geoInfo != null && StringUtil.isNotEmpty(geoInfo.distance)) {
+                buf.append(',');
+                buf.append("\"geo_distance\":{\"location\":[");
+                buf.append(geoInfo.latitude);
+                buf.append(',');
+                buf.append(geoInfo.longitude);
+                buf.append("],\"distance\":\"");
+                buf.append(geoInfo.distance);
+                buf.append("\"}");
+            }
+
         } catch (final Exception e) {
             status = 1;
             errMsg = e.getMessage();
