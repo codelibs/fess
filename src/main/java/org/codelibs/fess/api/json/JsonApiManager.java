@@ -55,6 +55,10 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
+import org.elasticsearch.ExceptionsHelper;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -153,6 +157,7 @@ public class JsonApiManager extends BaseApiManager {
             final String allPageCount = Integer.toString(data.getAllPageCount());
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
+            final GeoInfo geoInfo = params.getGeoInfo();
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
@@ -253,6 +258,16 @@ public class JsonApiManager extends BaseApiManager {
                         buf.append('}');
                     }
                     buf.append(']');
+                }
+                if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
+                    buf.append(',');
+                    buf.append("\"geo\":");
+                    try {
+                        XContentBuilder builder = XContentFactory.jsonBuilder();
+                        buf.append(geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string());
+                    } catch (Exception e) {
+                        buf.append("{ \"error\" : \"").append(ExceptionsHelper.detailedMessage(e)).append("\"}");
+                    }
                 }
             }
         } catch (final Exception e) {
