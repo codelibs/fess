@@ -71,9 +71,7 @@ public class QueryContext {
 
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {
         BoolQueryBuilder builder;
-        if (queryBuilder instanceof BoolQueryBuilder) {
-            builder = (BoolQueryBuilder) queryBuilder;
-        } else if (queryBuilder instanceof MatchAllQueryBuilder) {
+        if (queryBuilder instanceof MatchAllQueryBuilder) {
             builder = QueryBuilders.boolQuery();
         } else {
             builder = QueryBuilders.boolQuery().must(queryBuilder);
