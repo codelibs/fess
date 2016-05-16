@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
@@ -34,6 +38,8 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.StreamUtil;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.IndicesAdminClient;
@@ -127,6 +133,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void upgradeFrom10_0() {
 
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String indexConfigPath = "fess_indices";
         final String configIndex = ".fess_config";
         final String userIndex = ".fess_user";
         final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
@@ -137,7 +144,29 @@ public class AdminUpgradeAction extends FessAdminAction {
             // TODO seunjeon
 
             // alias
-            // TODO .fess_basic_config
+            final String aliasConfigDirPath = indexConfigPath + "/" + configIndex + "/alias";
+            try {
+                final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+                if (aliasConfigDir.isDirectory()) {
+                    StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
+                            f -> {
+                                final String aliasName = f.getName().replaceFirst(".json$", "");
+                                final String source = FileUtil.readUTF8(f);
+                                final IndicesAliasesResponse response =
+                                        indicesClient.prepareAliases().addAlias(configIndex, aliasName, source).execute()
+                                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                                if (response.isAcknowledged()) {
+                                    logger.info("Created " + aliasName + " alias for " + configIndex);
+                                } else if (logger.isDebugEnabled()) {
+                                    logger.debug("Failed to create " + aliasName + " alias for " + configIndex);
+                                }
+                            });
+                }
+            } catch (final ResourceNotFoundRuntimeException e) {
+                // ignore
+            } catch (final Exception e) {
+                logger.warn(aliasConfigDirPath + " is not found.", e);
+            }
 
             // update mapping
             addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
