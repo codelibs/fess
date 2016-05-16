@@ -124,7 +124,7 @@ $.fn.suggestor = function(setting) {
 
 			listNum = 0;
 			if(typeof hits !== "undefined") {
-				var reslist = new Array();
+				var reslist = [];
 				for(var i=0;i<hits.length;i++) {
 					reslist.push(hits[i].text);
 				}
@@ -139,7 +139,7 @@ $.fn.suggestor = function(setting) {
 
 					var $tmpli = $($olEle.children("li"));
 					for(var j=0;j<$tmpli.size();j++) {
-						if(str == $($tmpli.get(j)).html()) {
+						if(str === $($tmpli.get(j)).html()) {
 							chkCorrectWord = false;
 						}
 					}
@@ -159,7 +159,7 @@ $.fn.suggestor = function(setting) {
 						$liEle.hover(function() {
 							listSelNum = $(this).closest("ol").children("li").index(this) + 1;
 							$(this).closest("ol").children("li").each(function(i){
-								if(i == (listSelNum-1)) {
+								if(i === (listSelNum-1)) {
 									if(typeof listSelectedCssInfo === 'undefined') {
 										$(this).css("background-color", "#e5e5e5");
 									} else {
@@ -178,7 +178,7 @@ $.fn.suggestor = function(setting) {
 								}
 							});
 						}, function() {
-							if( listSelNum == ($(this).closest("ol").children("li").index(this) + 1) ) {
+							if( listSelNum === ($(this).closest("ol").children("li").index(this) + 1) ) {
 								if(typeof listDeselectedCssInfo !== 'undefined') {
 									$(this).css(listDeselectedCssInfo);
 								} else {
@@ -216,13 +216,13 @@ $.fn.suggestor = function(setting) {
 		},
 
 		selectlist: function(direction) {
-			if($boxElement.css("display") == "none") {
+			if($boxElement.css("display") === "none") {
 				return;
 			}
 
-			if(direction == "down") {
+			if(direction === "down") {
 				listSelNum++;
-			} else if(direction == "up") {
+			} else if(direction === "up") {
 				listSelNum--;
 			} else {
 				return;
@@ -238,7 +238,7 @@ $.fn.suggestor = function(setting) {
 
 			var a = $boxElement.children("ol").children("li");
 			$boxElement.children("ol").children("li").each(function(i){
-				if(i == (listSelNum-1)) {
+				if(i === (listSelNum-1)) {
 					if(typeof listSelectedCssInfo === 'undefined') {
 						$(this).css("background-color", "#e5e5e5");
 					} else {
@@ -257,7 +257,7 @@ $.fn.suggestor = function(setting) {
 					}
 				}
 			});
-			if(listSelNum == 0) {
+			if(listSelNum === 0) {
 				$textArea.val(inputText);
 			}
 
@@ -291,24 +291,24 @@ $.fn.suggestor = function(setting) {
 		if( ((e.keyCode >= 48) && (e.keyCode <= 90))
 			 || ((e.keyCode >= 96) && (e.keyCode <= 105))
 			 || ((e.keyCode >= 186) && (e.keyCode <= 226))
-			 || e.keyCode == 8
-			 || e.keyCode == 32
-			 || e.keyCode == 46
+			 || e.keyCode === 8
+			 || e.keyCode === 32
+			 || e.keyCode === 46
 			 ) {
 			started = true;
 			isFocusList = false;
-		} else if(e.keyCode == 38) {
-			if($boxElement.css("display") != "none") {
+		} else if(e.keyCode === 38) {
+			if($boxElement.css("display") !== "none") {
 				e.preventDefault();
 			}
 			suggestor.selectlist("up");
-		} else if(e.keyCode == 40) {
-			if($boxElement.css("display") == "none") {
+		} else if(e.keyCode === 40) {
+			if($boxElement.css("display") === "none") {
 				suggestor.suggest();
 			} else {
 				suggestor.selectlist("down");
 			}
-		} else if(e.keyCode == 13) {
+		} else if(e.keyCode === 13) {
 			if(isFocusList) {
 				suggestor.fixList();
 			}
@@ -318,14 +318,14 @@ $.fn.suggestor = function(setting) {
 		if( ((e.keyCode >= 48) && (e.keyCode <= 90))
 			 || ((e.keyCode >= 96) && (e.keyCode <= 105))
 			 || ((e.keyCode >= 186) && (e.keyCode <= 226))
-			 || e.keyCode == 8
-			 || e.keyCode == 32
-			 || e.keyCode == 46
+			 || e.keyCode === 8
+			 || e.keyCode === 32
+			 || e.keyCode === 46
 			 ) {
 			started = true;
 			isFocusList = false;
-		} else if(e.keyCode == 38) {
-/*			if($boxElement.css("display") != "none") {
+		} else if(e.keyCode === 38) {
+/*			if($boxElement.css("display") !== "none") {
 				var strTmp = $textArea.val();
 				$textArea.val("");
 				$textArea.focus();
@@ -344,7 +344,7 @@ $.fn.suggestor = function(setting) {
 		if(interval < 5) {
 			interval = interval + 1;
 		} else {
-			if($textArea.val() != inputText) {
+			if($textArea.val() !== inputText) {
 				if(!isFocusList && started && !suggestingSts) {
 					//リスト選択中でなければ更新
 					suggestor.suggest();

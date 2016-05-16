@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
+import org.codelibs.core.io.FileUtil;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
@@ -34,6 +38,8 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.StreamUtil;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.IndicesAdminClient;
@@ -127,6 +133,7 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void upgradeFrom10_0() {
 
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String indexConfigPath = "fess_indices";
         final String configIndex = ".fess_config";
         final String userIndex = ".fess_user";
         final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
@@ -137,7 +144,29 @@ public class AdminUpgradeAction extends FessAdminAction {
             // TODO seunjeon
 
             // alias
-            // TODO .fess_basic_config
+            final String aliasConfigDirPath = indexConfigPath + "/" + configIndex + "/alias";
+            try {
+                final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
+                if (aliasConfigDir.isDirectory()) {
+                    StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
+                            f -> {
+                                final String aliasName = f.getName().replaceFirst(".json$", "");
+                                final String source = FileUtil.readUTF8(f);
+                                final IndicesAliasesResponse response =
+                                        indicesClient.prepareAliases().addAlias(configIndex, aliasName, source).execute()
+                                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                                if (response.isAcknowledged()) {
+                                    logger.info("Created " + aliasName + " alias for " + configIndex);
+                                } else if (logger.isDebugEnabled()) {
+                                    logger.debug("Failed to create " + aliasName + " alias for " + configIndex);
+                                }
+                            });
+                }
+            } catch (final ResourceNotFoundRuntimeException e) {
+                // ignore
+            } catch (final Exception e) {
+                logger.warn(aliasConfigDirPath + " is not found.", e);
+            }
 
             // update mapping
             addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
@@ -149,6 +178,76 @@ public class AdminUpgradeAction extends FessAdminAction {
             addFieldMapping(indicesClient, configIndex, "data_config", "permissions",
                     "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, userIndex, "group", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "employeeNumber",
+                    "{\"properties\":{\"employeeNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "mail",
+                    "{\"properties\":{\"mail\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "telephoneNumber",
+                    "{\"properties\":{\"telephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "homePhone",
+                    "{\"properties\":{\"homePhone\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "homePostalAddress",
+                    "{\"properties\":{\"homePostalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "labeledURI",
+                    "{\"properties\":{\"labeledURI\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "roomNumber",
+                    "{\"properties\":{\"roomNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "description",
+                    "{\"properties\":{\"description\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "title",
+                    "{\"properties\":{\"title\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "pager",
+                    "{\"properties\":{\"pager\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "street",
+                    "{\"properties\":{\"street\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "postalCode",
+                    "{\"properties\":{\"postalCode\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "physicalDeliveryOfficeName",
+                    "{\"properties\":{\"physicalDeliveryOfficeName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "destinationIndicator",
+                    "{\"properties\":{\"destinationIndicator\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "internationaliSDNNumber",
+                    "{\"properties\":{\"internationaliSDNNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "state",
+                    "{\"properties\":{\"state\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "employeeType",
+                    "{\"properties\":{\"employeeType\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "facsimileTelephoneNumber",
+                    "{\"properties\":{\"facsimileTelephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "postOfficeBox",
+                    "{\"properties\":{\"postOfficeBox\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "initials",
+                    "{\"properties\":{\"initials\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "carLicense",
+                    "{\"properties\":{\"carLicense\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "mobile",
+                    "{\"properties\":{\"mobile\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "postalAddress",
+                    "{\"properties\":{\"postalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "city",
+                    "{\"properties\":{\"city\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "teletexTerminalIdentifier",
+                    "{\"properties\":{\"teletexTerminalIdentifier\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "x121Address",
+                    "{\"properties\":{\"x121Address\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "businessCategory",
+                    "{\"properties\":{\"businessCategory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "registeredAddress",
+                    "{\"properties\":{\"registeredAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "displayName",
+                    "{\"properties\":{\"displayName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "preferredLanguage",
+                    "{\"properties\":{\"preferredLanguage\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "departmentNumber",
+                    "{\"properties\":{\"departmentNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "uidNumber",
+                    "{\"properties\":{\"uidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "gidNumber",
+                    "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "homeDirectory",
+                    "{\"properties\":{\"homeDirectory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "groups",
+                    "{\"properties\":{\"groups\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, docIndex, docType, "location", "{\"properties\":{\"location\":{\"type\":\"geo_point\"}}}");
 
             // data migration
