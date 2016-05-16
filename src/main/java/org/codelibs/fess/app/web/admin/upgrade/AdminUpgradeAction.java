@@ -144,29 +144,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             // TODO seunjeon
 
             // alias
-            final String aliasConfigDirPath = indexConfigPath + "/" + configIndex + "/alias";
-            try {
-                final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
-                if (aliasConfigDir.isDirectory()) {
-                    StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
-                            f -> {
-                                final String aliasName = f.getName().replaceFirst(".json$", "");
-                                final String source = FileUtil.readUTF8(f);
-                                final IndicesAliasesResponse response =
-                                        indicesClient.prepareAliases().addAlias(configIndex, aliasName, source).execute()
-                                                .actionGet(fessConfig.getIndexIndicesTimeout());
-                                if (response.isAcknowledged()) {
-                                    logger.info("Created " + aliasName + " alias for " + configIndex);
-                                } else if (logger.isDebugEnabled()) {
-                                    logger.debug("Failed to create " + aliasName + " alias for " + configIndex);
-                                }
-                            });
-                }
-            } catch (final ResourceNotFoundRuntimeException e) {
-                // ignore
-            } catch (final Exception e) {
-                logger.warn(aliasConfigDirPath + " is not found.", e);
-            }
+            createAlias(indicesClient, indexConfigPath, configIndex, ".fess_basic_config");
 
             // update mapping
             addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
@@ -240,10 +218,8 @@ public class AdminUpgradeAction extends FessAdminAction {
                     "{\"properties\":{\"preferredLanguage\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, userIndex, "user", "departmentNumber",
                     "{\"properties\":{\"departmentNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "uidNumber",
-                    "{\"properties\":{\"uidNumber\":{\"type\":\"long\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "gidNumber",
-                    "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "uidNumber", "{\"properties\":{\"uidNumber\":{\"type\":\"long\"}}}");
+            addFieldMapping(indicesClient, userIndex, "user", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
             addFieldMapping(indicesClient, userIndex, "user", "homeDirectory",
                     "{\"properties\":{\"homeDirectory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
             addFieldMapping(indicesClient, userIndex, "user", "groups",
@@ -358,6 +334,29 @@ public class AdminUpgradeAction extends FessAdminAction {
         } catch (final Exception e) {
             logger.warn("Failed to upgrade data.", e);
             saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));
+        }
+    }
+
+    private void createAlias(final IndicesAdminClient indicesClient, final String indexConfigPath, final String indexName,
+            final String aliasName) {
+        final String aliasConfigPath = indexConfigPath + "/" + indexName + "/alias/" + aliasName + ".json";
+        try {
+            final File aliasConfigFile = ResourceUtil.getResourceAsFile(aliasConfigPath);
+            if (aliasConfigFile.exists()) {
+                final String source = FileUtil.readUTF8(aliasConfigFile);
+                final IndicesAliasesResponse response =
+                        indicesClient.prepareAliases().addAlias(indexName, aliasName, source).execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                if (response.isAcknowledged()) {
+                    logger.info("Created " + aliasName + " alias for " + indexName);
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to create " + aliasName + " alias for " + indexName);
+                }
+            }
+        } catch (final ResourceNotFoundRuntimeException e) {
+            // ignore
+        } catch (final Exception e) {
+            logger.warn(aliasConfigPath + " is not found.", e);
         }
     }
 
