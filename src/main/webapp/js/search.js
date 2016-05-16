@@ -136,7 +136,7 @@ $(function() {
 							var url = $favorite.attr('href');
 							var found = false;
 							for (var i = 0; i < docIds.length; i++) {
-								if (url == docIds[i]) {
+								if (url === docIds[i]) {
 									found = true;
 									break;
 								}
@@ -158,7 +158,7 @@ $(function() {
 	$result.on('click', '.more a', function(e) {
 		var $moreLink = $(this);
 		var value = $moreLink.attr('href');
-		if (value != '') {
+		if (value !== '') {
 			var $info = $(value + ' .info');
 			if ($info.size() > 0) {
 				$moreLink.fadeOut(500, function() {
