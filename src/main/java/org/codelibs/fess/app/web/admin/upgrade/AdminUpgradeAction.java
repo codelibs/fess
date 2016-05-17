@@ -26,6 +26,8 @@ import javax.annotation.Resource;
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
+import org.codelibs.elasticsearch.runner.net.Curl;
+import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
@@ -38,7 +40,6 @@ import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -141,7 +142,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
         try {
             // file
-            // TODO seunjeon
+            uploadResource(indexConfigPath, docIndex, "ko/seunjeon.txt");
 
             // alias
             createAlias(indicesClient, indexConfigPath, configIndex, ".fess_basic_config");
@@ -334,6 +335,24 @@ public class AdminUpgradeAction extends FessAdminAction {
         } catch (final Exception e) {
             logger.warn("Failed to upgrade data.", e);
             saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));
+        }
+    }
+
+    private void uploadResource(String indexConfigPath, String indexName, String path) {
+        final String filePath = indexConfigPath + "/" + indexName + "/" + path;
+        try {
+            String source = FileUtil.readUTF8(filePath);
+            try (CurlResponse response =
+                    Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", path)
+                            .body(source).execute()) {
+                if (response.getHttpStatusCode() == 200) {
+                    logger.info("Register " + path + " to " + indexName);
+                } else {
+                    logger.warn("Invalid request for " + path);
+                }
+            }
+        } catch (final Exception e) {
+            logger.warn("Failed to register " + filePath, e);
         }
     }
 
