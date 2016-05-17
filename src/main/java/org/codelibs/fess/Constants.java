@@ -64,8 +64,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String ITEM_NAME = "name";
 
-    public static final String UTF_8 = "UTF-8";
-
     public static final String MS932 = "MS932";
 
     public static final String DEFAULT_CRON_EXPRESSION = "0 0 * * *";

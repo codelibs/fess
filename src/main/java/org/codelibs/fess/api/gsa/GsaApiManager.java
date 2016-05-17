@@ -129,7 +129,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final String start = request.getParameter("start");
             long startNumber = 1;
             if (StringUtil.isNotBlank(start)) {
-                startNumber = Integer.parseInt(start) + 1;
+                startNumber = Long.parseLong(start) + 1;
             }
             long endNumber = startNumber + data.getPageSize() - 1;
             if (endNumber > allRecordCount) {

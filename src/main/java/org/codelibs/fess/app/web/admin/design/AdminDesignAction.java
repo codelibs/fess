@@ -150,9 +150,11 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             uploadFile = ResourceUtil.getResourceAsFileNoException(fileName);
             if (uploadFile == null) {
                 throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFileName"), () -> asListHtml());
+                return null;
             }
         } else {
             throwValidationError(messages -> messages.addErrorsDesignFileIsUnsupportedType("designFileName"), () -> asListHtml());
+            return null;
         }
 
         final File parentFile = uploadFile.getParentFile();
@@ -189,6 +191,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
         final File file = getTargetFile(form.fileName).get();
         if (file == null) {
             throwValidationError(messages -> messages.addErrorsTargetFileDoesNotExist(GLOBAL, form.fileName), () -> asListHtml());
+            return null;
         }
         validate(form, messages -> {}, () -> asListHtml());
         verifyToken(() -> asListHtml());
@@ -294,7 +297,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             throwValidationError(messages -> messages.addErrorsInvalidDesignJspFileName(GLOBAL), () -> asListHtml());
         }
         final File jspFile = new File(getServletContext().getRealPath("/WEB-INF/" + jspType + "/" + jspFileName));
-        if (jspFile == null || !jspFile.exists()) {
+        if (!jspFile.exists()) {
             throwValidationError(messages -> messages.addErrorsDesignJspFileDoesNotExist(GLOBAL), () -> asListHtml());
         }
         return jspFile;
