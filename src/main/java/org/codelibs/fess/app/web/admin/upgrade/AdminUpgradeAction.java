@@ -245,7 +245,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                                 entity -> {
                                     final String[] permissions =
                                             roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getName())
+                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
                                                     .toArray(n -> new String[n]);
                                     entity.setPermissions(permissions);
                                     labelTypeBhv.insertOrUpdate(entity);
@@ -271,7 +271,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                                 entity -> {
                                     final String[] permissions =
                                             roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getName())
+                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
                                                     .toArray(n -> new String[n]);
                                     entity.setPermissions(permissions);
                                     webConfigBhv.insertOrUpdate(entity);
@@ -297,7 +297,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                                 entity -> {
                                     final String[] permissions =
                                             roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getName())
+                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
                                                     .toArray(n -> new String[n]);
                                     entity.setPermissions(permissions);
                                     fileConfigBhv.insertOrUpdate(entity);
@@ -323,7 +323,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                                 entity -> {
                                     final String[] permissions =
                                             roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getName())
+                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
                                                     .toArray(n -> new String[n]);
                                     entity.setPermissions(permissions);
                                     dataConfigBhv.insertOrUpdate(entity);
