@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.client;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
 import java.io.File;
@@ -56,7 +57,6 @@ import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
@@ -371,8 +371,8 @@ public class FessEsClient implements Client {
                 try {
                     final File aliasConfigDir = ResourceUtil.getResourceAsFile(aliasConfigDirPath);
                     if (aliasConfigDir.isDirectory()) {
-                        StreamUtil.of(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).forEach(
-                                f -> {
+                        stream(aliasConfigDir.listFiles((dir, name) -> name.endsWith(".json"))).of(
+                                stream -> stream.forEach(f -> {
                                     final String aliasName = f.getName().replaceFirst(".json$", "");
                                     final String source = FileUtil.readUTF8(f);
                                     final IndicesAliasesResponse response =
@@ -383,7 +383,7 @@ public class FessEsClient implements Client {
                                     } else if (logger.isDebugEnabled()) {
                                         logger.debug("Failed to create " + aliasName + " alias for " + configIndex);
                                     }
-                                });
+                                }));
                     }
                 } catch (final ResourceNotFoundRuntimeException e) {
                     // ignore
@@ -882,12 +882,12 @@ public class FessEsClient implements Client {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
 
             // highlighting
-            queryHelper.highlightedFields().forEach(
-                    hf -> searchRequestBuilder.addHighlightedField(hf, queryHelper.getHighlightFragmentSize()));
+            queryHelper.highlightedFields(stream -> stream.forEach(hf -> searchRequestBuilder.addHighlightedField(hf,
+                    queryHelper.getHighlightFragmentSize())));
 
             // facets
             if (facetInfo != null) {
-                StreamUtil.of(facetInfo.field).forEach(f -> {
+                stream(facetInfo.field).of(stream -> stream.forEach(f -> {
                     if (queryHelper.isFacetField(f)) {
                         final String encodedField = BaseEncoding.base64().encode(f.getBytes(StandardCharsets.UTF_8));
                         final TermsBuilder termsBuilder = AggregationBuilders.terms(Constants.FACET_FIELD_PREFIX + encodedField).field(f);
@@ -909,9 +909,9 @@ public class FessEsClient implements Client {
                     } else {
                         throw new SearchQueryException("Invalid facet field: " + f);
                     }
-                });
-                StreamUtil.of(facetInfo.query).forEach(
-                        fq -> {
+                }));
+                stream(facetInfo.query).of(
+                        stream -> stream.forEach(fq -> {
                             final QueryContext facetContext = new QueryContext(fq, false);
                             queryHelper.buildBaseQuery(facetContext, c -> {});
                             final String encodedFacetQuery = BaseEncoding.base64().encode(fq.getBytes(StandardCharsets.UTF_8));
@@ -919,7 +919,7 @@ public class FessEsClient implements Client {
                                     AggregationBuilders.filter(Constants.FACET_QUERY_PREFIX + encodedFacetQuery).filter(
                                             facetContext.getQueryBuilder());
                             searchRequestBuilder.addAggregation(filterBuilder);
-                        });
+                        }));
             }
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());

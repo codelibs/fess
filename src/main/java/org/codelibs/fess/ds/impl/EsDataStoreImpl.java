@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.ds.impl;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -31,7 +33,6 @@ import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -89,7 +90,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                                         Collectors.toMap(e -> e.getKey().replaceFirst("^settings\\.", StringUtil.EMPTY), e -> e.getValue())))
                         .build();
         logger.info("Connecting to " + hostsStr + " with [" + settings.toDelimitedString(',') + "]");
-        final InetSocketTransportAddress[] addresses = StreamUtil.of(hostsStr.split(",")).map(h -> {
+        final InetSocketTransportAddress[] addresses = stream(hostsStr.split(",")).get(stream -> stream.map(h -> {
             final String[] values = h.trim().split(":");
             try {
                 if (values.length == 1) {
@@ -101,7 +102,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                 logger.warn("Failed to parse address: " + h, e);
             }
             return null;
-        }).filter(v -> v != null).toArray(n -> new InetSocketTransportAddress[n]);
+        }).filter(v -> v != null).toArray(n -> new InetSocketTransportAddress[n]));
         try (Client client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses)) {
             processData(dataConfig, callback, paramMap, scriptMap, defaultDataMap, readInterval, client);
         }

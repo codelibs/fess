@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.exec;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -45,7 +47,6 @@ import org.codelibs.fess.helper.WebFsIndexHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.CrawlerPostcard;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -318,9 +319,9 @@ public class Crawler implements Serializable {
             CrawlerPostcard.droppedInto(postbox, postcard -> {
                 postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
                 postcard.addReplyTo(fessConfig.getMailReturnPath());
-                StreamUtil.of(toAddresses).forEach(address -> {
+                stream(toAddresses).of(stream -> stream.forEach(address -> {
                     postcard.addTo(address);
-                });
+                }));
                 postcard.setCrawlerEndTime(getValueFromMap(dataMap, "crawlerEndTime", StringUtil.EMPTY));
                 postcard.setCrawlerExecTime(getValueFromMap(dataMap, "crawlerExecTime", "0"));
                 postcard.setCrawlerStartTime(getValueFromMap(dataMap, "crawlerStartTime", StringUtil.EMPTY));

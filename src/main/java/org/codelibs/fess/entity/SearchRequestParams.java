@@ -15,13 +15,14 @@
  */
 package org.codelibs.fess.entity;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.util.StreamUtil;
 
 public interface SearchRequestParams {
 
@@ -50,7 +51,7 @@ public interface SearchRequestParams {
     Locale getLocale();
 
     public default String[] simplifyArray(final String[] values) {
-        return StreamUtil.of(values).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
+        return stream(values).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
     }
 
     public default String[] getParamValueArray(final HttpServletRequest request, final String param) {

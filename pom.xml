@@ -60,7 +60,7 @@
 		<crawler.version>1.0.9-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>2.1.4-SNAPSHOT</suggest.version>
+		<suggest.version>2.2.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.3.2</elasticsearch.version>
@@ -1054,7 +1054,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.4</version>
+			<version>0.3.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

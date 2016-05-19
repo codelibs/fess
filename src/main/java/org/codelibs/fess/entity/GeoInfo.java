@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.entity;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -42,10 +43,8 @@ public class GeoInfo {
         final String[] geoFields = fessConfig.getQueryGeoFieldsAsArray();
         final Map<String, List<QueryBuilder>> geoMap = new HashMap<>();
 
-        StreamUtil
-                .of(request.getParameterMap())
-                .filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point"))
-                .forEach(
+        stream(request.getParameterMap()).of(
+                stream -> stream.filter(e -> e.getKey().startsWith("geo.") && e.getKey().endsWith(".point")).forEach(
                         e -> {
                             final String key = e.getKey();
                             for (final String geoField : geoFields) {
@@ -53,8 +52,8 @@ public class GeoInfo {
                                     final String distanceKey = key.replaceFirst(".point$", ".distance");
                                     final String distance = request.getParameter(distanceKey);
                                     if (StringUtil.isNotBlank(distance)) {
-                                        StreamUtil.of(e.getValue()).forEach(
-                                                pt -> {
+                                        stream(e.getValue()).of(
+                                                s -> s.forEach(pt -> {
                                                     List<QueryBuilder> list = geoMap.get(geoField);
                                                     if (list == null) {
                                                         list = new ArrayList<>();
@@ -77,12 +76,12 @@ public class GeoInfo {
                                                                 .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY),
                                                                 "Invalid geo point: " + pt);
                                                     }
-                                                });
+                                                }));
                                     }
                                     break;
                                 }
                             }
-                        });
+                        }));
 
         final QueryBuilder[] queryBuilders = geoMap.values().stream().map(list -> {
             if (list.size() == 1) {
@@ -99,7 +98,7 @@ public class GeoInfo {
             builder = queryBuilders[0];
         } else if (queryBuilders.length > 1) {
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            StreamUtil.of(queryBuilders).forEach(q -> boolQuery.must(q));
+            stream(queryBuilders).of(stream -> stream.forEach(q -> boolQuery.must(q)));
             builder = boolQuery;
         }
 

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.job;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -38,7 +40,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.InputStreamThread;
 import org.codelibs.fess.util.JobProcess;
-import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -323,8 +324,8 @@ public class CrawlJob {
         } else {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
-        StreamUtil.of(fessConfig.getJvmCrawlerOptionsAsArray()).filter(value -> StringUtil.isNotBlank(value))
-                .forEach(value -> cmdList.add(value));
+        stream(fessConfig.getJvmCrawlerOptionsAsArray()).of(
+                stream -> stream.filter(value -> StringUtil.isNotBlank(value)).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");
@@ -338,7 +339,7 @@ public class CrawlJob {
         }
 
         if (StringUtil.isNotBlank(jvmOptions)) {
-            StreamUtil.of(jvmOptions.split(" ")).filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s));
+            stream(jvmOptions.split(" ")).of(stream -> stream.filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s)));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());

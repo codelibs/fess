@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.api.suggest;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.IOException;
 
 import javax.annotation.Resource;
@@ -34,7 +36,6 @@ import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.request.suggest.SuggestRequestBuilder;
 import org.codelibs.fess.suggest.request.suggest.SuggestResponse;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,7 @@ public class SuggestApiManager extends BaseApiManager {
             final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
             final SuggestRequestBuilder builder = suggestHelper.suggester().suggest();
             builder.setQuery(parameter.getQuery());
-            StreamUtil.of(parameter.getFields()).forEach(field -> builder.addField(field));
+            stream(parameter.getFields()).of(stream -> stream.forEach(field -> builder.addField(field)));
             roleQueryHelper.build().stream().forEach(role -> builder.addRole(role));
             builder.setSize(parameter.getNum());
 

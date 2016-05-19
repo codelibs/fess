@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -29,7 +31,6 @@ import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.es.user.exentity.Group;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -85,12 +86,15 @@ public class GroupService implements Serializable {
             op.setRefresh(true);
         });
 
-        userBhv.selectCursor(cb -> {
-            cb.query().setGroups_Equal(group.getId());
-        }, entity -> {
-            entity.setGroups(StreamUtil.of(entity.getGroups()).filter(s -> !s.equals(group.getId())).toArray(n -> new String[n]));
-            userBhv.insertOrUpdate(entity);
-        });
+        userBhv.selectCursor(
+                cb -> {
+                    cb.query().setGroups_Equal(group.getId());
+                },
+                entity -> {
+                    entity.setGroups(stream(entity.getGroups()).get(
+                            stream -> stream.filter(s -> !s.equals(group.getId())).toArray(n -> new String[n])));
+                    userBhv.insertOrUpdate(entity);
+                });
 
     }
 

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +32,6 @@ import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.mylasta.mail.TestmailPostcard;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.core.mail.Postbox;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -91,9 +92,9 @@ public class AdminGeneralAction extends FessAdminAction {
             TestmailPostcard.droppedInto(postbox, postcard -> {
                 postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());
                 postcard.addReplyTo(fessConfig.getMailReturnPath());
-                StreamUtil.of(toAddresses).forEach(address -> {
+                stream(toAddresses).of(stream -> stream.forEach(address -> {
                     postcard.addTo(address);
-                });
+                }));
                 BeanUtil.copyMapToBean(dataMap, postcard);
             });
             saveInfo(messages -> messages.addSuccessSendTestmail(GLOBAL));

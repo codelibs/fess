@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.dict.seunjeon;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +34,6 @@ import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.dict.seunjeon.SeunjeonItem;
 import org.codelibs.fess.util.RenderDataUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -363,7 +364,8 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }
-        return StreamUtil.of(value.split(",")).filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim()).toArray(n -> new String[n]);
+        return stream(value.split(",")).get(
+                stream -> stream.filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim()).toArray(n -> new String[n]));
     }
 
     // ===================================================================================

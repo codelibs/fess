@@ -15,16 +15,18 @@
  */
 package org.codelibs.fess.es.user.exentity;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.es.user.bsentity.BsUser;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 
 /**
  * @author FreeGen
@@ -53,20 +55,16 @@ public class User extends BsUser implements FessUser {
 
     @Override
     public String[] getRoleNames() {
-        return getRoleStream().toArray(n -> new String[n]);
-    }
-
-    protected Stream<String> getRoleStream() {
-        return StreamUtil.of(getRoles()).map(role -> new String(Base64.getDecoder().decode(role), Constants.CHARSET_UTF_8));
+        return stream(getRoles()).get(stream -> stream.map(s -> decode(s)).toArray(n -> new String[n]));
     }
 
     @Override
     public String[] getGroupNames() {
-        return getGroupStream().toArray(n -> new String[n]);
+        return stream(getGroups()).get(stream -> stream.map(s -> decode(s)).toArray(n -> new String[n]));
     }
 
-    private Stream<String> getGroupStream() {
-        return StreamUtil.of(getGroups()).map(group -> new String(Base64.getDecoder().decode(group), Constants.CHARSET_UTF_8));
+    private String decode(String value) {
+        return new String(Base64.getDecoder().decode(value), Constants.CHARSET_UTF_8);
     }
 
     @Override
@@ -86,10 +84,11 @@ public class User extends BsUser implements FessUser {
     @Override
     public String[] getPermissions() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return Stream.concat(
-                Stream.of(fessConfig.getRoleSearchUserPrefix() + getName()),
-                Stream.concat(getRoleStream().map(s -> fessConfig.getRoleSearchRolePrefix() + s),
-                        getGroupStream().map(s -> fessConfig.getRoleSearchGroupPrefix() + s))).toArray(n -> new String[n]);
+        final List<String> list = new ArrayList<>();
+        list.add(fessConfig.getRoleSearchUserPrefix() + getName());
+        stream(getRoles()).of(stream -> stream.forEach(s -> list.add(fessConfig.getRoleSearchRolePrefix() + decode(s))));
+        stream(getGroups()).of(stream -> stream.forEach(s -> list.add(fessConfig.getRoleSearchGroupPrefix() + decode(s))));
+        return list.toArray(new String[list.size()]);
     }
 
 }

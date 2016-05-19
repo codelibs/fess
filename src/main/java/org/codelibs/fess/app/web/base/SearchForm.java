@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
@@ -28,7 +30,6 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -92,7 +93,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getExtraQueries() {
-        return StreamUtil.of(ex_q).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
+        return stream(ex_q).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
     }
 
     @Override
@@ -102,7 +103,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getLanguages() {
-        return StreamUtil.of(lang).filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]);
+        return stream(lang).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
     }
 
     @Override

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.labeltype;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +33,6 @@ import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.Execute;
@@ -141,8 +142,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
                             });
                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
-                                    StreamUtil.of(entity.getPermissions()).map(s -> permissionHelper.decode(s))
-                                            .filter(s -> StringUtil.isNotBlank(s)).distinct().collect(Collectors.joining("\n"));
+                                    stream(entity.getPermissions()).get(
+                                            stream -> stream.map(s -> permissionHelper.decode(s)).filter(s -> StringUtil.isNotBlank(s))
+                                                    .distinct().collect(Collectors.joining("\n")));
                         }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
@@ -178,9 +180,10 @@ public class AdminLabeltypeAction extends FessAdminAction {
                                             });
                                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                                             form.permissions =
-                                                    StreamUtil.of(entity.getPermissions()).map(s -> permissionHelper.decode(s))
-                                                            .filter(s -> StringUtil.isNotBlank(s)).distinct()
-                                                            .collect(Collectors.joining("\n"));
+                                                    stream(entity.getPermissions()).get(
+                                                            stream -> stream.map(s -> permissionHelper.decode(s))
+                                                                    .filter(s -> StringUtil.isNotBlank(s)).distinct()
+                                                                    .collect(Collectors.joining("\n")));
                                             form.crudMode = crudMode;
                                         })
                                 .orElse(() -> {
@@ -296,8 +299,9 @@ public class AdminLabeltypeAction extends FessAdminAction {
                             op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
                                     n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(StreamUtil.of(form.permissions.split("\n")).map(s -> permissionHelper.encode(s))
-                            .filter(s -> StringUtil.isNotBlank(s)).distinct().toArray(n -> new String[n]));
+                    entity.setPermissions(stream(form.permissions.split("\n")).get(
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(s -> StringUtil.isNotBlank(s)).distinct()
+                                    .toArray(n -> new String[n])));
                     return entity;
                 });
     }

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -29,7 +31,6 @@ import org.codelibs.fess.es.user.exbhv.UserBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
@@ -82,12 +83,15 @@ public class RoleService implements Serializable {
             op.setRefresh(true);
         });
 
-        userBhv.selectCursor(cb -> {
-            cb.query().setRoles_Equal(role.getId());
-        }, entity -> {
-            entity.setRoles(StreamUtil.of(entity.getRoles()).filter(s -> !s.equals(role.getId())).toArray(n -> new String[n]));
-            userBhv.insertOrUpdate(entity);
-        });
+        userBhv.selectCursor(
+                cb -> {
+                    cb.query().setRoles_Equal(role.getId());
+                },
+                entity -> {
+                    entity.setRoles(stream(entity.getRoles()).get(
+                            stream -> stream.filter(s -> !s.equals(role.getId())).toArray(n -> new String[n])));
+                    userBhv.insertOrUpdate(entity);
+                });
     }
 
     protected void setupListCondition(final RoleCB cb, final RolePager rolePager) {

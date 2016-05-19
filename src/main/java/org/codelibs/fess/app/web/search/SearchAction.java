@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.search;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +35,6 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.util.RenderDataUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.taglib.function.LaFunctions;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -199,8 +200,9 @@ public class SearchAction extends FessSearchAction {
     protected void createPagingQuery(final SearchForm form) {
         final List<String> pagingQueryList = new ArrayList<>();
         if (form.ex_q != null) {
-            StreamUtil.of(form.ex_q).filter(q -> StringUtil.isNotBlank(q)).distinct()
-                    .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q)));
+            stream(form.ex_q).of(
+                    stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct()
+                            .forEach(q -> pagingQueryList.add("ex_q=" + LaFunctions.u(q))));
         }
         if (StringUtil.isNotBlank(form.sort)) {
             pagingQueryList.add("sort=" + LaFunctions.u(form.sort));

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.ds.impl;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,6 @@ import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +150,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
                         } else {
                             ignoreFields = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
                         }
-                        StreamUtil.of(ignoreFields).map(s -> s.trim()).forEach(s -> dataMap.remove(s));
+                        stream(ignoreFields).of(stream -> stream.map(s -> s.trim()).forEach(s -> dataMap.remove(s)));
 
                         indexUpdateCallback.store(paramMap, dataMap);
                     } else {

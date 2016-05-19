@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.ds.impl;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +41,6 @@ import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.exception.DataStoreCrawlingException;
 import org.codelibs.fess.exception.DataStoreException;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,8 +97,9 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             for (final String path : values) {
                 final File dir = new File(path);
                 if (dir.isDirectory()) {
-                    StreamUtil.of(dir.listFiles()).filter(f -> isCsvFile(f.getParentFile(), f.getName()))
-                            .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(f -> fileList.add(f));
+                    stream(dir.listFiles()).of(
+                            stream -> stream.filter(f -> isCsvFile(f.getParentFile(), f.getName()))
+                                    .sorted((f1, f2) -> (int) (f1.lastModified() - f2.lastModified())).forEach(f -> fileList.add(f)));
                 } else {
                     logger.warn(path + " is not a directory.");
                 }

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.ldap;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -49,7 +51,6 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.OptionalUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.util.DfTypeUtil;
 import org.slf4j.Logger;
@@ -331,13 +332,13 @@ public class LdapManager {
                                 oldRoleList.add(name);
                             }
                         });
-                        final List<String> newGroupList = StreamUtil.of(user.getGroupNames()).collect(Collectors.toList());
-                        StreamUtil.of(user.getGroupNames()).forEach(name -> {
+                        final List<String> newGroupList = stream(user.getGroupNames()).get(stream -> stream.collect(Collectors.toList()));
+                        stream(user.getGroupNames()).of(stream -> stream.forEach(name -> {
                             if (oldGroupList.contains(name)) {
                                 oldGroupList.remove(name);
                                 newGroupList.remove(name);
                             }
-                        });
+                        }));
                         oldGroupList.stream().forEach(
                                 name -> {
                                     search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
@@ -364,13 +365,13 @@ public class LdapManager {
                                             });
                                 });
 
-                        final List<String> newRoleList = StreamUtil.of(user.getRoleNames()).collect(Collectors.toList());
-                        StreamUtil.of(user.getRoleNames()).forEach(name -> {
+                        final List<String> newRoleList = stream(user.getRoleNames()).get(stream -> stream.collect(Collectors.toList()));
+                        stream(user.getRoleNames()).of(stream -> stream.forEach(name -> {
                             if (oldRoleList.contains(name)) {
                                 oldRoleList.remove(name);
                                 newRoleList.remove(name);
                             }
-                        });
+                        }));
                         oldRoleList.stream().forEach(
                                 name -> {
                                     search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
@@ -397,8 +398,8 @@ public class LdapManager {
                                             });
                                 });
                     } else {
-                        StreamUtil.of(user.getGroupNames()).forEach(
-                                name -> {
+                        stream(user.getGroupNames()).of(
+                                stream -> stream.forEach(name -> {
                                     search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv,
                                             subResult -> {
                                                 if (!!subResult.isEmpty()) {
@@ -410,10 +411,10 @@ public class LdapManager {
                                                 modifyAddEntry(modifyList, "member", userDN);
                                                 modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
                                             });
-                                });
+                                }));
 
-                        StreamUtil.of(user.getRoleNames()).forEach(
-                                name -> {
+                        stream(user.getRoleNames()).of(
+                                stream -> stream.forEach(name -> {
                                     search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv,
                                             subResult -> {
                                                 if (!!subResult.isEmpty()) {
@@ -425,7 +426,7 @@ public class LdapManager {
                                                 modifyAddEntry(modifyList, "member", userDN);
                                                 modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
                                             });
-                                });
+                                }));
                     }
                 });
 
@@ -764,7 +765,7 @@ public class LdapManager {
         final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
         final String userDN = fessConfig.getLdapAdminUserSecurityPrincipal(user.getName());
 
-        StreamUtil.of(user.getGroupNames()).forEach(name -> {
+        stream(user.getGroupNames()).of(stream -> stream.forEach(name -> {
             search(fessConfig.getLdapAdminGroupBaseDn(), fessConfig.getLdapAdminGroupFilter(name), null, adminEnv, subResult -> {
                 if (!!subResult.isEmpty()) {
                     final Group group = new Group();
@@ -775,8 +776,8 @@ public class LdapManager {
                 modifyDeleteEntry(modifyList, "member", userDN);
                 modify(fessConfig.getLdapAdminGroupSecurityPrincipal(name), modifyList, adminEnv);
             });
-        });
-        StreamUtil.of(user.getRoleNames()).forEach(name -> {
+        }));
+        stream(user.getRoleNames()).of(stream -> stream.forEach(name -> {
             search(fessConfig.getLdapAdminRoleBaseDn(), fessConfig.getLdapAdminRoleFilter(name), null, adminEnv, subResult -> {
                 if (!!subResult.isEmpty()) {
                     final Role role = new Role();
@@ -787,7 +788,7 @@ public class LdapManager {
                 modifyDeleteEntry(modifyList, "member", userDN);
                 modify(fessConfig.getLdapAdminRoleSecurityPrincipal(name), modifyList, adminEnv);
             });
-        });
+        }));
 
         search(fessConfig.getLdapAdminUserBaseDn(), fessConfig.getLdapAdminUserFilter(user.getName()), null, adminEnv, result -> {
             if (!result.isEmpty()) {

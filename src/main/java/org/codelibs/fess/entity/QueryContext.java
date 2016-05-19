@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.entity;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +27,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -87,7 +88,7 @@ public class QueryContext {
     }
 
     public void addSorts(final SortBuilder... sortBuilders) {
-        StreamUtil.of(sortBuilders).forEach(sortBuilder -> sortBuilderList.add(sortBuilder));
+        stream(sortBuilders).of(stream -> stream.forEach(sortBuilder -> sortBuilderList.add(sortBuilder)));
     }
 
     public boolean hasSorts() {

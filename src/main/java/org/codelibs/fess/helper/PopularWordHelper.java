@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +29,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.request.popularwords.PopularWordsRequestBuilder;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,10 +72,10 @@ public class PopularWordHelper {
                                         .setSize(fessConfig.getSuggestPopularWordSizeAsInteger().intValue())
                                         .setWindowSize(fessConfig.getSuggestPopularWordWindowSizeAsInteger().intValue());
                         popularWordsRequestBuilder.setSeed(baseSeed);
-                        StreamUtil.of(baseTags).forEach(tag -> popularWordsRequestBuilder.addTag(tag));
-                        StreamUtil.of(baseRoles).forEach(role -> popularWordsRequestBuilder.addRole(role));
-                        StreamUtil.of(baseFields).forEach(field -> popularWordsRequestBuilder.addField(field));
-                        StreamUtil.of(baseExcludes).forEach(exclude -> popularWordsRequestBuilder.addExcludeWord(exclude));
+                        stream(baseTags).of(stream -> stream.forEach(tag -> popularWordsRequestBuilder.addTag(tag)));
+                        stream(baseRoles).of(stream -> stream.forEach(role -> popularWordsRequestBuilder.addRole(role)));
+                        stream(baseFields).of(stream -> stream.forEach(field -> popularWordsRequestBuilder.addField(field)));
+                        stream(baseExcludes).of(stream -> stream.forEach(exclude -> popularWordsRequestBuilder.addExcludeWord(exclude)));
                         popularWordsRequestBuilder.execute().then(r -> {
                             r.getItems().stream().forEach(item -> wordList.add(item.getText()));
                         }).error(t -> logger.warn("Failed to generate popular words.", t));
@@ -91,13 +92,13 @@ public class PopularWordHelper {
             final String[] excludes) {
         final StringBuilder buf = new StringBuilder(100);
         buf.append(seed).append(CACHE_KEY_SPLITTER);
-        StreamUtil.of(tags).sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v));
+        stream(tags).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
         buf.append(CACHE_KEY_SPLITTER);
-        StreamUtil.of(roles).sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v));
+        stream(roles).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
         buf.append(CACHE_KEY_SPLITTER);
-        StreamUtil.of(fields).sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v));
+        stream(fields).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
         buf.append(CACHE_KEY_SPLITTER);
-        StreamUtil.of(excludes).sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v));
+        stream(excludes).of(stream -> stream.sorted().reduce((l, r) -> l + r).ifPresent(v -> buf.append(v)));
         return buf.toString();
     }
 

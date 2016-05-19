@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +49,6 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.QueryResponseList;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.script.Script;
@@ -199,21 +200,24 @@ public class SearchLogHelper {
 
         final List<SearchLog> searchLogList = new ArrayList<>();
         final Map<String, UserInfo> userInfoMap = new HashMap<>();
-        queue.stream().forEach(searchLog -> {
-            final String userAgent = searchLog.getUserAgent();
-            final boolean isBot = userAgent != null && StreamUtil.of(botNames).anyMatch(botName -> userAgent.indexOf(botName) >= 0);
-            if (!isBot) {
-                searchLog.getUserInfo().ifPresent(userInfo -> {
-                    final String code = userInfo.getId();
-                    final UserInfo oldUserInfo = userInfoMap.get(code);
-                    if (oldUserInfo != null) {
-                        userInfo.setCreatedAt(oldUserInfo.getCreatedAt());
+        queue.stream().forEach(
+                searchLog -> {
+                    final String userAgent = searchLog.getUserAgent();
+                    final boolean isBot =
+                            userAgent != null
+                                    && stream(botNames).get(stream -> stream.anyMatch(botName -> userAgent.indexOf(botName) >= 0));
+                    if (!isBot) {
+                        searchLog.getUserInfo().ifPresent(userInfo -> {
+                            final String code = userInfo.getId();
+                            final UserInfo oldUserInfo = userInfoMap.get(code);
+                            if (oldUserInfo != null) {
+                                userInfo.setCreatedAt(oldUserInfo.getCreatedAt());
+                            }
+                            userInfoMap.put(code, userInfo);
+                        });
+                        searchLogList.add(searchLog);
                     }
-                    userInfoMap.put(code, userInfo);
                 });
-                searchLogList.add(searchLog);
-            }
-        });
 
         if (!userInfoMap.isEmpty()) {
             final List<UserInfo> insertList = new ArrayList<>(userInfoMap.values());

@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.util;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
@@ -33,10 +35,10 @@ public class QueryStringBuilder {
         if (StringUtil.isNotBlank(query)) {
             queryBuf.append('(').append(query).append(')');
         }
-        StreamUtil.of(extraQueries)
-                .filter(q -> StringUtil.isNotBlank(q) && q.length() <= fessConfig.getQueryMaxLengthAsInteger().intValue())
-                .forEach(q -> queryBuf.append(' ').append(q));
-        StreamUtil.of(fieldMap).forEach(entry -> {
+        stream(extraQueries).of(
+                stream -> stream.filter(q -> StringUtil.isNotBlank(q) && q.length() <= fessConfig.getQueryMaxLengthAsInteger().intValue())
+                        .forEach(q -> queryBuf.append(' ').append(q)));
+        stream(fieldMap).of(stream -> stream.forEach(entry -> {
             final String key = entry.getKey();
             final String[] values = entry.getValue();
             if (values == null) {
@@ -56,7 +58,7 @@ public class QueryStringBuilder {
                 }
                 queryBuf.append(')');
             }
-        });
+        }));
         return queryBuf.toString();
     }
 

@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -25,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -46,7 +48,6 @@ import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
@@ -80,21 +81,24 @@ public class SuggestHelper {
     @PostConstruct
     public void init() {
         fessConfig = ComponentUtil.getFessConfig();
-        stream(fessConfig.getSuggestFieldContents()).forEach(f -> contentFieldNameSet.add(f));
-        stream(fessConfig.getSuggestFieldTags()).forEach(f -> tagFieldNameSet.add(f));
-        stream(fessConfig.getSuggestFieldRoles()).forEach(f -> roleFieldNameSet.add(f));
-        contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).toArray(n -> new String[n]));
-        stream(fessConfig.getSuggestRoleFilters()).forEach(filter -> {
+        split(fessConfig.getSuggestFieldContents(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> contentFieldNameSet.add(f)));
+        split(fessConfig.getSuggestFieldTags(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> tagFieldNameSet.add(f)));
+        split(fessConfig.getSuggestFieldRoles(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> roleFieldNameSet.add(f)));
+        contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
+        split(fessConfig.getSuggestRoleFilters(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(filter -> {
             roleFilterList.add(Pattern.compile(filter));
-        });
+        }));
 
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
         suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-        stream(fessConfig.getSuggestFieldIndexContents()).forEach(field -> {
+        split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
             suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
-        });
+        }));
         suggester.createIndexIfNothing();
     }
 
@@ -131,7 +135,7 @@ public class SuggestHelper {
                     }
 
                     if (sb.length() > 0) {
-                        StreamUtil.of(searchLog.getRoles()).forEach(role -> roles.add(role));
+                        stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
                         if (roles.stream().allMatch(v -> roleFilterList.stream().anyMatch(pattern -> pattern.matcher(v).matches()))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
@@ -260,10 +264,6 @@ public class SuggestHelper {
 
     public void deleteBadWord(final String badWord) {
         suggester.indexer().deleteBadWord(badWord);
-    }
-
-    private Stream<String> stream(final String value) {
-        return StreamUtil.of(value.split(",")).filter(v -> StringUtil.isNotBlank(v));
     }
 
 }

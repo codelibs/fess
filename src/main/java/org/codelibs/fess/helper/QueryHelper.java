@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +57,6 @@ import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -448,10 +449,10 @@ public class QueryHelper implements Serializable {
                     "Unknown phrase query: " + query);
         }
         final String field = terms[0].field();
-        final String[] texts = StreamUtil.of(terms).map(term -> term.text()).toArray(n -> new String[n]);
+        final String[] texts = stream(terms).get(stream -> stream.map(term -> term.text()).toArray(n -> new String[n]));
         final String text = String.join(" ", texts);
         context.addFieldLog(field, text);
-        StreamUtil.of(texts).forEach(t -> context.addHighlightedQuery(t));
+        stream(texts).of(stream -> stream.forEach(t -> context.addHighlightedQuery(t)));
         return buildDefaultQueryBuilder((f, b) -> QueryBuilders.matchPhraseQuery(f, text).boost(b * boost));
     }
 
@@ -474,8 +475,8 @@ public class QueryHelper implements Serializable {
         boolQuery.should(contentQuery);
         getQueryLanguages().ifPresent(
                 langs -> {
-                    StreamUtil.of(langs).forEach(
-                            lang -> {
+                    stream(langs).of(
+                            stream -> stream.forEach(lang -> {
                                 final QueryBuilder titleLangQuery =
                                         builder.apply(fessConfig.getIndexFieldTitle() + "_" + lang, fessConfig
                                                 .getQueryBoostTitleLangAsDecimal().floatValue());
@@ -484,7 +485,7 @@ public class QueryHelper implements Serializable {
                                         builder.apply(fessConfig.getIndexFieldContent() + "_" + lang, fessConfig
                                                 .getQueryBoostContentLangAsDecimal().floatValue());
                                 boolQuery.should(contentLangQuery);
-                            });
+                            }));
                 });
         return boolQuery;
     }
@@ -580,8 +581,9 @@ public class QueryHelper implements Serializable {
         this.highlightedFields = highlightedFields;
     }
 
-    public Stream<String> highlightedFields() {
-        return StreamUtil.of(highlightedFields);
+    public void highlightedFields(Consumer<Stream<String>> stream) {
+        stream(highlightedFields).of(stream);
+        ;
     }
 
     /**
@@ -711,7 +713,7 @@ public class QueryHelper implements Serializable {
     public void addDefaultSort(final String fieldName, final String order) {
         final List<SortBuilder> list = new ArrayList<>();
         if (defaultSortBuilders != null) {
-            StreamUtil.of(defaultSortBuilders).forEach(builder -> list.add(builder));
+            stream(defaultSortBuilders).of(stream -> stream.forEach(builder -> list.add(builder)));
         }
         list.add(SortBuilders.fieldSort(fieldName)
                 .order(SortOrder.DESC.toString().equalsIgnoreCase(order) ? SortOrder.DESC : SortOrder.ASC));

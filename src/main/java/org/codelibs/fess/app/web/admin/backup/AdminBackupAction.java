@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.backup;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,6 @@ import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
-import org.codelibs.fess.util.StreamUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -50,7 +51,7 @@ public class AdminBackupAction extends FessAdminAction {
 
     @Execute
     public ActionResponse download(final String id) {
-        if (StreamUtil.of(fessConfig.getIndexBackupTargetsAsArray()).anyMatch(s -> s.equals(id))) {
+        if (stream(fessConfig.getIndexBackupTargetsAsArray()).get(stream -> stream.anyMatch(s -> s.equals(id)))) {
             return asStream(id + ".bulk").contentTypeOctetStream().stream(
                     out -> {
                         try (CurlResponse response =
@@ -66,12 +67,13 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private List<Map<String, String>> getBackupItems() {
-        return StreamUtil.of(fessConfig.getIndexBackupTargetsAsArray()).filter(name -> StringUtil.isNotBlank(name)).map(name -> {
-            final Map<String, String> map = new HashMap<>();
-            map.put("id", name);
-            map.put("name", name);
-            return map;
-        }).collect(Collectors.toList());
+        return stream(fessConfig.getIndexBackupTargetsAsArray()).get(
+                stream -> stream.filter(name -> StringUtil.isNotBlank(name)).map(name -> {
+                    final Map<String, String> map = new HashMap<>();
+                    map.put("id", name);
+                    map.put("name", name);
+                    return map;
+                }).collect(Collectors.toList()));
     }
 
     private HtmlResponse asIndexHtml() {
