@@ -325,7 +325,7 @@ public class CrawlJob {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
         stream(fessConfig.getJvmCrawlerOptionsAsArray()).of(
-                stream -> stream.filter(value -> StringUtil.isNotBlank(value)).forEach(value -> cmdList.add(value)));
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");
@@ -339,7 +339,7 @@ public class CrawlJob {
         }
 
         if (StringUtil.isNotBlank(jvmOptions)) {
-            stream(jvmOptions.split(" ")).of(stream -> stream.filter(s -> StringUtil.isNotBlank(s)).forEach(s -> cmdList.add(s)));
+            stream(jvmOptions.split(" ")).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());

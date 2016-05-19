@@ -68,7 +68,7 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getExtraQueries() {
-        return stream(ex_q).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
+        return stream(ex_q).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     @Override
     public String[] getLanguages() {
-        return stream(lang).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
+        return stream(lang).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
     @Override

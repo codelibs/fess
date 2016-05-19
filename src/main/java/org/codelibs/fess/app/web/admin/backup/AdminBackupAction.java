@@ -67,13 +67,12 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private List<Map<String, String>> getBackupItems() {
-        return stream(fessConfig.getIndexBackupTargetsAsArray()).get(
-                stream -> stream.filter(name -> StringUtil.isNotBlank(name)).map(name -> {
-                    final Map<String, String> map = new HashMap<>();
-                    map.put("id", name);
-                    map.put("name", name);
-                    return map;
-                }).collect(Collectors.toList()));
+        return stream(fessConfig.getIndexBackupTargetsAsArray()).get(stream -> stream.filter(StringUtil::isNotBlank).map(name -> {
+            final Map<String, String> map = new HashMap<>();
+            map.put("id", name);
+            map.put("name", name);
+            return map;
+        }).collect(Collectors.toList()));
     }
 
     private HtmlResponse asIndexHtml() {

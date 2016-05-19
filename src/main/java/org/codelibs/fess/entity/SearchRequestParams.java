@@ -51,7 +51,7 @@ public interface SearchRequestParams {
     Locale getLocale();
 
     public default String[] simplifyArray(final String[] values) {
-        return stream(values).get(stream -> stream.filter(q -> StringUtil.isNotBlank(q)).distinct().toArray(n -> new String[n]));
+        return stream(values).get(stream -> stream.filter(StringUtil::isNotBlank).distinct().toArray(n -> new String[n]));
     }
 
     public default String[] getParamValueArray(final HttpServletRequest request, final String param) {

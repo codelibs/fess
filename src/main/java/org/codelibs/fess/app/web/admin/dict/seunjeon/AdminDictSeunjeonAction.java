@@ -364,8 +364,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }
-        return stream(value.split(",")).get(
-                stream -> stream.filter(s -> StringUtil.isNotBlank(s)).map(s -> s.trim()).toArray(n -> new String[n]));
+        return stream(value.split(",")).get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
     }
 
     // ===================================================================================

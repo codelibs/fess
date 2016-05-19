@@ -57,7 +57,7 @@ public class PopularWordHelper {
         final String baseSeed = seed != null ? seed : fessConfig.getSuggestPopularWordSeed();
         final String[] baseTags = tags != null ? tags : fessConfig.getSuggestPopularWordTagsAsArray();
         final String[] baseRoles =
-                roles != null ? roles : ComponentUtil.getRoleQueryHelper().build().stream().filter(s -> StringUtil.isNotBlank(s))
+                roles != null ? roles : ComponentUtil.getRoleQueryHelper().build().stream().filter(StringUtil::isNotBlank)
                         .toArray(n -> new String[n]);
         final String[] baseFields = fields != null ? fields : fessConfig.getSuggestPopularWordFieldsAsArray();
         final String[] baseExcludes = excludes != null ? excludes : fessConfig.getSuggestPopularWordExcludesAsArray();

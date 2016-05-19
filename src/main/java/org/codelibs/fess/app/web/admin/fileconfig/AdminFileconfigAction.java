@@ -145,8 +145,8 @@ public class AdminFileconfigAction extends FessAdminAction {
                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
                                     stream(entity.getPermissions()).get(
-                                            stream -> stream.map(s -> permissionHelper.decode(s)).filter(s -> StringUtil.isNotBlank(s))
-                                                    .distinct().collect(Collectors.joining("\n")));
+                                            stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
+                                                    .collect(Collectors.joining("\n")));
                         }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
@@ -184,7 +184,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                                             form.permissions =
                                                     stream(entity.getPermissions()).get(
                                                             stream -> stream.map(s -> permissionHelper.decode(s))
-                                                                    .filter(s -> StringUtil.isNotBlank(s)).distinct()
+                                                                    .filter(StringUtil::isNotBlank).distinct()
                                                                     .collect(Collectors.joining("\n")));
                                             form.crudMode = crudMode;
                                         })
@@ -301,7 +301,7 @@ public class AdminFileconfigAction extends FessAdminAction {
                                     n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(stream(form.permissions.split("\n")).get(
-                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(s -> StringUtil.isNotBlank(s)).distinct()
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
                                     .toArray(n -> new String[n])));
                     return entity;
                 });

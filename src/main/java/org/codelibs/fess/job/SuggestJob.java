@@ -197,7 +197,7 @@ public class SuggestJob {
             cmdList.add("-Dfess.log.level=" + logLevel);
         }
         stream(fessConfig.getJvmSuggestOptionsAsArray()).of(
-                stream -> stream.filter(value -> StringUtil.isNotBlank(value)).forEach(value -> cmdList.add(value)));
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(value -> cmdList.add(value)));
 
         File ownTmpDir = null;
         final String tmpDir = System.getProperty("java.io.tmpdir");
