@@ -47,7 +47,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
 
     @PostConstruct
     public void init() {
-        maxDocumentRequestSize = ComponentUtil.getFessConfig().getIndexerWebfsMaxDocumentRequestSizeAsInteger().longValue();
+        maxDocumentRequestSize = ComponentUtil.getFessConfig().getIndexerDataMaxDocumentRequestSizeAsInteger().longValue();
     }
 
     /* (non-Javadoc)
