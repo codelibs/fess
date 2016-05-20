@@ -31,7 +31,7 @@ public abstract class BaseApiManager implements WebApiManager {
 
     protected String pathPrefix;
 
-    protected static enum FormatType {
+    protected enum FormatType {
         SEARCH, LABEL, POPULARWORD, FAVORITE, FAVORITES, OTHER, PING;
     }
 
