@@ -3,7 +3,22 @@
     "must_not": [
       {
         "type": {
+          "value": "crawling_info"
+        }
+      },
+      {
+        "type": {
+          "value": "crawling_info_param"
+        }
+      },
+      {
+        "type": {
           "value": "failure_url"
+        }
+      },
+      {
+        "type": {
+          "value": "job_log"
         }
       }
     ]
