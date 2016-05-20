@@ -133,13 +133,13 @@ $.fn.suggestor = function(setting) {
 				$olEle.css("padding","0");
 				$olEle.css("margin","2px");
 
-				for(var i=0;i<reslist.length && listNum < settingAjaxInfo.num;i++) {
-					var str = reslist[i];
+				for(var j=0;j<reslist.length && listNum < settingAjaxInfo.num;j++) {
+					var str = reslist[j];
 					var chkCorrectWord = true;
 
 					var $tmpli = $($olEle.children("li"));
-					for(var j=0;j<$tmpli.size();j++) {
-						if(str === $($tmpli.get(j)).html()) {
+					for(var k=0;k<$tmpli.size();k++) {
+						if(str === $($tmpli.get(k)).html()) {
 							chkCorrectWord = false;
 						}
 					}
@@ -188,7 +188,7 @@ $.fn.suggestor = function(setting) {
 										$(this).css("background-color", boxCssInfo["background-color"]);
 									}
 								}
-								listSelNum = 0
+								listSelNum = 0;
 							}
 						});
 
@@ -283,7 +283,7 @@ $.fn.suggestor = function(setting) {
 				$boxElement.width($textArea.width() + settingAdjustWidthVal);
 			}
 		}
-	}
+	};
 
 	suggestor.init($(this), setting);
 
