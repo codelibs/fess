@@ -236,7 +236,6 @@ $.fn.suggestor = function(setting) {
 				listSelNum = 0;
 			}
 
-			var a = $boxElement.children("ol").children("li");
 			$boxElement.children("ol").children("li").each(function(i){
 				if(i === (listSelNum-1)) {
 					if(typeof listSelectedCssInfo === 'undefined') {
