@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.CoreLibConstants;
@@ -543,7 +544,7 @@ public class ViewHelper implements Serializable {
             try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);
             } catch (final IOException e) {
-                if (!"ClientAbortException".equals(e.getClass().getSimpleName())) {
+                if (!(e.getCause() instanceof ClientAbortException)) {
                     throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
             }
