@@ -330,6 +330,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                                     dataConfigToRoleBhv.queryDelete(cb -> cb.query().setDataConfigId_Equal(dataConfigTypeId));
                                 });
                     });
+            roleTypeBhv.queryDelete(cb -> {});
 
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
         } catch (final Exception e) {
