@@ -148,6 +148,8 @@ public final class ComponentUtil {
 
     private static SystemHelper systemHelper;
 
+    private static FessConfig fessConfig;
+
     private ComponentUtil() {
     }
 
@@ -293,6 +295,9 @@ public final class ComponentUtil {
     }
 
     public static FessConfig getFessConfig() {
+        if (fessConfig != null) {
+            return fessConfig;
+        }
         return getComponent(FessConfig.class);
     }
 
@@ -363,6 +368,15 @@ public final class ComponentUtil {
             // ignore
         }
         return false;
+    }
+
+    /**
+     * For test purpose only.
+     * 
+     * @param fessConfig
+     */
+    public static void setFessConfig(FessConfig fessConfig) {
+        ComponentUtil.fessConfig = fessConfig;
     }
 
 }

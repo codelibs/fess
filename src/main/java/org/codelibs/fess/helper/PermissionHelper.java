@@ -17,6 +17,8 @@ package org.codelibs.fess.helper;
 
 import java.util.Locale;
 
+import javax.annotation.Resource;
+
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -28,20 +30,34 @@ public class PermissionHelper {
 
     protected String userPrefix = "{user}";
 
+    @Resource
+    protected SystemHelper systemHelper;
+
     public String encode(final String value) {
         if (StringUtil.isBlank(value)) {
             return null;
         }
 
-        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final String permission = value.trim();
         final String lower = permission.toLowerCase(Locale.ROOT);
-        if (lower.startsWith(userPrefix) && permission.length() > userPrefix.length()) {
-            return systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
-        } else if (lower.startsWith(groupPrefix) && permission.length() > groupPrefix.length()) {
-            return systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
-        } else if (lower.startsWith(rolePrefix) && permission.length() > rolePrefix.length()) {
-            return systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
+        if (lower.startsWith(userPrefix)) {
+            if (permission.length() > userPrefix.length()) {
+                return systemHelper.getSearchRoleByUser(permission.substring(userPrefix.length()));
+            } else {
+                return null;
+            }
+        } else if (lower.startsWith(groupPrefix)) {
+            if (permission.length() > groupPrefix.length()) {
+                return systemHelper.getSearchRoleByGroup(permission.substring(groupPrefix.length()));
+            } else {
+                return null;
+            }
+        } else if (lower.startsWith(rolePrefix)) {
+            if (permission.length() > rolePrefix.length()) {
+                return systemHelper.getSearchRoleByRole(permission.substring(rolePrefix.length()));
+            } else {
+                return null;
+            }
         }
         return permission;
     }
@@ -52,12 +68,13 @@ public class PermissionHelper {
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (value.startsWith(fessConfig.getRoleSearchUserPrefix()) && value.length() > 1) {
-            return userPrefix + value.substring(1);
-        } else if (value.startsWith(fessConfig.getRoleSearchGroupPrefix()) && value.length() > 1) {
-            return groupPrefix + value.substring(1);
-        } else if (value.startsWith(fessConfig.getRoleSearchRolePrefix()) && value.length() > 1) {
-            return rolePrefix + value.substring(1);
+        if (value.startsWith(fessConfig.getRoleSearchUserPrefix()) && value.length() > fessConfig.getRoleSearchUserPrefix().length()) {
+            return userPrefix + value.substring(fessConfig.getRoleSearchUserPrefix().length());
+        } else if (value.startsWith(fessConfig.getRoleSearchGroupPrefix())
+                && value.length() > fessConfig.getRoleSearchGroupPrefix().length()) {
+            return groupPrefix + value.substring(fessConfig.getRoleSearchGroupPrefix().length());
+        } else if (value.startsWith(fessConfig.getRoleSearchRolePrefix()) && value.length() > fessConfig.getRoleSearchRolePrefix().length()) {
+            return rolePrefix + value.substring(fessConfig.getRoleSearchRolePrefix().length());
         }
         return value;
     }
