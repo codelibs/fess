@@ -28,13 +28,13 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<h3 class="title ellipsis">
-						<a class="link" href="${doc.urlLink}" data-uri="${doc.urlLink}"
-							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.contentTitle)}</a>
+						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
+							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 					</h3>
 					<div class="body">
-						<div class="description">${doc.contentDescription}</div>
+						<div class="description">${doc.content_description}</div>
 						<div class="site ellipsis">
-							<cite>${f:h(doc.sitePath)}</cite>
+							<cite>${f:h(doc.site_path)}</cite>
 							<c:if test="${doc.has_cache=='true'}">
 								<small class="hidden-md-down"> <la:link
 										href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
@@ -58,8 +58,8 @@
 								</c:if> <c:if
 									test="${doc.last_modified!=null && doc.last_modified!=''}">
 									<c:if test="${hasInfo}">
-										<span class="br-phone"></span>
-										<span class="hidden-phone">-</span>
+										<span class="br-xs"></span>
+										<span class="hidden-xs">-</span>
 									</c:if>
 									<c:set var="hasInfo" value="true" />
 									<la:message key="labels.search_result_last_modified" />
@@ -68,24 +68,24 @@
 								</c:if> <c:if
 									test="${doc.content_length!=null && doc.content_length!=''}">
 									<c:if test="${hasInfo}">
-										<span class="br-phone"></span>
-										<span class="hidden-phone">-</span>
+										<span class="br-xs"></span>
+										<span class="hidden-xs">-</span>
 									</c:if>
 									<c:set var="hasInfo" value="true" />
 									<la:message key="labels.search_result_size"
 										arg0="${fe:formatNumber(doc.content_length)}" />
 								</c:if> <c:if test="${searchLogSupport}">
 									<c:if test="${hasInfo}">
-										<span class="br-phone"></span>
-										<span class="hidden-phone">-</span>
+										<span class="br-xs"></span>
+										<span class="hidden-xs">-</span>
 									</c:if>
 									<c:set var="hasInfo" value="true" />
 									<la:message key="labels.search_click_count"
 										arg0="${f:h(doc.click_count)}" />
 								</c:if> <c:if test="${favoriteSupport}">
 									<c:if test="${hasInfo}">
-										<span class="br-phone"></span>
-										<span class="hidden-phone">-</span>
+										<span class="br-xs"></span>
+										<span class="hidden-xs">-</span>
 									</c:if>
 									<c:set var="hasInfo" value="true" />
 									<a href="#${doc.doc_id}" class="favorite"><la:message
@@ -171,7 +171,7 @@
 			</c:if>
 			<c:forEach var="pageNumber" varStatus="s" items="${pageNumberList}">
 				<li
-					<c:if test="${pageNumber < currentPageNumber - 2 || pageNumber > currentPageNumber + 2}">class="hidden-phone"</c:if>
+					<c:if test="${pageNumber < currentPageNumber - 2 || pageNumber > currentPageNumber + 2}">class="hidden-xs"</c:if>
 					<c:if test="${pageNumber == currentPageNumber && pageNumber >= currentPageNumber - 2 && pageNumber <= currentPageNumber + 2}">class="active"</c:if>>
 					<la:link
 						href="/search/move?q=${f:u(q)}&pn=${f:u(pageNumber)}&num=${f:u(pageSize)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(pageNumber)}</la:link>

@@ -78,9 +78,15 @@
 							<div class="clearfix">
 								<p class="popularWordBody ellipsis">
 									<la:message key="labels.search_popular_word_word" />
-									<c:forEach var="item" items="${popularWords}">
-										<la:link
-											href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+									<c:forEach var="item" varStatus="s" items="${popularWords}">
+										<c:if test="${s.index < 3}">
+											<la:link
+												href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+										</c:if>
+										<c:if test="${3 <= s.index}">
+											<la:link styleClass="hidden-xs"
+												href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+										</c:if>
 									</c:forEach>
 								</p>
 							</div>
@@ -137,6 +143,9 @@
 											<option value="">
 												<la:message key="labels.search_result_select_sort" />
 											</option>
+											<la:option value="score.desc">
+												<la:message key="labels.search_result_sort_score_desc" />
+											</la:option>
 											<la:option value="created.asc">
 												<la:message key="labels.search_result_sort_created_asc" />
 											</la:option>

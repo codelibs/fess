@@ -1,5 +1,5 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="search" method="get" styleId="searchForm" role="search">
+<la:form action="/search" method="get" styleId="searchForm" role="search">
 ${fe:facetForm()}${fe:geoForm()}
 <nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
 		<la:link styleClass="navbar-brand" href="/">
@@ -76,6 +76,9 @@ ${fe:facetForm()}${fe:geoForm()}
 						<option value="">
 							<la:message key="labels.search_result_select_sort" />
 						</option>
+						<la:option value="score.desc">
+							<la:message key="labels.search_result_sort_score_desc" />
+						</la:option>
 						<la:option value="created.asc">
 							<la:message key="labels.search_result_sort_created_asc" />
 						</la:option>
