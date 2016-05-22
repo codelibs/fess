@@ -12,12 +12,12 @@ ${fe:facetForm()}${fe:geoForm()}
 				styleClass="form-control" autocomplete="off" />
 			<button class="btn medium btn-primary" type="submit" name="search"
 				id="searchButton">
-				<i class="icon-search icon-white"></i><span class="hidden-phone"><la:message
+				<i class="icon-search icon-white"></i><span class="hidden-xs"><la:message
 						key="labels.search" /></span>
 			</button>
 			<a href="#searchOptions" role="button" class="btn btn-secondary"
 				data-toggle="modal"><i class="icon-cog"></i><span
-				class="hidden-phone"><la:message
+				class="hidden-xs"><la:message
 						key="labels.header_form_option_btn" /></span></a>
 		</div>
 	</nav>
