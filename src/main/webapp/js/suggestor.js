@@ -119,7 +119,6 @@ $.fn.suggestor = function(setting) {
 
 			var hits = obj.response.result.hits;
 			var suggestor = this;
-			var addCount = 0;
 
 
 			listNum = 0;

@@ -56,7 +56,7 @@ $(function() {
 
 	$result.on('mouseover', 'a.link', function(e) {
 		var docId = $(this).attr('data-id'), rt = $('#rt').val(), url = $(
-				this).attr('href'), queryId = $queryId.val(), buf = [];
+				this).attr('href'), buf = [];
 		buf.push(contextPath);
 		buf.push('/go/?rt=');
 		buf.push(rt);
