@@ -6,7 +6,7 @@
       "title": "fess_log",
       "hits": 0,
       "description": "",
-      "panelsJSON": "[{\"col\":11,\"id\":\"search-term-rank-of-no-results\",\"panelIndex\":1,\"row\":1,\"size_x\":2,\"size_y\":6,\"type\":\"visualization\"},{\"col\":5,\"id\":\"rank-of-UserAgent\",\"panelIndex\":2,\"row\":7,\"size_x\":8,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"average-response-time\",\"panelIndex\":3,\"row\":4,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":9,\"id\":\"search-term-rank\",\"panelIndex\":4,\"row\":1,\"size_x\":2,\"size_y\":6,\"type\":\"visualization\"},{\"col\":1,\"id\":\"search-query-counts/sec.\",\"panelIndex\":5,\"row\":1,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"hit-counts\",\"panelIndex\":6,\"row\":7,\"size_x\":4,\"size_y\":4,\"type\":\"visualization\"}]",
+      "panelsJSON": "[{\"col\":11,\"id\":\"search-term-rank-of-no-results\",\"panelIndex\":1,\"row\":1,\"size_x\":2,\"size_y\":6,\"type\":\"visualization\"},{\"col\":5,\"id\":\"rank-of-UserAgent\",\"panelIndex\":2,\"row\":7,\"size_x\":8,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"average-response-time\",\"panelIndex\":3,\"row\":4,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":9,\"id\":\"search-term-rank\",\"panelIndex\":4,\"row\":1,\"size_x\":2,\"size_y\":6,\"type\":\"visualization\"},{\"col\":1,\"id\":\"search-query-counts-per-sec\",\"panelIndex\":5,\"row\":1,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"hit-counts\",\"panelIndex\":6,\"row\":7,\"size_x\":4,\"size_y\":4,\"type\":\"visualization\"}]",
       "optionsJSON": "{\"darkTheme\":false}",
       "uiStateJSON": "{\"P-1\":{\"spy\":{\"mode\":{\"fill\":false,\"name\":null}}},\"P-2\":{\"spy\":{\"mode\":{\"fill\":false,\"name\":null}}}}",
       "version": 1,
@@ -87,7 +87,7 @@
     }
   },
   {
-    "_id": "search-query-counts/sec.",
+    "_id": "search-query-counts-per-sec",
     "_type": "visualization",
     "_source": {
       "title": "search query counts / sec.",
