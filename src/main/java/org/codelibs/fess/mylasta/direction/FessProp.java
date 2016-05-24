@@ -248,7 +248,7 @@ public interface FessProp {
     }
 
     public default boolean isSearchLog() {
-        return getSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, false);
+        return getSystemPropertyAsBoolean(Constants.SEARCH_LOG_PROPERTY, true);
     }
 
     public default void setUserInfo(final boolean value) {
@@ -256,7 +256,7 @@ public interface FessProp {
     }
 
     public default boolean isUserInfo() {
-        return getSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, false);
+        return getSystemPropertyAsBoolean(Constants.USER_INFO_PROPERTY, true);
     }
 
     public default void setUserFavorite(final boolean value) {
@@ -272,7 +272,7 @@ public interface FessProp {
     }
 
     public default boolean isWebApiJson() {
-        return getSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, false);
+        return getSystemPropertyAsBoolean(Constants.WEB_API_JSON_PROPERTY, true);
     }
 
     public default boolean isWebApiGsa() {
