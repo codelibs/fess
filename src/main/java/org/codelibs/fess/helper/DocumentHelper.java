@@ -36,7 +36,8 @@ public class DocumentHelper implements Serializable {
 
         final int maxAlphanumTermSize = getMaxAlphanumTermSize();
         final int maxSymbolTermSize = getMaxSymbolTermSize();
-        return TextUtil.normalizeText(content, content.length(), maxAlphanumTermSize, maxSymbolTermSize);
+        // TODO removeDuplication
+        return TextUtil.normalizeText(content, content.length(), maxAlphanumTermSize, maxSymbolTermSize, false);
     }
 
     protected int getMaxAlphanumTermSize() {
@@ -61,7 +62,7 @@ public class DocumentHelper implements Serializable {
             subContent = content.substring(0, maxWidth * 2);
         }
 
-        final String originalStr = TextUtil.normalizeText(subContent, subContent.length(), -1, -1);
+        final String originalStr = TextUtil.normalizeText(subContent, subContent.length(), -1, -1, false);
         return StringUtils.abbreviate(originalStr, maxWidth);
     }
 }
