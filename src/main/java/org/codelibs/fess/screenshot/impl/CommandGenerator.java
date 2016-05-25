@@ -36,7 +36,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
 
     public List<String> commandList;
 
-    public long commandTimeout = 10 * 1000;// 10sec
+    public long commandTimeout = (long) 10 * 1000;// 10sec
 
     public File baseDir;
 

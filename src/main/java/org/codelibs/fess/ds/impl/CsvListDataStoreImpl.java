@@ -35,7 +35,7 @@ public class CsvListDataStoreImpl extends CsvDataStoreImpl {
 
     public boolean deleteProcessedFile = true;
 
-    public long csvFileTimestampMargin = 60 * 1000;// 1min
+    public long csvFileTimestampMargin = (long) 60 * 1000;// 1min
 
     public boolean ignoreDataStoreException = true;
 

@@ -50,7 +50,7 @@ public class ScreenShotManager {
 
     protected File baseDir;
 
-    public long shutdownTimeout = 5 * 60 * 1000; // 5min
+    public long shutdownTimeout = (long) 5 * 60 * 1000; // 5min
 
     public int screenShotPathCacheSize = 10;
 
