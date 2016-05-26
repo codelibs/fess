@@ -118,7 +118,7 @@
 							<c:if
 								test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
 								<li class="list-group-item"><la:link
-										href="/search/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+										href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 											${f:h(fe:label(countEntry.key))} 
 											<span class="label label-default label-pill pull-right">${f:h(countEntry.value)}</span>
 									</la:link></li>
@@ -134,7 +134,7 @@
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
-									href="/search/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
+									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>
@@ -144,7 +144,7 @@
 			</c:forEach>
 			<c:if test="${!empty ex_q}">
 				<div class="pull-right">
-					<la:link href="/search/search?q=${f:u(q)}"
+					<la:link href="/search?q=${f:u(q)}"
 						styleClass="btn btn-secondary btn-sm">
 						<la:message key="labels.facet_label_reset" />
 					</la:link>

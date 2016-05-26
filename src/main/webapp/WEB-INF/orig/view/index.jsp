@@ -81,11 +81,11 @@
 									<c:forEach var="item" varStatus="s" items="${popularWords}">
 										<c:if test="${s.index < 3}">
 											<la:link
-												href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 										<c:if test="${3 <= s.index}">
 											<la:link styleClass="hidden-xs"
-												href="/search/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
+												href="/search?q=${f:u(item)}${fe:facetQuery()}${fe:geoQuery()}">${f:h(item)}</la:link>
 										</c:if>
 									</c:forEach>
 								</p>
