@@ -62,7 +62,7 @@ public class SearchLogHelper {
     @Resource
     protected DynamicProperties systemProperties;
 
-    public long userCheckInterval = (long) 5 * 60 * 1000;// 5 min
+    public long userCheckInterval = 5 * 60 * 1000L;// 5 min
 
     public int userInfoCacheSize = 1000;
 

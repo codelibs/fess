@@ -88,7 +88,7 @@ public class JobLogService implements Serializable {
     }
 
     public void deleteBefore(final int days) {
-        final long oneday = (long) 24 * 60 * 60 * 1000;
+        final long oneday = 24 * 60 * 60 * 1000L;
         final long targetTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong() - days * oneday;
         jobLogBhv.queryDelete(cb -> {
             cb.query().setEndTime_LessThan(targetTime);

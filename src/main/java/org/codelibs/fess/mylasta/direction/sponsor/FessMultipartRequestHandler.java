@@ -53,7 +53,7 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
     //                                                                          Definition
     //                                                                          ==========
     private static final Logger logger = LoggerFactory.getLogger(FessMultipartRequestHandler.class);
-    public static final long DEFAULT_SIZE_MAX = (long) 250 * 1024 * 1024; // 250MB
+    public static final long DEFAULT_SIZE_MAX = 250 * 1024 * 1024L; // 250MB
     public static final int DEFAULT_SIZE_THRESHOLD = 256 * 1024; // 250KB
     protected static final String CONTEXT_TEMPDIR_KEY = "javax.servlet.context.tempdir";
     protected static final String JAVA_IO_TMPDIR_KEY = "java.io.tmpdir";
