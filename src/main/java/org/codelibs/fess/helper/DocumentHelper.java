@@ -36,8 +36,8 @@ public class DocumentHelper implements Serializable {
 
         final int maxAlphanumTermSize = getMaxAlphanumTermSize();
         final int maxSymbolTermSize = getMaxSymbolTermSize();
-        // TODO removeDuplication
-        return TextUtil.normalizeText(content, content.length(), maxAlphanumTermSize, maxSymbolTermSize, false);
+        final boolean duplicateTermRemoved = isDuplicateTermRemoved();
+        return TextUtil.normalizeText(content, content.length(), maxAlphanumTermSize, maxSymbolTermSize, duplicateTermRemoved);
     }
 
     protected int getMaxAlphanumTermSize() {
@@ -48,6 +48,11 @@ public class DocumentHelper implements Serializable {
     protected int getMaxSymbolTermSize() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessConfig.getCrawlerDocumentMaxSymbolTermSizeAsInteger().intValue();
+    }
+
+    protected boolean isDuplicateTermRemoved() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return fessConfig.isCrawlerDocumentDuplicateTermRemoved();
     }
 
     public String getDigest(final ResponseData responseData, final String content, final Map<String, Object> dataMap, final int maxWidth) {

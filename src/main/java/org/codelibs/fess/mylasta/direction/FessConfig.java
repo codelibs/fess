@@ -137,6 +137,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 10 */
     String CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE = "crawler.document.max.symbol.term.size";
 
+    /** The key of the configuration. e.g. false */
+    String CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED = "crawler.document.duplicate.term.removed";
+
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
@@ -1213,6 +1216,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @throws NumberFormatException When the property is not integer.
      */
     Integer getCrawlerDocumentMaxSymbolTermSizeAsInteger();
+
+    /**
+     * Get the value for the key 'crawler.document.duplicate.term.removed'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentDuplicateTermRemoved();
+
+    /**
+     * Is the property for the key 'crawler.document.duplicate.term.removed' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerDocumentDuplicateTermRemoved();
 
     /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
@@ -3780,6 +3797,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getCrawlerDocumentMaxSymbolTermSizeAsInteger() {
             return getAsInteger(FessConfig.CRAWLER_DOCUMENT_MAX_SYMBOL_TERM_SIZE);
+        }
+
+        public String getCrawlerDocumentDuplicateTermRemoved() {
+            return get(FessConfig.CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED);
+        }
+
+        public boolean isCrawlerDocumentDuplicateTermRemoved() {
+            return is(FessConfig.CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED);
         }
 
         public String getCrawlerCrawlingDataEncoding() {

@@ -725,7 +725,7 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: {0} results */
     public static final String LABELS_searchoptions_num = "{labels.searchoptions_num}";
 
-    /** The key of the message: Preferred Languages */
+    /** The key of the message: Languages */
     public static final String LABELS_searchoptions_menu_lang = "{labels.searchoptions_menu_lang}";
 
     /** The key of the message: Labels */
