@@ -91,9 +91,9 @@
 		<delete file="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-assembly-${elasticsearch.version}.0.jar"/>
 		<!-- kopf -->
 		<get dest="${target.dir}">
-			<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.0.0.zip" />
+			<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.1.0.zip" />
 		</get>
-		<unzip dest="${plugins.dir}/kopf" src="${target.dir}/elasticsearch-kopf-2.0.0.0.zip" />
+		<unzip dest="${plugins.dir}/kopf" src="${target.dir}/elasticsearch-kopf-2.0.1.0.zip" />
 
 		<antcall target="remove.jars" />
 	</target>
