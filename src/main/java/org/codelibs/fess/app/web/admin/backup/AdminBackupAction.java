@@ -17,26 +17,41 @@ package org.codelibs.fess.app.web.admin.backup;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
+import org.codelibs.core.exception.IORuntimeException;
+import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.codelibs.fess.util.ResourceUtil;
+import org.lastaflute.core.magic.async.AsyncManager;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author shinsuke
  */
 public class AdminBackupAction extends FessAdminAction {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminBackupAction.class);
+
+    @Resource
+    private AsyncManager asyncManager;
 
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
@@ -46,7 +61,32 @@ public class AdminBackupAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse index() {
-        return asIndexHtml();
+        saveToken();
+        return asListHtml();
+    }
+
+    @Execute
+    public HtmlResponse upload(final UploadForm form) {
+        validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
+        asyncManager.async(() -> {
+            try (CurlResponse response = Curl.post(ResourceUtil.getElasticsearchHttpUrl() + "/_bulk").onConnect((req, con) -> {
+                con.setDoOutput(true);
+                try (InputStream in = form.bulkFile.getInputStream(); OutputStream out = con.getOutputStream()) {
+                    CopyUtil.copy(in, out);
+                } catch (IOException e) {
+                    throw new IORuntimeException(e);
+                }
+            }).execute()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Bulk Response:\n" + response.getContentAsString());
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to process bulk file: " + form.bulkFile.getFileName(), e);
+            }
+        });
+        saveInfo(messages -> messages.addSuccessBulkProcessStarted(GLOBAL));
+        return redirect(getClass()); // no-op
     }
 
     @Execute
@@ -61,7 +101,7 @@ public class AdminBackupAction extends FessAdminAction {
                     });
         }
         throwValidationError(messages -> messages.addErrorsCouldNotFindBackupIndex(GLOBAL), () -> {
-            return asIndexHtml();
+            return asListHtml();
         });
         return redirect(getClass()); // no-op
     }
@@ -75,8 +115,8 @@ public class AdminBackupAction extends FessAdminAction {
         }).collect(Collectors.toList()));
     }
 
-    private HtmlResponse asIndexHtml() {
-        return asHtml(path_AdminBackup_AdminBackupJsp).renderWith(data -> {
+    private HtmlResponse asListHtml() {
+        return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class).renderWith(data -> {
             RenderDataUtil.register(data, "backupItems", getBackupItems());
         });
     }

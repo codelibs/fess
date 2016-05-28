@@ -339,10 +339,10 @@ public class AdminUpgradeAction extends FessAdminAction {
         }
     }
 
-    private void uploadResource(String indexConfigPath, String indexName, String path) {
+    private void uploadResource(final String indexConfigPath, final String indexName, final String path) {
         final String filePath = indexConfigPath + "/" + indexName + "/" + path;
         try {
-            String source = FileUtil.readUTF8(filePath);
+            final String source = FileUtil.readUTF8(filePath);
             try (CurlResponse response =
                     Curl.post(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("path", path)
                             .body(source).execute()) {

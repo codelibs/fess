@@ -42,6 +42,18 @@
 								<div class="data-wrapper">
 									<div class="row">
 										<div class="col-sm-12">
+											<la:form action="/admin/backup/upload/" enctype="multipart/form-data" styleClass="form-inline">
+												<div class="form-group">
+													<label for="bulkFile"> <la:message key="labels.backup_bulk_file" />
+													</label> <input type="file" name="bulkFile" class="form-control" />
+												</div>
+												<button type="submit" class="btn btn-success" name="upload">
+													<i class="fa fa-upload"></i>
+													<la:message key="labels.backup_button_upload" />
+												</button>
+											</la:form>
+										</div>
+										<div class="col-sm-12">
 											<table class="table table-bordered table-striped dataTable">
 												<tbody>
 													<tr>

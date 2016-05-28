@@ -377,6 +377,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Upgraded data. */
     public static final String SUCCESS_upgrade_from = "{success.upgrade_from}";
 
+    /** The key of the message: Bulk process is started. */
+    public static final String SUCCESS_bulk_process_started = "{success.bulk_process_started}";
+
     /** The key of the message: Created data. */
     public static final String SUCCESS_crud_create_crud_table = "{success.crud_create_crud_table}";
 
@@ -2106,6 +2109,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUpgradeFrom(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_upgrade_from));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.bulk_process_started' with parameters.
+     * <pre>
+     * message: Bulk process is started.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessBulkProcessStarted(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_bulk_process_started));
         return this;
     }
 

@@ -158,6 +158,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Upload File */
     public static final String LABELS_DESIGN_FILE = "{labels.designFile}";
 
+    /** The key of the message: Bulk File */
+    public static final String LABELS_BULK_FILE = "{labels.bulkFile}";
+
     /** The key of the message: Additional Query Parameters */
     public static final String LABELS_APPEND_QUERY_PARAMETER = "{labels.appendQueryParameter}";
 
@@ -2102,6 +2105,12 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Name */
     public static final String LABELS_backup_name = "{labels.backup_name}";
+
+    /** The key of the message: Bulk File */
+    public static final String LABELS_backup_bulk_file = "{labels.backup_bulk_file}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_backup_button_upload = "{labels.backup_button_upload}";
 
     /** The key of the message: The limit of a search time was exceeded. The partial result might be displayed. */
     public static final String LABELS_process_time_is_exceeded = "{labels.process_time_is_exceeded}";
