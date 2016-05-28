@@ -110,6 +110,7 @@ public class RoleService implements Serializable {
     public List<Role> getAvailableRoleList() {
         return roleBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.query().addOrderBy_Name_Asc();
             cb.paging(fessConfig.getPageRoleMaxFetchSizeAsInteger(), 1);
         });
     }

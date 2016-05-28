@@ -114,6 +114,7 @@ public class GroupService implements Serializable {
     public List<Group> getAvailableGroupList() {
         return groupBhv.selectList(cb -> {
             cb.query().matchAll();
+            cb.query().addOrderBy_Name_Asc();
             cb.paging(fessConfig.getPageGroupMaxFetchSizeAsInteger(), 1);
         });
     }
