@@ -63,7 +63,7 @@ public class User extends BsUser implements FessUser {
         return stream(getGroups()).get(stream -> stream.map(s -> decode(s)).toArray(n -> new String[n]));
     }
 
-    private String decode(String value) {
+    private String decode(final String value) {
         return new String(Base64.getDecoder().decode(value), Constants.CHARSET_UTF_8);
     }
 

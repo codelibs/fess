@@ -375,7 +375,7 @@ public final class ComponentUtil {
      * 
      * @param fessConfig
      */
-    public static void setFessConfig(FessConfig fessConfig) {
+    public static void setFessConfig(final FessConfig fessConfig) {
         ComponentUtil.fessConfig = fessConfig;
     }
 

@@ -263,9 +263,9 @@ public class JsonApiManager extends BaseApiManager {
                     buf.append(',');
                     buf.append("\"geo\":");
                     try {
-                        XContentBuilder builder = XContentFactory.jsonBuilder();
+                        final XContentBuilder builder = XContentFactory.jsonBuilder();
                         buf.append(geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string());
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         buf.append("{ \"error\" : \"").append(ExceptionsHelper.detailedMessage(e)).append("\"}");
                     }
                 }

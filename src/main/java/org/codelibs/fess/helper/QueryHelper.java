@@ -581,7 +581,7 @@ public class QueryHelper implements Serializable {
         this.highlightedFields = highlightedFields;
     }
 
-    public void highlightedFields(Consumer<Stream<String>> stream) {
+    public void highlightedFields(final Consumer<Stream<String>> stream) {
         stream(highlightedFields).of(stream);
         ;
     }
