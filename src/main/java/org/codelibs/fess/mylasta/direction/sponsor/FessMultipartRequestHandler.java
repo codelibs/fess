@@ -359,11 +359,11 @@ public class FessMultipartRequestHandler implements MultipartRequestHandler {
 
         protected String getBaseFileName(final String filePath) {
             final String fileName = new File(filePath).getName();
-            int colonIndex = fileName.indexOf(":");
+            int colonIndex = fileName.indexOf(':');
             if (colonIndex == -1) {
                 colonIndex = fileName.indexOf("\\\\"); // Windows SMB
             }
-            final int backslashIndex = fileName.lastIndexOf("\\");
+            final int backslashIndex = fileName.lastIndexOf('\\');
             if (colonIndex > -1 && backslashIndex > -1) {
                 return fileName.substring(backslashIndex + 1);
             } else {

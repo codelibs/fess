@@ -79,9 +79,7 @@ public class CrawlingInfoService implements Serializable {
 
         // update pager
         BeanUtil.copyBeanToBean(crawlingInfoList, crawlingInfoPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        crawlingInfoPager.setPageNumberList(crawlingInfoList.pageRange(op -> {
-            op.rangeSize(5);
-        }).createPageNumberList());
+        crawlingInfoPager.setPageNumberList(crawlingInfoList.pageRange(op -> op.rangeSize(5)).createPageNumberList());
 
         return crawlingInfoList;
     }
@@ -93,18 +91,14 @@ public class CrawlingInfoService implements Serializable {
     public void store(final CrawlingInfo crawlingInfo) {
         setupStoreCondition(crawlingInfo);
 
-        crawlingInfoBhv.insertOrUpdate(crawlingInfo, op -> {
-            op.setRefresh(true);
-        });
+        crawlingInfoBhv.insertOrUpdate(crawlingInfo, op -> op.setRefresh(true));
 
     }
 
     public void delete(final CrawlingInfo crawlingInfo) {
         setupDeleteCondition(crawlingInfo);
 
-        crawlingInfoBhv.delete(crawlingInfo, op -> {
-            op.setRefresh(true);
-        });
+        crawlingInfoBhv.delete(crawlingInfo, op -> op.setRefresh(true));
 
     }
 
@@ -130,9 +124,7 @@ public class CrawlingInfoService implements Serializable {
     }
 
     protected void setupDeleteCondition(final CrawlingInfo crawlingInfo) {
-        crawlingInfoParamBhv.queryDelete(cb -> {
-            cb.query().setCrawlingInfoId_Equal(crawlingInfo.getId());
-        });
+        crawlingInfoParamBhv.queryDelete(cb -> cb.query().setCrawlingInfoId_Equal(crawlingInfo.getId()));
     }
 
     public void deleteSessionIdsBefore(final String activeSessionId, final String name, final long date) {
@@ -156,21 +148,13 @@ public class CrawlingInfoService implements Serializable {
             for (final CrawlingInfo cs : crawlingInfoList) {
                 crawlingInfoIdList.add(cs.getId());
             }
-
-            crawlingInfoParamBhv.queryDelete(cb2 -> {
-                cb2.query().setCrawlingInfoId_InScope(crawlingInfoIdList);
-            });
-
-            crawlingInfoBhv.batchDelete(crawlingInfoList, op -> {
-                op.setRefresh(true);
-            });
+            crawlingInfoParamBhv.queryDelete(cb2 -> cb2.query().setCrawlingInfoId_InScope(crawlingInfoIdList));
+            crawlingInfoBhv.batchDelete(crawlingInfoList, op -> op.setRefresh(true));
         }
     }
 
     public CrawlingInfo get(final String sessionId) {
-        return crawlingInfoBhv.selectEntity(cb -> {
-            cb.query().setSessionId_Equal(sessionId);
-        }).orElse(null);//TODO
+        return crawlingInfoBhv.selectEntity(cb -> cb.query().setSessionId_Equal(sessionId)).orElse(null);//TODO
     }
 
     public void storeInfo(final List<CrawlingInfoParam> crawlingInfoParamList) {
@@ -184,9 +168,7 @@ public class CrawlingInfoService implements Serializable {
                 crawlingInfoParam.setCreatedTime(now);
             }
         }
-        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList, op -> {
-            op.setRefresh(true);
-        });
+        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList, op -> op.setRefresh(true));
     }
 
     public List<CrawlingInfoParam> getCrawlingInfoParamList(final String id) {
@@ -218,26 +200,18 @@ public class CrawlingInfoService implements Serializable {
                     cb.specify().columnId();
                 });
         final List<String> idList = activeSessionList.stream().map(session -> session.getId()).collect(Collectors.toList());
-        crawlingInfoParamBhv.queryDelete(cb1 -> {
-            cb1.query().filtered((cq, cf) -> {
-                cq.matchAll();
-                if (!idList.isEmpty()) {
-                    cf.not(subCf -> {
-                        subCf.setCrawlingInfoId_InScope(idList);
-                    });
-                }
-            });
-        });
-        crawlingInfoBhv.queryDelete(cb2 -> {
-            cb2.query().filtered((cq, cf) -> {
-                cq.matchAll();
-                if (!idList.isEmpty()) {
-                    cf.not(subCf -> {
-                        subCf.setId_InScope(idList);
-                    });
-                }
-            });
-        });
+        crawlingInfoParamBhv.queryDelete(cb1 -> cb1.query().filtered((cq, cf) -> {
+            cq.matchAll();
+            if (!idList.isEmpty()) {
+                cf.not(subCf -> subCf.setCrawlingInfoId_InScope(idList));
+            }
+        }));
+        crawlingInfoBhv.queryDelete(cb2 -> cb2.query().filtered((cq, cf) -> {
+            cq.matchAll();
+            if (!idList.isEmpty()) {
+                cf.not(subCf -> subCf.setId_InScope(idList));
+            }
+        }));
     }
 
     public void importCsv(final Reader reader) {
@@ -258,9 +232,7 @@ public class CrawlingInfoService implements Serializable {
                         crawlingInfo = new CrawlingInfo();
                         crawlingInfo.setSessionId(list.get(0));
                         crawlingInfo.setCreatedTime(formatter.parse(list.get(1)).getTime());
-                        crawlingInfoBhv.insert(crawlingInfo, op -> {
-                            op.setRefresh(true);
-                        });
+                        crawlingInfoBhv.insert(crawlingInfo, op -> op.setRefresh(true));
                     }
 
                     final CrawlingInfoParam entity = new CrawlingInfoParam();
@@ -268,9 +240,7 @@ public class CrawlingInfoService implements Serializable {
                     entity.setKey(list.get(2));
                     entity.setValue(list.get(3));
                     entity.setCreatedTime(formatter.parse(list.get(4)).getTime());
-                    crawlingInfoParamBhv.insert(entity, op -> {
-                        op.setRefresh(true);
-                    });
+                    crawlingInfoParamBhv.insert(entity, op -> op.setRefresh(true));
                 } catch (final Exception e) {
                     logger.warn("Failed to read a click log: " + list, e);
                 }
@@ -295,9 +265,7 @@ public class CrawlingInfoService implements Serializable {
             list.add("CreatedTime");
             csvWriter.writeValues(list);
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            crawlingInfoParamBhv.selectCursor(cb -> {
-                cb.query().matchAll();
-            }, new EntityRowHandler<CrawlingInfoParam>() {
+            crawlingInfoParamBhv.selectCursor(cb -> cb.query().matchAll(),new EntityRowHandler<CrawlingInfoParam>() {
                 @Override
                 public void handle(final CrawlingInfoParam entity) {
                     final List<String> list = new ArrayList<>();
@@ -337,16 +305,10 @@ public class CrawlingInfoService implements Serializable {
     }
 
     public void deleteBefore(final long date) {
-        crawlingInfoBhv.selectBulk(cb -> {
-            cb.query().setExpiredTime_LessThan(date);
-        }, list -> {
+        crawlingInfoBhv.selectBulk(cb -> cb.query().setExpiredTime_LessThan(date), list -> {
             final List<String> idList = list.stream().map(entity -> entity.getId()).collect(Collectors.toList());
-            crawlingInfoParamBhv.queryDelete(cb1 -> {
-                cb1.query().setCrawlingInfoId_InScope(idList);
-            });
-            crawlingInfoBhv.queryDelete(cb2 -> {
-                cb2.query().setExpiredTime_LessThan(date);
-            });
+            crawlingInfoParamBhv.queryDelete(cb1 -> cb1.query().setCrawlingInfoId_InScope(idList));
+            crawlingInfoBhv.queryDelete(cb2 -> cb2.query().setExpiredTime_LessThan(date));
         });
     }
 

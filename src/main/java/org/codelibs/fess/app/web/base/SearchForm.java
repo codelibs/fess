@@ -50,7 +50,7 @@ public class SearchForm implements SearchRequestParams, Serializable {
 
     public String[] lang;
 
-    public String ex_q[];
+    public String[] ex_q;
 
     @ValidateTypeFailure
     public Integer start;

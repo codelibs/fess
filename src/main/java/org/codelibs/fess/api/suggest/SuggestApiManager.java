@@ -42,12 +42,12 @@ import org.slf4j.LoggerFactory;
 public class SuggestApiManager extends BaseApiManager {
     private static final Logger logger = LoggerFactory.getLogger(SuggestApiManager.class);
 
+    @Resource
+    protected DynamicProperties systemProperties;
+
     public SuggestApiManager() {
         setPathPrefix("/suggest");
     }
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Override
     public boolean matches(final HttpServletRequest request) {

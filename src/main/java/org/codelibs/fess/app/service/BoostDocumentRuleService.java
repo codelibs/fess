@@ -49,9 +49,8 @@ public class BoostDocumentRuleService implements Serializable {
 
         // update pager
         BeanUtil.copyBeanToBean(boostDocumentRuleList, boostDocumentRulePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op -> {
-            op.rangeSize(5);
-        }).createPageNumberList());
+        boostDocumentRulePager.setPageNumberList(boostDocumentRuleList.pageRange(op ->
+                op.rangeSize(5)).createPageNumberList());
 
         return boostDocumentRuleList;
     }
@@ -62,17 +61,13 @@ public class BoostDocumentRuleService implements Serializable {
 
     public void store(final BoostDocumentRule boostDocumentRule) {
 
-        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> {
-            op.setRefresh(true);
-        });
+        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> op.setRefresh(true));
 
     }
 
     public void delete(final BoostDocumentRule boostDocumentRule) {
 
-        boostDocumentRuleBhv.delete(boostDocumentRule, op -> {
-            op.setRefresh(true);
-        });
+        boostDocumentRuleBhv.delete(boostDocumentRule, op -> op.setRefresh(true));
 
     }
 

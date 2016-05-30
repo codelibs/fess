@@ -57,14 +57,14 @@ public class ListForm implements SearchRequestParams, Serializable {
 
     public String[] lang;
 
+    public Map<String, String[]> fields = new HashMap<>();
+
+    public String[] ex_q;
+
     @Override
     public String getQuery() {
         return q;
     }
-
-    public Map<String, String[]> fields = new HashMap<>();
-
-    public String ex_q[];
 
     @Override
     public String[] getExtraQueries() {

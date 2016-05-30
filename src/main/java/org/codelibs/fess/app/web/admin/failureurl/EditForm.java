@@ -40,10 +40,6 @@ public class EditForm implements Serializable {
     @ValidateTypeFailure
     public Integer crudMode;
 
-    public String getCurrentPageNumber() {
-        return pageNumber;
-    }
-
     @Required
     @Size(max = 1000)
     public String id;
@@ -67,6 +63,10 @@ public class EditForm implements Serializable {
 
     @Size(max = 1000)
     public String configId;
+
+    public String getCurrentPageNumber() {
+        return pageNumber;
+    }
 
     public void initialize() {
         id = null;

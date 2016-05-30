@@ -62,9 +62,7 @@ public class BadWordService implements Serializable {
 
         // update pager
         BeanUtil.copyBeanToBean(badWordList, badWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        badWordPager.setPageNumberList(badWordList.pageRange(op -> {
-            op.rangeSize(5);
-        }).createPageNumberList());
+        badWordPager.setPageNumberList(badWordList.pageRange(op -> op.rangeSize(5)).createPageNumberList());
 
         return badWordList;
     }
@@ -75,17 +73,13 @@ public class BadWordService implements Serializable {
 
     public void store(final BadWord badWord) {
 
-        badWordBhv.insertOrUpdate(badWord, op -> {
-            op.setRefresh(true);
-        });
+        badWordBhv.insertOrUpdate(badWord, op -> op.setRefresh(true));
 
     }
 
     public void delete(final BadWord badWord) {
 
-        badWordBhv.delete(badWord, op -> {
-            op.setRefresh(true);
-        });
+        badWordBhv.delete(badWord, op -> op.setRefresh(true));
 
     }
 
@@ -121,9 +115,8 @@ public class BadWordService implements Serializable {
                         targetWord = targetWord.substring(2);
                     }
                     final String target = targetWord;
-                    BadWord badWord = badWordBhv.selectEntity(cb -> {
-                        cb.query().setSuggestWord_Equal(target);
-                    }).orElse(null);//TODO
+                    BadWord badWord = badWordBhv.selectEntity(cb ->
+                            cb.query().setSuggestWord_Equal(target)).orElse(null);//TODO
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                     if (isDelete) {
                         badWordBhv.delete(badWord);
@@ -158,9 +151,7 @@ public class BadWordService implements Serializable {
             list.add("BadWord");
             csvWriter.writeValues(list);
 
-            badWordBhv.selectCursor(cb -> {
-                cb.query().matchAll();
-            }, new EntityRowHandler<BadWord>() {
+            badWordBhv.selectCursor(cb -> cb.query().matchAll(), new EntityRowHandler<BadWord>() {
                 @Override
                 public void handle(final BadWord entity) {
                     final List<String> list = new ArrayList<>();

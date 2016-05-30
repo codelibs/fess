@@ -127,8 +127,8 @@ public class SynonymFile extends DictionaryFile<SynonymItem> {
                     continue; // ignore empty lines and comments
                 }
 
-                String inputs[];
-                String outputs[];
+                String[] inputs;
+                String[] outputs;
 
                 final List<String> sides = split(line, "=>");
                 if (sides.size() > 1) { // explicit mapping

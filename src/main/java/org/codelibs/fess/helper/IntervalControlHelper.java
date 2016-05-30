@@ -90,7 +90,7 @@ public class IntervalControlHelper {
 
         protected long delay;
 
-        protected int days[];
+        protected int[] days;
 
         protected boolean reverse;
 
