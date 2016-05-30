@@ -265,7 +265,7 @@ public class CrawlingInfoService implements Serializable {
             list.add("CreatedTime");
             csvWriter.writeValues(list);
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND);
-            crawlingInfoParamBhv.selectCursor(cb -> cb.query().matchAll(),new EntityRowHandler<CrawlingInfoParam>() {
+            crawlingInfoParamBhv.selectCursor(cb -> cb.query().matchAll(), new EntityRowHandler<CrawlingInfoParam>() {
                 @Override
                 public void handle(final CrawlingInfoParam entity) {
                     final List<String> list = new ArrayList<>();

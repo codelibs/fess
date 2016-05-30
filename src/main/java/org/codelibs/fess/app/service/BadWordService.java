@@ -115,8 +115,7 @@ public class BadWordService implements Serializable {
                         targetWord = targetWord.substring(2);
                     }
                     final String target = targetWord;
-                    BadWord badWord = badWordBhv.selectEntity(cb ->
-                            cb.query().setSuggestWord_Equal(target)).orElse(null);//TODO
+                    BadWord badWord = badWordBhv.selectEntity(cb -> cb.query().setSuggestWord_Equal(target)).orElse(null);//TODO
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
                     if (isDelete) {
                         badWordBhv.delete(badWord);
