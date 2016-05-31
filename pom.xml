@@ -63,8 +63,8 @@
 		<suggest.version>2.2.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>2.3.2</elasticsearch.version>
-		<cluster.runner.version>2.2.1.0-SNAPSHOT</cluster.runner.version>
+		<elasticsearch.version>2.3.3</elasticsearch.version>
+		<cluster.runner.version>2.3.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.boot.version>0.4.4-B-SNAPSHOT</tomcat.boot.version>
