@@ -1,5 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<la:form action="/search" method="get" styleId="searchForm" role="search">
+<la:form action="/search" method="get" styleId="searchForm"
+	role="search">
 ${fe:facetForm()}${fe:geoForm()}
 <nav class="navbar navbar-dark bg-inverse navbar-fixed-top">
 		<la:link styleClass="navbar-brand" href="/">
@@ -24,6 +25,14 @@ ${fe:facetForm()}${fe:geoForm()}
 						</div>
 					</div>
 				</li>
+			</c:if>
+			<c:if test="${ pageLoginLink == 'true'}">
+				<li class="nav-item username"><la:link href="/login"
+						styleClass="nav-link" role="button" aria-haspopup="true"
+						aria-expanded="false">
+						<i class="fa fa-user"></i>
+						<la:message key="labels.login" />
+					</la:link></li>
 			</c:if>
 		</ul>
 		<div

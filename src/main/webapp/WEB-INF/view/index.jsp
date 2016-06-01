@@ -39,6 +39,14 @@
 						</div>
 					</li>
 				</c:if>
+				<c:if test="${ pageLoginLink == 'true'}">
+					<li class="nav-item username"><la:link href="/login"
+							styleClass="nav-link" role="button" aria-haspopup="true"
+							aria-expanded="false">
+							<i class="fa fa-user"></i>
+							<la:message key="labels.login" />
+						</la:link></li>
+				</c:if>
 				<li class="nav-item"><la:link href="/help"
 						styleClass="nav-link help-link">
 						<i class="fa fa-question-circle"></i>
