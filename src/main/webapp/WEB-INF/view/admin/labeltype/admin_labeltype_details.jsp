@@ -69,7 +69,7 @@
 														property="excludedPaths" /></td>
 											</tr>
 											<tr>
-												<th><la:message key="labels.role_type" /></th>
+												<th><la:message key="labels.permission_type" /></th>
 												<td>${f:br(f:h(permissions))}<la:hidden
 														property="permissions" /></td>
 											</tr>

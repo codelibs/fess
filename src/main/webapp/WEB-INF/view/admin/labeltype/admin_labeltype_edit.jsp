@@ -80,7 +80,7 @@
 									</div>
 									<div class="form-group">
 										<label for="permissions" class="col-sm-3 control-label"><la:message
-												key="labels.role_type" /></label>
+												key="labels.permission_type" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
 											<la:textarea property="permissions" styleClass="form-control"
