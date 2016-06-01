@@ -26,7 +26,7 @@ ${fe:facetForm()}${fe:geoForm()}
 					</div>
 				</li>
 			</c:if>
-			<c:if test="${ pageLoginLink == 'true'}">
+			<c:if test="${ pageLoginLink }">
 				<li class="nav-item username"><la:link href="/login"
 						styleClass="nav-link" role="button" aria-haspopup="true"
 						aria-expanded="false">

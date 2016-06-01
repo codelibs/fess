@@ -289,7 +289,7 @@ public class SystemHelper implements Serializable {
         return type + name;
     }
     
-    public String getPageLoginLink() {
-        return ComponentUtil.getFessConfig().getPageLoginLink();
+    public boolean getPageLoginLink() {
+        return ComponentUtil.getFessConfig().isPageLoginLink();
     }
 }
