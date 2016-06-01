@@ -122,7 +122,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
         runtime.registerData("username", systemHelper.getUsername());
         
-        runtime.registerData("pageLoginLink", systemHelper.getPageLoginLink());
+        runtime.registerData("pageLoginLink", fessConfig.isPageLoginLink());
     }
 
     // ===================================================================================
