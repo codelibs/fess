@@ -8,32 +8,34 @@ ${fe:facetForm()}${fe:geoForm()}
 				alt="<la:message key="labels.header_brand_name" />" />
 		</la:link>
 		<ul class="nav navbar-nav hidden-xs-down">
-			<c:if test="${!empty username && username != 'guest'}">
-				<li class="nav-item username">
-					<div class="dropdown">
-						<a class="nav-link dropdown-toggle" data-toggle="dropdown"
-							href="#" role="button" aria-haspopup="true" aria-expanded="false">
-							<i class="fa fa-user"></i>${username}
-						</a>
-						<div class="dropdown-menu" aria-labelledby="userMenu">
-							<la:link href="/profile" styleClass="dropdown-item">
-								<la:message key="labels.profile" />
-							</la:link>
-							<la:link href="/logout" styleClass="dropdown-item">
-								<la:message key="labels.logout" />
-							</la:link>
+			<c:choose>
+				<c:when test="${!empty username && username != 'guest'}">
+					<li class="nav-item">
+						<div class="dropdown">
+							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+								href="#" role="button" aria-haspopup="true"
+								aria-expanded="false"> <i class="fa fa-user"></i>${username}
+							</a>
+							<div class="dropdown-menu" aria-labelledby="userMenu">
+								<la:link href="/profile" styleClass="dropdown-item">
+									<la:message key="labels.profile" />
+								</la:link>
+								<la:link href="/logout" styleClass="dropdown-item">
+									<la:message key="labels.logout" />
+								</la:link>
+							</div>
 						</div>
-					</div>
-				</li>
-			</c:if>
-			<c:if test="${ pageLoginLink }">
-				<li class="nav-item username"><la:link href="/login"
-						styleClass="nav-link" role="button" aria-haspopup="true"
-						aria-expanded="false">
-						<i class="fa fa-user"></i>
-						<la:message key="labels.login" />
-					</la:link></li>
-			</c:if>
+					</li>
+				</c:when>
+				<c:when test="${ pageLoginLink }">
+					<li class="nav-item username"><la:link href="/login"
+							styleClass="nav-link" role="button" aria-haspopup="true"
+							aria-expanded="false">
+							<i class="fa fa-user"></i>
+							<la:message key="labels.login" />
+						</la:link></li>
+				</c:when>
+			</c:choose>
 		</ul>
 		<div
 			class="search-box navbar-form col-lg-5 col-md-6 col-sm-6 col-xs-8 pull-right"

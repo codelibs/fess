@@ -288,8 +288,5 @@ public class SystemHelper implements Serializable {
     protected String createSearchRole(final String type, final String name) {
         return type + name;
     }
-    
-    public boolean getPageLoginLink() {
-        return ComponentUtil.getFessConfig().isPageLoginLink();
-    }
+
 }

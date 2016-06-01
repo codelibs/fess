@@ -21,32 +21,34 @@
 	<nav class="navbar navbar-dark bg-inverse navbar-static-top pos-f-t">
 		<div class="container">
 			<ul class="nav navbar-nav pull-right">
-				<c:if test="${!empty username && username != 'guest'}">
-					<li class="nav-item">
-						<div class="dropdown">
-							<a class="nav-link dropdown-toggle" data-toggle="dropdown"
-								href="#" role="button" aria-haspopup="true"
-								aria-expanded="false"> <i class="fa fa-user"></i>${username}
-							</a>
-							<div class="dropdown-menu" aria-labelledby="userMenu">
-								<la:link href="/profile" styleClass="dropdown-item">
-									<la:message key="labels.profile" />
-								</la:link>
-								<la:link href="/logout" styleClass="dropdown-item">
-									<la:message key="labels.logout" />
-								</la:link>
+				<c:choose>
+					<c:when test="${!empty username && username != 'guest'}">
+						<li class="nav-item">
+							<div class="dropdown">
+								<a class="nav-link dropdown-toggle" data-toggle="dropdown"
+									href="#" role="button" aria-haspopup="true"
+									aria-expanded="false"> <i class="fa fa-user"></i>${username}
+								</a>
+								<div class="dropdown-menu" aria-labelledby="userMenu">
+									<la:link href="/profile" styleClass="dropdown-item">
+										<la:message key="labels.profile" />
+									</la:link>
+									<la:link href="/logout" styleClass="dropdown-item">
+										<la:message key="labels.logout" />
+									</la:link>
+								</div>
 							</div>
-						</div>
-					</li>
-				</c:if>
-				<c:if test="${ pageLoginLink }">
-					<li class="nav-item username"><la:link href="/login"
-							styleClass="nav-link" role="button" aria-haspopup="true"
-							aria-expanded="false">
-							<i class="fa fa-user"></i>
-							<la:message key="labels.login" />
-						</la:link></li>
-				</c:if>
+						</li>
+					</c:when>
+					<c:when test="${ pageLoginLink }">
+						<li class="nav-item username"><la:link href="/login"
+								styleClass="nav-link" role="button" aria-haspopup="true"
+								aria-expanded="false">
+								<i class="fa fa-user"></i>
+								<la:message key="labels.login" />
+							</la:link></li>
+					</c:when>
+				</c:choose>
 				<li class="nav-item"><la:link href="/help"
 						styleClass="nav-link help-link">
 						<i class="fa fa-question-circle"></i>
