@@ -104,8 +104,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends PathMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(PathMappingCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends PathMapping> OptionalEntity<ENTITY> doSelectOptionalEntity(PathMappingCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -173,7 +172,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
     }
 
     public void selectBulk(CBCall<PathMappingCB> cbLambda, EntityRowHandler<List<PathMapping>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -268,4 +267,3 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
 
     // #pending create, modify, remove
 }
-

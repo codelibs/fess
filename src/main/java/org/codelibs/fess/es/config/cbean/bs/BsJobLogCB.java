@@ -75,7 +75,7 @@ public class BsJobLogCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,24 +161,31 @@ public class BsJobLogCB extends EsAbstractConditionBean {
         public void columnEndTime() {
             doColumn("endTime");
         }
+
         public void columnJobName() {
             doColumn("jobName");
         }
+
         public void columnJobStatus() {
             doColumn("jobStatus");
         }
+
         public void columnScriptData() {
             doColumn("scriptData");
         }
+
         public void columnScriptResult() {
             doColumn("scriptResult");
         }
+
         public void columnScriptType() {
             doColumn("scriptType");
         }
+
         public void columnStartTime() {
             doColumn("startTime");
         }
+
         public void columnTarget() {
             doColumn("target");
         }

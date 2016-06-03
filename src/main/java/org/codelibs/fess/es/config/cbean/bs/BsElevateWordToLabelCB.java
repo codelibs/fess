@@ -75,7 +75,7 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,6 +161,7 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
         public void columnElevateWordId() {
             doColumn("elevateWordId");
         }
+
         public void columnLabelTypeId() {
             doColumn("labelTypeId");
         }

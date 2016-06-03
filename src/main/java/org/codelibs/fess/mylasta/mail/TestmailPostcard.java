@@ -50,7 +50,7 @@ public class TestmailPostcard extends LaTypicalPostcard {
 
     @Override
     protected String[] getPropertyNames() {
-        return new String[] {"hostname"};
+        return new String[] { "hostname" };
     }
 
     // ===================================================================================

@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.log.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.exentity.FavoriteLog;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,11 +79,14 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((FavoriteLog)et).getCreatedAt(),(et,vl)->((FavoriteLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
-        setupEpg(_epgMap, et-> ((FavoriteLog)et).getUrl(),(et,vl)->((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
-        setupEpg(_epgMap, et-> ((FavoriteLog)et).getDocId(),(et,vl)->((FavoriteLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
-        setupEpg(_epgMap, et-> ((FavoriteLog)et).getQueryId(),(et,vl)->((FavoriteLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
-        setupEpg(_epgMap, et-> ((FavoriteLog)et).getUserInfoId(),(et,vl)->((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)), "userInfoId");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getCreatedAt(),
+                (et, vl) -> ((FavoriteLog) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getUrl(), (et, vl) -> ((FavoriteLog) et).setUrl(DfTypeUtil.toString(vl)), "url");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getDocId(), (et, vl) -> ((FavoriteLog) et).setDocId(DfTypeUtil.toString(vl)), "docId");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getQueryId(), (et, vl) -> ((FavoriteLog) et).setQueryId(DfTypeUtil.toString(vl)),
+                "queryId");
+        setupEpg(_epgMap, et -> ((FavoriteLog) et).getUserInfoId(), (et, vl) -> ((FavoriteLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
+                "userInfoId");
     }
 
     @Override
@@ -98,28 +100,59 @@ public class FavoriteLogDbm extends AbstractDBMeta {
     protected final String _tableDbName = "favorite_log";
     protected final String _tableDispName = "favorite_log";
     protected final String _tablePropertyName = "FavoriteLog";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
+            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
+            null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDocId = cci("docId", "docId", null, null, String.class, "docId", null, false, false, false, "String",
+            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedAt() { return _columnCreatedAt; }
-    public ColumnInfo columnUrl() { return _columnUrl; }
-    public ColumnInfo columnDocId() { return _columnDocId; }
-    public ColumnInfo columnQueryId() { return _columnQueryId; }
-    public ColumnInfo columnUserInfoId() { return _columnUserInfoId; }
+    public ColumnInfo columnCreatedAt() {
+        return _columnCreatedAt;
+    }
+
+    public ColumnInfo columnUrl() {
+        return _columnUrl;
+    }
+
+    public ColumnInfo columnDocId() {
+        return _columnDocId;
+    }
+
+    public ColumnInfo columnQueryId() {
+        return _columnQueryId;
+    }
+
+    public ColumnInfo columnUserInfoId() {
+        return _columnUserInfoId;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -204,4 +237,3 @@ public class FavoriteLogDbm extends AbstractDBMeta {
         return null;
     }
 }
-

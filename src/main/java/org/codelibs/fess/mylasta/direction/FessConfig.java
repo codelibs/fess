@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
-import org.codelibs.fess.mylasta.direction.FessEnv;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
@@ -42,37 +41,37 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
--server
--Xmx512m
--XX:MaxMetaspaceSize=128m
--XX:CompressedClassSpaceSize=32m
--XX:-UseGCOverheadLimit
--XX:+UseConcMarkSweepGC
--XX:CMSInitiatingOccupancyFraction=75
--XX:+UseParNewGC
--XX:+UseTLAB
--XX:+DisableExplicitGC
--XX:-OmitStackTraceInFastThrow
--Djcifs.smb.client.connTimeout=60000
--Djcifs.smb.client.soTimeout=35000
--Djcifs.smb.client.responseTimeout=30000
--Dgroovy.use.classvalue=true
- */
+    -server
+    -Xmx512m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -XX:-OmitStackTraceInFastThrow
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
+    */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
--server
--Xmx256m
--XX:MaxMetaspaceSize=128m
--XX:CompressedClassSpaceSize=32m
--XX:-UseGCOverheadLimit
--XX:+UseConcMarkSweepGC
--XX:CMSInitiatingOccupancyFraction=75
--XX:+UseParNewGC
--XX:+UseTLAB
--XX:+DisableExplicitGC
--Dgroovy.use.classvalue=true
- */
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -Dgroovy.use.classvalue=true
+    */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -154,8 +153,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
     /** The key of the configuration. e.g. title=title:string
-Title=title:string
- */
+    Title=title:string
+    */
     String CRAWLER_METADATA_NAME_MAPPING = "crawler.metadata.name.mapping";
 
     /** The key of the configuration. e.g. //BODY */
@@ -381,54 +380,54 @@ Title=title:string
     String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
 
     /** The key of the configuration. e.g. ar=ar
-bg=bg
-bn=bn
-ca=ca
-cs=cs
-da=da
-de=de
-el=el
-en=en
-es=es
-et=et
-fa=fa
-fi=fi
-fr=fr
-gu=gu
-he=he
-hi=hi
-hr=hr
-hu=hu
-id=id
-it=it
-ja=ja
-ko=ko
-lt=lt
-lv=lv
-mk=mk
-ml=ml
-nl=nl
-no=no
-pa=pa
-pl=pl
-pt=pt
-ro=ro
-ru=ru
-si=si
-sq=sq
-sv=sv
-ta=ta
-te=te
-th=th
-tl=tl
-tr=tr
-uk=uk
-ur=ur
-vi=vi
-zh=zh-cn
-zh-cn=zh-cn
-zh-tw=zh-tw
- */
+    bg=bg
+    bn=bn
+    ca=ca
+    cs=cs
+    da=da
+    de=de
+    el=el
+    en=en
+    es=es
+    et=et
+    fa=fa
+    fi=fi
+    fr=fr
+    gu=gu
+    he=he
+    hi=hi
+    hr=hr
+    hu=hu
+    id=id
+    it=it
+    ja=ja
+    ko=ko
+    lt=lt
+    lv=lv
+    mk=mk
+    ml=ml
+    nl=nl
+    no=no
+    pa=pa
+    pl=pl
+    pt=pt
+    ro=ro
+    ru=ru
+    si=si
+    sq=sq
+    sv=sv
+    ta=ta
+    te=te
+    th=th
+    tl=tl
+    tr=tr
+    uk=uk
+    ur=ur
+    vi=vi
+    zh=zh-cn
+    zh-cn=zh-cn
+    zh-tw=zh-tw
+    */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
     /** The key of the configuration. e.g. 1.6 */
@@ -978,22 +977,22 @@ zh-tw=zh-tw
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
--server
--Xmx512m
--XX:MaxMetaspaceSize=128m
--XX:CompressedClassSpaceSize=32m
--XX:-UseGCOverheadLimit
--XX:+UseConcMarkSweepGC
--XX:CMSInitiatingOccupancyFraction=75
--XX:+UseParNewGC
--XX:+UseTLAB
--XX:+DisableExplicitGC
--XX:-OmitStackTraceInFastThrow
--Djcifs.smb.client.connTimeout=60000
--Djcifs.smb.client.soTimeout=35000
--Djcifs.smb.client.responseTimeout=30000
--Dgroovy.use.classvalue=true
- <br>
+    -server
+    -Xmx512m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -XX:-OmitStackTraceInFastThrow
+    -Djcifs.smb.client.connTimeout=60000
+    -Djcifs.smb.client.soTimeout=35000
+    -Djcifs.smb.client.responseTimeout=30000
+    -Dgroovy.use.classvalue=true
+    <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -1002,18 +1001,18 @@ zh-tw=zh-tw
     /**
      * Get the value for the key 'jvm.suggest.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
--server
--Xmx256m
--XX:MaxMetaspaceSize=128m
--XX:CompressedClassSpaceSize=32m
--XX:-UseGCOverheadLimit
--XX:+UseConcMarkSweepGC
--XX:CMSInitiatingOccupancyFraction=75
--XX:+UseParNewGC
--XX:+UseTLAB
--XX:+DisableExplicitGC
--Dgroovy.use.classvalue=true
- <br>
+    -server
+    -Xmx256m
+    -XX:MaxMetaspaceSize=128m
+    -XX:CompressedClassSpaceSize=32m
+    -XX:-UseGCOverheadLimit
+    -XX:+UseConcMarkSweepGC
+    -XX:CMSInitiatingOccupancyFraction=75
+    -XX:+UseParNewGC
+    -XX:+UseTLAB
+    -XX:+DisableExplicitGC
+    -Dgroovy.use.classvalue=true
+    <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
@@ -1266,8 +1265,8 @@ zh-tw=zh-tw
     /**
      * Get the value for the key 'crawler.metadata.name.mapping'. <br>
      * The value is, e.g. title=title:string
-Title=title:string
- <br>
+    Title=title:string
+    <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataNameMapping();
@@ -1990,54 +1989,54 @@ Title=title:string
     /**
      * Get the value for the key 'query.language.mapping'. <br>
      * The value is, e.g. ar=ar
-bg=bg
-bn=bn
-ca=ca
-cs=cs
-da=da
-de=de
-el=el
-en=en
-es=es
-et=et
-fa=fa
-fi=fi
-fr=fr
-gu=gu
-he=he
-hi=hi
-hr=hr
-hu=hu
-id=id
-it=it
-ja=ja
-ko=ko
-lt=lt
-lv=lv
-mk=mk
-ml=ml
-nl=nl
-no=no
-pa=pa
-pl=pl
-pt=pt
-ro=ro
-ru=ru
-si=si
-sq=sq
-sv=sv
-ta=ta
-te=te
-th=th
-tl=tl
-tr=tr
-uk=uk
-ur=ur
-vi=vi
-zh=zh-cn
-zh-cn=zh-cn
-zh-tw=zh-tw
- <br>
+    bg=bg
+    bn=bn
+    ca=ca
+    cs=cs
+    da=da
+    de=de
+    el=el
+    en=en
+    es=es
+    et=et
+    fa=fa
+    fi=fi
+    fr=fr
+    gu=gu
+    he=he
+    hi=hi
+    hr=hr
+    hu=hu
+    id=id
+    it=it
+    ja=ja
+    ko=ko
+    lt=lt
+    lv=lv
+    mk=mk
+    ml=ml
+    nl=nl
+    no=no
+    pa=pa
+    pl=pl
+    pt=pt
+    ro=ro
+    ru=ru
+    si=si
+    sq=sq
+    sv=sv
+    ta=ta
+    te=te
+    th=th
+    tl=tl
+    tr=tr
+    uk=uk
+    ur=ur
+    vi=vi
+    zh=zh-cn
+    zh-cn=zh-cn
+    zh-tw=zh-tw
+    <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryLanguageMapping();

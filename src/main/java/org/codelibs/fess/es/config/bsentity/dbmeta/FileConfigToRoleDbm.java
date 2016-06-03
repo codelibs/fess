@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.FileConfigToRole;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,8 +79,10 @@ public class FileConfigToRoleDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((FileConfigToRole)et).getFileConfigId(),(et,vl)->((FileConfigToRole) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
-        setupEpg(_epgMap, et-> ((FileConfigToRole)et).getRoleTypeId(),(et,vl)->((FileConfigToRole) et).setRoleTypeId(DfTypeUtil.toString(vl)), "roleTypeId");
+        setupEpg(_epgMap, et -> ((FileConfigToRole) et).getFileConfigId(),
+                (et, vl) -> ((FileConfigToRole) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
+        setupEpg(_epgMap, et -> ((FileConfigToRole) et).getRoleTypeId(),
+                (et, vl) -> ((FileConfigToRole) et).setRoleTypeId(DfTypeUtil.toString(vl)), "roleTypeId");
     }
 
     @Override
@@ -95,22 +96,41 @@ public class FileConfigToRoleDbm extends AbstractDBMeta {
     protected final String _tableDbName = "file_config_to_role";
     protected final String _tableDispName = "file_config_to_role";
     protected final String _tablePropertyName = "FileConfigToRole";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnFileConfigId = cci("fileConfigId", "fileConfigId", null, null, String.class, "fileConfigId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRoleTypeId = cci("roleTypeId", "roleTypeId", null, null, String.class, "roleTypeId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnFileConfigId = cci("fileConfigId", "fileConfigId", null, null, String.class, "fileConfigId", null,
+            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoleTypeId = cci("roleTypeId", "roleTypeId", null, null, String.class, "roleTypeId", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnFileConfigId() { return _columnFileConfigId; }
-    public ColumnInfo columnRoleTypeId() { return _columnRoleTypeId; }
+    public ColumnInfo columnFileConfigId() {
+        return _columnFileConfigId;
+    }
+
+    public ColumnInfo columnRoleTypeId() {
+        return _columnRoleTypeId;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -192,4 +212,3 @@ public class FileConfigToRoleDbm extends AbstractDBMeta {
         return null;
     }
 }
-

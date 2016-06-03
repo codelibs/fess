@@ -167,7 +167,7 @@ public abstract class BsDataConfigToRoleBhv extends EsAbstractBehavior<DataConfi
     }
 
     public void selectBulk(CBCall<DataConfigToRoleCB> cbLambda, EntityRowHandler<List<DataConfigToRole>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -262,4 +262,3 @@ public abstract class BsDataConfigToRoleBhv extends EsAbstractBehavior<DataConfi
 
     // #pending create, modify, remove
 }
-

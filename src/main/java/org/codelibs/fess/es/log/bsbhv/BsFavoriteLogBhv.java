@@ -101,8 +101,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FavoriteLog> OptionalEntity<ENTITY> doSelectOptionalEntity(FavoriteLogCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends FavoriteLog> OptionalEntity<ENTITY> doSelectOptionalEntity(FavoriteLogCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -170,7 +169,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     }
 
     public void selectBulk(CBCall<FavoriteLogCB> cbLambda, EntityRowHandler<List<FavoriteLog>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -265,4 +264,3 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
 
     // #pending create, modify, remove
 }
-

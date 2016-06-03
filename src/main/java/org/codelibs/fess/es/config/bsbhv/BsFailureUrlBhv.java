@@ -103,8 +103,7 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalEntity(FailureUrlCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends FailureUrl> OptionalEntity<ENTITY> doSelectOptionalEntity(FailureUrlCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -172,7 +171,7 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
     }
 
     public void selectBulk(CBCall<FailureUrlCB> cbLambda, EntityRowHandler<List<FailureUrl>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -267,4 +266,3 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
 
     // #pending create, modify, remove
 }
-

@@ -75,7 +75,7 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String)primaryKeyMap.get("_id"));
+        acceptPK((String) primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,27 +161,35 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
         public void columnBoost() {
             doColumn("boost");
         }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
+
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
+
         public void columnReading() {
             doColumn("reading");
         }
+
         public void columnSuggestWord() {
             doColumn("suggestWord");
         }
+
         public void columnTargetLabel() {
             doColumn("targetLabel");
         }
+
         public void columnTargetRole() {
             doColumn("targetRole");
         }
+
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
+
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }

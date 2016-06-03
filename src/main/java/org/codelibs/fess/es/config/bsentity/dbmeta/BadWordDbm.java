@@ -15,12 +15,11 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.BadWord;
-
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -80,13 +79,20 @@ public class BadWordDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et-> ((BadWord)et).getCreatedBy(),(et,vl)->((BadWord) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et-> ((BadWord)et).getCreatedTime(),(et,vl)->((BadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et-> ((BadWord)et).getSuggestWord(),(et,vl)->((BadWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
-        setupEpg(_epgMap, et-> ((BadWord)et).getTargetLabel(),(et,vl)->((BadWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
-        setupEpg(_epgMap, et-> ((BadWord)et).getTargetRole(),(et,vl)->((BadWord) et).setTargetRole(DfTypeUtil.toString(vl)), "targetRole");
-        setupEpg(_epgMap, et-> ((BadWord)et).getUpdatedBy(),(et,vl)->((BadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et-> ((BadWord)et).getUpdatedTime(),(et,vl)->((BadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et -> ((BadWord) et).getCreatedBy(), (et, vl) -> ((BadWord) et).setCreatedBy(DfTypeUtil.toString(vl)),
+                "createdBy");
+        setupEpg(_epgMap, et -> ((BadWord) et).getCreatedTime(), (et, vl) -> ((BadWord) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+                "createdTime");
+        setupEpg(_epgMap, et -> ((BadWord) et).getSuggestWord(), (et, vl) -> ((BadWord) et).setSuggestWord(DfTypeUtil.toString(vl)),
+                "suggestWord");
+        setupEpg(_epgMap, et -> ((BadWord) et).getTargetLabel(), (et, vl) -> ((BadWord) et).setTargetLabel(DfTypeUtil.toString(vl)),
+                "targetLabel");
+        setupEpg(_epgMap, et -> ((BadWord) et).getTargetRole(), (et, vl) -> ((BadWord) et).setTargetRole(DfTypeUtil.toString(vl)),
+                "targetRole");
+        setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedBy(), (et, vl) -> ((BadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+                "updatedBy");
+        setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedTime(), (et, vl) -> ((BadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+                "updatedTime");
     }
 
     @Override
@@ -100,32 +106,71 @@ public class BadWordDbm extends AbstractDBMeta {
     protected final String _tableDbName = "bad_word";
     protected final String _tableDispName = "bad_word";
     protected final String _tablePropertyName = "BadWord";
-    public String getTableDbName() { return _tableDbName; }
+
+    public String getTableDbName() {
+        return _tableDbName;
+    }
+
     @Override
-    public String getTableDispName() { return _tableDispName; }
+    public String getTableDispName() {
+        return _tableDispName;
+    }
+
     @Override
-    public String getTablePropertyName() { return _tablePropertyName; }
+    public String getTablePropertyName() {
+        return _tablePropertyName;
+    }
+
     @Override
-    public TableSqlName getTableSqlName() { return null; }
+    public TableSqlName getTableSqlName() {
+        return null;
+    }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSuggestWord = cci("suggestWord", "suggestWord", null, null, String.class, "suggestWord", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
+            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
-    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
-    public ColumnInfo columnSuggestWord() { return _columnSuggestWord; }
-    public ColumnInfo columnTargetLabel() { return _columnTargetLabel; }
-    public ColumnInfo columnTargetRole() { return _columnTargetRole; }
-    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
-    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
+    public ColumnInfo columnCreatedBy() {
+        return _columnCreatedBy;
+    }
+
+    public ColumnInfo columnCreatedTime() {
+        return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnSuggestWord() {
+        return _columnSuggestWord;
+    }
+
+    public ColumnInfo columnTargetLabel() {
+        return _columnTargetLabel;
+    }
+
+    public ColumnInfo columnTargetRole() {
+        return _columnTargetRole;
+    }
+
+    public ColumnInfo columnUpdatedBy() {
+        return _columnUpdatedBy;
+    }
+
+    public ColumnInfo columnUpdatedTime() {
+        return _columnUpdatedTime;
+    }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -212,4 +257,3 @@ public class BadWordDbm extends AbstractDBMeta {
         return null;
     }
 }
-

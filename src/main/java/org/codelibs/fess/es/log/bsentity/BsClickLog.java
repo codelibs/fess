@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.es.log.bsentity;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 

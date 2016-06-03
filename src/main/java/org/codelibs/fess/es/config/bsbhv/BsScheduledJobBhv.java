@@ -109,8 +109,7 @@ public abstract class BsScheduledJobBhv extends EsAbstractBehavior<ScheduledJob,
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends ScheduledJob> OptionalEntity<ENTITY> doSelectOptionalEntity(ScheduledJobCB cb,
-            Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ScheduledJob> OptionalEntity<ENTITY> doSelectOptionalEntity(ScheduledJobCB cb, Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -178,7 +177,7 @@ public abstract class BsScheduledJobBhv extends EsAbstractBehavior<ScheduledJob,
     }
 
     public void selectBulk(CBCall<ScheduledJobCB> cbLambda, EntityRowHandler<List<ScheduledJob>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -273,4 +272,3 @@ public abstract class BsScheduledJobBhv extends EsAbstractBehavior<ScheduledJob,
 
     // #pending create, modify, remove
 }
-
