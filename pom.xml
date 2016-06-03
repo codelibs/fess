@@ -67,7 +67,7 @@
 		<cluster.runner.version>2.3.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.4.4-B-SNAPSHOT</tomcat.boot.version>
+		<tomcat.boot.version>0.4.4</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
