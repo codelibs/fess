@@ -44,7 +44,7 @@
 						<li class="nav-item username"><la:link href="/login"
 								styleClass="nav-link" role="button" aria-haspopup="true"
 								aria-expanded="false">
-								<i class="fa fa-user"></i>
+								<i class="fa fa-sign-in"></i>
 								<la:message key="labels.login" />
 							</la:link></li>
 					</c:when>

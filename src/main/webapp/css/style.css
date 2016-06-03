@@ -86,19 +86,6 @@ h3 {
 	padding: 0;
 }
 
-.navbar .logout-link {
-	margin-right: 10px;
-}
-
-.navbar .logout-link, .navbar .help-link {
-	color: #ffffff;
-}
-
-.navbar .logout-link:hover, .navbar .help-link:hover {
-	color: #08c;
-	text-decoration: none;
-}
-
 .nav-list li.reset {
 	margin-top: 10px;
 }
