@@ -167,7 +167,7 @@ public abstract class BsWebConfigToLabelBhv extends EsAbstractBehavior<WebConfig
     }
 
     public void selectBulk(CBCall<WebConfigToLabelCB> cbLambda, EntityRowHandler<List<WebConfigToLabel>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -262,3 +262,4 @@ public abstract class BsWebConfigToLabelBhv extends EsAbstractBehavior<WebConfig
 
     // #pending create, modify, remove
 }
+

@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.log.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.exentity.SearchFieldLog;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,11 +80,9 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((SearchFieldLog) et).getName(), (et, vl) -> ((SearchFieldLog) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((SearchFieldLog) et).getSearchLogId(),
-                (et, vl) -> ((SearchFieldLog) et).setSearchLogId(DfTypeUtil.toString(vl)), "searchLogId");
-        setupEpg(_epgMap, et -> ((SearchFieldLog) et).getValue(), (et, vl) -> ((SearchFieldLog) et).setValue(DfTypeUtil.toString(vl)),
-                "value");
+        setupEpg(_epgMap, et-> ((SearchFieldLog)et).getName(),(et,vl)->((SearchFieldLog) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et-> ((SearchFieldLog)et).getSearchLogId(),(et,vl)->((SearchFieldLog) et).setSearchLogId(DfTypeUtil.toString(vl)), "searchLogId");
+        setupEpg(_epgMap, et-> ((SearchFieldLog)et).getValue(),(et,vl)->((SearchFieldLog) et).setValue(DfTypeUtil.toString(vl)), "value");
     }
 
     @Override
@@ -97,47 +96,24 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
     protected final String _tableDbName = "search_field_log";
     protected final String _tableDispName = "search_field_log";
     protected final String _tablePropertyName = "SearchFieldLog";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSearchLogId = cci("searchLogId", "searchLogId", null, null, String.class, "searchLogId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String",
-            0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSearchLogId = cci("searchLogId", "searchLogId", null, null, String.class, "searchLogId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnValue = cci("value", "value", null, null, String.class, "value", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnSearchLogId() {
-        return _columnSearchLogId;
-    }
-
-    public ColumnInfo columnValue() {
-        return _columnValue;
-    }
+    public ColumnInfo columnName() { return _columnName; }
+    public ColumnInfo columnSearchLogId() { return _columnSearchLogId; }
+    public ColumnInfo columnValue() { return _columnValue; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -220,3 +196,4 @@ public class SearchFieldLogDbm extends AbstractDBMeta {
         return null;
     }
 }
+

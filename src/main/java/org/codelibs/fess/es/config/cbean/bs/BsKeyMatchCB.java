@@ -75,7 +75,7 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,31 +161,24 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
         public void columnBoost() {
             doColumn("boost");
         }
-
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
-
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-
         public void columnMaxSize() {
             doColumn("maxSize");
         }
-
         public void columnQuery() {
             doColumn("query");
         }
-
         public void columnTerm() {
             doColumn("term");
         }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
-
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }

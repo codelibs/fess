@@ -75,7 +75,7 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,63 +161,48 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
         public void columnAccessType() {
             doColumn("accessType");
         }
-
         public void columnUser() {
             doColumn("user");
         }
-
         public void columnRoles() {
             doColumn("roles");
         }
-
         public void columnQueryId() {
             doColumn("queryId");
         }
-
         public void columnClientIp() {
             doColumn("clientIp");
         }
-
         public void columnHitCount() {
             doColumn("hitCount");
         }
-
         public void columnQueryOffset() {
             doColumn("queryOffset");
         }
-
         public void columnQueryPageSize() {
             doColumn("queryPageSize");
         }
-
         public void columnReferer() {
             doColumn("referer");
         }
-
         public void columnRequestedAt() {
             doColumn("requestedAt");
         }
-
         public void columnResponseTime() {
             doColumn("responseTime");
         }
-
         public void columnQueryTime() {
             doColumn("queryTime");
         }
-
         public void columnSearchWord() {
             doColumn("searchWord");
         }
-
         public void columnUserAgent() {
             doColumn("userAgent");
         }
-
         public void columnUserInfoId() {
             doColumn("userInfoId");
         }
-
         public void columnUserSessionId() {
             doColumn("userSessionId");
         }

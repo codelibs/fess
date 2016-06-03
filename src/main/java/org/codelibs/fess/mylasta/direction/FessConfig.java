@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import org.codelibs.fess.mylasta.direction.FessEnv;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
@@ -41,37 +42,37 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String APP_DIGEST_ALGORISM = "app.digest.algorism";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -server
-    -Xmx512m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-OmitStackTraceInFastThrow
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.responseTimeout=30000
-    -Dgroovy.use.classvalue=true
-    */
+-server
+-Xmx512m
+-XX:MaxMetaspaceSize=128m
+-XX:CompressedClassSpaceSize=32m
+-XX:-UseGCOverheadLimit
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseParNewGC
+-XX:+UseTLAB
+-XX:+DisableExplicitGC
+-XX:-OmitStackTraceInFastThrow
+-Djcifs.smb.client.connTimeout=60000
+-Djcifs.smb.client.soTimeout=35000
+-Djcifs.smb.client.responseTimeout=30000
+-Dgroovy.use.classvalue=true
+ */
     String JVM_CRAWLER_OPTIONS = "jvm.crawler.options";
 
     /** The key of the configuration. e.g. -Djava.awt.headless=true
-    -server
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -Dgroovy.use.classvalue=true
-    */
+-server
+-Xmx256m
+-XX:MaxMetaspaceSize=128m
+-XX:CompressedClassSpaceSize=32m
+-XX:-UseGCOverheadLimit
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseParNewGC
+-XX:+UseTLAB
+-XX:+DisableExplicitGC
+-Dgroovy.use.classvalue=true
+ */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
 
     /** The key of the configuration. e.g. default_crawler */
@@ -153,8 +154,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
     /** The key of the configuration. e.g. title=title:string
-    Title=title:string
-    */
+Title=title:string
+ */
     String CRAWLER_METADATA_NAME_MAPPING = "crawler.metadata.name.mapping";
 
     /** The key of the configuration. e.g. //BODY */
@@ -380,54 +381,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
 
     /** The key of the configuration. e.g. ar=ar
-    bg=bg
-    bn=bn
-    ca=ca
-    cs=cs
-    da=da
-    de=de
-    el=el
-    en=en
-    es=es
-    et=et
-    fa=fa
-    fi=fi
-    fr=fr
-    gu=gu
-    he=he
-    hi=hi
-    hr=hr
-    hu=hu
-    id=id
-    it=it
-    ja=ja
-    ko=ko
-    lt=lt
-    lv=lv
-    mk=mk
-    ml=ml
-    nl=nl
-    no=no
-    pa=pa
-    pl=pl
-    pt=pt
-    ro=ro
-    ru=ru
-    si=si
-    sq=sq
-    sv=sv
-    ta=ta
-    te=te
-    th=th
-    tl=tl
-    tr=tr
-    uk=uk
-    ur=ur
-    vi=vi
-    zh=zh-cn
-    zh-cn=zh-cn
-    zh-tw=zh-tw
-    */
+bg=bg
+bn=bn
+ca=ca
+cs=cs
+da=da
+de=de
+el=el
+en=en
+es=es
+et=et
+fa=fa
+fi=fi
+fr=fr
+gu=gu
+he=he
+hi=hi
+hr=hr
+hu=hu
+id=id
+it=it
+ja=ja
+ko=ko
+lt=lt
+lv=lv
+mk=mk
+ml=ml
+nl=nl
+no=no
+pa=pa
+pl=pl
+pt=pt
+ro=ro
+ru=ru
+si=si
+sq=sq
+sv=sv
+ta=ta
+te=te
+th=th
+tl=tl
+tr=tr
+uk=uk
+ur=ur
+vi=vi
+zh=zh-cn
+zh-cn=zh-cn
+zh-tw=zh-tw
+ */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
     /** The key of the configuration. e.g. 1.6 */
@@ -489,6 +490,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. true */
     String PAGING_PAGE_RANGE_FILL_LIMIT = "paging.page.range.fill.limit";
+
+    /** The key of the configuration. e.g. true */
+    String PAGE_LOGIN_LINK = "page.login.link";
 
     /** The key of the configuration. e.g. 1000 */
     String PAGE_DOCBOOST_MAX_FETCH_SIZE = "page.docboost.max.fetch.size";
@@ -974,22 +978,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'jvm.crawler.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
-    -server
-    -Xmx512m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -XX:-OmitStackTraceInFastThrow
-    -Djcifs.smb.client.connTimeout=60000
-    -Djcifs.smb.client.soTimeout=35000
-    -Djcifs.smb.client.responseTimeout=30000
-    -Dgroovy.use.classvalue=true
-    <br>
+-server
+-Xmx512m
+-XX:MaxMetaspaceSize=128m
+-XX:CompressedClassSpaceSize=32m
+-XX:-UseGCOverheadLimit
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseParNewGC
+-XX:+UseTLAB
+-XX:+DisableExplicitGC
+-XX:-OmitStackTraceInFastThrow
+-Djcifs.smb.client.connTimeout=60000
+-Djcifs.smb.client.soTimeout=35000
+-Djcifs.smb.client.responseTimeout=30000
+-Dgroovy.use.classvalue=true
+ <br>
      * comment: JVM options
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -998,18 +1002,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'jvm.suggest.options'. <br>
      * The value is, e.g. -Djava.awt.headless=true
-    -server
-    -Xmx256m
-    -XX:MaxMetaspaceSize=128m
-    -XX:CompressedClassSpaceSize=32m
-    -XX:-UseGCOverheadLimit
-    -XX:+UseConcMarkSweepGC
-    -XX:CMSInitiatingOccupancyFraction=75
-    -XX:+UseParNewGC
-    -XX:+UseTLAB
-    -XX:+DisableExplicitGC
-    -Dgroovy.use.classvalue=true
-    <br>
+-server
+-Xmx256m
+-XX:MaxMetaspaceSize=128m
+-XX:CompressedClassSpaceSize=32m
+-XX:-UseGCOverheadLimit
+-XX:+UseConcMarkSweepGC
+-XX:CMSInitiatingOccupancyFraction=75
+-XX:+UseParNewGC
+-XX:+UseTLAB
+-XX:+DisableExplicitGC
+-Dgroovy.use.classvalue=true
+ <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJvmSuggestOptions();
@@ -1262,8 +1266,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'crawler.metadata.name.mapping'. <br>
      * The value is, e.g. title=title:string
-    Title=title:string
-    <br>
+Title=title:string
+ <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerMetadataNameMapping();
@@ -1986,54 +1990,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /**
      * Get the value for the key 'query.language.mapping'. <br>
      * The value is, e.g. ar=ar
-    bg=bg
-    bn=bn
-    ca=ca
-    cs=cs
-    da=da
-    de=de
-    el=el
-    en=en
-    es=es
-    et=et
-    fa=fa
-    fi=fi
-    fr=fr
-    gu=gu
-    he=he
-    hi=hi
-    hr=hr
-    hu=hu
-    id=id
-    it=it
-    ja=ja
-    ko=ko
-    lt=lt
-    lv=lv
-    mk=mk
-    ml=ml
-    nl=nl
-    no=no
-    pa=pa
-    pl=pl
-    pt=pt
-    ro=ro
-    ru=ru
-    si=si
-    sq=sq
-    sv=sv
-    ta=ta
-    te=te
-    th=th
-    tl=tl
-    tr=tr
-    uk=uk
-    ur=ur
-    vi=vi
-    zh=zh-cn
-    zh-cn=zh-cn
-    zh-tw=zh-tw
-    <br>
+bg=bg
+bn=bn
+ca=ca
+cs=cs
+da=da
+de=de
+el=el
+en=en
+es=es
+et=et
+fa=fa
+fi=fi
+fr=fr
+gu=gu
+he=he
+hi=hi
+hr=hr
+hu=hu
+id=id
+it=it
+ja=ja
+ko=ko
+lt=lt
+lv=lv
+mk=mk
+ml=ml
+nl=nl
+no=no
+pa=pa
+pl=pl
+pt=pt
+ro=ro
+ru=ru
+si=si
+sq=sq
+sv=sv
+ta=ta
+te=te
+th=th
+tl=tl
+tr=tr
+uk=uk
+ur=ur
+vi=vi
+zh=zh-cn
+zh-cn=zh-cn
+zh-tw=zh-tw
+ <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryLanguageMapping();
@@ -2297,6 +2301,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPagingPageRangeFillLimit();
+
+    /**
+     * Get the value for the key 'page.login.link'. <br>
+     * The value is, e.g. true <br>
+     * comment: The option 'loginLink' of page link button for search page
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageLoginLink();
+
+    /**
+     * Is the property for the key 'page.login.link' true? <br>
+     * The value is, e.g. true <br>
+     * comment: The option 'loginLink' of page link button for search page
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isPageLoginLink();
 
     /**
      * Get the value for the key 'page.docboost.max.fetch.size'. <br>
@@ -4353,6 +4373,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isPagingPageRangeFillLimit() {
             return is(FessConfig.PAGING_PAGE_RANGE_FILL_LIMIT);
+        }
+
+        public String getPageLoginLink() {
+            return get(FessConfig.PAGE_LOGIN_LINK);
+        }
+
+        public boolean isPageLoginLink() {
+            return is(FessConfig.PAGE_LOGIN_LINK);
         }
 
         public String getPageDocboostMaxFetchSize() {

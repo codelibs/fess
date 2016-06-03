@@ -75,7 +75,7 @@ public class BsUserCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,159 +161,120 @@ public class BsUserCB extends EsAbstractConditionBean {
         public void columnName() {
             doColumn("name");
         }
-
         public void columnPassword() {
             doColumn("password");
         }
-
         public void columnSurname() {
             doColumn("surname");
         }
-
         public void columnGivenName() {
             doColumn("givenName");
         }
-
         public void columnEmployeeNumber() {
             doColumn("employeeNumber");
         }
-
         public void columnMail() {
             doColumn("mail");
         }
-
         public void columnTelephoneNumber() {
             doColumn("telephoneNumber");
         }
-
         public void columnHomePhone() {
             doColumn("homePhone");
         }
-
         public void columnHomePostalAddress() {
             doColumn("homePostalAddress");
         }
-
         public void columnLabeledURI() {
             doColumn("labeledURI");
         }
-
         public void columnRoomNumber() {
             doColumn("roomNumber");
         }
-
         public void columnDescription() {
             doColumn("description");
         }
-
         public void columnTitle() {
             doColumn("title");
         }
-
         public void columnPager() {
             doColumn("pager");
         }
-
         public void columnStreet() {
             doColumn("street");
         }
-
         public void columnPostalCode() {
             doColumn("postalCode");
         }
-
         public void columnPhysicalDeliveryOfficeName() {
             doColumn("physicalDeliveryOfficeName");
         }
-
         public void columnDestinationIndicator() {
             doColumn("destinationIndicator");
         }
-
         public void columnInternationaliSDNNumber() {
             doColumn("internationaliSDNNumber");
         }
-
         public void columnState() {
             doColumn("state");
         }
-
         public void columnEmployeeType() {
             doColumn("employeeType");
         }
-
         public void columnFacsimileTelephoneNumber() {
             doColumn("facsimileTelephoneNumber");
         }
-
         public void columnPostOfficeBox() {
             doColumn("postOfficeBox");
         }
-
         public void columnInitials() {
             doColumn("initials");
         }
-
         public void columnCarLicense() {
             doColumn("carLicense");
         }
-
         public void columnMobile() {
             doColumn("mobile");
         }
-
         public void columnPostalAddress() {
             doColumn("postalAddress");
         }
-
         public void columnCity() {
             doColumn("city");
         }
-
         public void columnTeletexTerminalIdentifier() {
             doColumn("teletexTerminalIdentifier");
         }
-
         public void columnX121Address() {
             doColumn("x121Address");
         }
-
         public void columnBusinessCategory() {
             doColumn("businessCategory");
         }
-
         public void columnRegisteredAddress() {
             doColumn("registeredAddress");
         }
-
         public void columnDisplayName() {
             doColumn("displayName");
         }
-
         public void columnPreferredLanguage() {
             doColumn("preferredLanguage");
         }
-
         public void columnDepartmentNumber() {
             doColumn("departmentNumber");
         }
-
         public void columnUidNumber() {
             doColumn("uidNumber");
         }
-
         public void columnGidNumber() {
             doColumn("gidNumber");
         }
-
         public void columnHomeDirectory() {
             doColumn("homeDirectory");
         }
-
         public void columnGroups() {
             doColumn("groups");
         }
-
         public void columnRoles() {
             doColumn("roles");
         }

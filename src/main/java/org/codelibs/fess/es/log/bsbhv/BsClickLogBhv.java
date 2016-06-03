@@ -103,7 +103,8 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends ClickLog> OptionalEntity<ENTITY> doSelectOptionalEntity(ClickLogCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends ClickLog> OptionalEntity<ENTITY> doSelectOptionalEntity(ClickLogCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -171,7 +172,7 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
     }
 
     public void selectBulk(CBCall<ClickLogCB> cbLambda, EntityRowHandler<List<ClickLog>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -266,3 +267,4 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
 
     // #pending create, modify, remove
 }
+

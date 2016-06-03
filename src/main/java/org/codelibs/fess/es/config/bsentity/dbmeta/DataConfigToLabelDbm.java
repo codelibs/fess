@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.DataConfigToLabel;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,10 +80,8 @@ public class DataConfigToLabelDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((DataConfigToLabel) et).getDataConfigId(),
-                (et, vl) -> ((DataConfigToLabel) et).setDataConfigId(DfTypeUtil.toString(vl)), "dataConfigId");
-        setupEpg(_epgMap, et -> ((DataConfigToLabel) et).getLabelTypeId(),
-                (et, vl) -> ((DataConfigToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
+        setupEpg(_epgMap, et-> ((DataConfigToLabel)et).getDataConfigId(),(et,vl)->((DataConfigToLabel) et).setDataConfigId(DfTypeUtil.toString(vl)), "dataConfigId");
+        setupEpg(_epgMap, et-> ((DataConfigToLabel)et).getLabelTypeId(),(et,vl)->((DataConfigToLabel) et).setLabelTypeId(DfTypeUtil.toString(vl)), "labelTypeId");
     }
 
     @Override
@@ -96,41 +95,22 @@ public class DataConfigToLabelDbm extends AbstractDBMeta {
     protected final String _tableDbName = "data_config_to_label";
     protected final String _tableDispName = "data_config_to_label";
     protected final String _tablePropertyName = "DataConfigToLabel";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnDataConfigId = cci("dataConfigId", "dataConfigId", null, null, String.class, "dataConfigId", null,
-            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDataConfigId = cci("dataConfigId", "dataConfigId", null, null, String.class, "dataConfigId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnLabelTypeId = cci("labelTypeId", "labelTypeId", null, null, String.class, "labelTypeId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnDataConfigId() {
-        return _columnDataConfigId;
-    }
-
-    public ColumnInfo columnLabelTypeId() {
-        return _columnLabelTypeId;
-    }
+    public ColumnInfo columnDataConfigId() { return _columnDataConfigId; }
+    public ColumnInfo columnLabelTypeId() { return _columnLabelTypeId; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -212,3 +192,4 @@ public class DataConfigToLabelDbm extends AbstractDBMeta {
         return null;
     }
 }
+

@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.WebAuthentication;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,30 +80,18 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getAuthRealm(),
-                (et, vl) -> ((WebAuthentication) et).setAuthRealm(DfTypeUtil.toString(vl)), "authRealm");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getCreatedBy(),
-                (et, vl) -> ((WebAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getCreatedTime(),
-                (et, vl) -> ((WebAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getHostname(),
-                (et, vl) -> ((WebAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getParameters(),
-                (et, vl) -> ((WebAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getPassword(),
-                (et, vl) -> ((WebAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getPort(), (et, vl) -> ((WebAuthentication) et).setPort(DfTypeUtil.toInteger(vl)),
-                "port");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getProtocolScheme(),
-                (et, vl) -> ((WebAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUpdatedBy(),
-                (et, vl) -> ((WebAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUpdatedTime(),
-                (et, vl) -> ((WebAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getUsername(),
-                (et, vl) -> ((WebAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
-        setupEpg(_epgMap, et -> ((WebAuthentication) et).getWebConfigId(),
-                (et, vl) -> ((WebAuthentication) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getAuthRealm(),(et,vl)->((WebAuthentication) et).setAuthRealm(DfTypeUtil.toString(vl)), "authRealm");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getCreatedBy(),(et,vl)->((WebAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getCreatedTime(),(et,vl)->((WebAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getHostname(),(et,vl)->((WebAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getParameters(),(et,vl)->((WebAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getPassword(),(et,vl)->((WebAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getPort(),(et,vl)->((WebAuthentication) et).setPort(DfTypeUtil.toInteger(vl)), "port");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getProtocolScheme(),(et,vl)->((WebAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getUpdatedBy(),(et,vl)->((WebAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getUpdatedTime(),(et,vl)->((WebAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getUsername(),(et,vl)->((WebAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
+        setupEpg(_epgMap, et-> ((WebAuthentication)et).getWebConfigId(),(et,vl)->((WebAuthentication) et).setWebConfigId(DfTypeUtil.toString(vl)), "webConfigId");
     }
 
     @Override
@@ -116,101 +105,42 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
     protected final String _tableDbName = "web_authentication";
     protected final String _tableDispName = "web_authentication";
     protected final String _tablePropertyName = "WebAuthentication";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnAuthRealm = cci("authRealm", "authRealm", null, null, String.class, "authRealm", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnHostname = cci("hostname", "hostname", null, null, String.class, "hostname", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnParameters = cci("parameters", "parameters", null, null, String.class, "parameters", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer",
-            0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnProtocolScheme = cci("protocolScheme", "protocolScheme", null, null, String.class, "protocolScheme",
-            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUsername = cci("username", "username", null, null, String.class, "username", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnAuthRealm = cci("authRealm", "authRealm", null, null, String.class, "authRealm", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHostname = cci("hostname", "hostname", null, null, String.class, "hostname", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnParameters = cci("parameters", "parameters", null, null, String.class, "parameters", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnProtocolScheme = cci("protocolScheme", "protocolScheme", null, null, String.class, "protocolScheme", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUsername = cci("username", "username", null, null, String.class, "username", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnWebConfigId = cci("webConfigId", "webConfigId", null, null, String.class, "webConfigId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnAuthRealm() {
-        return _columnAuthRealm;
-    }
-
-    public ColumnInfo columnCreatedBy() {
-        return _columnCreatedBy;
-    }
-
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnHostname() {
-        return _columnHostname;
-    }
-
-    public ColumnInfo columnParameters() {
-        return _columnParameters;
-    }
-
-    public ColumnInfo columnPassword() {
-        return _columnPassword;
-    }
-
-    public ColumnInfo columnPort() {
-        return _columnPort;
-    }
-
-    public ColumnInfo columnProtocolScheme() {
-        return _columnProtocolScheme;
-    }
-
-    public ColumnInfo columnUpdatedBy() {
-        return _columnUpdatedBy;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
-    }
-
-    public ColumnInfo columnUsername() {
-        return _columnUsername;
-    }
-
-    public ColumnInfo columnWebConfigId() {
-        return _columnWebConfigId;
-    }
+    public ColumnInfo columnAuthRealm() { return _columnAuthRealm; }
+    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
+    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
+    public ColumnInfo columnHostname() { return _columnHostname; }
+    public ColumnInfo columnParameters() { return _columnParameters; }
+    public ColumnInfo columnPassword() { return _columnPassword; }
+    public ColumnInfo columnPort() { return _columnPort; }
+    public ColumnInfo columnProtocolScheme() { return _columnProtocolScheme; }
+    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
+    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
+    public ColumnInfo columnUsername() { return _columnUsername; }
+    public ColumnInfo columnWebConfigId() { return _columnWebConfigId; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -302,3 +232,4 @@ public class WebAuthenticationDbm extends AbstractDBMeta {
         return null;
     }
 }
+

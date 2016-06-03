@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.log.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.exentity.UserInfo;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,10 +80,8 @@ public class UserInfoDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((UserInfo) et).getCreatedAt(), (et, vl) -> ((UserInfo) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)),
-                "createdAt");
-        setupEpg(_epgMap, et -> ((UserInfo) et).getUpdatedAt(), (et, vl) -> ((UserInfo) et).setUpdatedAt(DfTypeUtil.toLocalDateTime(vl)),
-                "updatedAt");
+        setupEpg(_epgMap, et-> ((UserInfo)et).getCreatedAt(),(et,vl)->((UserInfo) et).setCreatedAt(DfTypeUtil.toLocalDateTime(vl)), "createdAt");
+        setupEpg(_epgMap, et-> ((UserInfo)et).getUpdatedAt(),(et,vl)->((UserInfo) et).setUpdatedAt(DfTypeUtil.toLocalDateTime(vl)), "updatedAt");
     }
 
     @Override
@@ -96,41 +95,22 @@ public class UserInfoDbm extends AbstractDBMeta {
     protected final String _tableDbName = "user_info";
     protected final String _tableDispName = "user_info";
     protected final String _tablePropertyName = "UserInfo";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false,
-            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedAt = cci("updatedAt", "updatedAt", null, null, LocalDateTime.class, "updatedAt", null, false,
-            false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedAt = cci("createdAt", "createdAt", null, null, LocalDateTime.class, "createdAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedAt = cci("updatedAt", "updatedAt", null, null, LocalDateTime.class, "updatedAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedAt() {
-        return _columnCreatedAt;
-    }
-
-    public ColumnInfo columnUpdatedAt() {
-        return _columnUpdatedAt;
-    }
+    public ColumnInfo columnCreatedAt() { return _columnCreatedAt; }
+    public ColumnInfo columnUpdatedAt() { return _columnUpdatedAt; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -212,3 +192,4 @@ public class UserInfoDbm extends AbstractDBMeta {
         return null;
     }
 }
+

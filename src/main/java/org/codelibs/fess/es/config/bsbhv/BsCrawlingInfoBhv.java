@@ -100,7 +100,8 @@ public abstract class BsCrawlingInfoBhv extends EsAbstractBehavior<CrawlingInfo,
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends CrawlingInfo> OptionalEntity<ENTITY> doSelectOptionalEntity(CrawlingInfoCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends CrawlingInfo> OptionalEntity<ENTITY> doSelectOptionalEntity(CrawlingInfoCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -168,7 +169,7 @@ public abstract class BsCrawlingInfoBhv extends EsAbstractBehavior<CrawlingInfo,
     }
 
     public void selectBulk(CBCall<CrawlingInfoCB> cbLambda, EntityRowHandler<List<CrawlingInfo>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -263,3 +264,4 @@ public abstract class BsCrawlingInfoBhv extends EsAbstractBehavior<CrawlingInfo,
 
     // #pending create, modify, remove
 }
+

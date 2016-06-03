@@ -893,8 +893,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: ms */
     public static final String LABELS_MILLISEC = "{labels.millisec}";
 
-    /** The key of the message: Role */
-    public static final String LABELS_role_type = "{labels.role_type}";
+    /** The key of the message: Permission */
+    public static final String LABELS_permission_type = "{labels.permission_type}";
 
     /** The key of the message: Label */
     public static final String LABELS_label_type = "{labels.label_type}";
@@ -1542,8 +1542,7 @@ public class FessLabels extends ActionMessages {
     public static final String LABELS_system_info_bug_report_title = "{labels.system_info_bug_report_title}";
 
     /** The key of the message: system.properties does not exist. Default values are applied. */
-    public static final String LABELS_system_info_system_properties_does_not_exist =
-            "{labels.system_info_system_properties_does_not_exist}";
+    public static final String LABELS_system_info_system_properties_does_not_exist = "{labels.system_info_system_properties_does_not_exist}";
 
     /** The key of the message: File Authentication */
     public static final String LABELS_file_auth_configuration = "{labels.file_auth_configuration}";

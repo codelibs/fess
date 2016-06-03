@@ -75,7 +75,7 @@ public class BsPathMappingCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,31 +161,24 @@ public class BsPathMappingCB extends EsAbstractConditionBean {
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
-
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-
         public void columnProcessType() {
             doColumn("processType");
         }
-
         public void columnRegex() {
             doColumn("regex");
         }
-
         public void columnReplacement() {
             doColumn("replacement");
         }
-
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
-
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }

@@ -62,3 +62,4 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
         this.failedShards = failedShards;
     }
 }
+

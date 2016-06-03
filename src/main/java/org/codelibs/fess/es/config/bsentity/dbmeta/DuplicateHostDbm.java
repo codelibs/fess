@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,20 +80,13 @@ public class DuplicateHostDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getCreatedBy(),
-                (et, vl) -> ((DuplicateHost) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getCreatedTime(),
-                (et, vl) -> ((DuplicateHost) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getDuplicateHostName(),
-                (et, vl) -> ((DuplicateHost) et).setDuplicateHostName(DfTypeUtil.toString(vl)), "duplicateHostName");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getRegularName(),
-                (et, vl) -> ((DuplicateHost) et).setRegularName(DfTypeUtil.toString(vl)), "regularName");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getSortOrder(),
-                (et, vl) -> ((DuplicateHost) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getUpdatedBy(),
-                (et, vl) -> ((DuplicateHost) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et -> ((DuplicateHost) et).getUpdatedTime(),
-                (et, vl) -> ((DuplicateHost) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getCreatedBy(),(et,vl)->((DuplicateHost) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getCreatedTime(),(et,vl)->((DuplicateHost) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getDuplicateHostName(),(et,vl)->((DuplicateHost) et).setDuplicateHostName(DfTypeUtil.toString(vl)), "duplicateHostName");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getRegularName(),(et,vl)->((DuplicateHost) et).setRegularName(DfTypeUtil.toString(vl)), "regularName");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getSortOrder(),(et,vl)->((DuplicateHost) et).setSortOrder(DfTypeUtil.toInteger(vl)), "sortOrder");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getUpdatedBy(),(et,vl)->((DuplicateHost) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et-> ((DuplicateHost)et).getUpdatedTime(),(et,vl)->((DuplicateHost) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
     }
 
     @Override
@@ -106,71 +100,32 @@ public class DuplicateHostDbm extends AbstractDBMeta {
     protected final String _tableDbName = "duplicate_host";
     protected final String _tableDispName = "duplicate_host";
     protected final String _tablePropertyName = "DuplicateHost";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnDuplicateHostName = cci("duplicateHostName", "duplicateHostName", null, null, String.class,
-            "duplicateHostName", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRegularName = cci("regularName", "regularName", null, null, String.class, "regularName", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
-            false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDuplicateHostName = cci("duplicateHostName", "duplicateHostName", null, null, String.class, "duplicateHostName", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRegularName = cci("regularName", "regularName", null, null, String.class, "regularName", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedBy() {
-        return _columnCreatedBy;
-    }
-
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnDuplicateHostName() {
-        return _columnDuplicateHostName;
-    }
-
-    public ColumnInfo columnRegularName() {
-        return _columnRegularName;
-    }
-
-    public ColumnInfo columnSortOrder() {
-        return _columnSortOrder;
-    }
-
-    public ColumnInfo columnUpdatedBy() {
-        return _columnUpdatedBy;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
-    }
+    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
+    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
+    public ColumnInfo columnDuplicateHostName() { return _columnDuplicateHostName; }
+    public ColumnInfo columnRegularName() { return _columnRegularName; }
+    public ColumnInfo columnSortOrder() { return _columnSortOrder; }
+    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
+    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -257,3 +212,4 @@ public class DuplicateHostDbm extends AbstractDBMeta {
         return null;
     }
 }
+

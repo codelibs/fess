@@ -103,7 +103,8 @@ public abstract class BsRequestHeaderBhv extends EsAbstractBehavior<RequestHeade
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends RequestHeader> OptionalEntity<ENTITY> doSelectOptionalEntity(RequestHeaderCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends RequestHeader> OptionalEntity<ENTITY> doSelectOptionalEntity(RequestHeaderCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -171,7 +172,7 @@ public abstract class BsRequestHeaderBhv extends EsAbstractBehavior<RequestHeade
     }
 
     public void selectBulk(CBCall<RequestHeaderCB> cbLambda, EntityRowHandler<List<RequestHeader>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -266,3 +267,4 @@ public abstract class BsRequestHeaderBhv extends EsAbstractBehavior<RequestHeade
 
     // #pending create, modify, remove
 }
+

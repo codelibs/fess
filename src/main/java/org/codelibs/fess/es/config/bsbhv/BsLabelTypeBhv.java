@@ -106,7 +106,8 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends LabelType> OptionalEntity<ENTITY> doSelectOptionalEntity(LabelTypeCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends LabelType> OptionalEntity<ENTITY> doSelectOptionalEntity(LabelTypeCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -174,7 +175,7 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
     }
 
     public void selectBulk(CBCall<LabelTypeCB> cbLambda, EntityRowHandler<List<LabelType>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -269,3 +270,4 @@ public abstract class BsLabelTypeBhv extends EsAbstractBehavior<LabelType, Label
 
     // #pending create, modify, remove
 }
+

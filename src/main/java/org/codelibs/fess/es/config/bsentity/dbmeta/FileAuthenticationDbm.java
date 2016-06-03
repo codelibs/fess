@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.exentity.FileAuthentication;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,28 +80,17 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getCreatedBy(),
-                (et, vl) -> ((FileAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getCreatedTime(),
-                (et, vl) -> ((FileAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getFileConfigId(),
-                (et, vl) -> ((FileAuthentication) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getHostname(),
-                (et, vl) -> ((FileAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getParameters(),
-                (et, vl) -> ((FileAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getPassword(),
-                (et, vl) -> ((FileAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getPort(),
-                (et, vl) -> ((FileAuthentication) et).setPort(DfTypeUtil.toInteger(vl)), "port");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getProtocolScheme(),
-                (et, vl) -> ((FileAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUpdatedBy(),
-                (et, vl) -> ((FileAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUpdatedTime(),
-                (et, vl) -> ((FileAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
-        setupEpg(_epgMap, et -> ((FileAuthentication) et).getUsername(),
-                (et, vl) -> ((FileAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getCreatedBy(),(et,vl)->((FileAuthentication) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getCreatedTime(),(et,vl)->((FileAuthentication) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getFileConfigId(),(et,vl)->((FileAuthentication) et).setFileConfigId(DfTypeUtil.toString(vl)), "fileConfigId");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getHostname(),(et,vl)->((FileAuthentication) et).setHostname(DfTypeUtil.toString(vl)), "hostname");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getParameters(),(et,vl)->((FileAuthentication) et).setParameters(DfTypeUtil.toString(vl)), "parameters");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getPassword(),(et,vl)->((FileAuthentication) et).setPassword(DfTypeUtil.toString(vl)), "password");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getPort(),(et,vl)->((FileAuthentication) et).setPort(DfTypeUtil.toInteger(vl)), "port");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getProtocolScheme(),(et,vl)->((FileAuthentication) et).setProtocolScheme(DfTypeUtil.toString(vl)), "protocolScheme");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getUpdatedBy(),(et,vl)->((FileAuthentication) et).setUpdatedBy(DfTypeUtil.toString(vl)), "updatedBy");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getUpdatedTime(),(et,vl)->((FileAuthentication) et).setUpdatedTime(DfTypeUtil.toLong(vl)), "updatedTime");
+        setupEpg(_epgMap, et-> ((FileAuthentication)et).getUsername(),(et,vl)->((FileAuthentication) et).setUsername(DfTypeUtil.toString(vl)), "username");
     }
 
     @Override
@@ -114,95 +104,40 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
     protected final String _tableDbName = "file_authentication";
     protected final String _tableDispName = "file_authentication";
     protected final String _tablePropertyName = "FileAuthentication";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnFileConfigId = cci("fileConfigId", "fileConfigId", null, null, String.class, "fileConfigId", null,
-            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnHostname = cci("hostname", "hostname", null, null, String.class, "hostname", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnParameters = cci("parameters", "parameters", null, null, String.class, "parameters", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer",
-            0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnProtocolScheme = cci("protocolScheme", "protocolScheme", null, null, String.class, "protocolScheme",
-            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
-            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUsername = cci("username", "username", null, null, String.class, "username", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnFileConfigId = cci("fileConfigId", "fileConfigId", null, null, String.class, "fileConfigId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHostname = cci("hostname", "hostname", null, null, String.class, "hostname", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnParameters = cci("parameters", "parameters", null, null, String.class, "parameters", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPassword = cci("password", "password", null, null, String.class, "password", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPort = cci("port", "port", null, null, Integer.class, "port", null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnProtocolScheme = cci("protocolScheme", "protocolScheme", null, null, String.class, "protocolScheme", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUsername = cci("username", "username", null, null, String.class, "username", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnCreatedBy() {
-        return _columnCreatedBy;
-    }
-
-    public ColumnInfo columnCreatedTime() {
-        return _columnCreatedTime;
-    }
-
-    public ColumnInfo columnFileConfigId() {
-        return _columnFileConfigId;
-    }
-
-    public ColumnInfo columnHostname() {
-        return _columnHostname;
-    }
-
-    public ColumnInfo columnParameters() {
-        return _columnParameters;
-    }
-
-    public ColumnInfo columnPassword() {
-        return _columnPassword;
-    }
-
-    public ColumnInfo columnPort() {
-        return _columnPort;
-    }
-
-    public ColumnInfo columnProtocolScheme() {
-        return _columnProtocolScheme;
-    }
-
-    public ColumnInfo columnUpdatedBy() {
-        return _columnUpdatedBy;
-    }
-
-    public ColumnInfo columnUpdatedTime() {
-        return _columnUpdatedTime;
-    }
-
-    public ColumnInfo columnUsername() {
-        return _columnUsername;
-    }
+    public ColumnInfo columnCreatedBy() { return _columnCreatedBy; }
+    public ColumnInfo columnCreatedTime() { return _columnCreatedTime; }
+    public ColumnInfo columnFileConfigId() { return _columnFileConfigId; }
+    public ColumnInfo columnHostname() { return _columnHostname; }
+    public ColumnInfo columnParameters() { return _columnParameters; }
+    public ColumnInfo columnPassword() { return _columnPassword; }
+    public ColumnInfo columnPort() { return _columnPort; }
+    public ColumnInfo columnProtocolScheme() { return _columnProtocolScheme; }
+    public ColumnInfo columnUpdatedBy() { return _columnUpdatedBy; }
+    public ColumnInfo columnUpdatedTime() { return _columnUpdatedTime; }
+    public ColumnInfo columnUsername() { return _columnUsername; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -293,3 +228,4 @@ public class FileAuthenticationDbm extends AbstractDBMeta {
         return null;
     }
 }
+

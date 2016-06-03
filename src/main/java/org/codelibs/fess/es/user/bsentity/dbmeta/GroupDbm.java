@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.user.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.user.exentity.Group;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,8 +80,8 @@ public class GroupDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((Group) et).getName(), (et, vl) -> ((Group) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((Group) et).getGidNumber(), (et, vl) -> ((Group) et).setGidNumber(DfTypeUtil.toLong(vl)), "gidNumber");
+        setupEpg(_epgMap, et-> ((Group)et).getName(),(et,vl)->((Group) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et-> ((Group)et).getGidNumber(),(et,vl)->((Group) et).setGidNumber(DfTypeUtil.toLong(vl)), "gidNumber");
     }
 
     @Override
@@ -94,41 +95,22 @@ public class GroupDbm extends AbstractDBMeta {
     protected final String _tableDbName = "group";
     protected final String _tableDispName = "group";
     protected final String _tablePropertyName = "Group";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnGidNumber = cci("gidNumber", "gidNumber", null, null, Long.class, "gidNumber", null, false, false,
-            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnGidNumber = cci("gidNumber", "gidNumber", null, null, Long.class, "gidNumber", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnName() {
-        return _columnName;
-    }
-
-    public ColumnInfo columnGidNumber() {
-        return _columnGidNumber;
-    }
+    public ColumnInfo columnName() { return _columnName; }
+    public ColumnInfo columnGidNumber() { return _columnGidNumber; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -210,3 +192,4 @@ public class GroupDbm extends AbstractDBMeta {
         return null;
     }
 }
+

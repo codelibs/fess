@@ -104,7 +104,8 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends JobLog> OptionalEntity<ENTITY> doSelectOptionalEntity(JobLogCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends JobLog> OptionalEntity<ENTITY> doSelectOptionalEntity(JobLogCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -172,7 +173,7 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
     }
 
     public void selectBulk(CBCall<JobLogCB> cbLambda, EntityRowHandler<List<JobLog>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -267,3 +268,4 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
 
     // #pending create, modify, remove
 }
+

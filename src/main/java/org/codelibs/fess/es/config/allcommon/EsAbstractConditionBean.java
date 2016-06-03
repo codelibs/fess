@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.config.allcommon;
 
+import org.codelibs.fess.es.config.allcommon.EsSqlClause;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.chelper.HpCBPurpose;
 import org.dbflute.cbean.chelper.HpColumnSpHandler;
@@ -51,14 +52,12 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
     //                                                                           =========
     protected final SqlClause _sqlClause = new EsSqlClause(asTableDbName());
     protected int _safetyMaxResultSize;
-    protected SearchRequestParams _searchRequestParams = new SearchRequestParams();
-    protected String _preference;
+    private SearchRequestParams _searchRequestParams = new SearchRequestParams();
 
     // ===================================================================================
     //                                                                             Builder
     //                                                                             =======
     public abstract CountRequestBuilder build(CountRequestBuilder builder);
-
     public abstract SearchRequestBuilder build(SearchRequestBuilder builder);
 
     // ===================================================================================
@@ -600,14 +599,6 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
         return _searchRequestParams;
     }
 
-    public void setPreference(final String preference) {
-        _preference = preference;
-    }
-
-    public String getPreference() {
-        return _preference;
-    }
-
     // ===================================================================================
     //                                                                      General Helper
     //                                                                      ==============
@@ -707,3 +698,4 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
         }
     }
 }
+

@@ -167,7 +167,7 @@ public abstract class BsDataConfigToLabelBhv extends EsAbstractBehavior<DataConf
     }
 
     public void selectBulk(CBCall<DataConfigToLabelCB> cbLambda, EntityRowHandler<List<DataConfigToLabel>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -262,3 +262,4 @@ public abstract class BsDataConfigToLabelBhv extends EsAbstractBehavior<DataConf
 
     // #pending create, modify, remove
 }
+

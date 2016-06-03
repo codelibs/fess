@@ -117,7 +117,8 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
         return doSelectOptionalEntity(cb, typeOfSelectedEntity());
     }
 
-    protected <ENTITY extends WebConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(WebConfigCB cb, Class<? extends ENTITY> tp) {
+    protected <ENTITY extends WebConfig> OptionalEntity<ENTITY> doSelectOptionalEntity(WebConfigCB cb,
+            Class<? extends ENTITY> tp) {
         return createOptionalEntity(doSelectEntity(cb, tp), cb);
     }
 
@@ -185,7 +186,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
     }
 
     public void selectBulk(CBCall<WebConfigCB> cbLambda, EntityRowHandler<List<WebConfig>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -280,3 +281,4 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
 
     // #pending create, modify, remove
 }
+

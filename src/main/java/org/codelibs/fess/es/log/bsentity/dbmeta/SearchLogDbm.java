@@ -15,11 +15,12 @@
  */
 package org.codelibs.fess.es.log.bsentity.dbmeta;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.exentity.SearchLog;
+
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -79,33 +80,22 @@ public class SearchLogDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((SearchLog) et).getAccessType(), (et, vl) -> ((SearchLog) et).setAccessType(DfTypeUtil.toString(vl)),
-                "accessType");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getUser(), (et, vl) -> ((SearchLog) et).setUser(DfTypeUtil.toString(vl)), "user");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getRoles(), (et, vl) -> ((SearchLog) et).setRoles((String[]) vl), "roles");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getQueryId(), (et, vl) -> ((SearchLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getClientIp(), (et, vl) -> ((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)),
-                "clientIp");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getHitCount(), (et, vl) -> ((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getQueryOffset(), (et, vl) -> ((SearchLog) et).setQueryOffset(DfTypeUtil.toInteger(vl)),
-                "queryOffset");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getQueryPageSize(),
-                (et, vl) -> ((SearchLog) et).setQueryPageSize(DfTypeUtil.toInteger(vl)), "queryPageSize");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getReferer(), (et, vl) -> ((SearchLog) et).setReferer(DfTypeUtil.toString(vl)), "referer");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getRequestedAt(),
-                (et, vl) -> ((SearchLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getResponseTime(), (et, vl) -> ((SearchLog) et).setResponseTime(DfTypeUtil.toLong(vl)),
-                "responseTime");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getQueryTime(), (et, vl) -> ((SearchLog) et).setQueryTime(DfTypeUtil.toLong(vl)),
-                "queryTime");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getSearchWord(), (et, vl) -> ((SearchLog) et).setSearchWord(DfTypeUtil.toString(vl)),
-                "searchWord");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getUserAgent(), (et, vl) -> ((SearchLog) et).setUserAgent(DfTypeUtil.toString(vl)),
-                "userAgent");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getUserInfoId(), (et, vl) -> ((SearchLog) et).setUserInfoId(DfTypeUtil.toString(vl)),
-                "userInfoId");
-        setupEpg(_epgMap, et -> ((SearchLog) et).getUserSessionId(),
-                (et, vl) -> ((SearchLog) et).setUserSessionId(DfTypeUtil.toString(vl)), "userSessionId");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getAccessType(),(et,vl)->((SearchLog) et).setAccessType(DfTypeUtil.toString(vl)), "accessType");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getUser(),(et,vl)->((SearchLog) et).setUser(DfTypeUtil.toString(vl)), "user");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getRoles(),(et,vl)->((SearchLog) et).setRoles((String[])vl), "roles");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getQueryId(),(et,vl)->((SearchLog) et).setQueryId(DfTypeUtil.toString(vl)), "queryId");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getClientIp(),(et,vl)->((SearchLog) et).setClientIp(DfTypeUtil.toString(vl)), "clientIp");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getHitCount(),(et,vl)->((SearchLog) et).setHitCount(DfTypeUtil.toLong(vl)), "hitCount");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getQueryOffset(),(et,vl)->((SearchLog) et).setQueryOffset(DfTypeUtil.toInteger(vl)), "queryOffset");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getQueryPageSize(),(et,vl)->((SearchLog) et).setQueryPageSize(DfTypeUtil.toInteger(vl)), "queryPageSize");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getReferer(),(et,vl)->((SearchLog) et).setReferer(DfTypeUtil.toString(vl)), "referer");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getRequestedAt(),(et,vl)->((SearchLog) et).setRequestedAt(DfTypeUtil.toLocalDateTime(vl)), "requestedAt");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getResponseTime(),(et,vl)->((SearchLog) et).setResponseTime(DfTypeUtil.toLong(vl)), "responseTime");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getQueryTime(),(et,vl)->((SearchLog) et).setQueryTime(DfTypeUtil.toLong(vl)), "queryTime");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getSearchWord(),(et,vl)->((SearchLog) et).setSearchWord(DfTypeUtil.toString(vl)), "searchWord");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getUserAgent(),(et,vl)->((SearchLog) et).setUserAgent(DfTypeUtil.toString(vl)), "userAgent");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getUserInfoId(),(et,vl)->((SearchLog) et).setUserInfoId(DfTypeUtil.toString(vl)), "userInfoId");
+        setupEpg(_epgMap, et-> ((SearchLog)et).getUserSessionId(),(et,vl)->((SearchLog) et).setUserSessionId(DfTypeUtil.toString(vl)), "userSessionId");
     }
 
     @Override
@@ -119,125 +109,50 @@ public class SearchLogDbm extends AbstractDBMeta {
     protected final String _tableDbName = "search_log";
     protected final String _tableDispName = "search_log";
     protected final String _tablePropertyName = "SearchLog";
-
-    public String getTableDbName() {
-        return _tableDbName;
-    }
-
+    public String getTableDbName() { return _tableDbName; }
     @Override
-    public String getTableDispName() {
-        return _tableDispName;
-    }
-
+    public String getTableDispName() { return _tableDispName; }
     @Override
-    public String getTablePropertyName() {
-        return _tablePropertyName;
-    }
-
+    public String getTablePropertyName() { return _tablePropertyName; }
     @Override
-    public TableSqlName getTableSqlName() {
-        return null;
-    }
+    public TableSqlName getTableSqlName() { return null; }
 
     // ===================================================================================
     //                                                                         Column Info
     //                                                                         ===========
-    protected final ColumnInfo _columnAccessType = cci("accessType", "accessType", null, null, String.class, "accessType", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUser = cci("user", "user", null, null, String.class, "user", null, false, false, false, "String", 0,
-            0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnClientIp = cci("clientIp", "clientIp", null, null, String.class, "clientIp", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnHitCount = cci("hitCount", "hitCount", null, null, Long.class, "hitCount", null, false, false, false,
-            "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryOffset = cci("queryOffset", "queryOffset", null, null, Integer.class, "queryOffset", null,
-            false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryPageSize = cci("queryPageSize", "queryPageSize", null, null, Integer.class, "queryPageSize",
-            null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnReferer = cci("referer", "referer", null, null, String.class, "referer", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null,
-            false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnResponseTime = cci("responseTime", "responseTime", null, null, Long.class, "responseTime", null,
-            false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnQueryTime = cci("queryTime", "queryTime", null, null, Long.class, "queryTime", null, false, false,
-            false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnSearchWord = cci("searchWord", "searchWord", null, null, String.class, "searchWord", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId",
-            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnAccessType = cci("accessType", "accessType", null, null, String.class, "accessType", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUser = cci("user", "user", null, null, String.class, "user", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRoles = cci("roles", "roles", null, null, String[].class, "roles", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryId = cci("queryId", "queryId", null, null, String.class, "queryId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnClientIp = cci("clientIp", "clientIp", null, null, String.class, "clientIp", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnHitCount = cci("hitCount", "hitCount", null, null, Long.class, "hitCount", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryOffset = cci("queryOffset", "queryOffset", null, null, Integer.class, "queryOffset", null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryPageSize = cci("queryPageSize", "queryPageSize", null, null, Integer.class, "queryPageSize", null, false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnReferer = cci("referer", "referer", null, null, String.class, "referer", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnRequestedAt = cci("requestedAt", "requestedAt", null, null, LocalDateTime.class, "requestedAt", null, false, false, false, "LocalDateTime", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnResponseTime = cci("responseTime", "responseTime", null, null, Long.class, "responseTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnQueryTime = cci("queryTime", "queryTime", null, null, Long.class, "queryTime", null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnSearchWord = cci("searchWord", "searchWord", null, null, String.class, "searchWord", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserInfoId = cci("userInfoId", "userInfoId", null, null, String.class, "userInfoId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnUserSessionId = cci("userSessionId", "userSessionId", null, null, String.class, "userSessionId", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
 
-    public ColumnInfo columnAccessType() {
-        return _columnAccessType;
-    }
-
-    public ColumnInfo columnUser() {
-        return _columnUser;
-    }
-
-    public ColumnInfo columnRoles() {
-        return _columnRoles;
-    }
-
-    public ColumnInfo columnQueryId() {
-        return _columnQueryId;
-    }
-
-    public ColumnInfo columnClientIp() {
-        return _columnClientIp;
-    }
-
-    public ColumnInfo columnHitCount() {
-        return _columnHitCount;
-    }
-
-    public ColumnInfo columnQueryOffset() {
-        return _columnQueryOffset;
-    }
-
-    public ColumnInfo columnQueryPageSize() {
-        return _columnQueryPageSize;
-    }
-
-    public ColumnInfo columnReferer() {
-        return _columnReferer;
-    }
-
-    public ColumnInfo columnRequestedAt() {
-        return _columnRequestedAt;
-    }
-
-    public ColumnInfo columnResponseTime() {
-        return _columnResponseTime;
-    }
-
-    public ColumnInfo columnQueryTime() {
-        return _columnQueryTime;
-    }
-
-    public ColumnInfo columnSearchWord() {
-        return _columnSearchWord;
-    }
-
-    public ColumnInfo columnUserAgent() {
-        return _columnUserAgent;
-    }
-
-    public ColumnInfo columnUserInfoId() {
-        return _columnUserInfoId;
-    }
-
-    public ColumnInfo columnUserSessionId() {
-        return _columnUserSessionId;
-    }
+    public ColumnInfo columnAccessType() { return _columnAccessType; }
+    public ColumnInfo columnUser() { return _columnUser; }
+    public ColumnInfo columnRoles() { return _columnRoles; }
+    public ColumnInfo columnQueryId() { return _columnQueryId; }
+    public ColumnInfo columnClientIp() { return _columnClientIp; }
+    public ColumnInfo columnHitCount() { return _columnHitCount; }
+    public ColumnInfo columnQueryOffset() { return _columnQueryOffset; }
+    public ColumnInfo columnQueryPageSize() { return _columnQueryPageSize; }
+    public ColumnInfo columnReferer() { return _columnReferer; }
+    public ColumnInfo columnRequestedAt() { return _columnRequestedAt; }
+    public ColumnInfo columnResponseTime() { return _columnResponseTime; }
+    public ColumnInfo columnQueryTime() { return _columnQueryTime; }
+    public ColumnInfo columnSearchWord() { return _columnSearchWord; }
+    public ColumnInfo columnUserAgent() { return _columnUserAgent; }
+    public ColumnInfo columnUserInfoId() { return _columnUserInfoId; }
+    public ColumnInfo columnUserSessionId() { return _columnUserSessionId; }
 
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
@@ -333,3 +248,4 @@ public class SearchLogDbm extends AbstractDBMeta {
         return null;
     }
 }
+

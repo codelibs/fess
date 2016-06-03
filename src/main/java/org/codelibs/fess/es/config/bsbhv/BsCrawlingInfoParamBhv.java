@@ -169,7 +169,7 @@ public abstract class BsCrawlingInfoParamBhv extends EsAbstractBehavior<Crawling
     }
 
     public void selectBulk(CBCall<CrawlingInfoParamCB> cbLambda, EntityRowHandler<List<CrawlingInfoParam>> entityLambda) {
-        delegateSelectBulk(createCB(cbLambda), entityLambda, typeOfSelectedEntity());
+        delegateSelectBulk(createCB(cbLambda), entityLambda,typeOfSelectedEntity());
     }
 
     // ===================================================================================
@@ -264,3 +264,4 @@ public abstract class BsCrawlingInfoParamBhv extends EsAbstractBehavior<Crawling
 
     // #pending create, modify, remove
 }
+

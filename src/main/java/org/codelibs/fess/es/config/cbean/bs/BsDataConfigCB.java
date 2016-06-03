@@ -75,7 +75,7 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,47 +161,36 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
         public void columnAvailable() {
             doColumn("available");
         }
-
         public void columnBoost() {
             doColumn("boost");
         }
-
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
-
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-
         public void columnHandlerName() {
             doColumn("handlerName");
         }
-
         public void columnHandlerParameter() {
             doColumn("handlerParameter");
         }
-
         public void columnHandlerScript() {
             doColumn("handlerScript");
         }
-
         public void columnName() {
             doColumn("name");
         }
-
         public void columnPermissions() {
             doColumn("permissions");
         }
-
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
-
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }

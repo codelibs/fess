@@ -75,7 +75,7 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
 
     @Override
     public void acceptPrimaryKeyMap(Map<String, ? extends Object> primaryKeyMap) {
-        acceptPK((String) primaryKeyMap.get("_id"));
+        acceptPK((String)primaryKeyMap.get("_id"));
     }
 
     // ===================================================================================
@@ -161,51 +161,39 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
         public void columnAvailable() {
             doColumn("available");
         }
-
         public void columnCrawler() {
             doColumn("crawler");
         }
-
         public void columnCreatedBy() {
             doColumn("createdBy");
         }
-
         public void columnCreatedTime() {
             doColumn("createdTime");
         }
-
         public void columnCronExpression() {
             doColumn("cronExpression");
         }
-
         public void columnJobLogging() {
             doColumn("jobLogging");
         }
-
         public void columnName() {
             doColumn("name");
         }
-
         public void columnScriptData() {
             doColumn("scriptData");
         }
-
         public void columnScriptType() {
             doColumn("scriptType");
         }
-
         public void columnSortOrder() {
             doColumn("sortOrder");
         }
-
         public void columnTarget() {
             doColumn("target");
         }
-
         public void columnUpdatedBy() {
             doColumn("updatedBy");
         }
-
         public void columnUpdatedTime() {
             doColumn("updatedTime");
         }
