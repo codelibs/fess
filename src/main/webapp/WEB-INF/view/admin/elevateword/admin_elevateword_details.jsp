@@ -101,8 +101,8 @@
 											</tr>
 											<tr>
 												<th><la:message key="labels.elevate_word_target_role" /></th>
-												<td>${f:br(f:h(permissions))}<la:hidden
-														property="permissions" /></td>
+												<td>${f:br(f:h(targetRole))}<la:hidden
+														property="targetRole" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.label_type" /></th>

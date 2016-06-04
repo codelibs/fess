@@ -49,8 +49,8 @@ public class BsBadWord extends EsAbstractEntity {
     /** targetLabel */
     protected String targetLabel;
 
-    /** permissions */
-    protected String permissions;
+    /** targetRole */
+    protected String targetRole;
 
     /** updatedBy */
     protected String updatedBy;
@@ -91,8 +91,8 @@ public class BsBadWord extends EsAbstractEntity {
         if (targetLabel != null) {
             sourceMap.put("targetLabel", targetLabel);
         }
-        if (permissions != null) {
-            sourceMap.put("permissions", permissions);
+        if (targetRole != null) {
+            sourceMap.put("targetRole", targetRole);
         }
         if (updatedBy != null) {
             sourceMap.put("updatedBy", updatedBy);
@@ -113,7 +113,7 @@ public class BsBadWord extends EsAbstractEntity {
         sb.append(dm).append(createdTime);
         sb.append(dm).append(suggestWord);
         sb.append(dm).append(targetLabel);
-        sb.append(dm).append(permissions);
+        sb.append(dm).append(targetRole);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         if (sb.length() > dm.length()) {
@@ -166,14 +166,14 @@ public class BsBadWord extends EsAbstractEntity {
         this.targetLabel = value;
     }
 
-    public String getPermissions() {
-        checkSpecifiedProperty("permissions");
-        return convertEmptyToNull(permissions);
+    public String getTargetRole() {
+        checkSpecifiedProperty("targetRole");
+        return convertEmptyToNull(targetRole);
     }
 
-    public void setPermissions(String value) {
-        registerModifiedProperty("permissions");
-        this.permissions = value;
+    public void setTargetRole(String value) {
+        registerModifiedProperty("targetRole");
+        this.targetRole = value;
     }
 
     public String getUpdatedBy() {

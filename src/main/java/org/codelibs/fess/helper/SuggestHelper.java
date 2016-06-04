@@ -197,7 +197,7 @@ public class SuggestHelper {
 
         for (final ElevateWord elevateWord : list) {
             addElevateWord(elevateWord.getSuggestWord(), elevateWord.getReading(), elevateWord.getLabelTypeValues(),
-                    elevateWord.getPermissions(), elevateWord.getBoost(), false);
+                    elevateWord.getTargetRole(), elevateWord.getBoost(), false);
         }
         suggester.refresh();
     }

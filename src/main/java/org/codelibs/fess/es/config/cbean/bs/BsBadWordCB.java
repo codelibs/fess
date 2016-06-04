@@ -174,8 +174,8 @@ public class BsBadWordCB extends EsAbstractConditionBean {
             doColumn("targetLabel");
         }
 
-        public void columnPermissions() {
-            doColumn("permissions");
+        public void columnTargetRole() {
+            doColumn("targetRole");
         }
 
         public void columnUpdatedBy() {
