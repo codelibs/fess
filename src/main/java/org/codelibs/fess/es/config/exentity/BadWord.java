@@ -43,7 +43,7 @@ public class BadWord extends BsBadWord {
     @Override
     public String toString() {
         return "BadWord [createdBy=" + createdBy + ", createdTime=" + createdTime + ", suggestWord=" + suggestWord + ", targetLabel="
-                + targetLabel + ", targetRole=" + targetRole + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta="
+                + targetLabel + ", permissions=" + permissions + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta="
                 + docMeta + "]";
     }
 }

@@ -90,8 +90,8 @@ public class ElevateWordDbm extends AbstractDBMeta {
                 (et, vl) -> ((ElevateWord) et).setSuggestWord(DfTypeUtil.toString(vl)), "suggestWord");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getTargetLabel(),
                 (et, vl) -> ((ElevateWord) et).setTargetLabel(DfTypeUtil.toString(vl)), "targetLabel");
-        setupEpg(_epgMap, et -> ((ElevateWord) et).getTargetRole(), (et, vl) -> ((ElevateWord) et).setTargetRole(DfTypeUtil.toString(vl)),
-                "targetRole");
+        setupEpg(_epgMap, et -> ((ElevateWord) et).getPermissions(),
+                (et, vl) -> ((ElevateWord) et).setPermissions(DfTypeUtil.toString(vl)), "permissions");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedBy(), (et, vl) -> ((ElevateWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((ElevateWord) et).getUpdatedTime(), (et, vl) -> ((ElevateWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
@@ -144,7 +144,7 @@ public class ElevateWordDbm extends AbstractDBMeta {
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String.class, "permissions", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
@@ -175,8 +175,8 @@ public class ElevateWordDbm extends AbstractDBMeta {
         return _columnTargetLabel;
     }
 
-    public ColumnInfo columnTargetRole() {
-        return _columnTargetRole;
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
     }
 
     public ColumnInfo columnUpdatedBy() {
@@ -195,7 +195,7 @@ public class ElevateWordDbm extends AbstractDBMeta {
         ls.add(columnReading());
         ls.add(columnSuggestWord());
         ls.add(columnTargetLabel());
-        ls.add(columnTargetRole());
+        ls.add(columnPermissions());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
         return ls;

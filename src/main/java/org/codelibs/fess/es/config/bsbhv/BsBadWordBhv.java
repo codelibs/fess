@@ -78,7 +78,7 @@ public abstract class BsBadWordBhv extends EsAbstractBehavior<BadWord, BadWordCB
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
             result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));
-            result.setTargetRole(DfTypeUtil.toString(source.get("targetRole")));
+            result.setPermissions(DfTypeUtil.toString(source.get("permissions")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;

@@ -87,8 +87,8 @@ public class BadWordDbm extends AbstractDBMeta {
                 "suggestWord");
         setupEpg(_epgMap, et -> ((BadWord) et).getTargetLabel(), (et, vl) -> ((BadWord) et).setTargetLabel(DfTypeUtil.toString(vl)),
                 "targetLabel");
-        setupEpg(_epgMap, et -> ((BadWord) et).getTargetRole(), (et, vl) -> ((BadWord) et).setTargetRole(DfTypeUtil.toString(vl)),
-                "targetRole");
+        setupEpg(_epgMap, et -> ((BadWord) et).getPermissions(), (et, vl) -> ((BadWord) et).setPermissions(DfTypeUtil.toString(vl)),
+                "permissions");
         setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedBy(), (et, vl) -> ((BadWord) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
         setupEpg(_epgMap, et -> ((BadWord) et).getUpdatedTime(), (et, vl) -> ((BadWord) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
@@ -137,7 +137,7 @@ public class BadWordDbm extends AbstractDBMeta {
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTargetLabel = cci("targetLabel", "targetLabel", null, null, String.class, "targetLabel", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnTargetRole = cci("targetRole", "targetRole", null, null, String.class, "targetRole", null, false,
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String.class, "permissions", null, false,
             false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
@@ -160,8 +160,8 @@ public class BadWordDbm extends AbstractDBMeta {
         return _columnTargetLabel;
     }
 
-    public ColumnInfo columnTargetRole() {
-        return _columnTargetRole;
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
     }
 
     public ColumnInfo columnUpdatedBy() {
@@ -178,7 +178,7 @@ public class BadWordDbm extends AbstractDBMeta {
         ls.add(columnCreatedTime());
         ls.add(columnSuggestWord());
         ls.add(columnTargetLabel());
-        ls.add(columnTargetRole());
+        ls.add(columnPermissions());
         ls.add(columnUpdatedBy());
         ls.add(columnUpdatedTime());
         return ls;

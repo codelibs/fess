@@ -96,14 +96,13 @@
 														property="suggestWord" /></td>
 											</tr>
 											<tr>
-												<th><la:message
-														key="labels.elevate_word_reading" /></th>
+												<th><la:message key="labels.elevate_word_reading" /></th>
 												<td>${f:h(reading)}<la:hidden property="reading" /></td>
 											</tr>
 											<tr>
-												<th><la:message
-														key="labels.elevate_word_target_role" /></th>
-												<td>${f:h(targetRole)}<la:hidden property="targetRole" /></td>
+												<th><la:message key="labels.elevate_word_target_role" /></th>
+												<td>${f:br(f:h(permissions))}<la:hidden
+														property="permissions" /></td>
 											</tr>
 											<tr>
 												<th><la:message key="labels.label_type" /></th>

@@ -1149,169 +1149,169 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
         return this;
     }
 
-    public void setTargetRole_Equal(String targetRole) {
-        setTargetRole_Term(targetRole, null);
+    public void setPermissions_Equal(String permissions) {
+        setPermissions_Term(permissions, null);
     }
 
-    public void setTargetRole_Equal(String targetRole, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        setTargetRole_Term(targetRole, opLambda);
+    public void setPermissions_Equal(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setPermissions_Term(permissions, opLambda);
     }
 
-    public void setTargetRole_Term(String targetRole) {
-        setTargetRole_Term(targetRole, null);
+    public void setPermissions_Term(String permissions) {
+        setPermissions_Term(permissions, null);
     }
 
-    public void setTargetRole_Term(String targetRole, ConditionOptionCall<TermQueryBuilder> opLambda) {
-        TermQueryBuilder builder = regTermQ("targetRole", targetRole);
+    public void setPermissions_Term(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_NotEqual(String targetRole) {
-        setTargetRole_NotTerm(targetRole, null);
+    public void setPermissions_NotEqual(String permissions) {
+        setPermissions_NotTerm(permissions, null);
     }
 
-    public void setTargetRole_NotEqual(String targetRole, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTargetRole_NotTerm(targetRole, opLambda);
+    public void setPermissions_NotEqual(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        setPermissions_NotTerm(permissions, opLambda);
     }
 
-    public void setTargetRole_NotTerm(String targetRole) {
-        setTargetRole_NotTerm(targetRole, null);
+    public void setPermissions_NotTerm(String permissions) {
+        setPermissions_NotTerm(permissions, null);
     }
 
-    public void setTargetRole_NotTerm(String targetRole, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("targetRole", targetRole));
+    public void setPermissions_NotTerm(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
+        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("permissions", permissions));
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_Terms(Collection<String> targetRoleList) {
-        setTargetRole_Terms(targetRoleList, null);
+    public void setPermissions_Terms(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
     }
 
-    public void setTargetRole_Terms(Collection<String> targetRoleList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        TermsQueryBuilder builder = regTermsQ("targetRole", targetRoleList);
+    public void setPermissions_Terms(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("permissions", permissionsList);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_InScope(Collection<String> targetRoleList) {
-        setTargetRole_Terms(targetRoleList, null);
+    public void setPermissions_InScope(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
     }
 
-    public void setTargetRole_InScope(Collection<String> targetRoleList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
-        setTargetRole_Terms(targetRoleList, opLambda);
+    public void setPermissions_InScope(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setPermissions_Terms(permissionsList, opLambda);
     }
 
-    public void setTargetRole_Match(String targetRole) {
-        setTargetRole_Match(targetRole, null);
+    public void setPermissions_Match(String permissions) {
+        setPermissions_Match(permissions, null);
     }
 
-    public void setTargetRole_Match(String targetRole, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchQ("targetRole", targetRole);
+    public void setPermissions_Match(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_MatchPhrase(String targetRole) {
-        setTargetRole_MatchPhrase(targetRole, null);
+    public void setPermissions_MatchPhrase(String permissions) {
+        setPermissions_MatchPhrase(permissions, null);
     }
 
-    public void setTargetRole_MatchPhrase(String targetRole, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("targetRole", targetRole);
+    public void setPermissions_MatchPhrase(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_MatchPhrasePrefix(String targetRole) {
-        setTargetRole_MatchPhrasePrefix(targetRole, null);
+    public void setPermissions_MatchPhrasePrefix(String permissions) {
+        setPermissions_MatchPhrasePrefix(permissions, null);
     }
 
-    public void setTargetRole_MatchPhrasePrefix(String targetRole, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("targetRole", targetRole);
+    public void setPermissions_MatchPhrasePrefix(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_Fuzzy(String targetRole) {
-        setTargetRole_Fuzzy(targetRole, null);
+    public void setPermissions_Fuzzy(String permissions) {
+        setPermissions_Fuzzy(permissions, null);
     }
 
-    public void setTargetRole_Fuzzy(String targetRole, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("targetRole", targetRole);
+    public void setPermissions_Fuzzy(String permissions, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_Prefix(String targetRole) {
-        setTargetRole_Prefix(targetRole, null);
+    public void setPermissions_Prefix(String permissions) {
+        setPermissions_Prefix(permissions, null);
     }
 
-    public void setTargetRole_Prefix(String targetRole, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
-        PrefixQueryBuilder builder = regPrefixQ("targetRole", targetRole);
+    public void setPermissions_Prefix(String permissions, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_GreaterThan(String targetRole) {
-        setTargetRole_GreaterThan(targetRole, null);
+    public void setPermissions_GreaterThan(String permissions) {
+        setPermissions_GreaterThan(permissions, null);
     }
 
-    public void setTargetRole_GreaterThan(String targetRole, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("targetRole", ConditionKey.CK_GREATER_THAN, targetRole);
+    public void setPermissions_GreaterThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_THAN, permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_LessThan(String targetRole) {
-        setTargetRole_LessThan(targetRole, null);
+    public void setPermissions_LessThan(String permissions) {
+        setPermissions_LessThan(permissions, null);
     }
 
-    public void setTargetRole_LessThan(String targetRole, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("targetRole", ConditionKey.CK_LESS_THAN, targetRole);
+    public void setPermissions_LessThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_THAN, permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_GreaterEqual(String targetRole) {
-        setTargetRole_GreaterEqual(targetRole, null);
+    public void setPermissions_GreaterEqual(String permissions) {
+        setPermissions_GreaterEqual(permissions, null);
     }
 
-    public void setTargetRole_GreaterEqual(String targetRole, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("targetRole", ConditionKey.CK_GREATER_EQUAL, targetRole);
+    public void setPermissions_GreaterEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_EQUAL, permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void setTargetRole_LessEqual(String targetRole) {
-        setTargetRole_LessEqual(targetRole, null);
+    public void setPermissions_LessEqual(String permissions) {
+        setPermissions_LessEqual(permissions, null);
     }
 
-    public void setTargetRole_LessEqual(String targetRole, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("targetRole", ConditionKey.CK_LESS_EQUAL, targetRole);
+    public void setPermissions_LessEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_EQUAL, permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public BsElevateWordCQ addOrderBy_TargetRole_Asc() {
-        regOBA("targetRole");
+    public BsElevateWordCQ addOrderBy_Permissions_Asc() {
+        regOBA("permissions");
         return this;
     }
 
-    public BsElevateWordCQ addOrderBy_TargetRole_Desc() {
-        regOBD("targetRole");
+    public BsElevateWordCQ addOrderBy_Permissions_Desc() {
+        regOBD("permissions");
         return this;
     }
 

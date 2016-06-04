@@ -416,7 +416,7 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
-          "targetRole" : {
+          "permissions" : {
             "type" : "string",
             "index" : "not_analyzed"
           },
@@ -677,7 +677,7 @@
             "type" : "string",
             "index" : "not_analyzed"
           },
-          "targetRole" : {
+          "permissions" : {
             "type" : "string",
             "index" : "not_analyzed"
           },

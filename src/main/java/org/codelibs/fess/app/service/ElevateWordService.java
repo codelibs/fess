@@ -192,7 +192,7 @@ public class ElevateWordService implements Serializable {
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(suggestWord);
                         if (StringUtil.isNotBlank(role)) {
-                            cb.query().setTargetRole_Equal(role);
+                            cb.query().setPermissions_Equal(role);
                         }
                         if (StringUtil.isNotBlank(label)) {
                             cb.query().setTargetLabel_Equal(label);
@@ -205,7 +205,7 @@ public class ElevateWordService implements Serializable {
                         elevateWord = new ElevateWord();
                         elevateWord.setSuggestWord(suggestWord);
                         elevateWord.setReading(reading);
-                        elevateWord.setTargetRole(role);
+                        elevateWord.setPermissions(role);
                         elevateWord.setTargetLabel(label);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setCreatedBy("system");
@@ -252,7 +252,7 @@ public class ElevateWordService implements Serializable {
                     final List<String> list = new ArrayList<>();
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
-                    addToList(list, entity.getTargetRole());
+                    addToList(list, entity.getPermissions());
                     addToList(list, entity.getTargetLabel());
                     addToList(list, entity.getBoost());
                     try {

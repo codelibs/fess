@@ -41,9 +41,10 @@ public class CreateForm implements Serializable {
 
     public String reading;
 
-    public String targetRole;
-
     public String targetLabel;
+
+    @Size(max = 4000)
+    public String permissions;
 
     @Required
     @ValidateTypeFailure
@@ -61,5 +62,6 @@ public class CreateForm implements Serializable {
         boost = 100.0f;
         createdBy = ComponentUtil.getSystemHelper().getUsername();
         createdTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+        permissions = ComponentUtil.getFessConfig().getSearchDefaultDisplayPermission();
     }
 }

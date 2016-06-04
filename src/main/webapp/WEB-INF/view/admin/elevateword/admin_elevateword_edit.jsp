@@ -102,11 +102,11 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="targetRole" class="col-sm-3 control-label"><la:message
+										<label for="permissions" class="col-sm-3 control-label"><la:message
 												key="labels.elevate_word_target_role" /></label>
 										<div class="col-sm-9">
-											<la:errors property="targetRole" />
-											<la:text property="targetRole" styleClass="form-control" />
+											<la:errors property="permissions" />
+											<la:text property="permissions" styleClass="form-control" />
 										</div>
 									</div>
 									<div class="form-group">

@@ -182,8 +182,8 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
             doColumn("targetLabel");
         }
 
-        public void columnTargetRole() {
-            doColumn("targetRole");
+        public void columnPermissions() {
+            doColumn("permissions");
         }
 
         public void columnUpdatedBy() {
