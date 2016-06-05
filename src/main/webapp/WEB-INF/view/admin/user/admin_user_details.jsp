@@ -62,6 +62,7 @@
 												<th class="col-xs-2"><la:message key="labels.user_mail" /></th>
 												<td>${f:h(mail)}<la:hidden property="mail" /></td>
 											</tr>
+											<c:if test="${ldapAdminEnabled}">
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.user_employeeNumber" /></th>
 												<td>${f:h(employeeNumber)}<la:hidden property="employeeNumber" /></td>
@@ -194,6 +195,7 @@
 												<th class="col-xs-2"><la:message key="labels.user_homeDirectory" /></th>
 												<td>${f:h(homeDirectory)}<la:hidden property="homeDirectory" /></td>
 											</tr>
+											</c:if>
 											<tr>
 												<th><la:message key="labels.roles" /></th>
 												<td><c:forEach var="rt" varStatus="s"
