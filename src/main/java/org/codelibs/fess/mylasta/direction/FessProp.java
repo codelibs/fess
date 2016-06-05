@@ -48,6 +48,8 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public interface FessProp {
 
+    public static final String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
+
     public static final String SEARCH_GUEST_PERMISSION_LIST = "searchGuestPermissionList";
 
     public static final String SUGGEST_SEARCH_LOG_PERMISSIONS = "suggestSearchLogPermissions";
@@ -487,7 +489,12 @@ public interface FessProp {
     String getAuthenticationAdminRoles();
 
     public default String[] getAuthenticationAdminRolesAsArray() {
-        return getAuthenticationAdminRoles().split(",");
+        String[] roles = (String[]) propMap.get(AUTHENTICATION_ADMIN_ROLES);
+        if (roles == null) {
+            roles = getAuthenticationAdminRoles().split(",");
+            propMap.put(AUTHENTICATION_ADMIN_ROLES, roles);
+        }
+        return roles;
     }
 
     String getJvmCrawlerOptions();
