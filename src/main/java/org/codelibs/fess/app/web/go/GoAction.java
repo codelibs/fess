@@ -135,7 +135,7 @@ public class GoAction extends FessSearchAction {
 
         final String targetUrl = pathMappingHelper.replaceUrl(url);
         if (isFileSystemPath(targetUrl)) {
-            if (Constants.TRUE.equals(systemProperties.getProperty(Constants.SEARCH_FILE_PROXY_PROPERTY, Constants.TRUE))) {
+            if (fessConfig.isSearchFileProxyEnabled()) {
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
                     return viewHelper.asContentResponse(doc);

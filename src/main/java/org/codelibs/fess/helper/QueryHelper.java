@@ -49,7 +49,6 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -79,9 +78,6 @@ public class QueryHelper implements Serializable {
     protected static final String SCORE_FIELD = "score";
 
     protected static final String INURL_FIELD = "inurl";
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Resource
     protected FessConfig fessConfig;

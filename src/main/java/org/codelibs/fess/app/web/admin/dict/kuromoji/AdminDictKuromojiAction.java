@@ -23,7 +23,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.KuromojiPager;
 import org.codelibs.fess.app.service.KuromojiService;
@@ -53,8 +52,6 @@ public class AdminDictKuromojiAction extends FessAdminAction {
     private KuromojiService kuromojiService;
     @Resource
     private KuromojiPager kuromojiPager;
-    @Resource
-    protected DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook

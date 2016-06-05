@@ -27,7 +27,6 @@ import java.nio.file.Path;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
@@ -58,8 +57,6 @@ public class AdminElevatewordAction extends FessAdminAction {
     private ElevateWordService elevateWordService;
     @Resource
     private ElevateWordPager elevateWordPager;
-    @Resource
-    protected DynamicProperties systemProperties;
     @Resource
     protected SuggestHelper suggestHelper;
     @Resource

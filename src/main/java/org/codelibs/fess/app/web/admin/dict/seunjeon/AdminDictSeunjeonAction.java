@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SeunjeonPager;
 import org.codelibs.fess.app.service.SeunjeonService;
@@ -56,8 +55,6 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
     private SeunjeonService seunjeonService;
     @Resource
     private SeunjeonPager seunjeonPager;
-    @Resource
-    protected DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook

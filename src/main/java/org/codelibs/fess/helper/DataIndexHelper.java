@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.DataConfigService;
 import org.codelibs.fess.app.service.FailureUrlService;
@@ -47,9 +46,6 @@ public class DataIndexHelper implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(DataIndexHelper.class);
 
     private static final String DELETE_OLD_DOCS = "delete_old_docs";
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Resource
     public DataConfigService dataConfigService;

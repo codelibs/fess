@@ -25,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 import org.codelibs.core.io.FileUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
@@ -39,9 +37,6 @@ import org.slf4j.LoggerFactory;
 
 public class DictionaryManager {
     private static final Logger logger = LoggerFactory.getLogger(DictionaryManager.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     protected List<DictionaryCreator> creatorList = new ArrayList<>();
 

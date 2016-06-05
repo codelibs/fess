@@ -27,7 +27,6 @@ import java.nio.file.Path;
 
 import javax.annotation.Resource;
 
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
 import org.codelibs.fess.app.service.BadWordService;
@@ -57,8 +56,6 @@ public class AdminBadwordAction extends FessAdminAction {
     private BadWordService badWordService;
     @Resource
     private BadWordPager badWordPager;
-    @Resource
-    protected DynamicProperties systemProperties;
     @Resource
     protected SuggestHelper suggestHelper;
 

@@ -173,7 +173,7 @@ public class AdminWizardAction extends FessAdminAction {
                 wConfig.setUpdatedTime(now);
                 wConfig.setUrls(configPath);
                 wConfig.setUserAgent(getDefaultString("default.config.web.userAgent", ComponentUtil.getUserAgentName()));
-                wConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray());
+                wConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultDisplayEncodedPermissions());
 
                 webConfigService.store(wConfig);
 
@@ -201,7 +201,7 @@ public class AdminWizardAction extends FessAdminAction {
                 fConfig.setUpdatedBy(username);
                 fConfig.setUpdatedTime(now);
                 fConfig.setPaths(configPath);
-                fConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultPermissionsAsArray());
+                fConfig.setPermissions(ComponentUtil.getFessConfig().getSearchDefaultDisplayEncodedPermissions());
 
                 fileConfigService.store(fConfig);
             }

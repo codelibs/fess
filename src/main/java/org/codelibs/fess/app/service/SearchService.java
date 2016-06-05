@@ -29,7 +29,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.QueryContext;
 import org.codelibs.fess.entity.SearchRenderData;
@@ -64,8 +63,6 @@ public class SearchService {
     // ===================================================================================
     //                                                                           Attribute
     //
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -196,7 +193,7 @@ public class SearchService {
                 langSet.remove(Constants.ALL_LANGUAGES);
             }
             return langSet.toArray(new String[langSet.size()]);
-        } else if (Constants.TRUE.equals(systemProperties.getProperty(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, Constants.FALSE))) {
+        } else if (fessConfig.isBrowserLocaleForSearchUsed()) {
             final Set<String> langSet = new HashSet<>();
             final Enumeration<Locale> locales = request.getLocales();
             if (locales != null) {

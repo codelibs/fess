@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -76,8 +75,6 @@ public class SuggestHelper {
 
     private List<String> contentFieldList;
 
-    private final List<Pattern> roleFilterList = new ArrayList<>();
-
     @PostConstruct
     public void init() {
         fessConfig = ComponentUtil.getFessConfig();
@@ -88,9 +85,6 @@ public class SuggestHelper {
         split(fessConfig.getSuggestFieldRoles(), ",").of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> roleFieldNameSet.add(f)));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
-        split(fessConfig.getSuggestRoleFilters(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(filter -> {
-            roleFilterList.add(Pattern.compile(filter));
-        }));
 
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
@@ -136,7 +130,7 @@ public class SuggestHelper {
 
                     if (sb.length() > 0) {
                         stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
-                        if (roles.stream().allMatch(v -> roleFilterList.stream().anyMatch(pattern -> pattern.matcher(v).matches()))) {
+                        if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
                                     tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
                         }
