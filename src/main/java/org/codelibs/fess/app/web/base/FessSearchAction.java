@@ -116,7 +116,9 @@ public abstract class FessSearchAction extends FessBaseAction {
             locale = Locale.ENGLISH;
         }
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
-        runtime.registerData("username", systemHelper.getUsername());
+        String username = systemHelper.getUsername();
+        runtime.registerData("username", username);
+        runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
         runtime.registerData("pageLoginLink", fessConfig.isPageLoginLink());
     }
