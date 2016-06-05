@@ -141,12 +141,16 @@ public class SuggestHelper {
 
     public void indexFromDocuments(final Consumer<Boolean> success, final Consumer<Throwable> error) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final ESSourceReader reader =
-                new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
-                        fessConfig.getIndexDocumentType());
-        reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger().intValue());
-        suggester.indexer().indexFromDocument(reader, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue())
-                .then(response -> {
+        suggester
+                .indexer()
+                .indexFromDocument(
+                        () -> {
+                            final ESSourceReader reader =
+                                    new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
+                                            fessConfig.getIndexDocumentType());
+                            reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger().intValue());
+                            return reader;
+                        }, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue()).then(response -> {
                     suggester.refresh();
                     success.accept(true);
                 }).error(t -> error.accept(t));
