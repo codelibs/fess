@@ -39,6 +39,8 @@ import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
+import org.codelibs.fess.es.user.exbhv.RoleBhv;
+import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
@@ -62,6 +64,9 @@ public class AdminUpgradeAction extends FessAdminAction {
     //
     @Resource
     protected FessConfig fessConfig;
+
+    @Resource
+    protected RoleBhv roleBhv;
 
     @Resource
     protected RoleTypeBhv roleTypeBhv;
@@ -330,7 +335,15 @@ public class AdminUpgradeAction extends FessAdminAction {
                                     dataConfigToRoleBhv.queryDelete(cb -> cb.query().setDataConfigId_Equal(dataConfigTypeId));
                                 });
                     });
+
             roleTypeBhv.queryDelete(cb -> {});
+
+            roleBhv.selectEntity(cb -> cb.query().setName_Equal("guest")).orElseGet(() -> {
+                Role entity = new Role();
+                entity.setName("guest");
+                roleBhv.insert(entity);
+                return entity;
+            });
 
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
         } catch (final Exception e) {
@@ -385,10 +398,14 @@ public class AdminUpgradeAction extends FessAdminAction {
         final GetFieldMappingsResponse gfmResponse =
                 indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
         if (gfmResponse.fieldMappings(index, type, field).isNull()) {
-            final PutMappingResponse pmResponse =
-                    indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
-            if (!pmResponse.isAcknowledged()) {
-                logger.warn("Failed to add " + field + " to " + index + "/" + type);
+            try {
+                final PutMappingResponse pmResponse =
+                        indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();
+                if (!pmResponse.isAcknowledged()) {
+                    logger.warn("Failed to add " + field + " to " + index + "/" + type);
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
             }
         }
     }
