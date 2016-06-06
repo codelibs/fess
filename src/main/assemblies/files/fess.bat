@@ -1,7 +1,7 @@
 @echo off
 
 SETLOCAL enabledelayedexpansion
-TITLE Fess 10.0.0-SNAPSHOT
+TITLE Fess
 
 SET params='%*'
 
