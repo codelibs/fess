@@ -23,13 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.io.FileUtils;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.exception.FessSystemException;
@@ -54,8 +51,6 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    @Resource
-    private DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook
@@ -81,7 +76,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
     }
 
     private boolean editable() {
-        return Constants.TRUE.equals(systemProperties.getProperty(Constants.WEB_DESIGN_EDITOR_PROPERTY, Constants.TRUE));
+        return fessConfig.isWebDesignEditorEnabled();
     }
 
     private List<String> loadFileNameItems() {

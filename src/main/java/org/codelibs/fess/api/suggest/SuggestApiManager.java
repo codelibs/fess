@@ -19,7 +19,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
 
-import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.json.JsonApiManager;
 import org.codelibs.fess.helper.RoleQueryHelper;
@@ -41,9 +39,6 @@ import org.slf4j.LoggerFactory;
 
 public class SuggestApiManager extends BaseApiManager {
     private static final Logger logger = LoggerFactory.getLogger(SuggestApiManager.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     public SuggestApiManager() {
         setPathPrefix("/suggest");

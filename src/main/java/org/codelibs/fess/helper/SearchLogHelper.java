@@ -26,13 +26,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
@@ -58,9 +56,6 @@ import org.slf4j.LoggerFactory;
 
 public class SearchLogHelper {
     private static final Logger logger = LoggerFactory.getLogger(SearchLogHelper.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     public long userCheckInterval = 5 * 60 * 1000L;// 5 min
 
@@ -190,7 +185,8 @@ public class SearchLogHelper {
     }
 
     protected void processSearchLogQueue(final Queue<SearchLog> queue) {
-        final String value = ComponentUtil.getFessConfig().getPurgeByBots();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String value = fessConfig.getPurgeByBots();
         String[] botNames;
         if (StringUtil.isBlank(value)) {
             botNames = StringUtil.EMPTY_STRINGS;
@@ -245,8 +241,10 @@ public class SearchLogHelper {
 
         if (!searchLogList.isEmpty()) {
             storeSearchLogList(searchLogList);
-            final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
-            suggestHelper.indexFromSearchLog(searchLogList);
+            if (fessConfig.isSuggestSearchLog()) {
+                final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
+                suggestHelper.indexFromSearchLog(searchLogList);
+            }
         }
     }
 

@@ -20,6 +20,7 @@
 		<!-- Navbar Right Menu -->
 		<div class="navbar-custom-menu">
 			<ul class="nav navbar-nav">
+				<li><a href="${contextPath}/"><i class="fa fa-list-alt"></i></a></li>
 				<li><a
 					href="${contextPath}/admin/scheduler/details/4/default_crawler"><i
 						class="fa fa-play-circle"></i></a></li>

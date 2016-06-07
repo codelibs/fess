@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.SynonymPager;
 import org.codelibs.fess.app.service.SynonymService;
@@ -56,8 +55,6 @@ public class AdminDictSynonymAction extends FessAdminAction {
     private SynonymService synonymService;
     @Resource
     private SynonymPager synonymPager;
-    @Resource
-    protected DynamicProperties systemProperties;
 
     // ===================================================================================
     //                                                                               Hook

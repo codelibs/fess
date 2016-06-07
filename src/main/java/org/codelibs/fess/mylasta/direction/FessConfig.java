@@ -457,8 +457,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_ROLES = "authentication.admin.roles";
 
-    /** The key of the configuration. e.g. {role}guest */
+    /** The key of the configuration. e.g.  */
     String ROLE_SEARCH_DEFAULT_PERMISSIONS = "role.search.default.permissions";
+
+    /** The key of the configuration. e.g. {role}guest */
+    String ROLE_SEARCH_DEFAULT_DISPLAY_PERMISSIONS = "role.search.default.display.permissions";
+
+    /** The key of the configuration. e.g. {role}guest */
+    String ROLE_SEARCH_GUEST_PERMISSIONS = "role.search.guest.permissions";
 
     /** The key of the configuration. e.g. 1 */
     String ROLE_SEARCH_USER_PREFIX = "role.search.user.prefix";
@@ -739,8 +745,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 60 */
     String SUGGEST_POPULAR_WORD_CACHE_EXPIRE = "suggest.popular.word.cache.expire";
 
-    /** The key of the configuration. e.g. Rguest */
-    String SUGGEST_ROLE_FILTERS = "suggest.role.filters";
+    /** The key of the configuration. e.g. {user}guest,{role}guest */
+    String SUGGEST_SEARCH_LOG_PERMISSIONS = "suggest.search.log.permissions";
 
     /** The key of the configuration. e.g. false */
     String LDAP_ADMIN_ENABLED = "ldap.admin.enabled";
@@ -2159,10 +2165,32 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'role.search.default.permissions'. <br>
-     * The value is, e.g. {role}guest <br>
+     * The value is, e.g.  <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getRoleSearchDefaultPermissions();
+
+    /**
+     * Get the value for the key 'role.search.default.permissions' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getRoleSearchDefaultPermissionsAsInteger();
+
+    /**
+     * Get the value for the key 'role.search.default.display.permissions'. <br>
+     * The value is, e.g. {role}guest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchDefaultDisplayPermissions();
+
+    /**
+     * Get the value for the key 'role.search.guest.permissions'. <br>
+     * The value is, e.g. {role}guest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getRoleSearchGuestPermissions();
 
     /**
      * Get the value for the key 'role.search.user.prefix'. <br>
@@ -3214,11 +3242,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSuggestPopularWordCacheExpireAsInteger();
 
     /**
-     * Get the value for the key 'suggest.role.filters'. <br>
-     * The value is, e.g. Rguest <br>
+     * Get the value for the key 'suggest.search.log.permissions'. <br>
+     * The value is, e.g. {user}guest,{role}guest <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getSuggestRoleFilters();
+    String getSuggestSearchLogPermissions();
 
     /**
      * Get the value for the key 'ldap.admin.enabled'. <br>
@@ -4306,6 +4334,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS);
         }
 
+        public Integer getRoleSearchDefaultPermissionsAsInteger() {
+            return getAsInteger(FessConfig.ROLE_SEARCH_DEFAULT_PERMISSIONS);
+        }
+
+        public String getRoleSearchDefaultDisplayPermissions() {
+            return get(FessConfig.ROLE_SEARCH_DEFAULT_DISPLAY_PERMISSIONS);
+        }
+
+        public String getRoleSearchGuestPermissions() {
+            return get(FessConfig.ROLE_SEARCH_GUEST_PERMISSIONS);
+        }
+
         public String getRoleSearchUserPrefix() {
             return get(FessConfig.ROLE_SEARCH_USER_PREFIX);
         }
@@ -4866,8 +4906,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.SUGGEST_POPULAR_WORD_CACHE_EXPIRE);
         }
 
-        public String getSuggestRoleFilters() {
-            return get(FessConfig.SUGGEST_ROLE_FILTERS);
+        public String getSuggestSearchLogPermissions() {
+            return get(FessConfig.SUGGEST_SEARCH_LOG_PERMISSIONS);
         }
 
         public String getLdapAdminEnabled() {

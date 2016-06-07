@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.Constants;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -109,7 +108,7 @@ public class RoleQueryHelper {
         final RequestManager requestManager = ComponentUtil.getRequestManager();
         requestManager.findUserBean(FessUserBean.class)
                 .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleList::add)))
-                .orElse(() -> roleList.add(fessConfig.getRoleSearchUserPrefix() + Constants.GUEST_USER));
+                .orElse(() -> roleList.addAll(fessConfig.getSearchGuestPermissionList()));
 
         if (defaultRoleList != null) {
             roleList.addAll(defaultRoleList);

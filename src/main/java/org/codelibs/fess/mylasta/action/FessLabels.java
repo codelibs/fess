@@ -797,6 +797,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Change Password */
     public static final String LABELS_PROFILE = "{labels.profile}";
 
+    /** The key of the message: Administration */
+    public static final String LABELS_ADMINISTRATION = "{labels.administration}";
+
     /** The key of the message: Profile */
     public static final String LABELS_profile_button = "{labels.profile_button}";
 

@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.BoostDocumentRuleService;
 import org.codelibs.fess.app.service.FailureUrlService;
@@ -52,9 +51,6 @@ public class WebFsIndexHelper implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(WebFsIndexHelper.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Resource
     public WebConfigService webConfigService;

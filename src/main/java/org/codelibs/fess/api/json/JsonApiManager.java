@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.app.service.FavoriteLogService;
@@ -67,9 +65,6 @@ import org.slf4j.LoggerFactory;
 public class JsonApiManager extends BaseApiManager {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     public JsonApiManager() {
         setPathPrefix("/json");

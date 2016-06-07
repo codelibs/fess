@@ -80,9 +80,6 @@ public class Crawler implements Serializable {
     @Resource
     protected CrawlingInfoService crawlingInfoService;
 
-    @Resource
-    protected DynamicProperties systemProperties;
-
     public static class Options {
 
         @Option(name = "-s", aliases = "--sessionId", metaVar = "sessionId", usage = "Session ID")
@@ -302,7 +299,8 @@ public class Crawler implements Serializable {
     }
 
     protected void sendMail(final Map<String, String> infoMap) {
-        final String toStrs = (String) systemProperties.get(Constants.NOTIFICATION_TO_PROPERTY);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String toStrs = fessConfig.getNotificationTo();
         if (StringUtil.isNotBlank(toStrs)) {
             final String[] toAddresses = toStrs.split(",");
             final Map<String, String> dataMap = new HashMap<>();
@@ -314,7 +312,6 @@ public class Crawler implements Serializable {
 
             logger.debug("\ninfoMap: {}\ndataMap: {}", infoMap, dataMap);
 
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             final Postbox postbox = ComponentUtil.getComponent(Postbox.class);
             CrawlerPostcard.droppedInto(postbox, postcard -> {
                 postcard.setFrom(fessConfig.getMailFromAddress(), fessConfig.getMailFromName());

@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.util.Locale;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -32,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.InputStreamUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.elasticsearch.runner.net.Curl.Method;
 import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.fess.Constants;
@@ -51,9 +49,6 @@ public class EsApiManager extends BaseApiManager {
     private static final String ADMIN_SERVER = "/admin/server_";
 
     private static final Logger logger = LoggerFactory.getLogger(EsApiManager.class);
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     protected String[] acceptedRoles = new String[] { "admin" };
 

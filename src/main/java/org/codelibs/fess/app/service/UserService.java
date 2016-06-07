@@ -32,6 +32,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
+import org.jsoup.helper.StringUtil;
 
 public class UserService implements Serializable {
 
@@ -70,6 +71,10 @@ public class UserService implements Serializable {
     }
 
     public void store(final User user) {
+        if (StringUtil.isBlank(user.getSurname())) {
+            user.setSurname(user.getName());
+        }
+
         ComponentUtil.getLdapManager().insert(user);
 
         userBhv.insertOrUpdate(user, op -> {

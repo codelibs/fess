@@ -28,7 +28,6 @@ import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.FailureUrlPager;
 import org.codelibs.fess.es.config.cbean.FailureUrlCB;
@@ -45,9 +44,6 @@ import org.dbflute.optional.OptionalEntity;
 public class FailureUrlService implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     @Resource
     protected FailureUrlBhv failureUrlBhv;

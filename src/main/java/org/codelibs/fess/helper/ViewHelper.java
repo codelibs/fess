@@ -94,13 +94,13 @@ public class ViewHelper implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
     @Resource
+    protected DynamicProperties systemProperties;
+
+    @Resource
     protected PathMappingHelper pathMappingHelper;
 
     @Resource
     protected UserAgentHelper userAgentHelper;
-
-    @Resource
-    protected DynamicProperties systemProperties;
 
     public int descriptionLength = 200;
 
@@ -309,8 +309,8 @@ public class ViewHelper implements Serializable {
     }
 
     protected String appendQueryParameter(final Map<String, Object> document, final String url) {
-        if (Constants.TRUE.equals(systemProperties.get(Constants.APPEND_QUERY_PARAMETER_PROPERTY))) {
-            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isAppendQueryParameter()) {
             final String mimetype = DocumentUtil.getValue(document, fessConfig.getIndexFieldMimetype(), String.class);
             if (StringUtil.isNotBlank(mimetype)) {
                 if ("application/pdf".equals(mimetype)) {

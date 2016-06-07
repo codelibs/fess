@@ -97,6 +97,7 @@
 											<la:text property="mail" styleClass="form-control" />
 										</div>
 									</div>
+									<c:if test="${ldapAdminEnabled}">
 									<div class="form-group">
 										<label for="employeeNumber" class="col-sm-3 control-label"><la:message
 												key="labels.user_employeeNumber" /></label>
@@ -361,6 +362,7 @@
 											<la:text property="homeDirectory" styleClass="form-control" />
 										</div>
 									</div>
+									</c:if>
 									<div class="form-group">
 										<label for="roles" class="col-sm-3 control-label"><la:message
 												key="labels.roles" /></label>

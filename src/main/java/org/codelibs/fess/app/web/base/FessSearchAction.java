@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.DynamicProperties;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.login.LoginAction;
@@ -80,9 +79,6 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected PopularWordHelper popularWordHelper;
 
     @Resource
-    protected DynamicProperties systemProperties;
-
-    @Resource
     protected HttpServletRequest request;
 
     protected boolean searchLogSupport;
@@ -120,7 +116,9 @@ public abstract class FessSearchAction extends FessBaseAction {
             locale = Locale.ENGLISH;
         }
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
-        runtime.registerData("username", systemHelper.getUsername());
+        String username = systemHelper.getUsername();
+        runtime.registerData("username", username);
+        runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
         runtime.registerData("pageLoginLink", fessConfig.isPageLoginLink());
     }

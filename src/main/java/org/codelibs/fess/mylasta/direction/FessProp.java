@@ -20,6 +20,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,12 @@ import org.lastaflute.job.subsidiary.ConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public interface FessProp {
+
+    public static final String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
+
+    public static final String SEARCH_GUEST_PERMISSION_LIST = "searchGuestPermissionList";
+
+    public static final String SUGGEST_SEARCH_LOG_PERMISSIONS = "suggestSearchLogPermissions";
 
     public static final String GROUP_VALUE_PREFIX = "group:";
 
@@ -109,6 +116,18 @@ public interface FessProp {
 
     public default void setSystemPropertyAsInt(final String key, final int value) {
         setSystemProperty(key, Integer.toString(value));
+    }
+
+    public default boolean isWebDesignEditorEnabled() {
+        return getSystemPropertyAsBoolean(Constants.WEB_DESIGN_EDITOR_PROPERTY, true);
+    }
+
+    public default boolean isSearchFileProxyEnabled() {
+        return getSystemPropertyAsBoolean(Constants.SEARCH_FILE_PROXY_PROPERTY, true);
+    }
+
+    public default boolean isBrowserLocaleForSearchUsed() {
+        return getSystemPropertyAsBoolean(Constants.USE_BROWSER_LOCALE_FOR_SEARCH_PROPERTY, false);
     }
 
     public default String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
@@ -470,7 +489,12 @@ public interface FessProp {
     String getAuthenticationAdminRoles();
 
     public default String[] getAuthenticationAdminRolesAsArray() {
-        return getAuthenticationAdminRoles().split(",");
+        String[] roles = (String[]) propMap.get(AUTHENTICATION_ADMIN_ROLES);
+        if (roles == null) {
+            roles = getAuthenticationAdminRoles().split(",");
+            propMap.put(AUTHENTICATION_ADMIN_ROLES, roles);
+        }
+        return roles;
     }
 
     String getJvmCrawlerOptions();
@@ -898,8 +922,17 @@ public interface FessProp {
                         .toArray(n -> new String[n]));
     }
 
+    String getRoleSearchDefaultDisplayPermissions();
+
+    public default String[] getSearchDefaultDisplayEncodedPermissions() {
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        return stream(getRoleSearchDefaultDisplayPermissions().split(","))
+                .get(stream -> stream.map(p -> permissionHelper.encode(p)).filter(StringUtil::isNotBlank).distinct()
+                        .toArray(n -> new String[n]));
+    }
+
     public default String getSearchDefaultDisplayPermission() {
-        return stream(getRoleSearchDefaultPermissions().split(",")).get(
+        return stream(getRoleSearchDefaultDisplayPermissions().split(",")).get(
                 stream -> stream.filter(StringUtil::isNotBlank).distinct().collect(Collectors.joining("\n")));
     }
 
@@ -910,4 +943,42 @@ public interface FessProp {
                 stream -> stream.map(s -> s.trim()).filter(StringUtil::isNotBlank).toArray(n -> new String[n]));
     }
 
+    String getSuggestSearchLogPermissions();
+
+    public default boolean isValidSearchLogPermissions(final String[] permissions) {
+        if (permissions == null) {
+            return false;
+        }
+        @SuppressWarnings("unchecked")
+        List<String> validPermissionList = (List<String>) propMap.get(SUGGEST_SEARCH_LOG_PERMISSIONS);
+        if (validPermissionList == null) {
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            validPermissionList =
+                    stream(getSuggestSearchLogPermissions().split(",")).get(
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank)
+                                    .collect(Collectors.toList()));
+            propMap.put(SUGGEST_SEARCH_LOG_PERMISSIONS, validPermissionList);
+        }
+        final List<String> list = validPermissionList;
+        return stream(permissions).get(stream -> stream.allMatch(v -> list.contains(v)));
+    }
+
+    String getRoleSearchUserPrefix();
+
+    String getRoleSearchGuestPermissions();
+
+    public default List<String> getSearchGuestPermissionList() {
+        @SuppressWarnings("unchecked")
+        List<String> list = (List<String>) propMap.get(SEARCH_GUEST_PERMISSION_LIST);
+        if (list == null) {
+            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+            list =
+                    stream(getRoleSearchGuestPermissions().split(",")).get(
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank)
+                                    .collect(Collectors.toList()));
+            list.add(getRoleSearchUserPrefix() + Constants.GUEST_USER);
+            propMap.put(SEARCH_GUEST_PERMISSION_LIST, list);
+        }
+        return list;
+    }
 }

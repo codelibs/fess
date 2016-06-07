@@ -69,6 +69,7 @@ public class AdminUserAction extends FessAdminAction {
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameUser()));
+        runtime.registerData("ldapAdminEnabled", fessConfig.isLdapAdminEnabled());
     }
 
     // ===================================================================================
