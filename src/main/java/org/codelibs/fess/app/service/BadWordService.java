@@ -28,6 +28,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.BadWordPager;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.cbean.BadWordCB;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
@@ -52,6 +53,9 @@ public class BadWordService implements Serializable {
 
     @Resource
     protected BadWordBhv badWordBhv;
+
+    @Resource
+    protected FessEsClient fessEsClient;
 
     public List<BadWord> getBadWordList(final BadWordPager badWordPager) {
 
@@ -134,6 +138,7 @@ public class BadWordService implements Serializable {
                     logger.warn("Failed to read a sugget elevate word: " + list, e);
                 }
             }
+            fessEsClient.refresh("_all"); // TODO replace _all
         } catch (final IOException e) {
             logger.warn("Failed to read a sugget elevate word.", e);
         }

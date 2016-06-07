@@ -28,6 +28,7 @@ import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
+import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.cbean.ElevateWordCB;
 import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
@@ -59,6 +60,9 @@ public class ElevateWordService implements Serializable {
 
     @Resource
     protected FessConfig fessConfig;
+
+    @Resource
+    protected FessEsClient fessEsClient;
 
     public List<ElevateWord> getElevateWordList(final ElevateWordPager elevateWordPager) {
 
@@ -210,26 +214,21 @@ public class ElevateWordService implements Serializable {
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setCreatedBy("system");
                         elevateWord.setCreatedTime(now);
-                        elevateWordBhv.insert(elevateWord, op -> {
-                            op.setRefresh(true);
-                        });
+                        elevateWordBhv.insert(elevateWord);
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
-                        elevateWordBhv.delete(elevateWord, op -> {
-                            op.setRefresh(true);
-                        });
+                        elevateWordBhv.delete(elevateWord);
                     } else {
                         elevateWord.setReading(reading);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setUpdatedBy("system");
                         elevateWord.setUpdatedTime(now);
-                        elevateWordBhv.update(elevateWord, op -> {
-                            op.setRefresh(true);
-                        });
+                        elevateWordBhv.update(elevateWord);
                     }
                 } catch (final Exception e) {
                     logger.warn("Failed to read a sugget elevate word: " + list, e);
                 }
             }
+            fessEsClient.refresh("_all"); // TODO replace _all
         } catch (final IOException e) {
             logger.warn("Failed to read a sugget elevate word.", e);
         }

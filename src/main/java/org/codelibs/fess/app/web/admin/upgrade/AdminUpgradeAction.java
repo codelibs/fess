@@ -20,18 +20,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
 import org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv;
+import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigBhv;
 import org.codelibs.fess.es.config.exbhv.FileConfigToRoleBhv;
 import org.codelibs.fess.es.config.exbhv.LabelToRoleBhv;
@@ -39,6 +43,7 @@ import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
+import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -94,6 +99,9 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     @Resource
     protected DataConfigBhv dataConfigBhv;
+
+    @Resource
+    protected ElevateWordBhv elevateWordBhv;
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -345,7 +353,28 @@ public class AdminUpgradeAction extends FessAdminAction {
                 return entity;
             });
 
+            final List<ElevateWord> elevateWordList =
+                    elevateWordBhv
+                            .selectList(cb -> cb.query().addOrderBy_CreatedBy_Asc())
+                            .stream()
+                            .filter(e -> StringUtil.isNotBlank(e.getTargetRole()))
+                            .map(e -> {
+                                final String[] permissions =
+                                        StreamUtil
+                                                .stream(e.getTargetRole().split(","))
+                                                .get(stream -> stream.filter(StringUtil::isNotBlank).map(
+                                                        s -> fessConfig.getRoleSearchRolePrefix() + s)).toArray(n -> new String[n]);
+                                e.setPermissions(permissions);
+                                e.setTargetRole(null);
+                                return e;
+                            }).collect(Collectors.toList());
+            if (!elevateWordList.isEmpty()) {
+                elevateWordBhv.batchUpdate(elevateWordList);
+            }
+
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+            fessEsClient.refresh("_all");
         } catch (final Exception e) {
             logger.warn("Failed to upgrade data.", e);
             saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));

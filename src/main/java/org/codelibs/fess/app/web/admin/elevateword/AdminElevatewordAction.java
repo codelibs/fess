@@ -153,8 +153,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                                 copyOp.exclude("permissions");
                             });
                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                            form.targetRole =
-                                    stream(entity.getTargetRole()).get(
+                            form.permissions =
+                                    stream(entity.getPermissions()).get(
                                             stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
                                                     .collect(Collectors.joining("\n")));
                         }).orElse(() -> {
@@ -191,8 +191,8 @@ public class AdminElevatewordAction extends FessAdminAction {
                                                 copyOp.exclude("permissions");
                                             });
                                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                                            form.targetRole =
-                                                    stream(entity.getTargetRole()).get(
+                                            form.permissions =
+                                                    stream(entity.getPermissions()).get(
                                                             stream -> stream.map(s -> permissionHelper.decode(s))
                                                                     .filter(StringUtil::isNotBlank).distinct()
                                                                     .collect(Collectors.joining("\n")));
@@ -260,7 +260,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                     try {
                         elevateWordService.store(entity);
                         suggestHelper.addElevateWord(entity.getSuggestWord(), entity.getReading(), entity.getLabelTypeValues(),
-                                entity.getTargetRole(), entity.getBoost());
+                                entity.getPermissions(), entity.getBoost());
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -372,7 +372,9 @@ public class AdminElevatewordAction extends FessAdminAction {
                             op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
                                     n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setTargetRole(permissionHelper.encode(form.targetRole));
+                    entity.setPermissions(stream(form.permissions.split("\n")).get(
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
+                                    .toArray(n -> new String[n])));
                     return entity;
                 });
     }

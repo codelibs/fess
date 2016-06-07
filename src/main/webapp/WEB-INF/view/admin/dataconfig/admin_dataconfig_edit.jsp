@@ -95,7 +95,7 @@
 									</div>
 									<div class="form-group">
 										<label for="permissions" class="col-sm-3 control-label"><la:message
-												key="labels.permission_type" /></label>
+												key="labels.permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
 											<la:textarea property="permissions" styleClass="form-control"

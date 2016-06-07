@@ -81,6 +81,7 @@ public abstract class BsElevateWordBhv extends EsAbstractBehavior<ElevateWord, E
             result.setSuggestWord(DfTypeUtil.toString(source.get("suggestWord")));
             result.setTargetLabel(DfTypeUtil.toString(source.get("targetLabel")));
             result.setTargetRole(DfTypeUtil.toString(source.get("targetRole")));
+            result.setPermissions(toStringArray(source.get("permissions")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;

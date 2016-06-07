@@ -263,6 +263,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Login Required */
     public static final String LABELS_LOGIN_REQUIRED = "{labels.loginRequired}";
 
+    /** The key of the message: Login Link */
+    public static final String LABELS_LOGIN_LINK = "{labels.loginLink}";
+
     /** The key of the message: Thread Name */
     public static final String LABELS_THREAD_NAME = "{labels.threadName}";
 
@@ -416,11 +419,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Suggest Word */
     public static final String LABELS_SUGGEST_WORD = "{labels.suggestWord}";
 
-    /** The key of the message: Target Label */
+    /** The key of the message: Label */
     public static final String LABELS_TARGET_LABEL = "{labels.targetLabel}";
-
-    /** The key of the message: Target Role */
-    public static final String LABELS_TARGET_ROLE = "{labels.targetRole}";
 
     /** The key of the message: Term */
     public static final String LABELS_TERM = "{labels.term}";
@@ -896,8 +896,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: ms */
     public static final String LABELS_MILLISEC = "{labels.millisec}";
 
-    /** The key of the message: Permission */
-    public static final String LABELS_permission_type = "{labels.permission_type}";
+    /** The key of the message: Permissions */
+    public static final String LABELS_PERMISSIONS = "{labels.permissions}";
 
     /** The key of the message: Label */
     public static final String LABELS_label_type = "{labels.label_type}";
@@ -988,6 +988,9 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Login Required */
     public static final String LABELS_login_required = "{labels.login_required}";
+
+    /** The key of the message: Login Link */
+    public static final String LABELS_login_link = "{labels.login_link}";
 
     /** The key of the message: Excluded Failure Type */
     public static final String LABELS_ignore_failure_type = "{labels.ignore_failure_type}";
@@ -1908,8 +1911,8 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Reading */
     public static final String LABELS_elevate_word_reading = "{labels.elevate_word_reading}";
 
-    /** The key of the message: Role */
-    public static final String LABELS_elevate_word_target_role = "{labels.elevate_word_target_role}";
+    /** The key of the message: Permissions */
+    public static final String LABELS_elevate_word_permissions = "{labels.elevate_word_permissions}";
 
     /** The key of the message: Boost */
     public static final String LABELS_elevate_word_boost = "{labels.elevate_word_boost}";
