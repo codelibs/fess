@@ -217,8 +217,8 @@ public class SuggestHelper {
         suggester.refresh();
     }
 
-    public void addElevateWord(final String word, final String reading, final String[] tags, final String roles, final float boost) {
-        addElevateWord(word, reading, tags, roles, boost, true);
+    public void addElevateWord(final String word, final String reading, final String[] tags, final String permissions, final Float boost) {
+        addElevateWord(word, reading, tags, permissions, boost, true);
     }
 
     public void addElevateWord(final String word, final String reading, final String[] tags, final String roles, final float boost,
@@ -229,10 +229,7 @@ public class SuggestHelper {
         }
         final List<String> roleList = new ArrayList<>();
         if (StringUtil.isNotBlank(roles)) {
-            final String[] array = roles.trim().split(",");
-            for (final String role : array) {
-                roleList.add(role);
-            }
+            roleList.add(roles);
         }
 
         suggester.indexer().addElevateWord(

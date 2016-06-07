@@ -210,15 +210,21 @@ public class ElevateWordService implements Serializable {
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setCreatedBy("system");
                         elevateWord.setCreatedTime(now);
-                        elevateWordBhv.insert(elevateWord);
+                        elevateWordBhv.insert(elevateWord, op -> {
+                            op.setRefresh(true);
+                        });
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
-                        elevateWordBhv.delete(elevateWord);
+                        elevateWordBhv.delete(elevateWord, op -> {
+                            op.setRefresh(true);
+                        });
                     } else {
                         elevateWord.setReading(reading);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setUpdatedBy("system");
                         elevateWord.setUpdatedTime(now);
-                        elevateWordBhv.update(elevateWord);
+                        elevateWordBhv.update(elevateWord, op -> {
+                            op.setRefresh(true);
+                        });
                     }
                 } catch (final Exception e) {
                     logger.warn("Failed to read a sugget elevate word: " + list, e);

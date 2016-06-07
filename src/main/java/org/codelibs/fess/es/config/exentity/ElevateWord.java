@@ -112,4 +112,5 @@ public class ElevateWord extends BsElevateWord {
                 + ", targetLabel=" + targetLabel + ", targetRole=" + targetRole + ", updatedBy=" + updatedBy + ", updatedTime="
                 + updatedTime + ", docMeta=" + docMeta + "]";
     }
+
 }

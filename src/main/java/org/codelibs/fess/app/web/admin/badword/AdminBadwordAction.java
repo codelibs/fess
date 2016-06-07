@@ -285,6 +285,7 @@ public class AdminBadwordAction extends FessAdminAction {
         new Thread(() -> {
             try (Reader reader = new BufferedReader(new InputStreamReader(form.badWordFile.getInputStream(), getCsvEncoding()))) {
                 badWordService.importCsv(reader);
+                suggestHelper.deleteAllBadWords();
                 suggestHelper.storeAllBadWords();
             } catch (final Exception e) {
                 throw new FessSystemException("Failed to import data.", e);
