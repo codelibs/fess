@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.ElevateWordPager;
 import org.codelibs.fess.app.service.ElevateWordService;
