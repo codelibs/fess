@@ -115,6 +115,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String LOGIN_REQUIRED_PROPERTY = "login.required";
 
+    public static final String LOGIN_LINK_ENALBED_PROPERTY = "login.link.enabled";
+
     public static final String IGNORE_FAILURE_TYPE_PROPERTY = "failure.ignoretype";
 
     public static final String FAILURE_COUNT_THRESHOLD_PROPERTY = "failure.countthreshold";

@@ -71,6 +71,9 @@ public class EditForm implements Serializable {
     @Size(max = 10)
     public String loginRequired;
 
+    @Size(max = 10)
+    public String loginLink;
+
     @Size(max = 1000)
     public String ignoreFailureType;
 

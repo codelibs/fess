@@ -238,6 +238,14 @@ public interface FessProp {
         return getSystemPropertyAsBoolean(Constants.LOGIN_REQUIRED_PROPERTY, false);
     }
 
+    public default void setLoginLinkEnabled(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.LOGIN_LINK_ENALBED_PROPERTY, value);
+    }
+
+    public default boolean isLoginLinkEnabled() {
+        return getSystemPropertyAsBoolean(Constants.LOGIN_LINK_ENALBED_PROPERTY, true);
+    }
+
     public default void setIncrementalCrawling(final boolean value) {
         setSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
     }

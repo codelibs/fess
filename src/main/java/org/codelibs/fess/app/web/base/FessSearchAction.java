@@ -120,7 +120,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("username", username);
         runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
-        runtime.registerData("pageLoginLink", fessConfig.isPageLoginLink());
+        runtime.registerData("pageLoginLink", fessConfig.isLoginLinkEnabled());
     }
 
     // ===================================================================================

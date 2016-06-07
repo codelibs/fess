@@ -496,9 +496,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String PAGING_PAGE_RANGE_FILL_LIMIT = "paging.page.range.fill.limit";
 
-    /** The key of the configuration. e.g. true */
-    String PAGE_LOGIN_LINK = "page.login.link";
-
     /** The key of the configuration. e.g. 1000 */
     String PAGE_DOCBOOST_MAX_FETCH_SIZE = "page.docboost.max.fetch.size";
 
@@ -2328,22 +2325,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isPagingPageRangeFillLimit();
-
-    /**
-     * Get the value for the key 'page.login.link'. <br>
-     * The value is, e.g. true <br>
-     * comment: The option 'loginLink' of page link button for search page
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getPageLoginLink();
-
-    /**
-     * Is the property for the key 'page.login.link' true? <br>
-     * The value is, e.g. true <br>
-     * comment: The option 'loginLink' of page link button for search page
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isPageLoginLink();
 
     /**
      * Get the value for the key 'page.docboost.max.fetch.size'. <br>
@@ -4412,14 +4393,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isPagingPageRangeFillLimit() {
             return is(FessConfig.PAGING_PAGE_RANGE_FILL_LIMIT);
-        }
-
-        public String getPageLoginLink() {
-            return get(FessConfig.PAGE_LOGIN_LINK);
-        }
-
-        public boolean isPageLoginLink() {
-            return is(FessConfig.PAGE_LOGIN_LINK);
         }
 
         public String getPageDocboostMaxFetchSize() {

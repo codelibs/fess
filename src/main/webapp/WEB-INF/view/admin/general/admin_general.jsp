@@ -58,6 +58,18 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="loginLink" class="col-sm-3 control-label"><la:message
+												key="labels.login_link" /></label>
+										<div class="col-sm-9">
+											<la:errors property="loginLink" />
+											<div class="checkbox">
+												<label> <la:checkbox property="loginLink" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="defaultLabelValue" class="col-sm-3 control-label"><la:message
 												key="labels.default_label_value" /></label>
 										<div class="col-sm-9">
