@@ -106,7 +106,7 @@
 												key="labels.elevate_word_permissions" /></label>
 										<div class="col-sm-9">
 											<la:errors property="permissions" />
-											<la:text property="permissions" styleClass="form-control" />
+											<la:textarea property="permissions" styleClass="form-control" rows="5" />
 										</div>
 									</div>
 									<div class="form-group">
