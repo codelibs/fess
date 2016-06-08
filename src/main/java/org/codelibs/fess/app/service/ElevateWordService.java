@@ -196,7 +196,8 @@ public class ElevateWordService implements Serializable {
                 try {
                     final String role = getValue(list, 2);
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper(); // TODO
-                    final String[] permissions = stream(getValue(list, 2).split(",")).get(
+                    final String[] permissions =
+                            stream(getValue(list, 2).split(",")).get(
                                     stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
                                             .toArray(n -> new String[n])); // TODO
                     final String label = getValue(list, 3);
