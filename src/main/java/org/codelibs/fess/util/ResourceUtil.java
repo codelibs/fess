@@ -82,7 +82,7 @@ public class ResourceUtil {
                     return Paths.get(webinfPath, names);
                 }
             }
-        } catch (final Throwable e) { // NOSONAR
+        } catch (final Throwable e) {
             // ignore
         }
         final String webinfBase = "WEB-INF/" + base;

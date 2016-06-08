@@ -153,7 +153,7 @@ public class SuggestCreator implements Serializable {
                     logger.debug("Deleted a temp file: " + propFile.getAbsolutePath());
                 }
                 systemProperties.reload(propFile.getAbsolutePath());
-                propFile.deleteOnExit(); // NOSONAR
+                propFile.deleteOnExit();
             } catch (final IOException e) {
                 logger.warn("Failed to create system properties file.", e);
             }
