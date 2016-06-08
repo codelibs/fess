@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.web.screenshot;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
 
-public class ScreenshotForm implements Serializable {
+public class ScreenshotForm {
     private static final long serialVersionUID = 1L;
 
     @Required

@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.crawlinginfo;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -26,9 +24,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author shinsuke
  * @author Shunji Makino
  */
-public class EditForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class EditForm {
 
     @ValidateTypeFailure
     public int crudMode;

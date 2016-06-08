@@ -20,8 +20,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class EditForm extends CreateForm {
 
-    private static final long serialVersionUID = 1L;
-
     @Required
     @ValidateTypeFailure
     public Long id;

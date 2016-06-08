@@ -19,7 +19,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +48,7 @@ import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
 
-public class ElevateWordService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ElevateWordService {
 
     private static final Logger logger = LoggerFactory.getLogger(ElevateWordService.class);
 

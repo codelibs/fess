@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,9 +31,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class PathMappingService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class PathMappingService {
 
     @Resource
     protected PathMappingBhv pathMappingBhv;

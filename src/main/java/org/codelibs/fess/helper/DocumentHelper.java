@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +24,7 @@ import org.codelibs.fess.crawler.util.TextUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class DocumentHelper implements Serializable {
+public class DocumentHelper {
 
     private static final long serialVersionUID = 1L;
 

@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.joblog;
 
-import java.io.Serializable;
-
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -24,9 +22,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author codelibs
  * @author Shunji Makino
  */
-public class EditForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class EditForm {
 
     @ValidateTypeFailure
     public int crudMode;

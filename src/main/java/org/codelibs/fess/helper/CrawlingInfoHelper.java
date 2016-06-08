@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -44,12 +43,10 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrawlingInfoHelper implements Serializable {
+public class CrawlingInfoHelper {
     private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoHelper.class);
 
     public static final String FACET_COUNT_KEY = "count";
-
-    private static final long serialVersionUID = 1L;
 
     protected Map<String, String> infoMap;
 

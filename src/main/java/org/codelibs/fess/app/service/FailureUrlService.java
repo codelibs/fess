@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.service;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,9 +40,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class FailureUrlService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class FailureUrlService {
 
     @Resource
     protected FailureUrlBhv failureUrlBhv;

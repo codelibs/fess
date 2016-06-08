@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +45,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebFsIndexHelper implements Serializable {
+public class WebFsIndexHelper {
 
     private static final long serialVersionUID = 1L;
 

@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -34,9 +33,7 @@ import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 import org.jsoup.helper.StringUtil;
 
-public class UserService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class UserService {
 
     @Resource
     protected UserBhv userBhv;

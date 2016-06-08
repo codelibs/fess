@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.reqheader;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
@@ -29,9 +27,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author Shunji Makino
  * @author Keiichi Watanabe
  */
-public class CreateForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CreateForm {
 
     @ValidateTypeFailure
     public Integer crudMode;

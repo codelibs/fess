@@ -15,15 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.boostdoc;
 
-import java.io.Serializable;
-
 /**
  * @author codelibs
  * @author jflute
  */
-public class SearchForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SearchForm {
 
     public String id;
 

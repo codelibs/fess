@@ -16,7 +16,6 @@
 package org.codelibs.fess.helper;
 
 import java.io.File;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
@@ -56,7 +55,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.ibm.icu.util.ULocale;
 
-public class SystemHelper implements Serializable {
+public class SystemHelper {
     private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
     private static final long serialVersionUID = 1L;

@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.wizard;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -24,9 +22,7 @@ import javax.validation.constraints.Size;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
-public class CrawlingConfigForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CrawlingConfigForm {
 
     @Required
     @Size(max = 200)

@@ -19,7 +19,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -77,7 +76,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class ViewHelper implements Serializable {
+public class ViewHelper {
 
     private static final String HL_CACHE = "hl_cache";
 

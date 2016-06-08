@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,9 +27,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrawlingConfigHelper implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CrawlingConfigHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlingConfigHelper.class);
 

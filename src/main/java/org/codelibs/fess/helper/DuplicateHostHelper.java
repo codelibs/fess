@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import org.codelibs.fess.app.service.DuplicateHostService;
 import org.codelibs.fess.es.config.exentity.DuplicateHost;
 import org.codelibs.fess.util.ComponentUtil;
 
-public class DuplicateHostHelper implements Serializable {
+public class DuplicateHostHelper {
 
     private static final long serialVersionUID = 1L;
 

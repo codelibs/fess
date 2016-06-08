@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +42,9 @@ import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
 
-public class BadWordService implements Serializable {
+public class BadWordService {
 
     private static final String DELETE_PREFIX = "--";
-
-    private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(BadWordService.class);
 

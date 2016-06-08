@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.webconfig;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -35,9 +33,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author Shunji Makino
  * @author Keiichi Watanabe
  */
-public class CreateForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CreateForm {
 
     public String[] labelTypeIds;
 

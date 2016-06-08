@@ -15,11 +15,10 @@
  */
 package org.codelibs.fess.app.web.error;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ErrorForm implements Serializable {
+public class ErrorForm {
 
     private static final long serialVersionUID = 1L;
 

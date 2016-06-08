@@ -15,15 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.crawlinginfo;
 
-import java.io.Serializable;
-
 /**
  * @author shinsuke
  * @author Shunji Makino
  */
-public class SearchForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SearchForm {
 
     public String sessionId;
 

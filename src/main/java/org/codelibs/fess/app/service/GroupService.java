@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -34,9 +33,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class GroupService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class GroupService {
 
     @Resource
     protected GroupBhv groupBhv;

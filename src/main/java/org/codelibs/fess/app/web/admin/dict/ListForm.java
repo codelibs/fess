@@ -15,16 +15,13 @@
  */
 package org.codelibs.fess.app.web.admin.dict;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Keiichi Watanabe
  */
-public class ListForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ListForm {
 
     public Map<String, String> searchParams = new HashMap<>();
 }

@@ -17,7 +17,6 @@ package org.codelibs.fess.app.service;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -55,9 +54,7 @@ import com.orangesignal.csv.CsvConfig;
 import com.orangesignal.csv.CsvReader;
 import com.orangesignal.csv.CsvWriter;
 
-public class CrawlingInfoService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CrawlingInfoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlingInfoService.class);
 

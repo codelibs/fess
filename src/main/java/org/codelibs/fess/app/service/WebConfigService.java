@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +34,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
 
-public class WebConfigService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class WebConfigService {
 
     @Resource
     protected WebConfigToLabelBhv webConfigToLabelBhv;

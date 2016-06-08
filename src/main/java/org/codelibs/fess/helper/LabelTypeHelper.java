@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +35,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LabelTypeHelper implements Serializable {
+public class LabelTypeHelper {
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
 
     private static final long serialVersionUID = 1L;

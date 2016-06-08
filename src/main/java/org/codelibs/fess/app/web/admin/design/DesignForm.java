@@ -15,13 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.design;
 
-import java.io.Serializable;
-
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 
-public class DesignForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class DesignForm {
 
     public MultipartFormFile designFile;
 

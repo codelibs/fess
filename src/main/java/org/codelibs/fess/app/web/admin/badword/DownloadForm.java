@@ -15,13 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.badword;
 
-import java.io.Serializable;
-
 /**
  * @author shinsuke
  */
-public class DownloadForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class DownloadForm {
 
 }

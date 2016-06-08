@@ -15,16 +15,12 @@
  */
 package org.codelibs.fess.app.web.admin.webconfig;
 
-import java.io.Serializable;
-
 /**
  * @author codelibs
  * @author Shunji Makino
  * @author Keiichi Watanabe
  */
-public class SearchForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SearchForm {
 
     public String id;
 }

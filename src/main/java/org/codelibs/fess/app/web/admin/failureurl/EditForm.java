@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.failureurl;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -26,9 +24,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author codelibs
  * @author Keiichi Watanabe
  */
-public class EditForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class EditForm {
 
     public String webConfigName;
 

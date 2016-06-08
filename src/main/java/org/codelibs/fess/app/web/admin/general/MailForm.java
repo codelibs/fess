@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -24,9 +22,7 @@ import org.lastaflute.web.validation.Required;
 /**
  * @author shinsuke
  */
-public class MailForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class MailForm {
 
     public String incrementalCrawling;
 

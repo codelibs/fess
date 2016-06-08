@@ -15,17 +15,13 @@
  */
 package org.codelibs.fess.app.web.admin.dict.seunjeon;
 
-import java.io.Serializable;
-
 import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
  * @author nocode
  */
-public class UploadForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class UploadForm {
 
     @Required
     public String dictId;

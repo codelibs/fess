@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.helper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,9 +38,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DataIndexHelper implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class DataIndexHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(DataIndexHelper.class);
 

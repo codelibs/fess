@@ -17,7 +17,6 @@ package org.codelibs.fess.helper;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +68,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
-public class QueryHelper implements Serializable {
+public class QueryHelper {
 
     protected static final String SCORE_SORT_VALUE = "score";
 

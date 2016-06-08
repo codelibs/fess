@@ -15,7 +15,6 @@
  */
 package org.codelibs.fess.app.service;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -34,9 +33,7 @@ import org.lastaflute.job.LaCron;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScheduledJobService implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class ScheduledJobService {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledJobService.class);
 

@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.general;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -28,9 +26,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author shinsuke
  * @author Shunji Makino
  */
-public class EditForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class EditForm {
 
     @Size(max = 10)
     public String incrementalCrawling;

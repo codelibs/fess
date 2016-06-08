@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.app.web.admin.boostdoc;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
@@ -26,9 +24,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
-public class CreateForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CreateForm {
 
     @ValidateTypeFailure
     public Integer crudMode;

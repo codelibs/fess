@@ -15,15 +15,11 @@
  */
 package org.codelibs.fess.app.web.admin.searchlist;
 
-import java.io.Serializable;
-
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
 
-public class DeleteForm implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class DeleteForm {
 
     @Size(max = 1000)
     public String q;
