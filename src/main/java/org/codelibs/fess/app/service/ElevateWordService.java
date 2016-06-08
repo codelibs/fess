@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.service;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
@@ -34,6 +36,7 @@ import org.codelibs.fess.es.config.exbhv.ElevateWordBhv;
 import org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv;
 import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.config.exentity.ElevateWordToLabel;
+import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
@@ -192,11 +195,15 @@ public class ElevateWordService implements Serializable {
                 }
                 try {
                     final String role = getValue(list, 2);
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper(); // TODO
+                    final String[] permissions = stream(getValue(list, 2).split(",")).get(
+                                    stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
+                                            .toArray(n -> new String[n])); // TODO
                     final String label = getValue(list, 3);
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(suggestWord);
                         if (StringUtil.isNotBlank(role)) {
-                            cb.query().setTargetRole_Equal(role);
+                            cb.query().setPermissions_Equal(role);
                         }
                         if (StringUtil.isNotBlank(label)) {
                             cb.query().setTargetLabel_Equal(label);
@@ -209,7 +216,7 @@ public class ElevateWordService implements Serializable {
                         elevateWord = new ElevateWord();
                         elevateWord.setSuggestWord(suggestWord);
                         elevateWord.setReading(reading);
-                        elevateWord.setTargetRole(role);
+                        elevateWord.setPermissions(permissions);
                         elevateWord.setTargetLabel(label);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setCreatedBy("system");
@@ -255,9 +262,17 @@ public class ElevateWordService implements Serializable {
                 @Override
                 public void handle(final ElevateWord entity) {
                     final List<String> list = new ArrayList<>();
+                    final PermissionHelper permissionHelper = new PermissionHelper();
+                    StringBuilder permissions = new StringBuilder();
+                    for (String permission : entity.getPermissions()) {
+                        if (permissions.length() != 0) {
+                            permissions.append(",");
+                        }
+                        permissions.append(permissionHelper.decode(permission));
+                    }
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
-                    addToList(list, entity.getTargetRole());
+                    addToList(list, permissions.toString());
                     addToList(list, entity.getTargetLabel());
                     addToList(list, entity.getBoost());
                     try {
