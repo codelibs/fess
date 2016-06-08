@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -179,6 +180,7 @@ public class ElevateWordService {
     }
 
     public void importCsv(final Reader reader) {
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         @SuppressWarnings("resource")
         final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
         try {
@@ -191,22 +193,20 @@ public class ElevateWordService {
                     continue;
                 }
                 try {
-                    final String role = getValue(list, 2);
-                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper(); // TODO
                     final String[] permissions =
                             stream(getValue(list, 2).split(",")).get(
                                     stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
-                                            .toArray(n -> new String[n])); // TODO
+                                            .toArray(n -> new String[n]));
                     final String label = getValue(list, 3);
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
                         cb.query().setSuggestWord_Equal(suggestWord);
-                        if (StringUtil.isNotBlank(role)) {
-                            cb.query().setPermissions_Equal(role);
+                        if (permissions.length > 0) {
+                            cb.query().setPermissions_InScope(stream(permissions).get(stream -> stream.collect(Collectors.toList())));
                         }
                         if (StringUtil.isNotBlank(label)) {
                             cb.query().setTargetLabel_Equal(label);
                         }
-                    }).orElse(null);//TODO
+                    }).orElse(null);
                     final String reading = getValue(list, 1);
                     final String boost = getValue(list, 4);
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
@@ -224,6 +224,7 @@ public class ElevateWordService {
                         elevateWordBhv.delete(elevateWord);
                     } else {
                         elevateWord.setReading(reading);
+                        elevateWord.setPermissions(permissions);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
                         elevateWord.setUpdatedBy("system");
                         elevateWord.setUpdatedTime(now);
@@ -240,6 +241,7 @@ public class ElevateWordService {
     }
 
     public void exportCsv(final Writer writer) {
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         final CsvConfig cfg = new CsvConfig(',', '"', '"');
         cfg.setEscapeDisabled(false);
         cfg.setQuoteDisabled(false);
@@ -249,7 +251,7 @@ public class ElevateWordService {
             final List<String> list = new ArrayList<>();
             list.add("SuggestWord");
             list.add("Reading");
-            list.add("Role");
+            list.add("Permissions");
             list.add("Label");
             list.add("Boost");
             csvWriter.writeValues(list);
@@ -260,17 +262,13 @@ public class ElevateWordService {
                 @Override
                 public void handle(final ElevateWord entity) {
                     final List<String> list = new ArrayList<>();
-                    final PermissionHelper permissionHelper = new PermissionHelper();
-                    StringBuilder permissions = new StringBuilder();
-                    for (String permission : entity.getPermissions()) {
-                        if (permissions.length() != 0) {
-                            permissions.append(",");
-                        }
-                        permissions.append(permissionHelper.decode(permission));
-                    }
+                    final String permissions =
+                            stream(entity.getPermissions()).get(
+                                    stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
+                                            .collect(Collectors.joining(",")));
                     addToList(list, entity.getSuggestWord());
                     addToList(list, entity.getReading());
-                    addToList(list, permissions.toString());
+                    addToList(list, permissions);
                     addToList(list, entity.getTargetLabel());
                     addToList(list, entity.getBoost());
                     try {
