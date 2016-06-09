@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.InputStreamUtil;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl.Method;
 import org.codelibs.elasticsearch.runner.net.CurlRequest;
 import org.codelibs.fess.Constants;
@@ -96,6 +97,18 @@ public class EsApiManager extends BaseApiManager {
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
         final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
+
+        if (StringUtil.isNotBlank(path)) {
+            final String lowerPath = path.toLowerCase(Locale.ROOT);
+            if (lowerPath.endsWith(".html")) {
+                response.setContentType("text/html;charset=utf-8");
+            } else if (lowerPath.endsWith(".txt")) {
+                response.setContentType("text/plain");
+            } else if (lowerPath.endsWith(".css")) {
+                response.setContentType("text/css");
+            }
+        }
+
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
                 curlRequest.param(entry.getKey(), String.join(",", entry.getValue()));
