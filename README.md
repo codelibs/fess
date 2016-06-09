@@ -21,16 +21,16 @@ Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 
 ### Download
 
-Fess 10.0 is available.
+Fess 10.1 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
 ### Install/Run Fess
 
-    $ unzip fess-10.0.x.zip
-    $ cd fess-10.0.x
+    $ unzip fess-10.1.x.zip
+    $ cd fess-10.1.x
     $ ./bin/fess
 
-For the details, see [Installation Guide](http://fess.codelibs.org/10.0/install/index.html).
+For the details, see [Installation Guide](http://fess.codelibs.org/10.1/install/index.html).
 
 ### Access Fess
 
