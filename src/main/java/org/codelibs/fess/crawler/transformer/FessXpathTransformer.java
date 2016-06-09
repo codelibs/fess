@@ -101,8 +101,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         try (final BufferedInputStream bis = new BufferedInputStream(responseData.getResponseBody())) {
             final byte[] bomBytes = new byte[UTF8_BOM_SIZE];
             bis.mark(UTF8_BOM_SIZE);
-            bis.read(bomBytes);
-            if (!isUtf8BomBytes(bomBytes)) {
+            final int size = bis.read(bomBytes);
+            if (size < 3 || !isUtf8BomBytes(bomBytes)) {
                 bis.reset();
             }
             final InputSource is = new InputSource(bis);
