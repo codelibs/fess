@@ -181,8 +181,11 @@ public class ElevateWordService {
 
     public void importCsv(final Reader reader) {
         final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+        final CsvConfig cfg = new CsvConfig(',', '"', '"');
+        cfg.setEscapeDisabled(false);
+        cfg.setQuoteDisabled(false);
         @SuppressWarnings("resource")
-        final CsvReader csvReader = new CsvReader(reader, new CsvConfig());
+        final CsvReader csvReader = new CsvReader(reader, cfg);
         try {
             List<String> list;
             csvReader.readValues(); // ignore header
