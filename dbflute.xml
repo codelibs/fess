@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dbflute" basedir=".">
+	<property name="mydbflute.dir" value="${basedir}/mydbflute" />
+	<property name="target.dir" value="${basedir}/target" />
+	<property name="mydbflute.url" value="https://github.com/lastaflute/lastaflute-example-waterfront/archive/master.zip" />
+
+	<target name="mydbflute.check">
+		<condition property="mydbflute.exists">
+			<available file="${mydbflute.dir}" type="dir" />
+		</condition>
+	</target>
+
+	<target name="download.dbflute" depends="mydbflute.check" unless="mydbflute.exists">
+		<mkdir dir="${mydbflute.dir}" />
+		<get dest="${target.dir}/mydbflute.zip">
+			<url url="${mydbflute.url}" />
+		</get>
+		<unzip dest="${mydbflute.dir}" src="${target.dir}/mydbflute.zip">
+			<patternset>
+				<include name="lastaflute-example-waterfront-master/mydbflute/dbflute-1.x/**" />
+			</patternset>
+			<cutdirsmapper dirs="2" />
+		</unzip>
+	</target>
+
+</project>

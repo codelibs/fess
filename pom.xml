@@ -250,6 +250,7 @@
 				</dependencies>
 				<configuration>
 					<tasks>
+						<ant antfile="${basedir}/dbflute.xml" target="download.dbflute" />
 						<ant antfile="${basedir}/plugin.xml" target="install.plugins">
 							<property name="with.fess" value="true" />
 						</ant>
