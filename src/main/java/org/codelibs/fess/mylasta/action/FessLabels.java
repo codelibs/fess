@@ -1385,10 +1385,10 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Back */
     public static final String LABELS_design_button_back = "{labels.design_button_back}";
 
-    /** The key of the message: Data　Store Crawling */
+    /** The key of the message: Data Store Crawling */
     public static final String LABELS_data_crawling_configuration = "{labels.data_crawling_configuration}";
 
-    /** The key of the message: Data　Store Crawling Configuration */
+    /** The key of the message: Data Store Crawling Configuration */
     public static final String LABELS_data_crawling_title_details = "{labels.data_crawling_title_details}";
 
     /** The key of the message: Handler Name */
