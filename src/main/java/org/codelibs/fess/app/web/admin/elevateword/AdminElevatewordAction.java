@@ -150,7 +150,7 @@ public class AdminElevatewordAction extends FessAdminAction {
                         entity -> {
                             copyBeanToBean(entity, form, copyOp -> {
                                 copyOp.excludeNull();
-                                copyOp.exclude("permissions");
+                                copyOp.exclude(Constants.PERMISSIONS);
                             });
                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
@@ -178,34 +178,27 @@ public class AdminElevatewordAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         return asHtml(path_AdminElevateword_AdminElevatewordDetailsJsp).useForm(
                 EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        elevateWordService
-                                .getElevateWord(id)
-                                .ifPresent(
-                                        entity -> {
-                                            copyBeanToBean(entity, form, copyOp -> {
-                                                copyOp.excludeNull();
-                                                copyOp.exclude("permissions");
-                                            });
-                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                                            form.permissions =
-                                                    stream(entity.getPermissions()).get(
-                                                            stream -> stream.map(s -> permissionHelper.decode(s))
-                                                                    .filter(StringUtil::isNotBlank).distinct()
-                                                                    .collect(Collectors.joining("\n")));
-                                            form.crudMode = crudMode;
-                                        })
-                                .orElse(() -> {
-                                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                            () -> asListHtml());
-                                });
-                    });
-                }).renderWith(data -> {
-            registerLabels(data);
-        });
+                op -> op.setup(form -> {
+                    elevateWordService
+                            .getElevateWord(id)
+                            .ifPresent(
+                                    entity -> {
+                                        copyBeanToBean(entity, form, copyOp -> {
+                                            copyOp.excludeNull();
+                                            copyOp.exclude(Constants.PERMISSIONS);
+                                        });
+                                        form.permissions =
+                                                stream(entity.getPermissions()).get(
+                                                        stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank)
+                                                                .distinct().collect(Collectors.joining("\n")));
+                                        form.crudMode = crudMode;
+                                    })
+                            .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                                    () -> asListHtml()));
+                })).renderWith(data -> registerLabels(data));
     }
 
     // -----------------------------------------------------
@@ -313,9 +306,9 @@ public class AdminElevatewordAction extends FessAdminAction {
                                         messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
                                         () -> asEditHtml());
                             }
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asDetailsHtml());
-                });
+                        })
+                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                        () -> asDetailsHtml()));
         return redirect(getClass());
     }
 
@@ -366,14 +359,11 @@ public class AdminElevatewordAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(
-                            form,
-                            entity,
-                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
-                                    n -> new String[n])));
+                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                            Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(stream(form.permissions.split("\n")).get(
-                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
+                            stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct()
                                     .toArray(n -> new String[n])));
                     return entity;
                 });

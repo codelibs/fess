@@ -79,20 +79,18 @@ public class SuggestHelper {
     public void init() {
         fessConfig = ComponentUtil.getFessConfig();
         split(fessConfig.getSuggestFieldContents(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> contentFieldNameSet.add(f)));
-        split(fessConfig.getSuggestFieldTags(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> tagFieldNameSet.add(f)));
-        split(fessConfig.getSuggestFieldRoles(), ",").of(
-                stream -> stream.filter(StringUtil::isNotBlank).forEach(f -> roleFieldNameSet.add(f)));
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(contentFieldNameSet::add));
+        split(fessConfig.getSuggestFieldTags(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(tagFieldNameSet::add));
+        split(fessConfig.getSuggestFieldRoles(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleFieldNameSet::add));
         contentFieldList = Arrays.asList(stream(fessConfig.getSuggestFieldContents()).get(stream -> stream.toArray(n -> new String[n])));
 
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
         suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
-        split(fessConfig.getSuggestFieldIndexContents(), ",").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(field -> {
-            suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field);
-        }));
+        split(fessConfig.getSuggestFieldIndexContents(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).forEach(
+                        field -> suggester.settings().array().add(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS, field)));
         suggester.createIndexIfNothing();
     }
 

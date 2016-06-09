@@ -133,6 +133,7 @@ public class AdminFileconfigAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
+        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
         final String id = form.id;
         fileConfigService
                 .getFileConfig(id)
@@ -140,16 +141,14 @@ public class AdminFileconfigAction extends FessAdminAction {
                         entity -> {
                             copyBeanToBean(entity, form, copyOp -> {
                                 copyOp.excludeNull();
-                                copyOp.exclude("permissions");
+                                copyOp.exclude(Constants.PERMISSIONS);
                             });
-                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
                                     stream(entity.getPermissions()).get(
-                                            stream -> stream.map(s -> permissionHelper.decode(s)).filter(StringUtil::isNotBlank).distinct()
+                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
                                                     .collect(Collectors.joining("\n")));
-                        }).orElse(() -> {
-                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
-                });
+                        })
+                .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml()));
         saveToken();
         if (form.crudMode.intValue() == CrudMode.EDIT) {
             // back
@@ -170,32 +169,26 @@ public class AdminFileconfigAction extends FessAdminAction {
         saveToken();
         return asHtml(path_AdminFileconfig_AdminFileconfigDetailsJsp).useForm(
                 EditForm.class,
-                op -> {
-                    op.setup(form -> {
-                        fileConfigService
-                                .getFileConfig(id)
-                                .ifPresent(
-                                        entity -> {
-                                            copyBeanToBean(entity, form, copyOp -> {
-                                                copyOp.excludeNull();
-                                                copyOp.exclude("permissions");
-                                            });
-                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                                            form.permissions =
-                                                    stream(entity.getPermissions()).get(
-                                                            stream -> stream.map(s -> permissionHelper.decode(s))
-                                                                    .filter(StringUtil::isNotBlank).distinct()
-                                                                    .collect(Collectors.joining("\n")));
-                                            form.crudMode = crudMode;
-                                        })
-                                .orElse(() -> {
-                                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
-                                            () -> asListHtml());
-                                });
-                    });
-                }).renderWith(data -> {
-            registerRolesAndLabels(data);
-        });
+                op -> op.setup(form -> {
+                    fileConfigService
+                            .getFileConfig(id)
+                            .ifPresent(
+                                    entity -> {
+                                        copyBeanToBean(entity, form, copyOp -> {
+                                            copyOp.excludeNull();
+                                            copyOp.exclude(Constants.PERMISSIONS);
+                                        });
+                                        final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                                        form.permissions =
+                                                stream(entity.getPermissions()).get(
+                                                        stream -> stream.map(s -> permissionHelper.decode(s))
+                                                                .filter(StringUtil::isNotBlank).distinct()
+                                                                .collect(Collectors.joining("\n")));
+                                        form.crudMode = crudMode;
+                                    })
+                            .orElse(() -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                                    () -> asListHtml()));
+                })).renderWith(data -> registerRolesAndLabels(data));
     }
 
     // -----------------------------------------------------
@@ -294,11 +287,8 @@ public class AdminFileconfigAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(
-                            form,
-                            entity,
-                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
-                                    n -> new String[n])));
+                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                            Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(stream(form.permissions.split("\n")).get(
                             stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()

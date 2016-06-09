@@ -150,10 +150,6 @@ public class CrawlingInfoService {
         }
     }
 
-    public CrawlingInfo get(final String sessionId) {
-        return crawlingInfoBhv.selectEntity(cb -> cb.query().setSessionId_Equal(sessionId)).orElse(null);//TODO
-    }
-
     public void storeInfo(final List<CrawlingInfoParam> crawlingInfoParamList) {
         if (crawlingInfoParamList == null) {
             throw new FessSystemException("Crawling Session Info is null.");

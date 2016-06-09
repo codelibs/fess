@@ -55,9 +55,7 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Crawler implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Crawler {
 
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
 

@@ -198,7 +198,7 @@ public class ElevateWordService {
                 try {
                     final String[] permissions =
                             stream(getValue(list, 2).split(",")).get(
-                                    stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
+                                    stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct()
                                             .toArray(n -> new String[n]));
                     final String label = getValue(list, 3);
                     ElevateWord elevateWord = elevateWordBhv.selectEntity(cb -> {
@@ -259,9 +259,7 @@ public class ElevateWordService {
             list.add("Boost");
             csvWriter.writeValues(list);
 
-            elevateWordBhv.selectCursor(cb -> {
-                cb.query().matchAll();
-            }, new EntityRowHandler<ElevateWord>() {
+            elevateWordBhv.selectCursor(cb -> cb.query().matchAll(), new EntityRowHandler<ElevateWord>() {
                 @Override
                 public void handle(final ElevateWord entity) {
                     final List<String> list = new ArrayList<>();

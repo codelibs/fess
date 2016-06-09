@@ -84,9 +84,7 @@ public class GroupService {
         });
 
         userBhv.selectCursor(
-                cb -> {
-                    cb.query().setGroups_Equal(group.getId());
-                },
+                cb -> cb.query().setGroups_Equal(group.getId()),
                 entity -> {
                     entity.setGroups(stream(entity.getGroups()).get(
                             stream -> stream.filter(s -> !s.equals(group.getId())).toArray(n -> new String[n])));

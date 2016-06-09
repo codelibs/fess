@@ -69,7 +69,7 @@ public class GeoInfo {
                                                         } catch (final Exception ex) {
                                                             throw new InvalidQueryException(messages -> messages
                                                                     .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), ex
-                                                                    .getLocalizedMessage());
+                                                                    .getLocalizedMessage(), ex);
                                                         }
                                                     } else {
                                                         throw new InvalidQueryException(messages -> messages
@@ -88,7 +88,7 @@ public class GeoInfo {
                 return list.get(0);
             } else if (list.size() > 1) {
                 final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-                list.forEach(q -> boolQuery.should(q));
+                list.forEach(boolQuery::should);
                 return boolQuery;
             }
             return null;
@@ -98,7 +98,7 @@ public class GeoInfo {
             builder = queryBuilders[0];
         } else if (queryBuilders.length > 1) {
             final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-            stream(queryBuilders).of(stream -> stream.forEach(q -> boolQuery.must(q)));
+            stream(queryBuilders).of(stream -> stream.forEach(boolQuery::must));
             builder = boolQuery;
         }
 

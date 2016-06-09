@@ -390,4 +390,6 @@ public class Constants extends CoreLibConstants {
     public static final String CONFIG_CLEANUP_ALL = "cleanup.all";
 
     public static final String GSA_API_VERSION = "3.2";
+
+    public static final String PERMISSIONS = "permissions";
 }

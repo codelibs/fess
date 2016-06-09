@@ -142,7 +142,7 @@ public class AdminWebconfigAction extends FessAdminAction {
                         entity -> {
                             copyBeanToBean(entity, form, copyOp -> {
                                 copyOp.excludeNull();
-                                copyOp.exclude("permissions");
+                                copyOp.exclude(Constants.PERMISSIONS);
                             });
                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                             form.permissions =
@@ -180,7 +180,7 @@ public class AdminWebconfigAction extends FessAdminAction {
                                         entity -> {
                                             copyBeanToBean(entity, form, copyOp -> {
                                                 copyOp.excludeNull();
-                                                copyOp.exclude("permissions");
+                                                copyOp.exclude(Constants.PERMISSIONS);
                                             });
                                             final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                                             form.permissions =
@@ -294,11 +294,8 @@ public class AdminWebconfigAction extends FessAdminAction {
                 entity -> {
                     entity.setUpdatedBy(username);
                     entity.setUpdatedTime(currentTime);
-                    copyBeanToBean(
-                            form,
-                            entity,
-                            op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE), Stream.of("permissions")).toArray(
-                                    n -> new String[n])));
+                    copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
+                            Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
                     entity.setPermissions(stream(form.permissions.split("\n")).get(
                             stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()

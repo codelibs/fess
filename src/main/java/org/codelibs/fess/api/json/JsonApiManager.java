@@ -257,12 +257,7 @@ public class JsonApiManager extends BaseApiManager {
                 if (geoInfo != null && geoInfo.toQueryBuilder() != null) {
                     buf.append(',');
                     buf.append("\"geo\":");
-                    try {
-                        final XContentBuilder builder = XContentFactory.jsonBuilder();
-                        buf.append(geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string());
-                    } catch (final Exception e) {
-                        buf.append("{ \"error\" : \"").append(ExceptionsHelper.detailedMessage(e)).append("\"}");
-                    }
+                    buf.append(toGeoRequestString(geoInfo));
                 }
             }
         } catch (final Exception e) {
@@ -278,6 +273,15 @@ public class JsonApiManager extends BaseApiManager {
 
         writeJsonResponse(status, buf.toString(), errMsg);
 
+    }
+
+    protected String toGeoRequestString(final GeoInfo geoInfo) {
+        try {
+            final XContentBuilder builder = XContentFactory.jsonBuilder();
+            return geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string();
+        } catch (final Exception e) {
+            return "{\"error\":\"" + ExceptionsHelper.detailedMessage(e) + "\"}";
+        }
     }
 
     protected void processLabelRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {

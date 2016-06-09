@@ -81,9 +81,7 @@ public class RoleService {
         });
 
         userBhv.selectCursor(
-                cb -> {
-                    cb.query().setRoles_Equal(role.getId());
-                },
+                cb -> cb.query().setRoles_Equal(role.getId()),
                 entity -> {
                     entity.setRoles(stream(entity.getRoles()).get(
                             stream -> stream.filter(s -> !s.equals(role.getId())).toArray(n -> new String[n])));

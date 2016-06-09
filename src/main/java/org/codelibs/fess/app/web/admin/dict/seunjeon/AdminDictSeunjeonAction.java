@@ -272,9 +272,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         createSeunjeonItem(form, () -> asEditHtml()).ifPresent(entity -> {
             seunjeonService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
-        });
+        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml()));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -286,9 +284,9 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         createSeunjeonItem(form, () -> asEditHtml()).ifPresent(entity -> {
             seunjeonService.store(form.dictId, entity);
             saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asEditHtml());
-        });
+        }).orElse(
+                () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
+                        () -> asEditHtml()));
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 

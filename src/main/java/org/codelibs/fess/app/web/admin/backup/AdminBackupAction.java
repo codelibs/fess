@@ -116,9 +116,8 @@ public class AdminBackupAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class).renderWith(data -> {
-            RenderDataUtil.register(data, "backupItems", getBackupItems());
-        });
+        return asHtml(path_AdminBackup_AdminBackupJsp).useForm(UploadForm.class).renderWith(
+                data -> RenderDataUtil.register(data, "backupItems", getBackupItems()));
     }
 
 }

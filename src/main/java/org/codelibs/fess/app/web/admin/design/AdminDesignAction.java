@@ -130,7 +130,7 @@ public class AdminDesignAction extends FessAdminAction implements Serializable {
             throwValidationError(messages -> messages.addErrorsDesignFileNameIsNotFound("designFile"), () -> asListHtml());
         }
 
-        File uploadFile = null;
+        File uploadFile;
         // normalize filename
         if (checkFileType(fileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())
                 && checkFileType(uploadedFileName, fessConfig.getSupportedUploadedMediaExtentionsAsArray())) {
