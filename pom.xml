@@ -57,10 +57,10 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.9-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.9</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>2.2.0-SNAPSHOT</suggest.version>
+		<suggest.version>2.2.0</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.3.3</elasticsearch.version>
@@ -1055,7 +1055,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.5-SNAPSHOT</version>
+			<version>0.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
