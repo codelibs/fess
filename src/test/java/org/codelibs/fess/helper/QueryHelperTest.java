@@ -16,7 +16,6 @@
 package org.codelibs.fess.helper;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.codelibs.fess.Constants;
@@ -43,86 +42,86 @@ public class QueryHelperTest extends UnitFessTestCase {
         queryHelper.init();
     }
 
-    public void test_dummy() throws ParseException {
-        System.out.println(queryHelper); // TODO
+    public void test_build() {
+        assertEquals(answer_basic("QUERY"), build_helper("QUERY"));
+        assertEquals(answer_basic("QUERY"), build_helper("QUERY "));
+        assertEquals(answer_basic("QUERY"), build_helper(" QUERY"));
+
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper("QUERY1 QUERY2"));
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper("QUERY1 QUERY2 "));
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper(" QUERY1 QUERY2"));
+
+        assertEquals(answer_basic("QUERY1 QUERY2"), build_helper("\"QUERY1 QUERY2\""));
+        assertEquals(answer_basic("QUERY1 QUERY2"), build_helper("\"QUERY1 QUERY2\" "));
+        assertEquals(answer_basic("QUERY1 QUERY2"), build_helper(" \"QUERY1 QUERY2\""));
+
+        assertEquals(answer_and("QUERY1 QUERY2", "QUERY3"), build_helper("\"QUERY1 QUERY2\" QUERY3"));
     }
 
-    //    public void test_build() {
-    //        for (final String op : new String[] { "AND", "OR" }) {
-    //            getMockRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
-    //            assertEquals("", queryHelper.buildQuery("").getQuery());
-    //
-    //            assertEquals("title:QUERY OR content:QUERY", queryHelper.buildQuery("QUERY").getQuery());
-    //            assertEquals("title:QUERY OR content:QUERY", queryHelper.buildQuery("QUERY ").getQuery());
-    //            assertEquals("title:QUERY OR content:QUERY", queryHelper.buildQuery(" QUERY").getQuery());
-    //
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("QUERY1 QUERY2").getQuery());
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("QUERY1 QUERY2 ").getQuery());
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery(" QUERY1 QUERY2").getQuery());
-    //
-    //            assertEquals("title:QUERY1\\ QUERY2 OR content:QUERY1\\ QUERY2", queryHelper.buildQuery("\"QUERY1 QUERY2\"").getQuery());
-    //            assertEquals("title:QUERY1\\ QUERY2 OR content:QUERY1\\ QUERY2", queryHelper.buildQuery("\"QUERY1 QUERY2\" ").getQuery());
-    //            assertEquals("title:QUERY1\\ QUERY2 OR content:QUERY1\\ QUERY2", queryHelper.buildQuery(" \"QUERY1 QUERY2\"").getQuery());
-    //
-    //            assertEquals("(title:QUERY1\\ QUERY2 OR content:QUERY1\\ QUERY2) " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("\"QUERY1 QUERY2\" QUERY3").getQuery());
-    //        }
-    //    }
-    //
-    //    public void test_build_fullwidthSpace() {
-    //        for (final String op : new String[] { "AND", "OR" }) {
-    //            getMockRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
-    //
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("QUERY1\u3000QUERY2").getQuery());
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("QUERY1\u3000QUERY2\u3000").getQuery());
-    //            assertEquals("(title:QUERY1 OR content:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("\u3000QUERY1\u3000QUERY2").getQuery());
-    //
-    //            assertEquals("title:QUERY1\\\u3000QUERY2 OR content:QUERY1\\\u3000QUERY2",
-    //                    queryHelper.buildQuery("\"QUERY1\u3000QUERY2\"").getQuery());
-    //
-    //            assertEquals("(title:QUERY1\\\u3000QUERY2 OR content:QUERY1\\\u3000QUERY2) " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("\"QUERY1\u3000QUERY2\"\u3000QUERY3").getQuery());
-    //        }
-    //    }
-    //
-    //    public void test_build_prefix() {
-    //        for (final String op : new String[] { "AND", "OR" }) {
-    //            getMockRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
-    //            assertEquals("mimetype:QUERY1", queryHelper.buildQuery("mimetype:QUERY1").getQuery());
-    //            assertEquals("mimetype:QUERY1 " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("mimetype:QUERY1 QUERY2").getQuery());
-    //            assertEquals("mimetype:QUERY1 " + op + " (title:QUERY2 OR content:QUERY2) " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("mimetype:QUERY1 QUERY2 QUERY3").getQuery());
-    //            assertEquals("mimetype:QUERY1 " + op + " host:QUERY2 " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("mimetype:QUERY1 host:QUERY2 QUERY3").getQuery());
-    //            assertEquals("mimetype:QUERY1\\ QUERY2 " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("mimetype:\"QUERY1 QUERY2\" QUERY3").getQuery());
-    //        }
-    //    }
-    //
-    //    public void test_build_prefix_unknown() {
-    //        for (final String op : new String[] { "AND", "OR" }) {
-    //            getMockRequest().setAttribute(Constants.DEFAULT_OPERATOR, op);
-    //            assertEquals("title:site\\: OR content:site\\:", queryHelper.buildQuery("site:").getQuery());
-    //            assertEquals("title:hoge\\:QUERY1 OR content:hoge\\:QUERY1", queryHelper.buildQuery("hoge:QUERY1").getQuery());
-    //            assertEquals("(title:hoge\\:QUERY1 OR content:hoge\\:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2)",
-    //                    queryHelper.buildQuery("hoge:QUERY1 QUERY2").getQuery());
-    //            assertEquals("(title:hoge\\:QUERY1 OR content:hoge\\:QUERY1) " + op + " (title:QUERY2 OR content:QUERY2) " + op
-    //                    + " (title:QUERY3 OR content:QUERY3)", queryHelper.buildQuery("hoge:QUERY1 QUERY2 QUERY3").getQuery());
-    //            assertEquals(
-    //                    "(title:hoge\\:QUERY1 OR content:hoge\\:QUERY1) " + op + " host:QUERY2 " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("hoge:QUERY1 host:QUERY2 QUERY3").getQuery());
-    //            assertEquals("(title:hoge\\:QUERY1\\ QUERY2 OR content:hoge\\:QUERY1\\ QUERY2) " + op + " (title:QUERY3 OR content:QUERY3)",
-    //                    queryHelper.buildQuery("hoge:\"QUERY1 QUERY2\" QUERY3").getQuery());
-    //        }
-    //    }
-    //
+    public void test_build_fullwidthSpace() {
+
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper("QUERY1\u3000QUERY2"));
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper("QUERY1\u3000QUERY2\u3000"));
+        assertEquals(answer_and("QUERY1", "QUERY2"), build_helper("\u3000QUERY1\u3000QUERY2"));
+
+        assertEquals(answer_basic("QUERY1 QUERY2"), build_helper("\"QUERY1\u3000QUERY2\""));
+
+        assertEquals(answer_and("QUERY1 QUERY2", "QUERY3"), build_helper("\"QUERY1\u3000QUERY2\"\u3000QUERY3"));
+    }
+
+    public void test_build_prefix() {
+        final String[] ans =
+                {
+                        "{ \"match\" : { \"mimetype\" : { \"query\" : \"QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }",
+                        "{ \"bool\" : { \"should\" : [ { \"match\" : { \"mimetype\" : { \"query\" : \"QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"match\" : { \"mimetype\" : { \"query\" : \"QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"match\" : { \"mimetype\" : { \"query\" : \"QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }, { \"match\" : { \"host\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY1 QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY1 QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }" };
+        assertEquals(answer_query(ans[0]), build_helper("mimetype:QUERY1"));
+        assertEquals(answer_query(ans[1]), build_helper("mimetype:QUERY1 QUERY2"));
+        assertEquals(answer_query(ans[2]), build_helper("mimetype:QUERY1 QUERY2 QUERY3"));
+        assertEquals(answer_query(ans[3]), build_helper("mimetype:QUERY1 host:QUERY2 QUERY3"));
+        assertEquals(answer_query(ans[4]), build_helper("mimetype:\"QUERY1 QUERY2\" QUERY3"));
+    }
+
+    public void test_build_prefix_unknown() {
+        final String[] ans =
+                {
+                        "{ \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"foo:QUERY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"match\" : { \"host\" : { \"query\" : \"QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }",
+                        "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY1 QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY1 QUERY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"QUERY3\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }" };
+        assertEquals(answer_query(ans[0]), build_helper("foo:QUERY1"));
+        assertEquals(answer_query(ans[1]), build_helper("foo:QUERY1 QUERY2"));
+        assertEquals(answer_query(ans[2]), build_helper("foo:QUERY1 QUERY2 QUERY3"));
+        assertEquals(answer_query(ans[3]), build_helper("foo:QUERY1 host:QUERY2 QUERY3"));
+        assertEquals(answer_query(ans[4]), build_helper("foo:\"QUERY1 QUERY2\" QUERY3"));
+    }
+
+    private String answer_query(String q) {
+        return "{ \"function_score\" : { \"query\" : " + q
+                + ", \"functions\" : [ { \"field_value_factor\" : { \"field\" : \"boost\" } } ] } }";
+    }
+
+    private String answer_basic(String q) {
+        final String template =
+                "{ \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"DUMMY\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"DUMMY\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }";
+        return answer_query(template.replaceAll("DUMMY", q));
+    }
+
+    private String answer_and(String q1, String q2) {
+        final String template =
+                "{ \"bool\" : { \"should\" : [ { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"DUMMY1\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"DUMMY1\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } }, { \"bool\" : { \"should\" : [ { \"match\" : { \"title\" : { \"query\" : \"DUMMY2\", \"type\" : \"phrase\", \"boost\" : 1.6 } } }, { \"match\" : { \"content\" : { \"query\" : \"DUMMY2\", \"type\" : \"phrase\", \"boost\" : 1.0 } } } ] } } ] } }";
+        return answer_query(template.replaceAll("DUMMY1", q1).replaceAll("DUMMY2", q2));
+    }
+
+    private String build_helper(String query) {
+        return queryHelper.build(query, context -> {
+            context.skipRoleQuery();
+        }).getQueryBuilder().toString().replaceAll("[\n ]+", " ");
+    }
+
     //    public void test_build_roleType() {
     //        for (final String op : new String[] { "AND", "OR" }) {
     //            queryHelper.roleQueryHelper = new RoleQueryHelper() {
