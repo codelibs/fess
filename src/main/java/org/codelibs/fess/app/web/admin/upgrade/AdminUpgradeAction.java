@@ -374,7 +374,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
             saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
-            fessEsClient.refresh("_all");
+            fessEsClient.refresh();
         } catch (final Exception e) {
             logger.warn("Failed to upgrade data.", e);
             saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));

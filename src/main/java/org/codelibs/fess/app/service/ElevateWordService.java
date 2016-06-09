@@ -237,7 +237,7 @@ public class ElevateWordService {
                     logger.warn("Failed to read a sugget elevate word: " + list, e);
                 }
             }
-            fessEsClient.refresh("_all"); // TODO replace _all
+            elevateWordBhv.refresh();
         } catch (final IOException e) {
             logger.warn("Failed to read a sugget elevate word.", e);
         }

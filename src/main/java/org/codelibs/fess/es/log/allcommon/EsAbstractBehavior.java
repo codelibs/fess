@@ -39,6 +39,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -72,6 +73,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected String scrollSearchTimeout = "3m";
     protected String bulkTimeout = "3m";
     protected String deleteTimeout = "3m";
+    protected String refreshTimeout = "1m";
 
     protected abstract String asEsIndex();
 
@@ -80,6 +82,13 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
     protected abstract String asEsSearchType();
 
     protected abstract <RESULT extends ENTITY> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType);
+
+    // ===================================================================================
+    //                                                                       Elasticsearch
+    //                                                                              ======
+    public RefreshResponse refresh() {
+        return client.admin().indices().prepareRefresh(asEsIndex()).execute().actionGet(refreshTimeout);
+    }
 
     // ===================================================================================
     //                                                                              Select
@@ -472,6 +481,10 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
     public void setDeleteTimeout(String deleteTimeout) {
         this.deleteTimeout = deleteTimeout;
+    }
+
+    public void setRefreshTimeout(String refreshTimeout) {
+        this.refreshTimeout = refreshTimeout;
     }
 
     // ===================================================================================

@@ -722,36 +722,36 @@ public class FessEsClient implements Client {
         }
     }
 
-    public void refresh(final String index) {
-        client.admin().indices().prepareRefresh(index).execute(new ActionListener<RefreshResponse>() {
+    public void refresh(final String... indices) {
+        client.admin().indices().prepareRefresh(indices).execute(new ActionListener<RefreshResponse>() {
             @Override
             public void onResponse(final RefreshResponse response) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Refreshed " + index + ".");
+                    logger.debug("Refreshed " + stream(indices).get(stream -> stream.collect(Collectors.joining(", "))) + ".");
                 }
             }
 
             @Override
             public void onFailure(final Throwable e) {
-                logger.error("Failed to refresh " + index + ".", e);
+                logger.error("Failed to refresh " + stream(indices).get(stream -> stream.collect(Collectors.joining(", "))) + ".", e);
             }
         });
 
     }
 
-    public void flush(final String index) {
-        client.admin().indices().prepareFlush(index).execute(new ActionListener<FlushResponse>() {
+    public void flush(final String... indices) {
+        client.admin().indices().prepareFlush(indices).execute(new ActionListener<FlushResponse>() {
 
             @Override
             public void onResponse(final FlushResponse response) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Flushed " + index + ".");
+                    logger.debug("Flushed " + stream(indices).get(stream -> stream.collect(Collectors.joining(", "))) + ".");
                 }
             }
 
             @Override
             public void onFailure(final Throwable e) {
-                logger.error("Failed to flush " + index + ".", e);
+                logger.error("Failed to flush " + stream(indices).get(stream -> stream.collect(Collectors.joining(", "))) + ".", e);
             }
         });
 
