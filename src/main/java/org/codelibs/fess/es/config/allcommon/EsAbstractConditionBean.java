@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.es.config.allcommon;
 
+import org.codelibs.fess.es.config.allcommon.EsSqlClause;
 import org.dbflute.cbean.ConditionBean;
 import org.dbflute.cbean.chelper.HpCBPurpose;
 import org.dbflute.cbean.chelper.HpColumnSpHandler;
