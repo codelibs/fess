@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.es.config.bsentity.dbmeta;
 
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
