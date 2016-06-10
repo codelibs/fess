@@ -12,7 +12,7 @@
           "match": "*_ar",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "arabic_analyzer"
           }
         }
       },
@@ -21,7 +21,7 @@
           "match": "*_bg",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "bulgarian_analyzer"
           }
         }
       },
@@ -39,7 +39,7 @@
           "match": "*_ca",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "catalan_analyzer"
           }
         }
       },
@@ -48,7 +48,7 @@
           "match": "*_cs",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "czech_analyzer"
           }
         }
       },
@@ -57,7 +57,7 @@
           "match": "*_da",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "danish_analyzer"
           }
         }
       },
@@ -66,7 +66,7 @@
           "match": "*_de",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "german_analyzer"
           }
         }
       },
@@ -75,7 +75,7 @@
           "match": "*_el",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "greek_analyzer"
           }
         }
       },
@@ -93,7 +93,7 @@
           "match": "*_es",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "spanish_analyzer"
           }
         }
       },
@@ -111,7 +111,7 @@
           "match": "*_fa",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "persian_analyzer"
           }
         }
       },
@@ -120,7 +120,7 @@
           "match": "*_fi",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "finnish_analyzer"
           }
         }
       },
@@ -129,7 +129,7 @@
           "match": "*_fr",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "french_analyzer"
           }
         }
       },
@@ -174,7 +174,7 @@
           "match": "*_hu",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "hungarian_analyzer"
           }
         }
       },
@@ -183,7 +183,7 @@
           "match": "*_id",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "indonesian_analyzer"
           }
         }
       },
@@ -192,7 +192,7 @@
           "match": "*_it",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "italian_analyzer"
           }
         }
       },
@@ -219,7 +219,7 @@
           "match": "*_lt",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "lithuanian_analyzer"
           }
         }
       },
@@ -228,7 +228,7 @@
           "match": "*_lv",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "latvian_analyzer"
           }
         }
       },
@@ -255,7 +255,7 @@
           "match": "*_nl",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "dutch_analyzer"
           }
         }
       },
@@ -264,7 +264,7 @@
           "match": "*_no",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "norwegian_analyzer"
           }
         }
       },
@@ -291,7 +291,7 @@
           "match": "*_pt",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "portuguese_analyzer"
           }
         }
       },
@@ -300,7 +300,7 @@
           "match": "*_ro",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "romanian_analyzer"
           }
         }
       },
@@ -309,7 +309,7 @@
           "match": "*_ru",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "russian_analyzer"
           }
         }
       },
@@ -336,7 +336,7 @@
           "match": "*_sv",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "swedish_analyzer"
           }
         }
       },
@@ -363,7 +363,7 @@
           "match": "*_th",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "thai_analyzer"
           }
         }
       },
@@ -381,7 +381,7 @@
           "match": "*_tr",
           "mapping": {
             "type": "string",
-            "analyzer": "empty_analyzer"
+            "analyzer": "turkish_analyzer"
           }
         }
       },

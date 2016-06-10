@@ -84,6 +84,22 @@
             "連体詞"
           ]
         },
+        "german_stop": {
+          "type":       "stop",
+          "stopwords":  "_german_" 
+        },
+        "german_stemmer": {
+          "type":       "stemmer",
+          "language":   "light_german"
+        },
+        "romanian_stop": {
+          "type":       "stop",
+          "stopwords":  "_romanian_" 
+        },
+        "romanian_stemmer": {
+          "type":       "stemmer",
+          "language":   "romanian"
+        },
         "truncate10_filter" : {
           "type" : "truncate",
           "length" : 10
@@ -152,6 +168,27 @@
         "korean_analyzer": {
           "type": "custom",
           "tokenizer":"seunjeon_default_tokenizer"
+        },
+        "german_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "truncate20_filter",
+            "german_stop",
+            "german_normalization",
+            "german_stemmer"
+          ]
+        },
+        "romanian_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "truncate20_filter",
+            "romanian_stop",
+            "romanian_stemmer"
+          ]
         },
         "empty_analyzer": {
           "type": "custom",
