@@ -61,8 +61,11 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ComponentUtil {
+    private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
     private static final String PERMISSION_HELPER = "permissionHelper";
 
@@ -345,7 +348,11 @@ public final class ComponentUtil {
         try {
             return SingletonLaContainer.getComponent(clazz);
         } catch (final NullPointerException e) {
-            throw new ContainerNotAvailableException(e);
+            if (logger.isDebugEnabled()) {
+                throw new ContainerNotAvailableException(clazz.getCanonicalName(), e);
+            } else {
+                throw new ContainerNotAvailableException(clazz.getCanonicalName());
+            }
         }
     }
 
@@ -353,7 +360,11 @@ public final class ComponentUtil {
         try {
             return SingletonLaContainer.getComponent(componentName);
         } catch (final NullPointerException e) {
-            throw new ContainerNotAvailableException(e);
+            if (logger.isDebugEnabled()) {
+                throw new ContainerNotAvailableException(componentName, e);
+            } else {
+                throw new ContainerNotAvailableException(componentName);
+            }
         }
     }
 

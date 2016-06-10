@@ -40,6 +40,7 @@ import org.codelibs.fess.crawler.util.EsResultList;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.helper.IndexingHelper;
 import org.codelibs.fess.helper.IntervalControlHelper;
@@ -287,8 +288,17 @@ public class IndexUpdater extends Thread {
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished indexUpdater.");
             }
+        } catch (final ContainerNotAvailableException e) {
+            if (logger.isDebugEnabled()) {
+                logger.error("IndexUpdater is terminated.", e);
+            } else if (logger.isInfoEnabled()) {
+                logger.info("IndexUpdater is terminated.");
+            }
+            forceStop();
         } catch (final Throwable t) {
             if (ComponentUtil.available()) {
+                logger.error("IndexUpdater is terminated.", t);
+            } else if (logger.isDebugEnabled()) {
                 logger.error("IndexUpdater is terminated.", t);
             } else if (logger.isInfoEnabled()) {
                 logger.info("IndexUpdater is terminated.");
