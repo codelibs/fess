@@ -13,7 +13,7 @@
         },
         "zero_width_spaces": {
             "type":       "mapping",
-            "mappings": [ "\\u200C=> "] 
+            "mappings": [ "\\u200C=> "]
         },
         "removeall_filter": {
           "type": "pattern_replace",
@@ -90,7 +90,7 @@
         },
         "german_stop": {
           "type":       "stop",
-          "stopwords":  "_german_" 
+          "stopwords":  "_german_"
         },
         "german_keywords": {
           "type":       "keyword_marker",
@@ -111,7 +111,7 @@
         },
         "french_stop": {
           "type":       "stop",
-          "stopwords":  "_french_" 
+          "stopwords":  "_french_"
         },
         "french_keywords": {
           "type":       "keyword_marker",
@@ -132,7 +132,7 @@
         },
         "italian_stop": {
           "type":       "stop",
-          "stopwords":  "_italian_" 
+          "stopwords":  "_italian_"
         },
         "italian_keywords": {
           "type":       "keyword_marker",
@@ -144,7 +144,7 @@
         },
         "arabic_stop": {
           "type":       "stop",
-          "stopwords":  "_arabic_" 
+          "stopwords":  "_arabic_"
         },
         "arabic_keywords": {
           "type":       "keyword_marker",
@@ -156,7 +156,7 @@
         },
         "romanian_stop": {
           "type":       "stop",
-          "stopwords":  "_romanian_" 
+          "stopwords":  "_romanian_"
         },
         "romanian_keywords": {
           "type":       "keyword_marker",
@@ -172,7 +172,7 @@
         },
         "catalan_stop": {
           "type":       "stop",
-          "stopwords":  "_catalan_" 
+          "stopwords":  "_catalan_"
         },
         "catalan_keywords": {
           "type":       "keyword_marker",
@@ -184,7 +184,7 @@
         },
         "czech_stop": {
           "type":       "stop",
-          "stopwords":  "_czech_" 
+          "stopwords":  "_czech_"
         },
         "czech_keywords": {
           "type":       "keyword_marker",
@@ -196,7 +196,7 @@
         },
         "danish_stop": {
           "type":       "stop",
-          "stopwords":  "_danish_" 
+          "stopwords":  "_danish_"
         },
         "danish_keywords": {
           "type":       "keyword_marker",
@@ -208,7 +208,7 @@
         },
         "spanish_stop": {
           "type":       "stop",
-          "stopwords":  "_spanish_" 
+          "stopwords":  "_spanish_"
         },
         "spanish_keywords": {
           "type":       "keyword_marker",
@@ -220,7 +220,7 @@
         },
         "greek_stop": {
           "type":       "stop",
-          "stopwords":  "_greek_" 
+          "stopwords":  "_greek_"
         },
         "greek_lowercase": {
           "type":       "lowercase",
@@ -236,11 +236,11 @@
         },
         "persian_stop": {
           "type":       "stop",
-          "stopwords":  "_persian_" 
+          "stopwords":  "_persian_"
         },
         "finnish_stop": {
           "type":       "stop",
-          "stopwords":  "_finnish_" 
+          "stopwords":  "_finnish_"
         },
         "finnish_keywords": {
           "type":       "keyword_marker",
@@ -252,7 +252,7 @@
         },
         "hindi_stop": {
           "type":       "stop",
-          "stopwords":  "_hindi_" 
+          "stopwords":  "_hindi_"
         },
         "hindi_keywords": {
           "type":       "keyword_marker",
@@ -264,7 +264,7 @@
         },
         "hungarian_stop": {
           "type":       "stop",
-          "stopwords":  "_hungarian_" 
+          "stopwords":  "_hungarian_"
         },
         "hungarian_keywords": {
           "type":       "keyword_marker",
@@ -276,7 +276,7 @@
         },
         "indonesian_stop": {
           "type":       "stop",
-          "stopwords":  "_indonesian_" 
+          "stopwords":  "_indonesian_"
         },
         "indonesian_keywords": {
           "type":       "keyword_marker",
@@ -288,7 +288,7 @@
         },
         "lithuanian_stop": {
           "type":       "stop",
-          "stopwords":  "_lithuanian_" 
+          "stopwords":  "_lithuanian_"
         },
         "lithuanian_keywords": {
           "type":       "keyword_marker",
@@ -300,7 +300,7 @@
         },
         "latvian_stop": {
           "type":       "stop",
-          "stopwords":  "_latvian_" 
+          "stopwords":  "_latvian_"
         },
         "latvian_keywords": {
           "type":       "keyword_marker",
@@ -312,7 +312,7 @@
         },
         "dutch_stop": {
           "type":       "stop",
-          "stopwords":  "_dutch_" 
+          "stopwords":  "_dutch_"
         },
         "dutch_keywords": {
           "type":       "keyword_marker",
@@ -333,7 +333,7 @@
         },
         "norwegian_stop": {
           "type":       "stop",
-          "stopwords":  "_norwegian_" 
+          "stopwords":  "_norwegian_"
         },
         "norwegian_keywords": {
           "type":       "keyword_marker",
@@ -345,7 +345,7 @@
         },
         "portuguese_stop": {
           "type":       "stop",
-          "stopwords":  "_portuguese_" 
+          "stopwords":  "_portuguese_"
         },
         "portuguese_keywords": {
           "type":       "keyword_marker",
@@ -357,7 +357,7 @@
         },
         "russian_stop": {
           "type":       "stop",
-          "stopwords":  "_russian_" 
+          "stopwords":  "_russian_"
         },
         "russian_keywords": {
           "type":       "keyword_marker",
@@ -369,7 +369,7 @@
         },
         "swedish_stop": {
           "type":       "stop",
-          "stopwords":  "_swedish_" 
+          "stopwords":  "_swedish_"
         },
         "swedish_keywords": {
           "type":       "keyword_marker",
@@ -381,11 +381,11 @@
         },
         "thai_stop": {
           "type":       "stop",
-          "stopwords":  "_thai_" 
+          "stopwords":  "_thai_"
         },
         "turkish_stop": {
           "type":       "stop",
-          "stopwords":  "_turkish_" 
+          "stopwords":  "_turkish_"
         },
         "turkish_lowercase": {
           "type":       "lowercase",
@@ -472,8 +472,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "german_stop",
             "german_normalization",
             "german_stemmer"
@@ -483,9 +483,9 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
+            "truncate20_filter",
             "french_elision",
             "lowercase",
-            "truncate20_filter",
             "french_stop",
             "french_keywords",
             "french_stemmer"
@@ -495,9 +495,9 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
+            "truncate20_filter",
             "italian_elision",
             "lowercase",
-            "truncate20_filter",
             "italian_stop",
             "italian_keywords",
             "italian_stemmer"
@@ -507,8 +507,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "arabic_stop",
             "arabic_normalization",
             "arabic_keywords",
@@ -519,8 +519,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "romanian_stop",
             "romanian_stemmer"
           ]
@@ -529,9 +529,9 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
+            "truncate20_filter",
             "catalan_elision",
             "lowercase",
-            "truncate20_filter",
             "catalan_stop",
             "catalan_keywords",
             "catalan_stemmer"
@@ -541,8 +541,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "czech_stop",
             "czech_keywords",
             "czech_stemmer"
@@ -552,8 +552,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "danish_stop",
             "danish_keywords",
             "danish_stemmer"
@@ -563,8 +563,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "spanish_stop",
             "spanish_keywords",
             "spanish_stemmer"
@@ -574,8 +574,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "greek_lowercase",
             "truncate20_filter",
+            "greek_lowercase",
             "greek_stop",
             "greek_keywords",
             "greek_stemmer"
@@ -586,8 +586,8 @@
           "tokenizer": "standard",
           "char_filter": [ "zero_width_spaces" ],
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "arabic_normalization",
             "persian_normalization",
             "persian_stop"
@@ -597,8 +597,8 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "finnish_stop",
             "finnish_keywords",
             "finnish_stemmer"
@@ -608,8 +608,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "indic_normalization",
             "hindi_normalization",
             "hindi_stop",
@@ -621,8 +621,8 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "hungarian_stop",
             "hungarian_keywords",
             "hungarian_stemmer"
@@ -632,8 +632,8 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "indonesian_stop",
             "indonesian_keywords",
             "indonesian_stemmer"
@@ -643,8 +643,8 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "lithuanian_stop",
             "lithuanian_keywords",
             "lithuanian_stemmer"
@@ -654,8 +654,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "latvian_stop",
             "latvian_keywords",
             "latvian_stemmer"
@@ -665,8 +665,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "dutch_stop",
             "dutch_keywords",
             "dutch_override",
@@ -677,8 +677,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "norwegian_stop",
             "norwegian_keywords",
             "norwegian_stemmer"
@@ -688,8 +688,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "portuguese_stop",
             "portuguese_keywords",
             "portuguese_stemmer"
@@ -699,8 +699,8 @@
           "type": "custom",
           "tokenizer":  "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "russian_stop",
             "russian_keywords",
             "russian_stemmer"
@@ -710,8 +710,8 @@
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "swedish_stop",
             "swedish_keywords",
             "swedish_stemmer"
@@ -721,8 +721,8 @@
           "type": "custom",
           "tokenizer": "thai",
           "filter": [
-            "lowercase",
             "truncate20_filter",
+            "lowercase",
             "thai_stop"
           ]
         },
