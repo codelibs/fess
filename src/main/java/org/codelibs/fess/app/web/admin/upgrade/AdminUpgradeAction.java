@@ -64,6 +64,10 @@ public class AdminUpgradeAction extends FessAdminAction {
     //
     private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
 
+    private static final String VERSION_10_1 = "10.1";
+
+    private static final String VERSION_10_0 = "10.0";
+
     // ===================================================================================
     //                                                                           Attribute
     //
@@ -136,12 +140,37 @@ public class AdminUpgradeAction extends FessAdminAction {
         });
         verifyToken(() -> asIndexHtml());
 
-        if ("10.0".equals(form.targetVersion)) {
-            upgradeFrom10_0();
+        if (VERSION_10_1.equals(form.targetVersion)) {
+            try {
+                upgradeFrom10_1();
+
+                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+                fessEsClient.refresh();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_1, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_10_0.equals(form.targetVersion)) {
+            try {
+                upgradeFrom10_0();
+                upgradeFrom10_1();
+
+                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+                fessEsClient.refresh();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_0, e.getLocalizedMessage()));
+            }
         } else {
             saveError(messages -> messages.addErrorsUnknownVersionForUpgrade(GLOBAL));
         }
         return redirect(getClass());
+    }
+
+    private void upgradeFrom10_1() {
+        // TODO close index, update analyzers, open index
     }
 
     private void upgradeFrom10_0() {
@@ -153,232 +182,220 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String docType = fessConfig.getIndexDocumentType();
 
-        try {
-            // file
-            uploadResource(indexConfigPath, docIndex, "ko/seunjeon.txt");
+        // file
+        uploadResource(indexConfigPath, docIndex, "ko/seunjeon.txt");
 
-            // alias
-            createAlias(indicesClient, indexConfigPath, configIndex, ".fess_basic_config");
+        // alias
+        createAlias(indicesClient, indexConfigPath, configIndex, ".fess_basic_config");
 
-            // update mapping
-            addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
-                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, configIndex, "web_config", "permissions",
-                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, configIndex, "file_config", "permissions",
-                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, configIndex, "data_config", "permissions",
-                    "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "group", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "employeeNumber",
-                    "{\"properties\":{\"employeeNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "mail",
-                    "{\"properties\":{\"mail\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "telephoneNumber",
-                    "{\"properties\":{\"telephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "homePhone",
-                    "{\"properties\":{\"homePhone\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "homePostalAddress",
-                    "{\"properties\":{\"homePostalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "labeledURI",
-                    "{\"properties\":{\"labeledURI\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "roomNumber",
-                    "{\"properties\":{\"roomNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "description",
-                    "{\"properties\":{\"description\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "title",
-                    "{\"properties\":{\"title\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "pager",
-                    "{\"properties\":{\"pager\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "street",
-                    "{\"properties\":{\"street\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "postalCode",
-                    "{\"properties\":{\"postalCode\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "physicalDeliveryOfficeName",
-                    "{\"properties\":{\"physicalDeliveryOfficeName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "destinationIndicator",
-                    "{\"properties\":{\"destinationIndicator\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "internationaliSDNNumber",
-                    "{\"properties\":{\"internationaliSDNNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "state",
-                    "{\"properties\":{\"state\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "employeeType",
-                    "{\"properties\":{\"employeeType\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "facsimileTelephoneNumber",
-                    "{\"properties\":{\"facsimileTelephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "postOfficeBox",
-                    "{\"properties\":{\"postOfficeBox\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "initials",
-                    "{\"properties\":{\"initials\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "carLicense",
-                    "{\"properties\":{\"carLicense\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "mobile",
-                    "{\"properties\":{\"mobile\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "postalAddress",
-                    "{\"properties\":{\"postalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "city",
-                    "{\"properties\":{\"city\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "teletexTerminalIdentifier",
-                    "{\"properties\":{\"teletexTerminalIdentifier\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "x121Address",
-                    "{\"properties\":{\"x121Address\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "businessCategory",
-                    "{\"properties\":{\"businessCategory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "registeredAddress",
-                    "{\"properties\":{\"registeredAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "displayName",
-                    "{\"properties\":{\"displayName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "preferredLanguage",
-                    "{\"properties\":{\"preferredLanguage\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "departmentNumber",
-                    "{\"properties\":{\"departmentNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "uidNumber", "{\"properties\":{\"uidNumber\":{\"type\":\"long\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "homeDirectory",
-                    "{\"properties\":{\"homeDirectory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, userIndex, "user", "groups",
-                    "{\"properties\":{\"groups\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-            addFieldMapping(indicesClient, docIndex, docType, "location", "{\"properties\":{\"location\":{\"type\":\"geo_point\"}}}");
+        // update mapping
+        addFieldMapping(indicesClient, configIndex, "label_type", "permissions",
+                "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, configIndex, "web_config", "permissions",
+                "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, configIndex, "file_config", "permissions",
+                "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, configIndex, "data_config", "permissions",
+                "{\"properties\":{\"permissions\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "group", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "employeeNumber",
+                "{\"properties\":{\"employeeNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "mail",
+                "{\"properties\":{\"mail\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "telephoneNumber",
+                "{\"properties\":{\"telephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "homePhone",
+                "{\"properties\":{\"homePhone\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "homePostalAddress",
+                "{\"properties\":{\"homePostalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "labeledURI",
+                "{\"properties\":{\"labeledURI\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "roomNumber",
+                "{\"properties\":{\"roomNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "description",
+                "{\"properties\":{\"description\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "title",
+                "{\"properties\":{\"title\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "pager",
+                "{\"properties\":{\"pager\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "street",
+                "{\"properties\":{\"street\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "postalCode",
+                "{\"properties\":{\"postalCode\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "physicalDeliveryOfficeName",
+                "{\"properties\":{\"physicalDeliveryOfficeName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "destinationIndicator",
+                "{\"properties\":{\"destinationIndicator\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "internationaliSDNNumber",
+                "{\"properties\":{\"internationaliSDNNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "state",
+                "{\"properties\":{\"state\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "employeeType",
+                "{\"properties\":{\"employeeType\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "facsimileTelephoneNumber",
+                "{\"properties\":{\"facsimileTelephoneNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "postOfficeBox",
+                "{\"properties\":{\"postOfficeBox\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "initials",
+                "{\"properties\":{\"initials\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "carLicense",
+                "{\"properties\":{\"carLicense\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "mobile",
+                "{\"properties\":{\"mobile\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "postalAddress",
+                "{\"properties\":{\"postalAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "city",
+                "{\"properties\":{\"city\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "teletexTerminalIdentifier",
+                "{\"properties\":{\"teletexTerminalIdentifier\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "x121Address",
+                "{\"properties\":{\"x121Address\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "businessCategory",
+                "{\"properties\":{\"businessCategory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "registeredAddress",
+                "{\"properties\":{\"registeredAddress\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "displayName",
+                "{\"properties\":{\"displayName\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "preferredLanguage",
+                "{\"properties\":{\"preferredLanguage\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "departmentNumber",
+                "{\"properties\":{\"departmentNumber\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "uidNumber", "{\"properties\":{\"uidNumber\":{\"type\":\"long\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "gidNumber", "{\"properties\":{\"gidNumber\":{\"type\":\"long\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "homeDirectory",
+                "{\"properties\":{\"homeDirectory\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, userIndex, "user", "groups",
+                "{\"properties\":{\"groups\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, docIndex, docType, "location", "{\"properties\":{\"location\":{\"type\":\"geo_point\"}}}");
 
-            // data migration
-            final Map<String, List<String>> mapping = new HashMap<>();
-            labelToRoleBhv.selectList(cb -> cb.query().addOrderBy_LabelTypeId_Asc()).forEach(e -> {
-                List<String> list = mapping.get(e.getLabelTypeId());
-                if (list == null) {
-                    list = new ArrayList<>();
-                    mapping.put(e.getLabelTypeId(), list);
-                }
-                list.add(e.getRoleTypeId());
-            });
-            mapping.entrySet().forEach(
-                    e -> {
-                        final String labelTypeId = e.getKey();
-                        final List<String> idList = e.getValue();
-                        labelTypeBhv.selectEntity(cb -> cb.acceptPK(labelTypeId)).ifPresent(
-                                entity -> {
-                                    final String[] permissions =
-                                            roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
-                                                    .toArray(n -> new String[n]);
-                                    entity.setPermissions(permissions);
-                                    labelTypeBhv.insertOrUpdate(entity);
-                                    labelToRoleBhv.queryDelete(cb -> cb.query().setLabelTypeId_Equal(labelTypeId));
-                                });
-                    });
-
-            mapping.clear();
-            webConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_WebConfigId_Asc()).forEach(e -> {
-                final String webConfigId = e.getWebConfigId();
-                List<String> list = mapping.get(webConfigId);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    mapping.put(webConfigId, list);
-                }
-                list.add(e.getRoleTypeId());
-            });
-            mapping.entrySet().forEach(
-                    e -> {
-                        final String webConfigTypeId = e.getKey();
-                        final List<String> idList = e.getValue();
-                        webConfigBhv.selectEntity(cb -> cb.acceptPK(webConfigTypeId)).ifPresent(
-                                entity -> {
-                                    final String[] permissions =
-                                            roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
-                                                    .toArray(n -> new String[n]);
-                                    entity.setPermissions(permissions);
-                                    webConfigBhv.insertOrUpdate(entity);
-                                    webConfigToRoleBhv.queryDelete(cb -> cb.query().setWebConfigId_Equal(webConfigTypeId));
-                                });
-                    });
-
-            mapping.clear();
-            fileConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_FileConfigId_Asc()).forEach(e -> {
-                final String fileConfigId = e.getFileConfigId();
-                List<String> list = mapping.get(fileConfigId);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    mapping.put(fileConfigId, list);
-                }
-                list.add(e.getRoleTypeId());
-            });
-            mapping.entrySet().forEach(
-                    e -> {
-                        final String fileConfigTypeId = e.getKey();
-                        final List<String> idList = e.getValue();
-                        fileConfigBhv.selectEntity(cb -> cb.acceptPK(fileConfigTypeId)).ifPresent(
-                                entity -> {
-                                    final String[] permissions =
-                                            roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
-                                                    .toArray(n -> new String[n]);
-                                    entity.setPermissions(permissions);
-                                    fileConfigBhv.insertOrUpdate(entity);
-                                    fileConfigToRoleBhv.queryDelete(cb -> cb.query().setFileConfigId_Equal(fileConfigTypeId));
-                                });
-                    });
-
-            mapping.clear();
-            dataConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_DataConfigId_Asc()).forEach(e -> {
-                final String dataConfigId = e.getDataConfigId();
-                List<String> list = mapping.get(dataConfigId);
-                if (list == null) {
-                    list = new ArrayList<>();
-                    mapping.put(dataConfigId, list);
-                }
-                list.add(e.getRoleTypeId());
-            });
-            mapping.entrySet().forEach(
-                    e -> {
-                        final String dataConfigTypeId = e.getKey();
-                        final List<String> idList = e.getValue();
-                        dataConfigBhv.selectEntity(cb -> cb.acceptPK(dataConfigTypeId)).ifPresent(
-                                entity -> {
-                                    final String[] permissions =
-                                            roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
-                                                    .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue())
-                                                    .toArray(n -> new String[n]);
-                                    entity.setPermissions(permissions);
-                                    dataConfigBhv.insertOrUpdate(entity);
-                                    dataConfigToRoleBhv.queryDelete(cb -> cb.query().setDataConfigId_Equal(dataConfigTypeId));
-                                });
-                    });
-
-            roleTypeBhv.queryDelete(cb -> {});
-
-            roleBhv.selectEntity(cb -> cb.query().setName_Equal("guest")).orElseGet(() -> {
-                Role entity = new Role();
-                entity.setName("guest");
-                roleBhv.insert(entity);
-                return entity;
-            });
-
-            final List<ElevateWord> elevateWordList =
-                    elevateWordBhv
-                            .selectList(cb -> cb.query().addOrderBy_CreatedBy_Asc())
-                            .stream()
-                            .filter(e -> StringUtil.isNotBlank(e.getTargetRole()))
-                            .map(e -> {
-                                final String[] permissions =
-                                        StreamUtil
-                                                .stream(e.getTargetRole().split(","))
-                                                .get(stream -> stream.filter(StringUtil::isNotBlank).map(
-                                                        s -> fessConfig.getRoleSearchRolePrefix() + s)).toArray(n -> new String[n]);
-                                e.setPermissions(permissions);
-                                e.setTargetRole(null);
-                                return e;
-                            }).collect(Collectors.toList());
-            if (!elevateWordList.isEmpty()) {
-                elevateWordBhv.batchUpdate(elevateWordList);
+        // data migration
+        final Map<String, List<String>> mapping = new HashMap<>();
+        labelToRoleBhv.selectList(cb -> cb.query().addOrderBy_LabelTypeId_Asc()).forEach(e -> {
+            List<String> list = mapping.get(e.getLabelTypeId());
+            if (list == null) {
+                list = new ArrayList<>();
+                mapping.put(e.getLabelTypeId(), list);
             }
+            list.add(e.getRoleTypeId());
+        });
+        mapping.entrySet().forEach(
+                e -> {
+                    final String labelTypeId = e.getKey();
+                    final List<String> idList = e.getValue();
+                    labelTypeBhv.selectEntity(cb -> cb.acceptPK(labelTypeId)).ifPresent(
+                            entity -> {
+                                final String[] permissions =
+                                        roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
+                                                .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue()).toArray(n -> new String[n]);
+                                entity.setPermissions(permissions);
+                                labelTypeBhv.insertOrUpdate(entity);
+                                labelToRoleBhv.queryDelete(cb -> cb.query().setLabelTypeId_Equal(labelTypeId));
+                            });
+                });
 
-            saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+        mapping.clear();
+        webConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_WebConfigId_Asc()).forEach(e -> {
+            final String webConfigId = e.getWebConfigId();
+            List<String> list = mapping.get(webConfigId);
+            if (list == null) {
+                list = new ArrayList<>();
+                mapping.put(webConfigId, list);
+            }
+            list.add(e.getRoleTypeId());
+        });
+        mapping.entrySet().forEach(
+                e -> {
+                    final String webConfigTypeId = e.getKey();
+                    final List<String> idList = e.getValue();
+                    webConfigBhv.selectEntity(cb -> cb.acceptPK(webConfigTypeId)).ifPresent(
+                            entity -> {
+                                final String[] permissions =
+                                        roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
+                                                .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue()).toArray(n -> new String[n]);
+                                entity.setPermissions(permissions);
+                                webConfigBhv.insertOrUpdate(entity);
+                                webConfigToRoleBhv.queryDelete(cb -> cb.query().setWebConfigId_Equal(webConfigTypeId));
+                            });
+                });
 
-            fessEsClient.refresh();
-        } catch (final Exception e) {
-            logger.warn("Failed to upgrade data.", e);
-            saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, "10.0", e.getLocalizedMessage()));
+        mapping.clear();
+        fileConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_FileConfigId_Asc()).forEach(e -> {
+            final String fileConfigId = e.getFileConfigId();
+            List<String> list = mapping.get(fileConfigId);
+            if (list == null) {
+                list = new ArrayList<>();
+                mapping.put(fileConfigId, list);
+            }
+            list.add(e.getRoleTypeId());
+        });
+        mapping.entrySet().forEach(
+                e -> {
+                    final String fileConfigTypeId = e.getKey();
+                    final List<String> idList = e.getValue();
+                    fileConfigBhv.selectEntity(cb -> cb.acceptPK(fileConfigTypeId)).ifPresent(
+                            entity -> {
+                                final String[] permissions =
+                                        roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
+                                                .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue()).toArray(n -> new String[n]);
+                                entity.setPermissions(permissions);
+                                fileConfigBhv.insertOrUpdate(entity);
+                                fileConfigToRoleBhv.queryDelete(cb -> cb.query().setFileConfigId_Equal(fileConfigTypeId));
+                            });
+                });
+
+        mapping.clear();
+        dataConfigToRoleBhv.selectList(cb -> cb.query().addOrderBy_DataConfigId_Asc()).forEach(e -> {
+            final String dataConfigId = e.getDataConfigId();
+            List<String> list = mapping.get(dataConfigId);
+            if (list == null) {
+                list = new ArrayList<>();
+                mapping.put(dataConfigId, list);
+            }
+            list.add(e.getRoleTypeId());
+        });
+        mapping.entrySet().forEach(
+                e -> {
+                    final String dataConfigTypeId = e.getKey();
+                    final List<String> idList = e.getValue();
+                    dataConfigBhv.selectEntity(cb -> cb.acceptPK(dataConfigTypeId)).ifPresent(
+                            entity -> {
+                                final String[] permissions =
+                                        roleTypeBhv.selectList(cb -> cb.query().setId_InScope(idList)).stream()
+                                                .map(r -> fessConfig.getRoleSearchRolePrefix() + r.getValue()).toArray(n -> new String[n]);
+                                entity.setPermissions(permissions);
+                                dataConfigBhv.insertOrUpdate(entity);
+                                dataConfigToRoleBhv.queryDelete(cb -> cb.query().setDataConfigId_Equal(dataConfigTypeId));
+                            });
+                });
+
+        roleTypeBhv.queryDelete(cb -> {});
+
+        roleBhv.selectEntity(cb -> cb.query().setName_Equal("guest")).orElseGet(() -> {
+            Role entity = new Role();
+            entity.setName("guest");
+            roleBhv.insert(entity);
+            return entity;
+        });
+
+        final List<ElevateWord> elevateWordList =
+                elevateWordBhv
+                        .selectList(cb -> cb.query().addOrderBy_CreatedBy_Asc())
+                        .stream()
+                        .filter(e -> StringUtil.isNotBlank(e.getTargetRole()))
+                        .map(e -> {
+                            final String[] permissions =
+                                    StreamUtil
+                                            .stream(e.getTargetRole().split(","))
+                                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(
+                                                    s -> fessConfig.getRoleSearchRolePrefix() + s)).toArray(n -> new String[n]);
+                            e.setPermissions(permissions);
+                            e.setTargetRole(null);
+                            return e;
+                        }).collect(Collectors.toList());
+        if (!elevateWordList.isEmpty()) {
+            elevateWordBhv.batchUpdate(elevateWordList);
         }
+
     }
 
     private void uploadResource(final String indexConfigPath, final String indexName, final String path) {
