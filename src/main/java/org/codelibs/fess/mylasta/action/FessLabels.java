@@ -2355,6 +2355,18 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Version From */
     public static final String LABELS_target_version = "{labels.target_version}";
 
+    /** The key of the message: Request to elasticsearch */
+    public static final String LABELS_esreq_configuration = "{labels.esreq_configuration}";
+
+    /** The key of the message: Request File */
+    public static final String LABELS_esreq_request_file = "{labels.esreq_request_file}";
+
+    /** The key of the message: Request File */
+    public static final String LABELS_REQUEST_FILE = "{labels.requestFile}";
+
+    /** The key of the message: Send */
+    public static final String LABELS_esreq_button_upload = "{labels.esreq_button_upload}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

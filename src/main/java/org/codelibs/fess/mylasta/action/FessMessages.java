@@ -287,6 +287,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upgrade from {0}: {1} */
     public static final String ERRORS_failed_to_upgrade_from = "{errors.failed_to_upgrade_from}";
 
+    /** The key of the message: Failed to read request file: {0} */
+    public static final String ERRORS_failed_to_read_request_file = "{errors.failed_to_read_request_file}";
+
+    /** The key of the message: Invalid header: {0} */
+    public static final String ERRORS_invalid_header_for_request_file = "{errors.invalid_header_for_request_file}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1674,6 +1680,36 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUpgradeFrom(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_upgrade_from, arg0, arg1));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_read_request_file' with parameters.
+     * <pre>
+     * message: Failed to read request file: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToReadRequestFile(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_read_request_file, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.invalid_header_for_request_file' with parameters.
+     * <pre>
+     * message: Invalid header: {0}
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @param arg0 The parameter arg0 for message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsInvalidHeaderForRequestFile(String property, String arg0) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_invalid_header_for_request_file, arg0));
         return this;
     }
 
