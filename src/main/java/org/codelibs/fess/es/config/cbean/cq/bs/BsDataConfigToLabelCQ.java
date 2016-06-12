@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.DataConfigToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -71,19 +68,8 @@ public abstract class BsDataConfigToLabelCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<DataConfigToLabelCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        DataConfigToLabelCQ notQuery = new DataConfigToLabelCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<DataConfigToLabelCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<DataConfigToLabelCQ> boolLambda) {
@@ -132,19 +118,16 @@ public abstract class BsDataConfigToLabelCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -199,19 +182,16 @@ public abstract class BsDataConfigToLabelCQ extends EsAbstractConditionQuery {
         setDataConfigId_NotTerm(dataConfigId, null);
     }
 
-    public void setDataConfigId_NotEqual(String dataConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDataConfigId_NotTerm(dataConfigId, opLambda);
-    }
-
     public void setDataConfigId_NotTerm(String dataConfigId) {
         setDataConfigId_NotTerm(dataConfigId, null);
     }
 
-    public void setDataConfigId_NotTerm(String dataConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("dataConfigId", dataConfigId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDataConfigId_NotEqual(String dataConfigId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDataConfigId_NotTerm(dataConfigId, opLambda);
+    }
+
+    public void setDataConfigId_NotTerm(String dataConfigId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDataConfigId_Term(dataConfigId), opLambda);
     }
 
     public void setDataConfigId_Terms(Collection<String> dataConfigIdList) {
@@ -365,19 +345,16 @@ public abstract class BsDataConfigToLabelCQ extends EsAbstractConditionQuery {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setLabelTypeId_NotTerm(labelTypeId, opLambda);
-    }
-
     public void setLabelTypeId_NotTerm(String labelTypeId) {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("labelTypeId", labelTypeId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLabelTypeId_NotTerm(labelTypeId, opLambda);
+    }
+
+    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLabelTypeId_Term(labelTypeId), opLambda);
     }
 
     public void setLabelTypeId_Terms(Collection<String> labelTypeIdList) {

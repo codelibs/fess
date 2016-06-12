@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.log.cbean.cq.FavoriteLogCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<FavoriteLogCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        FavoriteLogCQ notQuery = new FavoriteLogCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<FavoriteLogCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<FavoriteLogCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedAt_NotTerm(createdAt, opLambda);
-    }
-
     public void setCreatedAt_NotTerm(LocalDateTime createdAt) {
         setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdAt", createdAt));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedAt_NotTerm(createdAt, opLambda);
+    }
+
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedAt_Term(createdAt), opLambda);
     }
 
     public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList) {
@@ -353,19 +333,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setUrl_NotTerm(url, null);
     }
 
-    public void setUrl_NotEqual(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUrl_NotTerm(url, opLambda);
-    }
-
     public void setUrl_NotTerm(String url) {
         setUrl_NotTerm(url, null);
     }
 
-    public void setUrl_NotTerm(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("url", url));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUrl_NotEqual(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUrl_NotTerm(url, opLambda);
+    }
+
+    public void setUrl_NotTerm(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUrl_Term(url), opLambda);
     }
 
     public void setUrl_Terms(Collection<String> urlList) {
@@ -519,19 +496,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setDocId_NotTerm(docId, null);
     }
 
-    public void setDocId_NotEqual(String docId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDocId_NotTerm(docId, opLambda);
-    }
-
     public void setDocId_NotTerm(String docId) {
         setDocId_NotTerm(docId, null);
     }
 
-    public void setDocId_NotTerm(String docId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("docId", docId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDocId_NotEqual(String docId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDocId_NotTerm(docId, opLambda);
+    }
+
+    public void setDocId_NotTerm(String docId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDocId_Term(docId), opLambda);
     }
 
     public void setDocId_Terms(Collection<String> docIdList) {
@@ -685,19 +659,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setQueryId_NotTerm(queryId, null);
     }
 
-    public void setQueryId_NotEqual(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setQueryId_NotTerm(queryId, opLambda);
-    }
-
     public void setQueryId_NotTerm(String queryId) {
         setQueryId_NotTerm(queryId, null);
     }
 
-    public void setQueryId_NotTerm(String queryId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("queryId", queryId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setQueryId_NotEqual(String queryId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setQueryId_NotTerm(queryId, opLambda);
+    }
+
+    public void setQueryId_NotTerm(String queryId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setQueryId_Term(queryId), opLambda);
     }
 
     public void setQueryId_Terms(Collection<String> queryIdList) {
@@ -851,19 +822,16 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         setUserInfoId_NotTerm(userInfoId, null);
     }
 
-    public void setUserInfoId_NotEqual(String userInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUserInfoId_NotTerm(userInfoId, opLambda);
-    }
-
     public void setUserInfoId_NotTerm(String userInfoId) {
         setUserInfoId_NotTerm(userInfoId, null);
     }
 
-    public void setUserInfoId_NotTerm(String userInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("userInfoId", userInfoId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUserInfoId_NotEqual(String userInfoId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUserInfoId_NotTerm(userInfoId, opLambda);
+    }
+
+    public void setUserInfoId_NotTerm(String userInfoId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUserInfoId_Term(userInfoId), opLambda);
     }
 
     public void setUserInfoId_Terms(Collection<String> userInfoIdList) {

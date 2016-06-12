@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -71,19 +68,8 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<ElevateWordToLabelCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        ElevateWordToLabelCQ notQuery = new ElevateWordToLabelCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<ElevateWordToLabelCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<ElevateWordToLabelCQ> boolLambda) {
@@ -132,19 +118,16 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -199,19 +182,16 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         setElevateWordId_NotTerm(elevateWordId, null);
     }
 
-    public void setElevateWordId_NotEqual(String elevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setElevateWordId_NotTerm(elevateWordId, opLambda);
-    }
-
     public void setElevateWordId_NotTerm(String elevateWordId) {
         setElevateWordId_NotTerm(elevateWordId, null);
     }
 
-    public void setElevateWordId_NotTerm(String elevateWordId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("elevateWordId", elevateWordId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setElevateWordId_NotEqual(String elevateWordId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setElevateWordId_NotTerm(elevateWordId, opLambda);
+    }
+
+    public void setElevateWordId_NotTerm(String elevateWordId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setElevateWordId_Term(elevateWordId), opLambda);
     }
 
     public void setElevateWordId_Terms(Collection<String> elevateWordIdList) {
@@ -365,19 +345,16 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setLabelTypeId_NotTerm(labelTypeId, opLambda);
-    }
-
     public void setLabelTypeId_NotTerm(String labelTypeId) {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("labelTypeId", labelTypeId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLabelTypeId_NotTerm(labelTypeId, opLambda);
+    }
+
+    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLabelTypeId_Term(labelTypeId), opLambda);
     }
 
     public void setLabelTypeId_Terms(Collection<String> labelTypeIdList) {

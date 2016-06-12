@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.JobLogCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<JobLogCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        JobLogCQ notQuery = new JobLogCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<JobLogCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<JobLogCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setEndTime_NotTerm(endTime, null);
     }
 
-    public void setEndTime_NotEqual(Long endTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setEndTime_NotTerm(endTime, opLambda);
-    }
-
     public void setEndTime_NotTerm(Long endTime) {
         setEndTime_NotTerm(endTime, null);
     }
 
-    public void setEndTime_NotTerm(Long endTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("endTime", endTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setEndTime_NotEqual(Long endTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setEndTime_NotTerm(endTime, opLambda);
+    }
+
+    public void setEndTime_NotTerm(Long endTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setEndTime_Term(endTime), opLambda);
     }
 
     public void setEndTime_Terms(Collection<Long> endTimeList) {
@@ -353,19 +333,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setJobName_NotTerm(jobName, null);
     }
 
-    public void setJobName_NotEqual(String jobName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setJobName_NotTerm(jobName, opLambda);
-    }
-
     public void setJobName_NotTerm(String jobName) {
         setJobName_NotTerm(jobName, null);
     }
 
-    public void setJobName_NotTerm(String jobName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("jobName", jobName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setJobName_NotEqual(String jobName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setJobName_NotTerm(jobName, opLambda);
+    }
+
+    public void setJobName_NotTerm(String jobName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setJobName_Term(jobName), opLambda);
     }
 
     public void setJobName_Terms(Collection<String> jobNameList) {
@@ -519,19 +496,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setJobStatus_NotTerm(jobStatus, null);
     }
 
-    public void setJobStatus_NotEqual(String jobStatus, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setJobStatus_NotTerm(jobStatus, opLambda);
-    }
-
     public void setJobStatus_NotTerm(String jobStatus) {
         setJobStatus_NotTerm(jobStatus, null);
     }
 
-    public void setJobStatus_NotTerm(String jobStatus, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("jobStatus", jobStatus));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setJobStatus_NotEqual(String jobStatus, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setJobStatus_NotTerm(jobStatus, opLambda);
+    }
+
+    public void setJobStatus_NotTerm(String jobStatus, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setJobStatus_Term(jobStatus), opLambda);
     }
 
     public void setJobStatus_Terms(Collection<String> jobStatusList) {
@@ -685,19 +659,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setScriptData_NotTerm(scriptData, null);
     }
 
-    public void setScriptData_NotEqual(String scriptData, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setScriptData_NotTerm(scriptData, opLambda);
-    }
-
     public void setScriptData_NotTerm(String scriptData) {
         setScriptData_NotTerm(scriptData, null);
     }
 
-    public void setScriptData_NotTerm(String scriptData, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("scriptData", scriptData));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setScriptData_NotEqual(String scriptData, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setScriptData_NotTerm(scriptData, opLambda);
+    }
+
+    public void setScriptData_NotTerm(String scriptData, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setScriptData_Term(scriptData), opLambda);
     }
 
     public void setScriptData_Terms(Collection<String> scriptDataList) {
@@ -851,19 +822,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setScriptResult_NotTerm(scriptResult, null);
     }
 
-    public void setScriptResult_NotEqual(String scriptResult, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setScriptResult_NotTerm(scriptResult, opLambda);
-    }
-
     public void setScriptResult_NotTerm(String scriptResult) {
         setScriptResult_NotTerm(scriptResult, null);
     }
 
-    public void setScriptResult_NotTerm(String scriptResult, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("scriptResult", scriptResult));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setScriptResult_NotEqual(String scriptResult, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setScriptResult_NotTerm(scriptResult, opLambda);
+    }
+
+    public void setScriptResult_NotTerm(String scriptResult, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setScriptResult_Term(scriptResult), opLambda);
     }
 
     public void setScriptResult_Terms(Collection<String> scriptResultList) {
@@ -1017,19 +985,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setScriptType_NotTerm(scriptType, null);
     }
 
-    public void setScriptType_NotEqual(String scriptType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setScriptType_NotTerm(scriptType, opLambda);
-    }
-
     public void setScriptType_NotTerm(String scriptType) {
         setScriptType_NotTerm(scriptType, null);
     }
 
-    public void setScriptType_NotTerm(String scriptType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("scriptType", scriptType));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setScriptType_NotEqual(String scriptType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setScriptType_NotTerm(scriptType, opLambda);
+    }
+
+    public void setScriptType_NotTerm(String scriptType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setScriptType_Term(scriptType), opLambda);
     }
 
     public void setScriptType_Terms(Collection<String> scriptTypeList) {
@@ -1183,19 +1148,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setStartTime_NotTerm(startTime, null);
     }
 
-    public void setStartTime_NotEqual(Long startTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setStartTime_NotTerm(startTime, opLambda);
-    }
-
     public void setStartTime_NotTerm(Long startTime) {
         setStartTime_NotTerm(startTime, null);
     }
 
-    public void setStartTime_NotTerm(Long startTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("startTime", startTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setStartTime_NotEqual(Long startTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setStartTime_NotTerm(startTime, opLambda);
+    }
+
+    public void setStartTime_NotTerm(Long startTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setStartTime_Term(startTime), opLambda);
     }
 
     public void setStartTime_Terms(Collection<Long> startTimeList) {
@@ -1338,19 +1300,16 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         setTarget_NotTerm(target, null);
     }
 
-    public void setTarget_NotEqual(String target, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTarget_NotTerm(target, opLambda);
-    }
-
     public void setTarget_NotTerm(String target) {
         setTarget_NotTerm(target, null);
     }
 
-    public void setTarget_NotTerm(String target, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("target", target));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setTarget_NotEqual(String target, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTarget_NotTerm(target, opLambda);
+    }
+
+    public void setTarget_NotTerm(String target, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTarget_Term(target), opLambda);
     }
 
     public void setTarget_Terms(Collection<String> targetList) {

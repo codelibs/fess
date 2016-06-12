@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.user.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.user.cbean.cq.UserCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<UserCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        UserCQ notQuery = new UserCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<UserCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<UserCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotEqual(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setName_NotTerm(name, opLambda);
-    }
-
     public void setName_NotTerm(String name) {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotTerm(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("name", name));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setName_NotEqual(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setName_NotTerm(name, opLambda);
+    }
+
+    public void setName_NotTerm(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setName_Term(name), opLambda);
     }
 
     public void setName_Terms(Collection<String> nameList) {
@@ -364,19 +344,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPassword_NotTerm(password, null);
     }
 
-    public void setPassword_NotEqual(String password, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPassword_NotTerm(password, opLambda);
-    }
-
     public void setPassword_NotTerm(String password) {
         setPassword_NotTerm(password, null);
     }
 
-    public void setPassword_NotTerm(String password, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("password", password));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPassword_NotEqual(String password, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPassword_NotTerm(password, opLambda);
+    }
+
+    public void setPassword_NotTerm(String password, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPassword_Term(password), opLambda);
     }
 
     public void setPassword_Terms(Collection<String> passwordList) {
@@ -530,19 +507,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setSurname_NotTerm(surname, null);
     }
 
-    public void setSurname_NotEqual(String surname, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSurname_NotTerm(surname, opLambda);
-    }
-
     public void setSurname_NotTerm(String surname) {
         setSurname_NotTerm(surname, null);
     }
 
-    public void setSurname_NotTerm(String surname, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("surname", surname));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setSurname_NotEqual(String surname, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setSurname_NotTerm(surname, opLambda);
+    }
+
+    public void setSurname_NotTerm(String surname, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setSurname_Term(surname), opLambda);
     }
 
     public void setSurname_Terms(Collection<String> surnameList) {
@@ -696,19 +670,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setGivenName_NotTerm(givenName, null);
     }
 
-    public void setGivenName_NotEqual(String givenName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setGivenName_NotTerm(givenName, opLambda);
-    }
-
     public void setGivenName_NotTerm(String givenName) {
         setGivenName_NotTerm(givenName, null);
     }
 
-    public void setGivenName_NotTerm(String givenName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("givenName", givenName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setGivenName_NotEqual(String givenName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setGivenName_NotTerm(givenName, opLambda);
+    }
+
+    public void setGivenName_NotTerm(String givenName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setGivenName_Term(givenName), opLambda);
     }
 
     public void setGivenName_Terms(Collection<String> givenNameList) {
@@ -862,19 +833,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setEmployeeNumber_NotTerm(employeeNumber, null);
     }
 
-    public void setEmployeeNumber_NotEqual(String employeeNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setEmployeeNumber_NotTerm(employeeNumber, opLambda);
-    }
-
     public void setEmployeeNumber_NotTerm(String employeeNumber) {
         setEmployeeNumber_NotTerm(employeeNumber, null);
     }
 
-    public void setEmployeeNumber_NotTerm(String employeeNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("employeeNumber", employeeNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setEmployeeNumber_NotEqual(String employeeNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setEmployeeNumber_NotTerm(employeeNumber, opLambda);
+    }
+
+    public void setEmployeeNumber_NotTerm(String employeeNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setEmployeeNumber_Term(employeeNumber), opLambda);
     }
 
     public void setEmployeeNumber_Terms(Collection<String> employeeNumberList) {
@@ -1028,19 +996,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setMail_NotTerm(mail, null);
     }
 
-    public void setMail_NotEqual(String mail, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setMail_NotTerm(mail, opLambda);
-    }
-
     public void setMail_NotTerm(String mail) {
         setMail_NotTerm(mail, null);
     }
 
-    public void setMail_NotTerm(String mail, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("mail", mail));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setMail_NotEqual(String mail, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setMail_NotTerm(mail, opLambda);
+    }
+
+    public void setMail_NotTerm(String mail, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setMail_Term(mail), opLambda);
     }
 
     public void setMail_Terms(Collection<String> mailList) {
@@ -1194,19 +1159,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTelephoneNumber_NotTerm(telephoneNumber, null);
     }
 
-    public void setTelephoneNumber_NotEqual(String telephoneNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTelephoneNumber_NotTerm(telephoneNumber, opLambda);
-    }
-
     public void setTelephoneNumber_NotTerm(String telephoneNumber) {
         setTelephoneNumber_NotTerm(telephoneNumber, null);
     }
 
-    public void setTelephoneNumber_NotTerm(String telephoneNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("telephoneNumber", telephoneNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setTelephoneNumber_NotEqual(String telephoneNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTelephoneNumber_NotTerm(telephoneNumber, opLambda);
+    }
+
+    public void setTelephoneNumber_NotTerm(String telephoneNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTelephoneNumber_Term(telephoneNumber), opLambda);
     }
 
     public void setTelephoneNumber_Terms(Collection<String> telephoneNumberList) {
@@ -1360,19 +1322,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setHomePhone_NotTerm(homePhone, null);
     }
 
-    public void setHomePhone_NotEqual(String homePhone, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setHomePhone_NotTerm(homePhone, opLambda);
-    }
-
     public void setHomePhone_NotTerm(String homePhone) {
         setHomePhone_NotTerm(homePhone, null);
     }
 
-    public void setHomePhone_NotTerm(String homePhone, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("homePhone", homePhone));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setHomePhone_NotEqual(String homePhone, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setHomePhone_NotTerm(homePhone, opLambda);
+    }
+
+    public void setHomePhone_NotTerm(String homePhone, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setHomePhone_Term(homePhone), opLambda);
     }
 
     public void setHomePhone_Terms(Collection<String> homePhoneList) {
@@ -1526,19 +1485,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setHomePostalAddress_NotTerm(homePostalAddress, null);
     }
 
-    public void setHomePostalAddress_NotEqual(String homePostalAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setHomePostalAddress_NotTerm(homePostalAddress, opLambda);
-    }
-
     public void setHomePostalAddress_NotTerm(String homePostalAddress) {
         setHomePostalAddress_NotTerm(homePostalAddress, null);
     }
 
-    public void setHomePostalAddress_NotTerm(String homePostalAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("homePostalAddress", homePostalAddress));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setHomePostalAddress_NotEqual(String homePostalAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setHomePostalAddress_NotTerm(homePostalAddress, opLambda);
+    }
+
+    public void setHomePostalAddress_NotTerm(String homePostalAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setHomePostalAddress_Term(homePostalAddress), opLambda);
     }
 
     public void setHomePostalAddress_Terms(Collection<String> homePostalAddressList) {
@@ -1692,19 +1648,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setLabeledURI_NotTerm(labeledURI, null);
     }
 
-    public void setLabeledURI_NotEqual(String labeledURI, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setLabeledURI_NotTerm(labeledURI, opLambda);
-    }
-
     public void setLabeledURI_NotTerm(String labeledURI) {
         setLabeledURI_NotTerm(labeledURI, null);
     }
 
-    public void setLabeledURI_NotTerm(String labeledURI, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("labeledURI", labeledURI));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setLabeledURI_NotEqual(String labeledURI, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLabeledURI_NotTerm(labeledURI, opLambda);
+    }
+
+    public void setLabeledURI_NotTerm(String labeledURI, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLabeledURI_Term(labeledURI), opLambda);
     }
 
     public void setLabeledURI_Terms(Collection<String> labeledURIList) {
@@ -1858,19 +1811,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setRoomNumber_NotTerm(roomNumber, null);
     }
 
-    public void setRoomNumber_NotEqual(String roomNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setRoomNumber_NotTerm(roomNumber, opLambda);
-    }
-
     public void setRoomNumber_NotTerm(String roomNumber) {
         setRoomNumber_NotTerm(roomNumber, null);
     }
 
-    public void setRoomNumber_NotTerm(String roomNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("roomNumber", roomNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setRoomNumber_NotEqual(String roomNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRoomNumber_NotTerm(roomNumber, opLambda);
+    }
+
+    public void setRoomNumber_NotTerm(String roomNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRoomNumber_Term(roomNumber), opLambda);
     }
 
     public void setRoomNumber_Terms(Collection<String> roomNumberList) {
@@ -2024,19 +1974,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDescription_NotTerm(description, null);
     }
 
-    public void setDescription_NotEqual(String description, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDescription_NotTerm(description, opLambda);
-    }
-
     public void setDescription_NotTerm(String description) {
         setDescription_NotTerm(description, null);
     }
 
-    public void setDescription_NotTerm(String description, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("description", description));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDescription_NotEqual(String description, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDescription_NotTerm(description, opLambda);
+    }
+
+    public void setDescription_NotTerm(String description, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDescription_Term(description), opLambda);
     }
 
     public void setDescription_Terms(Collection<String> descriptionList) {
@@ -2190,19 +2137,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTitle_NotTerm(title, null);
     }
 
-    public void setTitle_NotEqual(String title, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTitle_NotTerm(title, opLambda);
-    }
-
     public void setTitle_NotTerm(String title) {
         setTitle_NotTerm(title, null);
     }
 
-    public void setTitle_NotTerm(String title, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("title", title));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setTitle_NotEqual(String title, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTitle_NotTerm(title, opLambda);
+    }
+
+    public void setTitle_NotTerm(String title, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTitle_Term(title), opLambda);
     }
 
     public void setTitle_Terms(Collection<String> titleList) {
@@ -2356,19 +2300,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPager_NotTerm(pager, null);
     }
 
-    public void setPager_NotEqual(String pager, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPager_NotTerm(pager, opLambda);
-    }
-
     public void setPager_NotTerm(String pager) {
         setPager_NotTerm(pager, null);
     }
 
-    public void setPager_NotTerm(String pager, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("pager", pager));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPager_NotEqual(String pager, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPager_NotTerm(pager, opLambda);
+    }
+
+    public void setPager_NotTerm(String pager, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPager_Term(pager), opLambda);
     }
 
     public void setPager_Terms(Collection<String> pagerList) {
@@ -2522,19 +2463,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setStreet_NotTerm(street, null);
     }
 
-    public void setStreet_NotEqual(String street, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setStreet_NotTerm(street, opLambda);
-    }
-
     public void setStreet_NotTerm(String street) {
         setStreet_NotTerm(street, null);
     }
 
-    public void setStreet_NotTerm(String street, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("street", street));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setStreet_NotEqual(String street, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setStreet_NotTerm(street, opLambda);
+    }
+
+    public void setStreet_NotTerm(String street, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setStreet_Term(street), opLambda);
     }
 
     public void setStreet_Terms(Collection<String> streetList) {
@@ -2688,19 +2626,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPostalCode_NotTerm(postalCode, null);
     }
 
-    public void setPostalCode_NotEqual(String postalCode, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPostalCode_NotTerm(postalCode, opLambda);
-    }
-
     public void setPostalCode_NotTerm(String postalCode) {
         setPostalCode_NotTerm(postalCode, null);
     }
 
-    public void setPostalCode_NotTerm(String postalCode, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("postalCode", postalCode));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPostalCode_NotEqual(String postalCode, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPostalCode_NotTerm(postalCode, opLambda);
+    }
+
+    public void setPostalCode_NotTerm(String postalCode, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPostalCode_Term(postalCode), opLambda);
     }
 
     public void setPostalCode_Terms(Collection<String> postalCodeList) {
@@ -2854,19 +2789,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPhysicalDeliveryOfficeName_NotTerm(physicalDeliveryOfficeName, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_NotEqual(String physicalDeliveryOfficeName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPhysicalDeliveryOfficeName_NotTerm(physicalDeliveryOfficeName, opLambda);
-    }
-
     public void setPhysicalDeliveryOfficeName_NotTerm(String physicalDeliveryOfficeName) {
         setPhysicalDeliveryOfficeName_NotTerm(physicalDeliveryOfficeName, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_NotTerm(String physicalDeliveryOfficeName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("physicalDeliveryOfficeName", physicalDeliveryOfficeName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPhysicalDeliveryOfficeName_NotEqual(String physicalDeliveryOfficeName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPhysicalDeliveryOfficeName_NotTerm(physicalDeliveryOfficeName, opLambda);
+    }
+
+    public void setPhysicalDeliveryOfficeName_NotTerm(String physicalDeliveryOfficeName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPhysicalDeliveryOfficeName_Term(physicalDeliveryOfficeName), opLambda);
     }
 
     public void setPhysicalDeliveryOfficeName_Terms(Collection<String> physicalDeliveryOfficeNameList) {
@@ -3024,19 +2956,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDestinationIndicator_NotTerm(destinationIndicator, null);
     }
 
-    public void setDestinationIndicator_NotEqual(String destinationIndicator, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDestinationIndicator_NotTerm(destinationIndicator, opLambda);
-    }
-
     public void setDestinationIndicator_NotTerm(String destinationIndicator) {
         setDestinationIndicator_NotTerm(destinationIndicator, null);
     }
 
-    public void setDestinationIndicator_NotTerm(String destinationIndicator, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("destinationIndicator", destinationIndicator));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDestinationIndicator_NotEqual(String destinationIndicator, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDestinationIndicator_NotTerm(destinationIndicator, opLambda);
+    }
+
+    public void setDestinationIndicator_NotTerm(String destinationIndicator, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDestinationIndicator_Term(destinationIndicator), opLambda);
     }
 
     public void setDestinationIndicator_Terms(Collection<String> destinationIndicatorList) {
@@ -3190,19 +3119,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setInternationaliSDNNumber_NotTerm(internationaliSDNNumber, null);
     }
 
-    public void setInternationaliSDNNumber_NotEqual(String internationaliSDNNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setInternationaliSDNNumber_NotTerm(internationaliSDNNumber, opLambda);
-    }
-
     public void setInternationaliSDNNumber_NotTerm(String internationaliSDNNumber) {
         setInternationaliSDNNumber_NotTerm(internationaliSDNNumber, null);
     }
 
-    public void setInternationaliSDNNumber_NotTerm(String internationaliSDNNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("internationaliSDNNumber", internationaliSDNNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setInternationaliSDNNumber_NotEqual(String internationaliSDNNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setInternationaliSDNNumber_NotTerm(internationaliSDNNumber, opLambda);
+    }
+
+    public void setInternationaliSDNNumber_NotTerm(String internationaliSDNNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setInternationaliSDNNumber_Term(internationaliSDNNumber), opLambda);
     }
 
     public void setInternationaliSDNNumber_Terms(Collection<String> internationaliSDNNumberList) {
@@ -3358,19 +3284,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setState_NotTerm(state, null);
     }
 
-    public void setState_NotEqual(String state, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setState_NotTerm(state, opLambda);
-    }
-
     public void setState_NotTerm(String state) {
         setState_NotTerm(state, null);
     }
 
-    public void setState_NotTerm(String state, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("state", state));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setState_NotEqual(String state, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setState_NotTerm(state, opLambda);
+    }
+
+    public void setState_NotTerm(String state, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setState_Term(state), opLambda);
     }
 
     public void setState_Terms(Collection<String> stateList) {
@@ -3524,19 +3447,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setEmployeeType_NotTerm(employeeType, null);
     }
 
-    public void setEmployeeType_NotEqual(String employeeType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setEmployeeType_NotTerm(employeeType, opLambda);
-    }
-
     public void setEmployeeType_NotTerm(String employeeType) {
         setEmployeeType_NotTerm(employeeType, null);
     }
 
-    public void setEmployeeType_NotTerm(String employeeType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("employeeType", employeeType));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setEmployeeType_NotEqual(String employeeType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setEmployeeType_NotTerm(employeeType, opLambda);
+    }
+
+    public void setEmployeeType_NotTerm(String employeeType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setEmployeeType_Term(employeeType), opLambda);
     }
 
     public void setEmployeeType_Terms(Collection<String> employeeTypeList) {
@@ -3690,19 +3610,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setFacsimileTelephoneNumber_NotTerm(facsimileTelephoneNumber, null);
     }
 
-    public void setFacsimileTelephoneNumber_NotEqual(String facsimileTelephoneNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setFacsimileTelephoneNumber_NotTerm(facsimileTelephoneNumber, opLambda);
-    }
-
     public void setFacsimileTelephoneNumber_NotTerm(String facsimileTelephoneNumber) {
         setFacsimileTelephoneNumber_NotTerm(facsimileTelephoneNumber, null);
     }
 
-    public void setFacsimileTelephoneNumber_NotTerm(String facsimileTelephoneNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("facsimileTelephoneNumber", facsimileTelephoneNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setFacsimileTelephoneNumber_NotEqual(String facsimileTelephoneNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setFacsimileTelephoneNumber_NotTerm(facsimileTelephoneNumber, opLambda);
+    }
+
+    public void setFacsimileTelephoneNumber_NotTerm(String facsimileTelephoneNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setFacsimileTelephoneNumber_Term(facsimileTelephoneNumber), opLambda);
     }
 
     public void setFacsimileTelephoneNumber_Terms(Collection<String> facsimileTelephoneNumberList) {
@@ -3859,19 +3776,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPostOfficeBox_NotTerm(postOfficeBox, null);
     }
 
-    public void setPostOfficeBox_NotEqual(String postOfficeBox, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPostOfficeBox_NotTerm(postOfficeBox, opLambda);
-    }
-
     public void setPostOfficeBox_NotTerm(String postOfficeBox) {
         setPostOfficeBox_NotTerm(postOfficeBox, null);
     }
 
-    public void setPostOfficeBox_NotTerm(String postOfficeBox, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("postOfficeBox", postOfficeBox));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPostOfficeBox_NotEqual(String postOfficeBox, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPostOfficeBox_NotTerm(postOfficeBox, opLambda);
+    }
+
+    public void setPostOfficeBox_NotTerm(String postOfficeBox, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPostOfficeBox_Term(postOfficeBox), opLambda);
     }
 
     public void setPostOfficeBox_Terms(Collection<String> postOfficeBoxList) {
@@ -4025,19 +3939,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setInitials_NotTerm(initials, null);
     }
 
-    public void setInitials_NotEqual(String initials, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setInitials_NotTerm(initials, opLambda);
-    }
-
     public void setInitials_NotTerm(String initials) {
         setInitials_NotTerm(initials, null);
     }
 
-    public void setInitials_NotTerm(String initials, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("initials", initials));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setInitials_NotEqual(String initials, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setInitials_NotTerm(initials, opLambda);
+    }
+
+    public void setInitials_NotTerm(String initials, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setInitials_Term(initials), opLambda);
     }
 
     public void setInitials_Terms(Collection<String> initialsList) {
@@ -4191,19 +4102,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setCarLicense_NotTerm(carLicense, null);
     }
 
-    public void setCarLicense_NotEqual(String carLicense, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCarLicense_NotTerm(carLicense, opLambda);
-    }
-
     public void setCarLicense_NotTerm(String carLicense) {
         setCarLicense_NotTerm(carLicense, null);
     }
 
-    public void setCarLicense_NotTerm(String carLicense, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("carLicense", carLicense));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCarLicense_NotEqual(String carLicense, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCarLicense_NotTerm(carLicense, opLambda);
+    }
+
+    public void setCarLicense_NotTerm(String carLicense, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCarLicense_Term(carLicense), opLambda);
     }
 
     public void setCarLicense_Terms(Collection<String> carLicenseList) {
@@ -4357,19 +4265,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setMobile_NotTerm(mobile, null);
     }
 
-    public void setMobile_NotEqual(String mobile, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setMobile_NotTerm(mobile, opLambda);
-    }
-
     public void setMobile_NotTerm(String mobile) {
         setMobile_NotTerm(mobile, null);
     }
 
-    public void setMobile_NotTerm(String mobile, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("mobile", mobile));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setMobile_NotEqual(String mobile, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setMobile_NotTerm(mobile, opLambda);
+    }
+
+    public void setMobile_NotTerm(String mobile, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setMobile_Term(mobile), opLambda);
     }
 
     public void setMobile_Terms(Collection<String> mobileList) {
@@ -4523,19 +4428,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPostalAddress_NotTerm(postalAddress, null);
     }
 
-    public void setPostalAddress_NotEqual(String postalAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPostalAddress_NotTerm(postalAddress, opLambda);
-    }
-
     public void setPostalAddress_NotTerm(String postalAddress) {
         setPostalAddress_NotTerm(postalAddress, null);
     }
 
-    public void setPostalAddress_NotTerm(String postalAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("postalAddress", postalAddress));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPostalAddress_NotEqual(String postalAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPostalAddress_NotTerm(postalAddress, opLambda);
+    }
+
+    public void setPostalAddress_NotTerm(String postalAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPostalAddress_Term(postalAddress), opLambda);
     }
 
     public void setPostalAddress_Terms(Collection<String> postalAddressList) {
@@ -4689,19 +4591,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setCity_NotTerm(city, null);
     }
 
-    public void setCity_NotEqual(String city, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCity_NotTerm(city, opLambda);
-    }
-
     public void setCity_NotTerm(String city) {
         setCity_NotTerm(city, null);
     }
 
-    public void setCity_NotTerm(String city, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("city", city));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCity_NotEqual(String city, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCity_NotTerm(city, opLambda);
+    }
+
+    public void setCity_NotTerm(String city, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCity_Term(city), opLambda);
     }
 
     public void setCity_Terms(Collection<String> cityList) {
@@ -4855,19 +4754,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setTeletexTerminalIdentifier_NotTerm(teletexTerminalIdentifier, null);
     }
 
-    public void setTeletexTerminalIdentifier_NotEqual(String teletexTerminalIdentifier, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTeletexTerminalIdentifier_NotTerm(teletexTerminalIdentifier, opLambda);
-    }
-
     public void setTeletexTerminalIdentifier_NotTerm(String teletexTerminalIdentifier) {
         setTeletexTerminalIdentifier_NotTerm(teletexTerminalIdentifier, null);
     }
 
-    public void setTeletexTerminalIdentifier_NotTerm(String teletexTerminalIdentifier, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("teletexTerminalIdentifier", teletexTerminalIdentifier));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setTeletexTerminalIdentifier_NotEqual(String teletexTerminalIdentifier, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTeletexTerminalIdentifier_NotTerm(teletexTerminalIdentifier, opLambda);
+    }
+
+    public void setTeletexTerminalIdentifier_NotTerm(String teletexTerminalIdentifier, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTeletexTerminalIdentifier_Term(teletexTerminalIdentifier), opLambda);
     }
 
     public void setTeletexTerminalIdentifier_Terms(Collection<String> teletexTerminalIdentifierList) {
@@ -5024,19 +4920,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setX121Address_NotTerm(x121Address, null);
     }
 
-    public void setX121Address_NotEqual(String x121Address, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setX121Address_NotTerm(x121Address, opLambda);
-    }
-
     public void setX121Address_NotTerm(String x121Address) {
         setX121Address_NotTerm(x121Address, null);
     }
 
-    public void setX121Address_NotTerm(String x121Address, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("x121Address", x121Address));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setX121Address_NotEqual(String x121Address, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setX121Address_NotTerm(x121Address, opLambda);
+    }
+
+    public void setX121Address_NotTerm(String x121Address, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setX121Address_Term(x121Address), opLambda);
     }
 
     public void setX121Address_Terms(Collection<String> x121AddressList) {
@@ -5190,19 +5083,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setBusinessCategory_NotTerm(businessCategory, null);
     }
 
-    public void setBusinessCategory_NotEqual(String businessCategory, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setBusinessCategory_NotTerm(businessCategory, opLambda);
-    }
-
     public void setBusinessCategory_NotTerm(String businessCategory) {
         setBusinessCategory_NotTerm(businessCategory, null);
     }
 
-    public void setBusinessCategory_NotTerm(String businessCategory, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("businessCategory", businessCategory));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setBusinessCategory_NotEqual(String businessCategory, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setBusinessCategory_NotTerm(businessCategory, opLambda);
+    }
+
+    public void setBusinessCategory_NotTerm(String businessCategory, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setBusinessCategory_Term(businessCategory), opLambda);
     }
 
     public void setBusinessCategory_Terms(Collection<String> businessCategoryList) {
@@ -5356,19 +5246,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setRegisteredAddress_NotTerm(registeredAddress, null);
     }
 
-    public void setRegisteredAddress_NotEqual(String registeredAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setRegisteredAddress_NotTerm(registeredAddress, opLambda);
-    }
-
     public void setRegisteredAddress_NotTerm(String registeredAddress) {
         setRegisteredAddress_NotTerm(registeredAddress, null);
     }
 
-    public void setRegisteredAddress_NotTerm(String registeredAddress, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("registeredAddress", registeredAddress));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setRegisteredAddress_NotEqual(String registeredAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRegisteredAddress_NotTerm(registeredAddress, opLambda);
+    }
+
+    public void setRegisteredAddress_NotTerm(String registeredAddress, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRegisteredAddress_Term(registeredAddress), opLambda);
     }
 
     public void setRegisteredAddress_Terms(Collection<String> registeredAddressList) {
@@ -5522,19 +5409,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDisplayName_NotTerm(displayName, null);
     }
 
-    public void setDisplayName_NotEqual(String displayName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDisplayName_NotTerm(displayName, opLambda);
-    }
-
     public void setDisplayName_NotTerm(String displayName) {
         setDisplayName_NotTerm(displayName, null);
     }
 
-    public void setDisplayName_NotTerm(String displayName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("displayName", displayName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDisplayName_NotEqual(String displayName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDisplayName_NotTerm(displayName, opLambda);
+    }
+
+    public void setDisplayName_NotTerm(String displayName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDisplayName_Term(displayName), opLambda);
     }
 
     public void setDisplayName_Terms(Collection<String> displayNameList) {
@@ -5688,19 +5572,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setPreferredLanguage_NotTerm(preferredLanguage, null);
     }
 
-    public void setPreferredLanguage_NotEqual(String preferredLanguage, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPreferredLanguage_NotTerm(preferredLanguage, opLambda);
-    }
-
     public void setPreferredLanguage_NotTerm(String preferredLanguage) {
         setPreferredLanguage_NotTerm(preferredLanguage, null);
     }
 
-    public void setPreferredLanguage_NotTerm(String preferredLanguage, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("preferredLanguage", preferredLanguage));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPreferredLanguage_NotEqual(String preferredLanguage, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPreferredLanguage_NotTerm(preferredLanguage, opLambda);
+    }
+
+    public void setPreferredLanguage_NotTerm(String preferredLanguage, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPreferredLanguage_Term(preferredLanguage), opLambda);
     }
 
     public void setPreferredLanguage_Terms(Collection<String> preferredLanguageList) {
@@ -5854,19 +5735,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setDepartmentNumber_NotTerm(departmentNumber, null);
     }
 
-    public void setDepartmentNumber_NotEqual(String departmentNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDepartmentNumber_NotTerm(departmentNumber, opLambda);
-    }
-
     public void setDepartmentNumber_NotTerm(String departmentNumber) {
         setDepartmentNumber_NotTerm(departmentNumber, null);
     }
 
-    public void setDepartmentNumber_NotTerm(String departmentNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("departmentNumber", departmentNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDepartmentNumber_NotEqual(String departmentNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDepartmentNumber_NotTerm(departmentNumber, opLambda);
+    }
+
+    public void setDepartmentNumber_NotTerm(String departmentNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDepartmentNumber_Term(departmentNumber), opLambda);
     }
 
     public void setDepartmentNumber_Terms(Collection<String> departmentNumberList) {
@@ -6020,19 +5898,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setUidNumber_NotTerm(uidNumber, null);
     }
 
-    public void setUidNumber_NotEqual(Long uidNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUidNumber_NotTerm(uidNumber, opLambda);
-    }
-
     public void setUidNumber_NotTerm(Long uidNumber) {
         setUidNumber_NotTerm(uidNumber, null);
     }
 
-    public void setUidNumber_NotTerm(Long uidNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("uidNumber", uidNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUidNumber_NotEqual(Long uidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUidNumber_NotTerm(uidNumber, opLambda);
+    }
+
+    public void setUidNumber_NotTerm(Long uidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUidNumber_Term(uidNumber), opLambda);
     }
 
     public void setUidNumber_Terms(Collection<Long> uidNumberList) {
@@ -6175,19 +6050,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setGidNumber_NotTerm(gidNumber, null);
     }
 
-    public void setGidNumber_NotEqual(Long gidNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setGidNumber_NotTerm(gidNumber, opLambda);
-    }
-
     public void setGidNumber_NotTerm(Long gidNumber) {
         setGidNumber_NotTerm(gidNumber, null);
     }
 
-    public void setGidNumber_NotTerm(Long gidNumber, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("gidNumber", gidNumber));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setGidNumber_NotEqual(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setGidNumber_NotTerm(gidNumber, opLambda);
+    }
+
+    public void setGidNumber_NotTerm(Long gidNumber, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setGidNumber_Term(gidNumber), opLambda);
     }
 
     public void setGidNumber_Terms(Collection<Long> gidNumberList) {
@@ -6330,19 +6202,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setHomeDirectory_NotTerm(homeDirectory, null);
     }
 
-    public void setHomeDirectory_NotEqual(String homeDirectory, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setHomeDirectory_NotTerm(homeDirectory, opLambda);
-    }
-
     public void setHomeDirectory_NotTerm(String homeDirectory) {
         setHomeDirectory_NotTerm(homeDirectory, null);
     }
 
-    public void setHomeDirectory_NotTerm(String homeDirectory, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("homeDirectory", homeDirectory));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setHomeDirectory_NotEqual(String homeDirectory, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setHomeDirectory_NotTerm(homeDirectory, opLambda);
+    }
+
+    public void setHomeDirectory_NotTerm(String homeDirectory, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setHomeDirectory_Term(homeDirectory), opLambda);
     }
 
     public void setHomeDirectory_Terms(Collection<String> homeDirectoryList) {
@@ -6496,19 +6365,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setGroups_NotTerm(groups, null);
     }
 
-    public void setGroups_NotEqual(String groups, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setGroups_NotTerm(groups, opLambda);
-    }
-
     public void setGroups_NotTerm(String groups) {
         setGroups_NotTerm(groups, null);
     }
 
-    public void setGroups_NotTerm(String groups, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("groups", groups));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setGroups_NotEqual(String groups, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setGroups_NotTerm(groups, opLambda);
+    }
+
+    public void setGroups_NotTerm(String groups, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setGroups_Term(groups), opLambda);
     }
 
     public void setGroups_Terms(Collection<String> groupsList) {
@@ -6662,19 +6528,16 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         setRoles_NotTerm(roles, null);
     }
 
-    public void setRoles_NotEqual(String roles, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setRoles_NotTerm(roles, opLambda);
-    }
-
     public void setRoles_NotTerm(String roles) {
         setRoles_NotTerm(roles, null);
     }
 
-    public void setRoles_NotTerm(String roles, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("roles", roles));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setRoles_NotEqual(String roles, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRoles_NotTerm(roles, opLambda);
+    }
+
+    public void setRoles_NotTerm(String roles, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRoles_Term(roles), opLambda);
     }
 
     public void setRoles_Terms(Collection<String> rolesList) {

@@ -21,13 +21,10 @@ import java.util.Collection;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.log.cbean.cq.UserInfoCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -69,19 +66,8 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<UserInfoCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        UserInfoCQ notQuery = new UserInfoCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<UserInfoCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<UserInfoCQ> boolLambda) {
@@ -130,19 +116,16 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -197,19 +180,16 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedAt_NotTerm(createdAt, opLambda);
-    }
-
     public void setCreatedAt_NotTerm(LocalDateTime createdAt) {
         setCreatedAt_NotTerm(createdAt, null);
     }
 
-    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdAt", createdAt));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedAt_NotEqual(LocalDateTime createdAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedAt_NotTerm(createdAt, opLambda);
+    }
+
+    public void setCreatedAt_NotTerm(LocalDateTime createdAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedAt_Term(createdAt), opLambda);
     }
 
     public void setCreatedAt_Terms(Collection<LocalDateTime> createdAtList) {
@@ -352,19 +332,16 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         setUpdatedAt_NotTerm(updatedAt, null);
     }
 
-    public void setUpdatedAt_NotEqual(LocalDateTime updatedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedAt_NotTerm(updatedAt, opLambda);
-    }
-
     public void setUpdatedAt_NotTerm(LocalDateTime updatedAt) {
         setUpdatedAt_NotTerm(updatedAt, null);
     }
 
-    public void setUpdatedAt_NotTerm(LocalDateTime updatedAt, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedAt", updatedAt));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUpdatedAt_NotEqual(LocalDateTime updatedAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUpdatedAt_NotTerm(updatedAt, opLambda);
+    }
+
+    public void setUpdatedAt_NotTerm(LocalDateTime updatedAt, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUpdatedAt_Term(updatedAt), opLambda);
     }
 
     public void setUpdatedAt_Terms(Collection<LocalDateTime> updatedAtList) {

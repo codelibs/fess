@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.PathMappingCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<PathMappingCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        PathMappingCQ notQuery = new PathMappingCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<PathMappingCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<PathMappingCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedBy_NotTerm(createdBy, null);
     }
 
-    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedBy_NotTerm(createdBy, opLambda);
-    }
-
     public void setCreatedBy_NotTerm(String createdBy) {
         setCreatedBy_NotTerm(createdBy, null);
     }
 
-    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdBy", createdBy));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedBy_NotTerm(createdBy, opLambda);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedBy_Term(createdBy), opLambda);
     }
 
     public void setCreatedBy_Terms(Collection<String> createdByList) {
@@ -364,19 +344,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedTime_NotTerm(createdTime, opLambda);
-    }
-
     public void setCreatedTime_NotTerm(Long createdTime) {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedTime_NotTerm(createdTime, opLambda);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedTime_Term(createdTime), opLambda);
     }
 
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
@@ -519,19 +496,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setProcessType_NotTerm(processType, null);
     }
 
-    public void setProcessType_NotEqual(String processType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setProcessType_NotTerm(processType, opLambda);
-    }
-
     public void setProcessType_NotTerm(String processType) {
         setProcessType_NotTerm(processType, null);
     }
 
-    public void setProcessType_NotTerm(String processType, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("processType", processType));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setProcessType_NotEqual(String processType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setProcessType_NotTerm(processType, opLambda);
+    }
+
+    public void setProcessType_NotTerm(String processType, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setProcessType_Term(processType), opLambda);
     }
 
     public void setProcessType_Terms(Collection<String> processTypeList) {
@@ -685,19 +659,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setRegex_NotTerm(regex, null);
     }
 
-    public void setRegex_NotEqual(String regex, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setRegex_NotTerm(regex, opLambda);
-    }
-
     public void setRegex_NotTerm(String regex) {
         setRegex_NotTerm(regex, null);
     }
 
-    public void setRegex_NotTerm(String regex, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("regex", regex));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setRegex_NotEqual(String regex, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setRegex_NotTerm(regex, opLambda);
+    }
+
+    public void setRegex_NotTerm(String regex, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setRegex_Term(regex), opLambda);
     }
 
     public void setRegex_Terms(Collection<String> regexList) {
@@ -851,19 +822,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setReplacement_NotTerm(replacement, null);
     }
 
-    public void setReplacement_NotEqual(String replacement, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setReplacement_NotTerm(replacement, opLambda);
-    }
-
     public void setReplacement_NotTerm(String replacement) {
         setReplacement_NotTerm(replacement, null);
     }
 
-    public void setReplacement_NotTerm(String replacement, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("replacement", replacement));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setReplacement_NotEqual(String replacement, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setReplacement_NotTerm(replacement, opLambda);
+    }
+
+    public void setReplacement_NotTerm(String replacement, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setReplacement_Term(replacement), opLambda);
     }
 
     public void setReplacement_Terms(Collection<String> replacementList) {
@@ -1017,19 +985,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setSortOrder_NotTerm(sortOrder, null);
     }
 
-    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSortOrder_NotTerm(sortOrder, opLambda);
-    }
-
     public void setSortOrder_NotTerm(Integer sortOrder) {
         setSortOrder_NotTerm(sortOrder, null);
     }
 
-    public void setSortOrder_NotTerm(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("sortOrder", sortOrder));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setSortOrder_NotTerm(sortOrder, opLambda);
+    }
+
+    public void setSortOrder_NotTerm(Integer sortOrder, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setSortOrder_Term(sortOrder), opLambda);
     }
 
     public void setSortOrder_Terms(Collection<Integer> sortOrderList) {
@@ -1172,19 +1137,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedBy_NotTerm(updatedBy, null);
     }
 
-    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedBy_NotTerm(updatedBy, opLambda);
-    }
-
     public void setUpdatedBy_NotTerm(String updatedBy) {
         setUpdatedBy_NotTerm(updatedBy, null);
     }
 
-    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedBy", updatedBy));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUpdatedBy_NotTerm(updatedBy, opLambda);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUpdatedBy_Term(updatedBy), opLambda);
     }
 
     public void setUpdatedBy_Terms(Collection<String> updatedByList) {
@@ -1338,19 +1300,16 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedTime_NotTerm(updatedTime, null);
     }
 
-    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedTime_NotTerm(updatedTime, opLambda);
-    }
-
     public void setUpdatedTime_NotTerm(Long updatedTime) {
         setUpdatedTime_NotTerm(updatedTime, null);
     }
 
-    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedTime", updatedTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUpdatedTime_NotTerm(updatedTime, opLambda);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUpdatedTime_Term(updatedTime), opLambda);
     }
 
     public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {

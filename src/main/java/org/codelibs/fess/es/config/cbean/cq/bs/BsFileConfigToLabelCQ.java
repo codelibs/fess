@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.FileConfigToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -71,19 +68,8 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<FileConfigToLabelCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        FileConfigToLabelCQ notQuery = new FileConfigToLabelCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<FileConfigToLabelCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<FileConfigToLabelCQ> boolLambda) {
@@ -132,19 +118,16 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -199,19 +182,16 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         setFileConfigId_NotTerm(fileConfigId, null);
     }
 
-    public void setFileConfigId_NotEqual(String fileConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setFileConfigId_NotTerm(fileConfigId, opLambda);
-    }
-
     public void setFileConfigId_NotTerm(String fileConfigId) {
         setFileConfigId_NotTerm(fileConfigId, null);
     }
 
-    public void setFileConfigId_NotTerm(String fileConfigId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("fileConfigId", fileConfigId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setFileConfigId_NotEqual(String fileConfigId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setFileConfigId_NotTerm(fileConfigId, opLambda);
+    }
+
+    public void setFileConfigId_NotTerm(String fileConfigId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setFileConfigId_Term(fileConfigId), opLambda);
     }
 
     public void setFileConfigId_Terms(Collection<String> fileConfigIdList) {
@@ -365,19 +345,16 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setLabelTypeId_NotTerm(labelTypeId, opLambda);
-    }
-
     public void setLabelTypeId_NotTerm(String labelTypeId) {
         setLabelTypeId_NotTerm(labelTypeId, null);
     }
 
-    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("labelTypeId", labelTypeId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setLabelTypeId_NotEqual(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLabelTypeId_NotTerm(labelTypeId, opLambda);
+    }
+
+    public void setLabelTypeId_NotTerm(String labelTypeId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLabelTypeId_Term(labelTypeId), opLambda);
     }
 
     public void setLabelTypeId_Terms(Collection<String> labelTypeIdList) {

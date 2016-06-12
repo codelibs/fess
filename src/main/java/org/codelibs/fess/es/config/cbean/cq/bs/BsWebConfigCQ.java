@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.WebConfigCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<WebConfigCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        WebConfigCQ notQuery = new WebConfigCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<WebConfigCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<WebConfigCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setAvailable_NotTerm(available, null);
     }
 
-    public void setAvailable_NotEqual(Boolean available, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setAvailable_NotTerm(available, opLambda);
-    }
-
     public void setAvailable_NotTerm(Boolean available) {
         setAvailable_NotTerm(available, null);
     }
 
-    public void setAvailable_NotTerm(Boolean available, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("available", available));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setAvailable_NotEqual(Boolean available, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setAvailable_NotTerm(available, opLambda);
+    }
+
+    public void setAvailable_NotTerm(Boolean available, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setAvailable_Term(available), opLambda);
     }
 
     public void setAvailable_Terms(Collection<Boolean> availableList) {
@@ -353,19 +333,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setBoost_NotTerm(boost, null);
     }
 
-    public void setBoost_NotEqual(Float boost, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setBoost_NotTerm(boost, opLambda);
-    }
-
     public void setBoost_NotTerm(Float boost) {
         setBoost_NotTerm(boost, null);
     }
 
-    public void setBoost_NotTerm(Float boost, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("boost", boost));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setBoost_NotEqual(Float boost, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setBoost_NotTerm(boost, opLambda);
+    }
+
+    public void setBoost_NotTerm(Float boost, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setBoost_Term(boost), opLambda);
     }
 
     public void setBoost_Terms(Collection<Float> boostList) {
@@ -508,19 +485,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setConfigParameter_NotTerm(configParameter, null);
     }
 
-    public void setConfigParameter_NotEqual(String configParameter, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setConfigParameter_NotTerm(configParameter, opLambda);
-    }
-
     public void setConfigParameter_NotTerm(String configParameter) {
         setConfigParameter_NotTerm(configParameter, null);
     }
 
-    public void setConfigParameter_NotTerm(String configParameter, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("configParameter", configParameter));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setConfigParameter_NotEqual(String configParameter, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setConfigParameter_NotTerm(configParameter, opLambda);
+    }
+
+    public void setConfigParameter_NotTerm(String configParameter, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setConfigParameter_Term(configParameter), opLambda);
     }
 
     public void setConfigParameter_Terms(Collection<String> configParameterList) {
@@ -674,19 +648,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setCreatedBy_NotTerm(createdBy, null);
     }
 
-    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedBy_NotTerm(createdBy, opLambda);
-    }
-
     public void setCreatedBy_NotTerm(String createdBy) {
         setCreatedBy_NotTerm(createdBy, null);
     }
 
-    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdBy", createdBy));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedBy_NotEqual(String createdBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedBy_NotTerm(createdBy, opLambda);
+    }
+
+    public void setCreatedBy_NotTerm(String createdBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedBy_Term(createdBy), opLambda);
     }
 
     public void setCreatedBy_Terms(Collection<String> createdByList) {
@@ -840,19 +811,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedTime_NotTerm(createdTime, opLambda);
-    }
-
     public void setCreatedTime_NotTerm(Long createdTime) {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedTime_NotTerm(createdTime, opLambda);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedTime_Term(createdTime), opLambda);
     }
 
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
@@ -995,19 +963,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setDepth_NotTerm(depth, null);
     }
 
-    public void setDepth_NotEqual(Integer depth, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setDepth_NotTerm(depth, opLambda);
-    }
-
     public void setDepth_NotTerm(Integer depth) {
         setDepth_NotTerm(depth, null);
     }
 
-    public void setDepth_NotTerm(Integer depth, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("depth", depth));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setDepth_NotEqual(Integer depth, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDepth_NotTerm(depth, opLambda);
+    }
+
+    public void setDepth_NotTerm(Integer depth, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDepth_Term(depth), opLambda);
     }
 
     public void setDepth_Terms(Collection<Integer> depthList) {
@@ -1150,19 +1115,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setExcludedDocUrls_NotTerm(excludedDocUrls, null);
     }
 
-    public void setExcludedDocUrls_NotEqual(String excludedDocUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setExcludedDocUrls_NotTerm(excludedDocUrls, opLambda);
-    }
-
     public void setExcludedDocUrls_NotTerm(String excludedDocUrls) {
         setExcludedDocUrls_NotTerm(excludedDocUrls, null);
     }
 
-    public void setExcludedDocUrls_NotTerm(String excludedDocUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("excludedDocUrls", excludedDocUrls));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setExcludedDocUrls_NotEqual(String excludedDocUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setExcludedDocUrls_NotTerm(excludedDocUrls, opLambda);
+    }
+
+    public void setExcludedDocUrls_NotTerm(String excludedDocUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setExcludedDocUrls_Term(excludedDocUrls), opLambda);
     }
 
     public void setExcludedDocUrls_Terms(Collection<String> excludedDocUrlsList) {
@@ -1316,19 +1278,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setExcludedUrls_NotTerm(excludedUrls, null);
     }
 
-    public void setExcludedUrls_NotEqual(String excludedUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setExcludedUrls_NotTerm(excludedUrls, opLambda);
-    }
-
     public void setExcludedUrls_NotTerm(String excludedUrls) {
         setExcludedUrls_NotTerm(excludedUrls, null);
     }
 
-    public void setExcludedUrls_NotTerm(String excludedUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("excludedUrls", excludedUrls));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setExcludedUrls_NotEqual(String excludedUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setExcludedUrls_NotTerm(excludedUrls, opLambda);
+    }
+
+    public void setExcludedUrls_NotTerm(String excludedUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setExcludedUrls_Term(excludedUrls), opLambda);
     }
 
     public void setExcludedUrls_Terms(Collection<String> excludedUrlsList) {
@@ -1482,19 +1441,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setIncludedDocUrls_NotTerm(includedDocUrls, null);
     }
 
-    public void setIncludedDocUrls_NotEqual(String includedDocUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setIncludedDocUrls_NotTerm(includedDocUrls, opLambda);
-    }
-
     public void setIncludedDocUrls_NotTerm(String includedDocUrls) {
         setIncludedDocUrls_NotTerm(includedDocUrls, null);
     }
 
-    public void setIncludedDocUrls_NotTerm(String includedDocUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("includedDocUrls", includedDocUrls));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setIncludedDocUrls_NotEqual(String includedDocUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setIncludedDocUrls_NotTerm(includedDocUrls, opLambda);
+    }
+
+    public void setIncludedDocUrls_NotTerm(String includedDocUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setIncludedDocUrls_Term(includedDocUrls), opLambda);
     }
 
     public void setIncludedDocUrls_Terms(Collection<String> includedDocUrlsList) {
@@ -1648,19 +1604,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setIncludedUrls_NotTerm(includedUrls, null);
     }
 
-    public void setIncludedUrls_NotEqual(String includedUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setIncludedUrls_NotTerm(includedUrls, opLambda);
-    }
-
     public void setIncludedUrls_NotTerm(String includedUrls) {
         setIncludedUrls_NotTerm(includedUrls, null);
     }
 
-    public void setIncludedUrls_NotTerm(String includedUrls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("includedUrls", includedUrls));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setIncludedUrls_NotEqual(String includedUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setIncludedUrls_NotTerm(includedUrls, opLambda);
+    }
+
+    public void setIncludedUrls_NotTerm(String includedUrls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setIncludedUrls_Term(includedUrls), opLambda);
     }
 
     public void setIncludedUrls_Terms(Collection<String> includedUrlsList) {
@@ -1814,19 +1767,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setIntervalTime_NotTerm(intervalTime, null);
     }
 
-    public void setIntervalTime_NotEqual(Integer intervalTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setIntervalTime_NotTerm(intervalTime, opLambda);
-    }
-
     public void setIntervalTime_NotTerm(Integer intervalTime) {
         setIntervalTime_NotTerm(intervalTime, null);
     }
 
-    public void setIntervalTime_NotTerm(Integer intervalTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("intervalTime", intervalTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setIntervalTime_NotEqual(Integer intervalTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setIntervalTime_NotTerm(intervalTime, opLambda);
+    }
+
+    public void setIntervalTime_NotTerm(Integer intervalTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setIntervalTime_Term(intervalTime), opLambda);
     }
 
     public void setIntervalTime_Terms(Collection<Integer> intervalTimeList) {
@@ -1969,19 +1919,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setTimeToLive_NotTerm(timeToLive, null);
     }
 
-    public void setTimeToLive_NotEqual(Integer timeToLive, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setTimeToLive_NotTerm(timeToLive, opLambda);
-    }
-
     public void setTimeToLive_NotTerm(Integer timeToLive) {
         setTimeToLive_NotTerm(timeToLive, null);
     }
 
-    public void setTimeToLive_NotTerm(Integer timeToLive, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("timeToLive", timeToLive));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setTimeToLive_NotEqual(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTimeToLive_NotTerm(timeToLive, opLambda);
+    }
+
+    public void setTimeToLive_NotTerm(Integer timeToLive, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTimeToLive_Term(timeToLive), opLambda);
     }
 
     public void setTimeToLive_Terms(Collection<Integer> timeToLiveList) {
@@ -2124,19 +2071,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setMaxAccessCount_NotTerm(maxAccessCount, null);
     }
 
-    public void setMaxAccessCount_NotEqual(Long maxAccessCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setMaxAccessCount_NotTerm(maxAccessCount, opLambda);
-    }
-
     public void setMaxAccessCount_NotTerm(Long maxAccessCount) {
         setMaxAccessCount_NotTerm(maxAccessCount, null);
     }
 
-    public void setMaxAccessCount_NotTerm(Long maxAccessCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("maxAccessCount", maxAccessCount));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setMaxAccessCount_NotEqual(Long maxAccessCount, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setMaxAccessCount_NotTerm(maxAccessCount, opLambda);
+    }
+
+    public void setMaxAccessCount_NotTerm(Long maxAccessCount, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setMaxAccessCount_Term(maxAccessCount), opLambda);
     }
 
     public void setMaxAccessCount_Terms(Collection<Long> maxAccessCountList) {
@@ -2279,19 +2223,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotEqual(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setName_NotTerm(name, opLambda);
-    }
-
     public void setName_NotTerm(String name) {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotTerm(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("name", name));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setName_NotEqual(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setName_NotTerm(name, opLambda);
+    }
+
+    public void setName_NotTerm(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setName_Term(name), opLambda);
     }
 
     public void setName_Terms(Collection<String> nameList) {
@@ -2445,19 +2386,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setNumOfThread_NotTerm(numOfThread, null);
     }
 
-    public void setNumOfThread_NotEqual(Integer numOfThread, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setNumOfThread_NotTerm(numOfThread, opLambda);
-    }
-
     public void setNumOfThread_NotTerm(Integer numOfThread) {
         setNumOfThread_NotTerm(numOfThread, null);
     }
 
-    public void setNumOfThread_NotTerm(Integer numOfThread, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("numOfThread", numOfThread));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setNumOfThread_NotEqual(Integer numOfThread, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setNumOfThread_NotTerm(numOfThread, opLambda);
+    }
+
+    public void setNumOfThread_NotTerm(Integer numOfThread, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setNumOfThread_Term(numOfThread), opLambda);
     }
 
     public void setNumOfThread_Terms(Collection<Integer> numOfThreadList) {
@@ -2600,19 +2538,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setPermissions_NotTerm(permissions, null);
     }
 
-    public void setPermissions_NotEqual(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setPermissions_NotTerm(permissions, opLambda);
-    }
-
     public void setPermissions_NotTerm(String permissions) {
         setPermissions_NotTerm(permissions, null);
     }
 
-    public void setPermissions_NotTerm(String permissions, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("permissions", permissions));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setPermissions_NotEqual(String permissions, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPermissions_NotTerm(permissions, opLambda);
+    }
+
+    public void setPermissions_NotTerm(String permissions, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPermissions_Term(permissions), opLambda);
     }
 
     public void setPermissions_Terms(Collection<String> permissionsList) {
@@ -2766,19 +2701,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setSortOrder_NotTerm(sortOrder, null);
     }
 
-    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSortOrder_NotTerm(sortOrder, opLambda);
-    }
-
     public void setSortOrder_NotTerm(Integer sortOrder) {
         setSortOrder_NotTerm(sortOrder, null);
     }
 
-    public void setSortOrder_NotTerm(Integer sortOrder, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("sortOrder", sortOrder));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setSortOrder_NotEqual(Integer sortOrder, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setSortOrder_NotTerm(sortOrder, opLambda);
+    }
+
+    public void setSortOrder_NotTerm(Integer sortOrder, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setSortOrder_Term(sortOrder), opLambda);
     }
 
     public void setSortOrder_Terms(Collection<Integer> sortOrderList) {
@@ -2921,19 +2853,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setUpdatedBy_NotTerm(updatedBy, null);
     }
 
-    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedBy_NotTerm(updatedBy, opLambda);
-    }
-
     public void setUpdatedBy_NotTerm(String updatedBy) {
         setUpdatedBy_NotTerm(updatedBy, null);
     }
 
-    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedBy", updatedBy));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUpdatedBy_NotEqual(String updatedBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUpdatedBy_NotTerm(updatedBy, opLambda);
+    }
+
+    public void setUpdatedBy_NotTerm(String updatedBy, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUpdatedBy_Term(updatedBy), opLambda);
     }
 
     public void setUpdatedBy_Terms(Collection<String> updatedByList) {
@@ -3087,19 +3016,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setUpdatedTime_NotTerm(updatedTime, null);
     }
 
-    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUpdatedTime_NotTerm(updatedTime, opLambda);
-    }
-
     public void setUpdatedTime_NotTerm(Long updatedTime) {
         setUpdatedTime_NotTerm(updatedTime, null);
     }
 
-    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("updatedTime", updatedTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUpdatedTime_NotEqual(Long updatedTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUpdatedTime_NotTerm(updatedTime, opLambda);
+    }
+
+    public void setUpdatedTime_NotTerm(Long updatedTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUpdatedTime_Term(updatedTime), opLambda);
     }
 
     public void setUpdatedTime_Terms(Collection<Long> updatedTimeList) {
@@ -3242,19 +3168,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setUrls_NotTerm(urls, null);
     }
 
-    public void setUrls_NotEqual(String urls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUrls_NotTerm(urls, opLambda);
-    }
-
     public void setUrls_NotTerm(String urls) {
         setUrls_NotTerm(urls, null);
     }
 
-    public void setUrls_NotTerm(String urls, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("urls", urls));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUrls_NotEqual(String urls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUrls_NotTerm(urls, opLambda);
+    }
+
+    public void setUrls_NotTerm(String urls, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUrls_Term(urls), opLambda);
     }
 
     public void setUrls_Terms(Collection<String> urlsList) {
@@ -3408,19 +3331,16 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         setUserAgent_NotTerm(userAgent, null);
     }
 
-    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUserAgent_NotTerm(userAgent, opLambda);
-    }
-
     public void setUserAgent_NotTerm(String userAgent) {
         setUserAgent_NotTerm(userAgent, null);
     }
 
-    public void setUserAgent_NotTerm(String userAgent, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("userAgent", userAgent));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUserAgent_NotEqual(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUserAgent_NotTerm(userAgent, opLambda);
+    }
+
+    public void setUserAgent_NotTerm(String userAgent, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUserAgent_Term(userAgent), opLambda);
     }
 
     public void setUserAgent_Terms(Collection<String> userAgentList) {

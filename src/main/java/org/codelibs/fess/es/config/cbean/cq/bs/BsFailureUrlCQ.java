@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.FailureUrlCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<FailureUrlCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        FailureUrlCQ notQuery = new FailureUrlCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<FailureUrlCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<FailureUrlCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setConfigId_NotTerm(configId, null);
     }
 
-    public void setConfigId_NotEqual(String configId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setConfigId_NotTerm(configId, opLambda);
-    }
-
     public void setConfigId_NotTerm(String configId) {
         setConfigId_NotTerm(configId, null);
     }
 
-    public void setConfigId_NotTerm(String configId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("configId", configId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setConfigId_NotEqual(String configId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setConfigId_NotTerm(configId, opLambda);
+    }
+
+    public void setConfigId_NotTerm(String configId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setConfigId_Term(configId), opLambda);
     }
 
     public void setConfigId_Terms(Collection<String> configIdList) {
@@ -364,19 +344,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorCount_NotTerm(errorCount, null);
     }
 
-    public void setErrorCount_NotEqual(Integer errorCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setErrorCount_NotTerm(errorCount, opLambda);
-    }
-
     public void setErrorCount_NotTerm(Integer errorCount) {
         setErrorCount_NotTerm(errorCount, null);
     }
 
-    public void setErrorCount_NotTerm(Integer errorCount, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorCount", errorCount));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setErrorCount_NotEqual(Integer errorCount, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setErrorCount_NotTerm(errorCount, opLambda);
+    }
+
+    public void setErrorCount_NotTerm(Integer errorCount, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setErrorCount_Term(errorCount), opLambda);
     }
 
     public void setErrorCount_Terms(Collection<Integer> errorCountList) {
@@ -519,19 +496,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorLog_NotTerm(errorLog, null);
     }
 
-    public void setErrorLog_NotEqual(String errorLog, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setErrorLog_NotTerm(errorLog, opLambda);
-    }
-
     public void setErrorLog_NotTerm(String errorLog) {
         setErrorLog_NotTerm(errorLog, null);
     }
 
-    public void setErrorLog_NotTerm(String errorLog, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorLog", errorLog));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setErrorLog_NotEqual(String errorLog, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setErrorLog_NotTerm(errorLog, opLambda);
+    }
+
+    public void setErrorLog_NotTerm(String errorLog, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setErrorLog_Term(errorLog), opLambda);
     }
 
     public void setErrorLog_Terms(Collection<String> errorLogList) {
@@ -685,19 +659,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorName_NotTerm(errorName, null);
     }
 
-    public void setErrorName_NotEqual(String errorName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setErrorName_NotTerm(errorName, opLambda);
-    }
-
     public void setErrorName_NotTerm(String errorName) {
         setErrorName_NotTerm(errorName, null);
     }
 
-    public void setErrorName_NotTerm(String errorName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("errorName", errorName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setErrorName_NotEqual(String errorName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setErrorName_NotTerm(errorName, opLambda);
+    }
+
+    public void setErrorName_NotTerm(String errorName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setErrorName_Term(errorName), opLambda);
     }
 
     public void setErrorName_Terms(Collection<String> errorNameList) {
@@ -851,19 +822,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setLastAccessTime_NotTerm(lastAccessTime, null);
     }
 
-    public void setLastAccessTime_NotEqual(Long lastAccessTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setLastAccessTime_NotTerm(lastAccessTime, opLambda);
-    }
-
     public void setLastAccessTime_NotTerm(Long lastAccessTime) {
         setLastAccessTime_NotTerm(lastAccessTime, null);
     }
 
-    public void setLastAccessTime_NotTerm(Long lastAccessTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("lastAccessTime", lastAccessTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setLastAccessTime_NotEqual(Long lastAccessTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLastAccessTime_NotTerm(lastAccessTime, opLambda);
+    }
+
+    public void setLastAccessTime_NotTerm(Long lastAccessTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLastAccessTime_Term(lastAccessTime), opLambda);
     }
 
     public void setLastAccessTime_Terms(Collection<Long> lastAccessTimeList) {
@@ -1006,19 +974,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setThreadName_NotTerm(threadName, null);
     }
 
-    public void setThreadName_NotEqual(String threadName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setThreadName_NotTerm(threadName, opLambda);
-    }
-
     public void setThreadName_NotTerm(String threadName) {
         setThreadName_NotTerm(threadName, null);
     }
 
-    public void setThreadName_NotTerm(String threadName, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("threadName", threadName));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setThreadName_NotEqual(String threadName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setThreadName_NotTerm(threadName, opLambda);
+    }
+
+    public void setThreadName_NotTerm(String threadName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setThreadName_Term(threadName), opLambda);
     }
 
     public void setThreadName_Terms(Collection<String> threadNameList) {
@@ -1172,19 +1137,16 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setUrl_NotTerm(url, null);
     }
 
-    public void setUrl_NotEqual(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setUrl_NotTerm(url, opLambda);
-    }
-
     public void setUrl_NotTerm(String url) {
         setUrl_NotTerm(url, null);
     }
 
-    public void setUrl_NotTerm(String url, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("url", url));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setUrl_NotEqual(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setUrl_NotTerm(url, opLambda);
+    }
+
+    public void setUrl_NotTerm(String url, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setUrl_Term(url), opLambda);
     }
 
     public void setUrl_Terms(Collection<String> urlList) {

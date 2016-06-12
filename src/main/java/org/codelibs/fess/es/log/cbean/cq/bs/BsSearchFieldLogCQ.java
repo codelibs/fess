@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.log.cbean.cq.SearchFieldLogCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -70,19 +67,8 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<SearchFieldLogCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        SearchFieldLogCQ notQuery = new SearchFieldLogCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<SearchFieldLogCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<SearchFieldLogCQ> boolLambda) {
@@ -131,19 +117,16 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -198,19 +181,16 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotEqual(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setName_NotTerm(name, opLambda);
-    }
-
     public void setName_NotTerm(String name) {
         setName_NotTerm(name, null);
     }
 
-    public void setName_NotTerm(String name, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("name", name));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setName_NotEqual(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setName_NotTerm(name, opLambda);
+    }
+
+    public void setName_NotTerm(String name, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setName_Term(name), opLambda);
     }
 
     public void setName_Terms(Collection<String> nameList) {
@@ -364,19 +344,16 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         setSearchLogId_NotTerm(searchLogId, null);
     }
 
-    public void setSearchLogId_NotEqual(String searchLogId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setSearchLogId_NotTerm(searchLogId, opLambda);
-    }
-
     public void setSearchLogId_NotTerm(String searchLogId) {
         setSearchLogId_NotTerm(searchLogId, null);
     }
 
-    public void setSearchLogId_NotTerm(String searchLogId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("searchLogId", searchLogId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setSearchLogId_NotEqual(String searchLogId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setSearchLogId_NotTerm(searchLogId, opLambda);
+    }
+
+    public void setSearchLogId_NotTerm(String searchLogId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setSearchLogId_Term(searchLogId), opLambda);
     }
 
     public void setSearchLogId_Terms(Collection<String> searchLogIdList) {
@@ -530,19 +507,16 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         setValue_NotTerm(value, null);
     }
 
-    public void setValue_NotEqual(String value, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setValue_NotTerm(value, opLambda);
-    }
-
     public void setValue_NotTerm(String value) {
         setValue_NotTerm(value, null);
     }
 
-    public void setValue_NotTerm(String value, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("value", value));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setValue_NotEqual(String value, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setValue_NotTerm(value, opLambda);
+    }
+
+    public void setValue_NotTerm(String value, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setValue_Term(value), opLambda);
     }
 
     public void setValue_Terms(Collection<String> valueList) {

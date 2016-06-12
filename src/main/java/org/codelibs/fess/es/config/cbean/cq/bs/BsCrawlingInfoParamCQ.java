@@ -21,14 +21,11 @@ import java.util.Collection;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoParamCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
-import org.dbflute.exception.IllegalConditionBeanOperationException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NotQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
@@ -71,19 +68,8 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         not(notLambda, null);
     }
 
-    public void not(OperatorCall<CrawlingInfoParamCQ> notLambda, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        CrawlingInfoParamCQ notQuery = new CrawlingInfoParamCQ();
-        notLambda.callback(notQuery);
-        if (notQuery.hasQueries()) {
-            if (notQuery.getQueryBuilderList().size() > 1) {
-                final String msg = "not query must be one query.";
-                throw new IllegalConditionBeanOperationException(msg);
-            }
-            NotQueryBuilder builder = QueryBuilders.notQuery(notQuery.getQueryBuilderList().get(0));
-            if (opLambda != null) {
-                opLambda.callback(builder);
-            }
-        }
+    public void not(final OperatorCall<CrawlingInfoParamCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
     public void bool(BoolCall<CrawlingInfoParamCQ> boolLambda) {
@@ -132,19 +118,16 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotEqual(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setId_NotTerm(id, opLambda);
-    }
-
     public void setId_NotTerm(String id) {
         setId_NotTerm(id, null);
     }
 
-    public void setId_NotTerm(String id, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("_id", id));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setId_NotEqual(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setId_NotTerm(id, opLambda);
+    }
+
+    public void setId_NotTerm(String id, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setId_Term(id), opLambda);
     }
 
     public void setId_Terms(Collection<String> idList) {
@@ -199,19 +182,16 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setCrawlingInfoId_NotTerm(crawlingInfoId, null);
     }
 
-    public void setCrawlingInfoId_NotEqual(String crawlingInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCrawlingInfoId_NotTerm(crawlingInfoId, opLambda);
-    }
-
     public void setCrawlingInfoId_NotTerm(String crawlingInfoId) {
         setCrawlingInfoId_NotTerm(crawlingInfoId, null);
     }
 
-    public void setCrawlingInfoId_NotTerm(String crawlingInfoId, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("crawlingInfoId", crawlingInfoId));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCrawlingInfoId_NotEqual(String crawlingInfoId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCrawlingInfoId_NotTerm(crawlingInfoId, opLambda);
+    }
+
+    public void setCrawlingInfoId_NotTerm(String crawlingInfoId, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCrawlingInfoId_Term(crawlingInfoId), opLambda);
     }
 
     public void setCrawlingInfoId_Terms(Collection<String> crawlingInfoIdList) {
@@ -365,19 +345,16 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setCreatedTime_NotTerm(createdTime, opLambda);
-    }
-
     public void setCreatedTime_NotTerm(Long createdTime) {
         setCreatedTime_NotTerm(createdTime, null);
     }
 
-    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("createdTime", createdTime));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setCreatedTime_NotEqual(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setCreatedTime_NotTerm(createdTime, opLambda);
+    }
+
+    public void setCreatedTime_NotTerm(Long createdTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setCreatedTime_Term(createdTime), opLambda);
     }
 
     public void setCreatedTime_Terms(Collection<Long> createdTimeList) {
@@ -520,19 +497,16 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setKey_NotTerm(key, null);
     }
 
-    public void setKey_NotEqual(String key, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setKey_NotTerm(key, opLambda);
-    }
-
     public void setKey_NotTerm(String key) {
         setKey_NotTerm(key, null);
     }
 
-    public void setKey_NotTerm(String key, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("key", key));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setKey_NotEqual(String key, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setKey_NotTerm(key, opLambda);
+    }
+
+    public void setKey_NotTerm(String key, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setKey_Term(key), opLambda);
     }
 
     public void setKey_Terms(Collection<String> keyList) {
@@ -686,19 +660,16 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         setValue_NotTerm(value, null);
     }
 
-    public void setValue_NotEqual(String value, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        setValue_NotTerm(value, opLambda);
-    }
-
     public void setValue_NotTerm(String value) {
         setValue_NotTerm(value, null);
     }
 
-    public void setValue_NotTerm(String value, ConditionOptionCall<NotQueryBuilder> opLambda) {
-        NotQueryBuilder builder = QueryBuilders.notQuery(regTermQ("value", value));
-        if (opLambda != null) {
-            opLambda.callback(builder);
-        }
+    public void setValue_NotEqual(String value, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setValue_NotTerm(value, opLambda);
+    }
+
+    public void setValue_NotTerm(String value, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setValue_Term(value), opLambda);
     }
 
     public void setValue_Terms(Collection<String> valueList) {

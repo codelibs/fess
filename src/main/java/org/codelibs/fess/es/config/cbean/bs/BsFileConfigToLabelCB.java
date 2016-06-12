@@ -25,7 +25,6 @@ import org.codelibs.fess.es.config.cbean.FileConfigToLabelCB;
 import org.codelibs.fess.es.config.cbean.cq.FileConfigToLabelCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsFileConfigToLabelCQ;
 import org.dbflute.cbean.ConditionQuery;
-import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 
@@ -81,16 +80,6 @@ public class BsFileConfigToLabelCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Build
     //                                                                               =====
-    @Override
-    public CountRequestBuilder build(CountRequestBuilder builder) {
-        if (_conditionQuery != null) {
-            QueryBuilder queryBuilder = _conditionQuery.getQuery();
-            if (queryBuilder != null) {
-                builder.setQuery(queryBuilder);
-            }
-        }
-        return builder;
-    }
 
     @Override
     public SearchRequestBuilder build(SearchRequestBuilder builder) {

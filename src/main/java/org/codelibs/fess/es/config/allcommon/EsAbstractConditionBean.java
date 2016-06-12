@@ -37,7 +37,6 @@ import org.dbflute.dbmeta.accessory.DerivedTypeHandler;
 import org.dbflute.jdbc.StatementConfig;
 import org.dbflute.system.DBFluteSystem;
 import org.dbflute.twowaysql.style.BoundDateDisplayStyle;
-import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.common.unit.TimeValue;
 
@@ -57,8 +56,6 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
     // ===================================================================================
     //                                                                             Builder
     //                                                                             =======
-    public abstract CountRequestBuilder build(CountRequestBuilder builder);
-
     public abstract SearchRequestBuilder build(SearchRequestBuilder builder);
 
     // ===================================================================================
