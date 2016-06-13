@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.mylasta.direction;
 
+import org.codelibs.fess.mylasta.direction.FessEnv;
 import org.lastaflute.core.direction.exception.ConfigPropertyNotFoundException;
 
 /**
@@ -615,6 +616,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. seunjeon */
     String ONLINE_HELP_NAME_DICT_SEUNJEON = "online.help.name.dict.seunjeon";
+
+    /** The key of the configuration. e.g. mapping */
+    String ONLINE_HELP_NAME_DICT_MAPPING = "online.help.name.dict.mapping";
 
     /** The key of the configuration. e.g. webconfig */
     String ONLINE_HELP_NAME_WEBCONFIG = "online.help.name.webconfig";
@@ -2842,6 +2846,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameDictSeunjeon();
 
     /**
+     * Get the value for the key 'online.help.name.dict.mapping'. <br>
+     * The value is, e.g. mapping <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictMapping();
+
+    /**
      * Get the value for the key 'online.help.name.webconfig'. <br>
      * The value is, e.g. webconfig <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4675,6 +4686,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameDictSeunjeon() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON);
+        }
+
+        public String getOnlineHelpNameDictMapping() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_MAPPING);
         }
 
         public String getOnlineHelpNameWebconfig() {

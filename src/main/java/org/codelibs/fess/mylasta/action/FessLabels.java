@@ -365,6 +365,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Bad Word File */
     public static final String LABELS_BAD_WORD_FILE = "{labels.badWordFile}";
 
+    /** The key of the message: Mapping File */
+    public static final String LABELS_MAPPING_FILE = "{labels.mappingFile}";
+
     /** The key of the message: Boost Expr */
     public static final String LABELS_BOOST_EXPR = "{labels.boostExpr}";
 
@@ -1763,6 +1766,48 @@ public class FessLabels extends ActionMessages {
 
     /** The key of the message: Synonym File */
     public static final String LABELS_dict_synonym_file = "{labels.dict_synonym_file}";
+
+    /** The key of the message: Mapping List */
+    public static final String LABELS_dict_mapping_configuration = "{labels.dict_mapping_configuration}";
+
+    /** The key of the message: Mapping List */
+    public static final String LABELS_dict_mapping_title = "{labels.dict_mapping_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_mapping_list_link = "{labels.dict_mapping_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_mapping_link_create = "{labels.dict_mapping_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_mapping_link_edit = "{labels.dict_mapping_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_mapping_link_delete = "{labels.dict_mapping_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_mapping_link_details = "{labels.dict_mapping_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_mapping_link_download = "{labels.dict_mapping_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_mapping_link_upload = "{labels.dict_mapping_link_upload}";
+
+    /** The key of the message: Source */
+    public static final String LABELS_dict_mapping_source = "{labels.dict_mapping_source}";
+
+    /** The key of the message: Target */
+    public static final String LABELS_dict_mapping_target = "{labels.dict_mapping_target}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_mapping_button_download = "{labels.dict_mapping_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_mapping_button_upload = "{labels.dict_mapping_button_upload}";
+
+    /** The key of the message: Mapping File */
+    public static final String LABELS_dict_mapping_file = "{labels.dict_mapping_file}";
 
     /** The key of the message: Seunjeon List */
     public static final String LABELS_dict_seunjeon_configuration = "{labels.dict_seunjeon_configuration}";
