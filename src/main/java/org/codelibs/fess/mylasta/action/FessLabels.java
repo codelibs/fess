@@ -1851,6 +1851,45 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Kuromoji File */
     public static final String LABELS_dict_kuromoji_file = "{labels.dict_kuromoji_file}";
 
+    /** The key of the message: Protwords List */
+    public static final String LABELS_dict_protwords_configuration = "{labels.dict_protwords_configuration}";
+
+    /** The key of the message: Protwords List */
+    public static final String LABELS_dict_protwords_title = "{labels.dict_protwords_title}";
+
+    /** The key of the message: List */
+    public static final String LABELS_dict_protwords_list_link = "{labels.dict_protwords_list_link}";
+
+    /** The key of the message: Create New */
+    public static final String LABELS_dict_protwords_link_create = "{labels.dict_protwords_link_create}";
+
+    /** The key of the message: Edit */
+    public static final String LABELS_dict_protwords_link_edit = "{labels.dict_protwords_link_edit}";
+
+    /** The key of the message: Delete */
+    public static final String LABELS_dict_protwords_link_delete = "{labels.dict_protwords_link_delete}";
+
+    /** The key of the message: Details */
+    public static final String LABELS_dict_protwords_link_details = "{labels.dict_protwords_link_details}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_protwords_link_download = "{labels.dict_protwords_link_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_protwords_link_upload = "{labels.dict_protwords_link_upload}";
+
+    /** The key of the message: Source */
+    public static final String LABELS_dict_protwords_source = "{labels.dict_protwords_source}";
+
+    /** The key of the message: Download */
+    public static final String LABELS_dict_protwords_button_download = "{labels.dict_protwords_button_download}";
+
+    /** The key of the message: Upload */
+    public static final String LABELS_dict_protwords_button_upload = "{labels.dict_protwords_button_upload}";
+
+    /** The key of the message: Protwords File */
+    public static final String LABELS_dict_protwords_file = "{labels.dict_protwords_file}";
+
     /** The key of the message: Doc Boost */
     public static final String LABELS_boost_document_rule_configuration = "{labels.boost_document_rule_configuration}";
 

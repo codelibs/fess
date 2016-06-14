@@ -30,6 +30,7 @@ import org.codelibs.core.io.FileUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.ResourceUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.slf4j.Logger;
@@ -49,7 +50,8 @@ public class DictionaryManager {
 
     public DictionaryFile<? extends DictionaryItem>[] getDictionaryFiles() {
         try (CurlResponse response =
-                Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("fields", "path,@timestamp").execute()) {
+                Curl.get(ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/file").param("fields", "path,@timestamp")
+                        .param("size", ComponentUtil.getFessConfig().getPageDictionaryMaxFetchSize()).execute()) {
             final Map<String, Object> contentMap = response.getContentAsMap();
             @SuppressWarnings("unchecked")
             final List<Map<String, Object>> fileList = (List<Map<String, Object>>) contentMap.get("file");

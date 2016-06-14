@@ -242,6 +242,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upload the Kuromoji file. */
     public static final String ERRORS_failed_to_upload_kuromoji_file = "{errors.failed_to_upload_kuromoji_file}";
 
+    /** The key of the message: Failed to download the Protwords file. */
+    public static final String ERRORS_failed_to_download_protwords_file = "{errors.failed_to_download_protwords_file}";
+
+    /** The key of the message: Failed to upload the Protwords file. */
+    public static final String ERRORS_failed_to_upload_protwords_file = "{errors.failed_to_upload_protwords_file}";
+
     /** The key of the message: Failed to download the Elevate file. */
     public static final String ERRORS_failed_to_download_elevate_file = "{errors.failed_to_download_elevate_file}";
 
@@ -1466,6 +1472,34 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsFailedToUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_failed_to_upload_kuromoji_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_download_protwords_file' with parameters.
+     * <pre>
+     * message: Failed to download the Protwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDownloadProtwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_download_protwords_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_upload_protwords_file' with parameters.
+     * <pre>
+     * message: Failed to upload the Protwords file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUploadProtwordsFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_upload_protwords_file));
         return this;
     }
 

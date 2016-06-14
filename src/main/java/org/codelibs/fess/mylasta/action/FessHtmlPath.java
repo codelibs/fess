@@ -92,6 +92,22 @@ public interface FessHtmlPath {
     /** The path of the HTML: /admin/dict/kuromoji/admin_dict_kuromoji_upload.jsp */
     HtmlNext path_AdminDictKuromoji_AdminDictKuromojiUploadJsp = new HtmlNext("/admin/dict/kuromoji/admin_dict_kuromoji_upload.jsp");
 
+    /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords.jsp */
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords.jsp");
+
+    /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_details.jsp */
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDetailsJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_details.jsp");
+
+    /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_download.jsp */
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsDownloadJsp =
+            new HtmlNext("/admin/dict/protwords/admin_dict_protwords_download.jsp");
+
+    /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_edit.jsp */
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsEditJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_edit.jsp");
+
+    /** The path of the HTML: /admin/dict/protwords/admin_dict_protwords_upload.jsp */
+    HtmlNext path_AdminDictProtwords_AdminDictProtwordsUploadJsp = new HtmlNext("/admin/dict/protwords/admin_dict_protwords_upload.jsp");
+
     /** The path of the HTML: /admin/dict/seunjeon/admin_dict_seunjeon.jsp */
     HtmlNext path_AdminDictSeunjeon_AdminDictSeunjeonJsp = new HtmlNext("/admin/dict/seunjeon/admin_dict_seunjeon.jsp");
 
