@@ -201,8 +201,7 @@
           "match": "*_ja",
           "mapping": {
             "type": "string",
-            "analyzer": "japanese_analyzer",
-            "search_analyzer": "japanese_search_analyzer"
+            "analyzer": "japanese_analyzer"
           }
         }
       },
