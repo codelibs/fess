@@ -53,15 +53,15 @@
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
-												<th><la:message key="labels.dictionary_type" /></th>
 												<th><la:message key="labels.dictionary_name" /></th>
+												<th><la:message key="labels.dictionary_type" /></th>
 											</tr>
 										</thead>
 										<tbody>
 											<c:forEach var="data" varStatus="s" items="${dictFiles}">
 												<tr data-href="${f:h(data.type)}/?dictId=${f:h(data.id)}">
-													<td>${f:h(data.type)}</td>
 													<td>${f:h(data.path)}</td>
+													<td>${f:h(data.type)}</td>
 												</tr>
 											</c:forEach>
 										</tbody>
