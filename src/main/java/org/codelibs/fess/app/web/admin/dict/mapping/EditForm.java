@@ -13,13 +13,13 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.dict.protwords;
+package org.codelibs.fess.app.web.admin.dict.mapping;
 
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
- * @author ma2tani
+ * @author nullpos
  */
 public class EditForm extends CreateForm {
 

@@ -260,6 +260,12 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Failed to upload the Badword file. */
     public static final String ERRORS_failed_to_upload_badword_file = "{errors.failed_to_upload_badword_file}";
 
+    /** The key of the message: Failed to download the Mapping file. */
+    public static final String ERRORS_failed_to_download_mapping_file = "{errors.failed_to_download_mapping_file}";
+
+    /** The key of the message: Failed to upload the Mapping file. */
+    public static final String ERRORS_failed_to_upload_mapping_file = "{errors.failed_to_upload_mapping_file}";
+
     /** The key of the message: "{1}" in "{0}" is invalid. */
     public static final String ERRORS_invalid_str_is_included = "{errors.invalid_str_is_included}";
 
@@ -376,6 +382,9 @@ public class FessMessages extends FessLabels {
 
     /** The key of the message: Uploaded Bad Word file. */
     public static final String SUCCESS_upload_bad_word = "{success.upload_bad_word}";
+
+    /** The key of the message: Uploaded Mapping file. */
+    public static final String SUCCESS_upload_mapping_file = "{success.upload_mapping_file}";
 
     /** The key of the message: Sent the test mail. */
     public static final String SUCCESS_send_testmail = "{success.send_testmail}";
@@ -1560,6 +1569,34 @@ public class FessMessages extends FessLabels {
     }
 
     /**
+     * Add the created action message for the key 'errors.failed_to_download_mapping_file' with parameters.
+     * <pre>
+     * message: Failed to download the Mapping file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToDownloadMappingFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_download_mapping_file));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.failed_to_upload_mapping_file' with parameters.
+     * <pre>
+     * message: Failed to upload the Mapping file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsFailedToUploadMappingFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_failed_to_upload_mapping_file));
+        return this;
+    }
+
+    /**
      * Add the created action message for the key 'errors.invalid_str_is_included' with parameters.
      * <pre>
      * message: "{1}" in "{0}" is invalid.
@@ -2123,6 +2160,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addSuccessUploadBadWord(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(SUCCESS_upload_bad_word));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'success.upload_mapping_file' with parameters.
+     * <pre>
+     * message: Uploaded Mapping file.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addSuccessUploadMappingFile(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(SUCCESS_upload_mapping_file));
         return this;
     }
 

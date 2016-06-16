@@ -18,7 +18,7 @@ package org.codelibs.fess.app.web.admin.dict.protwords;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author nocode
+ * @author ma2tani
  */
 public class SearchForm {
 

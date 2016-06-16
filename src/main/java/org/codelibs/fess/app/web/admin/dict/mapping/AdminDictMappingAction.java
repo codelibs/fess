@@ -13,23 +13,25 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.dict.protwords;
+package org.codelibs.fess.app.web.admin.dict.mapping;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.codelibs.core.beans.util.BeanUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.ProtwordsPager;
-import org.codelibs.fess.app.service.ProtwordsService;
+import org.codelibs.fess.app.pager.CharMappingPager;
+import org.codelibs.fess.app.service.CharMappingService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.admin.dict.AdminDictAction;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.dict.protwords.ProtwordsItem;
+import org.codelibs.fess.dict.mapping.CharMappingItem;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -41,17 +43,18 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.validation.VaErrorHook;
 
 /**
+ * @author nullpos
  * @author ma2tani
  */
-public class AdminDictProtwordsAction extends FessAdminAction {
+public class AdminDictMappingAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private ProtwordsService protwordsService;
+    private CharMappingService charMappingService;
     @Resource
-    private ProtwordsPager protwordsPager;
+    private CharMappingPager charMappingPager;
 
     // ===================================================================================
     //                                                                               Hook
@@ -59,7 +62,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictProtwords()));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameDictMapping()));
     }
 
     // ===================================================================================
@@ -68,7 +71,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse index(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -77,11 +80,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
         pageNumber.ifPresent(num -> {
-            protwordsPager.setCurrentPageNumber(pageNumber.get());
+            charMappingPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            protwordsPager.setCurrentPageNumber(0);
+            charMappingPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -89,8 +92,8 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse search(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
-        copyBeanToBean(form, protwordsPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
+        copyBeanToBean(form, charMappingPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
@@ -98,18 +101,18 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse reset(final SearchForm form) {
         validate(form, messages -> {}, () -> asDictIndexHtml());
-        protwordsPager.clear();
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
+        charMappingPager.clear();
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
         // page navi
-        RenderDataUtil.register(data, "protwordsItemItems", protwordsService.getProtwordsList(form.dictId, protwordsPager));
+        RenderDataUtil.register(data, "charMappingItemItems", charMappingService.getCharMappingList(form.dictId, charMappingPager));
 
         // restore from pager
-        BeanUtil.copyBeanToBean(protwordsPager, form, op -> {
+        BeanUtil.copyBeanToBean(charMappingPager, form, op -> {
             op.exclude(Constants.PAGER_CONVERSION_RULE);
         });
     }
@@ -123,7 +126,7 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse createnew(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsEditJsp).useForm(CreateForm.class, op -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingEditJsp).useForm(CreateForm.class, op -> {
             op.setup(form -> {
                 form.initialize();
                 form.crudMode = CrudMode.CREATE;
@@ -135,10 +138,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml(form.dictId));
-        protwordsService
-                .getProtwordsItem(form.dictId, form.id)
+        charMappingService
+                .getCharMappingItem(form.dictId, form.id)
                 .ifPresent(entity -> {
-                    form.input = entity.getInputValue();
+                    form.inputs = entity.getInputsValue();
+                    form.output = entity.getOutput();
                 })
                 .orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
@@ -166,10 +170,11 @@ public class AdminDictProtwordsAction extends FessAdminAction {
                 EditForm.class,
                 op -> {
                     op.setup(form -> {
-                        protwordsService
-                                .getProtwordsItem(dictId, id)
+                        charMappingService
+                                .getCharMappingItem(dictId, id)
                                 .ifPresent(entity -> {
-                                    form.input = entity.getInputValue();
+                                    form.inputs = entity.getInputsValue();
+                                    form.output = entity.getOutput();
                                 })
                                 .orElse(() -> {
                                     throwValidationError(
@@ -189,15 +194,15 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse downloadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsDownloadJsp).useForm(DownloadForm.class, op -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingDownloadJsp).useForm(DownloadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
         }).renderWith(data -> {
-            protwordsService.getProtwordsFile(dictId).ifPresent(file -> {
+            charMappingService.getCharMappingFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL), () -> asDictIndexHtml());
             });
         });
     }
@@ -206,14 +211,14 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     public ActionResponse download(final DownloadForm form) {
         validate(form, messages -> {}, () -> downloadpage(form.dictId));
         verifyTokenKeep(() -> downloadpage(form.dictId));
-        return protwordsService.getProtwordsFile(form.dictId).map(file -> {
+        return charMappingService.getCharMappingFile(form.dictId).map(file -> {
             return asStream(new File(file.getPath()).getName()).contentTypeOctetStream().stream(out -> {
                 try (InputStream inputStream = file.getInputStream()) {
                     out.write(inputStream);
                 }
             });
         }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL), () -> downloadpage(form.dictId));
+            throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL), () -> downloadpage(form.dictId));
             return null;
         });
     }
@@ -224,15 +229,15 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     @Execute
     public HtmlResponse uploadpage(final String dictId) {
         saveToken();
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsUploadJsp).useForm(UploadForm.class, op -> {
+        return asHtml(path_AdminDictMapping_AdminDictMappingUploadJsp).useForm(UploadForm.class, op -> {
             op.setup(form -> {
                 form.dictId = dictId;
             });
         }).renderWith(data -> {
-            protwordsService.getProtwordsFile(dictId).ifPresent(file -> {
+            charMappingService.getCharMappingFile(dictId).ifPresent(file -> {
                 RenderDataUtil.register(data, "path", file.getPath());
             }).orElse(() -> {
-                throwValidationError(messages -> messages.addErrorsFailedToDownloadProtwordsFile(GLOBAL), () -> asDictIndexHtml());
+                throwValidationError(messages -> messages.addErrorsFailedToDownloadMappingFile(GLOBAL), () -> asDictIndexHtml());
             });
         });
     }
@@ -241,18 +246,18 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     public HtmlResponse upload(final UploadForm form) {
         validate(form, messages -> {}, () -> uploadpage(form.dictId));
         verifyToken(() -> uploadpage(form.dictId));
-        return protwordsService.getProtwordsFile(form.dictId).map(file -> {
-            try (InputStream inputStream = form.protwordsFile.getInputStream()) {
+        return charMappingService.getCharMappingFile(form.dictId).map(file -> {
+            try (InputStream inputStream = form.charMappingFile.getInputStream()) {
                 file.update(inputStream);
             } catch (final IOException e) {
-                throwValidationError(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL), () -> {
+                throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL), () -> {
                     return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
                 });
             }
-            saveInfo(messages -> messages.addSuccessUploadSynonymFile(GLOBAL));
+            saveInfo(messages -> messages.addSuccessUploadMappingFile(GLOBAL));
             return redirectWith(getClass(), moreUrl("uploadpage/" + form.dictId));
         }).orElseGet(() -> {
-            throwValidationError(messages -> messages.addErrorsFailedToUploadProtwordsFile(GLOBAL), () -> uploadpage(form.dictId));
+            throwValidationError(messages -> messages.addErrorsFailedToUploadMappingFile(GLOBAL), () -> uploadpage(form.dictId));
             return null;
         });
 
@@ -266,10 +271,18 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createProtwordsItem(form, () -> asEditHtml()).ifPresent(entity -> {
-            protwordsService.store(form.dictId, entity);
-            saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-        }).orElse(() -> throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml()));
+        createCharMappingItem(form, () -> asEditHtml()).ifPresent(
+                entity -> {
+                    try {
+                        charMappingService.store(form.dictId, entity);
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -278,12 +291,18 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT, form.dictId);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        createProtwordsItem(form, () -> asEditHtml()).ifPresent(entity -> {
-            protwordsService.store(form.dictId, entity);
-            saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-        }).orElse(
-                () -> throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
-                        () -> asEditHtml()));
+        createCharMappingItem(form, () -> asEditHtml()).ifPresent(
+                entity -> {
+                    try {
+                        charMappingService.store(form.dictId, entity);
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()), () -> asEditHtml());
+        });
         return redirectWith(getClass(), moreUrl("list/1").params("dictId", form.dictId));
     }
 
@@ -292,12 +311,19 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
         verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
-        protwordsService
-                .getProtwordsItem(form.dictId, form.id)
-                .ifPresent(entity -> {
-                    protwordsService.delete(form.dictId, entity);
-                    saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
-                })
+        charMappingService
+                .getCharMappingItem(form.dictId, form.id)
+                .ifPresent(
+                        entity -> {
+                            try {
+                                charMappingService.delete(form.dictId, entity);
+                                saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
+                            } catch (final Exception e) {
+                                throwValidationError(
+                                        messages -> messages.addErrorsCrudFailedToDeleteCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                        () -> asEditHtml());
+                            }
+                        })
                 .orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.getDisplayId()),
                             () -> asDetailsHtml());
@@ -309,14 +335,14 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<ProtwordsItem> getEntity(final CreateForm form) {
+    private OptionalEntity<CharMappingItem> getEntity(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            final ProtwordsItem entity = new ProtwordsItem(0, StringUtil.EMPTY);
+            final CharMappingItem entity = new CharMappingItem(0, StringUtil.EMPTY_STRINGS, StringUtil.EMPTY);
             return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return protwordsService.getProtwordsItem(form.dictId, ((EditForm) form).id);
+                return charMappingService.getCharMappingItem(form.dictId, ((EditForm) form).id);
             }
             break;
         default:
@@ -325,11 +351,13 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ProtwordsItem> createProtwordsItem(final CreateForm form, final VaErrorHook hook) {
+    protected OptionalEntity<CharMappingItem> createCharMappingItem(final CreateForm form, final VaErrorHook hook) {
         return getEntity(form).map(entity -> {
-            final String newInput = form.input;
-            validateProtwordsString(newInput, "input", hook);
-            entity.setNewInput(newInput);
+            final String[] newInputs = splitLine(form.inputs);
+            validateMappingString(newInputs, "inputs", hook);
+            entity.setNewInputs(newInputs);
+            final String newOutput = form.output;
+            entity.setNewOutput(newOutput);
             return entity;
         });
     }
@@ -345,11 +373,36 @@ public class AdminDictProtwordsAction extends FessAdminAction {
         }
     }
 
-    private void validateProtwordsString(final String values, final String propertyName, final VaErrorHook hook) {
-        if (values.length() == 0) {
+    private void validateMappingString(final String[] values, final String propertyName, final VaErrorHook hook) {
+        if (values.length == 0) {
             return;
         }
-        // TODO validation
+        for (final String value : values) {
+            if (value.indexOf(',') >= 0) {
+                throwValidationError(messages -> {
+                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, ",");
+                }, hook);
+            }
+            if (value.indexOf("=>") >= 0) {
+                throwValidationError(messages -> {
+                    messages.addErrorsInvalidStrIsIncluded(propertyName, value, "=>");
+                }, hook);
+            }
+        }
+    }
+
+    private String[] splitLine(final String value) {
+        if (StringUtil.isBlank(value)) {
+            return StringUtil.EMPTY_STRINGS;
+        }
+        final String[] values = value.split("[\r\n]");
+        final List<String> list = new ArrayList<>(values.length);
+        for (final String line : values) {
+            if (StringUtil.isNotBlank(line)) {
+                list.add(line.trim());
+            }
+        }
+        return list.toArray(new String[list.size()]);
     }
 
     // ===================================================================================
@@ -361,21 +414,21 @@ public class AdminDictProtwordsAction extends FessAdminAction {
     }
 
     private HtmlResponse asListHtml(final String dictId) {
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsJsp).renderWith(data -> {
-            RenderDataUtil.register(data, "protwordsItemItems", protwordsService.getProtwordsList(dictId, protwordsPager));
+        return asHtml(path_AdminDictMapping_AdminDictMappingJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "charMappingItemItems", charMappingService.getCharMappingList(dictId, charMappingPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(protwordsPager, form, op -> op.include("id"));
+                copyBeanToBean(charMappingPager, form, op -> op.include("id"));
             });
         });
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsEditJsp);
+        return asHtml(path_AdminDictMapping_AdminDictMappingEditJsp);
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminDictProtwords_AdminDictProtwordsDetailsJsp);
+        return asHtml(path_AdminDictMapping_AdminDictMappingDetailsJsp);
     }
 
 }

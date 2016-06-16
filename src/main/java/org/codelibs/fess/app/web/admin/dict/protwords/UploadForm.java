@@ -19,7 +19,7 @@ import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
 
 /**
- * @author nocode
+ * @author ma2tani
  */
 public class UploadForm {
 

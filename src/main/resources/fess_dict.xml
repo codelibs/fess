@@ -2,7 +2,7 @@
 <!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
-	<include path="fess_config.xml"/>
+	<include path="fess_config.xml" />
 
 	<component name="dictionaryManager" class="org.codelibs.fess.dict.DictionaryManager">
 		<postConstruct name="addCreator">
@@ -17,6 +17,9 @@
 		<postConstruct name="addCreator">
 			<arg>protwordsCreator</arg>
 		</postConstruct>
+		<postConstruct name="addCreator">
+			<arg>charMappingCreator</arg>
+		</postConstruct>
 	</component>
 
 	<component name="kuromojiDictCreator"
@@ -30,5 +33,8 @@
 	</component>
 	<component name="protwordsCreator"
 		class="org.codelibs.fess.dict.protwords.ProtwordsCreator">
+	</component>
+	<component name="charMappingCreator"
+		class="org.codelibs.fess.dict.mapping.CharMappingCreator">
 	</component>
 </components>

@@ -22,7 +22,7 @@ import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
- * @author nocode
+ * @author ma2tani
  */
 public class CreateForm {
 
@@ -34,7 +34,7 @@ public class CreateForm {
 
     @Required
     @Size(max = 1000)
-    public String inputs;
+    public String input;
 
     public void initialize() {
         crudMode = CrudMode.CREATE;

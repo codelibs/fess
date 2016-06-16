@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.dict.protwords;
+package org.codelibs.fess.dict.mapping;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.codelibs.core.lang.StringUtil;
@@ -38,18 +40,18 @@ import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.dbflute.optional.OptionalEntity;
 
-public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
-    private static final String PROTWORDS = "protwords";
+public class CharMappingFile extends DictionaryFile<CharMappingItem> {
+    private static final String MAPPING = "mapping";
 
-    List<ProtwordsItem> protwordsItemList;
+    List<CharMappingItem> mappingItemList;
 
-    public ProtwordsFile(final String id, final String path, final Date timestamp) {
+    public CharMappingFile(final String id, final String path, final Date timestamp) {
         super(id, path, timestamp);
     }
 
     @Override
     public String getType() {
-        return PROTWORDS;
+        return MAPPING;
     }
 
     @Override
@@ -58,121 +60,120 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     }
 
     @Override
-    public synchronized OptionalEntity<ProtwordsItem> get(final long id) {
-        if (protwordsItemList == null) {
+    public OptionalEntity<CharMappingItem> get(long id) {
+        if (mappingItemList == null) {
             reload(null, null);
         }
 
-        for (final ProtwordsItem ProtwordsItem : protwordsItemList) {
-            if (id == ProtwordsItem.getId()) {
-                return OptionalEntity.of(ProtwordsItem);
+        for (final CharMappingItem mappingItem : mappingItemList) {
+            if (id == mappingItem.getId()) {
+                return OptionalEntity.of(mappingItem);
             }
         }
         return OptionalEntity.empty();
     }
 
     @Override
-    public synchronized PagingList<ProtwordsItem> selectList(final int offset, final int size) {
-        if (protwordsItemList == null) {
+    public synchronized PagingList<CharMappingItem> selectList(final int offset, final int size) {
+        if (mappingItemList == null) {
             reload(null, null);
         }
 
-        if (offset >= protwordsItemList.size() || offset < 0) {
-            return new PagingList<>(Collections.<ProtwordsItem> emptyList(), offset, size, protwordsItemList.size());
+        if (offset >= mappingItemList.size() || offset < 0) {
+            return new PagingList<>(Collections.<CharMappingItem> emptyList(), offset, size, mappingItemList.size());
         }
 
         int toIndex = offset + size;
-        if (toIndex > protwordsItemList.size()) {
-            toIndex = protwordsItemList.size();
+        if (toIndex > mappingItemList.size()) {
+            toIndex = mappingItemList.size();
         }
 
-        return new PagingList<>(protwordsItemList.subList(offset, toIndex), offset, size, protwordsItemList.size());
+        return new PagingList<>(mappingItemList.subList(offset, toIndex), offset, size, mappingItemList.size());
     }
 
     @Override
-    public synchronized void insert(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+    public synchronized void insert(final CharMappingItem item) {
+        try (MappingUpdater updater = new MappingUpdater(item)) {
             reload(updater, null);
         }
     }
 
     @Override
-    public synchronized void update(final ProtwordsItem item) {
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+    public synchronized void update(final CharMappingItem item) {
+        try (MappingUpdater updater = new MappingUpdater(item)) {
             reload(updater, null);
         }
     }
 
     @Override
-    public synchronized void delete(final ProtwordsItem item) {
-        final ProtwordsItem ProtwordsItem = item;
-        ProtwordsItem.setNewInput(StringUtil.EMPTY);
-        try (SynonymUpdater updater = new SynonymUpdater(item)) {
+    public synchronized void delete(final CharMappingItem item) {
+        final CharMappingItem mappingItem = item;
+        mappingItem.setNewInputs(StringUtil.EMPTY_STRINGS);
+        mappingItem.setNewOutput(StringUtil.EMPTY);
+        try (MappingUpdater updater = new MappingUpdater(item)) {
             reload(updater, null);
         }
     }
 
-    protected void reload(final SynonymUpdater updater, final InputStream in) {
-        final List<ProtwordsItem> itemList = new ArrayList<>();
+    protected void reload(final MappingUpdater updater, final InputStream in) {
+        final Pattern parsePattern = Pattern.compile("(.*)\\s*=>\\s*(.*)\\s*$");
+        final List<CharMappingItem> itemList = new ArrayList<>();
         try (BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in != null ? in : dictionaryManager.getContentInputStream(this), Constants.UTF_8))) {
             long id = 0;
             String line = null;
             while ((line = reader.readLine()) != null) {
-                if (line.length() == 0 || line.charAt(0) == '#') {
+                // Remove comments
+                line = line.replaceAll("#.*$", StringUtil.EMPTY);
+
+                // Skip empty lines or comment lines
+                if (line.trim().length() == 0) {
                     if (updater != null) {
                         updater.write(line);
                     }
-                    continue; // ignore empty lines and comments
+                    continue;
                 }
 
-                final String inputStrings = line;
-                String input = null;
-                if (inputStrings != null) {
-                    input = unescape(inputStrings);
+                String[] inputs;
+                String output;
+
+                Matcher m = parsePattern.matcher(line.trim());
+
+                if (!m.find()) {
+                    throw new DictionaryException("Failed to parse " + path);
                 }
 
-                if (input.length() > 0) {
-                    id++;
-                    final ProtwordsItem item = new ProtwordsItem(id, input);
-                    if (updater != null) {
-                        final ProtwordsItem newItem = updater.write(item);
-                        if (newItem != null) {
-                            itemList.add(newItem);
-                        } else {
-                            id--;
-                        }
+                inputs = m.group(1).trim().split(",");
+                output = m.group(2).trim();
+
+                if (inputs == null || output == null || inputs.length == 0) {
+                    throw new DictionaryException("Failed to parse " + path);
+                }
+
+                id++;
+                final CharMappingItem item = new CharMappingItem(id, inputs, output);
+
+                if (updater != null) {
+                    final CharMappingItem newItem = updater.write(item);
+                    if (newItem != null) {
+                        itemList.add(newItem);
                     } else {
-                        itemList.add(item);
+                        id--;
                     }
+                } else {
+                    itemList.add(item);
                 }
             }
             if (updater != null) {
-                final ProtwordsItem item = updater.commit();
+                final CharMappingItem item = updater.commit();
                 if (item != null) {
                     itemList.add(item);
                 }
             }
-            protwordsItemList = itemList;
+            mappingItemList = itemList;
         } catch (final IOException e) {
             throw new DictionaryException("Failed to parse " + path, e);
         }
-    }
-
-    private String unescape(final String s) {
-        if (s.indexOf('\\') >= 0) {
-            final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < s.length(); i++) {
-                final char ch = s.charAt(i);
-                if (ch == '\\' && i < s.length() - 1) {
-                    sb.append(s.charAt(++i));
-                } else {
-                    sb.append(ch);
-                }
-            }
-            return sb.toString();
-        }
-        return s;
     }
 
     public String getSimpleName() {
@@ -184,17 +185,17 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
     }
 
     public synchronized void update(final InputStream in) throws IOException {
-        try (SynonymUpdater updater = new SynonymUpdater(null)) {
+        try (MappingUpdater updater = new MappingUpdater(null)) {
             reload(updater, in);
         }
     }
 
     @Override
     public String toString() {
-        return "SynonymFile [path=" + path + ", srotwordsItemList=" + protwordsItemList + ", id=" + id + "]";
+        return "MappingFile [path=" + path + ", mappingItemList=" + mappingItemList + ", id=" + id + "]";
     }
 
-    protected class SynonymUpdater implements Closeable {
+    protected class MappingUpdater implements Closeable {
 
         protected boolean isCommit = false;
 
@@ -202,11 +203,11 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
         protected Writer writer;
 
-        protected ProtwordsItem item;
+        protected CharMappingItem item;
 
-        protected SynonymUpdater(final ProtwordsItem newItem) {
+        protected MappingUpdater(final CharMappingItem newItem) {
             try {
-                newFile = File.createTempFile(PROTWORDS, ".txt");
+                newFile = File.createTempFile(MAPPING, ".txt");
                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFile), Constants.UTF_8));
             } catch (final IOException e) {
                 if (newFile != null) {
@@ -217,7 +218,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             item = newItem;
         }
 
-        public ProtwordsItem write(final ProtwordsItem oldItem) {
+        public CharMappingItem write(final CharMappingItem oldItem) {
             try {
                 if (item != null && item.getId() == oldItem.getId() && item.isUpdated()) {
                     if (item.equals(oldItem)) {
@@ -226,15 +227,16 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
                                 // update
                                 writer.write(item.toLineString());
                                 writer.write(Constants.LINE_SEPARATOR);
-                                return new ProtwordsItem(item.getId(), item.getNewInput());
+                                return new CharMappingItem(item.getId(), item.getNewInputs(), item.getNewOutput());
                             } else {
                                 return null;
                             }
                         } finally {
-                            item.setNewInput(null);
+                            item.setNewInputs(null);
+                            item.setNewOutput(null);
                         }
                     } else {
-                        throw new DictionaryException("Protwords file was updated: old=" + oldItem + " : new=" + item);
+                        throw new DictionaryException("Mapping file was updated: old=" + oldItem + " : new=" + item);
                     }
                 } else {
                     writer.write(oldItem.toLineString());
@@ -255,7 +257,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             }
         }
 
-        public ProtwordsItem commit() {
+        public CharMappingItem commit() {
             isCommit = true;
             if (item != null && item.isUpdated()) {
                 try {
@@ -280,7 +282,7 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
 
             if (isCommit) {
                 try {
-                    dictionaryManager.store(ProtwordsFile.this, newFile);
+                    dictionaryManager.store(CharMappingFile.this, newFile);
                 } finally {
                     newFile.delete();
                 }
@@ -289,4 +291,5 @@ public class ProtwordsFile extends DictionaryFile<ProtwordsItem> {
             }
         }
     }
+
 }

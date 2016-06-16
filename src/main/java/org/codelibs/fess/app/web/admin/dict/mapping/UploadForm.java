@@ -13,21 +13,21 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.dict.protwords;
+package org.codelibs.fess.app.web.admin.dict.mapping;
 
+import org.lastaflute.web.ruts.multipart.MultipartFormFile;
 import org.lastaflute.web.validation.Required;
-import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 /**
+ * @author nullpos
  * @author ma2tani
  */
-public class EditForm extends CreateForm {
+public class UploadForm {
 
     @Required
-    @ValidateTypeFailure
-    public Long id;
+    public String dictId;
 
-    public String getDisplayId() {
-        return dictId + ":" + id;
-    }
+    @Required
+    public MultipartFormFile charMappingFile;
+
 }

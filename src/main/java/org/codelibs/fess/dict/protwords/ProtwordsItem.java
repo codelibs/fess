@@ -15,59 +15,57 @@
  */
 package org.codelibs.fess.dict.protwords;
 
-import java.util.Arrays;
-
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.dict.DictionaryItem;
 
 public class ProtwordsItem extends DictionaryItem {
-    private final String[] inputs;
+    private final String input;
 
-    private String[] newInputs;
+    private String newInput;
 
-    public ProtwordsItem(final long id, final String[] inputs) {
+    public ProtwordsItem(final long id, final String input) {
         this.id = id;
-        this.inputs = inputs;
+        this.input = input;
 
         if (id == 0) {
             // create
-            newInputs = inputs;
+            newInput = input;
         }
     }
 
-    public String[] getNewInputs() {
-        return newInputs;
+    public String getNewInput() {
+        return newInput;
     }
 
-    public void setNewInputs(final String[] newInputs) {
-        this.newInputs = newInputs;
+    public void setNewInput(final String newInput) {
+        this.newInput = newInput;
     }
 
-    public String[] getInputs() {
-        return inputs;
+    public String getInput() {
+        return input;
     }
 
-    public String getInputsValue() {
-        if (inputs == null) {
+    public String getInputValue() {
+        if (input == null) {
             return StringUtil.EMPTY;
         }
-        return String.join(",", inputs);
+        return input;
     }
 
     public boolean isUpdated() {
-        return newInputs != null;
+        return newInput != null;
     }
 
     public boolean isDeleted() {
-        return isUpdated() && newInputs.length == 0;
+        return isUpdated() && newInput.length() == 0;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(inputs);
+        result = prime * result + input.hashCode();
         return result;
     }
 
@@ -83,7 +81,7 @@ public class ProtwordsItem extends DictionaryItem {
             return false;
         }
         final ProtwordsItem other = (ProtwordsItem) obj;
-        if (!Arrays.equals(inputs, other.inputs)) {
+        if (!input.equals(other.input)) {
             return false;
         }
         return true;
@@ -91,14 +89,14 @@ public class ProtwordsItem extends DictionaryItem {
 
     @Override
     public String toString() {
-        return "ProtwordsItem [id=" + id + ", inputs=" + Arrays.toString(inputs) + ", newInputs=" + Arrays.toString(newInputs) + "]";
+        return "ProtwordsItem [id=" + id + ", inputs=" + input + ", newInputs=" + newInput + "]";
     }
 
     public String toLineString() {
         if (isUpdated()) {
-            return StringUtils.join(newInputs, ",");
+            return StringUtils.join(newInput);
         } else {
-            return StringUtils.join(inputs, ",");
+            return StringUtils.join(input);
         }
     }
 

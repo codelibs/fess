@@ -202,7 +202,7 @@ ul.searchOptionLabels li {
 	vertical-align: middle;
 }
 
-#searchOptions {
+body.search #searchOptions, body.help #searchOptions, body.error #searchOptions {
 	position: fixed;
 	top: 0;
 	padding-top: 72px;
@@ -214,7 +214,7 @@ ul.searchOptionLabels li {
 	transition: all .4s ease 0s;
 }
 
-#searchOptions.active {
+body.search #searchOptions.active, body.help #searchOptions.active,  body.error #searchOptions.active {
 	right: 0;
 }
 

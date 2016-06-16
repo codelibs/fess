@@ -99,7 +99,7 @@
 											<tr>
 												<th><la:message
 														key="labels.dict_protwords_source" /></th>
-												<td>${f:h(inputs)}<la:hidden property="inputs" /></td>
+												<td>${f:h(input)}<la:hidden property="input" /></td>
 											</tr>
 										</tbody>
 									</table>
