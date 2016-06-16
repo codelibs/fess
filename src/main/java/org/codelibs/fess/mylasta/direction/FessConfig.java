@@ -565,6 +565,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1000 */
     String PAGE_BAD_WORD_MAX_FETCH_SIZE = "page.bad.word.max.fetch.size";
 
+    /** The key of the configuration. e.g. 1000 */
+    String PAGE_DICTIONARY_MAX_FETCH_SIZE = "page.dictionary.max.fetch.size";
+
     /** The key of the configuration. e.g. 0 */
     String PAGING_SEARCH_PAGE_START = "paging.search.page.start";
 
@@ -615,6 +618,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. seunjeon */
     String ONLINE_HELP_NAME_DICT_SEUNJEON = "online.help.name.dict.seunjeon";
+
+    /** The key of the configuration. e.g. protwords */
+    String ONLINE_HELP_NAME_DICT_PROTWORDS = "online.help.name.dict.protwords";
+
+    /** The key of the configuration. e.g. mapping */
+    String ONLINE_HELP_NAME_DICT_MAPPING = "online.help.name.dict.mapping";
 
     /** The key of the configuration. e.g. webconfig */
     String ONLINE_HELP_NAME_WEBCONFIG = "online.help.name.webconfig";
@@ -2677,6 +2686,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPageBadWordMaxFetchSizeAsInteger();
 
     /**
+     * Get the value for the key 'page.dictionary.max.fetch.size'. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getPageDictionaryMaxFetchSize();
+
+    /**
+     * Get the value for the key 'page.dictionary.max.fetch.size' as {@link Integer}. <br>
+     * The value is, e.g. 1000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getPageDictionaryMaxFetchSizeAsInteger();
+
+    /**
      * Get the value for the key 'paging.search.page.start'. <br>
      * The value is, e.g. 0 <br>
      * comment: search page
@@ -2840,6 +2864,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getOnlineHelpNameDictSeunjeon();
+
+    /**
+     * Get the value for the key 'online.help.name.dict.protwords'. <br>
+     * The value is, e.g. protwords <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictProtwords();
+
+    /**
+     * Get the value for the key 'online.help.name.dict.mapping'. <br>
+     * The value is, e.g. mapping <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameDictMapping();
 
     /**
      * Get the value for the key 'online.help.name.webconfig'. <br>
@@ -4589,6 +4627,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return getAsInteger(FessConfig.PAGE_BAD_WORD_MAX_FETCH_SIZE);
         }
 
+        public String getPageDictionaryMaxFetchSize() {
+            return get(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE);
+        }
+
+        public Integer getPageDictionaryMaxFetchSizeAsInteger() {
+            return getAsInteger(FessConfig.PAGE_DICTIONARY_MAX_FETCH_SIZE);
+        }
+
         public String getPagingSearchPageStart() {
             return get(FessConfig.PAGING_SEARCH_PAGE_START);
         }
@@ -4675,6 +4721,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameDictSeunjeon() {
             return get(FessConfig.ONLINE_HELP_NAME_DICT_SEUNJEON);
+        }
+
+        public String getOnlineHelpNameDictProtwords() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_PROTWORDS);
+        }
+
+        public String getOnlineHelpNameDictMapping() {
+            return get(FessConfig.ONLINE_HELP_NAME_DICT_MAPPING);
         }
 
         public String getOnlineHelpNameWebconfig() {
