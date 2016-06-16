@@ -46,7 +46,6 @@
             "記号-空白",
             "記号-読点",
             "形容詞",
-            "形容詞-自立",
             "形容詞-接尾",
             "形容詞-非自立",
             "語断片",
@@ -72,15 +71,8 @@
             "接頭詞-数接続",
             "接頭詞-動詞接続",
             "接頭詞-名詞接続",
-            "動詞",
-            "動詞-自立",
             "動詞-接尾",
-            "動詞-非自立",
             "非言語音",
-            "副詞",
-            "副詞-一般",
-            "副詞-助詞類接続",
-            "未知語",
             "連体詞"
           ]
         },
@@ -137,20 +129,6 @@
             "kuromoji_neologd_baseform",
             "kuromoji_neologd_stemmer",
             "kuromoji_neologd_pos_filter",
-            "lowercase"
-          ]
-        },
-        "japanese_search_analyzer": {
-          "type": "custom",
-          "char_filter": [
-            "mapping_ja_filter",
-            "kuromoji_neologd_iteration_mark"
-          ],
-          "tokenizer": "kuromoji_neologd_tokenizer",
-          "filter": [
-            "truncate10_filter",
-            "kuromoji_neologd_baseform",
-            "kuromoji_neologd_stemmer",
             "lowercase"
           ]
         },
