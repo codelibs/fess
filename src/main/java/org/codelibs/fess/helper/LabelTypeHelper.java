@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -37,8 +40,6 @@ import org.slf4j.LoggerFactory;
 
 public class LabelTypeHelper {
     private static final Logger logger = LoggerFactory.getLogger(LabelTypeHelper.class);
-
-    private static final long serialVersionUID = 1L;
 
     @Resource
     protected RoleQueryHelper roleQueryHelper;
@@ -67,7 +68,7 @@ public class LabelTypeHelper {
             final LabelTypeItem item = new LabelTypeItem();
             item.setLabel(labelType.getName());
             item.setValue(labelType.getValue());
-            item.setRoleValueList(labelType.getRoleValueList());
+            item.setPermissions(labelType.getPermissions());
             itemList.add(item);
         }
         labelTypeItemList = itemList;
@@ -82,15 +83,18 @@ public class LabelTypeHelper {
         final Set<String> roleSet = roleQueryHelper.build();
         if (roleSet.isEmpty()) {
             for (final LabelTypeItem item : labelTypeItemList) {
-                final Map<String, String> map = new HashMap<>(2);
-                map.put(Constants.ITEM_LABEL, item.getLabel());
-                map.put(Constants.ITEM_VALUE, item.getValue());
-                itemList.add(map);
+                if (item.getPermissions().length == 0) {
+                    final Map<String, String> map = new HashMap<>(2);
+                    map.put(Constants.ITEM_LABEL, item.getLabel());
+                    map.put(Constants.ITEM_VALUE, item.getValue());
+                    itemList.add(map);
+                }
             }
         } else {
             for (final LabelTypeItem item : labelTypeItemList) {
+                final Set<String> permissions = stream(item.getPermissions()).get(stream -> stream.collect(Collectors.toSet()));
                 for (final String roleValue : roleSet) {
-                    if (item.getRoleValueList().contains(roleValue)) {
+                    if (permissions.contains(roleValue)) {
                         final Map<String, String> map = new HashMap<>(2);
                         map.put(Constants.ITEM_LABEL, item.getLabel());
                         map.put(Constants.ITEM_VALUE, item.getValue());
@@ -145,7 +149,7 @@ public class LabelTypeHelper {
 
         private String value;
 
-        private List<String> roleValueList;
+        private String[] permissions;
 
         public String getLabel() {
             return label;
@@ -163,12 +167,12 @@ public class LabelTypeHelper {
             this.value = value;
         }
 
-        public List<String> getRoleValueList() {
-            return roleValueList;
+        public String[] getPermissions() {
+            return permissions;
         }
 
-        public void setRoleValueList(final List<String> roleValueList) {
-            this.roleValueList = roleValueList;
+        public void setPermissions(String[] permissions) {
+            this.permissions = permissions;
         }
     }
 
