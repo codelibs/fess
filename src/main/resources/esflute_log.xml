@@ -4,6 +4,9 @@
 <components>
 	<include path="esclient.xml"/>
 
+	<!-- The components of DBFlute Runtime. -->
+	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
+
     <!-- The components of Behavior. -->
     <component name="clickLogBhv" class="org.codelibs.fess.es.log.exbhv.ClickLogBhv"/>
     <component name="favoriteLogBhv" class="org.codelibs.fess.es.log.exbhv.FavoriteLogBhv"/>

@@ -4,6 +4,9 @@
 <components>
 	<include path="esclient.xml"/>
 
+	<!-- The components of DBFlute Runtime. -->
+	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
+
     <!-- The components of Behavior. -->
     <component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
     <component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
