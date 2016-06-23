@@ -188,7 +188,9 @@ public class FailureUrlService {
         failureUrl.setLastAccessTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         failureUrl.setThreadName(Thread.currentThread().getName());
 
-        bhv.insertOrUpdate(failureUrl);
+        bhv.insertOrUpdate(failureUrl, op -> {
+            op.setRefresh(true);
+        });
     }
 
     private String getStackTrace(final Throwable t) {
