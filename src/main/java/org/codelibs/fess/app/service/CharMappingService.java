@@ -34,18 +34,19 @@ public class CharMappingService {
     protected DictionaryManager dictionaryManager;
 
     public List<CharMappingItem> getCharMappingList(final String dictId, final CharMappingPager charMappingPager) {
-        return getCharMappingFile(dictId).map(file -> {
-            final int pageSize = charMappingPager.getPageSize();
-            final PagingList<CharMappingItem> charMappingList =
-                    file.selectList((charMappingPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
+        return getCharMappingFile(dictId).map(
+                file -> {
+                    final int pageSize = charMappingPager.getPageSize();
+                    final PagingList<CharMappingItem> charMappingList =
+                            file.selectList((charMappingPager.getCurrentPageNumber() - 1) * pageSize, pageSize);
 
-            // update pager
-                BeanUtil.copyBeanToBean(charMappingList, charMappingPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                charMappingList.setPageRangeSize(5);
-                charMappingPager.setPageNumberList(charMappingList.createPageNumberList());
+                    // update pager
+                    BeanUtil.copyBeanToBean(charMappingList, charMappingPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
+                    charMappingList.setPageRangeSize(5);
+                    charMappingPager.setPageNumberList(charMappingList.createPageNumberList());
 
-                return (List<CharMappingItem>) charMappingList;
-            }).orElse(Collections.emptyList());
+                    return (List<CharMappingItem>) charMappingList;
+                }).orElse(Collections.emptyList());
     }
 
     public OptionalEntity<CharMappingFile> getCharMappingFile(final String dictId) {
