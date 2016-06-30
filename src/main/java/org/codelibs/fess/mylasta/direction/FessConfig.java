@@ -169,7 +169,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. //LINK[@rel='canonical']/@href */
     String CRAWLER_DOCUMENT_HTML_CANNONICAL_XPATH = "crawler.document.html.cannonical.xpath";
 
-    /** The key of the configuration. e.g. noscript,script */
+    /** The key of the configuration. e.g. noscript,script,style */
     String CRAWLER_DOCUMENT_HTML_PRUNED_TAGS = "crawler.document.html.pruned.tags";
 
     /** The key of the configuration. e.g. 200 */
@@ -1317,7 +1317,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.html.pruned.tags'. <br>
-     * The value is, e.g. noscript,script <br>
+     * The value is, e.g. noscript,script,style <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentHtmlPrunedTags();
