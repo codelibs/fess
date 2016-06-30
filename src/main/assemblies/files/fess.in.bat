@@ -56,9 +56,6 @@ set JAVA_OPTS=%JAVA_OPTS% -XX:+UseConcMarkSweepGC
 set JAVA_OPTS=%JAVA_OPTS% -XX:CMSInitiatingOccupancyFraction=75
 set JAVA_OPTS=%JAVA_OPTS% -XX:+UseCMSInitiatingOccupancyOnly
 
-REM When running under Java 7
-REM JAVA_OPTS=%JAVA_OPTS% -XX:+UseCondCardMark
-
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDetails
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCTimeStamps
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDateStamps
@@ -87,4 +84,21 @@ set APP_NAME=fess
 set ES_HOME=%FESS_HOME%/es
 
 set FESS_CLASSPATH=%FESS_HOME%\lib\classes
-set FESS_PARAMS=-Dfess -Des-foreground=yes -Dfess.home="%FESS_HOME%" -Dfess.es.dir="%ES_HOME%"
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Des-foreground=yes
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.home="%FESS_HOME%"
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.dir="%ES_HOME%"
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.context.path=/
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.port=8080
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.webapp.path=%FESS_HOME%\app
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.temp.path=%FESS_HOME%\temp
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.name=%APP_NAME%
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.path=%FESS_HOME%\logs
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.log.level=warn
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dlasta.env=web
+set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dtomcat.config.path=tomcat_config.properties
+
+REM External elasticsearch cluster
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.http_address=http://localhost:9200
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.transport_addresses=localhost:9300
+REM FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.dictionary.path=%ES_HOME%\data\
