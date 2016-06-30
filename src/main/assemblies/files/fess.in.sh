@@ -13,6 +13,11 @@ if [ "x$FESS_HEAP_SIZE" != "x" ]; then
     FESS_MAX_MEM=$FESS_HEAP_SIZE
 fi
 
+# External elasticsearch cluster
+#ES_HTTP_URL=http://localhost:9200
+#ES_TRANSPORT_URL=localhost:9300
+#FESS_DICTIONARY_PATH=/var/lib/elasticsearch/config/
+
 # min and max heap sizes should be set to the same value to avoid
 # stop-the-world GC pauses during resize, and so that we can lock the
 # heap in memory on startup to prevent any of it from being swapped
