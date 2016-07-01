@@ -72,6 +72,10 @@ ul.has-error {
 	box-shadow: none;
 }
 
+input[type="file"].form-control {
+	height: 0% !important;
+}
+
 #result ol {
 	list-style: none !important;
 	padding-left: 0;

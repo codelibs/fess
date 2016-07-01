@@ -354,3 +354,10 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 		overflow-y: scroll;
 	}
 }
+
+/***workaround for IE browser***/
+@media screen and (min-width:0\0) {
+	input#query.form-searchHeader {
+		padding: 8.7px 10px;
+	}
+}
