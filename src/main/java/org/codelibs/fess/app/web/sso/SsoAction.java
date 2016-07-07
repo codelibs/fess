@@ -13,16 +13,23 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.login;
+package org.codelibs.fess.app.web.sso;
 
 import org.codelibs.fess.app.web.base.FessLoginAction;
-import org.codelibs.fess.app.web.base.login.UserPasswordLoginCredential;
-import org.codelibs.fess.util.RenderDataUtil;
+import org.codelibs.fess.app.web.base.login.SSOLoginCredential;
+import org.codelibs.fess.app.web.login.LoginAction;
+import org.jsoup.helper.StringUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class LoginAction extends FessLoginAction {
+public class SsoAction extends FessLoginAction {
+    // ===================================================================================
+    //                                                                            Constant
+    //
+    private static final Logger logger = LoggerFactory.getLogger(SsoAction.class);
 
     // ===================================================================================
     //                                                                       Login Execute
@@ -30,31 +37,26 @@ public class LoginAction extends FessLoginAction {
 
     @Execute
     public HtmlResponse index() {
-        return asHtml(path_Login_IndexJsp).renderWith(data -> {
-            RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
-        }).useForm(LoginForm.class);
-    }
-
-    @Execute
-    public HtmlResponse login(final LoginForm form) {
-        validate(form, messages -> {}, () -> {
-            form.clearSecurityInfo();
-            return asHtml(path_Login_IndexJsp);
-        });
-        final String username = form.username;
-        final String password = form.password;
-        form.clearSecurityInfo();
+        final String user = request.getRemoteUser();
+        if (StringUtil.isBlank(user)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No remote user in SSO request.");
+            }
+            saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            return redirect(LoginAction.class);
+        }
         try {
-            return fessLoginAssist.loginRedirect(new UserPasswordLoginCredential(username, password), op -> {}, () -> {
+            return fessLoginAssist.loginRedirect(new SSOLoginCredential(user), op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 return getHtmlResponse();
             });
         } catch (final LoginFailureException lfe) {
-            throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> {
-                return asHtml(path_Login_IndexJsp);
-            });
+            if (logger.isDebugEnabled()) {
+                logger.debug("SSO login failure.", lfe);
+            }
+            saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            return redirect(LoginAction.class);
         }
-        return redirect(getClass());
     }
 
 }

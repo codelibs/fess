@@ -105,6 +105,20 @@ public class LdapManager {
         return OptionalEntity.empty();
     }
 
+    public OptionalEntity<FessUser> login(final String username) {
+        final Hashtable<String, String> env = createAdminEnv();
+        try (DirContextHolder holder = getDirContext(() -> env)) {
+            final DirContext context = holder.get();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logged in.", context);
+            }
+            return OptionalEntity.of(createLdapUser(username, env));
+        } catch (final Exception e) {
+            logger.debug("Login failed.", e);
+        }
+        return OptionalEntity.empty();
+    }
+
     protected LdapUser createLdapUser(final String username, final Hashtable<String, String> env) {
         return new LdapUser(env, username);
     }
