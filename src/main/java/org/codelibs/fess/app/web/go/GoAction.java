@@ -40,6 +40,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.StreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +139,13 @@ public class GoAction extends FessSearchAction {
             if (fessConfig.isSearchFileProxyEnabled()) {
                 final ViewHelper viewHelper = ComponentUtil.getViewHelper();
                 try {
-                    return viewHelper.asContentResponse(doc);
+                    final StreamResponse response = viewHelper.asContentResponse(doc);
+                    if (response.getHttpStatus().orElse(200) == 404) {
+                        logger.debug("Not found: " + targetUrl);
+                        saveError(messages -> messages.addErrorsNotFoundOnFileSystem(GLOBAL, targetUrl));
+                        return redirect(ErrorAction.class);
+                    }
+                    return response;
                 } catch (final Exception e) {
                     logger.debug("Failed to load: " + doc, e);
                     saveError(messages -> messages.addErrorsNotLoadFromServer(GLOBAL, targetUrl));

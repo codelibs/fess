@@ -540,6 +540,10 @@ public class ViewHelper {
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
+        if (responseData.getHttpStatusCode() == 404) {
+            response.httpStatus(responseData.getHttpStatusCode());
+            return response;
+        }
         response.stream(out -> {
             try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);
