@@ -480,7 +480,8 @@ public class ViewHelper {
     }
 
     public Object getSitePath(final Map<String, Object> docMap) {
-        final Object urlLink = docMap.get("urlLink");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Object urlLink = docMap.get(fessConfig.getResponseFieldUrlLink());
         if (urlLink != null) {
             final String returnUrl;
             final String url = urlLink.toString();

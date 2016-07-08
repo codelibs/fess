@@ -18,7 +18,9 @@ package org.codelibs.fess.helper;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class ViewHelperTest extends UnitFessTestCase {
     public ViewHelper viewHelper;
@@ -103,54 +105,57 @@ public class ViewHelperTest extends UnitFessTestCase {
         String sitePath;
         final Map<String, Object> docMap = new HashMap<>();
 
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String fieldName = fessConfig.getResponseFieldUrlLink();
+
         urlLink = "http://www.google.com";
         sitePath = "www.google.com";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "https://www.jp.websecurity.symantec.com/";
         sitePath = "www.jp.websecurity.symantec.com/";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "http://www.qwerty.jp";
         sitePath = "www.qwerty.jp";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "://www.qwerty.jp";
         sitePath = "www.qwerty.jp";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "www.google.com";
         sitePath = "www.google.com";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "smb://123.45.678.91/share1";
         sitePath = "123.45.678.91/share1";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "file:/home/user/";
         sitePath = "/home/user/";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "file://home/user/";
         sitePath = "/home/user/";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "file://c:/home/user/";
         sitePath = "c:/home/user/";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
 
         urlLink = "file://1.2.3.4/user/";
         sitePath = "1.2.3.4/user/";
-        docMap.put("urlLink", urlLink);
+        docMap.put(fieldName, urlLink);
         assertEquals(sitePath, viewHelper.getSitePath(docMap));
     }
 }
