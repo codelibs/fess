@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -156,8 +158,24 @@ public abstract class FessSearchAction extends FessBaseAction {
         // sort
         if (StringUtil.isBlank(form.sort)) {
             final String[] defaultSortValues = fessConfig.getDefaultSortValues(getUserBean());
-            if (defaultSortValues.length > 0) {
-                form.sort = String.join(",", defaultSortValues);
+            if (defaultSortValues.length == 1) {
+                form.sort = defaultSortValues[0];
+            } else if (defaultSortValues.length >= 2) {
+                final StringBuilder sortValueSb = new StringBuilder();
+                final Set<String> sortFieldNames = new HashSet<>();
+                for (final String defaultSortValue : defaultSortValues) {
+                    for (final String singleValue : defaultSortValue.split(",")) {
+                        final String sortFieldName = singleValue.split("\\.")[0];
+                        if (!sortFieldNames.contains(sortFieldName)) {
+                            sortFieldNames.add(sortFieldName);
+                            if (sortValueSb.length() > 0) {
+                                sortValueSb.append(",");
+                            }
+                            sortValueSb.append(singleValue);
+                        }
+                    }
+                }
+                form.sort = sortValueSb.toString();
             }
         }
     }
