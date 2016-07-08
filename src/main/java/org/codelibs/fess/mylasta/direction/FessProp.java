@@ -132,14 +132,14 @@ public interface FessProp {
 
     public default String[] getDefaultSortValues(final OptionalThing<FessUserBean> userBean) {
         @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) propMap.get(DEFAULT_SORT_VALUES);
-        if (map == null) {
+        List<Pair<String, String>> list = (List<Pair<String, String>>) propMap.get(DEFAULT_SORT_VALUES);
+        if (list == null) {
             final String value = getSystemProperty(Constants.DEFAULT_SORT_VALUE_PROPERTY);
             if (StringUtil.isBlank(value)) {
-                map = Collections.emptyMap();
+                list = Collections.emptyList();
             } else {
                 final Set<String> keySet = new HashSet<>();
-                map = stream(value.split("\n")).get(stream -> (Map<String, String>) stream.filter(StringUtil::isNotBlank).map(s -> {
+                list = stream(value.split("\n")).get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
@@ -151,23 +151,22 @@ public interface FessProp {
                         return new Pair<>(pair[0].trim(), sortValue);
                     }
                     return null;
-                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
+                }).filter(o -> o != null && keySet.add(o.getFirst())).collect(Collectors.toList()));
             }
-            propMap.put(DEFAULT_SORT_VALUES, map);
+            propMap.put(DEFAULT_SORT_VALUES, list);
         }
-        return map
-                .entrySet()
+        return list
                 .stream()
-                .map(e -> {
-                    final String key = e.getKey();
+                .map(p -> {
+                    final String key = p.getFirst();
                     if (StringUtil.isEmpty(key)) {
-                        return e.getValue();
+                        return p.getSecond();
                     }
                     if (userBean.map(
                             user -> stream(user.getRoles()).get(stream -> stream.anyMatch(s -> key.equals(ROLE_VALUE_PREFIX + s)))
                                     || stream(user.getGroups()).get(stream -> stream.anyMatch(s -> key.equals(GROUP_VALUE_PREFIX + s))))
                             .orElse(false)) {
-                        return e.getValue();
+                        return p.getSecond();
                     }
                     return null;
                 }).filter(StringUtil::isNotBlank).toArray(n -> new String[n]);
