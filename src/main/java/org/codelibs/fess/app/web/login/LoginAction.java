@@ -45,7 +45,7 @@ public class LoginAction extends FessLoginAction {
         final String password = form.password;
         form.clearSecurityInfo();
         try {
-            return fessLoginAssist.loginRedirect(new UserPasswordLoginCredential(username, password), op -> {}, () -> {
+            return fessLoginAssist.loginRedirect(username, password, op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 return getHtmlResponse();
             });
