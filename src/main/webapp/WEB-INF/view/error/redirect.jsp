@@ -13,7 +13,7 @@ if("systemError".equals(type)) {
 		response.sendError(statusCode);
 	}
 } else if("logOut".equals(type)) {
-	redirectPage.append("/login/index?type=logout");
+	redirectPage.append("/login/?type=logout&code=" + statusCode);
 	response.sendRedirect(redirectPage.toString());
 } else if("badRequest".equals(type)) {
 	redirectPage.append("/error/badrequest");
