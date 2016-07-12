@@ -60,7 +60,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
     }
 
     @Override
-    public OptionalEntity<CharMappingItem> get(long id) {
+    public OptionalEntity<CharMappingItem> get(final long id) {
         if (mappingItemList == null) {
             reload(null, null);
         }
@@ -137,7 +137,7 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
                 String[] inputs;
                 String output;
 
-                Matcher m = parsePattern.matcher(line.trim());
+                final Matcher m = parsePattern.matcher(line.trim());
 
                 if (!m.find()) {
                     throw new DictionaryException("Failed to parse " + path);

@@ -42,6 +42,7 @@ import org.codelibs.spnego.SpnegoHttpServletRequest;
  */
 public class SpnegoFilter extends SpnegoHttpFilter {
 
+    @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         ComponentUtil.processAfterContainerInit(() -> {
             if (ComponentUtil.getFessConfig().isSsoEnabled()) {
@@ -65,7 +66,7 @@ public class SpnegoFilter extends SpnegoHttpFilter {
                 }
 
                 @Override
-                public String getInitParameter(String name) {
+                public String getInitParameter(final String name) {
                     if (Constants.KRB5_CONF.equals(name)) {
                         final String krb5Conf = ComponentUtil.getFessConfig().getSpnegoKrb5Conf();
                         if (StringUtil.isNotBlank(krb5Conf)) {
@@ -125,19 +126,19 @@ public class SpnegoFilter extends SpnegoHttpFilter {
             throws IOException, ServletException {
         if (StringUtil.isNotBlank(request.getRemoteUser())) {
             // TODO save path and parameters into session
-            RequestDispatcher dispatcher = request.getRequestDispatcher(ComponentUtil.getFessConfig().getSsoLoginPath());
+            final RequestDispatcher dispatcher = request.getRequestDispatcher(ComponentUtil.getFessConfig().getSsoLoginPath());
             dispatcher.forward(request, response);
         } else {
             chain.doFilter(request, response);
         }
     }
 
-    protected void doFilter(DoFilterCallback callback) {
+    protected void doFilter(final DoFilterCallback callback) {
         try {
             callback.run();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IORuntimeException(e);
-        } catch (ServletException e) {
+        } catch (final ServletException e) {
             throw new ServletRuntimeException(e);
         }
     }

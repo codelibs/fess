@@ -88,8 +88,6 @@ public class ViewHelper {
 
     private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
-    private static final long serialVersionUID = 1L;
-
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
     @Resource

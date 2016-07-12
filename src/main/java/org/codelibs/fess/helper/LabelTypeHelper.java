@@ -171,7 +171,7 @@ public class LabelTypeHelper {
             return permissions;
         }
 
-        public void setPermissions(String[] permissions) {
+        public void setPermissions(final String[] permissions) {
             this.permissions = permissions;
         }
     }

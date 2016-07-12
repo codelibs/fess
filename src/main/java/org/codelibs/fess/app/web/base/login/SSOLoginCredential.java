@@ -18,7 +18,7 @@ package org.codelibs.fess.app.web.base.login;
 import org.dbflute.util.DfCollectionUtil;
 
 public class SSOLoginCredential implements LoginCredential {
-    private String username;
+    private final String username;
 
     // private Principal principal;
 

@@ -57,7 +57,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
     public void store(final Map<String, String> paramMap, final Map<String, Object> dataMap) {
         final long startTime = System.currentTimeMillis();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Adding " + dataMap);
@@ -119,7 +119,7 @@ public class IndexUpdateCallbackImpl implements IndexUpdateCallback {
         synchronized (docList) {
             if (!docList.isEmpty()) {
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
                 indexingHelper.sendDocuments(fessEsClient, docList);
             }
         }

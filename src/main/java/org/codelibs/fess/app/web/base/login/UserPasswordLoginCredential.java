@@ -18,8 +18,8 @@ package org.codelibs.fess.app.web.base.login;
 import org.dbflute.util.DfCollectionUtil;
 
 public class UserPasswordLoginCredential implements LoginCredential {
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     public UserPasswordLoginCredential(final String username, final String password) {
         this.username = username;

@@ -22,16 +22,16 @@ public interface LoginCredential {
 
     Object getResource();
 
-    public default void assertLoginAccountRequired(String account) {
+    public default void assertLoginAccountRequired(final String account) {
         if (account == null || account.length() == 0) {
-            String msg = "The argument 'account' should not be null for login.";
+            final String msg = "The argument 'account' should not be null for login.";
             throw new IllegalArgumentException(msg);
         }
     }
 
-    public default void assertLoginPasswordRequired(String password) {
+    public default void assertLoginPasswordRequired(final String password) {
         if (password == null || password.length() == 0) {
-            String msg = "The argument 'password' should not be null for login.";
+            final String msg = "The argument 'password' should not be null for login.";
             throw new IllegalArgumentException(msg);
         }
     }

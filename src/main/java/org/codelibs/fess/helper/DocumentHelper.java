@@ -26,8 +26,6 @@ import org.codelibs.fess.util.ComponentUtil;
 
 public class DocumentHelper {
 
-    private static final long serialVersionUID = 1L;
-
     public String getContent(final ResponseData responseData, final String content, final Map<String, Object> dataMap) {
         if (content == null) {
             return StringUtil.EMPTY; // empty

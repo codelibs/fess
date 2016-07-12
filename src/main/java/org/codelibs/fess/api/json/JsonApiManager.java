@@ -112,7 +112,7 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         int status;
         Exception err = null;
         try {
@@ -547,7 +547,7 @@ public class JsonApiManager extends BaseApiManager {
         sb.append(" [ ").append(sw.toString()).append(" ]");
         try {
             sw.close();
-        } catch (IOException ignore) {}
+        } catch (final IOException ignore) {}
         writeJsonResponse(status, body, sb.toString());
     }
 

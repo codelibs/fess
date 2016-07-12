@@ -26,8 +26,6 @@ import org.codelibs.fess.util.ComponentUtil;
 
 public class DuplicateHostHelper {
 
-    private static final long serialVersionUID = 1L;
-
     protected List<DuplicateHost> duplicateHostList;
 
     @PostConstruct

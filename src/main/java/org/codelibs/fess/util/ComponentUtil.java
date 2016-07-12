@@ -147,8 +147,6 @@ public final class ComponentUtil {
 
     private static final String INDEXING_HELPER = "indexingHelper";
 
-    private static final String ELASTICSEARCH_CLIENT = FESS_ES_CLIENT;
-
     private static IndexingHelper indexingHelper;
 
     private static CrawlingConfigHelper crawlingConfigHelper;
@@ -162,7 +160,7 @@ public final class ComponentUtil {
     private ComponentUtil() {
     }
 
-    public static void processAfterContainerInit(Runnable process) {
+    public static void processAfterContainerInit(final Runnable process) {
         if (available()) {
             process.run();
         } else {
@@ -170,7 +168,7 @@ public final class ComponentUtil {
         }
     }
 
-    public static void doInitProcesses(Consumer<? super Runnable> action) {
+    public static void doInitProcesses(final Consumer<? super Runnable> action) {
         try {
             initProcesses.forEach(action);
         } finally {
@@ -297,10 +295,6 @@ public final class ComponentUtil {
 
     public static UserInfoHelper getUserInfoHelper() {
         return getComponent(USER_INFO_HELPER);
-    }
-
-    public static FessEsClient getElasticsearchClient() {
-        return getComponent(ELASTICSEARCH_CLIENT);
     }
 
     public static MessageManager getMessageManager() {

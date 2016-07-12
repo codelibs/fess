@@ -66,7 +66,7 @@ public class FessCrawlerThread extends CrawlerThread {
             final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
             final SambaHelper sambaHelper = ComponentUtil.getSambaHelper();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+            final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
 
             final String url = urlQueue.getUrl();
             ResponseData responseData = null;

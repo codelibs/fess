@@ -21,7 +21,7 @@ public class ServletRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public ServletRuntimeException(ServletException e) {
+    public ServletRuntimeException(final ServletException e) {
         super(e);
     }
 

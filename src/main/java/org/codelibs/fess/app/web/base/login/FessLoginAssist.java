@@ -144,8 +144,8 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                      ==============
 
     @Override
-    public HtmlResponse loginRedirect(String account, String password, LoginOpCall opLambda, LoginRedirectSuccessCall oneArgLambda)
-            throws LoginFailureException {
+    public HtmlResponse loginRedirect(final String account, final String password, final LoginOpCall opLambda,
+            final LoginRedirectSuccessCall oneArgLambda) throws LoginFailureException {
         return loginRedirect(new UserPasswordLoginCredential(account, password), opLambda, oneArgLambda);
     }
 

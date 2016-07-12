@@ -23,7 +23,6 @@ import javax.validation.constraints.Size;
 import org.lastaflute.web.validation.Required;
 
 public class CacheForm {
-    private static final long serialVersionUID = 1L;
 
     @Required
     @Size(max = 100)

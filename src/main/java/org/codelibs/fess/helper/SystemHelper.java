@@ -58,8 +58,6 @@ import com.ibm.icu.util.ULocale;
 public class SystemHelper {
     private static final Logger logger = LoggerFactory.getLogger(SystemHelper.class);
 
-    private static final long serialVersionUID = 1L;
-
     protected final Map<String, String> designJspFileNameMap = new HashMap<>();
 
     protected final AtomicBoolean forceStop = new AtomicBoolean(false);
