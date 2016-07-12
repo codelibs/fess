@@ -18,6 +18,10 @@ if("systemError".equals(type)) {
 } else if("badRequest".equals(type)) {
 	redirectPage.append("/error/badrequest");
 	response.sendRedirect(redirectPage.toString());
+} else if("badAuth".equals(type)) {
+ %>
+Bad Authentication.
+<%
 } else {
 	redirectPage.append("/error/notfound?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));
