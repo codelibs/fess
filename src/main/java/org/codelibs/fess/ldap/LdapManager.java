@@ -85,6 +85,12 @@ public class LdapManager {
                 fessConfig.getLdapProviderUrl(), fessConfig.getLdapSecurityPrincipal(username), password);
     }
 
+    protected Hashtable<String, String> createSearchEnv() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return createEnvironment(fessConfig.getLdapInitialContextFactory(), fessConfig.getLdapSecurityAuthentication(),
+                fessConfig.getLdapProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(), fessConfig.getLdapAdminSecurityCredentials());
+    }
+
     public OptionalEntity<FessUser> login(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
@@ -106,7 +112,7 @@ public class LdapManager {
     }
 
     public OptionalEntity<FessUser> login(final String username) {
-        final Hashtable<String, String> env = createAdminEnv();
+        final Hashtable<String, String> env = createSearchEnv();
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
             if (logger.isDebugEnabled()) {

@@ -102,6 +102,8 @@ public class SystemHelper {
                                 return langItems;
                             }
                         });
+
+        ComponentUtil.doInitProcesses(p -> p.run());
     }
 
     @PreDestroy

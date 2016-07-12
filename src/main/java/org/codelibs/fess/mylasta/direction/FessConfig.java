@@ -928,6 +928,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. homeDirectory */
     String LDAP_ATTR_HOME_DIRECTORY = "ldap.attr.homeDirectory";
 
+    /** The key of the configuration. e.g. false */
+    String SSO_ENABLED = "sso.enabled";
+
+    /** The key of the configuration. e.g. /sso/ */
+    String SSO_LOGIN_PATH = "sso.login.path";
+
+    /** The key of the configuration. e.g. krb5.conf */
+    String SPNEGO_KRB5_CONF = "spnego.krb5.conf";
+
+    /** The key of the configuration. e.g. auth_login.conf */
+    String SPNEGO_LOGIN_CONF = "spnego.login.conf";
+
+    /** The key of the configuration. e.g. username */
+    String SPNEGO_PREAUTH_USERNAME = "spnego.preauth.username";
+
+    /** The key of the configuration. e.g. password */
+    String SPNEGO_PREAUTH_PASSWORD = "spnego.preauth.password";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -3723,6 +3741,57 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAttrHomeDirectory();
 
     /**
+     * Get the value for the key 'sso.enabled'. <br>
+     * The value is, e.g. false <br>
+     * comment: ------
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSsoEnabled();
+
+    /**
+     * Is the property for the key 'sso.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * comment: ------
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSsoEnabled();
+
+    /**
+     * Get the value for the key 'sso.login.path'. <br>
+     * The value is, e.g. /sso/ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSsoLoginPath();
+
+    /**
+     * Get the value for the key 'spnego.krb5.conf'. <br>
+     * The value is, e.g. krb5.conf <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoKrb5Conf();
+
+    /**
+     * Get the value for the key 'spnego.login.conf'. <br>
+     * The value is, e.g. auth_login.conf <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoLoginConf();
+
+    /**
+     * Get the value for the key 'spnego.preauth.username'. <br>
+     * The value is, e.g. username <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoPreauthUsername();
+
+    /**
+     * Get the value for the key 'spnego.preauth.password'. <br>
+     * The value is, e.g. password <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoPreauthPassword();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -5201,6 +5270,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getLdapAttrHomeDirectory() {
             return get(FessConfig.LDAP_ATTR_HOME_DIRECTORY);
+        }
+
+        public String getSsoEnabled() {
+            return get(FessConfig.SSO_ENABLED);
+        }
+
+        public boolean isSsoEnabled() {
+            return is(FessConfig.SSO_ENABLED);
+        }
+
+        public String getSsoLoginPath() {
+            return get(FessConfig.SSO_LOGIN_PATH);
+        }
+
+        public String getSpnegoKrb5Conf() {
+            return get(FessConfig.SPNEGO_KRB5_CONF);
+        }
+
+        public String getSpnegoLoginConf() {
+            return get(FessConfig.SPNEGO_LOGIN_CONF);
+        }
+
+        public String getSpnegoPreauthUsername() {
+            return get(FessConfig.SPNEGO_PREAUTH_USERNAME);
+        }
+
+        public String getSpnegoPreauthPassword() {
+            return get(FessConfig.SPNEGO_PREAUTH_PASSWORD);
         }
     }
 }

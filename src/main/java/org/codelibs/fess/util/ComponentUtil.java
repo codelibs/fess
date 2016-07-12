@@ -15,6 +15,10 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.misc.DynamicProperties;
@@ -153,7 +157,25 @@ public final class ComponentUtil {
 
     private static FessConfig fessConfig;
 
+    private static List<Runnable> initProcesses = new ArrayList<>();
+
     private ComponentUtil() {
+    }
+
+    public static void processAfterContainerInit(Runnable process) {
+        if (available()) {
+            process.run();
+        } else {
+            initProcesses.add(process);
+        }
+    }
+
+    public static void doInitProcesses(Consumer<? super Runnable> action) {
+        try {
+            initProcesses.forEach(action);
+        } finally {
+            initProcesses.clear();
+        }
     }
 
     public static CachedCipher getCipher(final String cipherName) {

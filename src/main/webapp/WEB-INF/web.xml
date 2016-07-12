@@ -55,68 +55,38 @@
     <filter-class>org.lastaflute.web.servlet.filter.LastaToActionFilter</filter-class>
   </filter>
 
-  <!-- SPNEGO    -->
-  <!--
   <filter>
-      <filter-name>SpnegoHttpFilter</filter-name>
-      <filter-class>net.sourceforge.spnego.SpnegoHttpFilter</filter-class>
-
-      <init-param>
-          <param-name>spnego.allow.basic</param-name>
-          <param-value>false</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.allow.localhost</param-name>
-          <param-value>true</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.allow.unsecure.basic</param-name>
-          <param-value>false</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.login.client.module</param-name>
-          <param-value>spnego-client</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.krb5.conf</param-name>
-          <param-value>krb5.conf</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.login.conf</param-name>
-          <param-value>login.conf</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.preauth.username</param-name>
-          <param-value>knldguser</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.preauth.password</param-name>
-          <param-value>zaq12wsx</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.login.server.module</param-name>
-          <param-value>spnego-server</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.prompt.ntlm</param-name>
-          <param-value>false</param-value>
-      </init-param>
-
-      <init-param>
-          <param-name>spnego.logger.level</param-name>
-          <param-value>1</param-value>
-      </init-param>
+    <filter-name>spnegoFilter</filter-name>
+    <filter-class>org.codelibs.fess.filter.SpnegoFilter</filter-class>
+    <init-param>
+      <param-name>spnego.allow.basic</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.allow.localhost</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.allow.unsecure.basic</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.login.client.module</param-name>
+      <param-value>spnego-client</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.login.server.module</param-name>
+      <param-value>spnego-server</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.prompt.ntlm</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>spnego.logger.level</param-name>
+      <param-value>0</param-value>
+    </init-param>
   </filter>
--->
 
   <!-- ================================================================================= -->
   <!--                                                                    Filter Mapping -->
@@ -137,6 +107,12 @@
   </filter-mapping>
 
   <filter-mapping>
+    <filter-name>spnegoFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
     <filter-name>webApiFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
@@ -154,13 +130,6 @@
     <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
 
-  <!--
-  <filter-mapping>
-      <filter-name>SpnegoHttpFilter</filter-name>
-      <url-pattern>/*</url-pattern>
-  </filter-mapping>
--->
-
   <!-- ================================================================================= -->
   <!--                                                                           Servlet -->
   <!--                                                                           ======= -->
@@ -173,7 +142,7 @@
   <!--                                                                  Servlet Listener -->
   <!--                                                                  ================ -->
   <listener>
-  	<listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
+    <listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
   </listener>
 
   <!-- ================================================================================= -->
@@ -183,7 +152,7 @@
     <session-config>
         <session-timeout>1</session-timeout>
     </session-config>
-	-->
+  -->
 
   <!-- ================================================================================= -->
   <!--                                                                      Welcome File -->
@@ -191,7 +160,7 @@
 <!--
     <welcome-file-list>
     </welcome-file-list>
-	-->
+  -->
 
   <!-- ================================================================================= -->
   <!--                                                                        JSP Config -->
@@ -210,23 +179,27 @@
   <!--                                                                        Error Page -->
   <!--                                                                        ========== -->
   <error-page>
-  	<error-code>400</error-code>
-  	<location>/WEB-INF/view/error/redirect.jsp?type=badRequest</location>
+    <error-code>400</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=badRequest</location>
   </error-page>
   <error-page>
-  	<error-code>403</error-code>
-  	<location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+    <error-code>401</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=badAuth</location>
   </error-page>
   <error-page>
-  	<error-code>404</error-code>
-  	<location>/WEB-INF/view/error/redirect.jsp?type=notFound</location>
+    <error-code>403</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
   </error-page>
   <error-page>
-  	<error-code>408</error-code>
-  	<location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+    <error-code>404</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=notFound</location>
   </error-page>
   <error-page>
-  	<error-code>500</error-code>
-  	<location>/WEB-INF/view/error/redirect.jsp?type=systemError</location>
+    <error-code>408</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=logOut</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/WEB-INF/view/error/redirect.jsp?type=systemError</location>
   </error-page>
 </web-app>

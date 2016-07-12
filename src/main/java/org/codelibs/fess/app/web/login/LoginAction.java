@@ -16,7 +16,6 @@
 package org.codelibs.fess.app.web.login;
 
 import org.codelibs.fess.app.web.base.FessLoginAction;
-import org.codelibs.fess.app.web.base.login.UserPasswordLoginCredential;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;

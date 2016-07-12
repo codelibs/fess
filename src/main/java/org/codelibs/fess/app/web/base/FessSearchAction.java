@@ -15,12 +15,12 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
