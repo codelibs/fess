@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.filter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -27,6 +28,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.codelibs.core.exception.IORuntimeException;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.ServletRuntimeException;
@@ -34,6 +36,8 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.spnego.SpnegoHttpFilter;
 import org.codelibs.spnego.SpnegoHttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SpnegoFilter supports Integrated Windows Authentication(SSO).
@@ -41,6 +45,8 @@ import org.codelibs.spnego.SpnegoHttpServletRequest;
  * @author shinsuke
  */
 public class SpnegoFilter extends SpnegoHttpFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(SpnegoFilter.class);
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -70,12 +76,16 @@ public class SpnegoFilter extends SpnegoHttpFilter {
                     if (Constants.KRB5_CONF.equals(name)) {
                         final String krb5Conf = ComponentUtil.getFessConfig().getSpnegoKrb5Conf();
                         if (StringUtil.isNotBlank(krb5Conf)) {
-                            return krb5Conf;
+                            final File file = ResourceUtil.getResourceAsFileNoException(krb5Conf);
+                            if (file != null) {
+                                return file.getAbsolutePath();
+                            }
                         }
                     } else if (Constants.LOGIN_CONF.equals(name)) {
                         final String loginConf = ComponentUtil.getFessConfig().getSpnegoLoginConf();
-                        if (StringUtil.isNotBlank(loginConf)) {
-                            return loginConf;
+                        final File file = ResourceUtil.getResourceAsFileNoException(loginConf);
+                        if (file != null) {
+                            return file.getAbsolutePath();
                         }
                     } else if (Constants.PREAUTH_USERNAME.equals(name)) {
                         final String username = ComponentUtil.getFessConfig().getSpnegoPreauthUsername();
@@ -106,9 +116,15 @@ public class SpnegoFilter extends SpnegoHttpFilter {
             ServletException {
         try {
             ComponentUtil.getRequestManager().findUserBean(FessUserBean.class).ifPresent(u -> {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("process your request as " + u.getUserId());
+                }
                 doFilter(() -> chain.doFilter(request, response));
             }).orElse(() -> {
                 if (ComponentUtil.getFessConfig().isSsoEnabled()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("process authentication");
+                    }
                     doFilter(() -> SpnegoFilter.super.doFilter(request, response, chain));
                 } else {
                     doFilter(() -> chain.doFilter(request, response));
@@ -125,10 +141,16 @@ public class SpnegoFilter extends SpnegoHttpFilter {
     protected void processRequest(final SpnegoHttpServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (StringUtil.isNotBlank(request.getRemoteUser())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("log in as " + request.getRemoteUser());
+            }
             // TODO save path and parameters into session
             final RequestDispatcher dispatcher = request.getRequestDispatcher(ComponentUtil.getFessConfig().getSsoLoginPath());
             dispatcher.forward(request, response);
         } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("this request is not logged in.");
+            }
             chain.doFilter(request, response);
         }
     }
