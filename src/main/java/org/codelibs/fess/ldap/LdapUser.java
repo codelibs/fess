@@ -84,7 +84,4 @@ public class LdapUser implements FessUser {
         return env;
     }
 
-    public String getPassword() {
-        return getEnvironment().get(Context.SECURITY_CREDENTIALS);
-    }
 }

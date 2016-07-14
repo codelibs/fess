@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.sso.spnego;
 
+import java.io.File;
 import java.util.Enumeration;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +23,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.fess.app.web.base.login.EmptyLoginCredential;
 import org.codelibs.fess.app.web.base.login.LoginCredential;
 import org.codelibs.fess.app.web.base.login.SsoLoginCredential;
@@ -100,11 +101,8 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     logger.debug("principal=" + principal);
                 }
 
-                final String username = LaRequestUtil.getOptionalRequest().map(r -> r.getRemoteUser()).orElseGet(() -> null);
-                if (StringUtil.isBlank(username)) {
-                    return null;
-                }
-                return new SsoLoginCredential(username);
+                final String[] username = principal.getName().split("@", 2);
+                return new SsoLoginCredential(username[0]);
             }).orElseGet(() -> null);
 
     }
@@ -128,9 +126,9 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
                 return fessConfig.getSpnegoLoggerLevel();
             } else if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {
-                return fessConfig.getSpnegoLoginConf();
+                return getResourcePath(fessConfig.getSpnegoLoginConf());
             } else if (SpnegoHttpFilter.Constants.KRB5_CONF.equals(name)) {
-                return fessConfig.getSpnegoKrb5Conf();
+                return getResourcePath(fessConfig.getSpnegoKrb5Conf());
             } else if (SpnegoHttpFilter.Constants.CLIENT_MODULE.equals(name)) {
                 return fessConfig.getSpnegoLoginClientModule();
             } else if (SpnegoHttpFilter.Constants.SERVER_MODULE.equals(name)) {
@@ -149,6 +147,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                 return fessConfig.getSpnegoAllowLocalhost();
             } else if (SpnegoHttpFilter.Constants.ALLOW_DELEGATION.equals(name)) {
                 return fessConfig.getSpnegoAllowDelegation();
+            }
+            return null;
+        }
+
+        protected String getResourcePath(final String path) {
+            final File file = ResourceUtil.getResourceAsFileNoException(path);
+            if (file != null) {
+                return file.getAbsolutePath();
             }
             return null;
         }

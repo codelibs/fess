@@ -106,9 +106,14 @@ public class RoleQueryHelper {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RequestManager requestManager = ComponentUtil.getRequestManager();
-        requestManager.findUserBean(FessUserBean.class)
-                .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleList::add)))
-                .orElse(() -> roleList.addAll(fessConfig.getSearchGuestPermissionList()));
+        try {
+            requestManager.findUserBean(FessUserBean.class)
+                    .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleList::add)))
+                    .orElse(() -> roleList.addAll(fessConfig.getSearchGuestPermissionList()));
+        } catch (RuntimeException e) {
+            requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
+            throw e;
+        }
 
         if (defaultRoleList != null) {
             roleList.addAll(defaultRoleList);

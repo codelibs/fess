@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.app.web.sso.SsoAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
@@ -206,7 +206,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlResponse redirectToLogin() {
-        return redirect(LoginAction.class);
+        return redirect(SsoAction.class);
     }
 
     protected HtmlResponse redirectToRoot() {
