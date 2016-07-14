@@ -15,33 +15,22 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
-import org.dbflute.util.DfCollectionUtil;
+import java.util.Collections;
 
-public class SSOLoginCredential implements LoginCredential {
-    private final String username;
-
-    // private Principal principal;
-
-    public SSOLoginCredential(final String username) {
-        this.username = username;
-    }
+public class EmptyLoginCredential implements LoginCredential {
 
     @Override
     public void validate() {
-        assertLoginAccountRequired(username);
-    }
-
-    @Override
-    public Object getResource() {
-        return DfCollectionUtil.newHashMap("account", username);
     }
 
     @Override
     public String getId() {
-        return username;
+        return "empty";
     }
 
-    public String getUsername() {
-        return username;
+    @Override
+    public Object getResource() {
+        return Collections.emptyMap();
     }
+
 }

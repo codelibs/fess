@@ -16,12 +16,14 @@
 package org.codelibs.fess.app.web.sso;
 
 import org.codelibs.fess.app.web.base.FessLoginAction;
-import org.codelibs.fess.app.web.base.login.SSOLoginCredential;
+import org.codelibs.fess.app.web.base.login.EmptyLoginCredential;
+import org.codelibs.fess.app.web.base.login.LoginCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
-import org.jsoup.helper.StringUtil;
+import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
-import org.lastaflute.web.response.HtmlResponse;
+import org.lastaflute.web.response.ActionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +38,20 @@ public class SsoAction extends FessLoginAction {
     //                                                                      ==============
 
     @Execute
-    public HtmlResponse index() {
-        final String user = request.getRemoteUser();
-        if (StringUtil.isBlank(user)) {
+    public ActionResponse index() {
+        final SsoAuthenticator authenticator = ComponentUtil.getSsoAuthenticator();
+        LoginCredential loginCredential = authenticator.getLoginCredential();
+        if (loginCredential == null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("No remote user in SSO request.");
+                logger.debug("No user in SSO request.");
             }
             saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             return redirect(LoginAction.class);
+        } else if (loginCredential instanceof EmptyLoginCredential) {
+            return null;
         }
         try {
-            return fessLoginAssist.loginRedirect(new SSOLoginCredential(user), op -> {}, () -> {
+            return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 return getHtmlResponse();
             });

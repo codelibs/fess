@@ -931,8 +931,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String SSO_ENABLED = "sso.enabled";
 
-    /** The key of the configuration. e.g. /sso/ */
-    String SSO_LOGIN_PATH = "sso.login.path";
+    /** The key of the configuration. e.g. 0 */
+    String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
 
     /** The key of the configuration. e.g. krb5.conf */
     String SPNEGO_KRB5_CONF = "spnego.krb5.conf";
@@ -945,6 +945,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. password */
     String SPNEGO_PREAUTH_PASSWORD = "spnego.preauth.password";
+
+    /** The key of the configuration. e.g. spnego-client */
+    String SPNEGO_LOGIN_CLIENT_MODULE = "spnego.login.client.module";
+
+    /** The key of the configuration. e.g. spnego-server */
+    String SPNEGO_LOGIN_SERVER_MODULE = "spnego.login.server.module";
+
+    /** The key of the configuration. e.g. true */
+    String SPNEGO_ALLOW_BASIC = "spnego.allow.basic";
+
+    /** The key of the configuration. e.g. true */
+    String SPNEGO_ALLOW_UNSECURE_BASIC = "spnego.allow.unsecure.basic";
+
+    /** The key of the configuration. e.g. true */
+    String SPNEGO_PROMPT_NTLM = "spnego.prompt.ntlm";
+
+    /** The key of the configuration. e.g. true */
+    String SPNEGO_ALLOW_LOCALHOST = "spnego.allow.localhost";
+
+    /** The key of the configuration. e.g. false */
+    String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
 
     /**
      * Get the value of property as {@link String}.
@@ -3757,11 +3778,19 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isSsoEnabled();
 
     /**
-     * Get the value for the key 'sso.login.path'. <br>
-     * The value is, e.g. /sso/ <br>
+     * Get the value for the key 'spnego.logger.level'. <br>
+     * The value is, e.g. 0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getSsoLoginPath();
+    String getSpnegoLoggerLevel();
+
+    /**
+     * Get the value for the key 'spnego.logger.level' as {@link Integer}. <br>
+     * The value is, e.g. 0 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSpnegoLoggerLevelAsInteger();
 
     /**
      * Get the value for the key 'spnego.krb5.conf'. <br>
@@ -3790,6 +3819,90 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSpnegoPreauthPassword();
+
+    /**
+     * Get the value for the key 'spnego.login.client.module'. <br>
+     * The value is, e.g. spnego-client <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoLoginClientModule();
+
+    /**
+     * Get the value for the key 'spnego.login.server.module'. <br>
+     * The value is, e.g. spnego-server <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoLoginServerModule();
+
+    /**
+     * Get the value for the key 'spnego.allow.basic'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoAllowBasic();
+
+    /**
+     * Is the property for the key 'spnego.allow.basic' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSpnegoAllowBasic();
+
+    /**
+     * Get the value for the key 'spnego.allow.unsecure.basic'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoAllowUnsecureBasic();
+
+    /**
+     * Is the property for the key 'spnego.allow.unsecure.basic' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSpnegoAllowUnsecureBasic();
+
+    /**
+     * Get the value for the key 'spnego.prompt.ntlm'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoPromptNtlm();
+
+    /**
+     * Is the property for the key 'spnego.prompt.ntlm' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSpnegoPromptNtlm();
+
+    /**
+     * Get the value for the key 'spnego.allow.localhost'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoAllowLocalhost();
+
+    /**
+     * Is the property for the key 'spnego.allow.localhost' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSpnegoAllowLocalhost();
+
+    /**
+     * Get the value for the key 'spnego.allow.delegation'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSpnegoAllowDelegation();
+
+    /**
+     * Is the property for the key 'spnego.allow.delegation' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isSpnegoAllowDelegation();
 
     /**
      * The simple implementation for configuration.
@@ -5280,8 +5393,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return is(FessConfig.SSO_ENABLED);
         }
 
-        public String getSsoLoginPath() {
-            return get(FessConfig.SSO_LOGIN_PATH);
+        public String getSpnegoLoggerLevel() {
+            return get(FessConfig.SPNEGO_LOGGER_LEVEL);
+        }
+
+        public Integer getSpnegoLoggerLevelAsInteger() {
+            return getAsInteger(FessConfig.SPNEGO_LOGGER_LEVEL);
         }
 
         public String getSpnegoKrb5Conf() {
@@ -5298,6 +5415,54 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSpnegoPreauthPassword() {
             return get(FessConfig.SPNEGO_PREAUTH_PASSWORD);
+        }
+
+        public String getSpnegoLoginClientModule() {
+            return get(FessConfig.SPNEGO_LOGIN_CLIENT_MODULE);
+        }
+
+        public String getSpnegoLoginServerModule() {
+            return get(FessConfig.SPNEGO_LOGIN_SERVER_MODULE);
+        }
+
+        public String getSpnegoAllowBasic() {
+            return get(FessConfig.SPNEGO_ALLOW_BASIC);
+        }
+
+        public boolean isSpnegoAllowBasic() {
+            return is(FessConfig.SPNEGO_ALLOW_BASIC);
+        }
+
+        public String getSpnegoAllowUnsecureBasic() {
+            return get(FessConfig.SPNEGO_ALLOW_UNSECURE_BASIC);
+        }
+
+        public boolean isSpnegoAllowUnsecureBasic() {
+            return is(FessConfig.SPNEGO_ALLOW_UNSECURE_BASIC);
+        }
+
+        public String getSpnegoPromptNtlm() {
+            return get(FessConfig.SPNEGO_PROMPT_NTLM);
+        }
+
+        public boolean isSpnegoPromptNtlm() {
+            return is(FessConfig.SPNEGO_PROMPT_NTLM);
+        }
+
+        public String getSpnegoAllowLocalhost() {
+            return get(FessConfig.SPNEGO_ALLOW_LOCALHOST);
+        }
+
+        public boolean isSpnegoAllowLocalhost() {
+            return is(FessConfig.SPNEGO_ALLOW_LOCALHOST);
+        }
+
+        public String getSpnegoAllowDelegation() {
+            return get(FessConfig.SPNEGO_ALLOW_DELEGATION);
+        }
+
+        public boolean isSpnegoAllowDelegation() {
+            return is(FessConfig.SPNEGO_ALLOW_DELEGATION);
         }
     }
 }
