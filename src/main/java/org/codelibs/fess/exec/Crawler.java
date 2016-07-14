@@ -359,7 +359,6 @@ public class Crawler {
         final CrawlingInfoHelper crawlingInfoHelper = ComponentUtil.getCrawlingInfoHelper();
 
         boolean completed = false;
-        final int exitCode = Constants.EXIT_OK;
         try {
             writeTimeToSessionInfo(crawlingInfoHelper, Constants.CRAWLER_START_TIME);
 
@@ -417,7 +416,7 @@ public class Crawler {
             }
             completed = true;
 
-            return exitCode;
+            return Constants.EXIT_OK;
         } catch (final Throwable t) {
             logger.warn("An exception occurs on the crawl task.", t);
             return Constants.EXIT_FAIL;
