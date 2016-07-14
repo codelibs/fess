@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -54,10 +55,6 @@ public class SuggestJob {
 
     protected String logLevel;
 
-    protected int retryCountToDeleteTempDir = 10;
-
-    protected long retryIntervalToDeleteTempDir = 5000;
-
     public SuggestJob jobExecutor(final JobExecutor jobExecutor) {
         this.jobExecutor = jobExecutor;
         return this;
@@ -75,12 +72,6 @@ public class SuggestJob {
 
     public SuggestJob logLevel(final String logLevel) {
         this.logLevel = logLevel;
-        return this;
-    }
-
-    public SuggestJob retryToDeleteTempDir(final int retryCount, final long retryInterval) {
-        retryCountToDeleteTempDir = retryCount;
-        retryIntervalToDeleteTempDir = retryInterval;
         return this;
     }
 
@@ -288,17 +279,9 @@ public class SuggestJob {
         if (ownTmpDir == null) {
             return;
         }
-        for (int i = 0; i < retryCountToDeleteTempDir; i++) {
-            if (ownTmpDir.delete()) {
-                return;
-            }
-            try {
-                Thread.sleep(retryIntervalToDeleteTempDir);
-            } catch (final InterruptedException e) {
-                // ignore
-            }
+        if (!FileUtils.deleteQuietly(ownTmpDir)) {
+            logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
         }
-        logger.warn("Could not delete a temp dir: " + ownTmpDir.getAbsolutePath());
     }
 
     protected void appendJarFile(final String cpSeparator, final StringBuilder buf, final File libDir, final String basePath) {
