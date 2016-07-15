@@ -48,7 +48,9 @@ public class SsoAction extends FessLoginAction {
             if (logger.isDebugEnabled()) {
                 logger.debug("No user in SSO request.");
             }
-            saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            if (fessConfig.isSsoEnabled()) {
+                saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
+            }
             return redirect(LoginAction.class);
         } else if (loginCredential instanceof EmptyLoginCredential) {
             throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.", "401 Unauthorized",
