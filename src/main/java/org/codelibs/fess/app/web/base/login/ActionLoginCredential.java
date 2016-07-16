@@ -16,16 +16,15 @@
 package org.codelibs.fess.app.web.base.login;
 
 import java.util.Collections;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-import org.codelibs.fess.app.web.sso.SsoAction;
 import org.lastaflute.web.response.ActionResponse;
 
 public class ActionLoginCredential implements LoginCredential {
 
-    private final Function<SsoAction, ActionResponse> action;
+    private final Supplier<ActionResponse> action;
 
-    public ActionLoginCredential(final Function<SsoAction, ActionResponse> action) {
+    public ActionLoginCredential(final Supplier<ActionResponse> action) {
         this.action = action;
     }
 
@@ -43,7 +42,7 @@ public class ActionLoginCredential implements LoginCredential {
         return Collections.emptyMap();
     }
 
-    public ActionResponse execute(final SsoAction a) {
-        return action.apply(a);
+    public ActionResponse execute() {
+        return action.get();
     }
 }

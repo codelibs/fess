@@ -86,7 +86,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
                     // context/auth loop not yet complete
                     if (spnegoResponse.isStatusSet()) {
-                        return new ActionLoginCredential(action -> {
+                        return new ActionLoginCredential(() -> {
                             throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.",
                                     "401 Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
                         });

@@ -51,7 +51,7 @@ public class SsoAction extends FessLoginAction {
             }
             return redirect(LoginAction.class);
         } else if (loginCredential instanceof ActionLoginCredential) {
-            return ((ActionLoginCredential) loginCredential).execute(this);
+            return ((ActionLoginCredential) loginCredential).execute();
         }
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
@@ -67,9 +67,5 @@ public class SsoAction extends FessLoginAction {
             }
             return redirect(LoginAction.class);
         }
-    }
-
-    public ActionResponse redirect(final String url) {
-        return HtmlResponse.fromRedirectPathAsIs(url);
     }
 }

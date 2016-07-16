@@ -32,6 +32,7 @@ import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +65,8 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final HttpSession session = request.getSession(false);
             if (session != null) {
                 final String sesState = (String) session.getAttribute(OIC_STATE);
-                session.removeAttribute(OIC_STATE);
                 if (StringUtil.isNotBlank(sesState)) {
+                    session.removeAttribute(OIC_STATE);
                     final String code = request.getParameter("code");
                     final String reqState = request.getParameter("state");
                     if (sesState.equals(reqState) && StringUtil.isNotBlank(code)) {
@@ -78,7 +79,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 }
             }
 
-            return new ActionLoginCredential(action -> action.redirect(getAuthUrl(request)));
+            return new ActionLoginCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
         }).orElse(null);
     }
 
