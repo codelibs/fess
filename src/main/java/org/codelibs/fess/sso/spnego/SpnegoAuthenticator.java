@@ -24,9 +24,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.io.ResourceUtil;
-import org.codelibs.fess.app.web.base.login.EmptyLoginCredential;
+import org.codelibs.fess.app.web.base.login.ActionLoginCredential;
 import org.codelibs.fess.app.web.base.login.LoginCredential;
-import org.codelibs.fess.app.web.base.login.SsoLoginCredential;
+import org.codelibs.fess.app.web.base.login.SpnegoLoginCredential;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -37,6 +37,7 @@ import org.codelibs.spnego.SpnegoHttpFilter;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
+import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
@@ -49,14 +50,14 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
     @PostConstruct
     public void init() {
-        if (ComponentUtil.getFessConfig().isSsoEnabled()) {
+        if ("spnego".equals(ComponentUtil.getFessConfig().getSsoType())) {
             try {
                 // set some System properties
                 final SpnegoFilterConfig config = SpnegoFilterConfig.getInstance(new SpengoConfig());
 
                 // pre-authenticate
                 authenticator = new org.codelibs.spnego.SpnegoAuthenticator(config);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new FessSystemException("Failed to initialize SPNEGO.", e);
             }
         }
@@ -67,43 +68,44 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
      */
     @Override
     public LoginCredential getLoginCredential() {
-        if (!ComponentUtil.getFessConfig().isSsoEnabled()) {
-            return null;
-        }
+        return LaRequestUtil
+                .getOptionalRequest()
+                .map(request -> {
+                    final HttpServletResponse response = LaResponseUtil.getResponse();
+                    final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
 
-        return LaRequestUtil.getOptionalRequest().map(request -> {
-            final HttpServletResponse response = LaResponseUtil.getResponse();
-            final SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(response);
+                    // client/caller principal
+                    final SpnegoPrincipal principal;
+                    try {
+                        principal = authenticator.authenticate(request, spnegoResponse);
+                    } catch (final Exception e) {
+                        final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
+                        logger.error(msg);
+                        throw new SsoLoginException(msg, e);
+                    }
 
-            // client/caller principal
-                final SpnegoPrincipal principal;
-                try {
-                    principal = authenticator.authenticate(request, spnegoResponse);
-                } catch (Exception e) {
-                    final String msg = "HTTP Authorization Header=" + request.getHeader(Constants.AUTHZ_HEADER);
-                    logger.error(msg);
-                    throw new SsoLoginException(msg, e);
-                }
+                    // context/auth loop not yet complete
+                    if (spnegoResponse.isStatusSet()) {
+                        return new ActionLoginCredential(action -> {
+                            throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.",
+                                    "401 Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
+                        });
+                    }
 
-                // context/auth loop not yet complete
-                if (spnegoResponse.isStatusSet()) {
-                    return new EmptyLoginCredential();
-                }
+                    // assert
+                    if (null == principal) {
+                        final String msg = "Principal was null.";
+                        logger.error(msg);
+                        throw new SsoLoginException(msg);
+                    }
 
-                // assert
-                if (null == principal) {
-                    String msg = "Principal was null.";
-                    logger.error(msg);
-                    throw new SsoLoginException(msg);
-                }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("principal=" + principal);
+                    }
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("principal=" + principal);
-                }
-
-                final String[] username = principal.getName().split("@", 2);
-                return new SsoLoginCredential(username[0]);
-            }).orElseGet(() -> null);
+                    final String[] username = principal.getName().split("@", 2);
+                    return new SpnegoLoginCredential(username[0]);
+                }).orElseGet(() -> null);
 
     }
 
@@ -122,7 +124,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
         }
 
         @Override
-        public String getInitParameter(String name) {
+        public String getInitParameter(final String name) {
             if (SpnegoHttpFilter.Constants.LOGGER_LEVEL.equals(name)) {
                 return fessConfig.getSpnegoLoggerLevel();
             } else if (SpnegoHttpFilter.Constants.LOGIN_CONF.equals(name)) {

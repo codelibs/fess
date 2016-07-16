@@ -15,33 +15,35 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
-import org.dbflute.util.DfCollectionUtil;
+import java.util.Collections;
+import java.util.function.Function;
 
-public class SsoLoginCredential implements LoginCredential {
-    private final String username;
+import org.codelibs.fess.app.web.sso.SsoAction;
+import org.lastaflute.web.response.ActionResponse;
 
-    // private Principal principal;
+public class ActionLoginCredential implements LoginCredential {
 
-    public SsoLoginCredential(final String username) {
-        this.username = username;
+    private final Function<SsoAction, ActionResponse> action;
+
+    public ActionLoginCredential(final Function<SsoAction, ActionResponse> action) {
+        this.action = action;
     }
 
     @Override
     public void validate() {
-        assertLoginAccountRequired(username);
-    }
-
-    @Override
-    public Object getResource() {
-        return DfCollectionUtil.newHashMap("account", username);
     }
 
     @Override
     public String getId() {
-        return username;
+        return action.toString();
     }
 
-    public String getUsername() {
-        return username;
+    @Override
+    public Object getResource() {
+        return Collections.emptyMap();
+    }
+
+    public ActionResponse execute(final SsoAction a) {
+        return action.apply(a);
     }
 }

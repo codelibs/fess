@@ -110,7 +110,7 @@ public class RoleQueryHelper {
             requestManager.findUserBean(FessUserBean.class)
                     .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleList::add)))
                     .orElse(() -> roleList.addAll(fessConfig.getSearchGuestPermissionList()));
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
             throw e;
         }

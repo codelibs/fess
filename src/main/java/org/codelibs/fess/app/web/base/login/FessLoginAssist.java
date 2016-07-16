@@ -175,11 +175,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 }
             }
             return doFindLoginUser(username, encryptPassword(password));
-        } else if (credential instanceof SsoLoginCredential) {
-            final String username = ((SsoLoginCredential) credential).getUsername();
+        } else if (credential instanceof SpnegoLoginCredential) {
+            final String username = credential.getId();
             if (!fessConfig.isAdminUser(username)) {
                 return ComponentUtil.getLdapManager().login(username);
             }
+        } else if (credential instanceof OpenIdConnectLoginCredential) {
+            return OptionalEntity.of(((OpenIdConnectLoginCredential) credential).getUser());
         }
         return OptionalEntity.empty();
     }

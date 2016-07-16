@@ -19,11 +19,11 @@ public class SsoLoginException extends FessSystemException {
 
     private static final long serialVersionUID = 1L;
 
-    public SsoLoginException(String message) {
+    public SsoLoginException(final String message) {
         super(message);
     }
 
-    public SsoLoginException(String message, Exception e) {
+    public SsoLoginException(final String message, final Exception e) {
         super(message, e);
     }
 

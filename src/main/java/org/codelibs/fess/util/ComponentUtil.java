@@ -59,7 +59,7 @@ import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.sso.SsoManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
@@ -73,7 +73,7 @@ public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
-    private static final String SSO_AUTHENTICATOR = "ssoAuthenticator";
+    private static final String SSO_MANAGER = "ssoManager";
 
     private static final String PERMISSION_HELPER = "permissionHelper";
 
@@ -360,8 +360,8 @@ public final class ComponentUtil {
         return getComponent(PERMISSION_HELPER);
     }
 
-    public static SsoAuthenticator getSsoAuthenticator() {
-        return getComponent(SSO_AUTHENTICATOR);
+    public static SsoManager getSsoManager() {
+        return getComponent(SSO_MANAGER);
     }
 
     public static CrawlerClientFactory getCrawlerClientFactory() {

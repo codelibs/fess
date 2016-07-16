@@ -931,8 +931,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. homeDirectory */
     String LDAP_ATTR_HOME_DIRECTORY = "ldap.attr.homeDirectory";
 
-    /** The key of the configuration. e.g. false */
-    String SSO_ENABLED = "sso.enabled";
+    /** The key of the configuration. e.g. none */
+    String SSO_TYPE = "sso.type";
 
     /** The key of the configuration. e.g. 0 */
     String SPNEGO_LOGGER_LEVEL = "spnego.logger.level";
@@ -969,6 +969,24 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /** The key of the configuration. e.g. false */
     String SPNEGO_ALLOW_DELEGATION = "spnego.allow.delegation";
+
+    /** The key of the configuration. e.g. __CLIENT_ID__ */
+    String OIC_CLIENT_ID = "oic.client.id";
+
+    /** The key of the configuration. e.g. __CLIENT_SECRET__ */
+    String OIC_CLIENT_SECRET = "oic.client.secret";
+
+    /** The key of the configuration. e.g. https://accounts.google.com/o/oauth2/auth */
+    String OIC_AUTH_SERVER_URL = "oic.auth.server.url";
+
+    /** The key of the configuration. e.g. http://localhost:8080/sso/ */
+    String OIC_REDIRECT_URL = "oic.redirect.url";
+
+    /** The key of the configuration. e.g. openid email */
+    String OIC_SCOPE = "oic.scope";
+
+    /** The key of the configuration. e.g. https://accounts.google.com/o/oauth2/token */
+    String OIC_TOKEN_SERVER_URL = "oic.token.server.url";
 
     /**
      * Get the value of property as {@link String}.
@@ -3779,20 +3797,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getLdapAttrHomeDirectory();
 
     /**
-     * Get the value for the key 'sso.enabled'. <br>
-     * The value is, e.g. false <br>
+     * Get the value for the key 'sso.type'. <br>
+     * The value is, e.g. none <br>
      * comment: ------
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
-    String getSsoEnabled();
-
-    /**
-     * Is the property for the key 'sso.enabled' true? <br>
-     * The value is, e.g. false <br>
-     * comment: ------
-     * @return The determination, true or false. (if not found, exception but basically no way)
-     */
-    boolean isSsoEnabled();
+    String getSsoType();
 
     /**
      * Get the value for the key 'spnego.logger.level'. <br>
@@ -3920,6 +3930,48 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isSpnegoAllowDelegation();
+
+    /**
+     * Get the value for the key 'oic.client.id'. <br>
+     * The value is, e.g. __CLIENT_ID__ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicClientId();
+
+    /**
+     * Get the value for the key 'oic.client.secret'. <br>
+     * The value is, e.g. __CLIENT_SECRET__ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicClientSecret();
+
+    /**
+     * Get the value for the key 'oic.auth.server.url'. <br>
+     * The value is, e.g. https://accounts.google.com/o/oauth2/auth <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicAuthServerUrl();
+
+    /**
+     * Get the value for the key 'oic.redirect.url'. <br>
+     * The value is, e.g. http://localhost:8080/sso/ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicRedirectUrl();
+
+    /**
+     * Get the value for the key 'oic.scope'. <br>
+     * The value is, e.g. openid email <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicScope();
+
+    /**
+     * Get the value for the key 'oic.token.server.url'. <br>
+     * The value is, e.g. https://accounts.google.com/o/oauth2/token <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicTokenServerUrl();
 
     /**
      * The simple implementation for configuration.
@@ -5410,12 +5462,8 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.LDAP_ATTR_HOME_DIRECTORY);
         }
 
-        public String getSsoEnabled() {
-            return get(FessConfig.SSO_ENABLED);
-        }
-
-        public boolean isSsoEnabled() {
-            return is(FessConfig.SSO_ENABLED);
+        public String getSsoType() {
+            return get(FessConfig.SSO_TYPE);
         }
 
         public String getSpnegoLoggerLevel() {
@@ -5488,6 +5536,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isSpnegoAllowDelegation() {
             return is(FessConfig.SPNEGO_ALLOW_DELEGATION);
+        }
+
+        public String getOicClientId() {
+            return get(FessConfig.OIC_CLIENT_ID);
+        }
+
+        public String getOicClientSecret() {
+            return get(FessConfig.OIC_CLIENT_SECRET);
+        }
+
+        public String getOicAuthServerUrl() {
+            return get(FessConfig.OIC_AUTH_SERVER_URL);
+        }
+
+        public String getOicRedirectUrl() {
+            return get(FessConfig.OIC_REDIRECT_URL);
+        }
+
+        public String getOicScope() {
+            return get(FessConfig.OIC_SCOPE);
+        }
+
+        public String getOicTokenServerUrl() {
+            return get(FessConfig.OIC_TOKEN_SERVER_URL);
         }
     }
 }

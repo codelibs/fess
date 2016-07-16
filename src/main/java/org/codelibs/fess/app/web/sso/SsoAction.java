@@ -15,18 +15,16 @@
  */
 package org.codelibs.fess.app.web.sso;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.codelibs.fess.app.web.base.FessLoginAction;
-import org.codelibs.fess.app.web.base.login.EmptyLoginCredential;
+import org.codelibs.fess.app.web.base.login.ActionLoginCredential;
 import org.codelibs.fess.app.web.base.login.LoginCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
-import org.codelibs.fess.sso.SsoAuthenticator;
+import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
-import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
+import org.lastaflute.web.response.HtmlResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,19 +40,18 @@ public class SsoAction extends FessLoginAction {
 
     @Execute
     public ActionResponse index() {
-        final SsoAuthenticator authenticator = ComponentUtil.getSsoAuthenticator();
-        LoginCredential loginCredential = authenticator.getLoginCredential();
+        final SsoManager ssoManager = ComponentUtil.getSsoManager();
+        final LoginCredential loginCredential = ssoManager.getLoginCredential();
         if (loginCredential == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("No user in SSO request.");
             }
-            if (fessConfig.isSsoEnabled()) {
+            if (ssoManager.available()) {
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
             return redirect(LoginAction.class);
-        } else if (loginCredential instanceof EmptyLoginCredential) {
-            throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.", "401 Unauthorized",
-                    HttpServletResponse.SC_UNAUTHORIZED);
+        } else if (loginCredential instanceof ActionLoginCredential) {
+            return ((ActionLoginCredential) loginCredential).execute(this);
         }
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {
@@ -65,11 +62,14 @@ public class SsoAction extends FessLoginAction {
             if (logger.isDebugEnabled()) {
                 logger.debug("SSO login failure.", lfe);
             }
-            if (fessConfig.isSsoEnabled()) {
+            if (ssoManager.available()) {
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
             return redirect(LoginAction.class);
         }
     }
 
+    public ActionResponse redirect(final String url) {
+        return HtmlResponse.fromRedirectPathAsIs(url);
+    }
 }
