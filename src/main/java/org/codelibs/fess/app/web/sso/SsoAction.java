@@ -24,7 +24,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
-import org.lastaflute.web.response.HtmlResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

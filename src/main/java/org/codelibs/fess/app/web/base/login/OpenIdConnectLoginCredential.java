@@ -15,9 +15,16 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.codelibs.fess.entity.FessUser;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class OpenIdConnectLoginCredential implements LoginCredential {
 
@@ -43,16 +50,26 @@ public class OpenIdConnectLoginCredential implements LoginCredential {
     }
 
     public User getUser() {
-        return new User(getId());
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return new User(getId(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
     }
 
     public static class User implements FessUser {
 
-        private final String name;
+        private static final long serialVersionUID = 1L;
 
-        protected User(final String name) {
+        protected final String name;
+
+        protected String[] groups;
+
+        protected String[] roles;
+
+        protected String[] permissions;
+
+        protected User(final String name, final String[] groups, final String[] roles) {
             this.name = name;
-            // TODO groups and roles
+            this.groups = groups;
+            this.roles = roles;
         }
 
         @Override
@@ -62,20 +79,25 @@ public class OpenIdConnectLoginCredential implements LoginCredential {
 
         @Override
         public String[] getRoleNames() {
-            // TODO Auto-generated method stub
-            return null;
+            return roles;
         }
 
         @Override
         public String[] getGroupNames() {
-            // TODO Auto-generated method stub
-            return null;
+            return groups;
         }
 
         @Override
         public String[] getPermissions() {
-            // TODO Auto-generated method stub
-            return null;
+            if (permissions == null) {
+                final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+                final Set<String> permissionSet = new HashSet<>();
+                permissionSet.add(systemHelper.getSearchRoleByUser(name));
+                stream(groups).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByGroup(s))));
+                stream(roles).of(stream -> stream.forEach(s -> permissionSet.add(systemHelper.getSearchRoleByRole(s))));
+                permissions = permissionSet.toArray(new String[permissionSet.size()]);
+            }
+            return permissions;
         }
 
     }

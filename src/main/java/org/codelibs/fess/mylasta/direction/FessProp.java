@@ -48,6 +48,10 @@ import org.lastaflute.web.util.LaRequestUtil;
 
 public interface FessProp {
 
+    public static final String OIC_DEFAULT_ROLES = "oicDefaultRoles";
+
+    public static final String OIC_DEFAULT_GROUPS = "oicDefaultGroups";
+
     public static final String AUTHENTICATION_ADMIN_ROLES = "authenticationAdminRoles";
 
     public static final String SEARCH_GUEST_PERMISSION_LIST = "searchGuestPermissionList";
@@ -987,5 +991,39 @@ public interface FessProp {
             propMap.put(SEARCH_GUEST_PERMISSION_LIST, list);
         }
         return list;
+    }
+
+    String getOicDefaultGroups();
+
+    public default String[] getOicDefaultGroupsAsArray() {
+        String[] array = (String[]) propMap.get(OIC_DEFAULT_GROUPS);
+        if (array == null) {
+            if (StringUtil.isBlank(getOicDefaultGroups())) {
+                array = StringUtil.EMPTY_STRINGS;
+            } else {
+                array =
+                        stream(getOicDefaultGroups().split(",")).get(
+                                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+            }
+            propMap.put(OIC_DEFAULT_GROUPS, array);
+        }
+        return array;
+    }
+
+    String getOicDefaultRoles();
+
+    public default String[] getOicDefaultRolesAsArray() {
+        String[] array = (String[]) propMap.get(OIC_DEFAULT_ROLES);
+        if (array == null) {
+            if (StringUtil.isBlank(getOicDefaultRoles())) {
+                array = StringUtil.EMPTY_STRINGS;
+            } else {
+                array =
+                        stream(getOicDefaultRoles().split(",")).get(
+                                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+            }
+            propMap.put(OIC_DEFAULT_ROLES, array);
+        }
+        return array;
     }
 }

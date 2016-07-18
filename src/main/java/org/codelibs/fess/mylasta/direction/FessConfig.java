@@ -988,6 +988,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. https://accounts.google.com/o/oauth2/token */
     String OIC_TOKEN_SERVER_URL = "oic.token.server.url";
 
+    /** The key of the configuration. e.g. guest */
+    String OIC_DEFAULT_ROLES = "oic.default.roles";
+
+    /** The key of the configuration. e.g.  */
+    String OIC_DEFAULT_GROUPS = "oic.default.groups";
+
     /**
      * Get the value of property as {@link String}.
      * @param propertyKey The key of the property. (NotNull)
@@ -3974,6 +3980,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOicTokenServerUrl();
 
     /**
+     * Get the value for the key 'oic.default.roles'. <br>
+     * The value is, e.g. guest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicDefaultRoles();
+
+    /**
+     * Get the value for the key 'oic.default.groups'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOicDefaultGroups();
+
+    /**
+     * Get the value for the key 'oic.default.groups' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getOicDefaultGroupsAsInteger();
+
+    /**
      * The simple implementation for configuration.
      * @author FreeGen
      */
@@ -5560,6 +5588,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOicTokenServerUrl() {
             return get(FessConfig.OIC_TOKEN_SERVER_URL);
+        }
+
+        public String getOicDefaultRoles() {
+            return get(FessConfig.OIC_DEFAULT_ROLES);
+        }
+
+        public String getOicDefaultGroups() {
+            return get(FessConfig.OIC_DEFAULT_GROUPS);
+        }
+
+        public Integer getOicDefaultGroupsAsInteger() {
+            return getAsInteger(FessConfig.OIC_DEFAULT_GROUPS);
         }
     }
 }
