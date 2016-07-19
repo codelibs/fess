@@ -258,6 +258,9 @@
 						</la:link></li>
 
 				</ul></li>
+			<c:catch>
+				<c:import url="/WEB-INF/view/common/admin/sidebar_extra.jsp" />
+			</c:catch>
 		</ul>
 		<!-- /.sidebar-menu -->
 	</section>
