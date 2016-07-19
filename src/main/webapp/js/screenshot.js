@@ -1,0 +1,1 @@
+function noimage(screenshot){$(screenshot).attr("src",$('#contextPath').val()+"/images/noimage.png")};

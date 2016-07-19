@@ -127,5 +127,6 @@
 	<script type="text/javascript" src="${f:url('/js/bootstrap.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/suggestor.js')}"></script>
 	<script type="text/javascript" src="${f:url('/js/search.js')}"></script>
+	<script type="text/javascript" src="${f:url('/js/screenshot.js')}"></script>
 </body>
 </html>

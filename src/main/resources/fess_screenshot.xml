@@ -8,6 +8,53 @@
 			<arg>htmlScreenShotGenerator</arg>
 		</postConstruct>
 		 -->
+		<postConstruct name="add">
+			<arg>officeScreenShotGenerator</arg>
+		</postConstruct>
+	</component>
+	<component name="officeScreenShotGenerator"
+		class="org.codelibs.fess.screenshot.impl.CommandGenerator">
+		<property name="commandList">
+			["sh",
+			"/use/share/fess/bin/office-screenshot.sh",
+			"${url}",
+			"${outputFile}"]
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/vnd.openxmlformats-officedocument.presentationml.presentation"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/msword"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/vnd.ms-excel"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/vnd.ms-powerpoint"
+			</arg>
+		</postConstruct>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"application/rtf"
+			</arg>
+		</postConstruct>
 	</component>
 <!--
 	<component name="webDriver" class="org.openqa.selenium.phantomjs.PhantomJSDriver">
