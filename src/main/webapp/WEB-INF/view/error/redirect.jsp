@@ -13,15 +13,14 @@ if("systemError".equals(type)) {
 		response.sendError(statusCode);
 	}
 } else if("logOut".equals(type)) {
-	redirectPage.append("/login/index?type=logout");
+	redirectPage.append("/login/?type=logout&code=" + statusCode);
 	response.sendRedirect(redirectPage.toString());
 } else if("badRequest".equals(type)) {
 	redirectPage.append("/error/badrequest");
 	response.sendRedirect(redirectPage.toString());
-} else {
+} else if(!"badAuth".equals(type)) {
 	redirectPage.append("/error/notfound?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));
 	response.sendRedirect(redirectPage.toString());
 }
- %>
-
+ %>Bad Authentication.

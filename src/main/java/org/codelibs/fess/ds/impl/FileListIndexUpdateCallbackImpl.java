@@ -182,7 +182,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
             deleteIdList.add(ComponentUtil.getCrawlingInfoHelper().generateId(dataMap));
 
             if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
-                final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
                 final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
                 for (final String id : deleteIdList) {
                     indexingHelper.deleteDocument(fessEsClient, id);
@@ -200,7 +200,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
     @Override
     public void commit() {
         if (!deleteIdList.isEmpty()) {
-            final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+            final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
             final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
             for (final String id : deleteIdList) {
                 indexingHelper.deleteDocument(fessEsClient, id);

@@ -2451,6 +2451,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Send */
     public static final String LABELS_esreq_button_upload = "{labels.esreq_button_upload}";
 
+    /** The key of the message: No match */
+    public static final String LABELS_facet_is_not_found = "{labels.facet_is_not_found}";
+
     /**
      * Assert the property is not null.
      * @param property The value of the property. (NotNull)

@@ -371,7 +371,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         roleTypeBhv.queryDelete(cb -> {});
 
         roleBhv.selectEntity(cb -> cb.query().setName_Equal("guest")).orElseGet(() -> {
-            Role entity = new Role();
+            final Role entity = new Role();
             entity.setName("guest");
             roleBhv.insert(entity);
             return entity;
@@ -450,7 +450,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 if (!pmResponse.isAcknowledged()) {
                     logger.warn("Failed to add " + field + " to " + index + "/" + type);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
             }
         }

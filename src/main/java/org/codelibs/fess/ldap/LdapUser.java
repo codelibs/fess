@@ -19,8 +19,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Hashtable;
 
-import javax.naming.Context;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.entity.FessUser;
@@ -84,7 +82,4 @@ public class LdapUser implements FessUser {
         return env;
     }
 
-    public String getPassword() {
-        return getEnvironment().get(Context.SECURITY_CREDENTIALS);
-    }
 }

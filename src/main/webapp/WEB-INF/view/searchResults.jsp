@@ -136,6 +136,7 @@
 				<ul class="list-group m-b">
 					<li class="list-group-item text-uppercase"><la:message
 							key="${facetQueryView.title}" /></li>
+					<c:set var="facetFound" value="F"/>
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
 							<li class="list-group-item p-l-md"><la:link
@@ -143,8 +144,12 @@
 									<la:message key="${queryEntry.key}" />
 									<span class="label label-default label-pill pull-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>
+							<c:set var="facetFound" value="T"/>
 						</c:if>
 					</c:forEach>
+					<c:if test="${facetFound == 'F'}">
+						<li class="list-group-item p-l-md"><la:message key="labels.facet_is_not_found" /></li>
+					</c:if>
 				</ul>
 			</c:forEach>
 			<c:if test="${!empty ex_q}">

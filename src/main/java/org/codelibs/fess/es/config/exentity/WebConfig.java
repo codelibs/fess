@@ -200,6 +200,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
         final WebAuthenticationService webAuthenticationService = ComponentUtil.getComponent(WebAuthenticationService.class);
         final RequestHeaderService requestHeaderService = ComponentUtil.getComponent(RequestHeaderService.class);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         // HttpClient Parameters
         final Map<String, Object> paramMap = new HashMap<>();
@@ -208,6 +209,11 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         final Map<String, String> clientConfigMap = getConfigParameterMap(ConfigName.CLIENT);
         if (clientConfigMap != null) {
             paramMap.putAll(clientConfigMap);
+        }
+
+        // robots txt enabled
+        if (paramMap.get(HcHttpClient.ROBOTS_TXT_ENABLED_PROPERTY) == null) {
+            paramMap.put(HcHttpClient.ROBOTS_TXT_ENABLED_PROPERTY, !fessConfig.isCrawlerIgnoreRobotsTxt());
         }
 
         final String userAgent = getUserAgent();

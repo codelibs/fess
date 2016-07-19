@@ -11,14 +11,14 @@
 		<mkdir dir="${target.dir}" />
 		<delete dir="${plugins.dir}" />
 		<mkdir dir="${plugins.dir}" />
-		<!-- analysis-kuromoji-neologd -->
+		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
+			<param name="repo.url" value="${maven.snapshot.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="analysis-kuromoji-neologd" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.name" value="analysis-fess" />
+			<param name="plugin.version" value="2.3.0-SNAPSHOT" />
+			<param name="plugin.zip.version" value="2.3.0-20160714.212731-1" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
@@ -74,21 +74,6 @@
 			<param name="plugin.version" value="2.3.0" />
 			<param name="plugin.zip.version" value="2.3.0" />
 		</antcall>
-		<!-- seunjeon -->
-		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.release.repo.url}" />
-			<param name="plugin.groupId" value="org/bitbucket/eunjeon" />
-			<param name="plugin.name.prefix" value="elasticsearch-" />
-			<param name="plugin.name" value="analysis-seunjeon" />
-			<param name="plugin.version" value="${elasticsearch.version}.0" />
-			<param name="plugin.zip.version" value="${elasticsearch.version}.0" />
-		</antcall>
-		<jar destfile="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-${elasticsearch.version}.jar">
-			<zipfileset
-				src="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-assembly-${elasticsearch.version}.0.jar"
-				excludes="org/slf4j/**"/>
-		</jar>
-		<delete file="${plugins.dir}/analysis-seunjeon/elasticsearch-analysis-seunjeon-assembly-${elasticsearch.version}.0.jar"/>
 		<!-- kopf -->
 		<get dest="${target.dir}">
 			<url url="http://maven.codelibs.org/archive/elasticsearch/plugin/kopf/elasticsearch-kopf-2.0.1.0.zip" />

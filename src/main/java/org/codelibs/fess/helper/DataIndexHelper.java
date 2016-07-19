@@ -258,8 +258,8 @@ public class DataIndexHelper {
                                     .should(QueryBuilders.missingQuery(fessConfig.getIndexFieldExpires())))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
-                ComponentUtil.getElasticsearchClient().deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(),
-                        fessConfig.getIndexDocumentType(), queryBuilder);
+                ComponentUtil.getFessEsClient().deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
+                        queryBuilder);
             } catch (final Exception e) {
                 logger.error("Could not delete old docs at " + dataConfig, e);
             }

@@ -86,7 +86,7 @@ public class KeyMatchHelper {
     }
 
     protected List<Map<String, Object>> getDocumentList(final KeyMatch keyMatch) {
-        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final List<Map<String, Object>> documentList =
                 fessEsClient.getDocumentList(

@@ -15,10 +15,12 @@
  */
 package org.codelibs.fess.app.web.base;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.web.login.LoginAction;
+import org.codelibs.fess.app.web.sso.SsoAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
@@ -116,7 +118,7 @@ public abstract class FessSearchAction extends FessBaseAction {
             locale = Locale.ENGLISH;
         }
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
-        String username = systemHelper.getUsername();
+        final String username = systemHelper.getUsername();
         runtime.registerData("username", username);
         runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
@@ -156,8 +158,24 @@ public abstract class FessSearchAction extends FessBaseAction {
         // sort
         if (StringUtil.isBlank(form.sort)) {
             final String[] defaultSortValues = fessConfig.getDefaultSortValues(getUserBean());
-            if (defaultSortValues.length > 0) {
-                form.sort = String.join(",", defaultSortValues);
+            if (defaultSortValues.length == 1) {
+                form.sort = defaultSortValues[0];
+            } else if (defaultSortValues.length >= 2) {
+                final StringBuilder sortValueSb = new StringBuilder();
+                final Set<String> sortFieldNames = new HashSet<>();
+                for (final String defaultSortValue : defaultSortValues) {
+                    for (final String singleValue : defaultSortValue.split(",")) {
+                        final String sortFieldName = singleValue.split("\\.")[0];
+                        if (!sortFieldNames.contains(sortFieldName)) {
+                            sortFieldNames.add(sortFieldName);
+                            if (sortValueSb.length() > 0) {
+                                sortValueSb.append(",");
+                            }
+                            sortValueSb.append(singleValue);
+                        }
+                    }
+                }
+                form.sort = sortValueSb.toString();
             }
         }
     }
@@ -188,7 +206,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     }
 
     protected HtmlResponse redirectToLogin() {
-        return redirect(LoginAction.class);
+        return redirect(SsoAction.class);
     }
 
     protected HtmlResponse redirectToRoot() {

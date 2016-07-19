@@ -167,6 +167,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Username or Password is not correct. */
     public static final String ERRORS_login_error = "{errors.login_error}";
 
+    /** The key of the message: Failed to process SSO login. */
+    public static final String ERRORS_sso_login_error = "{errors.sso_login_error}";
+
     /** The key of the message: Could not find {0}. */
     public static final String ERRORS_could_not_find_log_file = "{errors.could_not_find_log_file}";
 
@@ -1121,6 +1124,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsLoginError(String property) {
         assertPropertyNotNull(property);
         add(property, new ActionMessage(ERRORS_login_error));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.sso_login_error' with parameters.
+     * <pre>
+     * message: Failed to process SSO login.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsSsoLoginError(String property) {
+        assertPropertyNotNull(property);
+        add(property, new ActionMessage(ERRORS_sso_login_error));
         return this;
     }
 

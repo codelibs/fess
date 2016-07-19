@@ -34,8 +34,8 @@
           "type": "stop",
           "stopwords": "_english_"
         },
-        "kuromoji_neologd_pos_filter" : {
-          "type" : "kuromoji_neologd_part_of_speech",
+        "japanese_pos_filter" : {
+          "type" : "fess_japanese_part_of_speech",
           "stoptags" : [
             "その他",
             "その他-間投",
@@ -405,15 +405,15 @@
         }
       },
       "tokenizer": {
-        "kuromoji_neologd_tokenizer": {
-          "type": "reloadable_kuromoji_neologd_tokenizer",
+        "japanese_tokenizer": {
+          "type": "fess_japanese_reloadable_tokenizer",
           "mode": "normal",
           "user_dictionary": "${fess.dictionary.path}ja/kuromoji.txt",
           "discard_punctuation": false,
           "reload_interval":"1m"
         },
-        "seunjeon_default_tokenizer": {
-            "type": "seunjeon_tokenizer",
+        "korean_tokenizer": {
+            "type": "fess_korean_tokenizer",
             "user_dict_path": "${fess.dictionary.path}ko/seunjeon.txt"
         },
         "unigram_synonym_tokenizer": {
@@ -436,14 +436,14 @@
           "type": "custom",
           "char_filter": [
             "mapping_ja_filter",
-            "kuromoji_neologd_iteration_mark"
+            "fess_japanese_iteration_mark"
           ],
-          "tokenizer": "kuromoji_neologd_tokenizer",
+          "tokenizer": "japanese_tokenizer",
           "filter": [
             "truncate10_filter",
-            "kuromoji_neologd_baseform",
-            "kuromoji_neologd_stemmer",
-            "kuromoji_neologd_pos_filter",
+            "fess_japanese_baseform",
+            "fess_japanese_stemmer",
+            "japanese_pos_filter",
             "lowercase"
           ]
         },
@@ -458,7 +458,7 @@
         },
         "korean_analyzer": {
           "type": "custom",
-          "tokenizer":"seunjeon_default_tokenizer"
+          "tokenizer":"korean_tokenizer"
         },
         "german_analyzer": {
           "type": "custom",

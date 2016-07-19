@@ -111,7 +111,7 @@ public class AdminEsreqAction extends FessAdminAction {
         return redirect(getClass()); // no-op
     }
 
-    private CurlRequest getCurlRequest(String header) {
+    private CurlRequest getCurlRequest(final String header) {
         if (StringUtil.isBlank(header)) {
             return null;
         }
@@ -143,7 +143,7 @@ public class AdminEsreqAction extends FessAdminAction {
         return null;
     }
 
-    private HtmlResponse asListHtml(Runnable runnable) {
+    private HtmlResponse asListHtml(final Runnable runnable) {
         if (runnable != null) {
             runnable.run();
         }

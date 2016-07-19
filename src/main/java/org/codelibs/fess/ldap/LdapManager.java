@@ -74,15 +74,29 @@ public class LdapManager {
 
     protected Hashtable<String, String> createAdminEnv() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return createEnvironment(fessConfig.getLdapAdminInitialContextFactory(), fessConfig.getLdapAdminSecurityAuthentication(),
-                fessConfig.getLdapAdminProviderUrl(), fessConfig.getLdapAdminSecurityPrincipal(),
+        return createEnvironment(//
+                fessConfig.getLdapAdminInitialContextFactory(), //
+                fessConfig.getLdapAdminSecurityAuthentication(), fessConfig.getLdapAdminProviderUrl(), //
+                fessConfig.getLdapAdminSecurityPrincipal(), //
                 fessConfig.getLdapAdminSecurityCredentials());
     }
 
     protected Hashtable<String, String> createSearchEnv(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return createEnvironment(fessConfig.getLdapInitialContextFactory(), fessConfig.getLdapSecurityAuthentication(),
-                fessConfig.getLdapProviderUrl(), fessConfig.getLdapSecurityPrincipal(username), password);
+        return createEnvironment(//
+                fessConfig.getLdapInitialContextFactory(), //
+                fessConfig.getLdapSecurityAuthentication(), //
+                fessConfig.getLdapProviderUrl(), //
+                fessConfig.getLdapSecurityPrincipal(username), password);
+    }
+
+    protected Hashtable<String, String> createSearchEnv() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        return createEnvironment(//
+                fessConfig.getLdapAdminInitialContextFactory(), //
+                fessConfig.getLdapAdminSecurityAuthentication(), fessConfig.getLdapAdminProviderUrl(), //
+                fessConfig.getLdapAdminSecurityPrincipal(), //
+                fessConfig.getLdapAdminSecurityCredentials());
     }
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
@@ -93,6 +107,20 @@ public class LdapManager {
         }
 
         final Hashtable<String, String> env = createSearchEnv(username, password);
+        try (DirContextHolder holder = getDirContext(() -> env)) {
+            final DirContext context = holder.get();
+            if (logger.isDebugEnabled()) {
+                logger.debug("Logged in.", context);
+            }
+            return OptionalEntity.of(createLdapUser(username, env));
+        } catch (final Exception e) {
+            logger.debug("Login failed.", e);
+        }
+        return OptionalEntity.empty();
+    }
+
+    public OptionalEntity<FessUser> login(final String username) {
+        final Hashtable<String, String> env = createSearchEnv();
         try (DirContextHolder holder = getDirContext(() -> env)) {
             final DirContext context = holder.get();
             if (logger.isDebugEnabled()) {
@@ -121,19 +149,18 @@ public class LdapManager {
         // LDAP: cn=%s
         // AD: (&(objectClass=user)(sAMAccountName=%s))
         final String filter = String.format(accountFilter, ldapUser.getName());
-        search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() },
-                () -> createSearchEnv(ldapUser.getName(), ldapUser.getPassword()), result -> {
-                    processSearchRoles(result, (entryDn, name) -> {
-                        final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
-                        if (isRole) {
-                            if (fessConfig.isLdapRoleSearchRoleEnabled()) {
-                                roleList.add(systemHelper.getSearchRoleByRole(name));
-                            }
-                        } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
-                            roleList.add(systemHelper.getSearchRoleByGroup(name));
-                        }
-                    });
-                });
+        search(bindDn, filter, new String[] { fessConfig.getLdapMemberofAttribute() }, () -> ldapUser.getEnvironment(), result -> {
+            processSearchRoles(result, (entryDn, name) -> {
+                final boolean isRole = entryDn.toLowerCase(Locale.ROOT).indexOf("ou=role") != -1;
+                if (isRole) {
+                    if (fessConfig.isLdapRoleSearchRoleEnabled()) {
+                        roleList.add(systemHelper.getSearchRoleByRole(name));
+                    }
+                } else if (fessConfig.isLdapRoleSearchGroupEnabled()) {
+                    roleList.add(systemHelper.getSearchRoleByGroup(name));
+                }
+            });
+        });
 
         return roleList.toArray(new String[roleList.size()]);
     }

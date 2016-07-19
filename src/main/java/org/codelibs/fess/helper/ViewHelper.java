@@ -88,8 +88,6 @@ public class ViewHelper {
 
     private static final Pattern SHARED_FOLDER_PATTERN = Pattern.compile("^file:/+[^/]\\.");
 
-    private static final long serialVersionUID = 1L;
-
     private static final Logger logger = LoggerFactory.getLogger(ViewHelper.class);
 
     @Resource
@@ -480,7 +478,8 @@ public class ViewHelper {
     }
 
     public Object getSitePath(final Map<String, Object> docMap) {
-        final Object urlLink = docMap.get("urlLink");
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final Object urlLink = docMap.get(fessConfig.getResponseFieldUrlLink());
         if (urlLink != null) {
             final String returnUrl;
             final String url = urlLink.toString();
@@ -539,6 +538,10 @@ public class ViewHelper {
         writeFileName(response, responseData);
         writeContentType(response, responseData);
         writeNoCache(response, responseData);
+        if (responseData.getHttpStatusCode() == 404) {
+            response.httpStatus(responseData.getHttpStatusCode());
+            return response;
+        }
         response.stream(out -> {
             try (final InputStream is = new BufferedInputStream(responseData.getResponseBody())) {
                 out.write(is);

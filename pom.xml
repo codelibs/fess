@@ -40,7 +40,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.8.2</lastaflute.version>
+		<lastaflute.version>0.8.3-A-SNAPSHOT</lastaflute.version>
 		<lasta.taglib.version>0.7.0</lasta.taglib.version>
 		<lasta.job.version>0.2.2</lasta.job.version>
 		<mailflute.version>0.5.1</mailflute.version>
@@ -57,10 +57,10 @@
 		<utflute.version>0.6.0F</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.9</crawler.version>
+		<crawler.version>1.0.10-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>2.2.0</suggest.version>
+		<suggest.version>2.3.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.3.3</elasticsearch.version>
@@ -1053,9 +1053,35 @@
 
 		<!-- common library -->
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client</artifactId>
+			<version>1.22.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson2</artifactId>
+			<version>1.22.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
 			<version>0.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codelibs</groupId>
+			<artifactId>spnego</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

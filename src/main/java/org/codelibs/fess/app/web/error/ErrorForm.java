@@ -20,8 +20,6 @@ import java.util.Map;
 
 public class ErrorForm {
 
-    private static final long serialVersionUID = 1L;
-
     public Map<String, String[]> fields = new HashMap<>();
 
     public String q;

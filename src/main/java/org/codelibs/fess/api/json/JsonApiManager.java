@@ -16,6 +16,8 @@
 package org.codelibs.fess.api.json;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,24 +112,21 @@ public class JsonApiManager extends BaseApiManager {
     }
 
     protected void processPingRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
-        final FessEsClient fessEsClient = ComponentUtil.getElasticsearchClient();
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
         int status;
-        String errMsg = null;
+        Exception err = null;
         try {
             final PingResponse pingResponse = fessEsClient.ping();
             status = pingResponse.getStatus();
         } catch (final Exception e) {
             status = 9;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
-            }
+            err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a ping request.", e);
             }
         }
 
-        writeJsonResponse(status, null, errMsg);
+        writeJsonResponse(status, null, err);
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {
@@ -135,7 +134,7 @@ public class JsonApiManager extends BaseApiManager {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         int status = 0;
-        String errMsg = StringUtil.EMPTY;
+        Exception err = null;
         String query = null;
         final StringBuilder buf = new StringBuilder(1000); // TODO replace response stream
         request.setAttribute(Constants.SEARCH_LOG_ACCESS_TYPE, Constants.SEARCH_LOG_ACCESS_TYPE_JSON);
@@ -262,16 +261,13 @@ public class JsonApiManager extends BaseApiManager {
             }
         } catch (final Exception e) {
             status = 1;
-            errMsg = e.getMessage();
-            if (errMsg == null) {
-                errMsg = e.getClass().getName();
-            }
+            err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a search request.", e);
             }
         }
 
-        writeJsonResponse(status, buf.toString(), errMsg);
+        writeJsonResponse(status, buf.toString(), err);
 
     }
 
@@ -288,7 +284,7 @@ public class JsonApiManager extends BaseApiManager {
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
 
         int status = 0;
-        String errMsg = StringUtil.EMPTY;
+        Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
@@ -314,13 +310,13 @@ public class JsonApiManager extends BaseApiManager {
             }
         } catch (final Exception e) {
             status = 1;
-            errMsg = e.getMessage();
+            err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a label request.", e);
             }
         }
 
-        writeJsonResponse(status, buf.toString(), errMsg);
+        writeJsonResponse(status, buf.toString(), err);
 
     }
 
@@ -338,7 +334,7 @@ public class JsonApiManager extends BaseApiManager {
         final PopularWordHelper popularWordHelper = ComponentUtil.getPopularWordHelper();
 
         int status = 0;
-        String errMsg = StringUtil.EMPTY;
+        Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
             final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, null, fields, excludes);
@@ -360,13 +356,13 @@ public class JsonApiManager extends BaseApiManager {
             } else {
                 status = 1;
             }
-            errMsg = e.getMessage();
+            err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a popularWord request.", e);
             }
         }
 
-        writeJsonResponse(status, buf.toString(), errMsg);
+        writeJsonResponse(status, buf.toString(), err);
 
     }
 
@@ -433,7 +429,7 @@ public class JsonApiManager extends BaseApiManager {
                             builder.setRefresh(true);
                         });
 
-                        writeJsonResponse(0, "\"result\":\"ok\"", null);
+                        writeJsonResponse(0, "\"result\":\"ok\"", (String) null);
 
                     }).orElse(() -> {
                         throw new WebApiException(6, "Not found: " + docId);
@@ -446,7 +442,7 @@ public class JsonApiManager extends BaseApiManager {
             } else {
                 status = 1;
             }
-            writeJsonResponse(status, null, e.getMessage());
+            writeJsonResponse(status, null, e);
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a favorite request.", e);
             }
@@ -467,7 +463,7 @@ public class JsonApiManager extends BaseApiManager {
 
         int status = 0;
         String body = null;
-        String errMsg = null;
+        Exception err = null;
 
         try {
             final String queryId = request.getParameter("queryId");
@@ -523,14 +519,36 @@ public class JsonApiManager extends BaseApiManager {
             } else {
                 status = 1;
             }
-            errMsg = e.getMessage();
+
+            err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a favorites request.", e);
             }
         }
 
-        writeJsonResponse(status, body, errMsg);
+        writeJsonResponse(status, body, err);
 
+    }
+
+    public static void writeJsonResponse(final int status, final String body, final Throwable t) {
+        if (t == null) {
+            writeJsonResponse(status, body, (String) null);
+            return;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        if (StringUtil.isBlank(t.getMessage())) {
+            sb.append(t.getClass().getName());
+        } else {
+            sb.append(t.getMessage());
+        }
+        final StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        sb.append(" [ ").append(sw.toString()).append(" ]");
+        try {
+            sw.close();
+        } catch (final IOException ignore) {}
+        writeJsonResponse(status, body, sb.toString());
     }
 
     public static void writeJsonResponse(final int status, final String body, final String errMsg) {

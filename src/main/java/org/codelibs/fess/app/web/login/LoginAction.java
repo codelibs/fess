@@ -15,30 +15,16 @@
  */
 package org.codelibs.fess.app.web.login;
 
-import org.codelibs.fess.app.web.admin.dashboard.AdminDashboardAction;
-import org.codelibs.fess.app.web.base.FessSearchAction;
-import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
 
-public class LoginAction extends FessSearchAction {
+public class LoginAction extends FessLoginAction {
 
     // ===================================================================================
-    //                                                                            Constant
-    //
-
-    // ===================================================================================
-    //                                                                           Attribute
-    //
-
-    // ===================================================================================
-    //                                                                               Hook
-    //                                                                              ======
-
-    // ===================================================================================
-    //                                                                      Search Execute
+    //                                                                       Login Execute
     //                                                                      ==============
 
     @Execute
@@ -68,17 +54,6 @@ public class LoginAction extends FessSearchAction {
             });
         }
         return redirect(getClass());
-    }
-
-    private HtmlResponse getHtmlResponse() {
-        return getUserBean().map(user -> redirectByUser(user)).orElse(asHtml(path_Login_IndexJsp));
-    }
-
-    private HtmlResponse redirectByUser(final FessUserBean user) {
-        if (!user.hasRoles(fessConfig.getAuthenticationAdminRolesAsArray())) {
-            return redirectToRoot();
-        }
-        return redirect(AdminDashboardAction.class);
     }
 
 }

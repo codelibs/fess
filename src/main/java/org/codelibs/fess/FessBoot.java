@@ -18,7 +18,10 @@ package org.codelibs.fess;
 // DO NOT DEPEND OTHER JARs
 
 import java.io.File;
+import java.util.Properties;
 
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.startup.Tomcat;
 import org.codelibs.core.lang.StringUtil;
 import org.dbflute.tomcat.TomcatBoot;
 
@@ -54,6 +57,16 @@ public class FessBoot extends TomcatBoot {
     @Override
     protected String getMarkDir() {
         return new File(System.getProperty(JAVA_IO_TMPDIR), "fessboot").getAbsolutePath();
+    }
+
+    @Override
+    protected void reflectConfigToServer(Tomcat server, Connector connector, Properties props) { // you can override
+        super.reflectConfigToServer(server, connector, props);
+        final String bindAddress = props.getProperty("tomcat.bindAddress");
+        if (bindAddress != null) {
+            info(" tomcat.bindAddress = " + bindAddress);
+            connector.setProperty("address", bindAddress);
+        }
     }
 
     // ===================================================================================
