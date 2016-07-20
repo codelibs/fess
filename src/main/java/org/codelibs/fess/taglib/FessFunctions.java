@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.taglib;
 
+import java.io.File;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -39,6 +40,7 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.di.util.LdiURLUtil;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaServletContextUtil;
 
 public class FessFunctions {
 
@@ -223,4 +225,10 @@ public class FessFunctions {
         }
         return Base64.getEncoder().encodeToString(value.getBytes(Constants.CHARSET_UTF_8));
     }
+
+    public static boolean fileExists(final String path) {
+        final File file = new File(LaServletContextUtil.getServletContext().getRealPath(path));
+        return file.exists();
+    }
+
 }
