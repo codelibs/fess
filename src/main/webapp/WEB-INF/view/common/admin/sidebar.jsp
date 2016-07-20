@@ -258,6 +258,9 @@
 						</la:link></li>
 
 				</ul></li>
+			<c:if test="${fe:fileExists('/WEB-INF/view/common/admin/sidebar_extra.jsp')}">
+				<c:import url="/WEB-INF/view/common/admin/sidebar_extra.jsp" />
+			</c:if>
 		</ul>
 		<!-- /.sidebar-menu -->
 	</section>
