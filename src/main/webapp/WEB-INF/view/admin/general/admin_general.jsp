@@ -70,6 +70,18 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="thumbnail" class="col-sm-3 control-label"><la:message
+												key="labels.thumbnail" /></label>
+										<div class="col-sm-9">
+											<la:errors property="thumbnail" />
+											<div class="checkbox">
+												<label> <la:checkbox property="thumbnail" /> <la:message
+														key="labels.enabled" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="defaultLabelValue" class="col-sm-3 control-label"><la:message
 												key="labels.default_label_value" /></label>
 										<div class="col-sm-9">

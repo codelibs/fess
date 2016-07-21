@@ -127,11 +127,11 @@ public class SearchAction extends FessSearchAction {
             return asHtml(path_SearchJsp).renderWith(data -> {
                 renderData.register(data);
                 // favorite or screenshot
-                    if (favoriteSupport || screenShotManager != null) {
+                    if (favoriteSupport || thumbnailSupport) {
                         final String queryId = renderData.getQueryId();
                         final List<Map<String, Object>> documentItems = renderData.getDocumentItems();
                         userInfoHelper.storeQueryId(queryId, documentItems);
-                        if (screenShotManager != null) {
+                        if (thumbnailSupport) {
                             screenShotManager.storeRequest(queryId, documentItems);
                             RenderDataUtil.register(data, "screenShotSupport", true);
                         }

@@ -63,7 +63,7 @@ public class ScreenshotAction extends FessSearchAction {
                             return true;
                         }).orElse(null);
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
-        if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || screenShotManager == null) {
+        if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || !thumbnailSupport) {
             // 404
             throw404("Screenshot for " + form.docId + " is not found.");
             return null;
