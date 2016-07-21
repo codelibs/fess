@@ -231,6 +231,18 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 	padding-top: 4px;
 }
 
+.form-control {
+	border-radius: 0px;
+}
+
+:first-child.list-group-item {
+	border-radius: 0px;
+}
+
+:last-child.list-group-item {
+	border-radius: 0px;
+}
+
 /* Large desktop */
 @media ( min-width : 74.9em) {
 	.visible-xs {
@@ -357,7 +369,7 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 
 /***workaround for IE browser***/
 @media screen and (min-width:0\0) {
-	input#query.form-searchHeader {
-		padding: 8.7px 10px;
+	input#query.form-control {
+		padding-bottom: 0.75rem;
 	}
 }
