@@ -995,6 +995,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Login Link */
     public static final String LABELS_login_link = "{labels.login_link}";
 
+    /** The key of the message: Thumbnail View */
+    public static final String LABELS_THUMBNAIL = "{labels.thumbnail}";
+
     /** The key of the message: Excluded Failure Type */
     public static final String LABELS_ignore_failure_type = "{labels.ignore_failure_type}";
 

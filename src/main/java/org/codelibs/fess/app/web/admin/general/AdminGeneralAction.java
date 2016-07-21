@@ -119,6 +119,7 @@ public class AdminGeneralAction extends FessAdminAction {
 
         fessConfig.setLoginRequired(Constants.ON.equalsIgnoreCase(form.loginRequired));
         fessConfig.setLoginLinkEnabled(Constants.ON.equalsIgnoreCase(form.loginLink));
+        fessConfig.setThumbnailEnabled(Constants.ON.equalsIgnoreCase(form.thumbnail));
         fessConfig.setIncrementalCrawling(Constants.ON.equalsIgnoreCase(form.incrementalCrawling));
         fessConfig.setDayForCleanup(form.dayForCleanup);
         fessConfig.setCrawlingThreadCount(form.crawlingThreadCount);
@@ -156,6 +157,7 @@ public class AdminGeneralAction extends FessAdminAction {
     protected void updateForm(final EditForm form) {
         form.loginRequired = fessConfig.isLoginRequired() ? Constants.TRUE : Constants.FALSE;
         form.loginLink = fessConfig.isLoginLinkEnabled() ? Constants.TRUE : Constants.FALSE;
+        form.thumbnail = fessConfig.isThumbnailEnabled() ? Constants.TRUE : Constants.FALSE;
         form.incrementalCrawling = fessConfig.isIncrementalCrawling() ? Constants.TRUE : Constants.FALSE;
         form.dayForCleanup = fessConfig.getDayForCleanup();
         form.crawlingThreadCount = fessConfig.getCrawlingThreadCount();

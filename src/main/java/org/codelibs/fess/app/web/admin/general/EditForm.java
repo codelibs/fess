@@ -70,6 +70,9 @@ public class EditForm {
     @Size(max = 10)
     public String loginLink;
 
+    @Size(max = 10)
+    public String thumbnail;
+
     @Size(max = 1000)
     public String ignoreFailureType;
 

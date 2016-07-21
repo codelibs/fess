@@ -249,6 +249,14 @@ public interface FessProp {
         return getSystemPropertyAsBoolean(Constants.LOGIN_LINK_ENALBED_PROPERTY, true);
     }
 
+    public default void setThumbnailEnabled(final boolean value) {
+        setSystemPropertyAsBoolean(Constants.THUMBNAIL_ENALBED_PROPERTY, value);
+    }
+
+    public default boolean isThumbnailEnabled() {
+        return getSystemPropertyAsBoolean(Constants.THUMBNAIL_ENALBED_PROPERTY, false);
+    }
+
     public default void setIncrementalCrawling(final boolean value) {
         setSystemPropertyAsBoolean(Constants.INCREMENTAL_CRAWLING_PROPERTY, value);
     }
