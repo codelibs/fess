@@ -27,11 +27,13 @@
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
-					<div class="screenShotBox">
-						<img
-							src="/screenshot/?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
-							class="img-responsive" onError="noimage(this)">
-					</div>
+					<c:if test="thumbnailSupport">
+						<div class="screenShotBox">
+							<img
+								src="/screenshot/?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
+								class="img-responsive thumbnail">
+						</div>
+					</c:if>
 					<h3 class="title ellipsis">
 						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
