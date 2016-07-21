@@ -191,4 +191,16 @@
     </example>
   </function>
 
+  <function>
+    <description>
+      Check if a file exists.
+    </description>
+    <name>fileExists</name>
+    <function-class>org.codelibs.fess.taglib.FessFunctions</function-class>
+    <function-signature>boolean fileExists(java.lang.String)</function-signature>
+    <example>
+      ${fe:fileExists(path)}
+    </example>
+  </function>
+
 </taglib>
