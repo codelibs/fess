@@ -261,7 +261,7 @@ public class Constants extends CoreLibConstants {
 
     public static final String RESULT_DOC_ID_CACHE = "resultDocIds";
 
-    public static final String SCREEN_SHOT_PATH_CACHE = "screenShotPaths";
+    public static final String SCREEN_SHOT_PATH_CACHE = "thumbnailPaths";
 
     public static final String CRAWLING_INFO_SYSTEM_NAME = "system";
 

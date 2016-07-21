@@ -129,10 +129,6 @@ h1.mainLogo {
 	display: none;
 }
 
-#screenshot {
-	position: fixed;
-}
-
 .searchFormBox {
 	text-align: center;
 	margin-top: 160px;

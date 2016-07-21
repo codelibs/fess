@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.screenshot.impl;
+package org.codelibs.fess.thumbnail.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,7 +31,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandGenerator extends BaseScreenShotGenerator {
+public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
 
     public List<String> commandList;
@@ -59,12 +59,12 @@ public class CommandGenerator extends BaseScreenShotGenerator {
     @Override
     public void generate(final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate ScreenShot: " + url);
+            logger.debug("Generate Thumbnail: " + url);
         }
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The screenshot file exists: " + outputFile.getAbsolutePath());
+                logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
             }
             return;
         }
@@ -88,7 +88,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         Process p = null;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("ScreenShot Command: " + cmdList);
+            logger.debug("Thumbnail Command: " + cmdList);
         }
 
         TimerTask task = null;
@@ -121,7 +121,7 @@ public class CommandGenerator extends BaseScreenShotGenerator {
                 p.destroy();
             }
         } catch (final Exception e) {
-            logger.warn("Failed to generate a screenshot of " + url, e);
+            logger.warn("Failed to generate a thumbnail of " + url, e);
         }
         if (task != null) {
             task.cancel();
@@ -129,14 +129,14 @@ public class CommandGenerator extends BaseScreenShotGenerator {
         }
 
         if (outputFile.isFile() && outputFile.length() == 0) {
-            logger.warn("ScreenShot File is empty. URL is " + url);
+            logger.warn("Thumbnail File is empty. URL is " + url);
             if (outputFile.delete()) {
                 logger.info("Deleted: " + outputFile.getAbsolutePath());
             }
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("ScreenShot File: " + outputPath);
+            logger.debug("Thumbnail File: " + outputPath);
         }
     }
 

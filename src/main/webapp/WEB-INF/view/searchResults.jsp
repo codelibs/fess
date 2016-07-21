@@ -104,9 +104,6 @@
 	</div>
 	<aside class="col-md-4 hidden-sm-down">
 		<%-- Side Content --%>
-		<c:if test="${screenShotSupport}">
-			<div id="screenshot"></div>
-		</c:if>
 		<c:if test="${facetResponse != null}">
 			<c:forEach var="fieldData" items="${facetResponse.fieldList}">
 				<c:if
