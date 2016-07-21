@@ -87,12 +87,16 @@ public abstract class FessSearchAction extends FessBaseAction {
 
     protected boolean favoriteSupport;
 
+    protected boolean thumbnailSupport;
+
     @Override
     public ActionResponse hookBefore(final ActionRuntime runtime) { // application may override
         searchLogSupport = fessConfig.isSearchLog();
         favoriteSupport = fessConfig.isUserFavorite();
+        thumbnailSupport = fessConfig.isThumbnailEnabled();
         runtime.registerData("searchLogSupport", searchLogSupport);
         runtime.registerData("favoriteSupport", favoriteSupport);
+        runtime.registerData("thumbnailSupport", thumbnailSupport);
         if (fessConfig.isWebApiPopularWord()) {
             runtime.registerData("popularWords", popularWordHelper.getWordList(null, null, null, null, null));
         }
