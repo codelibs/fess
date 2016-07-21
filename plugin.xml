@@ -18,7 +18,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="2.3.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="2.3.0-20160720.143233-2" />
+			<param name="plugin.zip.version" value="2.3.0-20160721.213941-3" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
