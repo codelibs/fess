@@ -32,7 +32,7 @@
 							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 								data-id="${doc.doc_id}" data-order="${s.index}">
 								<img
-									src="/screenshot/?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
+									src="${f:url('/screenshot/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
 									class="img-responsive thumbnail">
 							</a>
 						</div>
