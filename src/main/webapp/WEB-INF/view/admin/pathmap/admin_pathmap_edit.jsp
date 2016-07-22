@@ -88,6 +88,13 @@
 												min="0" max="100000">
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="userAgent" class="col-sm-3 control-label"><la:message key="labels.userAgent" /></label>
+										<div class="col-sm-9">
+											<la:errors property="userAgent" />
+											<la:text property="userAgent" styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

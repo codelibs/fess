@@ -22,11 +22,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +98,10 @@ public class PathMappingHelper {
         }
         String result = text;
         for (final PathMapping pathMapping : cachedPathMappingList) {
-            result = result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+            if (matchUserAgent(pathMapping)) {
+                result =
+                        result.replaceAll("(\"[^\"]*)" + pathMapping.getRegex() + "([^\"]*\")", "$1" + pathMapping.getReplacement() + "$2");
+            }
         }
         return result;
     }
@@ -114,11 +120,42 @@ public class PathMappingHelper {
     private String replaceUrl(final List<PathMapping> pathMappingList, final String url) {
         String newUrl = url;
         for (final PathMapping pathMapping : pathMappingList) {
-            final Matcher matcher = pathMapping.getMatcher(newUrl);
-            if (matcher.find()) {
-                newUrl = matcher.replaceAll(pathMapping.getReplacement());
+            if (matchUserAgent(pathMapping)) {
+                final Matcher matcher = pathMapping.getMatcher(newUrl);
+                if (matcher.find()) {
+                    newUrl = matcher.replaceAll(pathMapping.getReplacement());
+                }
             }
         }
         return newUrl;
+    }
+
+    private boolean matchUserAgent(final PathMapping pathMapping) {
+        if (!pathMapping.hasUAMathcer()) {
+            return true;
+        }
+
+        //TODO use OptionalThing
+        final HttpServletRequest request;
+        try {
+            request = LaRequestUtil.getRequest();
+        } catch (IllegalStateException e) {
+            //could not get request.
+            return false;
+        }
+        /*
+        final OptionalThing<HttpServletRequest> op = LaRequestUtil.getOptionalRequest();
+        if (!op.isPresent()) {
+            return false;
+        }
+        final HttpServletRequest request = op.get();
+        */
+
+        final String userAgent = request.getHeader("user-agent");
+        if (StringUtil.isBlank(userAgent)) {
+            return false;
+        }
+
+        return pathMapping.getUAMatcher(userAgent).find();
     }
 }

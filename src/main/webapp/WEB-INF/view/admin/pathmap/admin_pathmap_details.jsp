@@ -72,6 +72,10 @@
 												<th><la:message key="labels.sortOrder" /></th>
 												<td>${f:h(sortOrder)}<la:hidden property="sortOrder" /></td>
 											</tr>
+											<tr>
+												<th class="col-xs-2"><la:message key="labels.userAgent" /></th>
+												<td>${f:h(userAgent)}<la:hidden property="userAgent" /></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>
