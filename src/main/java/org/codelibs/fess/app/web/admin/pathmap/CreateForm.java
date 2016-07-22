@@ -59,7 +59,7 @@ public class CreateForm {
     @ValidateTypeFailure
     public Long createdTime;
 
-    @Required
+    @Size(max = 1000)
     public String userAgent;
 
     public void initialize() {

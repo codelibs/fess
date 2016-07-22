@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.PathMappingBhv;
 import org.codelibs.fess.es.config.exentity.PathMapping;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,27 +135,16 @@ public class PathMappingHelper {
             return true;
         }
 
-        //TODO use OptionalThing
-        final HttpServletRequest request;
-        try {
-            request = LaRequestUtil.getRequest();
-        } catch (IllegalStateException e) {
-            //could not get request.
-            return false;
-        }
-        /*
-        final OptionalThing<HttpServletRequest> op = LaRequestUtil.getOptionalRequest();
-        if (!op.isPresent()) {
-            return false;
-        }
-        final HttpServletRequest request = op.get();
-        */
+        if (SingletonLaContainerFactory.getExternalContext().getRequest() != null) {
+            return LaRequestUtil.getOptionalRequest().map(request -> {
+                final String userAgent = request.getHeader("user-agent");
+                if (StringUtil.isBlank(userAgent)) {
+                    return false;
+                }
 
-        final String userAgent = request.getHeader("user-agent");
-        if (StringUtil.isBlank(userAgent)) {
-            return false;
+                return pathMapping.getUAMatcher(userAgent).find();
+            }).orElse(false);
         }
-
-        return pathMapping.getUAMatcher(userAgent).find();
+        return false;
     }
 }

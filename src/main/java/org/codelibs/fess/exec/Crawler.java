@@ -50,6 +50,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.lastaflute.core.mail.Postbox;
+import org.lastaflute.di.core.external.GenericExternalContext;
+import org.lastaflute.di.core.external.GenericExternalContextComponentDefRegister;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +183,8 @@ public class Crawler {
         int exitCode;
         try {
             SingletonLaContainerFactory.setConfigPath("app.xml");
+            SingletonLaContainerFactory.setExternalContext(new GenericExternalContext());
+            SingletonLaContainerFactory.setExternalContextComponentDefRegister(new GenericExternalContextComponentDefRegister());
             SingletonLaContainerFactory.init();
 
             final Thread shutdownCallback = new Thread("ShutdownHook") {
