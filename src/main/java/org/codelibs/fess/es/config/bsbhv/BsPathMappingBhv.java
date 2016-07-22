@@ -80,6 +80,7 @@ public abstract class BsPathMappingBhv extends EsAbstractBehavior<PathMapping, P
             result.setRegex(DfTypeUtil.toString(source.get("regex")));
             result.setReplacement(DfTypeUtil.toString(source.get("replacement")));
             result.setSortOrder(DfTypeUtil.toInteger(source.get("sortOrder")));
+            result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));
             result.setUpdatedTime(DfTypeUtil.toLong(source.get("updatedTime")));
             return result;

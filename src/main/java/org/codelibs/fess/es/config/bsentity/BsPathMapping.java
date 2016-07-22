@@ -55,6 +55,9 @@ public class BsPathMapping extends EsAbstractEntity {
     /** sortOrder */
     protected Integer sortOrder;
 
+    /** userAgent */
+    protected String userAgent;
+
     /** updatedBy */
     protected String updatedBy;
 
@@ -100,6 +103,9 @@ public class BsPathMapping extends EsAbstractEntity {
         if (sortOrder != null) {
             sourceMap.put("sortOrder", sortOrder);
         }
+        if (userAgent != null) {
+            sourceMap.put("userAgent", userAgent);
+        }
         if (updatedBy != null) {
             sourceMap.put("updatedBy", updatedBy);
         }
@@ -121,6 +127,7 @@ public class BsPathMapping extends EsAbstractEntity {
         sb.append(dm).append(regex);
         sb.append(dm).append(replacement);
         sb.append(dm).append(sortOrder);
+        sb.append(dm).append(userAgent);
         sb.append(dm).append(updatedBy);
         sb.append(dm).append(updatedTime);
         if (sb.length() > dm.length()) {
@@ -191,6 +198,16 @@ public class BsPathMapping extends EsAbstractEntity {
     public void setSortOrder(Integer value) {
         registerModifiedProperty("sortOrder");
         this.sortOrder = value;
+    }
+
+    public String getUserAgent() {
+        checkSpecifiedProperty("userAgent");
+        return convertEmptyToNull(userAgent);
+    }
+
+    public void setUserAgent(String value) {
+        registerModifiedProperty("userAgent");
+        this.userAgent = value;
     }
 
     public String getUpdatedBy() {

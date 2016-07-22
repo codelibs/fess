@@ -22,6 +22,10 @@
       "sortOrder": {
         "type": "integer"
       },
+      "userAgent": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "createdBy": {
         "type": "string",
         "index": "not_analyzed"
