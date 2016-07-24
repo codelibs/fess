@@ -1,0 +1,73 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><la:message key="labels.admin_brand_title" /> | <la:message
+		key="labels.search_list_configuration" /></title>
+<jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
+		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
+			<jsp:param name="menuCategoryType" value="log" />
+			<jsp:param name="menuType" value="searchList" />
+		</jsp:include>
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>
+					<la:message key="labels.search_list_configuration" />
+				</h1>
+				<ol class="breadcrumb">
+					<li class="active"><la:link href="/admin/searchlist">
+							<la:message key="labels.search_list_configuration" />
+						</la:link></li>
+				</ol>
+			</section>
+			<section class="content">
+				<la:form action="/admin/searchlist/" styleClass="form-horizontal">
+					<la:hidden property="crudMode" />
+					<c:if test="${crudMode==2}">
+						<la:hidden property="id" />
+					</c:if>
+					<div class="row">
+						<div class="col-md-12">
+							<div
+								class="box <c:if test="${crudMode == 1}">box-success</c:if><c:if test="${crudMode == 2}">box-warning</c:if>">
+								<div class="box-header with-border">
+									<jsp:include page="/WEB-INF/view/common/admin/crud/header.jsp"></jsp:include>
+								</div>
+								<!-- /.box-header -->
+								<div class="box-body">
+									<div>
+										<la:info id="msg" message="true">
+											<div class="alert alert-info">${msg}</div>
+										</la:info>
+										<la:errors property="_global" />
+									</div>
+									<div class="form-group">
+										<label for="title" class="col-sm-3 control-label"><la:message
+												key="labels.user_surname" /></label>
+										<div class="col-sm-9">
+											<la:errors property="doc.title" />
+											<la:text property="doc.title" styleClass="form-control" />
+										</div>
+									</div>
+								</div>
+								<!-- /.box-body -->
+								<div class="box-footer">
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
+								</div>
+								<!-- /.box-footer -->
+							</div>
+							<!-- /.box -->
+						</div>
+					</div>
+				</la:form>
+			</section>
+		</div>
+		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
+	</div>
+	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
+</body>
+</html>

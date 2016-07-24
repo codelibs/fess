@@ -18,10 +18,7 @@ package org.codelibs.fess;
 // DO NOT DEPEND OTHER JARs
 
 import java.io.File;
-import java.util.Properties;
 
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.startup.Tomcat;
 import org.codelibs.core.lang.StringUtil;
 import org.dbflute.tomcat.TomcatBoot;
 

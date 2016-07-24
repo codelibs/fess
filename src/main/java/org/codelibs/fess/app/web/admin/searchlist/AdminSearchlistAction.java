@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
+import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -32,6 +33,7 @@ import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.util.RenderDataUtil;
+import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.lastaflute.web.Execute;
@@ -222,12 +224,96 @@ public class AdminSearchlistAction extends FessAdminAction {
         return asListHtml();
     }
 
+    @Execute
+    public HtmlResponse createnew() {
+        saveToken();
+        return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp).useForm(CreateForm.class, op -> {
+            op.setup(form -> {
+                form.initialize();
+                form.crudMode = CrudMode.CREATE;
+            });
+        });
+    }
+
+    @Execute
+    public HtmlResponse edit(final EditForm form) {
+        validate(form, messages -> {}, () -> asListHtml());
+        // TODO load
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asListHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
+    }
+
+    @Execute
+    public HtmlResponse create(final CreateForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.CREATE);
+        validate(form, messages -> {}, () -> asEditHtml());
+        // TODO verify
+        verifyToken(() -> asEditHtml());
+        getDoc(form).ifPresent(entity -> {
+            try {
+                // TODO save
+                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to add " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        () -> asEditHtml());
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        });
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, () -> asEditHtml());
+        // TODO verify
+        verifyToken(() -> asEditHtml());
+        getDoc(form).ifPresent(entity -> {
+            try {
+                // TODO save
+                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+            } catch (final Exception e) {
+                logger.error("Failed to update " + entity, e);
+                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                        () -> asEditHtml());
+            }
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+        });
+        return redirect(getClass());
+    }
+
     // ===================================================================================
     //                                                                              JSP
     //                                                                           =========
+    protected void verifyCrudMode(final int crudMode, final int expectedMode) {
+        if (crudMode != expectedMode) {
+            throwValidationError(messages -> {
+                messages.addErrorsCrudInvalidMode(GLOBAL, String.valueOf(expectedMode), String.valueOf(crudMode));
+            }, () -> asListHtml());
+        }
+    }
+
+    protected OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
+        // TODO
+        return OptionalEntity.empty();
+    }
 
     private HtmlResponse asListHtml() {
         return asHtml(path_AdminSearchlist_AdminSearchlistJsp);
+    }
+
+    private HtmlResponse asEditHtml() {
+        return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp);
     }
 
     protected static class WebRenderData extends SearchRenderData {
