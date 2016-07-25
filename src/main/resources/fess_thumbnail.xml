@@ -8,7 +8,7 @@
 		</postConstruct>
 <!--
 		<postConstruct name="add">
-			<arg>officeThumbnailGenerator</arg>
+			<arg>msofficeThumbnailGenerator</arg>
 		</postConstruct>
 -->
 	</component>
