@@ -6,6 +6,11 @@
 		<postConstruct name="add">
 			<arg>htmlThumbnailGenerator</arg>
 		</postConstruct>
+<!--
+		<postConstruct name="add">
+			<arg>officeThumbnailGenerator</arg>
+		</postConstruct>
+-->
 	</component>
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.WebDriverGenerator">
 		<property name="webDriverCapabilities">
@@ -40,7 +45,7 @@
 	</component>
 -->
 <!--
-	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+	<component name="msofficeThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
 		<property name="commandList">
 			["bash",
 			"/usr/share/fess/bin/generate-thumbnail",
