@@ -27,21 +27,21 @@
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
-					<c:if test="thumbnailSupport">
-						<div class="col-mod-3 screenShotBox">
+					<c:if test="${thumbnailSupport}">
+						<div class="pull-left col-md-3 thumbnailBox">
 							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 								data-id="${doc.doc_id}" data-order="${s.index}">
 								<img
-									src="${f:url('/screenshot/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
+									src="${f:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
 									class="img-responsive thumbnail">
 							</a>
 						</div>
 					</c:if>
-					<h3 class="col-md-9 title ellipsis">
+					<h3 class="pull-right col-md-9 title ellipsis">
 						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 					</h3>
-					<div class="col-md-9 body">
+					<div class="pull-right col-md-9 body">
 						<div class="description">${doc.content_description}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.site_path)}</cite>

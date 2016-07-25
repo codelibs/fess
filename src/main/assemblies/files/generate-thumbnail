@@ -1,10 +1,14 @@
 #!/bin/sh
-
-url=$1
-outputFile=$2
-
-targetFile=`echo $url | sed -e "s#^file:/*#/#g"`
-pdfFile="`echo $outputFile | sed -e "s/\.[^.]*$//g"`.pdf"
-
-unoconv -o ${pdfFile} -f pdf ${targetFile}
-convert -thumbnail 200x150! ${pdfFile} ${outputFile}
+CMD_TYPE=$1
+URL=$2
+OUTPUT_FILE=$3
+if [ x"$CMD_TYPE" = "xmsoffice" ] ; then
+  TARGET_FILE=`echo $URL | sed -e "s#^file:/*#/#g"`
+  TMP_FILE=/tmp/thumbnail.$$.pdf
+  unoconv -o $TMP_FILE -f pdf $TARGET_FILE
+  convert -thumbnail 200x150! $TMP_FILE $OUTPUT_FILE
+  rm $TMP_FILE
+ else
+   echo "Unsupported type: $CMD_TYPE"
+   exit 1
+ fi
