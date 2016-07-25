@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.screenshot.impl;
+package org.codelibs.fess.thumbnail.impl;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.imageio.ImageIO;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -33,42 +34,54 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebDriverGenerator extends BaseScreenShotGenerator {
+public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(WebDriverGenerator.class);
 
     public WebDriver webDriver;
 
+    public Capabilities webDriverCapabilities;
+
     public int windowWidth = 1200;
 
     public int windowHeight = 800;
 
-    public int screenShotWidth = 400;
+    public int thumbnailWidth = 400;
 
     public String imageFormatName = "png";
 
     @PostConstruct
     public void init() {
-        if (webDriver == null) {
-            webDriver = new PhantomJSDriver();
+        try {
+            if (webDriver == null) {
+                webDriver = webDriverCapabilities == null ? new PhantomJSDriver() : new PhantomJSDriver(webDriverCapabilities);
+            }
+            webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
+        } catch (final Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebDriver is not available for generating thumbnails.", e);
+            } else {
+                logger.info("WebDriver is not available for generating thumbnails.");
+            }
         }
-        webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
     }
 
     @PreDestroy
     public void destroy() {
-        webDriver.close();
+        if (webDriver != null) {
+            webDriver.quit();
+        }
     }
 
     @Override
     public void generate(final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Generate ScreenShot: " + url);
+            logger.debug("Generate Thumbnail: " + url);
         }
 
         if (outputFile.exists()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("The screenshot file exists: " + outputFile.getAbsolutePath());
+                logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
             }
             return;
         }
@@ -84,22 +97,30 @@ public class WebDriverGenerator extends BaseScreenShotGenerator {
 
         if (webDriver instanceof TakesScreenshot) {
             webDriver.get(url);
-            final File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
-            convert(screenshot, outputFile);
+            final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
+            convert(thumbnail, outputFile);
         } else {
             logger.warn("WebDriver is not instance of TakesScreenshot: " + webDriver);
         }
     }
 
+    @Override
+    public boolean isAvailable() {
+        if (webDriver == null) {
+            return false;
+        }
+        return super.isAvailable();
+    }
+
     protected void convert(final File inputFile, final File outputFile) {
         try {
             final BufferedImage image = loadImage(inputFile);
-            final int screenShotHeight = screenShotWidth * image.getHeight() / windowWidth;
-            final BufferedImage screenShotImage = new BufferedImage(screenShotWidth, screenShotHeight, image.getType());
-            screenShotImage.getGraphics().drawImage(image.getScaledInstance(screenShotWidth, screenShotHeight, Image.SCALE_AREA_AVERAGING),
-                    0, 0, screenShotWidth, screenShotHeight, null);
+            final int thumbnailHeight = thumbnailWidth * image.getHeight() / windowWidth;
+            final BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
+            thumbnailImage.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0,
+                    0, thumbnailWidth, thumbnailHeight, null);
 
-            ImageIO.write(screenShotImage, imageFormatName, outputFile);
+            ImageIO.write(thumbnailImage, imageFormatName, outputFile);
         } catch (final Exception e) {
             logger.warn("Failed to convert " + inputFile.getAbsolutePath(), e);
             inputFile.renameTo(outputFile);

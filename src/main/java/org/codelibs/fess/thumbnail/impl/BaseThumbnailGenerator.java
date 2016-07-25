@@ -13,24 +13,28 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.screenshot.impl;
+package org.codelibs.fess.thumbnail.impl;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
 
-import org.codelibs.fess.screenshot.ScreenShotGenerator;
+import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 
-public abstract class BaseScreenShotGenerator implements ScreenShotGenerator {
+public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     @Resource
     protected ServletContext application;
 
     protected final Map<String, String> conditionMap = new HashMap<>();
 
-    public int directoryNameLength = 5;
+    protected int directoryNameLength = 5;
+
+    public List<String> generatorList;
 
     public void addCondition(final String key, final String regex) {
         conditionMap.put(key, regex);
@@ -45,6 +49,18 @@ public abstract class BaseScreenShotGenerator implements ScreenShotGenerator {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        if (generatorList != null && !generatorList.isEmpty()) {
+            return generatorList.stream().allMatch(s -> new File(s).isFile());
+        }
+        return true;
+    }
+
+    public void setDirectoryNameLength(int directoryNameLength) {
+        this.directoryNameLength = directoryNameLength;
     }
 
 }

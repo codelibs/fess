@@ -11,7 +11,7 @@
 	<include path="fess_api.xml"/>
 	<include path="fess_dict.xml"/>
 	<include path="fess_job.xml"/>
-	<include path="fess_screenshot.xml"/>
+	<include path="fess_thumbnail.xml"/>
 	<include path="fess_sso.xml"/>
 
 	<include path="crawler/client.xml" />

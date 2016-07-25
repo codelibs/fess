@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.screenshot;
+package org.codelibs.fess.app.web.thumbnail;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,7 +31,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 
-public class ScreenshotAction extends FessSearchAction {
+public class ThumbnailAction extends FessSearchAction {
 
     // ===================================================================================
     //                                                                           Attribute
@@ -47,7 +47,7 @@ public class ScreenshotAction extends FessSearchAction {
     //                                                                      Search Execute
     //                                                                      ==============
     @Execute
-    public ActionResponse index(final ScreenshotForm form) {
+    public ActionResponse index(final ThumbnailForm form) {
         validate(form, messages -> {}, () -> asHtml(path_Error_ErrorJsp));
         if (isLoginRequired()) {
             return redirectToLogin();
@@ -65,20 +65,20 @@ public class ScreenshotAction extends FessSearchAction {
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || !thumbnailSupport) {
             // 404
-            throw404("Screenshot for " + form.docId + " is not found.");
+            throw404("Thumbnail for " + form.docId + " is not found.");
             return null;
         }
 
-        final File screenShotFile = screenShotManager.getScreenShotFile(form.queryId, form.docId);
-        if (screenShotFile == null) {
+        final File thumbnailFile = thumbnailManager.getThumbnailFile(form.queryId, form.docId);
+        if (thumbnailFile == null) {
             // 404
-            throw404("Screenshot for " + form.docId + " is under generating.");
-            screenShotManager.generate(doc);
+            throw404("Thumbnail for " + form.docId + " is under generating.");
+            thumbnailManager.generate(doc);
             return null;
         }
 
-        return asStream(form.docId).contentType(getImageMimeType(screenShotFile)).stream(out -> {
-            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(screenShotFile))) {
+        return asStream(form.docId).contentType(getImageMimeType(thumbnailFile)).stream(out -> {
+            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(thumbnailFile))) {
                 out.write(in);
             }
         });

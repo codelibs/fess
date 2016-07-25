@@ -13,15 +13,17 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.screenshot;
+package org.codelibs.fess.thumbnail;
 
 import java.io.File;
 import java.util.Map;
 
-public interface ScreenShotGenerator {
+public interface ThumbnailGenerator {
 
     void generate(String url, File outputFile);
 
     boolean isTarget(Map<String, Object> docMap);
+
+    boolean isAvailable();
 
 }
