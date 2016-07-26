@@ -58,6 +58,10 @@
           "sortOrder" : {
             "type" : "integer"
           },
+          "userAgent" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
           "updatedBy" : {
             "type" : "string",
             "index" : "not_analyzed"

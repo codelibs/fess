@@ -18,6 +18,7 @@ package org.codelibs.fess.es.config.exentity;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.es.config.bsentity.BsPathMapping;
 
 /**
@@ -28,6 +29,8 @@ public class PathMapping extends BsPathMapping {
     private static final long serialVersionUID = 1L;
 
     private Pattern regexPattern;
+
+    private Pattern userAgentPattern;
 
     public String getId() {
         return asDocMeta().id();
@@ -52,10 +55,25 @@ public class PathMapping extends BsPathMapping {
         return regexPattern.matcher(input);
     }
 
+    public boolean hasUAMathcer() {
+        return StringUtil.isNotBlank(getUserAgent());
+    }
+
+    public Matcher getUAMatcher(final CharSequence input) {
+        if (!hasUAMathcer()) {
+            return null;
+        }
+
+        if (userAgentPattern == null) {
+            userAgentPattern = Pattern.compile(getUserAgent());
+        }
+        return userAgentPattern.matcher(input);
+    }
+
     @Override
     public String toString() {
         return "PathMapping [regexPattern=" + regexPattern + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", processType="
-                + processType + ", regex=" + regex + ", replacement=" + replacement + ", sortOrder=" + sortOrder + ", updatedBy="
-                + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+                + processType + ", regex=" + regex + ", replacement=" + replacement + ", sortOrder=" + sortOrder + ", userAgent="
+                + userAgent + ", updatedBy=" + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
     }
 }

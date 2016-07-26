@@ -59,6 +59,9 @@ public class CreateForm {
     @ValidateTypeFailure
     public Long createdTime;
 
+    @Size(max = 1000)
+    public String userAgent;
+
     public void initialize() {
         crudMode = CrudMode.CREATE;
         sortOrder = 0;

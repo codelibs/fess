@@ -79,7 +79,7 @@ public class CreateForm {
     public String userAgent;
 
     @Required
-    @Min(value = 0)
+    @Min(value = 1)
     @Max(value = 2147483647)
     @ValidateTypeFailure
     public Integer numOfThread;

@@ -100,9 +100,15 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             final TokenResponse tr = getTokenUrl(code);
 
             final String[] jwt = ((String) tr.get("id_token")).split("\\.");
-            final byte[] jwtHeader = Base64.decodeBase64(jwt[0]);
-            final byte[] jwtClaim = Base64.decodeBase64(jwt[1]);
-            final byte[] jwtSigniture = Base64.decodeBase64(jwt[2]);
+            final String jwtHeader = new String(Base64.decodeBase64(jwt[0]), Constants.UTF_8_CHARSET);
+            final String jwtClaim = new String(Base64.decodeBase64(jwt[1]), Constants.UTF_8_CHARSET);
+            final String jwtSigniture = new String(Base64.decodeBase64(jwt[2]), Constants.UTF_8_CHARSET);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("jwtHeader: " + jwtHeader);
+                logger.debug("jwtClaim: " + jwtClaim);
+                logger.debug("jwtSigniture: " + jwtSigniture);
+            }
 
             // TODO validate signiture
 
@@ -111,11 +117,11 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
             attributes.put("refreshtoken", tr.getRefreshToken() == null ? "null" : tr.getRefreshToken());
             attributes.put("tokentype", tr.getTokenType());
             attributes.put("expire", tr.getExpiresInSeconds());
-            attributes.put("jwtheader", new String(jwtHeader, Constants.UTF_8_CHARSET));
-            attributes.put("jwtclaim", new String(jwtClaim, Constants.UTF_8_CHARSET));
-            attributes.put("jwtsign", new String(jwtSigniture, Constants.UTF_8_CHARSET));
+            attributes.put("jwtheader", jwtHeader);
+            attributes.put("jwtclaim", jwtClaim);
+            attributes.put("jwtsign", jwtSigniture);
 
-            parseJwtClaim(new String(jwtClaim, Constants.UTF_8_CHARSET), attributes);
+            parseJwtClaim(jwtClaim, attributes);
 
             return new OpenIdConnectLoginCredential(attributes);
         } catch (final IOException e) {
