@@ -94,6 +94,16 @@
 															<i class="fa fa-trash"></i>
 															<la:message key="labels.search_list_button_delete" />
 														</button>
+														<la:form action="/admin/searchlist/edit" styleClass="form-inline">
+																<input type="hidden" name="id" value="${doc.doc_id}" />
+																<input type="hidden" name="crudMode" value="4" />  <!-- FIXME -->
+																<input type="hidden" name="versionNo" value="1" /> <!-- FIXME -->
+																<button type="submit" class="btn btn-warning" name="update"
+																				value="<la:message key="labels.crud_button_update" />">
+																		<i class="fa fa-pencil"></i>
+																		<la:message key="labels.crud_button_update" />
+																</button>
+														</la:form>
 													</li>
 												</c:forEach>
 											</ol>

@@ -279,7 +279,11 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(entity -> {
             try {
-                // TODO save
+                for (Map.Entry<String, Object> entry : form.doc.entrySet()) {
+                    entity.put(entry.getKey(), entry.getValue());
+                }
+                // TODO store does not work
+                fessEsClient.store(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), entity);
                 saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
             } catch (final Exception e) {
                 logger.error("Failed to update " + entity, e);
@@ -304,7 +308,28 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     protected OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
-        // TODO
+        switch (form.crudMode) {
+        case CrudMode.CREATE:
+            // TODO
+            return OptionalEntity.empty();
+        case CrudMode.EDIT:
+            if (form instanceof EditForm) {
+                final String docId = ((EditForm) form).id;
+                if (processHelper.isProcessRunning()) {
+                    break;
+                }
+                try {
+                    final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
+                    return fessEsClient.getDocumentByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
+                            query);
+                } catch (final Exception e) {
+                    break;
+                }
+            }
+            break;
+        default:
+            break;
+        }
         return OptionalEntity.empty();
     }
 
