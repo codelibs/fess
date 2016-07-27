@@ -28,7 +28,7 @@
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
 					<c:if test="${thumbnailSupport}">
-						<div class="col-md-3 thumbnailBox">
+						<div class="thumbnailBox">
 							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 								data-id="${doc.doc_id}" data-order="${s.index}">
 								<img
@@ -37,11 +37,11 @@
 							</a>
 						</div>
 					</c:if>
-					<h3 class="col-md-9 title ellipsis">
+					<h3 class="title ellipsis">
 						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
 					</h3>
-					<div class="col-md-9 body">
+					<div class="body">
 						<div class="description">${doc.content_description}</div>
 						<div class="site ellipsis">
 							<cite>${f:h(doc.site_path)}</cite>
