@@ -196,4 +196,8 @@ $(function() {
 						searchForm : $('#searchForm')
 					});
 
+	$('img.thumbnail', $result).error(function() {
+		$(this).attr("src", contextPath + "/images/noimage.png");
+	});
+
 });
