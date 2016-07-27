@@ -56,6 +56,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
+								    <input type="hidden" name="versionNo" value="1" /> <!-- FIXME -->
 									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
 								<!-- /.box-footer -->

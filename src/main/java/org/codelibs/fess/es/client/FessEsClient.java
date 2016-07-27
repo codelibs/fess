@@ -674,6 +674,17 @@ public class FessEsClient implements Client {
         });
     }
 
+    public OptionalEntity<Map<String, Object>> getDocumentByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
+
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        SearchResponse response =
+                client.prepareSearch(index).setTypes(type).setSize(sizeForDelete).setQuery(queryBuilder)
+                        .setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute()
+                        .actionGet(fessConfig.getIndexScrollSearchTimeoutTimeout());
+        return OptionalEntity.of(response.getHits().getAt(0).getSource());
+
+    }
+
     public List<Map<String, Object>> getDocumentList(final String index, final String type,
             final SearchCondition<SearchRequestBuilder> condition) {
         return getDocumentList(
