@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.searchlist;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -216,14 +216,14 @@ public class AdminSearchlistAction extends FessAdminAction {
     }
 
     @Execute
-    public HtmlResponse createnew() {
+    public HtmlResponse createnew(final CreateForm form) {
         saveToken();
-        return asHtml(path_AdminSearchlist_AdminSearchlistEditJsp).useForm(CreateForm.class, op -> {
-            op.setup(form -> {
-                form.initialize();
-                form.crudMode = CrudMode.CREATE;
-            });
+        form.initialize();
+        form.crudMode = CrudMode.CREATE;
+        getDoc(form).ifPresent(entity -> {
+            form.doc = fessConfig.convertToEditableDoc(entity);
         });
+        return asEditHtml();
     }
 
     @Execute
@@ -231,7 +231,7 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asListHtml());
         final String docId = form.docId;
         getDoc(form).ifPresent(entity -> {
-            form.doc = entity;
+            form.doc = fessConfig.convertToEditableDoc(entity);
             form.id = (String) entity.remove(fessConfig.getIndexFieldId());
             form.version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
         }).orElse(() -> {
@@ -245,18 +245,28 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
-        // TODO verify
+        if (!fessConfig.hasIndexRequiredFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
         verifyToken(() -> asEditHtml());
-        getDoc(form).ifPresent(entity -> {
-            try {
-                // TODO save
-                saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
-            } catch (final Exception e) {
-                logger.error("Failed to add " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                        () -> asEditHtml());
-            }
-        }).orElse(() -> {
+        getDoc(form).ifPresent(
+                entity -> {
+                    try {
+                        entity.putAll(fessConfig.convertToStorableDoc(form.doc));
+
+                        final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
+                        entity.put(fessConfig.getIndexFieldId(), newId);
+
+                        final String index = fessConfig.getIndexDocumentUpdateIndex();
+                        final String type = fessConfig.getIndexDocumentType();
+                        fessEsClient.store(index, type, entity);
+                        saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        logger.error("Failed to add " + entity, e);
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         });
         return redirect(getClass());
@@ -266,25 +276,25 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
-        // TODO verify
+        if (!fessConfig.hasIndexRequiredFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(
                 entity -> {
                     try {
-                        form.doc.entrySet().stream().map(e -> {
-                            // TODO converter
-                                return new Pair<>(e.getKey(), e.getValue());
-                            }).forEach(p -> entity.put(p.getFirst(), p.getSecond()));
+                        entity.putAll(fessConfig.convertToStorableDoc(form.doc));
 
                         final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
                         String oldId = null;
                         if (newId.equals(form.id)) {
                             entity.put(fessConfig.getIndexFieldId(), form.id);
+                            entity.put(fessConfig.getIndexFieldVersion(), form.version);
                         } else {
                             oldId = form.id;
                             entity.put(fessConfig.getIndexFieldId(), newId);
+                            entity.remove(fessConfig.getIndexFieldVersion());
                         }
-                        entity.put(fessConfig.getIndexFieldVersion(), form.version);
 
                         final String index = fessConfig.getIndexDocumentUpdateIndex();
                         final String type = fessConfig.getIndexDocumentType();
@@ -318,8 +328,9 @@ public class AdminSearchlistAction extends FessAdminAction {
     protected OptionalEntity<Map<String, Object>> getDoc(final CreateForm form) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            // TODO
-            return OptionalEntity.empty();
+            Map<String, Object> entity = new HashMap<>();
+            entity.put(fessConfig.getIndexFieldDocId(), systemHelper.generateDocId(entity));
+            return OptionalEntity.of(entity);
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
                 final String docId = ((EditForm) form).docId;

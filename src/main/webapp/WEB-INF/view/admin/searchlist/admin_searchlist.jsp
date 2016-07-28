@@ -33,6 +33,12 @@
 								<h3 class="box-title">
 									<la:message key="labels.search_list_configuration" />
 								</h3>
+								<div class="btn-group pull-right">
+									<la:link href="/admin/searchlist/createnew?q=${f:u(q)}" styleClass="btn btn-success btn-xs">
+										<i class="fa fa-plus"></i>
+										<la:message key="labels.crud_link_create" />
+									</la:link>
+								</div>
 							</div>
 							<%-- Box Body --%>
 							<div class="box-body">

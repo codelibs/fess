@@ -79,10 +79,31 @@
 										<la:errors property="_global" />
 									</div>
 									<div class="form-group">
+										<label for="doc_id" class="col-sm-3 control-label">doc_id</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.doc_id" />
+											<la:text property="doc.doc_id" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="url" class="col-sm-3 control-label">url</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.url" />
+											<la:text property="doc.url" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="title" class="col-sm-3 control-label">title</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.title" />
 											<la:text property="doc.title" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="role" class="col-sm-3 control-label">role</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.role" />
+											<la:textarea property="doc.role" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

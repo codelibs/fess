@@ -352,6 +352,27 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. doc */
     String INDEX_DOCUMENT_TYPE = "index.document.type";
 
+    /** The key of the configuration. e.g. lang,role,label,anchor */
+    String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
+
+    /** The key of the configuration. e.g. expires,created,timestamp,last_modified */
+    String INDEX_ADMIN_DATE_FIELDS = "index.admin.date.fields";
+
+    /** The key of the configuration. e.g.  */
+    String INDEX_ADMIN_INTEGER_FIELDS = "index.admin.integer.fields";
+
+    /** The key of the configuration. e.g. favorite_count,click_count */
+    String INDEX_ADMIN_LONG_FIELDS = "index.admin.long.fields";
+
+    /** The key of the configuration. e.g. boost */
+    String INDEX_ADMIN_FLOAT_FIELDS = "index.admin.float.fields";
+
+    /** The key of the configuration. e.g.  */
+    String INDEX_ADMIN_DOUBLE_FIELDS = "index.admin.double.fields";
+
+    /** The key of the configuration. e.g. doc_id,url,title,role */
+    String INDEX_ADMIN_REQUIRED_FIELDS = "index.admin.required.fields";
+
     /** The key of the configuration. e.g. 3m */
     String INDEX_SEARCH_TIMEOUT = "index.search.timeout";
 
@@ -1987,6 +2008,72 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentType();
+
+    /**
+     * Get the value for the key 'index.admin.array.fields'. <br>
+     * The value is, e.g. lang,role,label,anchor <br>
+     * comment: doc management
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminArrayFields();
+
+    /**
+     * Get the value for the key 'index.admin.date.fields'. <br>
+     * The value is, e.g. expires,created,timestamp,last_modified <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminDateFields();
+
+    /**
+     * Get the value for the key 'index.admin.integer.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminIntegerFields();
+
+    /**
+     * Get the value for the key 'index.admin.integer.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexAdminIntegerFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'index.admin.long.fields'. <br>
+     * The value is, e.g. favorite_count,click_count <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminLongFields();
+
+    /**
+     * Get the value for the key 'index.admin.float.fields'. <br>
+     * The value is, e.g. boost <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminFloatFields();
+
+    /**
+     * Get the value for the key 'index.admin.double.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminDoubleFields();
+
+    /**
+     * Get the value for the key 'index.admin.double.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getIndexAdminDoubleFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'index.admin.required.fields'. <br>
+     * The value is, e.g. doc_id,url,title,role <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexAdminRequiredFields();
 
     /**
      * Get the value for the key 'index.search.timeout'. <br>
@@ -4538,6 +4625,42 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexDocumentType() {
             return get(FessConfig.INDEX_DOCUMENT_TYPE);
+        }
+
+        public String getIndexAdminArrayFields() {
+            return get(FessConfig.INDEX_ADMIN_ARRAY_FIELDS);
+        }
+
+        public String getIndexAdminDateFields() {
+            return get(FessConfig.INDEX_ADMIN_DATE_FIELDS);
+        }
+
+        public String getIndexAdminIntegerFields() {
+            return get(FessConfig.INDEX_ADMIN_INTEGER_FIELDS);
+        }
+
+        public Integer getIndexAdminIntegerFieldsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_ADMIN_INTEGER_FIELDS);
+        }
+
+        public String getIndexAdminLongFields() {
+            return get(FessConfig.INDEX_ADMIN_LONG_FIELDS);
+        }
+
+        public String getIndexAdminFloatFields() {
+            return get(FessConfig.INDEX_ADMIN_FLOAT_FIELDS);
+        }
+
+        public String getIndexAdminDoubleFields() {
+            return get(FessConfig.INDEX_ADMIN_DOUBLE_FIELDS);
+        }
+
+        public Integer getIndexAdminDoubleFieldsAsInteger() {
+            return getAsInteger(FessConfig.INDEX_ADMIN_DOUBLE_FIELDS);
+        }
+
+        public String getIndexAdminRequiredFields() {
+            return get(FessConfig.INDEX_ADMIN_REQUIRED_FIELDS);
         }
 
         public String getIndexSearchTimeout() {

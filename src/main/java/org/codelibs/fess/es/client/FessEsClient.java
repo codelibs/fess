@@ -966,9 +966,12 @@ public class FessEsClient implements Client {
                                 .actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
-                response =
-                        client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX).setVersion(version)
-                                .execute().actionGet(fessConfig.getIndexIndexTimeout());
+                IndexRequestBuilder builder =
+                        client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX);
+                if (version != null && version.longValue() > 0) {
+                    builder.setVersion(version);
+                }
+                response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
             }
             return response.isCreated();
         } catch (final ElasticsearchException e) {

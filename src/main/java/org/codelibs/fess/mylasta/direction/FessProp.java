@@ -18,6 +18,7 @@ package org.codelibs.fess.mylasta.direction;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.codelibs.core.misc.Tuple3;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -47,6 +49,18 @@ import org.lastaflute.job.subsidiary.ConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public interface FessProp {
+
+    public static final String INDEX_ADMIN_ARRAY_FIELD_SET = "indexAdminArrayFieldSet";
+
+    public static final String INDEX_ADMIN_DATE_FIELD_SET = "indexAdminDateFieldSet";
+
+    public static final String INDEX_ADMIN_INTEGER_FIELD_SET = "indexAdminIntegerFieldSet";
+
+    public static final String INDEX_ADMIN_LONG_FIELD_SET = "indexAdminLongFieldSet";
+
+    public static final String INDEX_ADMIN_FLOAT_FIELD_SET = "indexAdminFloatFieldSet";
+
+    public static final String INDEX_ADMIN_DOUBLE_FIELD_SET = "indexAdminDoubleFieldSet";
 
     public static final String OIC_DEFAULT_ROLES = "oicDefaultRoles";
 
@@ -1034,4 +1048,172 @@ public interface FessProp {
         }
         return array;
     }
+
+    String getIndexAdminArrayFields();
+
+    public default Set<String> getIndexAdminArrayFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_ARRAY_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminArrayFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_ARRAY_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    String getIndexAdminDateFields();
+
+    public default Set<String> getIndexAdminDateFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_DATE_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminDateFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_DATE_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    String getIndexAdminIntegerFields();
+
+    public default Set<String> getIndexAdminIntegerFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_INTEGER_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminIntegerFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_INTEGER_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    String getIndexAdminLongFields();
+
+    public default Set<String> getIndexAdminLongFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_LONG_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminLongFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_LONG_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    String getIndexAdminFloatFields();
+
+    public default Set<String> getIndexAdminFloatFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_FLOAT_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminFloatFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_FLOAT_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    String getIndexAdminDoubleFields();
+
+    public default Set<String> getIndexAdminDoubleFieldSet() {
+        @SuppressWarnings("unchecked")
+        Set<String> fieldSet = (Set<String>) propMap.get(INDEX_ADMIN_DOUBLE_FIELD_SET);
+        if (fieldSet == null) {
+            fieldSet =
+                    stream(getIndexAdminDoubleFields().split(",")).get(
+                            stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toSet()));
+            propMap.put(INDEX_ADMIN_DOUBLE_FIELD_SET, fieldSet);
+        }
+        return fieldSet;
+    }
+
+    public default Map<String, Object> convertToEditableDoc(final Map<String, Object> source) {
+
+        final Set<String> arrayFieldSet = getIndexAdminArrayFieldSet();
+        final Set<String> dateFieldSet = getIndexAdminDateFieldSet();
+        final Set<String> integerFieldSet = getIndexAdminIntegerFieldSet();
+        final Set<String> longFieldSet = getIndexAdminLongFieldSet();
+        final Set<String> floatFieldSet = getIndexAdminFloatFieldSet();
+        final Set<String> doubleFieldSet = getIndexAdminDoubleFieldSet();
+
+        return source.entrySet().stream().map(e -> {
+            final String key = e.getKey();
+            Object value = e.getValue();
+            if (value instanceof String || value == null) {
+                return new Pair<String, Object>(key, value);
+            }
+            if (arrayFieldSet.contains(key)) {
+                if (value instanceof String[]) {
+                    value = stream((String[]) value).get(stream -> stream.collect(Collectors.joining("\n")));
+                } else if (value instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    final List<String> list = (List<String>) value;
+                    value = list.stream().collect(Collectors.joining("\n"));
+                }
+            } else if (dateFieldSet.contains(key)) {
+                value = FessFunctions.formatDate((Date) value);
+            } else if (integerFieldSet.contains(key)) {
+                value = value.toString();
+            } else if (longFieldSet.contains(key)) {
+                value = value.toString();
+            } else if (floatFieldSet.contains(key)) {
+                value = value.toString();
+            } else if (doubleFieldSet.contains(key)) {
+                value = value.toString();
+            }
+            return new Pair<String, Object>(key, value);
+        }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+    }
+
+    public default Map<String, Object> convertToStorableDoc(final Map<String, Object> source) {
+
+        final Set<String> arrayFieldSet = getIndexAdminArrayFieldSet();
+        final Set<String> dateFieldSet = getIndexAdminDateFieldSet();
+        final Set<String> integerFieldSet = getIndexAdminIntegerFieldSet();
+        final Set<String> longFieldSet = getIndexAdminLongFieldSet();
+        final Set<String> floatFieldSet = getIndexAdminFloatFieldSet();
+        final Set<String> doubleFieldSet = getIndexAdminDoubleFieldSet();
+
+        return source
+                .entrySet()
+                .stream()
+                .map(e -> {
+                    final String key = e.getKey();
+                    Object value = e.getValue();
+                    if (value == null) {
+                        return new Pair<String, Object>(key, value);
+                    }
+                    if (arrayFieldSet.contains(key)) {
+                        value =
+                                stream(value.toString().split("\n")).get(
+                                        stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).collect(Collectors.toList()));
+                    } else if (dateFieldSet.contains(key)) {
+                        // TODO time zone
+                        value = FessFunctions.parseDate(value.toString());
+                    } else if (integerFieldSet.contains(key)) {
+                        value = Integer.parseInt(value.toString());
+                    } else if (longFieldSet.contains(key)) {
+                        value = Long.parseLong(value.toString());
+                    } else if (floatFieldSet.contains(key)) {
+                        value = Float.parseFloat(value.toString());
+                    } else if (doubleFieldSet.contains(key)) {
+                        value = Double.parseDouble(value.toString());
+                    }
+                    return new Pair<String, Object>(key, value);
+                }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+    }
+
+    String getIndexAdminRequiredFields();
+
+    public default boolean hasIndexRequiredFields(final Map<String, Object> source) {
+        return stream(getIndexAdminRequiredFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).allMatch(s -> source.containsKey(s)));
+    }
+
 }
