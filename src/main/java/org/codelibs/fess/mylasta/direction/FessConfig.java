@@ -268,6 +268,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. _id */
     String INDEX_FIELD_ID = "index.field.id";
 
+    /** The key of the configuration. e.g. _version */
+    String INDEX_FIELD_VERSION = "index.field.version";
+
     /** The key of the configuration. e.g. lang */
     String INDEX_FIELD_LANG = "index.field.lang";
 
@@ -1787,6 +1790,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldId();
+
+    /**
+     * Get the value for the key 'index.field.version'. <br>
+     * The value is, e.g. _version <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldVersion();
 
     /**
      * Get the value for the key 'index.field.lang'. <br>
@@ -4416,6 +4426,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexFieldId() {
             return get(FessConfig.INDEX_FIELD_ID);
+        }
+
+        public String getIndexFieldVersion() {
+            return get(FessConfig.INDEX_FIELD_VERSION);
         }
 
         public String getIndexFieldLang() {

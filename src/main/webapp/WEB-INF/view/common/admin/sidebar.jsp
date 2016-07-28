@@ -6,7 +6,7 @@
 	<section class="sidebar">
 
 		<!-- search form -->
-		<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="post"
+		<form action="<%=request.getContextPath()%>/admin/searchlist/search" method="GET"
 			class="sidebar-form">
 			<div class="input-group">
 				<input type="text" name="q" id="query" class="form-control"
@@ -23,7 +23,7 @@
 
 		<!-- Sidebar Menu -->
 		<ul class="sidebar-menu">
-			<li class="header">MENU</li>
+			<li class="header"><la:message key="labels.sidebar.menu" /></li>
 
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='dashboard'}">active</c:if>"><la:link

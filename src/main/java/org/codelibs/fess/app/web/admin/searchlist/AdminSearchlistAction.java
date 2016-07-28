@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.CrudMode;
@@ -30,8 +31,8 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
-import org.codelibs.fess.helper.ProcessHelper;
 import org.codelibs.fess.helper.QueryHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -63,9 +64,6 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Resource
     protected QueryHelper queryHelper;
-
-    @Resource
-    protected ProcessHelper processHelper;
 
     @Resource
     protected SearchService searchService;
@@ -103,7 +101,6 @@ public class AdminSearchlistAction extends FessAdminAction {
         super.setupHtmlData(runtime);
 
         runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameSearchlist()));
-        runtime.registerData("isProcessRunning", processHelper.isProcessRunning());
     }
 
     // ===================================================================================
@@ -192,9 +189,6 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
         final String docId = form.docId;
-        if (processHelper.isProcessRunning()) {
-            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
-        }
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
             fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), query);
@@ -209,9 +203,6 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse deleteall(final ListForm form) {
         verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
-        if (processHelper.isProcessRunning()) {
-            throwValidationError(messages -> messages.addErrorsCannotDeleteDocBecauseOfRunning(GLOBAL), () -> asListHtml());
-        }
         try {
             searchService.deleteByQuery(request, form);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
@@ -238,16 +229,16 @@ public class AdminSearchlistAction extends FessAdminAction {
     @Execute
     public HtmlResponse edit(final EditForm form) {
         validate(form, messages -> {}, () -> asListHtml());
-        // TODO load
+        final String docId = form.docId;
+        getDoc(form).ifPresent(entity -> {
+            form.doc = entity;
+            form.id = (String) entity.remove(fessConfig.getIndexFieldId());
+            form.version = (Long) entity.remove(fessConfig.getIndexFieldVersion());
+        }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, docId), () -> asListHtml());
+        });
         saveToken();
-        if (form.crudMode.intValue() == CrudMode.EDIT) {
-            // back
-            form.crudMode = CrudMode.DETAILS;
-            return asListHtml();
-        } else {
-            form.crudMode = CrudMode.EDIT;
-            return asEditHtml();
-        }
+        return asEditHtml();
     }
 
     @Execute
@@ -277,23 +268,40 @@ public class AdminSearchlistAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asEditHtml());
         // TODO verify
         verifyToken(() -> asEditHtml());
-        getDoc(form).ifPresent(entity -> {
-            try {
-                for (Map.Entry<String, Object> entry : form.doc.entrySet()) {
-                    entity.put(entry.getKey(), entry.getValue());
-                }
-                // TODO store does not work
-                fessEsClient.store(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), entity);
-                saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
-            } catch (final Exception e) {
-                logger.error("Failed to update " + entity, e);
-                throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
-                        () -> asEditHtml());
-            }
-        }).orElse(() -> {
-            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
+        getDoc(form).ifPresent(
+                entity -> {
+                    try {
+                        form.doc.entrySet().stream().map(e -> {
+                            // TODO converter
+                                return new Pair<>(e.getKey(), e.getValue());
+                            }).forEach(p -> entity.put(p.getFirst(), p.getSecond()));
+
+                        final String newId = ComponentUtil.getCrawlingInfoHelper().generateId(entity);
+                        String oldId = null;
+                        if (newId.equals(form.id)) {
+                            entity.put(fessConfig.getIndexFieldId(), form.id);
+                        } else {
+                            oldId = form.id;
+                            entity.put(fessConfig.getIndexFieldId(), newId);
+                        }
+                        entity.put(fessConfig.getIndexFieldVersion(), form.version);
+
+                        final String index = fessConfig.getIndexDocumentUpdateIndex();
+                        final String type = fessConfig.getIndexDocumentType();
+                        fessEsClient.store(index, type, entity);
+                        if (oldId != null) {
+                            fessEsClient.delete(index, type, oldId, form.version);
+                        }
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        logger.error("Failed to update " + entity, e);
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
         });
-        return redirect(getClass());
+        return redirectWith(getClass(), moreUrl("search").params("q", form.q));
     }
 
     // ===================================================================================
@@ -314,17 +322,9 @@ public class AdminSearchlistAction extends FessAdminAction {
             return OptionalEntity.empty();
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                final String docId = ((EditForm) form).id;
-                if (processHelper.isProcessRunning()) {
-                    break;
-                }
-                try {
-                    final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
-                    return fessEsClient.getDocumentByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
-                            query);
-                } catch (final Exception e) {
-                    break;
-                }
+                final String docId = ((EditForm) form).docId;
+                final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
+                return fessEsClient.getDocumentByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), query);
             }
             break;
         default:

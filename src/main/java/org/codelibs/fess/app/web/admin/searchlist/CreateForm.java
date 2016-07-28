@@ -29,6 +29,8 @@ public class CreateForm {
 
     public Map<String, Object> doc;
 
+    public String q;
+
     public void initialize() {
     }
 }

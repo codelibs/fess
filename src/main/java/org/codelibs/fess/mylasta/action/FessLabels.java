@@ -563,6 +563,9 @@ public class FessLabels extends ActionMessages {
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
+    /** The key of the message: MENU */
+    public static final String LABELS_SIDEBAR_MENU = "{labels.sidebar.menu}";
+
     /** The key of the message: Copyright(C) 2009-2016 &lt;a href="https://github.com/codelibs"&gt;CodeLibs Project&lt;/a&gt;. &lt;span class="br-phone"&gt;&lt;/span&gt;All Rights Reserved. */
     public static final String LABELS_FOOTER_COPYRIGHT = "{labels.footer.copyright}";
 

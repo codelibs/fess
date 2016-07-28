@@ -678,11 +678,21 @@ public class FessEsClient implements Client {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         SearchResponse response =
-                client.prepareSearch(index).setTypes(type).setSize(sizeForDelete).setQuery(queryBuilder)
-                        .setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute()
-                        .actionGet(fessConfig.getIndexScrollSearchTimeoutTimeout());
-        return OptionalEntity.of(response.getHits().getAt(0).getSource());
-
+                client.prepareSearch(index).setTypes(type).setSize(1).setQuery(queryBuilder).addField(fessConfig.getIndexFieldId())
+                        .setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute().actionGet(fessConfig.getIndexSearchTimeout());
+        SearchHits hits = response.getHits();
+        if (hits.getTotalHits() != 0) {
+            SearchHit hit = hits.getAt(0);
+            String id = hit.getId();
+            GetResponse getResponse =
+                    client.prepareGet(index, type, id).setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute()
+                            .actionGet(fessConfig.getIndexSearchTimeout());
+            Map<String, Object> source = BeanUtil.copyMapToNewMap(getResponse.getSource());
+            source.put(fessConfig.getIndexFieldId(), id);
+            source.put(fessConfig.getIndexFieldVersion(), getResponse.getVersion());
+            return OptionalEntity.of(source);
+        }
+        return OptionalEntity.empty();
     }
 
     public List<Map<String, Object>> getDocumentList(final String index, final String type,
@@ -944,9 +954,9 @@ public class FessEsClient implements Client {
 
     public boolean store(final String index, final String type, final Object obj) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final Map<String, Object> source = BeanUtil.copyBeanToNewMap(obj);
+        final Map<String, Object> source = obj instanceof Map ? (Map<String, Object>) obj : BeanUtil.copyBeanToNewMap(obj);
         final String id = (String) source.remove(fessConfig.getIndexFieldId());
-        final Long version = (Long) source.remove("version");
+        final Long version = (Long) source.remove(fessConfig.getIndexFieldVersion());
         IndexResponse response;
         try {
             if (id == null) {

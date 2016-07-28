@@ -23,11 +23,12 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  */
 public class EditForm extends CreateForm {
 
-    @Required
     public String id;
 
     @Required
+    public String docId;
+
     @ValidateTypeFailure
-    public Integer versionNo;
+    public Long version;
 
 }

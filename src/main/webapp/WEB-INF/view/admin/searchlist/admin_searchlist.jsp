@@ -43,7 +43,7 @@
 									</la:info>
 									<la:errors />
 								</div>
-								<la:form action="/admin/searchlist" styleClass="form-inline">
+								<la:form action="/admin/searchlist" styleClass="form-inline" method="GET">
 									<div class="form-group">
 										<label class="sr-only" for="sessionIdSearchBtn"></label>
 										<la:text styleClass="query form-control" property="q"
@@ -82,28 +82,24 @@
 														<h3 class="title">
 															<a href="${doc.url_link}">${f:h(doc.content_title)}</a>
 														</h3>
-														<div class="body col-sm-11">
+														<div class="body col-sm-10">
 															${doc.content_description}</div>
-														<button type="button"
-															class="btn btn-xs btn-danger col-sm-1"
-															data-toggle="modal" data-target="#confirmToDelete"
-															data-docid="${f:u(doc.doc_id)}"
-															data-title="${f:h(doc.content_title)}"
-															data-url="${f:h(doc.url_link)}"
-															<c:if test="${crawlerProcessRunning}">disable</c:if>>
-															<i class="fa fa-trash"></i>
-															<la:message key="labels.search_list_button_delete" />
-														</button>
-														<la:form action="/admin/searchlist/edit" styleClass="form-inline">
-																<input type="hidden" name="id" value="${doc.doc_id}" />
-																<input type="hidden" name="crudMode" value="4" />  <!-- FIXME -->
-																<input type="hidden" name="versionNo" value="1" /> <!-- FIXME -->
-																<button type="submit" class="btn btn-warning" name="update"
-																				value="<la:message key="labels.crud_button_update" />">
-																		<i class="fa fa-pencil"></i>
-																		<la:message key="labels.crud_button_update" />
-																</button>
-														</la:form>
+														<div class="body col-sm-2 text-right">
+															<la:link href="/admin/searchlist/edit?crudMode=2&amp;docId=${f:u(doc.doc_id)}&amp;q=${f:u(q)}"
+																styleClass="btn btn-xs btn-warning">
+																<i class="fa fa-pencil"></i>
+																<la:message key="labels.crud_button_update" />
+															</la:link>
+															<button type="button"
+																class="btn btn-xs btn-danger"
+																data-toggle="modal" data-target="#confirmToDelete"
+																data-docid="${f:u(doc.doc_id)}"
+																data-title="${f:h(doc.content_title)}"
+																data-url="${f:h(doc.url_link)}">
+																<i class="fa fa-trash"></i>
+																<la:message key="labels.search_list_button_delete" />
+															</button>
+														</div>
 													</li>
 												</c:forEach>
 											</ol>
