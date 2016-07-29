@@ -210,5 +210,9 @@ public class BsSearchLogCB extends EsAbstractConditionBean {
         public void columnUserSessionId() {
             doColumn("userSessionId");
         }
+
+        public void columnLanguages() {
+            doColumn("languages");
+        }
     }
 }

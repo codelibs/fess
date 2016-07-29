@@ -90,6 +90,7 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
             result.setUserAgent(DfTypeUtil.toString(source.get("userAgent")));
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
+            result.setLanguages(DfTypeUtil.toString(source.get("languages")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

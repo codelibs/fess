@@ -85,6 +85,9 @@ public class BsSearchLog extends EsAbstractEntity {
     /** userSessionId */
     protected String userSessionId;
 
+    /** languages */
+    protected String languages;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -154,6 +157,9 @@ public class BsSearchLog extends EsAbstractEntity {
         if (userSessionId != null) {
             sourceMap.put("userSessionId", userSessionId);
         }
+        if (languages != null) {
+            sourceMap.put("languages", languages);
+        }
         return sourceMap;
     }
 
@@ -179,6 +185,7 @@ public class BsSearchLog extends EsAbstractEntity {
         sb.append(dm).append(userAgent);
         sb.append(dm).append(userInfoId);
         sb.append(dm).append(userSessionId);
+        sb.append(dm).append(languages);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -347,5 +354,15 @@ public class BsSearchLog extends EsAbstractEntity {
     public void setUserSessionId(String value) {
         registerModifiedProperty("userSessionId");
         this.userSessionId = value;
+    }
+
+    public String getLanguages() {
+        checkSpecifiedProperty("languages");
+        return convertEmptyToNull(languages);
+    }
+
+    public void setLanguages(String value) {
+        registerModifiedProperty("languages");
+        this.languages = value;
     }
 }

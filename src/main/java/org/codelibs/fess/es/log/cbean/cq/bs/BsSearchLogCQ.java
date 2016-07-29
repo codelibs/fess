@@ -2700,4 +2700,167 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setLanguages_Equal(String languages) {
+        setLanguages_Term(languages, null);
+    }
+
+    public void setLanguages_Equal(String languages, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setLanguages_Term(languages, opLambda);
+    }
+
+    public void setLanguages_Term(String languages) {
+        setLanguages_Term(languages, null);
+    }
+
+    public void setLanguages_Term(String languages, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_NotEqual(String languages) {
+        setLanguages_NotTerm(languages, null);
+    }
+
+    public void setLanguages_NotTerm(String languages) {
+        setLanguages_NotTerm(languages, null);
+    }
+
+    public void setLanguages_NotEqual(String languages, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setLanguages_NotTerm(languages, opLambda);
+    }
+
+    public void setLanguages_NotTerm(String languages, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setLanguages_Term(languages), opLambda);
+    }
+
+    public void setLanguages_Terms(Collection<String> languagesList) {
+        setLanguages_Terms(languagesList, null);
+    }
+
+    public void setLanguages_Terms(Collection<String> languagesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("languages", languagesList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_InScope(Collection<String> languagesList) {
+        setLanguages_Terms(languagesList, null);
+    }
+
+    public void setLanguages_InScope(Collection<String> languagesList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setLanguages_Terms(languagesList, opLambda);
+    }
+
+    public void setLanguages_Match(String languages) {
+        setLanguages_Match(languages, null);
+    }
+
+    public void setLanguages_Match(String languages, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_MatchPhrase(String languages) {
+        setLanguages_MatchPhrase(languages, null);
+    }
+
+    public void setLanguages_MatchPhrase(String languages, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_MatchPhrasePrefix(String languages) {
+        setLanguages_MatchPhrasePrefix(languages, null);
+    }
+
+    public void setLanguages_MatchPhrasePrefix(String languages, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_Fuzzy(String languages) {
+        setLanguages_Fuzzy(languages, null);
+    }
+
+    public void setLanguages_Fuzzy(String languages, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_Prefix(String languages) {
+        setLanguages_Prefix(languages, null);
+    }
+
+    public void setLanguages_Prefix(String languages, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_GreaterThan(String languages) {
+        setLanguages_GreaterThan(languages, null);
+    }
+
+    public void setLanguages_GreaterThan(String languages, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("languages", ConditionKey.CK_GREATER_THAN, languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_LessThan(String languages) {
+        setLanguages_LessThan(languages, null);
+    }
+
+    public void setLanguages_LessThan(String languages, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("languages", ConditionKey.CK_LESS_THAN, languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_GreaterEqual(String languages) {
+        setLanguages_GreaterEqual(languages, null);
+    }
+
+    public void setLanguages_GreaterEqual(String languages, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("languages", ConditionKey.CK_GREATER_EQUAL, languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_LessEqual(String languages) {
+        setLanguages_LessEqual(languages, null);
+    }
+
+    public void setLanguages_LessEqual(String languages, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("languages", ConditionKey.CK_LESS_EQUAL, languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsSearchLogCQ addOrderBy_Languages_Asc() {
+        regOBA("languages");
+        return this;
+    }
+
+    public BsSearchLogCQ addOrderBy_Languages_Desc() {
+        regOBD("languages");
+        return this;
+    }
+
 }
