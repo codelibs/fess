@@ -114,6 +114,12 @@ public class SearchLogHelper {
         } else {
             searchLog.setAccessType(Constants.SEARCH_LOG_ACCESS_TYPE_WEB);
         }
+        final Object languages = request.getAttribute(Constants.REQUEST_LANGUAGES);
+        if (languages != null) {
+            searchLog.setLanguages(StringUtils.join((String[]) languages, ","));
+        } else {
+            searchLog.setLanguages("");
+        }
 
         @SuppressWarnings("unchecked")
         final Map<String, List<String>> fieldLogMap = (Map<String, List<String>>) request.getAttribute(Constants.FIELD_LOGS);

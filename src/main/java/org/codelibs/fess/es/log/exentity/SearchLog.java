@@ -112,6 +112,6 @@ public class SearchLog extends BsSearchLog {
                 + ", queryOffset=" + queryOffset + ", queryPageSize=" + queryPageSize + ", referer=" + referer + ", requestedAt="
                 + requestedAt + ", responseTime=" + responseTime + ", queryTime=" + queryTime + ", searchWord=" + searchWord
                 + ", userAgent=" + userAgent + ", userInfoId=" + userInfoId + ", userSessionId=" + userSessionId + ", docMeta=" + docMeta
-                + "]";
+                + ", languages=" + languages + "]";
     }
 }
