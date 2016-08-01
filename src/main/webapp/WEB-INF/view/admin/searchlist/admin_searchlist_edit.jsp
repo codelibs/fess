@@ -106,29 +106,224 @@
 											<la:textarea property="doc.role" styleClass="form-control" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="boost" class="col-sm-3 control-label">boost</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.boost" />
+											<la:text property="doc.boost" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="label" class="col-sm-3 control-label">label</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.label" />
+											<la:textarea property="doc.label" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="version" class="col-sm-3 control-label">version</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.version" />
+											<la:text property="doc.version" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="lang" class="col-sm-3 control-label">lang</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.lang" />
+											<la:textarea property="doc.lang" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="mimetype" class="col-sm-3 control-label">mimetype</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.mimetype" />
+											<la:text property="doc.mimetype" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="filetype" class="col-sm-3 control-label">filetype</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.filetype" />
+											<la:text property="doc.filetype" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="content" class="col-sm-3 control-label">content</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.content" />
+											<la:text property="doc.content" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="has_cache" class="col-sm-3 control-label">has_cache</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.has_cache" />
+											<la:text property="doc.has_cache" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="cache" class="col-sm-3 control-label">cache</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.cache" />
+											<la:text property="doc.cache" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="digest" class="col-sm-3 control-label">digest</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.digest" />
+											<la:text property="doc.digest" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="host" class="col-sm-3 control-label">host</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.host" />
+											<la:text property="doc.host" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="site" class="col-sm-3 control-label">site</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.site" />
+											<la:text property="doc.site" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="segment" class="col-sm-3 control-label">segment</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.segment" />
+											<la:text property="doc.segment" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="config_id" class="col-sm-3 control-label">config_id</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.config_id" />
+											<la:text property="doc.config_id" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="_id" class="col-sm-3 control-label">_id</label>
+										<div class="col-sm-9">
+											<la:errors property="doc._id" />
+											<la:text property="doc._id" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="parent_id" class="col-sm-3 control-label">parent_id</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.parent_id" />
+											<la:text property="doc.parent_id" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="content_title" class="col-sm-3 control-label">content_title</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.content_title" />
+											<la:text property="doc.content_title"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="content_description"
+											class="col-sm-3 control-label">content_description</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.content_description" />
+											<la:text property="doc.content_description"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="content_length" class="col-sm-3 control-label">content_length</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.content_length" />
+											<la:text property="doc.content_length"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="url_link" class="col-sm-3 control-label">url_link</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.url_link" />
+											<la:text property="doc.url_link" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="site_path" class="col-sm-3 control-label">site_path</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.site_path" />
+											<la:text property="doc.site_path" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="favorite_count" class="col-sm-3 control-label">favorite_count</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.favorite_count" />
+											<la:text property="doc.favorite_count"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="click_count" class="col-sm-3 control-label">click_count</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.click_count" />
+											<la:text property="doc.click_count" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+									    <label for="created" class="col-sm-3 control-label">created</label>
+									    <div class="col-sm-9">
+										<la:errors property="doc.created" />
+										<la:text property="doc.created" styleClass="form-control" />
+									    </div>
+									</div>
+									<div class="form-group">
+										<label for="timestamp" class="col-sm-3 control-label">timestamp</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.timestamp" />
+											<la:text property="doc.timestamp" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+									    <label for="last_modified" class="col-sm-3 control-label">last_modified</label>
+									    <div class="col-sm-9">
+										<la:errors property="doc.last_modified" />
+										<la:text property="doc.last_modified"
+											 styleClass="form-control" />
+									    </div>
+									</div>
+									<div class="form-group">
+										<label for="expires" class="col-sm-3 control-label">expires</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.expires" />
+											<la:text property="doc.expires" styleClass="form-control" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn btn-default" name="search" value="<la:message key="labels.crud_button_back" />">
+										<button type="submit" class="btn btn-default" name="search"
+											value="<la:message key="labels.crud_button_back" />">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
 										</button>
 										<button type="submit" class="btn btn-success" name="create"
-											value="<la:message key="labels.crud_button_create" />"
-										>
+											value="<la:message key="labels.crud_button_create" />">
 											<i class="fa fa-plus"></i>
 											<la:message key="labels.crud_button_create" />
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn btn-default" name="search" value="back">
+										<button type="submit" class="btn btn-default" name="search"
+											value="back">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
 										</button>
 										<button type="submit" class="btn btn-warning" name="update"
-											value="<la:message key="labels.crud_button_update" />"
-										>
+											value="<la:message key="labels.crud_button_update" />">
 											<i class="fa fa-pencil"></i>
 											<la:message key="labels.crud_button_update" />
 										</button>
