@@ -18,6 +18,8 @@ package org.codelibs.fess.api.suggest;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -28,6 +30,10 @@ import org.apache.commons.lang.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.api.BaseApiManager;
 import org.codelibs.fess.api.json.JsonApiManager;
+import org.codelibs.fess.app.service.SearchService;
+import org.codelibs.fess.entity.FacetInfo;
+import org.codelibs.fess.entity.GeoInfo;
+import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -57,17 +63,19 @@ public class SuggestApiManager extends BaseApiManager {
         String errMsg = StringUtil.EMPTY;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
+        final SearchService searchService = ComponentUtil.getComponent(SearchService.class);
 
         try {
-
             final RequestParameter parameter = RequestParameter.parse(request);
+            final String[] langs = searchService.getLanguages(request, parameter);
 
             final SuggestHelper suggestHelper = ComponentUtil.getSuggestHelper();
             final SuggestRequestBuilder builder = suggestHelper.suggester().suggest();
             builder.setQuery(parameter.getQuery());
-            stream(parameter.getFields()).of(stream -> stream.forEach(field -> builder.addField(field)));
-            roleQueryHelper.build().stream().forEach(role -> builder.addRole(role));
+            stream(parameter.getSuggestFields()).of(stream -> stream.forEach(builder::addField));
+            roleQueryHelper.build().stream().forEach(builder::addRole);
             builder.setSize(parameter.getNum());
+            stream(langs).of(stream -> stream.forEach(builder::addLang));
 
             builder.addKind(SuggestItem.Kind.USER.toString());
             if (ComponentUtil.getFessConfig().isSuggestSearchLog()) {
@@ -144,17 +152,20 @@ public class SuggestApiManager extends BaseApiManager {
         JsonApiManager.writeJsonResponse(status, buf.toString(), errMsg);
     }
 
-    protected static class RequestParameter {
+    protected static class RequestParameter implements SearchRequestParams {
         private final String query;
 
         private final String[] fields;
 
         private final int num;
 
-        protected RequestParameter(final String query, final String[] fields, final int num) {
+        private HttpServletRequest request;
+
+        protected RequestParameter(final HttpServletRequest request, final String query, final String[] fields, final int num) {
             this.query = query;
             this.fields = fields;
             this.num = num;
+            this.request = request;
         }
 
         protected static RequestParameter parse(final HttpServletRequest request) {
@@ -175,19 +186,74 @@ public class SuggestApiManager extends BaseApiManager {
                 num = 10;
             }
 
-            return new RequestParameter(query, fields, num);
+            return new RequestParameter(request, query, fields, num);
         }
 
-        protected String getQuery() {
+        public String getQuery() {
             return query;
         }
 
-        protected String[] getFields() {
+        protected String[] getSuggestFields() {
             return fields;
         }
 
         protected int getNum() {
             return num;
+        }
+
+        @Override
+        public Map<String, String[]> getFields() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String[] getLanguages() {
+            return getParamValueArray(request, "lang");
+        }
+
+        @Override
+        public GeoInfo getGeoInfo() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public FacetInfo getFacetInfo() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getSort() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getStartPosition() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int getPageSize() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isAdministrativeAccess() {
+            return false;
+        }
+
+        @Override
+        public String[] getExtraQueries() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Object getAttribute(String name) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Locale getLocale() {
+            throw new UnsupportedOperationException();
         }
     }
 }

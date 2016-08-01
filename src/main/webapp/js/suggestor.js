@@ -104,8 +104,10 @@ $.fn.suggestor = function(setting) {
 				cache : false,
 				data:{	query: $textArea.val(),
 						fields: settingAjaxInfo.fn,
-						num: settingAjaxInfo.num * 2
-				}
+						num: settingAjaxInfo.num * 2,
+					    lang: settingAjaxInfo.lang
+				},
+				traditional: true
 			}).done(function(obj) { suggestor.createAutoCompleteList(obj); }).fail(function(a,obj,b) { suggestingSts=false; return; });
 
 		},

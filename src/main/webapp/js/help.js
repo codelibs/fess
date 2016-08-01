@@ -30,7 +30,8 @@ $(function(){
         ajaxinfo: {
             url: contextPath + '/suggest',
             fn: '_default,content,title',
-            num: 10
+            num: 10,
+            lang: $('#langSearchOption').val()
         },
         boxCssInfo: {
             border: '1px solid rgba(82, 168, 236, 0.5)',

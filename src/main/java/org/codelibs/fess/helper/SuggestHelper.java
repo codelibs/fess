@@ -127,10 +127,11 @@ public class SuggestHelper {
                     }
 
                     if (sb.length() > 0) {
+                        final String[] langs = searchLog.getLanguages() == null ? new String[] {} : searchLog.getLanguages().split(",");
                         stream(searchLog.getRoles()).of(stream -> stream.forEach(role -> roles.add(role)));
                         if (fessConfig.isValidSearchLogPermissions(roles.toArray(new String[roles.size()]))) {
                             suggester.indexer().indexFromSearchWord(sb.toString(), fields.toArray(new String[fields.size()]),
-                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1);
+                                    tags.toArray(new String[tags.size()]), roles.toArray(new String[roles.size()]), 1, langs);
                         }
                     }
                 });

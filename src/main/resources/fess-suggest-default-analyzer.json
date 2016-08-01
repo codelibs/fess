@@ -27,6 +27,45 @@
         "type" : "custom",
         "tokenizer" : "fess_japanese_normal",
         "filter" : ["stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "filter" : ["reading_form"]
+      },
+      "reading_term_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal"
+      },
+      "normalize_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "filter" : ["stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+      },
+      "reading_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "reading_term_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "normalize_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "keyword",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase"]
+      },
+      "contents_analyzer_en" : {
+        "type" : "custom",
+        "tokenizer" : "standard",
+        "filter" : ["stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter"]
       }
     },
     "char_filter" : {
@@ -138,6 +177,10 @@
       "limit_token_count_filter": {
         "type": "limit",
         "max_token_count": 10000
+      },
+      "stemmer_en_filter": {
+        "type": "stemmer",
+        "name": "english"
       }
     }
   }
