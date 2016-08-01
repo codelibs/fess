@@ -1183,12 +1183,10 @@ public interface FessProp {
         return source
                 .entrySet()
                 .stream()
+                .filter(e -> isNonEmptyValue(e.getValue()))
                 .map(e -> {
                     final String key = e.getKey();
                     Object value = e.getValue();
-                    if (value == null) {
-                        return new Pair<String, Object>(key, value);
-                    }
                     if (arrayFieldSet.contains(key)) {
                         value =
                                 stream(value.toString().split("\n")).get(
@@ -1213,7 +1211,16 @@ public interface FessProp {
 
     public default boolean hasIndexRequiredFields(final Map<String, Object> source) {
         return stream(getIndexAdminRequiredFields().split(",")).get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).allMatch(s -> source.containsKey(s)));
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).allMatch(s -> isNonEmptyValue(source.get(s))));
     }
 
+    public static boolean isNonEmptyValue(final Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof String && StringUtil.isEmpty((String) value)) {
+            return false;
+        }
+        return true;
+    }
 }
