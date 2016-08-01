@@ -305,6 +305,7 @@
 										<include>bin/fess</include>
 										<include>bin/fess.in.sh</include>
 										<include>bin/generate-thumbnail</include>
+										<include>bin/plugin.xml</include>
 									</includes>
 								</resource>
 							</resources>
@@ -350,6 +351,7 @@
 										<include>bin/fess</include>
 										<include>bin/fess.in.sh</include>
 										<include>bin/generate-thumbnail</include>
+										<include>bin/plugin.xml</include>
 									</includes>
 								</resource>
 							</resources>
@@ -493,6 +495,7 @@
 								<path>${project.basedir}/src/main/assemblies/files/fess</path>
 								<path>${project.basedir}/src/main/assemblies/files/fess.in.sh</path>
 								<path>${project.basedir}/src/main/assemblies/files/generate-thumbnail</path>
+								<path>${project.basedir}/src/main/assemblies/files/plugin.xml</path>
 							</paths>
 							<dst>${packaging.fess.bin.dir}</dst>
 							<mapper>
@@ -740,6 +743,7 @@
 										<include>fess</include>
 										<include>fess.in.sh</include>
 										<include>generate-thumbnail</include>
+										<include>plugin.xml</include>
 									</includes>
 								</source>
 							</sources>

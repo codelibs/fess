@@ -43,6 +43,14 @@
 			<includes>
 				<include>fess.in.sh</include>
 				<include>fess</include>
+				<include>generate-thumbnail</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<filtered>false</filtered>
+			<outputDirectory>fess-${project.version}/bin</outputDirectory>
+			<includes>
+				<include>plugin.xml</include>
 			</includes>
 		</fileSet>
 
