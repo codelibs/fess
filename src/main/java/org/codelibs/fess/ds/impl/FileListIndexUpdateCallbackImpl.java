@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.fess.Constants;
@@ -32,6 +33,7 @@ import org.codelibs.fess.crawler.client.CrawlerClient;
 import org.codelibs.fess.crawler.client.CrawlerClientFactory;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
+import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.processor.ResponseProcessor;
 import org.codelibs.fess.crawler.processor.impl.DefaultResponseProcessor;
@@ -58,6 +60,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
     protected List<String> deleteIdList = new ArrayList<>(100);
 
     protected int maxDeleteDocumentCacheSize = 100;
+
+    protected int maxRedirectCount = 10;
 
     private final ExecutorService executor;
 
@@ -113,54 +117,73 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
                 return;
             }
 
-            final long startTime = System.currentTimeMillis();
-            try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
-                responseData.setExecutionTime(System.currentTimeMillis() - startTime);
-                if (dataMap.containsKey(Constants.SESSION_ID)) {
-                    responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
-                } else {
-                    responseData.setSessionId(paramMap.get(Constants.CRAWLING_INFO_ID));
+            String processingUrl = url;
+            for (int i = 0; i < maxRedirectCount; i++) {
+                processingUrl = processRequest(paramMap, dataMap, processingUrl, client);
+                if (processingUrl == null) {
+                    break;
                 }
-
-                final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
-                final Rule rule = ruleManager.getRule(responseData);
-                if (rule == null) {
-                    logger.warn("No url rule. Data: " + dataMap);
-                } else {
-                    responseData.setRuleId(rule.getRuleId());
-                    final ResponseProcessor responseProcessor = rule.getResponseProcessor();
-                    if (responseProcessor instanceof DefaultResponseProcessor) {
-                        final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
-                        final ResultData resultData = transformer.transform(responseData);
-                        final byte[] data = resultData.getData();
-                        if (data != null) {
-                            try {
-                                @SuppressWarnings("unchecked")
-                                final Map<String, Object> responseDataMap = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
-                                dataMap.putAll(responseDataMap);
-                            } catch (final Exception e) {
-                                throw new CrawlerSystemException("Could not create an instance from bytes.", e);
-                            }
-                        }
-
-                        // remove
-                        String[] ignoreFields;
-                        if (paramMap.containsKey("ignore.field.names")) {
-                            ignoreFields = paramMap.get("ignore.field.names").split(",");
-                        } else {
-                            ignoreFields = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
-                        }
-                        stream(ignoreFields).of(stream -> stream.map(s -> s.trim()).forEach(s -> dataMap.remove(s)));
-
-                        indexUpdateCallback.store(paramMap, dataMap);
-                    } else {
-                        logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: " + responseProcessor
-                                + ", Data: " + dataMap);
-                    }
-                }
-            } catch (final Exception e) {
-                throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
+                dataMap.put(fessConfig.getIndexFieldUrl(), processingUrl);
             }
+        }
+    }
+
+    protected String processRequest(final Map<String, String> paramMap, final Map<String, Object> dataMap, final String url,
+            final CrawlerClient client) {
+        final long startTime = System.currentTimeMillis();
+        try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
+            if (responseData.getRedirectLocation() != null) {
+                return responseData.getRedirectLocation();
+            }
+            responseData.setExecutionTime(System.currentTimeMillis() - startTime);
+            if (dataMap.containsKey(Constants.SESSION_ID)) {
+                responseData.setSessionId((String) dataMap.get(Constants.SESSION_ID));
+            } else {
+                responseData.setSessionId(paramMap.get(Constants.CRAWLING_INFO_ID));
+            }
+
+            final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
+            final Rule rule = ruleManager.getRule(responseData);
+            if (rule == null) {
+                logger.warn("No url rule. Data: " + dataMap);
+            } else {
+                responseData.setRuleId(rule.getRuleId());
+                final ResponseProcessor responseProcessor = rule.getResponseProcessor();
+                if (responseProcessor instanceof DefaultResponseProcessor) {
+                    final Transformer transformer = ((DefaultResponseProcessor) responseProcessor).getTransformer();
+                    final ResultData resultData = transformer.transform(responseData);
+                    final byte[] data = resultData.getData();
+                    if (data != null) {
+                        try {
+                            @SuppressWarnings("unchecked")
+                            final Map<String, Object> responseDataMap = (Map<String, Object>) SerializeUtil.fromBinaryToObject(data);
+                            dataMap.putAll(responseDataMap);
+                        } catch (final Exception e) {
+                            throw new CrawlerSystemException("Could not create an instance from bytes.", e);
+                        }
+                    }
+
+                    // remove
+                    String[] ignoreFields;
+                    if (paramMap.containsKey("ignore.field.names")) {
+                        ignoreFields = paramMap.get("ignore.field.names").split(",");
+                    } else {
+                        ignoreFields = new String[] { Constants.INDEXING_TARGET, Constants.SESSION_ID };
+                    }
+                    stream(ignoreFields).of(stream -> stream.map(s -> s.trim()).forEach(s -> dataMap.remove(s)));
+
+                    indexUpdateCallback.store(paramMap, dataMap);
+                } else {
+                    logger.warn("The response processor is not DefaultResponseProcessor. responseProcessor: " + responseProcessor
+                            + ", Data: " + dataMap);
+                }
+            }
+            return null;
+        } catch (final ChildUrlsException e) {
+            throw new DataStoreCrawlingException(url, "Redirected to "
+                    + e.getChildUrlList().stream().map(r -> r.getUrl()).collect(Collectors.joining(", ")), e);
+        } catch (final Exception e) {
+            throw new DataStoreCrawlingException(url, "Failed to add: " + dataMap, e);
         }
     }
 
@@ -224,6 +247,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
 
     public void setMaxDeleteDocumentCacheSize(final int maxDeleteDocumentCacheSize) {
         this.maxDeleteDocumentCacheSize = maxDeleteDocumentCacheSize;
+    }
+
+    public void setMaxRedirectCount(int maxRedirectCount) {
+        this.maxRedirectCount = maxRedirectCount;
     }
 
     @Override

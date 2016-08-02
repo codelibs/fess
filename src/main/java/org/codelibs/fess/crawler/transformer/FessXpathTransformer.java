@@ -167,7 +167,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             if (canonicalUrl != null && !canonicalUrl.equals(responseData.getUrl())) {
                 final Set<RequestData> childUrlSet = new HashSet<>();
                 childUrlSet.add(RequestDataBuilder.newRequestData().get().url(canonicalUrl).build());
-                throw new ChildUrlsException(childUrlSet);
+                throw new ChildUrlsException(childUrlSet, this.getClass().getName()
+                        + "#putAdditionalData(Map<String, Object>, ResponseData, Document)");
             }
         }
 
