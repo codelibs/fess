@@ -17,6 +17,7 @@ package org.codelibs.fess.mylasta.direction;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.misc.DynamicProperties;
@@ -71,4 +72,32 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals("1234567890@fess.codelibs.local", fessConfig.getLdapSecurityPrincipal("12345678901"));
     }
 
+    public void test_validateIndexRequiredFields() {
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getIndexAdminRequiredFields() {
+                return "aaa,bbb";
+            }
+        };
+
+        HashMap<String, Object> source = new HashMap<>();
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", null);
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", null);
+        source.put("bbb", null);
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", "");
+        source.put("bbb", "");
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", "");
+        source.put("bbb", "a");
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", " ");
+        source.put("bbb", "a");
+        assertFalse(fessConfig.validateIndexRequiredFields(source));
+        source.put("aaa", "a");
+        source.put("bbb", "a");
+        assertTrue(fessConfig.validateIndexRequiredFields(source));
+    }
 }

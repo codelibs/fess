@@ -245,7 +245,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse create(final CreateForm form) {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
-        if (!fessConfig.hasIndexRequiredFields(form.doc)) {
+        if (!fessConfig.validateIndexRequiredFields(form.doc)) {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         }
         verifyToken(() -> asEditHtml());
@@ -276,7 +276,7 @@ public class AdminSearchlistAction extends FessAdminAction {
     public HtmlResponse update(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
-        if (!fessConfig.hasIndexRequiredFields(form.doc)) {
+        if (!fessConfig.validateIndexRequiredFields(form.doc)) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
         }
         verifyToken(() -> asEditHtml());

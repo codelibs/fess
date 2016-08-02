@@ -47,6 +47,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.validation.RequiredValidator;
 
 public interface FessProp {
 
@@ -1209,9 +1210,11 @@ public interface FessProp {
 
     String getIndexAdminRequiredFields();
 
-    public default boolean hasIndexRequiredFields(final Map<String, Object> source) {
+    public default boolean validateIndexRequiredFields(final Map<String, Object> source) {
+        final RequiredValidator requiredValidator = new RequiredValidator();
         return stream(getIndexAdminRequiredFields().split(",")).get(
-                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).allMatch(s -> isNonEmptyValue(source.get(s))));
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim())
+                        .allMatch(s -> requiredValidator.isValid(source.get(s), null)));
     }
 
     public static boolean isNonEmptyValue(final Object value) {
