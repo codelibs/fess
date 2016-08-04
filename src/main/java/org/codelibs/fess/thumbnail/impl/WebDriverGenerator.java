@@ -46,7 +46,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     public int windowHeight = 800;
 
-    public int thumbnailWidth = 400;
+    public int thumbnailWidth = 160;
 
     public String imageFormatName = "png";
 
