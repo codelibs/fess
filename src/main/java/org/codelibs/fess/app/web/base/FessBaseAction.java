@@ -25,10 +25,12 @@ import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.servlet.request.ResponseManager;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
 import org.lastaflute.web.validation.LaValidatable;
@@ -63,6 +65,12 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Resource
     protected ActivityHelper activityHelper;
+
+    @Resource
+    protected ResponseManager responseManager;
+
+    @Resource
+    protected TimeManager timeManager;
 
     // ===================================================================================
     //                                                                               Hook
@@ -103,7 +111,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
         // fess does not use DBFlute, and this is unneeded so dummy
         return resource -> {
             final AccessContext context = new AccessContext();
-            context.setAccessLocalDateTimeProvider(() -> currentDateTime());
+            context.setAccessLocalDateTimeProvider(() -> timeManager.currentDateTime());
             context.setAccessUserProvider(() -> "unused");
             return context;
         };
@@ -114,7 +122,7 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     //                                                                           =========
     @Override
     protected OptionalThing<FessUserBean> getUserBean() { // to return as concrete class
-        return fessLoginAssist.getSessionUserBean();
+        return fessLoginAssist.getSavedUserBean();
     }
 
     @Override

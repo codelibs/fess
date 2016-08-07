@@ -44,7 +44,6 @@ import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
-import org.codelibs.fess.suggest.settings.AnalyzerSettings;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;

@@ -65,16 +65,14 @@ public class ThumbnailAction extends FessSearchAction {
         final String url = DocumentUtil.getValue(doc, fessConfig.getIndexFieldUrl(), String.class);
         if (StringUtil.isBlank(form.queryId) || StringUtil.isBlank(url) || !thumbnailSupport) {
             // 404
-            throw404("Thumbnail for " + form.docId + " is not found.");
-            return null;
+            throw responseManager.new404("Thumbnail for " + form.docId + " is not found.");
         }
 
         final File thumbnailFile = thumbnailManager.getThumbnailFile(form.queryId, form.docId);
         if (thumbnailFile == null) {
             // 404
             thumbnailManager.generate(doc);
-            throw404("Thumbnail for " + form.docId + " is under generating.");
-            return null;
+            throw responseManager.new404("Thumbnail for " + form.docId + " is under generating.");
         }
 
         return asStream(form.docId).contentType(getImageMimeType(thumbnailFile)).stream(out -> {

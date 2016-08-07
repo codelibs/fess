@@ -133,7 +133,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     //                                                                             Helpers
     //                                                                           =========
     protected boolean isLoginRequired() {
-        if (fessConfig.isLoginRequired() && !fessLoginAssist.getSessionUserBean().isPresent()) {
+        if (fessConfig.isLoginRequired() && !fessLoginAssist.getSavedUserBean().isPresent()) {
             return true;
         }
         return false;

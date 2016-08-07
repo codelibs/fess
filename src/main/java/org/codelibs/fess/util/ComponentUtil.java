@@ -66,6 +66,7 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
 import org.lastaflute.job.JobManager;
 import org.lastaflute.web.servlet.request.RequestManager;
+import org.lastaflute.web.servlet.request.ResponseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,6 +343,10 @@ public final class ComponentUtil {
 
     public static RequestManager getRequestManager() {
         return getComponent(RequestManager.class);
+    }
+
+    public static ResponseManager getResponseManager() {
+        return getComponent(ResponseManager.class);
     }
 
     public static JobManager getJobManager() {

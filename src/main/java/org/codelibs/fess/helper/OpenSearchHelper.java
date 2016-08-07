@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.lastaflute.web.exception.ForcedRequest404NotFoundException;
+import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.response.StreamResponse;
 import org.lastaflute.web.util.LaServletContextUtil;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class OpenSearchHelper {
 
     public StreamResponse asStream() {
         if (osddFile == null) {
-            throw new ForcedRequest404NotFoundException("Unsupported OpenSearch response.");
+            throw ComponentUtil.getResponseManager().new404("Unsupported OpenSearch response.");
         }
 
         return new StreamResponse(osddFile.getName()).contentType(contentType + "; charset=" + encoding).stream(out -> {
