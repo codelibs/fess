@@ -81,7 +81,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         final String outputPath = outputFile.getAbsolutePath();
         final List<String> cmdList = new ArrayList<>();
         for (final String value : commandList) {
-            cmdList.add(value.replace("${url}", url).replace("${outputFile}", outputPath));
+            cmdList.add(expandPath(value.replace("${url}", url).replace("${outputFile}", outputPath)));
         }
 
         ProcessBuilder pb = null;

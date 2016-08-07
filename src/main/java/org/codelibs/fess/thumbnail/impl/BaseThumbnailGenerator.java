@@ -15,7 +15,9 @@
  */
 package org.codelibs.fess.thumbnail.impl;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,9 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected int directoryNameLength = 5;
 
-    public List<String> generatorList;
+    protected List<String> generatorList;
+
+    protected Map<String, String> filePathMap = new HashMap<>();
 
     public void addCondition(final String key, final String regex) {
         conditionMap.put(key, regex);
@@ -54,13 +58,48 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
     @Override
     public boolean isAvailable() {
         if (generatorList != null && !generatorList.isEmpty()) {
-            return generatorList.stream().allMatch(s -> new File(s).isFile());
+            String path = System.getenv("PATH");
+            if (path == null) {
+                path = System.getenv("Path");
+            }
+            if (path == null) {
+                path = System.getenv("path");
+            }
+            final List<String> pathList = new ArrayList<>();
+            pathList.add("/usr/share/fess/bin");
+            if (path != null) {
+                stream(path.split(File.pathSeparator)).of(stream -> stream.map(s -> s.trim()).forEach(s -> pathList.add(s)));
+            }
+            return generatorList.stream().map(s -> {
+                if (s.startsWith("${path}")) {
+                    for (String p : pathList) {
+                        final File f = new File(s.replace("${path}", p));
+                        if (f.exists()) {
+                            final String filePath = f.getAbsolutePath();
+                            filePathMap.put(s, filePath);
+                            return filePath;
+                        }
+                    }
+                }
+                return s;
+            }).allMatch(s -> new File(s).isFile());
         }
         return true;
     }
 
     public void setDirectoryNameLength(int directoryNameLength) {
         this.directoryNameLength = directoryNameLength;
+    }
+
+    protected String expandPath(String value) {
+        if (value != null && filePathMap.containsKey(value)) {
+            return filePathMap.get(value);
+        }
+        return value;
+    }
+
+    public void setGeneratorList(List<String> generatorList) {
+        this.generatorList = generatorList;
     }
 
 }

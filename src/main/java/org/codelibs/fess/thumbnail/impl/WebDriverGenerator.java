@@ -31,6 +31,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +53,28 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     @PostConstruct
     public void init() {
-        try {
-            if (webDriver == null) {
-                webDriver = webDriverCapabilities == null ? new PhantomJSDriver() : new PhantomJSDriver(webDriverCapabilities);
-            }
-            webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
-        } catch (final Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("WebDriver is not available for generating thumbnails.", e);
-            } else {
-                logger.info("WebDriver is not available for generating thumbnails.");
+        if (super.isAvailable()) {
+            try {
+                if (webDriver == null) {
+                    if (webDriverCapabilities == null) {
+                        webDriver = new PhantomJSDriver();
+                    } else {
+                        if (webDriverCapabilities instanceof DesiredCapabilities) {
+                            DesiredCapabilities capabilities = (DesiredCapabilities) webDriverCapabilities;
+                            webDriverCapabilities.asMap().entrySet().stream()
+                                    .filter(e -> e.getValue() instanceof String && filePathMap.containsKey(e.getValue().toString()))
+                                    .forEach(e -> capabilities.setCapability(e.getKey(), filePathMap.get(e.getValue().toString())));
+                        }
+                        webDriver = new PhantomJSDriver(webDriverCapabilities);
+                    }
+                }
+                webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
+            } catch (final Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("WebDriver is not available for generating thumbnails.", e);
+                } else {
+                    logger.info("WebDriver is not available for generating thumbnails.");
+                }
             }
         }
     }
