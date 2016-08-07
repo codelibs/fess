@@ -16,12 +16,12 @@
 package org.codelibs.fess.app.web.sso;
 
 import org.codelibs.fess.app.web.base.FessLoginAction;
-import org.codelibs.fess.app.web.base.login.ActionLoginCredential;
-import org.codelibs.fess.app.web.base.login.LoginCredential;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.ActionResponse;
 import org.slf4j.Logger;
@@ -49,8 +49,8 @@ public class SsoAction extends FessLoginAction {
                 saveError(messages -> messages.addErrorsSsoLoginError(GLOBAL));
             }
             return redirect(LoginAction.class);
-        } else if (loginCredential instanceof ActionLoginCredential) {
-            return ((ActionLoginCredential) loginCredential).execute();
+        } else if (loginCredential instanceof ActionResponseCredential) {
+            return ((ActionResponseCredential) loginCredential).execute();
         }
         try {
             return fessLoginAssist.loginRedirect(loginCredential, op -> {}, () -> {

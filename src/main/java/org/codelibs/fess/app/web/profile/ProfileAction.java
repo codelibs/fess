@@ -26,6 +26,7 @@ import org.codelibs.fess.app.service.UserService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.login.LoginAction;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.validation.VaErrorHook;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class ProfileAction extends FessSearchAction {
             }, validationErrorLambda);
         }
 
-        fessLoginAssist.findLoginUser(getUserBean().get().getUserId(), form.oldPassword).orElseGet(() -> {
+        fessLoginAssist.findLoginUser(new UserPasswordCredential(getUserBean().get().getUserId(), form.oldPassword)).orElseGet(() -> {
             throwValidationError(messages -> {
                 messages.addErrorsNoUserForChangingPassword(GLOBAL);
             }, validationErrorLambda);

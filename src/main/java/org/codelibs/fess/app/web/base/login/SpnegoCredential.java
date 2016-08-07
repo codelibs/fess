@@ -15,39 +15,23 @@
  */
 package org.codelibs.fess.app.web.base.login;
 
-import org.dbflute.util.DfCollectionUtil;
+import org.lastaflute.web.login.credential.LoginCredential;
 
-public class UserPasswordLoginCredential implements LoginCredential {
+public class SpnegoCredential implements LoginCredential {
     private final String username;
-    private final String password;
 
-    public UserPasswordLoginCredential(final String username, final String password) {
+    // private Principal principal;
+
+    public SpnegoCredential(final String username) {
         this.username = username;
-        this.password = password;
-
     }
 
     @Override
-    public void validate() {
-        assertLoginAccountRequired(username);
-        assertLoginPasswordRequired(password);
-    }
-
-    @Override
-    public Object getResource() {
-        return DfCollectionUtil.newHashMap("account", username, "password", password);
-    }
-
-    @Override
-    public String getId() {
-        return username;
+    public String toString() {
+        return "{" + username + "}";
     }
 
     public String getUsername() {
         return username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }

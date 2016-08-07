@@ -25,13 +25,13 @@ import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.UuidUtil;
-import org.codelibs.fess.app.web.base.login.ActionLoginCredential;
-import org.codelibs.fess.app.web.base.login.LoginCredential;
-import org.codelibs.fess.app.web.base.login.OpenIdConnectLoginCredential;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.OpenIdConnectCredential;
 import org.codelibs.fess.crawler.Constants;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoAuthenticator;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
                 }
             }
 
-            return new ActionLoginCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
+            return new ActionResponseCredential(() -> HtmlResponse.fromRedirectPathAsIs(getAuthUrl(request)));
         }).orElse(null);
     }
 
@@ -123,7 +123,7 @@ public class OpenIdConnectAuthenticator implements SsoAuthenticator {
 
             parseJwtClaim(jwtClaim, attributes);
 
-            return new OpenIdConnectLoginCredential(attributes);
+            return new OpenIdConnectCredential(attributes);
         } catch (final IOException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process callbacked request.", e);

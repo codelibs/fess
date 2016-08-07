@@ -25,33 +25,28 @@ import org.codelibs.fess.entity.FessUser;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.login.credential.LoginCredential;
 
-public class OpenIdConnectLoginCredential implements LoginCredential {
+public class OpenIdConnectCredential implements LoginCredential {
 
     private final Map<String, Object> attributes;
 
-    public OpenIdConnectLoginCredential(final Map<String, Object> attributes) {
+    public OpenIdConnectCredential(final Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
     @Override
-    public void validate() {
-        assertLoginAccountRequired((String) attributes.get("email"));
+    public String toString() {
+        return "{" + getEmail() + "}";
     }
 
-    @Override
-    public String getId() {
+    public String getEmail() {
         return (String) attributes.get("email");
-    }
-
-    @Override
-    public Object getResource() {
-        return attributes;
     }
 
     public User getUser() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return new User(getId(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
+        return new User(getEmail(), fessConfig.getOicDefaultGroupsAsArray(), fessConfig.getOicDefaultRolesAsArray());
     }
 
     public static class User implements FessUser {

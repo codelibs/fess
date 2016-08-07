@@ -17,8 +17,8 @@ package org.codelibs.fess.sso;
 
 import javax.annotation.PostConstruct;
 
-import org.codelibs.fess.app.web.base.login.LoginCredential;
 import org.codelibs.fess.util.ComponentUtil;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 public class SsoManager {
 

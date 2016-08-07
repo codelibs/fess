@@ -18,6 +18,7 @@ package org.codelibs.fess.app.web.login;
 import org.codelibs.fess.app.web.base.FessLoginAction;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.lastaflute.web.Execute;
+import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.login.exception.LoginFailureException;
 import org.lastaflute.web.response.HtmlResponse;
 
@@ -44,7 +45,7 @@ public class LoginAction extends FessLoginAction {
         final String password = form.password;
         form.clearSecurityInfo();
         try {
-            return fessLoginAssist.loginRedirect(username, password, op -> {}, () -> {
+            return fessLoginAssist.loginRedirect(new UserPasswordCredential(username, password), op -> {}, () -> {
                 activityHelper.login(getUserBean());
                 return getHtmlResponse();
             });

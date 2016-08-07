@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.sso;
 
-import org.codelibs.fess.app.web.base.login.LoginCredential;
+import org.lastaflute.web.login.credential.LoginCredential;
 
 public interface SsoAuthenticator {
 

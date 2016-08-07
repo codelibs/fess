@@ -33,12 +33,10 @@ import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.web.login.LoginHandlingResource;
 import org.lastaflute.web.login.PrimaryLoginManager;
 import org.lastaflute.web.login.TypicalLoginAssist;
-import org.lastaflute.web.login.exception.LoginFailureException;
+import org.lastaflute.web.login.credential.LoginCredential;
+import org.lastaflute.web.login.credential.UserPasswordCredential;
 import org.lastaflute.web.login.exception.LoginRequiredException;
-import org.lastaflute.web.login.option.LoginOpCall;
 import org.lastaflute.web.login.option.LoginSpecifiedOption;
-import org.lastaflute.web.login.redirect.LoginRedirectSuccessCall;
-import org.lastaflute.web.response.HtmlResponse;
 
 /**
  * @author jflute
@@ -63,19 +61,13 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                           Find User
     //                                                                           =========
     @Override
-    protected boolean doCheckUserLoginable(final String username, final String cipheredPassword) {
-        return userBhv.selectCount(cb -> {
-            cb.query().setName_Equal(username);
-            cb.query().setPassword_Equal(cipheredPassword);
-        }) > 0;
+    public boolean checkUserLoginable(LoginCredential credential) {
+        throw new UnsupportedOperationException("checkUserLoginable is not supported.");
     }
 
     @Override
-    protected OptionalEntity<FessUser> doFindLoginUser(final String username, final String cipheredPassword) {
-        return userBhv.selectEntity(cb -> {
-            cb.query().setName_Equal(username);
-            cb.query().setPassword_Equal(cipheredPassword);
-        }).map(user -> (FessUser) user);
+    protected void checkCredential(TypicalLoginAssist<String, FessUserBean, FessUser>.CredentialChecker checker) {
+        throw new UnsupportedOperationException("checkCredential is not supported.");
     }
 
     @Override
@@ -144,29 +136,10 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                      ==============
 
     @Override
-    public HtmlResponse loginRedirect(final String account, final String password, final LoginOpCall opLambda,
-            final LoginRedirectSuccessCall oneArgLambda) throws LoginFailureException {
-        return loginRedirect(new UserPasswordLoginCredential(account, password), opLambda, oneArgLambda);
-    }
-
-    public HtmlResponse loginRedirect(final LoginCredential credential, final LoginOpCall opLambda,
-            final LoginRedirectSuccessCall oneArgLambda) throws LoginFailureException {
-        doLogin(credential, createLoginOption(opLambda)); // exception if login failure
-        return switchToRequestedActionIfExists(oneArgLambda.success()); // so success only here
-    }
-
-    protected void doLogin(final LoginCredential credential, final LoginSpecifiedOption option) throws LoginFailureException {
-        credential.validate();
-        handleLoginSuccess(findLoginUser(credential).orElseThrow(() -> {
-            final String msg = "Not found the user by the account and password: " + credential.getId() + ", " + option;
-            return handleLoginFailure(msg, credential.getResource(), OptionalThing.of(option));
-        }), option);
-    }
-
-    public OptionalEntity<FessUser> findLoginUser(final LoginCredential credential) {
-        if (credential instanceof UserPasswordLoginCredential) {
-            final UserPasswordLoginCredential userCredential = (UserPasswordLoginCredential) credential;
-            final String username = userCredential.getUsername();
+    protected void resolveCredential(CredentialResolver resolver) {
+        resolver.resolve(UserPasswordCredential.class, credential -> {
+            final UserPasswordCredential userCredential = (UserPasswordCredential) credential;
+            final String username = userCredential.getUser();
             final String password = userCredential.getPassword();
             if (!fessConfig.isAdminUser(username)) {
                 final OptionalEntity<FessUser> ldapUser = ComponentUtil.getLdapManager().login(username, password);
@@ -175,14 +148,23 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
                 }
             }
             return doFindLoginUser(username, encryptPassword(password));
-        } else if (credential instanceof SpnegoLoginCredential) {
-            final String username = credential.getId();
+        });
+        resolver.resolve(SpnegoCredential.class, credential -> {
+            final String username = ((SpnegoCredential) credential).getUsername();
             if (!fessConfig.isAdminUser(username)) {
                 return ComponentUtil.getLdapManager().login(username);
             }
-        } else if (credential instanceof OpenIdConnectLoginCredential) {
-            return OptionalEntity.of(((OpenIdConnectLoginCredential) credential).getUser());
-        }
-        return OptionalEntity.empty();
+            return OptionalEntity.empty();
+        });
+        resolver.resolve(OpenIdConnectCredential.class, credential -> {
+            return OptionalEntity.of(((OpenIdConnectCredential) credential).getUser());
+        });
+    }
+
+    protected OptionalEntity<FessUser> doFindLoginUser(final String username, final String cipheredPassword) {
+        return userBhv.selectEntity(cb -> {
+            cb.query().setName_Equal(username);
+            cb.query().setPassword_Equal(cipheredPassword);
+        }).map(user -> (FessUser) user);
     }
 }

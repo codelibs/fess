@@ -24,9 +24,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codelibs.core.io.ResourceUtil;
-import org.codelibs.fess.app.web.base.login.ActionLoginCredential;
-import org.codelibs.fess.app.web.base.login.LoginCredential;
-import org.codelibs.fess.app.web.base.login.SpnegoLoginCredential;
+import org.codelibs.fess.app.web.base.login.ActionResponseCredential;
+import org.codelibs.fess.app.web.base.login.SpnegoCredential;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.SsoLoginException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
@@ -37,6 +36,7 @@ import org.codelibs.spnego.SpnegoHttpFilter;
 import org.codelibs.spnego.SpnegoHttpFilter.Constants;
 import org.codelibs.spnego.SpnegoHttpServletResponse;
 import org.codelibs.spnego.SpnegoPrincipal;
+import org.lastaflute.web.login.credential.LoginCredential;
 import org.lastaflute.web.servlet.filter.RequestLoggingFilter;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.util.LaResponseUtil;
@@ -86,7 +86,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
 
                     // context/auth loop not yet complete
                     if (spnegoResponse.isStatusSet()) {
-                        return new ActionLoginCredential(() -> {
+                        return new ActionResponseCredential(() -> {
                             throw new RequestLoggingFilter.RequestClientErrorException("Your request is not authorized.",
                                     "401 Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
                         });
@@ -104,7 +104,7 @@ public class SpnegoAuthenticator implements SsoAuthenticator {
                     }
 
                     final String[] username = principal.getName().split("@", 2);
-                    return new SpnegoLoginCredential(username[0]);
+                    return new SpnegoCredential(username[0]);
                 }).orElseGet(() -> null);
 
     }
