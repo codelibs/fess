@@ -26,7 +26,7 @@
       "contents_analyzer" : {
         "type" : "custom",
         "tokenizer" : "fess_japanese_normal",
-        "filter" : ["stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
       },
       "reading_analyzer_ja" : {
         "type" : "custom",
@@ -46,7 +46,7 @@
       "contents_analyzer_ja" : {
         "type" : "custom",
         "tokenizer" : "fess_japanese_normal",
-        "filter" : ["stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
       },
       "reading_analyzer_en" : {
         "type" : "custom",
@@ -65,7 +65,7 @@
       "contents_analyzer_en" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "english_keywords"]
       },
       "reading_analyzer_ar" : {
         "type" : "custom",
@@ -79,12 +79,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "arabic_normalization", "arabic_stemmer"]
+        "filter" : ["lowercase", "arabic_normalization"]
       },
       "contents_analyzer_ar" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_normalization", "arabic_keywords", "arabic_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_stop", "arabic_normalization", "arabic_keywords"]
       },
       "reading_analyzer_ca" : {
         "type" : "custom",
@@ -98,12 +98,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "catalan_elision", "catalan_stemmer"]
+        "filter" : ["lowercase", "catalan_elision"]
       },
       "contents_analyzer_ca" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "catalan_elision", "catalan_stop", "catalan_keywords", "catalan_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "catalan_elision", "catalan_stop", "catalan_keywords"]
       },
       "reading_analyzer_cs" : {
         "type" : "custom",
@@ -117,12 +117,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "czech_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_cs" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "czech_stop", "czech_keywords", "czech_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "czech_stop", "czech_keywords"]
       },
       "reading_analyzer_da" : {
         "type" : "custom",
@@ -136,12 +136,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "danish_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_da" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "danish_stop", "danish_keywords", "danish_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "danish_stop", "danish_keywords"]
       },
       "reading_analyzer_nl" : {
         "type" : "custom",
@@ -155,12 +155,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "dutch_override", "dutch_stemmer"]
+        "filter" : ["lowercase", "dutch_override"]
       },
       "contents_analyzer_nl" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "dutch_stop", "dutch_keywords", "dutch_override", "dutch_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "dutch_stop", "dutch_keywords", "dutch_override"]
       },
       "reading_analyzer_fi" : {
         "type" : "custom",
@@ -174,12 +174,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "finnish_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_fi" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "finnish_stop", "finnish_keywords", "finnish_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "finnish_stop", "finnish_keywords"]
       },
       "reading_analyzer_fr" : {
         "type" : "custom",
@@ -193,12 +193,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "french_elision", "finnish_stemmer"]
+        "filter" : ["lowercase", "french_elision"]
       },
       "contents_analyzer_fr" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "french_elision", "french_stop", "french_keywords", "french_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "french_elision", "french_stop", "french_keywords"]
       },
       "reading_analyzer_de" : {
         "type" : "custom",
@@ -212,12 +212,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "german_normalization", "german_stemmer"]
+        "filter" : ["lowercase", "german_normalization"]
       },
       "contents_analyzer_de" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords", "german_normalization", "german_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "german_stop", "german_keywords", "german_normalization"]
       },
       "reading_analyzer_el" : {
         "type" : "custom",
@@ -231,12 +231,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["greek_lowercase", "lowercase", "stemmer_en_filter", "greek_stemmer"]
+        "filter" : ["greek_lowercase", "lowercase"]
       },
       "contents_analyzer_el" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "greek_stop", "greek_keywords", "greek_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "greek_stop", "greek_keywords"]
       },
       "reading_analyzer_hu" : {
         "type" : "custom",
@@ -250,12 +250,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "hungarian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_hu" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "hungarian_stop", "hungarian_keywords", "hungarian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "hungarian_stop", "hungarian_keywords"]
       },
       "reading_analyzer_id" : {
         "type" : "custom",
@@ -269,12 +269,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "indonesian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_id" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "indonesian_stop", "indonesian_keywords", "indonesian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "indonesian_stop", "indonesian_keywords"]
       },
       "reading_analyzer_it" : {
         "type" : "custom",
@@ -288,12 +288,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "italian_elision", "italian_stemmer"]
+        "filter" : ["lowercase", "italian_elision"]
       },
       "contents_analyzer_it" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "italian_elision", "italian_stop", "italian_keywords", "italian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "italian_elision", "italian_stop", "italian_keywords"]
       },
       "reading_analyzer_lv" : {
         "type" : "custom",
@@ -307,12 +307,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "latvian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_lv" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "latvian_stop", "latvian_keywords", "latvian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "latvian_stop", "latvian_keywords"]
       },
       "reading_analyzer_lt" : {
         "type" : "custom",
@@ -326,12 +326,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "lithuanian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_lt" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "lithuanian_stop", "lithuanian_keywords", "lithuanian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "lithuanian_stop", "lithuanian_keywords"]
       },
       "reading_analyzer_no" : {
         "type" : "custom",
@@ -345,12 +345,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "norwegian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_no" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "norwegian_stop", "norwegian_keywords", "norwegian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "norwegian_stop", "norwegian_keywords"]
       },
       "reading_analyzer_fa" : {
         "type" : "custom",
@@ -364,12 +364,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "arabic_normalization", "persian_normalization"]
+        "filter" : ["lowercase", "arabic_normalization", "persian_normalization"]
       },
       "contents_analyzer_fa" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_normalization", "persian_normalization", "persian_stop"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "arabic_normalization", "persian_normalization", "persian_stop"]
       },
       "reading_analyzer_pt" : {
         "type" : "custom",
@@ -383,12 +383,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "portuguese_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_pt" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "portuguese_stop", "portuguese_keywords", "portuguese_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "portuguese_stop", "portuguese_keywords"]
       },
       "reading_analyzer_ro" : {
         "type" : "custom",
@@ -402,12 +402,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "romanian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_ro" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "romanian_stop", "romanian_keywords", "romanian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "romanian_stop", "romanian_keywords"]
       },
       "reading_analyzer_ru" : {
         "type" : "custom",
@@ -421,12 +421,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "russian_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_ru" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "russian_stop", "russian_keywords", "russian_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "russian_stop", "russian_keywords"]
       },
       "reading_analyzer_es" : {
         "type" : "custom",
@@ -440,12 +440,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "spanish_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_es" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "spanish_stop", "spanish_keywords", "spanish_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "spanish_stop", "spanish_keywords"]
       },
       "reading_analyzer_sv" : {
         "type" : "custom",
@@ -459,12 +459,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "swedish_stemmer"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_sv" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "swedish_stop", "swedish_keywords", "swedish_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "swedish_stop", "swedish_keywords"]
       },
       "reading_analyzer_tr" : {
         "type" : "custom",
@@ -478,12 +478,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter", "apostrophe", "turkish_lowercase", "turkish_stemmer"]
+        "filter" : ["lowercase", "apostrophe", "turkish_lowercase", "turkish_stemmer"]
       },
       "contents_analyzer_tr" : {
         "type" : "custom",
         "tokenizer" : "standard",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "apostrophe", "turkish_lowercase", "turkish_stop", "turkish_keywords", "turkish_stemmer"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "apostrophe", "turkish_lowercase", "turkish_stop", "turkish_keywords"]
       },
       "reading_analyzer_th" : {
         "type" : "custom",
@@ -497,12 +497,12 @@
         "type" : "custom",
         "tokenizer" : "keyword",
         "char_filter" : ["mapping_char"],
-        "filter" : ["lowercase", "stemmer_en_filter"]
+        "filter" : ["lowercase"]
       },
       "contents_analyzer_th" : {
         "type" : "custom",
         "tokenizer" : "thai",
-        "filter" : ["lowercase", "stemmer_en_filter", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "thai_stop"]
+        "filter" : ["lowercase", "stopword_en_filter", "content_length_filter", "limit_token_count_filter", "thai_stop"]
       }
     },
     "char_filter" : {
