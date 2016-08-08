@@ -48,6 +48,10 @@ import org.lastaflute.job.LaJob;
 import org.lastaflute.job.subsidiary.ConcurrentExec;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.lastaflute.web.validation.RequiredValidator;
+import org.lastaflute.web.validation.theme.typed.DoubleTypeValidator;
+import org.lastaflute.web.validation.theme.typed.FloatTypeValidator;
+import org.lastaflute.web.validation.theme.typed.IntegerTypeValidator;
+import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
@@ -1064,6 +1068,18 @@ public interface FessProp {
         return fieldSet;
     }
 
+    public default boolean validateIndexArrayFields(final Map<String, Object> source) {
+        return invalidIndexArrayFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexArrayFields(final Map<String, Object> source) {
+        // TODO always returns empty list
+        return stream(getIndexAdminArrayFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> false) // TODO
+                        .collect(Collectors.toList()));
+    }
+
     String getIndexAdminDateFields();
 
     public default Set<String> getIndexAdminDateFieldSet() {
@@ -1076,6 +1092,25 @@ public interface FessProp {
             propMap.put(INDEX_ADMIN_DATE_FIELD_SET, fieldSet);
         }
         return fieldSet;
+    }
+
+    public default boolean validateIndexDateFields(final Map<String, Object> source) {
+        return invalidIndexDateFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexDateFields(final Map<String, Object> source) {
+        return stream(getIndexAdminDateFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> !validateDateTimeString((String) source.get(s))).collect(Collectors.toList()));
+    }
+
+    public default boolean validateDateTimeString(final String str) {
+        try {
+            FessFunctions.parseDate(str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     String getIndexAdminIntegerFields();
@@ -1092,6 +1127,17 @@ public interface FessProp {
         return fieldSet;
     }
 
+    public default boolean validateIndexIntegerFields(final Map<String, Object> source) {
+        return invalidIndexIntegerFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexIntegerFields(final Map<String, Object> source) {
+        final IntegerTypeValidator integerValidator = new IntegerTypeValidator();
+        return stream(getIndexAdminIntegerFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> !integerValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+    }
+
     String getIndexAdminLongFields();
 
     public default Set<String> getIndexAdminLongFieldSet() {
@@ -1104,6 +1150,17 @@ public interface FessProp {
             propMap.put(INDEX_ADMIN_LONG_FIELD_SET, fieldSet);
         }
         return fieldSet;
+    }
+
+    public default boolean validateIndexLongFields(final Map<String, Object> source) {
+        return invalidIndexLongFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexLongFields(final Map<String, Object> source) {
+        final LongTypeValidator longValidator = new LongTypeValidator();
+        return stream(getIndexAdminLongFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> !longValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
     }
 
     String getIndexAdminFloatFields();
@@ -1120,6 +1177,17 @@ public interface FessProp {
         return fieldSet;
     }
 
+    public default boolean validateIndexFloatFields(final Map<String, Object> source) {
+        return invalidIndexFloatFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexFloatFields(final Map<String, Object> source) {
+        final FloatTypeValidator floatValidator = new FloatTypeValidator();
+        return stream(getIndexAdminFloatFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> !floatValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
+    }
+
     String getIndexAdminDoubleFields();
 
     public default Set<String> getIndexAdminDoubleFieldSet() {
@@ -1132,6 +1200,17 @@ public interface FessProp {
             propMap.put(INDEX_ADMIN_DOUBLE_FIELD_SET, fieldSet);
         }
         return fieldSet;
+    }
+
+    public default boolean validateIndexDoubleFields(final Map<String, Object> source) {
+        return invalidIndexDoubleFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexDoubleFields(final Map<String, Object> source) {
+        final DoubleTypeValidator doubleValidator = new DoubleTypeValidator();
+        return stream(getIndexAdminDoubleFields().split(",")).get(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
+                        .filter(s -> !doubleValidator.isValid((String) source.get(s), null)).collect(Collectors.toList()));
     }
 
     public default Map<String, Object> convertToEditableDoc(final Map<String, Object> source) {
@@ -1211,19 +1290,19 @@ public interface FessProp {
     String getIndexAdminRequiredFields();
 
     public default boolean validateIndexRequiredFields(final Map<String, Object> source) {
+        return invalidIndexRequiredFields(source).isEmpty();
+    }
+
+    public default List<String> invalidIndexRequiredFields(final Map<String, Object> source) {
         final RequiredValidator requiredValidator = new RequiredValidator();
         return stream(getIndexAdminRequiredFields().split(",")).get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim())
-                        .allMatch(s -> requiredValidator.isValid(source.get(s), null)));
+                        .filter(s -> !requiredValidator.isValid(source.get(s), null)).collect(Collectors.toList()));
     }
 
-    public static boolean isNonEmptyValue(final Object value) {
-        if (value == null) {
-            return false;
-        }
-        if (value instanceof String && StringUtil.isEmpty((String) value)) {
-            return false;
-        }
-        return true;
+    public default boolean isNonEmptyValue(final Object value) {
+        final RequiredValidator requiredValidator = new RequiredValidator();
+        return requiredValidator.isValid(value, null);
     }
+
 }
