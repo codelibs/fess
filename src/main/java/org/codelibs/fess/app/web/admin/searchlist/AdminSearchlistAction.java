@@ -248,6 +248,24 @@ public class AdminSearchlistAction extends FessAdminAction {
         if (!fessConfig.validateIndexRequiredFields(form.doc)) {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
         }
+        if (!fessConfig.validateIndexArrayFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexDateFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexIntegerFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexLongFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexFloatFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexDoubleFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        }
         verifyToken(() -> asEditHtml());
         getDoc(form).ifPresent(
                 entity -> {
@@ -277,6 +295,24 @@ public class AdminSearchlistAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.EDIT);
         validate(form, messages -> {}, () -> asEditHtml());
         if (!fessConfig.validateIndexRequiredFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexArrayFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexDateFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexIntegerFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexLongFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexFloatFields(form.doc)) {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
+        }
+        if (!fessConfig.validateIndexDoubleFields(form.doc)) {
             throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.docId), () -> asEditHtml());
         }
         verifyToken(() -> asEditHtml());
