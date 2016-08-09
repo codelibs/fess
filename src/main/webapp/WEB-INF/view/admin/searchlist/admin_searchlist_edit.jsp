@@ -310,11 +310,10 @@
 								<!-- /.box-body -->
 								<div class="box-footer">
 									<c:if test="${crudMode == 1}">
-										<button type="submit" class="btn btn-default" name="search"
-											value="<la:message key="labels.crud_button_back" />">
+										<la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
-										</button>
+										</la:link>
 										<button type="submit" class="btn btn-success" name="create"
 											value="<la:message key="labels.crud_button_create" />">
 											<i class="fa fa-plus"></i>
@@ -322,11 +321,10 @@
 										</button>
 									</c:if>
 									<c:if test="${crudMode == 2}">
-										<button type="submit" class="btn btn-default" name="search"
-											value="back">
+										<la:link href="/admin/searchlist/search?q=${f:u(q)}" styleClass="btn btn-default">
 											<i class="fa fa-arrow-circle-left"></i>
 											<la:message key="labels.crud_button_back" />
-										</button>
+										</la:link>
 										<button type="submit" class="btn btn-warning" name="update"
 											value="<la:message key="labels.crud_button_update" />">
 											<i class="fa fa-pencil"></i>
