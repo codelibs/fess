@@ -39,17 +39,19 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(WebDriverGenerator.class);
 
-    public WebDriver webDriver;
+    protected WebDriver webDriver;
 
-    public Capabilities webDriverCapabilities;
+    protected Capabilities webDriverCapabilities;
 
-    public int windowWidth = 1200;
+    protected int windowWidth = 1200;
 
-    public int windowHeight = 800;
+    protected int windowHeight = 800;
 
-    public int thumbnailWidth = 160;
+    protected int thumbnailWidth = 160;
 
-    public String imageFormatName = "png";
+    protected int thumbnailHeight = 160;
+
+    protected String imageFormatName = "png";
 
     @PostConstruct
     public void init() {
@@ -87,7 +89,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public void generate(final String url, final File outputFile) {
+    public boolean generate(final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate Thumbnail: " + url);
         }
@@ -96,7 +98,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
             if (logger.isDebugEnabled()) {
                 logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
             }
-            return;
+            return true;
         }
 
         final File parentFile = outputFile.getParentFile();
@@ -105,15 +107,17 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
         if (!parentFile.isDirectory()) {
             logger.warn("Not found: " + parentFile.getAbsolutePath());
-            return;
+            return false;
         }
 
         if (webDriver instanceof TakesScreenshot) {
             webDriver.get(url);
             final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
             convert(thumbnail, outputFile);
+            return true;
         } else {
             logger.warn("WebDriver is not instance of TakesScreenshot: " + webDriver);
+            return false;
         }
     }
 
@@ -128,10 +132,10 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     protected void convert(final File inputFile, final File outputFile) {
         try {
             final BufferedImage image = loadImage(inputFile);
-            final int thumbnailHeight = thumbnailWidth * image.getHeight() / windowWidth;
+            final int height = thumbnailWidth * image.getHeight() / windowWidth;
             final BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
-            thumbnailImage.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_AREA_AVERAGING), 0,
-                    0, thumbnailWidth, thumbnailHeight, null);
+            thumbnailImage.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, height, Image.SCALE_AREA_AVERAGING), 0, 0,
+                    thumbnailWidth, thumbnailHeight, null);
 
             ImageIO.write(thumbnailImage, imageFormatName, outputFile);
         } catch (final Exception e) {
@@ -144,6 +148,34 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         try (FileInputStream in = new FileInputStream(file)) {
             return ImageIO.read(in);
         }
+    }
+
+    public void setWebDriver(WebDriver webDriver) {
+        this.webDriver = webDriver;
+    }
+
+    public void setWebDriverCapabilities(Capabilities webDriverCapabilities) {
+        this.webDriverCapabilities = webDriverCapabilities;
+    }
+
+    public void setWindowWidth(int windowWidth) {
+        this.windowWidth = windowWidth;
+    }
+
+    public void setWindowHeight(int windowHeight) {
+        this.windowHeight = windowHeight;
+    }
+
+    public void setThumbnailWidth(int thumbnailWidth) {
+        this.thumbnailWidth = thumbnailWidth;
+    }
+
+    public void setImageFormatName(String imageFormatName) {
+        this.imageFormatName = imageFormatName;
+    }
+
+    public void setThumbnailHeight(int thumbnailHeight) {
+        this.thumbnailHeight = thumbnailHeight;
     }
 
 }

@@ -57,7 +57,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
     }
 
     @Override
-    public void generate(final String url, final File outputFile) {
+    public boolean generate(final String url, final File outputFile) {
         if (logger.isDebugEnabled()) {
             logger.debug("Generate Thumbnail: " + url);
         }
@@ -66,7 +66,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             if (logger.isDebugEnabled()) {
                 logger.debug("The thumbnail file exists: " + outputFile.getAbsolutePath());
             }
-            return;
+            return true;
         }
 
         final File parentFile = outputFile.getParentFile();
@@ -75,7 +75,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         }
         if (!parentFile.isDirectory()) {
             logger.warn("Not found: " + parentFile.getAbsolutePath());
-            return;
+            return false;
         }
 
         final String outputPath = outputFile.getAbsolutePath();
@@ -133,11 +133,13 @@ public class CommandGenerator extends BaseThumbnailGenerator {
             if (outputFile.delete()) {
                 logger.info("Deleted: " + outputFile.getAbsolutePath());
             }
+            return false;
         }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Thumbnail File: " + outputPath);
         }
+        return true;
     }
 
     protected static class ProcessDestroyer extends TimerTask {

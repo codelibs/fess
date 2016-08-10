@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface ThumbnailGenerator {
 
-    void generate(String url, File outputFile);
+    boolean generate(String url, File outputFile);
 
     boolean isTarget(Map<String, Object> docMap);
 

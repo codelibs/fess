@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 public class ThumbnailManager {
     private static final String DEFAULT_SCREENSHOT_DIR = "/WEB-INF/thumbnails";
 
+    private static final String NOIMAGE_FILE_SUFFIX = ".txt";
+
     private static final Logger logger = LoggerFactory.getLogger(ThumbnailManager.class);
 
     @Resource
@@ -50,21 +52,23 @@ public class ThumbnailManager {
 
     protected File baseDir;
 
-    public long shutdownTimeout = 5 * 60 * 1000L; // 5min
-
-    public int thumbnailPathCacheSize = 10;
-
     private final List<ThumbnailGenerator> generatorList = new ArrayList<>();
 
-    public String imageExtention = "png";
+    private BlockingQueue<ThumbnailTask> thumbnailTaskQueue;
 
-    public int splitSize = 5;
-
-    private final BlockingQueue<ThumbnailTask> thumbnailTaskQueue = new LinkedBlockingQueue<>();
-
-    private boolean generating;
+    private volatile boolean generating;
 
     private Thread thumbnailGeneratorThread;
+
+    protected int thumbnailPathCacheSize = 10;
+
+    protected String imageExtention = "png";
+
+    protected int splitSize = 5;
+
+    protected int thumbnailTaskQueueSize = 10000;
+
+    protected long noImageExpired = 24 * 60 * 60 * 1000; // 24 hours
 
     @PostConstruct
     public void init() {
@@ -90,6 +94,7 @@ public class ThumbnailManager {
             logger.debug("Thumbnail Directory: " + baseDir.getAbsolutePath());
         }
 
+        thumbnailTaskQueue = new LinkedBlockingQueue<>(thumbnailTaskQueueSize);
         generating = true;
         thumbnailGeneratorThread = new Thread((Runnable) () -> {
             while (generating) {
@@ -117,8 +122,17 @@ public class ThumbnailManager {
             if (generator.isTarget(docMap)) {
                 final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
                 final String path = getImageFilename(docMap);
-                if (!thumbnailTaskQueue.offer(new ThumbnailTask(url, new File(baseDir, path), generator))) {
-                    logger.warn("Failed to offer a thumbnail task: " + url + " -> " + path);
+                final File outputFile = new File(baseDir, path);
+                final File noImageFile = new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX);
+                if (!noImageFile.isFile() || System.currentTimeMillis() - noImageFile.lastModified() > noImageExpired) {
+                    if (noImageFile.isFile() && !noImageFile.delete()) {
+                        logger.warn("Failed to delete " + noImageFile.getAbsolutePath());
+                    }
+                    if (!thumbnailTaskQueue.offer(new ThumbnailTask(url, outputFile, generator))) {
+                        logger.warn("Failed to offer a thumbnail task: " + url + " -> " + path);
+                    }
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("No image file exists: " + noImageFile.getAbsolutePath());
                 }
                 break;
             }
@@ -187,6 +201,7 @@ public class ThumbnailManager {
     }
 
     protected static class ThumbnailTask {
+
         String url;
 
         File outputFile;
@@ -200,7 +215,9 @@ public class ThumbnailManager {
         }
 
         public void generate() {
-            generator.generate(url, outputFile);
+            if (!generator.generate(url, outputFile)) {
+                new File(outputFile.getAbsolutePath() + NOIMAGE_FILE_SUFFIX).setLastModified(System.currentTimeMillis());
+            }
         }
 
         @Override
@@ -241,6 +258,26 @@ public class ThumbnailManager {
             return true;
         }
 
+    }
+
+    public void setThumbnailPathCacheSize(int thumbnailPathCacheSize) {
+        this.thumbnailPathCacheSize = thumbnailPathCacheSize;
+    }
+
+    public void setImageExtention(String imageExtention) {
+        this.imageExtention = imageExtention;
+    }
+
+    public void setSplitSize(int splitSize) {
+        this.splitSize = splitSize;
+    }
+
+    public void setThumbnailTaskQueueSize(int thumbnailTaskQueueSize) {
+        this.thumbnailTaskQueueSize = thumbnailTaskQueueSize;
+    }
+
+    public void setNoImageExpired(long noImageExpired) {
+        this.noImageExpired = noImageExpired;
     }
 
 }
