@@ -24,7 +24,7 @@
 					<div class="col-md-12">
 						<div>
 							<la:info id="msg" message="true">
-								<div class="alert-message info">${msg}</div>
+								<div class="alert alert-info">${msg}</div>
 							</la:info>
 							<la:errors property="_global" />
 						</div>
