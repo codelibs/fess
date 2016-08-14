@@ -40,7 +40,7 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.8.3-RC9</lastaflute.version>
+		<lastaflute.version>0.8.3-RCC</lastaflute.version>
 		<lasta.taglib.version>0.7.1-RC2</lasta.taglib.version>
 		<lasta.job.version>0.2.2</lasta.job.version>
 		<mailflute.version>0.5.1</mailflute.version>
@@ -67,7 +67,8 @@
 		<cluster.runner.version>2.3.5.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.boot.version>0.5.0-RC2</tomcat.boot.version>
+		<tomcat.version>8.5.4</tomcat.version>
+		<tomcat.boot.version>0.5.0-RC3</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>
@@ -1248,22 +1249,28 @@
 			<version>${tomcat.boot.version}</version>
 			<!-- Disable scope at development on IDEA -->
 			<scope>provided</scope>
+		</dependency>
+		<dependency><!-- for jsp -->
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jasper</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
 			<exclusions>
-				<exclusion>
-					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-servlet-api</artifactId>
-				</exclusion>
 				<exclusion>
 					<groupId>org.apache.tomcat</groupId>
 					<artifactId>tomcat-api</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-util-scan</artifactId>
+					<artifactId>tomcat-juli</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.apache.tomcat</groupId>
-					<artifactId>tomcat-juli</artifactId>
+					<artifactId>tomcat-servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat</groupId>
+					<artifactId>tomcat-util-scan</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
