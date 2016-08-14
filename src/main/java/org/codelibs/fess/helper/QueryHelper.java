@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -113,6 +114,8 @@ public class QueryHelper {
     protected int highlightFragmentSize = 100;
 
     protected String additionalQuery;
+
+    protected boolean lowercaseWildcard = true;
 
     protected long timeAllowed = -1;
 
@@ -307,17 +310,26 @@ public class QueryHelper {
         return boolQuery;
     }
 
+    protected String toLowercaseWildcard(final String value) {
+        if (lowercaseWildcard) {
+            return value.toLowerCase(Locale.ROOT);
+        }
+        return value;
+    }
+
     protected QueryBuilder convertWildcardQuery(final QueryContext context, final WildcardQuery wildcardQuery, final float boost) {
         final String field = wildcardQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, wildcardQuery.getTerm().text()).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, toLowercaseWildcard(wildcardQuery.getTerm().text()))
+                    .boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, wildcardQuery.getTerm().text());
-            return QueryBuilders.wildcardQuery(field, wildcardQuery.getTerm().text()).boost(boost);
+            return QueryBuilders.wildcardQuery(field, toLowercaseWildcard(wildcardQuery.getTerm().text())).boost(boost);
         } else {
-            final String origQuery = wildcardQuery.getTerm().toString();
-            context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
+            final String query = wildcardQuery.getTerm().toString();
+            final String origQuery = toLowercaseWildcard(query);
+            context.addFieldLog(Constants.DEFAULT_FIELD, query);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.wildcardQuery(f, origQuery).boost(b * boost));
         }
@@ -327,13 +339,15 @@ public class QueryHelper {
         final String field = prefixQuery.getField();
         if (Constants.DEFAULT_FIELD.equals(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, prefixQuery.getPrefix().text()).boost(b * boost));
+            return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, toLowercaseWildcard(prefixQuery.getPrefix().text()))
+                    .boost(b * boost));
         } else if (isSearchField(field)) {
             context.addFieldLog(field, prefixQuery.getPrefix().text());
-            return QueryBuilders.prefixQuery(field, prefixQuery.getPrefix().text()).boost(boost);
+            return QueryBuilders.prefixQuery(field, toLowercaseWildcard(prefixQuery.getPrefix().text())).boost(boost);
         } else {
-            final String origQuery = prefixQuery.getPrefix().toString();
-            context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
+            final String query = prefixQuery.getPrefix().toString();
+            final String origQuery = toLowercaseWildcard(query);
+            context.addFieldLog(Constants.DEFAULT_FIELD, query);
             context.addHighlightedQuery(origQuery);
             return buildDefaultQueryBuilder((f, b) -> QueryBuilders.prefixQuery(f, origQuery).boost(b * boost));
         }
@@ -774,6 +788,10 @@ public class QueryHelper {
 
     public String generateId() {
         return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
+    }
+
+    public void setLowercaseWildcard(boolean lowercaseWildcard) {
+        this.lowercaseWildcard = lowercaseWildcard;
     }
 
 }
