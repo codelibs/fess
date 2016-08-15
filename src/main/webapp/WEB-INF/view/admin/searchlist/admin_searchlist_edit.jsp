@@ -115,8 +115,8 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.boost" />
 											<la:text property="doc.boost" styleClass="form-control"
-												pattern="\d+(\.\d*)?" title="Floating point number"
-												required="required" />
+												pattern="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
+												title="Floating point number" required="required" />
 										</div>
 									</div>
 									<div class="form-group">
