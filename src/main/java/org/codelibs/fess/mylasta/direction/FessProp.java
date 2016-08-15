@@ -1101,16 +1101,14 @@ public interface FessProp {
     public default List<String> invalidIndexDateFields(final Map<String, Object> source) {
         return stream(getIndexAdminDateFields().split(",")).get(
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).filter(s -> isNonEmptyValue(source.get(s)))
-                        .filter(s -> !validateDateTimeString((String) source.get(s))).collect(Collectors.toList()));
+                        .filter(s -> !validateDateTimeString(source.get(s))).collect(Collectors.toList()));
     }
 
-    public default boolean validateDateTimeString(final String str) {
-        try {
-            FessFunctions.parseDate(str);
+    public default boolean validateDateTimeString(final Object obj) {
+        if (FessFunctions.parseDate(obj.toString()) != null) {
             return true;
-        } catch (Exception e) {
-            return false;
         }
+        return false;
     }
 
     String getIndexAdminIntegerFields();
