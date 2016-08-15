@@ -115,6 +115,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.boost" />
 											<la:text property="doc.boost" styleClass="form-control"
+												pattern="\d+(\.\d*)?" title="Floating point number"
 												required="required" />
 										</div>
 									</div>
@@ -245,7 +246,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_length" />
 											<la:text property="doc.content_length"
-												styleClass="form-control" />
+												styleClass="form-control" pattern="\d+" title="Integer" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -267,43 +268,52 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.favorite_count" />
 											<la:text property="doc.favorite_count"
-												styleClass="form-control" />
+												styleClass="form-control" pattern="\d+" title="Integer" />
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="click_count" class="col-sm-3 control-label">click_count</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.click_count" />
-											<la:text property="doc.click_count" styleClass="form-control" />
+											<la:text property="doc.click_count" styleClass="form-control"
+												pattern="\d+" title="Integer"/>
 										</div>
 									</div>
 									<div class="form-group">
 									    <label for="created" class="col-sm-3 control-label">created</label>
 									    <div class="col-sm-9">
 										<la:errors property="doc.created" />
-										<la:text property="doc.created" styleClass="form-control" />
-									    </div>
+											<la:text property="doc.created" styleClass="form-control"
+												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
+										</div>
 									</div>
 									<div class="form-group">
 										<label for="timestamp" class="col-sm-3 control-label">timestamp</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.timestamp" />
-											<la:text property="doc.timestamp" styleClass="form-control" />
+											<la:text property="doc.timestamp" styleClass="form-control"
+												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
 									<div class="form-group">
 									    <label for="last_modified" class="col-sm-3 control-label">last_modified</label>
 									    <div class="col-sm-9">
 										<la:errors property="doc.last_modified" />
-										<la:text property="doc.last_modified"
-											 styleClass="form-control" />
+											<la:text property="doc.last_modified"
+												styleClass="form-control"
+												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 									    </div>
 									</div>
 									<div class="form-group">
 										<label for="expires" class="col-sm-3 control-label">expires</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.expires" />
-											<la:text property="doc.expires" styleClass="form-control" />
+											<la:text property="doc.expires" styleClass="form-control"
+												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
 								</div>
