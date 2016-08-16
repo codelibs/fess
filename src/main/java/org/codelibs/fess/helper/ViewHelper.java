@@ -322,12 +322,11 @@ public class ViewHelper {
     }
 
     protected String appendPDFSearchWord(final String url) {
-        @SuppressWarnings("unchecked")
-        final Set<String> queries = (Set<String>) LaRequestUtil.getRequest().getAttribute(Constants.HIGHLIGHT_QUERIES);
+        final String queries = (String) LaRequestUtil.getRequest().getAttribute(Constants.REQUEST_QUERIES);
         if (queries != null) {
             final StringBuilder buf = new StringBuilder(url.length() + 100);
             buf.append(url).append("#search=%22");
-            buf.append(String.join(" ", queries.toArray(new String[queries.size()])));
+            buf.append(queries); // TODO encode
             buf.append("%22");
             return buf.toString();
         }

@@ -145,9 +145,11 @@ public class Constants extends CoreLibConstants {
 
     public static final String PURGE_SUGGEST_SEARCH_LOG_DAY_PROPERTY = "purge.suggest.searchlog.day";
 
-    public static final String HIGHLIGHT_QUERIES = "org.codelibs.fess.Queries";
+    public static final String REQUEST_QUERIES = "fess.Queries";
 
-    public static final String FIELD_LOGS = "org.codelibs.fess.FieldLogs";
+    public static final String HIGHLIGHT_QUERIES = "fess.HighlightQueries";
+
+    public static final String FIELD_LOGS = "fess.FieldLogs";
 
     public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
@@ -267,15 +269,15 @@ public class Constants extends CoreLibConstants {
 
     // view parameters
 
-    public static final String FACET_QUERY = "org.codelibs.fess.tag.FacetQuery";
+    public static final String FACET_QUERY = "fess.FacetQuery";
 
-    public static final String GEO_QUERY = "org.codelibs.fess.tag.GeoQuery";
+    public static final String GEO_QUERY = "fess.GeoQuery";
 
-    public static final String FACET_FORM = "org.codelibs.fess.tag.FacetForm";
+    public static final String FACET_FORM = "fess.FacetForm";
 
-    public static final String GEO_FORM = "org.codelibs.fess.tag.GeoForm";
+    public static final String GEO_FORM = "fess.GeoForm";
 
-    public static final String LABEL_VALUE_MAP = "org.codelibs.fess.LabelValueMap";
+    public static final String LABEL_VALUE_MAP = "fess.LabelValueMap";
 
     public static final String OPTION_QUERY_Q = "q";
 
