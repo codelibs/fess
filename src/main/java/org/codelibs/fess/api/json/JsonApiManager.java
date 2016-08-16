@@ -585,11 +585,11 @@ public class JsonApiManager extends BaseApiManager {
 
     }
 
-    protected static String escapeCallbackName(final String callbackName) {
+    public static String escapeCallbackName(final String callbackName) {
         return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
     }
 
-    protected static String escapeJson(final Object obj) {
+    public static String escapeJson(final Object obj) {
         if (obj == null) {
             return "null";
         }
@@ -630,7 +630,7 @@ public class JsonApiManager extends BaseApiManager {
         return buf.toString();
     }
 
-    protected static String escapeJsonString(final String str) {
+    public static String escapeJsonString(final String str) {
 
         final StringBuilder out = new StringBuilder(str.length() * 2);
         int sz;

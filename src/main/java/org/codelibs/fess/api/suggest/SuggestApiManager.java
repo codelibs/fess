@@ -104,13 +104,13 @@ public class SuggestApiManager extends BaseApiManager {
                     }
                     first = false;
 
-                    buf.append("{\"text\":\"").append(item.getText()).append('\"');
+                    buf.append("{\"text\":\"").append(JsonApiManager.escapeJsonString(item.getText())).append('\"');
                     buf.append(",\"tags\":[");
                     for (int i = 0; i < item.getTags().length; i++) {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(item.getTags()[i]).append('\"');
+                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getTags()[i])).append('\"');
                     }
                     buf.append(']');
 
@@ -119,7 +119,7 @@ public class SuggestApiManager extends BaseApiManager {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(item.getRoles()[i]).append('\"');
+                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getRoles()[i])).append('\"');
                     }
                     buf.append(']');
 
@@ -128,7 +128,7 @@ public class SuggestApiManager extends BaseApiManager {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(item.getFields()[i]).append('\"');
+                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getFields()[i])).append('\"');
                     }
                     buf.append(']');
 
