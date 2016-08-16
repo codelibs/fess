@@ -48,7 +48,6 @@ $(function() {
 			var hashStr = url.substring(hashIndex);
 			buf.push('&hash=');
 			buf.push(encodeURIComponent(hashStr));
-			buf.push(hashStr);
 		}
 
 		$(this).attr('href', buf.join(''));
