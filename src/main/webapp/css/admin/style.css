@@ -72,7 +72,7 @@ ul.has-error {
 	box-shadow: none;
 }
 
-input[type="file"].form-control {
+input[type="file"].form-control:not([type="file"]) {
 	height: 0% !important;
 }
 
