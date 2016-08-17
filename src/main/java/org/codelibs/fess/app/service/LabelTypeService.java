@@ -60,6 +60,11 @@ public class LabelTypeService {
         labelTypeBhv.delete(labelType, op -> {
             op.setRefresh(true);
         });
+
+        final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
+        if (labelTypeHelper != null) {
+            labelTypeHelper.refresh(getLabelTypeList());
+        }
     }
 
     protected void setupListCondition(final LabelTypeCB cb, final LabelTypePager labelTypePager) {
