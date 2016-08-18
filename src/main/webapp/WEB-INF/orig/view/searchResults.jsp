@@ -27,75 +27,89 @@
 		<ol>
 			<c:forEach var="doc" varStatus="s" items="${documentItems}">
 				<li id="result${s.index}">
-					<h3 class="title ellipsis">
-						<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
-							data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
-					</h3>
-					<div class="body">
-						<div class="description">${doc.content_description}</div>
-						<div class="site ellipsis">
-							<cite>${f:h(doc.site_path)}</cite>
-							<c:if test="${doc.has_cache=='true'}">
-								<small class="hidden-md-down"> <la:link
-										href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
-										class="cache">
-										<la:message key="labels.search_result_cache" />
-									</la:link>
-								</small>
-							</c:if>
+					<div class="media">
+						<c:if test="${thumbnailSupport}">
+						<div class="thumbnailBox media-left">
+							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
+								data-id="${doc.doc_id}" data-order="${s.index}">
+								<img
+									src="${f:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
+									class="thumbnail">
+							</a>
 						</div>
-						<div class="more hidden-md-up">
-							<a href="#result${s.index}"><la:message
-									key="labels.search_result_more" /></a>
-						</div>
-						<div class="info">
-							<small> <c:if
-									test="${doc.created!=null && doc.created!=''}">
-									<c:set var="hasInfo" value="true" />
-									<la:message key="labels.search_result_created" />
-									<fmt:formatDate value="${fe:parseDate(doc.created)}"
-										type="BOTH" pattern="yyyy-MM-dd HH:mm" />
-								</c:if> <c:if
-									test="${doc.last_modified!=null && doc.last_modified!=''}">
-									<c:if test="${hasInfo}">
-										<span class="br-xs"></span>
-										<span class="hidden-xs">-</span>
+						</c:if>
+						<div class="media-body">
+							<h3 class="title ellipsis media-heading">
+								<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
+									data-id="${doc.doc_id}" data-order="${s.index}">${f:h(doc.content_title)}</a>
+							</h3>
+							<div class="body">
+								<div class="description">${doc.content_description}</div>
+								<div class="site ellipsis">
+									<cite>${f:h(doc.site_path)}</cite>
+									<c:if test="${doc.has_cache=='true'}">
+										<small class="hidden-md-down"> <la:link
+												href="/cache/?docId=${doc.doc_id}${appendHighlightParams}"
+												class="cache">
+												<la:message key="labels.search_result_cache" />
+											</la:link>
+										</small>
 									</c:if>
-									<c:set var="hasInfo" value="true" />
-									<la:message key="labels.search_result_last_modified" />
-									<fmt:formatDate value="${fe:parseDate(doc.last_modified)}"
-										type="BOTH" pattern="yyyy-MM-dd HH:mm" />
-								</c:if> <c:if
-									test="${doc.content_length!=null && doc.content_length!=''}">
-									<c:if test="${hasInfo}">
-										<span class="br-xs"></span>
-										<span class="hidden-xs">-</span>
-									</c:if>
-									<c:set var="hasInfo" value="true" />
-									<la:message key="labels.search_result_size"
-										arg0="${fe:formatNumber(doc.content_length)}" />
-								</c:if> <c:if test="${searchLogSupport}">
-									<c:if test="${hasInfo}">
-										<span class="br-xs"></span>
-										<span class="hidden-xs">-</span>
-									</c:if>
-									<c:set var="hasInfo" value="true" />
-									<la:message key="labels.search_click_count"
-										arg0="${f:h(doc.click_count)}" />
-								</c:if> <c:if test="${favoriteSupport}">
-									<c:if test="${hasInfo}">
-										<span class="br-xs"></span>
-										<span class="hidden-xs">-</span>
-									</c:if>
-									<c:set var="hasInfo" value="true" />
-									<a href="#${doc.doc_id}" class="favorite"><la:message
-											key="labels.search_result_favorite" />
-										(${f:h(doc.favorite_count)})</a>
-									<span class="favorited"><la:message
-											key="labels.search_result_favorited" /> <span
-										class="favorited-count">(${f:h(doc.favorite_count)})</span></span>
-								</c:if>
-							</small>
+								</div>
+								<div class="more hidden-md-up">
+									<a href="#result${s.index}"><la:message
+											key="labels.search_result_more" /></a>
+								</div>
+								<div class="info">
+									<small> <c:if
+											test="${doc.created!=null && doc.created!=''}">
+											<c:set var="hasInfo" value="true" />
+											<la:message key="labels.search_result_created" />
+											<fmt:formatDate value="${fe:parseDate(doc.created)}"
+												type="BOTH" pattern="yyyy-MM-dd HH:mm" />
+										</c:if> <c:if
+											test="${doc.last_modified!=null && doc.last_modified!=''}">
+											<c:if test="${hasInfo}">
+												<span class="br-xs"></span>
+												<span class="hidden-xs">-</span>
+											</c:if>
+											<c:set var="hasInfo" value="true" />
+											<la:message key="labels.search_result_last_modified" />
+											<fmt:formatDate value="${fe:parseDate(doc.last_modified)}"
+												type="BOTH" pattern="yyyy-MM-dd HH:mm" />
+										</c:if> <c:if
+											test="${doc.content_length!=null && doc.content_length!=''}">
+											<c:if test="${hasInfo}">
+												<span class="br-xs"></span>
+												<span class="hidden-xs">-</span>
+											</c:if>
+											<c:set var="hasInfo" value="true" />
+											<la:message key="labels.search_result_size"
+												arg0="${fe:formatNumber(doc.content_length)}" />
+										</c:if> <c:if test="${searchLogSupport}">
+											<c:if test="${hasInfo}">
+												<span class="br-xs"></span>
+												<span class="hidden-xs">-</span>
+											</c:if>
+											<c:set var="hasInfo" value="true" />
+											<la:message key="labels.search_click_count"
+												arg0="${f:h(doc.click_count)}" />
+										</c:if> <c:if test="${favoriteSupport}">
+											<c:if test="${hasInfo}">
+												<span class="br-xs"></span>
+												<span class="hidden-xs">-</span>
+											</c:if>
+											<c:set var="hasInfo" value="true" />
+											<a href="#${doc.doc_id}" class="favorite"><la:message
+													key="labels.search_result_favorite" />
+												(${f:h(doc.favorite_count)})</a>
+											<span class="favorited"><la:message
+													key="labels.search_result_favorited" /> <span
+												class="favorited-count">(${f:h(doc.favorite_count)})</span></span>
+										</c:if>
+									</small>
+								</div>
+							</div>
 						</div>
 					</div>
 				</li>
