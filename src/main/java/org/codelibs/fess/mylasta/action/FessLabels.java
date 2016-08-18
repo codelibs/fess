@@ -15,13 +15,13 @@
  */
 package org.codelibs.fess.mylasta.action;
 
-import org.lastaflute.web.ruts.message.ActionMessages;
+import org.lastaflute.core.message.UserMessages;
 
 /**
  * The keys for message.
  * @author FreeGen
  */
-public class FessLabels extends ActionMessages {
+public class FessLabels extends UserMessages {
 
     /** The serial version UID for object serialization. (Default) */
     private static final long serialVersionUID = 1L;

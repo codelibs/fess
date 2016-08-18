@@ -32,6 +32,7 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     public void test_maxUsernameLength() throws IOException {
+        FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public Integer getLdapMaxUsernameLengthAsInteger() {
@@ -52,6 +53,7 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     public void test_maxUsernameLength10() throws IOException {
+        FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public Integer getLdapMaxUsernameLengthAsInteger() {
@@ -73,6 +75,7 @@ public class FessPropTest extends UnitFessTestCase {
     }
 
     public void test_validateIndexRequiredFields() {
+        FessProp.propMap.clear();
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getIndexAdminRequiredFields() {
@@ -99,5 +102,20 @@ public class FessPropTest extends UnitFessTestCase {
         source.put("aaa", "a");
         source.put("bbb", "a");
         assertTrue(fessConfig.validateIndexRequiredFields(source));
+    }
+
+    public void test_getCrawlerDocumentSpaceCharsAsArray() {
+        FessProp.propMap.clear();
+        FessConfig fessConfig = new FessConfig.SimpleImpl() {
+            @Override
+            public String getCrawlerDocumentSpaceChars() {
+                return "\u0020\u3000";
+            }
+        };
+
+        int[] spaceChars = fessConfig.getCrawlerDocumentSpaceCharsAsArray();
+        assertEquals(2, spaceChars.length);
+        assertEquals(32, spaceChars[0]);
+        assertEquals(12288, spaceChars[1]);
     }
 }

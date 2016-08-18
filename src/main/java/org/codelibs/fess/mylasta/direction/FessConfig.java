@@ -140,6 +140,11 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED = "crawler.document.duplicate.term.removed";
 
+    /** The key of the configuration. e.g. 	
+    
+       ᠎           ​  　﻿�¶ */
+    String CRAWLER_DOCUMENT_SPACE_CHARS = "crawler.document.space.chars";
+
     /** The key of the configuration. e.g. UTF-8 */
     String CRAWLER_CRAWLING_DATA_ENCODING = "crawler.crawling.data.encoding";
 
@@ -361,7 +366,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_ADMIN_INTEGER_FIELDS = "index.admin.integer.fields";
 
-    /** The key of the configuration. e.g. favorite_count,click_count */
+    /** The key of the configuration. e.g. content_length,favorite_count,click_count */
     String INDEX_ADMIN_LONG_FIELDS = "index.admin.long.fields";
 
     /** The key of the configuration. e.g. boost */
@@ -370,7 +375,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g.  */
     String INDEX_ADMIN_DOUBLE_FIELDS = "index.admin.double.fields";
 
-    /** The key of the configuration. e.g. doc_id,url,title,role */
+    /** The key of the configuration. e.g. doc_id,url,title,role,boost */
     String INDEX_ADMIN_REQUIRED_FIELDS = "index.admin.required.fields";
 
     /** The key of the configuration. e.g. 3m */
@@ -1340,6 +1345,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isCrawlerDocumentDuplicateTermRemoved();
 
     /**
+     * Get the value for the key 'crawler.document.space.chars'. <br>
+     * The value is, e.g. 	
+    
+       ᠎           ​  　﻿�¶ <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerDocumentSpaceChars();
+
+    /**
      * Get the value for the key 'crawler.crawling.data.encoding'. <br>
      * The value is, e.g. UTF-8 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2041,7 +2055,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.long.fields'. <br>
-     * The value is, e.g. favorite_count,click_count <br>
+     * The value is, e.g. content_length,favorite_count,click_count <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminLongFields();
@@ -2070,7 +2084,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.admin.required.fields'. <br>
-     * The value is, e.g. doc_id,url,title,role <br>
+     * The value is, e.g. doc_id,url,title,role,boost <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexAdminRequiredFields();
@@ -4257,6 +4271,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerDocumentDuplicateTermRemoved() {
             return is(FessConfig.CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED);
+        }
+
+        public String getCrawlerDocumentSpaceChars() {
+            return get(FessConfig.CRAWLER_DOCUMENT_SPACE_CHARS);
         }
 
         public String getCrawlerCrawlingDataEncoding() {

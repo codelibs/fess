@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.mylasta.action;
 
-import org.lastaflute.web.ruts.message.ActionMessage;
+import org.lastaflute.core.message.UserMessage;
 
 /**
  * The keys for message.
@@ -424,7 +424,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsHeader(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_HEADER));
+        add(property, new UserMessage(ERRORS_HEADER));
         return this;
     }
 
@@ -438,7 +438,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFooter(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_FOOTER));
+        add(property, new UserMessage(ERRORS_FOOTER));
         return this;
     }
 
@@ -452,7 +452,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsPrefix(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_PREFIX));
+        add(property, new UserMessage(ERRORS_PREFIX));
         return this;
     }
 
@@ -466,7 +466,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsSuffix(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_SUFFIX));
+        add(property, new UserMessage(ERRORS_SUFFIX));
         return this;
     }
 
@@ -482,7 +482,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsAssertFalseMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_AssertFalse_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_AssertFalse_MESSAGE, item));
         return this;
     }
 
@@ -497,7 +497,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsAssertTrueMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_AssertTrue_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_AssertTrue_MESSAGE, item));
         return this;
     }
 
@@ -513,7 +513,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsDecimalMaxMessage(String property, String item, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_DecimalMax_MESSAGE, item, value));
+        add(property, new UserMessage(CONSTRAINTS_DecimalMax_MESSAGE, item, value));
         return this;
     }
 
@@ -529,7 +529,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsDecimalMinMessage(String property, String item, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_DecimalMin_MESSAGE, item, value));
+        add(property, new UserMessage(CONSTRAINTS_DecimalMin_MESSAGE, item, value));
         return this;
     }
 
@@ -546,7 +546,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsDigitsMessage(String property, String item, String integer, String fraction) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Digits_MESSAGE, item, integer, fraction));
+        add(property, new UserMessage(CONSTRAINTS_Digits_MESSAGE, item, integer, fraction));
         return this;
     }
 
@@ -561,7 +561,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsFutureMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Future_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_Future_MESSAGE, item));
         return this;
     }
 
@@ -577,7 +577,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsMaxMessage(String property, String item, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Max_MESSAGE, item, value));
+        add(property, new UserMessage(CONSTRAINTS_Max_MESSAGE, item, value));
         return this;
     }
 
@@ -593,7 +593,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsMinMessage(String property, String item, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Min_MESSAGE, item, value));
+        add(property, new UserMessage(CONSTRAINTS_Min_MESSAGE, item, value));
         return this;
     }
 
@@ -608,7 +608,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsNotNullMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_NotNull_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_NotNull_MESSAGE, item));
         return this;
     }
 
@@ -623,7 +623,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsNullMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Null_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_Null_MESSAGE, item));
         return this;
     }
 
@@ -638,7 +638,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsPastMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Past_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_Past_MESSAGE, item));
         return this;
     }
 
@@ -654,7 +654,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsPatternMessage(String property, String item, String regexp) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Pattern_MESSAGE, item, regexp));
+        add(property, new UserMessage(CONSTRAINTS_Pattern_MESSAGE, item, regexp));
         return this;
     }
 
@@ -671,7 +671,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsSizeMessage(String property, String item, String min, String max) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Size_MESSAGE, item, min, max));
+        add(property, new UserMessage(CONSTRAINTS_Size_MESSAGE, item, min, max));
         return this;
     }
 
@@ -687,7 +687,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsCreditCardNumberMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_CreditCardNumber_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_CreditCardNumber_MESSAGE, item));
         return this;
     }
 
@@ -703,7 +703,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsEanMessage(String property, String item, String type) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_EAN_MESSAGE, item, type));
+        add(property, new UserMessage(CONSTRAINTS_EAN_MESSAGE, item, type));
         return this;
     }
 
@@ -718,7 +718,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsEmailMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Email_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_Email_MESSAGE, item));
         return this;
     }
 
@@ -735,7 +735,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsLengthMessage(String property, String item, String min, String max) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Length_MESSAGE, item, min, max));
+        add(property, new UserMessage(CONSTRAINTS_Length_MESSAGE, item, min, max));
         return this;
     }
 
@@ -750,7 +750,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsLuhnCheckMessage(String property, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_LuhnCheck_MESSAGE, value));
+        add(property, new UserMessage(CONSTRAINTS_LuhnCheck_MESSAGE, value));
         return this;
     }
 
@@ -765,7 +765,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsMod10CheckMessage(String property, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Mod10Check_MESSAGE, value));
+        add(property, new UserMessage(CONSTRAINTS_Mod10Check_MESSAGE, value));
         return this;
     }
 
@@ -780,7 +780,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsMod11CheckMessage(String property, String value) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Mod11Check_MESSAGE, value));
+        add(property, new UserMessage(CONSTRAINTS_Mod11Check_MESSAGE, value));
         return this;
     }
 
@@ -796,7 +796,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsModCheckMessage(String property, String value, String modType) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_ModCheck_MESSAGE, value, modType));
+        add(property, new UserMessage(CONSTRAINTS_ModCheck_MESSAGE, value, modType));
         return this;
     }
 
@@ -811,7 +811,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsNotBlankMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_NotBlank_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_NotBlank_MESSAGE, item));
         return this;
     }
 
@@ -826,7 +826,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsNotEmptyMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_NotEmpty_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_NotEmpty_MESSAGE, item));
         return this;
     }
 
@@ -841,7 +841,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsParametersScriptAssertMessage(String property, String script) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_ParametersScriptAssert_MESSAGE, script));
+        add(property, new UserMessage(CONSTRAINTS_ParametersScriptAssert_MESSAGE, script));
         return this;
     }
 
@@ -858,7 +858,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsRangeMessage(String property, String item, String min, String max) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Range_MESSAGE, item, min, max));
+        add(property, new UserMessage(CONSTRAINTS_Range_MESSAGE, item, min, max));
         return this;
     }
 
@@ -873,7 +873,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsSafeHtmlMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_SafeHtml_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_SafeHtml_MESSAGE, item));
         return this;
     }
 
@@ -888,7 +888,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsScriptAssertMessage(String property, String script) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_ScriptAssert_MESSAGE, script));
+        add(property, new UserMessage(CONSTRAINTS_ScriptAssert_MESSAGE, script));
         return this;
     }
 
@@ -903,7 +903,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsUrlMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_URL_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_URL_MESSAGE, item));
         return this;
     }
 
@@ -918,7 +918,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsRequiredMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_Required_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_Required_MESSAGE, item));
         return this;
     }
 
@@ -933,7 +933,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsTypeIntegerMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_TypeInteger_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_TypeInteger_MESSAGE, item));
         return this;
     }
 
@@ -948,7 +948,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsTypeLongMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_TypeLong_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_TypeLong_MESSAGE, item));
         return this;
     }
 
@@ -963,7 +963,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsTypeFloatMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_TypeFloat_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_TypeFloat_MESSAGE, item));
         return this;
     }
 
@@ -978,7 +978,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsTypeDoubleMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_TypeDouble_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_TypeDouble_MESSAGE, item));
         return this;
     }
 
@@ -994,7 +994,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsTypeAnyMessage(String property, String item, String propertyType) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_TypeAny_MESSAGE, item, propertyType));
+        add(property, new UserMessage(CONSTRAINTS_TypeAny_MESSAGE, item, propertyType));
         return this;
     }
 
@@ -1009,7 +1009,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsUriTypeMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_UriType_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_UriType_MESSAGE, item));
         return this;
     }
 
@@ -1024,7 +1024,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addConstraintsCronExpressionMessage(String property, String item) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(CONSTRAINTS_CronExpression_MESSAGE, item));
+        add(property, new UserMessage(CONSTRAINTS_CronExpression_MESSAGE, item));
         return this;
     }
 
@@ -1039,7 +1039,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsLoginFailure(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_LOGIN_FAILURE));
+        add(property, new UserMessage(ERRORS_LOGIN_FAILURE));
         return this;
     }
 
@@ -1053,7 +1053,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsAppIllegalTransition(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_APP_ILLEGAL_TRANSITION));
+        add(property, new UserMessage(ERRORS_APP_ILLEGAL_TRANSITION));
         return this;
     }
 
@@ -1067,7 +1067,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsAppDbAlreadyDeleted(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_APP_DB_ALREADY_DELETED));
+        add(property, new UserMessage(ERRORS_APP_DB_ALREADY_DELETED));
         return this;
     }
 
@@ -1081,7 +1081,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsAppDbAlreadyUpdated(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_APP_DB_ALREADY_UPDATED));
+        add(property, new UserMessage(ERRORS_APP_DB_ALREADY_UPDATED));
         return this;
     }
 
@@ -1095,7 +1095,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsAppDbAlreadyExists(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_APP_DB_ALREADY_EXISTS));
+        add(property, new UserMessage(ERRORS_APP_DB_ALREADY_EXISTS));
         return this;
     }
 
@@ -1109,7 +1109,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsAppDoubleSubmitRequest(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_APP_DOUBLE_SUBMIT_REQUEST));
+        add(property, new UserMessage(ERRORS_APP_DOUBLE_SUBMIT_REQUEST));
         return this;
     }
 
@@ -1123,7 +1123,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsLoginError(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_login_error));
+        add(property, new UserMessage(ERRORS_login_error));
         return this;
     }
 
@@ -1137,7 +1137,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsSsoLoginError(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_sso_login_error));
+        add(property, new UserMessage(ERRORS_sso_login_error));
         return this;
     }
 
@@ -1152,7 +1152,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCouldNotFindLogFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_could_not_find_log_file, arg0));
+        add(property, new UserMessage(ERRORS_could_not_find_log_file, arg0));
         return this;
     }
 
@@ -1166,7 +1166,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToStartCrawlProcess(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_start_crawl_process));
+        add(property, new UserMessage(ERRORS_failed_to_start_crawl_process));
         return this;
     }
 
@@ -1180,7 +1180,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidDesignJspFileName(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_design_jsp_file_name));
+        add(property, new UserMessage(ERRORS_invalid_design_jsp_file_name));
         return this;
     }
 
@@ -1194,7 +1194,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDesignJspFileDoesNotExist(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_design_jsp_file_does_not_exist));
+        add(property, new UserMessage(ERRORS_design_jsp_file_does_not_exist));
         return this;
     }
 
@@ -1208,7 +1208,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDesignFileNameIsNotFound(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_design_file_name_is_not_found));
+        add(property, new UserMessage(ERRORS_design_file_name_is_not_found));
         return this;
     }
 
@@ -1222,7 +1222,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToWriteDesignImageFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_write_design_image_file));
+        add(property, new UserMessage(ERRORS_failed_to_write_design_image_file));
         return this;
     }
 
@@ -1236,7 +1236,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUpdateJspFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_update_jsp_file));
+        add(property, new UserMessage(ERRORS_failed_to_update_jsp_file));
         return this;
     }
 
@@ -1250,7 +1250,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDesignFileNameIsInvalid(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_design_file_name_is_invalid));
+        add(property, new UserMessage(ERRORS_design_file_name_is_invalid));
         return this;
     }
 
@@ -1264,7 +1264,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDesignFileIsUnsupportedType(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_design_file_is_unsupported_type));
+        add(property, new UserMessage(ERRORS_design_file_is_unsupported_type));
         return this;
     }
 
@@ -1278,7 +1278,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToCreateCrawlingConfigAtWizard(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_create_crawling_config_at_wizard));
+        add(property, new UserMessage(ERRORS_failed_to_create_crawling_config_at_wizard));
         return this;
     }
 
@@ -1292,7 +1292,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDesignEditorDisabled(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_design_editor_disabled));
+        add(property, new UserMessage(ERRORS_design_editor_disabled));
         return this;
     }
 
@@ -1307,7 +1307,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsNotFoundOnFileSystem(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_not_found_on_file_system, arg0));
+        add(property, new UserMessage(ERRORS_not_found_on_file_system, arg0));
         return this;
     }
 
@@ -1322,7 +1322,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCouldNotOpenOnSystem(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_could_not_open_on_system, arg0));
+        add(property, new UserMessage(ERRORS_could_not_open_on_system, arg0));
         return this;
     }
 
@@ -1336,7 +1336,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsResultSizeExceeded(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_result_size_exceeded));
+        add(property, new UserMessage(ERRORS_result_size_exceeded));
         return this;
     }
 
@@ -1351,7 +1351,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsTargetFileDoesNotExist(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_target_file_does_not_exist, arg0));
+        add(property, new UserMessage(ERRORS_target_file_does_not_exist, arg0));
         return this;
     }
 
@@ -1366,7 +1366,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDeleteFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_delete_file, arg0));
+        add(property, new UserMessage(ERRORS_failed_to_delete_file, arg0));
         return this;
     }
 
@@ -1381,7 +1381,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDocidNotFound(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_docid_not_found, arg0));
+        add(property, new UserMessage(ERRORS_docid_not_found, arg0));
         return this;
     }
 
@@ -1396,7 +1396,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsDocumentNotFound(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_document_not_found, arg0));
+        add(property, new UserMessage(ERRORS_document_not_found, arg0));
         return this;
     }
 
@@ -1411,7 +1411,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsNotLoadFromServer(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_not_load_from_server, arg0));
+        add(property, new UserMessage(ERRORS_not_load_from_server, arg0));
         return this;
     }
 
@@ -1426,7 +1426,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToStartJob(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_start_job, arg0));
+        add(property, new UserMessage(ERRORS_failed_to_start_job, arg0));
         return this;
     }
 
@@ -1441,7 +1441,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToStopJob(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_stop_job, arg0));
+        add(property, new UserMessage(ERRORS_failed_to_stop_job, arg0));
         return this;
     }
 
@@ -1455,7 +1455,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadSynonymFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_synonym_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_synonym_file));
         return this;
     }
 
@@ -1469,7 +1469,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadSynonymFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_synonym_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_synonym_file));
         return this;
     }
 
@@ -1483,7 +1483,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_kuromoji_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_kuromoji_file));
         return this;
     }
 
@@ -1497,7 +1497,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_kuromoji_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_kuromoji_file));
         return this;
     }
 
@@ -1511,7 +1511,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadProtwordsFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_protwords_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_protwords_file));
         return this;
     }
 
@@ -1525,7 +1525,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadProtwordsFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_protwords_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_protwords_file));
         return this;
     }
 
@@ -1539,7 +1539,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadElevateFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_elevate_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_elevate_file));
         return this;
     }
 
@@ -1553,7 +1553,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadElevateFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_elevate_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_elevate_file));
         return this;
     }
 
@@ -1567,7 +1567,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadBadwordFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_badword_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_badword_file));
         return this;
     }
 
@@ -1581,7 +1581,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadBadwordFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_badword_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_badword_file));
         return this;
     }
 
@@ -1595,7 +1595,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDownloadMappingFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_download_mapping_file));
+        add(property, new UserMessage(ERRORS_failed_to_download_mapping_file));
         return this;
     }
 
@@ -1609,7 +1609,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUploadMappingFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upload_mapping_file));
+        add(property, new UserMessage(ERRORS_failed_to_upload_mapping_file));
         return this;
     }
 
@@ -1625,7 +1625,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidStrIsIncluded(String property, String arg1, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_str_is_included, arg1, arg0));
+        add(property, new UserMessage(ERRORS_invalid_str_is_included, arg1, arg0));
         return this;
     }
 
@@ -1639,7 +1639,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsBlankPassword(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_blank_password));
+        add(property, new UserMessage(ERRORS_blank_password));
         return this;
     }
 
@@ -1653,7 +1653,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidConfirmPassword(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_confirm_password));
+        add(property, new UserMessage(ERRORS_invalid_confirm_password));
         return this;
     }
 
@@ -1667,7 +1667,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCannotDeleteDocBecauseOfRunning(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_cannot_delete_doc_because_of_running));
+        add(property, new UserMessage(ERRORS_cannot_delete_doc_because_of_running));
         return this;
     }
 
@@ -1681,7 +1681,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToDeleteDocInAdmin(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_delete_doc_in_admin));
+        add(property, new UserMessage(ERRORS_failed_to_delete_doc_in_admin));
         return this;
     }
 
@@ -1695,7 +1695,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToSendTestmail(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_send_testmail));
+        add(property, new UserMessage(ERRORS_failed_to_send_testmail));
         return this;
     }
 
@@ -1709,7 +1709,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCouldNotFindBackupIndex(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_could_not_find_backup_index));
+        add(property, new UserMessage(ERRORS_could_not_find_backup_index));
         return this;
     }
 
@@ -1723,7 +1723,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsNoUserForChangingPassword(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_no_user_for_changing_password));
+        add(property, new UserMessage(ERRORS_no_user_for_changing_password));
         return this;
     }
 
@@ -1737,7 +1737,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToChangePassword(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_change_password));
+        add(property, new UserMessage(ERRORS_failed_to_change_password));
         return this;
     }
 
@@ -1751,7 +1751,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsUnknownVersionForUpgrade(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_unknown_version_for_upgrade));
+        add(property, new UserMessage(ERRORS_unknown_version_for_upgrade));
         return this;
     }
 
@@ -1767,7 +1767,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToUpgradeFrom(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_upgrade_from, arg0, arg1));
+        add(property, new UserMessage(ERRORS_failed_to_upgrade_from, arg0, arg1));
         return this;
     }
 
@@ -1782,7 +1782,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsFailedToReadRequestFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_failed_to_read_request_file, arg0));
+        add(property, new UserMessage(ERRORS_failed_to_read_request_file, arg0));
         return this;
     }
 
@@ -1797,7 +1797,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidHeaderForRequestFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_header_for_request_file, arg0));
+        add(property, new UserMessage(ERRORS_invalid_header_for_request_file, arg0));
         return this;
     }
 
@@ -1811,7 +1811,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidQueryUnknown(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_unknown));
+        add(property, new UserMessage(ERRORS_invalid_query_unknown));
         return this;
     }
 
@@ -1825,7 +1825,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidQueryParseError(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_parse_error));
+        add(property, new UserMessage(ERRORS_invalid_query_parse_error));
         return this;
     }
 
@@ -1840,7 +1840,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidQuerySortValue(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_sort_value, arg0));
+        add(property, new UserMessage(ERRORS_invalid_query_sort_value, arg0));
         return this;
     }
 
@@ -1855,7 +1855,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidQueryUnsupportedSortField(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_unsupported_sort_field, arg0));
+        add(property, new UserMessage(ERRORS_invalid_query_unsupported_sort_field, arg0));
         return this;
     }
 
@@ -1870,7 +1870,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsInvalidQueryUnsupportedSortOrder(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_invalid_query_unsupported_sort_order, arg0));
+        add(property, new UserMessage(ERRORS_invalid_query_unsupported_sort_order, arg0));
         return this;
     }
 
@@ -1886,7 +1886,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudInvalidMode(String property, String arg0, String arg1) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_invalid_mode, arg0, arg1));
+        add(property, new UserMessage(ERRORS_crud_invalid_mode, arg0, arg1));
         return this;
     }
 
@@ -1900,7 +1900,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudFailedToCreateInstance(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_create_instance));
+        add(property, new UserMessage(ERRORS_crud_failed_to_create_instance));
         return this;
     }
 
@@ -1915,7 +1915,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudFailedToCreateCrudTable(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_create_crud_table, arg0));
+        add(property, new UserMessage(ERRORS_crud_failed_to_create_crud_table, arg0));
         return this;
     }
 
@@ -1930,7 +1930,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudFailedToUpdateCrudTable(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_update_crud_table, arg0));
+        add(property, new UserMessage(ERRORS_crud_failed_to_update_crud_table, arg0));
         return this;
     }
 
@@ -1945,7 +1945,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudFailedToDeleteCrudTable(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_failed_to_delete_crud_table, arg0));
+        add(property, new UserMessage(ERRORS_crud_failed_to_delete_crud_table, arg0));
         return this;
     }
 
@@ -1960,7 +1960,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addErrorsCrudCouldNotFindCrudTable(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(ERRORS_crud_could_not_find_crud_table, arg0));
+        add(property, new UserMessage(ERRORS_crud_could_not_find_crud_table, arg0));
         return this;
     }
 
@@ -1974,7 +1974,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUpdateCrawlerParams(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_update_crawler_params));
+        add(property, new UserMessage(SUCCESS_update_crawler_params));
         return this;
     }
 
@@ -1988,7 +1988,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessDeleteDocFromIndex(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_delete_doc_from_index));
+        add(property, new UserMessage(SUCCESS_delete_doc_from_index));
         return this;
     }
 
@@ -2002,7 +2002,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessCrawlingInfoDeleteAll(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_crawling_info_delete_all));
+        add(property, new UserMessage(SUCCESS_crawling_info_delete_all));
         return this;
     }
 
@@ -2016,7 +2016,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessStartCrawlProcess(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_start_crawl_process));
+        add(property, new UserMessage(SUCCESS_start_crawl_process));
         return this;
     }
 
@@ -2031,7 +2031,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadDesignFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_design_file, arg0));
+        add(property, new UserMessage(SUCCESS_upload_design_file, arg0));
         return this;
     }
 
@@ -2046,7 +2046,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUpdateDesignJspFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_update_design_jsp_file, arg0));
+        add(property, new UserMessage(SUCCESS_update_design_jsp_file, arg0));
         return this;
     }
 
@@ -2061,7 +2061,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessCreateCrawlingConfigAtWizard(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_create_crawling_config_at_wizard, arg0));
+        add(property, new UserMessage(SUCCESS_create_crawling_config_at_wizard, arg0));
         return this;
     }
 
@@ -2075,7 +2075,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessFailureUrlDeleteAll(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_failure_url_delete_all));
+        add(property, new UserMessage(SUCCESS_failure_url_delete_all));
         return this;
     }
 
@@ -2090,7 +2090,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessDeleteFile(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_delete_file, arg0));
+        add(property, new UserMessage(SUCCESS_delete_file, arg0));
         return this;
     }
 
@@ -2105,7 +2105,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessJobStarted(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_job_started, arg0));
+        add(property, new UserMessage(SUCCESS_job_started, arg0));
         return this;
     }
 
@@ -2120,7 +2120,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessJobStopped(String property, String arg0) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_job_stopped, arg0));
+        add(property, new UserMessage(SUCCESS_job_stopped, arg0));
         return this;
     }
 
@@ -2134,7 +2134,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadSynonymFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_synonym_file));
+        add(property, new UserMessage(SUCCESS_upload_synonym_file));
         return this;
     }
 
@@ -2148,7 +2148,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadKuromojiFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_kuromoji_file));
+        add(property, new UserMessage(SUCCESS_upload_kuromoji_file));
         return this;
     }
 
@@ -2162,7 +2162,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadElevateWord(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_elevate_word));
+        add(property, new UserMessage(SUCCESS_upload_elevate_word));
         return this;
     }
 
@@ -2176,7 +2176,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadBadWord(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_bad_word));
+        add(property, new UserMessage(SUCCESS_upload_bad_word));
         return this;
     }
 
@@ -2190,7 +2190,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUploadMappingFile(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upload_mapping_file));
+        add(property, new UserMessage(SUCCESS_upload_mapping_file));
         return this;
     }
 
@@ -2204,7 +2204,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessSendTestmail(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_send_testmail));
+        add(property, new UserMessage(SUCCESS_send_testmail));
         return this;
     }
 
@@ -2218,7 +2218,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessJobLogDeleteAll(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_job_log_delete_all));
+        add(property, new UserMessage(SUCCESS_job_log_delete_all));
         return this;
     }
 
@@ -2232,7 +2232,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessChangedPassword(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_changed_password));
+        add(property, new UserMessage(SUCCESS_changed_password));
         return this;
     }
 
@@ -2246,7 +2246,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessUpgradeFrom(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_upgrade_from));
+        add(property, new UserMessage(SUCCESS_upgrade_from));
         return this;
     }
 
@@ -2260,7 +2260,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessBulkProcessStarted(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_bulk_process_started));
+        add(property, new UserMessage(SUCCESS_bulk_process_started));
         return this;
     }
 
@@ -2274,7 +2274,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessCrudCreateCrudTable(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_crud_create_crud_table));
+        add(property, new UserMessage(SUCCESS_crud_create_crud_table));
         return this;
     }
 
@@ -2288,7 +2288,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessCrudUpdateCrudTable(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_crud_update_crud_table));
+        add(property, new UserMessage(SUCCESS_crud_update_crud_table));
         return this;
     }
 
@@ -2302,7 +2302,7 @@ public class FessMessages extends FessLabels {
      */
     public FessMessages addSuccessCrudDeleteCrudTable(String property) {
         assertPropertyNotNull(property);
-        add(property, new ActionMessage(SUCCESS_crud_delete_crud_table));
+        add(property, new UserMessage(SUCCESS_crud_delete_crud_table));
         return this;
     }
 }

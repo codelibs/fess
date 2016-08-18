@@ -16,6 +16,7 @@
 package org.codelibs.fess.thumbnail.impl;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;

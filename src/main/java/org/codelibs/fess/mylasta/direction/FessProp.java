@@ -55,6 +55,8 @@ import org.lastaflute.web.validation.theme.typed.LongTypeValidator;
 
 public interface FessProp {
 
+    public static final String CRAWLER_DOCUMENT_SPACE_CHARS = "crawlerDocumentSpaceChars";
+
     public static final String INDEX_ADMIN_ARRAY_FIELD_SET = "indexAdminArrayFieldSet";
 
     public static final String INDEX_ADMIN_DATE_FIELD_SET = "indexAdminDateFieldSet";
@@ -1303,4 +1305,18 @@ public interface FessProp {
         return requiredValidator.isValid(value, null);
     }
 
+    String getCrawlerDocumentSpaceChars();
+
+    public default int[] getCrawlerDocumentSpaceCharsAsArray() {
+        int[] spaceChars = (int[]) propMap.get(CRAWLER_DOCUMENT_SPACE_CHARS);
+        if (spaceChars == null) {
+            int length = getCrawlerDocumentSpaceChars().length();
+            spaceChars = new int[length];
+            for (int i = 0; i < length; i++) {
+                spaceChars[i] = getCrawlerDocumentSpaceChars().codePointAt(i);
+            }
+            propMap.put(CRAWLER_DOCUMENT_SPACE_CHARS, spaceChars);
+        }
+        return spaceChars;
+    }
 }
