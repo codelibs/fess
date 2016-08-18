@@ -184,6 +184,7 @@ public class AdminSchedulerAction extends FessAdminAction {
                     form.crudMode = crudMode;
                     LaRequestUtil.getOptionalRequest().ifPresent(request -> {
                         request.setAttribute("running", entity.isRunning());
+                        request.setAttribute("enabled", entity.isEnabled());
                     });
                 }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
@@ -266,6 +267,11 @@ public class AdminSchedulerAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
+            if(!entity.isEnabled()||entity.isRunning()){
+                throwValidationError(messages -> {
+                    messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
+                }, () -> asDetailsHtml(id));
+            }
             try {
                 entity.start();
                 saveInfo(messages -> messages.addSuccessJobStarted(GLOBAL, entity.getName()));
