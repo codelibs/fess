@@ -225,15 +225,13 @@ public class WebFsIndexHelper {
             }
 
             // failure url
-            if (!Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_IGNORE_FAILURE_URLS))) {
-                final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
-                for (final String u : excludedUrlList) {
-                    if (StringUtil.isNotBlank(u)) {
-                        final String urlValue = u.trim();
-                        crawler.addExcludeFilter(urlValue);
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Excluded URL from failures: " + urlValue);
-                        }
+            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(webConfig.getConfigId());
+            for (final String u : excludedUrlList) {
+                if (StringUtil.isNotBlank(u)) {
+                    final String urlValue = u.trim();
+                    crawler.addExcludeFilter(urlValue);
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Excluded URL from failures: " + urlValue);
                     }
                 }
             }
@@ -369,16 +367,14 @@ public class WebFsIndexHelper {
             }
 
             // failure url
-            if (!Constants.TRUE.equalsIgnoreCase(configParamMap.get(Constants.CONFIG_IGNORE_FAILURE_URLS))) {
-                final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileConfig.getConfigId());
-                if (excludedUrlList != null) {
-                    for (final String u : excludedUrlList) {
-                        if (StringUtil.isNotBlank(u)) {
-                            final String urlValue = u.trim();
-                            crawler.addExcludeFilter(urlValue);
-                            if (logger.isInfoEnabled()) {
-                                logger.info("Excluded Path from failures: " + urlValue);
-                            }
+            final List<String> excludedUrlList = failureUrlService.getExcludedUrlList(fileConfig.getConfigId());
+            if (excludedUrlList != null) {
+                for (final String u : excludedUrlList) {
+                    if (StringUtil.isNotBlank(u)) {
+                        final String urlValue = u.trim();
+                        crawler.addExcludeFilter(urlValue);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("Excluded Path from failures: " + urlValue);
                         }
                     }
                 }
