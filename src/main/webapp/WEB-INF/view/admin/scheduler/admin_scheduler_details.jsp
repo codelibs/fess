@@ -163,7 +163,7 @@
 											<la:message key="labels.scheduledjob_button_stop" />
 										</button>
 									</c:if>
-									<c:if test="${!running}">
+									<c:if test="${!running && enabled}">
 										<button type="submit" class="btn btn-success" name="start"
 											value="<la:message key="labels.scheduledjob_button_start" />">
 											<i class="fa fa-play-circle"></i>
