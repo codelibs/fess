@@ -267,7 +267,7 @@ public class AdminSchedulerAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml(id));
         verifyToken(() -> asDetailsHtml(id));
         scheduledJobService.getScheduledJob(id).ifPresent(entity -> {
-            if(!entity.isEnabled()||entity.isRunning()){
+            if (!entity.isEnabled() || entity.isRunning()) {
                 throwValidationError(messages -> {
                     messages.addErrorsFailedToStartJob(GLOBAL, entity.getName());
                 }, () -> asDetailsHtml(id));

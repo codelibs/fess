@@ -82,4 +82,9 @@ public class LdapUser implements FessUser {
         return env;
     }
 
+    @Override
+    public boolean isEditable() {
+        return ComponentUtil.getFessConfig().isLdapAdminEnabled(name);
+    }
+
 }

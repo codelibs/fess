@@ -124,6 +124,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("langItems", systemHelper.getLanguageItems(locale));
         final String username = systemHelper.getUsername();
         runtime.registerData("username", username);
+        runtime.registerData("editableUser", fessLoginAssist.getSavedUserBean().map(user -> user.isEditable()).orElse(false));
         runtime.registerData("adminUser", fessConfig.isAdminUser(username));
 
         runtime.registerData("pageLoginLink", fessConfig.isLoginLinkEnabled());

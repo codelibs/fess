@@ -95,5 +95,10 @@ public class OpenIdConnectCredential implements LoginCredential {
             return permissions;
         }
 
+        @Override
+        public boolean isEditable() {
+            return false;
+        }
+
     }
 }

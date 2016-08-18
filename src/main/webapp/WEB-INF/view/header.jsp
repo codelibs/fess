@@ -38,9 +38,11 @@ ${fe:facetForm()}${fe:geoForm()}
 								<span>${username}</span>
 							</a>
 							<div class="dropdown-menu" aria-labelledby="userMenu">
-								<la:link href="/profile" styleClass="dropdown-item">
-									<la:message key="labels.profile" />
-								</la:link>
+								<c:if test="${editableUser == true}">
+									<la:link href="/profile" styleClass="dropdown-item">
+										<la:message key="labels.profile" />
+									</la:link>
+								</c:if>
 								<c:if test="${adminUser == true}">
 									<la:link href="/admin" styleClass="dropdown-item">
 										<la:message key="labels.administration" />

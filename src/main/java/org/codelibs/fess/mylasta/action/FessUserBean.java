@@ -67,6 +67,10 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
         return user.getGroupNames();
     }
 
+    public boolean isEditable() {
+        return user.isEditable();
+    }
+
     public boolean hasRole(final String role) {
         return stream(user.getRoleNames()).get(stream -> stream.anyMatch(s -> s.equals(role)));
     }
@@ -102,6 +106,11 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
             @Override
             public String[] getRoles() {
                 return StringUtil.EMPTY_STRINGS;
+            }
+
+            @Override
+            public boolean isEditable() {
+                return false;
             }
         };
     }

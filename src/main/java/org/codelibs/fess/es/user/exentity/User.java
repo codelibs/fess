@@ -91,4 +91,9 @@ public class User extends BsUser implements FessUser {
         return list.toArray(new String[list.size()]);
     }
 
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
 }
