@@ -324,11 +324,15 @@ public class ViewHelper {
     protected String appendPDFSearchWord(final String url) {
         final String queries = (String) LaRequestUtil.getRequest().getAttribute(Constants.REQUEST_QUERIES);
         if (queries != null) {
-            final StringBuilder buf = new StringBuilder(url.length() + 100);
-            buf.append(url).append("#search=%22");
-            buf.append(queries); // TODO encode
-            buf.append("%22");
-            return buf.toString();
+            try {
+                final StringBuilder buf = new StringBuilder(url.length() + 100);
+                buf.append(url).append("#search=%22");
+                buf.append(URLEncoder.encode(queries, Constants.UTF_8));
+                buf.append("%22");
+                return buf.toString();
+            } catch (UnsupportedEncodingException e) {
+                logger.warn("Unsupported encoding.",e);
+            }
         }
         return url;
     }
