@@ -383,8 +383,6 @@ public class Constants extends CoreLibConstants {
 
     public static final String SEARCH_PREFERENCE_PRIMARY = "_primary";
 
-    public static final String CONFIG_IGNORE_FAILURE_URLS = "ignore.failureUrls";
-
     public static final String CONFIG_CLEANUP_FILTERS = "cleanup.urlFilters";
 
     public static final String CONFIG_CLEANUP_ALL = "cleanup.all";

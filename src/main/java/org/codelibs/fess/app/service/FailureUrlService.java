@@ -146,7 +146,7 @@ public class FailureUrlService {
         final List<String> urlList = new ArrayList<>();
         for (final FailureUrl failureUrl : list) {
             if (pattern != null) {
-                if (!pattern.matcher(failureUrl.getUrl()).matches()) {
+                if (!pattern.matcher(failureUrl.getErrorName()).matches()) {
                     urlList.add(failureUrl.getUrl());
                 }
             } else {
