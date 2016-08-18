@@ -81,10 +81,10 @@ public class UserService {
     }
 
     public void changePassword(final String username, final String password) {
-        ComponentUtil.getLdapManager().changePassword(username, password);
+        final boolean changed = ComponentUtil.getLdapManager().changePassword(username, password);
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        if (fessConfig.isLdapAdminEnabled(username) && fessConfig.isLdapAdminSyncPassword()) {
+        if (!changed || fessConfig.isLdapAdminSyncPassword()) {
             userBhv.selectEntity(cb -> cb.query().setName_Equal(username)).ifPresent(entity -> {
                 final String encodedPassword = fessLoginAssist.encryptPassword(password);
                 entity.setPassword(encodedPassword);

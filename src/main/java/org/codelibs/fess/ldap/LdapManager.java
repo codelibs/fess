@@ -942,10 +942,10 @@ public class LdapManager {
         });
     }
 
-    public void changePassword(final String username, final String password) {
+    public boolean changePassword(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         if (!fessConfig.isLdapAdminEnabled(username)) {
-            return;
+            return false;
         }
 
         final Supplier<Hashtable<String, String>> adminEnv = () -> createAdminEnv();
@@ -959,7 +959,7 @@ public class LdapManager {
                 throw new LdapOperationException("User is not found: " + username);
             }
         });
-
+        return true;
     }
 
     protected void insert(final String entryDN, final Attributes entry, final Supplier<Hashtable<String, String>> envSupplier) {
