@@ -186,8 +186,8 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse delete(final DeleteForm form) {
-        verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         final String docId = form.docId;
         try {
             final QueryBuilder query = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId);
@@ -201,8 +201,8 @@ public class AdminSearchlistAction extends FessAdminAction {
 
     @Execute
     public HtmlResponse deleteall(final ListForm form) {
-        verifyToken(() -> asListHtml());
         validate(form, messages -> {}, () -> asListHtml());
+        verifyToken(() -> asListHtml());
         try {
             searchService.deleteByQuery(request, form);
             saveInfo(messages -> messages.addSuccessDeleteDocFromIndex(GLOBAL));
