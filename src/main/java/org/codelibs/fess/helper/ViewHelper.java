@@ -331,7 +331,7 @@ public class ViewHelper {
                 buf.append("%22");
                 return buf.toString();
             } catch (UnsupportedEncodingException e) {
-                logger.warn("Unsupported encoding.",e);
+                logger.warn("Unsupported encoding.", e);
             }
         }
         return url;
