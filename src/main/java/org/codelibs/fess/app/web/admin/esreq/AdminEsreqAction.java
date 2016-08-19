@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 
+import javax.annotation.Nonnull;
+
 import org.codelibs.core.io.CopyUtil;
 import org.codelibs.core.io.ReaderUtil;
 import org.codelibs.core.lang.StringUtil;
@@ -83,7 +85,7 @@ public class AdminEsreqAction extends FessAdminAction {
             });
         }
 
-        try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
+        try (@Nonnull final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
             final File tempFile = File.createTempFile("esreq_", ".json");
             try (final InputStream in = response.getContentAsStream()) {
                 CopyUtil.copy(in, tempFile);
