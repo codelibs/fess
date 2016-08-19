@@ -284,7 +284,7 @@
 									    <div class="col-sm-9">
 										<la:errors property="doc.created" />
 											<la:text property="doc.created" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												pattern="^[1-9]\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
@@ -293,7 +293,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.timestamp" />
 											<la:text property="doc.timestamp" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												pattern="^[1-9]\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
@@ -303,7 +303,7 @@
 										<la:errors property="doc.last_modified" />
 											<la:text property="doc.last_modified"
 												styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												pattern="^[1-9]\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 									    </div>
 									</div>
@@ -312,7 +312,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.expires" />
 											<la:text property="doc.expires" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												pattern="^[2-9]\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
