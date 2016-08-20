@@ -33,6 +33,7 @@ import org.codelibs.fess.es.config.cbean.FailureUrlCB;
 import org.codelibs.fess.es.config.exbhv.FailureUrlBhv;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.FailureUrl;
+import org.codelibs.fess.exception.ContainerNotAvailableException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -163,25 +164,28 @@ public class FailureUrlService {
     }
 
     public void store(final CrawlingConfig crawlingConfig, final String errorName, final String url, final Throwable e) {
+        if (e instanceof ContainerNotAvailableException) {
+            return;
+        }
+
         final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
         FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
                 cb.query().setConfigId_Equal(crawlingConfig.getConfigId());
             }
-        }).orElse(null);//TODO
-
-        if (failureUrl != null) {
-            failureUrl.setErrorCount(failureUrl.getErrorCount() + 1);
-        } else {
-            // new
-            failureUrl = new FailureUrl();
-            failureUrl.setErrorCount(1);
-            failureUrl.setUrl(url);
+        }).map(entity -> {
+            entity.setErrorCount(entity.getErrorCount() + 1);
+            return entity;
+        }).orElseGet(() -> {
+            FailureUrl entity = new FailureUrl();
+            entity.setErrorCount(1);
+            entity.setUrl(url);
             if (crawlingConfig != null) {
-                failureUrl.setConfigId(crawlingConfig.getConfigId());
+                entity.setConfigId(crawlingConfig.getConfigId());
             }
-        }
+            return entity;
+        });
 
         failureUrl.setErrorName(errorName);
         failureUrl.setErrorLog(StringUtils.abbreviate(getStackTrace(e), 4000));
