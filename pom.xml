@@ -1254,6 +1254,7 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jasper</artifactId>
 			<version>${tomcat.version}</version>
+			<!-- Disable scope at development on IDEA -->
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>

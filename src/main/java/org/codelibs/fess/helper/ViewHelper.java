@@ -293,12 +293,21 @@ public class ViewHelper {
             if (encodeUrlLink) {
                 return appendQueryParameter(document, url);
             } else {
-                url = url.replace("+", "%2B");
+                final String urlLink = appendQueryParameter(document, url).replace("+", "%2B");
+                final String[] values = urlLink.split("#");
+                final StringBuilder buf = new StringBuilder(urlLink.length());
                 try {
-                    return URLDecoder.decode(appendQueryParameter(document, url), urlLinkEncoding);
+                    buf.append(URLDecoder.decode(values[0], urlLinkEncoding));
+                    for (int i = 1; i < values.length - 1; i++) {
+                        buf.append('#').append(URLDecoder.decode(values[i], urlLinkEncoding));
+                    }
                 } catch (final Exception e) {
                     throw new FessSystemException("Unsupported encoding: " + urlLinkEncoding, e);
                 }
+                if (values.length > 1) {
+                    buf.append('#').append(values[values.length - 1]);
+                }
+                return buf.toString();
             }
         }
 
@@ -327,11 +336,11 @@ public class ViewHelper {
             try {
                 final StringBuilder buf = new StringBuilder(url.length() + 100);
                 buf.append(url).append("#search=%22");
-                buf.append(URLEncoder.encode(queries, Constants.UTF_8));
+                buf.append(URLEncoder.encode(queries.trim(), Constants.UTF_8));
                 buf.append("%22");
                 return buf.toString();
             } catch (UnsupportedEncodingException e) {
-                logger.warn("Unsupported encoding.",e);
+                logger.warn("Unsupported encoding.", e);
             }
         }
         return url;
