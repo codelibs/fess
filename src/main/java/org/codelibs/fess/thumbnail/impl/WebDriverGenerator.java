@@ -20,17 +20,25 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.imageio.ImageIO;
 
+import org.codelibs.fess.util.ComponentUtil;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.browserlaunchers.Proxies;
+import org.openqa.selenium.os.CommandLine;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService.Builder;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +46,8 @@ import org.slf4j.LoggerFactory;
 public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(WebDriverGenerator.class);
+
+    private static final String PHANTOMJS_DEFAULT_EXECUTABLE = "phantomjs";
 
     protected WebDriver webDriver;
 
@@ -53,6 +63,8 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     protected String imageFormatName = "png";
 
+    protected Level logLevel;
+
     @PostConstruct
     public void init() {
         if (super.isAvailable()) {
@@ -67,7 +79,17 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                                     .filter(e -> e.getValue() instanceof String && filePathMap.containsKey(e.getValue().toString()))
                                     .forEach(e -> capabilities.setCapability(e.getKey(), filePathMap.get(e.getValue().toString())));
                         }
-                        webDriver = new PhantomJSDriver(webDriverCapabilities);
+                        PhantomJSDriver phantomJSDriver =
+                                new PhantomJSDriver(createDriverService(webDriverCapabilities), webDriverCapabilities);
+                        if (logLevel == null) {
+                            if (logger.isDebugEnabled()) {
+                                logLevel = Level.FINE;
+                            } else {
+                                logLevel = Level.OFF;
+                            }
+                        }
+                        phantomJSDriver.setLogLevel(logLevel);
+                        webDriver = phantomJSDriver;
                     }
                 }
                 webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
@@ -150,6 +172,57 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    protected PhantomJSDriverService createDriverService(Capabilities desiredCapabilities) {
+        // Look for Proxy configuration within the Capabilities
+        Proxy proxy = null;
+        if (desiredCapabilities != null) {
+            proxy = Proxies.extractProxy(desiredCapabilities);
+        }
+
+        // Find PhantomJS executable
+        String phantomjspath = null;
+        if (desiredCapabilities != null
+                && desiredCapabilities.getCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY) != null) {
+            phantomjspath = (String) desiredCapabilities.getCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY);
+        } else {
+            phantomjspath = CommandLine.find(PHANTOMJS_DEFAULT_EXECUTABLE);
+            phantomjspath = System.getProperty(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjspath);
+        }
+
+        File phantomjsfile = new File(phantomjspath);
+
+        // Build & return service
+        return new Builder()//
+                .usingPhantomJSExecutable(phantomjsfile).usingAnyFreePort()//
+                .withProxy(proxy)//
+                .withLogFile(new File(ComponentUtil.getSystemHelper().getLogFilePath(), "phantomjs.log"))//
+                .usingCommandLineArguments(findCLIArgumentsFromCaps(desiredCapabilities, PhantomJSDriverService.PHANTOMJS_CLI_ARGS))//
+                .build();
+    }
+
+    private static String[] findCLIArgumentsFromCaps(Capabilities desiredCapabilities, String capabilityName) {
+        if (desiredCapabilities != null) {
+            Object cap = desiredCapabilities.getCapability(capabilityName);
+            if (cap != null) {
+                if (cap instanceof String[]) {
+                    return (String[]) cap;
+                } else if (cap instanceof Collection) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Collection<String> capCollection = (Collection<String>) cap;
+                        return capCollection.toArray(new String[capCollection.size()]);
+                    } catch (Exception e) {
+                        // If casting fails, log an error and assume no CLI arguments are provided
+                        logger.warn(String.format("Unable to set Capability '%s' as it was neither a String[] or a Collection<String>",
+                                capabilityName));
+                    }
+                }
+            }
+        }
+        return new String[] {}; // nothing found: return an empty array of arguments
+    }
+
     public void setWebDriver(WebDriver webDriver) {
         this.webDriver = webDriver;
     }
@@ -176,6 +249,10 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     public void setThumbnailHeight(int thumbnailHeight) {
         this.thumbnailHeight = thumbnailHeight;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
     }
 
 }
