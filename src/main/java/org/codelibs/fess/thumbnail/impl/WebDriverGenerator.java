@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -63,8 +62,6 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     protected String imageFormatName = "png";
 
-    protected Level logLevel;
-
     @PostConstruct
     public void init() {
         if (super.isAvailable()) {
@@ -79,17 +76,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                                     .filter(e -> e.getValue() instanceof String && filePathMap.containsKey(e.getValue().toString()))
                                     .forEach(e -> capabilities.setCapability(e.getKey(), filePathMap.get(e.getValue().toString())));
                         }
-                        PhantomJSDriver phantomJSDriver =
-                                new PhantomJSDriver(createDriverService(webDriverCapabilities), webDriverCapabilities);
-                        if (logLevel == null) {
-                            if (logger.isDebugEnabled()) {
-                                logLevel = Level.FINE;
-                            } else {
-                                logLevel = Level.OFF;
-                            }
-                        }
-                        phantomJSDriver.setLogLevel(logLevel);
-                        webDriver = phantomJSDriver;
+                        webDriver = new PhantomJSDriver(createDriverService(webDriverCapabilities), webDriverCapabilities);
                     }
                 }
                 webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
@@ -250,9 +237,4 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     public void setThumbnailHeight(int thumbnailHeight) {
         this.thumbnailHeight = thumbnailHeight;
     }
-
-    public void setLogLevel(Level logLevel) {
-        this.logLevel = logLevel;
-    }
-
 }
