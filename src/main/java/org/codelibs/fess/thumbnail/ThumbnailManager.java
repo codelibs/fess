@@ -16,6 +16,12 @@
 package org.codelibs.fess.thumbnail;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +39,7 @@ import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.exception.FessSystemException;
+import org.codelibs.fess.exception.JobProcessingException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
@@ -198,6 +205,65 @@ public class ThumbnailManager {
         if (generator.isAvailable()) {
             generatorList.add(generator);
         }
+    }
+
+    public long purge(final long expiry) {
+        try {
+            final FilePurgeVisitor visitor = new FilePurgeVisitor(expiry);
+            Files.walkFileTree(baseDir.toPath(), visitor);
+            return visitor.getCount();
+        } catch (final Exception e) {
+            throw new JobProcessingException(e);
+        }
+    }
+
+    private static class FilePurgeVisitor implements FileVisitor<Path> {
+
+        private long expiry;
+
+        private long count;
+
+        FilePurgeVisitor(final long expiry) {
+            this.expiry = expiry;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+            if (System.currentTimeMillis() - Files.getLastModifiedTime(file).toMillis() > expiry) {
+                Files.delete(file);
+                count++;
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(final Path file, final IOException e) throws IOException {
+            if (e != null) {
+                logger.warn("I/O exception on " + file, e);
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(final Path dir, final IOException e) throws IOException {
+            if (e != null) {
+                logger.warn("I/O exception on " + dir, e);
+            }
+            if (dir.toFile().list().length == 0) {
+                Files.delete(dir);
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
     }
 
     protected static class ThumbnailTask {

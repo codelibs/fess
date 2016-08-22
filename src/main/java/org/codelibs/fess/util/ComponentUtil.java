@@ -60,6 +60,7 @@ import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoManager;
+import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
@@ -73,6 +74,8 @@ import org.slf4j.LoggerFactory;
 public final class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+
+    private static final String THUMBNAIL_MANAGER = "thumbnailManager";
 
     private static final String SSO_MANAGER = "ssoManager";
 
@@ -367,6 +370,10 @@ public final class ComponentUtil {
 
     public static SsoManager getSsoManager() {
         return getComponent(SSO_MANAGER);
+    }
+
+    public static ThumbnailManager getThumbnailManager() {
+        return getComponent(THUMBNAIL_MANAGER);
     }
 
     public static CrawlerClientFactory getCrawlerClientFactory() {
