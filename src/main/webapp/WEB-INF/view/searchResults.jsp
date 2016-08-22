@@ -29,7 +29,7 @@
 				<li id="result${s.index}">
 					<div class="media">
 						<c:if test="${thumbnailSupport}">
-						<div class="thumbnailBox media-left">
+						<div class="thumbnailBox media-left hidden-xs-down">
 							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
 								data-id="${doc.doc_id}" data-order="${s.index}">
 								<img
