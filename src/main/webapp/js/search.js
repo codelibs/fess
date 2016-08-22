@@ -196,8 +196,30 @@ $(function() {
 						searchForm : $('#searchForm')
 					});
 
-	$('img.thumbnail', $result).error(function() {
-		$(this).attr("src", contextPath + "/images/noimage.png");
+	IMG_LOADING_DELAY = 5000;
+	IMG_LOADING_MAX = 5;
+	var loadImage = function(img, url, limit) {
+		var imgData = new Image();
+		$(imgData).on("load", function() {
+			$(img).css('background-image', '');
+			$(img).attr('src', url);
+		});
+		$(imgData).error(function() {
+			if (limit > 0) {
+				setTimeout(function() {
+					loadImage(img, url, --limit);
+				}, IMG_LOADING_DELAY);
+			} else {
+				$(img).attr('src', contextPath + "/images/noimage.png");
+			}
+			imgData = null;
+		});
+		imgData.src = url;
+	};
+
+	$('img.thumbnail').each(function() {
+		$(this).css('background-image', 'url("' + contextPath + '/images/loading.gif")');
+		loadImage(this, $(this).attr('data-src'), IMG_LOADING_MAX);
 	});
 
 });

@@ -29,14 +29,14 @@
 				<li id="result${s.index}">
 					<div class="media">
 						<c:if test="${thumbnailSupport}">
-						<div class="thumbnailBox media-left hidden-xs-down">
-							<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"
-								data-id="${doc.doc_id}" data-order="${s.index}">
-								<img
-									src="${f:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
+							<div class="thumbnailBox media-left hidden-xs-down">
+								<a class="link" href="${doc.url_link}"
+									data-uri="${doc.url_link}" data-id="${doc.doc_id}"
+									data-order="${s.index}"> <img src="/images/blank.png"
+									data-src="${f:url('/thumbnail/')}?docId=${f:u(doc.doc_id)}&queryId=${f:u(queryId)}"
 									class="thumbnail">
-							</a>
-						</div>
+								</a>
+							</div>
 						</c:if>
 						<div class="media-body">
 							<h3 class="title ellipsis media-heading">

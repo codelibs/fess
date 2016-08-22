@@ -239,6 +239,13 @@ body.search #searchOptions.active, body.help #searchOptions.active,  body.error 
 	border-radius: 0px;
 }
 
+.thumbnail {
+	width: 160px;
+	height: 160px;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+}
+
 /* Large desktop */
 @media ( min-width : 74.9em) {
 	.visible-xs {
