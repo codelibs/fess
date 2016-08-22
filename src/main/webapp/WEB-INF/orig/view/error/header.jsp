@@ -18,7 +18,7 @@
 							class="btn btn-primary">
 						<i class="fa fa-search"></i>
 					</button>
-					<button type="button" class="btn btn-default"
+					<button type="button" class="btn btn-secondary"
 							data-toggle="control-options" data-target="#searchOptions"
 							id="searchOptionsButton">
 						<i class="fa fa-cog"></i> <span class="sr-only"><la:message
