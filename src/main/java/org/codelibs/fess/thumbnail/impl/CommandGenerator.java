@@ -25,7 +25,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -50,7 +49,6 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }
 
-    @PreDestroy
     public void destroy() {
         destoryTimer.cancel();
         destoryTimer = null;

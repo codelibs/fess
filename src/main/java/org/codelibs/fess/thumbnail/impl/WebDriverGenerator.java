@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.imageio.ImageIO;
 
 import org.codelibs.fess.util.ComponentUtil;
@@ -90,7 +89,6 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
     }
 
-    @PreDestroy
     public void destroy() {
         if (webDriver != null) {
             webDriver.quit();

@@ -26,4 +26,5 @@ public interface ThumbnailGenerator {
 
     boolean isAvailable();
 
+    void destroy();
 }

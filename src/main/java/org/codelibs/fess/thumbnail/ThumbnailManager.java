@@ -107,10 +107,12 @@ public class ThumbnailManager {
             while (generating) {
                 try {
                     thumbnailTaskQueue.take().generate();
-                } catch (final InterruptedException e1) {
-                    logger.debug("Interupted task.", e1);
-                } catch (final Exception e2) {
-                    logger.warn("Failed to generage a thumbnail.", e2);
+                } catch (final InterruptedException e) {
+                    logger.debug("Interupted task.", e);
+                } catch (final Exception e) {
+                    if (generating) {
+                        logger.warn("Failed to generage a thumbnail.", e);
+                    }
                 }
             }
         }, "ThumbnailGenerator");
@@ -121,6 +123,18 @@ public class ThumbnailManager {
     public void destroy() {
         generating = false;
         thumbnailGeneratorThread.interrupt();
+        try {
+            thumbnailGeneratorThread.join(10000);
+        } catch (InterruptedException e) {
+            logger.warn("Thumbnail thread is timeouted.", e);
+        }
+        generatorList.forEach(g -> {
+            try {
+                g.destroy();
+            } catch (final Exception e) {
+                logger.warn("Failed to stop thumbnail generator.", e);
+            }
+        });
     }
 
     public void generate(final Map<String, Object> docMap) {
