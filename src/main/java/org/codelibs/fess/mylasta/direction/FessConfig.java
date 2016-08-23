@@ -609,6 +609,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 100 */
     String PAGING_SEARCH_PAGE_MAX_SIZE = "paging.search.page.max.size";
 
+    /** The key of the configuration. e.g. true */
+    String THUMBNAIL_HTML_PHANTOMJS_ENABLED = "thumbnail.html.phantomjs.enabled";
+
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
 
@@ -2939,6 +2942,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getPagingSearchPageMaxSizeAsInteger();
 
     /**
+     * Get the value for the key 'thumbnail.html.phantomjs.enabled'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailHtmlPhantomjsEnabled();
+
+    /**
+     * Is the property for the key 'thumbnail.html.phantomjs.enabled' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isThumbnailHtmlPhantomjsEnabled();
+
+    /**
      * Get the value for the key 'mail.from.name'. <br>
      * The value is, e.g. Administrator <br>
      * comment: From
@@ -5099,6 +5116,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getPagingSearchPageMaxSizeAsInteger() {
             return getAsInteger(FessConfig.PAGING_SEARCH_PAGE_MAX_SIZE);
+        }
+
+        public String getThumbnailHtmlPhantomjsEnabled() {
+            return get(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED);
+        }
+
+        public boolean isThumbnailHtmlPhantomjsEnabled() {
+            return is(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED);
         }
 
         public String getMailFromName() {

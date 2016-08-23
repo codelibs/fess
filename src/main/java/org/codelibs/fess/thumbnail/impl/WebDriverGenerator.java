@@ -25,6 +25,7 @@ import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
@@ -63,7 +64,8 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     @PostConstruct
     public void init() {
-        if (super.isAvailable()) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        if (fessConfig.isThumbnailHtmlPhantomjsEnabled() && super.isAvailable()) {
             try {
                 if (webDriver == null) {
                     if (webDriverCapabilities == null) {
