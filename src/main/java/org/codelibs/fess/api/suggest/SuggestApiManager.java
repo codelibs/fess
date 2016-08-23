@@ -159,7 +159,7 @@ public class SuggestApiManager extends BaseApiManager {
 
         private final int num;
 
-        private HttpServletRequest request;
+        private final HttpServletRequest request;
 
         protected RequestParameter(final HttpServletRequest request, final String query, final String[] fields, final int num) {
             this.query = query;
@@ -189,6 +189,7 @@ public class SuggestApiManager extends BaseApiManager {
             return new RequestParameter(request, query, fields, num);
         }
 
+        @Override
         public String getQuery() {
             return query;
         }
@@ -247,7 +248,7 @@ public class SuggestApiManager extends BaseApiManager {
         }
 
         @Override
-        public Object getAttribute(String name) {
+        public Object getAttribute(final String name) {
             throw new UnsupportedOperationException();
         }
 

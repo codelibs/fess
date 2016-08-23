@@ -49,6 +49,7 @@ public class CommandGenerator extends BaseThumbnailGenerator {
         destoryTimer = new Timer("CommandGeneratorDestoryTimer-" + System.currentTimeMillis(), true);
     }
 
+    @Override
     public void destroy() {
         destoryTimer.cancel();
         destoryTimer = null;

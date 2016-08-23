@@ -125,7 +125,7 @@ public class ThumbnailManager {
         thumbnailGeneratorThread.interrupt();
         try {
             thumbnailGeneratorThread.join(10000);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             logger.warn("Thumbnail thread is timeouted.", e);
         }
         generatorList.forEach(g -> {
@@ -233,7 +233,7 @@ public class ThumbnailManager {
 
     private static class FilePurgeVisitor implements FileVisitor<Path> {
 
-        private long expiry;
+        private final long expiry;
 
         private long count;
 
@@ -340,23 +340,23 @@ public class ThumbnailManager {
 
     }
 
-    public void setThumbnailPathCacheSize(int thumbnailPathCacheSize) {
+    public void setThumbnailPathCacheSize(final int thumbnailPathCacheSize) {
         this.thumbnailPathCacheSize = thumbnailPathCacheSize;
     }
 
-    public void setImageExtention(String imageExtention) {
+    public void setImageExtention(final String imageExtention) {
         this.imageExtention = imageExtention;
     }
 
-    public void setSplitSize(int splitSize) {
+    public void setSplitSize(final int splitSize) {
         this.splitSize = splitSize;
     }
 
-    public void setThumbnailTaskQueueSize(int thumbnailTaskQueueSize) {
+    public void setThumbnailTaskQueueSize(final int thumbnailTaskQueueSize) {
         this.thumbnailTaskQueueSize = thumbnailTaskQueueSize;
     }
 
-    public void setNoImageExpired(long noImageExpired) {
+    public void setNoImageExpired(final long noImageExpired) {
         this.noImageExpired = noImageExpired;
     }
 

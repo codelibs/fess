@@ -1226,7 +1226,7 @@ public interface FessProp {
             final String key = e.getKey();
             Object value = e.getValue();
             if (value instanceof String || value == null) {
-                return new Pair<String, Object>(key, value);
+                return new Pair<>(key, value);
             }
             if (arrayFieldSet.contains(key)) {
                 if (value instanceof String[]) {
@@ -1247,7 +1247,7 @@ public interface FessProp {
             } else if (doubleFieldSet.contains(key)) {
                 value = value.toString();
             }
-            return new Pair<String, Object>(key, value);
+            return new Pair<>(key, value);
         }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
@@ -1283,7 +1283,7 @@ public interface FessProp {
                     } else if (doubleFieldSet.contains(key)) {
                         value = Double.parseDouble(value.toString());
                     }
-                    return new Pair<String, Object>(key, value);
+                    return new Pair<>(key, value);
                 }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
@@ -1310,7 +1310,7 @@ public interface FessProp {
     public default int[] getCrawlerDocumentSpaceCharsAsArray() {
         int[] spaceChars = (int[]) propMap.get(CRAWLER_DOCUMENT_SPACE_CHARS);
         if (spaceChars == null) {
-            int length = getCrawlerDocumentSpaceChars().length();
+            final int length = getCrawlerDocumentSpaceChars().length();
             spaceChars = new int[length];
             for (int i = 0; i < length; i++) {
                 spaceChars[i] = getCrawlerDocumentSpaceChars().codePointAt(i);

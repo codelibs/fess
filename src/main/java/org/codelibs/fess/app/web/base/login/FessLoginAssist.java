@@ -61,12 +61,12 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                           Find User
     //                                                                           =========
     @Override
-    public boolean checkUserLoginable(LoginCredential credential) {
+    public boolean checkUserLoginable(final LoginCredential credential) {
         throw new UnsupportedOperationException("checkUserLoginable is not supported.");
     }
 
     @Override
-    protected void checkCredential(TypicalLoginAssist<String, FessUserBean, FessUser>.CredentialChecker checker) {
+    protected void checkCredential(final TypicalLoginAssist<String, FessUserBean, FessUser>.CredentialChecker checker) {
         throw new UnsupportedOperationException("checkCredential is not supported.");
     }
 
@@ -136,9 +136,9 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
     //                                                                      ==============
 
     @Override
-    protected void resolveCredential(CredentialResolver resolver) {
+    protected void resolveCredential(final CredentialResolver resolver) {
         resolver.resolve(UserPasswordCredential.class, credential -> {
-            final UserPasswordCredential userCredential = (UserPasswordCredential) credential;
+            final UserPasswordCredential userCredential = credential;
             final String username = userCredential.getUser();
             final String password = userCredential.getPassword();
             if (!fessConfig.isAdminUser(username)) {
@@ -150,14 +150,14 @@ public class FessLoginAssist extends TypicalLoginAssist<String, FessUserBean, Fe
             return doFindLoginUser(username, encryptPassword(password));
         });
         resolver.resolve(SpnegoCredential.class, credential -> {
-            final String username = ((SpnegoCredential) credential).getUsername();
+            final String username = credential.getUsername();
             if (!fessConfig.isAdminUser(username)) {
                 return ComponentUtil.getLdapManager().login(username);
             }
             return OptionalEntity.empty();
         });
         resolver.resolve(OpenIdConnectCredential.class, credential -> {
-            return OptionalEntity.of(((OpenIdConnectCredential) credential).getUser());
+            return OptionalEntity.of(credential.getUser());
         });
     }
 

@@ -72,7 +72,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                         webDriver = new PhantomJSDriver();
                     } else {
                         if (webDriverCapabilities instanceof DesiredCapabilities) {
-                            DesiredCapabilities capabilities = (DesiredCapabilities) webDriverCapabilities;
+                            final DesiredCapabilities capabilities = (DesiredCapabilities) webDriverCapabilities;
                             webDriverCapabilities.asMap().entrySet().stream()
                                     .filter(e -> e.getValue() instanceof String && filePathMap.containsKey(e.getValue().toString()))
                                     .forEach(e -> capabilities.setCapability(e.getKey(), filePathMap.get(e.getValue().toString())));
@@ -91,6 +91,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    @Override
     public void destroy() {
         if (webDriver != null) {
             webDriver.quit();
@@ -160,7 +161,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     }
 
     @SuppressWarnings("deprecation")
-    protected PhantomJSDriverService createDriverService(Capabilities desiredCapabilities) {
+    protected PhantomJSDriverService createDriverService(final Capabilities desiredCapabilities) {
         // Look for Proxy configuration within the Capabilities
         Proxy proxy = null;
         if (desiredCapabilities != null) {
@@ -177,7 +178,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
             phantomjspath = System.getProperty(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjspath);
         }
 
-        File phantomjsfile = new File(phantomjspath);
+        final File phantomjsfile = new File(phantomjspath);
 
         // Build & return service
         return new Builder()//
@@ -188,18 +189,18 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                 .build();
     }
 
-    private static String[] findCLIArgumentsFromCaps(Capabilities desiredCapabilities, String capabilityName) {
+    private static String[] findCLIArgumentsFromCaps(final Capabilities desiredCapabilities, final String capabilityName) {
         if (desiredCapabilities != null) {
-            Object cap = desiredCapabilities.getCapability(capabilityName);
+            final Object cap = desiredCapabilities.getCapability(capabilityName);
             if (cap != null) {
                 if (cap instanceof String[]) {
                     return (String[]) cap;
                 } else if (cap instanceof Collection) {
                     try {
                         @SuppressWarnings("unchecked")
-                        Collection<String> capCollection = (Collection<String>) cap;
+                        final Collection<String> capCollection = (Collection<String>) cap;
                         return capCollection.toArray(new String[capCollection.size()]);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         // If casting fails, log an error and assume no CLI arguments are provided
                         logger.warn(String.format("Unable to set Capability '%s' as it was neither a String[] or a Collection<String>",
                                 capabilityName));
@@ -210,31 +211,31 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         return new String[] {}; // nothing found: return an empty array of arguments
     }
 
-    public void setWebDriver(WebDriver webDriver) {
+    public void setWebDriver(final WebDriver webDriver) {
         this.webDriver = webDriver;
     }
 
-    public void setWebDriverCapabilities(Capabilities webDriverCapabilities) {
+    public void setWebDriverCapabilities(final Capabilities webDriverCapabilities) {
         this.webDriverCapabilities = webDriverCapabilities;
     }
 
-    public void setWindowWidth(int windowWidth) {
+    public void setWindowWidth(final int windowWidth) {
         this.windowWidth = windowWidth;
     }
 
-    public void setWindowHeight(int windowHeight) {
+    public void setWindowHeight(final int windowHeight) {
         this.windowHeight = windowHeight;
     }
 
-    public void setThumbnailWidth(int thumbnailWidth) {
+    public void setThumbnailWidth(final int thumbnailWidth) {
         this.thumbnailWidth = thumbnailWidth;
     }
 
-    public void setImageFormatName(String imageFormatName) {
+    public void setImageFormatName(final String imageFormatName) {
         this.imageFormatName = imageFormatName;
     }
 
-    public void setThumbnailHeight(int thumbnailHeight) {
+    public void setThumbnailHeight(final int thumbnailHeight) {
         this.thumbnailHeight = thumbnailHeight;
     }
 }

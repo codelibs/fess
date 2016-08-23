@@ -249,7 +249,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         this.maxDeleteDocumentCacheSize = maxDeleteDocumentCacheSize;
     }
 
-    public void setMaxRedirectCount(int maxRedirectCount) {
+    public void setMaxRedirectCount(final int maxRedirectCount) {
         this.maxRedirectCount = maxRedirectCount;
     }
 

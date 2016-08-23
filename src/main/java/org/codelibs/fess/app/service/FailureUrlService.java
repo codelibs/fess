@@ -169,7 +169,7 @@ public class FailureUrlService {
         }
 
         final FailureUrlBhv bhv = ComponentUtil.getComponent(FailureUrlBhv.class);
-        FailureUrl failureUrl = bhv.selectEntity(cb -> {
+        final FailureUrl failureUrl = bhv.selectEntity(cb -> {
             cb.query().setUrl_Equal(url);
             if (crawlingConfig != null) {
                 cb.query().setConfigId_Equal(crawlingConfig.getConfigId());
@@ -178,7 +178,7 @@ public class FailureUrlService {
             entity.setErrorCount(entity.getErrorCount() + 1);
             return entity;
         }).orElseGet(() -> {
-            FailureUrl entity = new FailureUrl();
+            final FailureUrl entity = new FailureUrl();
             entity.setErrorCount(1);
             entity.setUrl(url);
             if (crawlingConfig != null) {

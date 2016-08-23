@@ -677,17 +677,17 @@ public class FessEsClient implements Client {
     public OptionalEntity<Map<String, Object>> getDocumentByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        SearchResponse response =
+        final SearchResponse response =
                 client.prepareSearch(index).setTypes(type).setSize(1).setQuery(queryBuilder).addField(fessConfig.getIndexFieldId())
                         .setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute().actionGet(fessConfig.getIndexSearchTimeout());
-        SearchHits hits = response.getHits();
+        final SearchHits hits = response.getHits();
         if (hits.getTotalHits() != 0) {
-            SearchHit hit = hits.getAt(0);
-            String id = hit.getId();
-            GetResponse getResponse =
+            final SearchHit hit = hits.getAt(0);
+            final String id = hit.getId();
+            final GetResponse getResponse =
                     client.prepareGet(index, type, id).setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute()
                             .actionGet(fessConfig.getIndexSearchTimeout());
-            Map<String, Object> source = BeanUtil.copyMapToNewMap(getResponse.getSource());
+            final Map<String, Object> source = BeanUtil.copyMapToNewMap(getResponse.getSource());
             source.put(fessConfig.getIndexFieldId(), id);
             source.put(fessConfig.getIndexFieldVersion(), getResponse.getVersion());
             return OptionalEntity.of(source);
@@ -966,7 +966,7 @@ public class FessEsClient implements Client {
                                 .actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
-                IndexRequestBuilder builder =
+                final IndexRequestBuilder builder =
                         client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX);
                 if (version != null && version.longValue() > 0) {
                     builder.setVersion(version);

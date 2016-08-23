@@ -73,7 +73,7 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
             }
             return generatorList.stream().map(s -> {
                 if (s.startsWith("${path}")) {
-                    for (String p : pathList) {
+                    for (final String p : pathList) {
                         final File f = new File(s.replace("${path}", p));
                         if (f.exists()) {
                             final String filePath = f.getAbsolutePath();
@@ -88,18 +88,18 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
         return true;
     }
 
-    public void setDirectoryNameLength(int directoryNameLength) {
+    public void setDirectoryNameLength(final int directoryNameLength) {
         this.directoryNameLength = directoryNameLength;
     }
 
-    protected String expandPath(String value) {
+    protected String expandPath(final String value) {
         if (value != null && filePathMap.containsKey(value)) {
             return filePathMap.get(value);
         }
         return value;
     }
 
-    public void setGeneratorList(List<String> generatorList) {
+    public void setGeneratorList(final List<String> generatorList) {
         this.generatorList = generatorList;
     }
 

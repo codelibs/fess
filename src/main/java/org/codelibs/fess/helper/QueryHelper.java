@@ -790,7 +790,7 @@ public class QueryHelper {
         return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY);
     }
 
-    public void setLowercaseWildcard(boolean lowercaseWildcard) {
+    public void setLowercaseWildcard(final boolean lowercaseWildcard) {
         this.lowercaseWildcard = lowercaseWildcard;
     }
 

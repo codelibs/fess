@@ -339,7 +339,7 @@ public class ViewHelper {
                 buf.append(URLEncoder.encode(queries.trim(), Constants.UTF_8));
                 buf.append("%22");
                 return buf.toString();
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 logger.warn("Unsupported encoding.", e);
             }
         }
