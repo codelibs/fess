@@ -81,32 +81,32 @@ public class AdminEsreqAction extends FessAdminAction {
             throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, msg), () -> {
                 return asListHtml(() -> saveToken());
             });
-        }
-
-        try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
-            final File tempFile = File.createTempFile("esreq_", ".json");
-            try (final InputStream in = response.getContentAsStream()) {
-                CopyUtil.copy(in, tempFile);
-            } catch (final Exception e1) {
-                if (tempFile != null && tempFile.exists() && !tempFile.delete()) {
-                    logger.warn("Failed to delete " + tempFile.getAbsolutePath());
-                }
-                throw e1;
-            }
-            return asStream("es_" + System.currentTimeMillis() + ".json").contentTypeOctetStream().stream(out -> {
-                try (final InputStream in = new FileInputStream(tempFile)) {
-                    out.write(in);
-                } finally {
-                    if (tempFile.exists() && !tempFile.delete()) {
+        } else {
+            try (final CurlResponse response = curlRequest.body(buf.toString()).execute()) {
+                final File tempFile = File.createTempFile("esreq_", ".json");
+                try (final InputStream in = response.getContentAsStream()) {
+                    CopyUtil.copy(in, tempFile);
+                } catch (final Exception e1) {
+                    if (tempFile != null && tempFile.exists() && !tempFile.delete()) {
                         logger.warn("Failed to delete " + tempFile.getAbsolutePath());
                     }
+                    throw e1;
                 }
-            });
-        } catch (final Exception e) {
-            logger.warn("Failed to process request file: " + form.requestFile.getFileName(), e);
-            throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, e.getMessage()), () -> {
-                return asListHtml(() -> saveToken());
-            });
+                return asStream("es_" + System.currentTimeMillis() + ".json").contentTypeOctetStream().stream(out -> {
+                    try (final InputStream in = new FileInputStream(tempFile)) {
+                        out.write(in);
+                    } finally {
+                        if (tempFile.exists() && !tempFile.delete()) {
+                            logger.warn("Failed to delete " + tempFile.getAbsolutePath());
+                        }
+                    }
+                });
+            } catch (final Exception e) {
+                logger.warn("Failed to process request file: " + form.requestFile.getFileName(), e);
+                throwValidationError(messages -> messages.addErrorsInvalidHeaderForRequestFile(GLOBAL, e.getMessage()), () -> {
+                    return asListHtml(() -> saveToken());
+                });
+            }
         }
         return redirect(getClass()); // no-op
     }
