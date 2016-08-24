@@ -210,12 +210,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         addFieldMapping(indicesClient, logIndex, "search_log", "languages",
                 "{\"properties\":{\"languages\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
 
-        addFieldMapping(indicesClient, configIndex, "scheduled_job", "languages",
-                "{\"properties\":{\"languages\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
-
         // data migration
-        addData(configIndex, "scheduled_job", "thumbnail_purger",
-                "{\"index\":{\"_index\":\".fess_config\",\"_type\":\"scheduled_job\",\"_id\":\"thumbnail_purger\"}}");
         addData(configIndex,
                 "scheduled_job",
                 "thumbnail_purger",
