@@ -50,6 +50,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
@@ -170,7 +171,55 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom10_1() {
-        // TODO close index, update analyzers, open index
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String indexConfigPath = "fess_indices";
+        final String configIndex = ".fess_config";
+        final String logIndex = "fess_log";
+        final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+
+        // file
+        uploadResource(indexConfigPath, docIndex, "ja/mapping.txt");
+        uploadResource(indexConfigPath, docIndex, "ar/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "ca/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "cs/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "da/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "de/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "el/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "es/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "fa/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "fi/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "fr/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "hi/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "hu/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "id/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "it/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "lt/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "lv/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "nl/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "no/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "pt/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "ro/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "ru/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "sv/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "th/protwords.txt");
+        uploadResource(indexConfigPath, docIndex, "tr/protwords.txt");
+
+        // update mapping
+        addFieldMapping(indicesClient, configIndex, "path_mapping", "userAgent",
+                "{\"properties\":{\"userAgent\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, logIndex, "search_log", "languages",
+                "{\"properties\":{\"languages\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+
+        addFieldMapping(indicesClient, configIndex, "scheduled_job", "languages",
+                "{\"properties\":{\"languages\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+
+        // data migration
+        addData(configIndex, "scheduled_job", "thumbnail_purger",
+                "{\"index\":{\"_index\":\".fess_config\",\"_type\":\"scheduled_job\",\"_id\":\"thumbnail_purger\"}}");
+        addData(configIndex,
+                "scheduled_job",
+                "thumbnail_purger",
+                "{\"name\":\"Thumbnail Purger\",\"target\":\"all\",\"cronExpression\":\"0 0 * * *\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"purgeThumbnailJob\\\").expiry(30 * 24 * 60 * 60 * 1000).execute();\",\"jobLogging\":true,\"crawler\":false,\"available\":true,\"sortOrder\":6,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
     }
 
     private void upgradeFrom10_0() {
@@ -453,6 +502,15 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
             }
+        }
+    }
+
+    private void addData(final String index, final String type, final String id, final String source) {
+        try {
+            IndexRequest indexRequest = new IndexRequest(index, type, id).source(source);
+            fessEsClient.index(indexRequest).actionGet();
+        } catch (Exception e) {
+            logger.warn("Failed to add " + id + " to " + index + "/" + type, e);
         }
     }
 
