@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,11 +50,17 @@ import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
+import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
@@ -179,6 +187,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String updateIndex = fessConfig.getIndexDocumentUpdateIndex();
         final String searchIndex = fessConfig.getIndexDocumentSearchIndex();
         final String oldDocIndex = "fess";
+        final String suggestAnalyzerIndex = ".suggest.analyzer";
 
         // file
         uploadResource(indexConfigPath, oldDocIndex, "ja/mapping.txt");
@@ -212,6 +221,439 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"properties\":{\"userAgent\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
         addFieldMapping(indicesClient, logIndex, "search_log", "languages",
                 "{\"properties\":{\"languages\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+
+        // update settings
+        // suggest
+        indicesClient.close(new CloseIndexRequest(suggestAnalyzerIndex));
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_ja",
+                "{\"type\":\"custom\",\"tokenizer\":\"fess_japanese_normal\",\"filter\":[\"reading_form\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_ja",
+                "{\"type\":\"custom\",\"tokenizer\":\"fess_japanese_normal\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_ja",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_ja",
+                "{\"type\":\"custom\",\"tokenizer\":\"fess_japanese_normal\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"pos_filter\",\"content_length_filter\",\"limit_token_count_filter\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_en",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_en",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_en",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_en",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"english_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_ar",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_ar",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_ar",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"arabic_normalization\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_ar",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"arabic_stop\",\"arabic_normalization\",\"arabic_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_ca",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_ca",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_ca",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"catalan_elision\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_ca",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"catalan_elision\",\"catalan_stop\",\"catalan_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_cs",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_cs",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_cs",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_cs",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"czech_stop\",\"czech_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_da",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_da",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_da",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_da",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"danish_stop\",\"danish_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_nl",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_nl",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_nl",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"dutch_override\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_nl",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"dutch_stop\",\"dutch_keywords\",\"dutch_override\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_fi",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_fi",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_fi",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_fi",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"finnish_stop\",\"finnish_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_fr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_fr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_fr",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"french_elision\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_fr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"french_elision\",\"french_stop\",\"french_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_de",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_de",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_de",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"german_normalization\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_de",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"german_stop\",\"german_keywords\",\"german_normalization\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_el",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_el",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_el",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"greek_lowercase\",\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_el",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"greek_stop\",\"greek_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_hu",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_hu",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_hu",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"hungarian_stop\",\"hungarian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_id",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_id",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_id",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_id",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"indonesian_stop\",\"indonesian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_it",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_it",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_it",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"italian_elision\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_it",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"italian_elision\",\"italian_stop\",\"italian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_lv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_lv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_lv",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_lv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"latvian_stop\",\"latvian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_lt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_lt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_lt",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_lt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"lithuanian_stop\",\"lithuanian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_no",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_no",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_no",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_no",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"norwegian_stop\",\"norwegian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_fa",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_fa",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "normalize_analyzer_fa",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"arabic_normalization\",\"persian_normalization\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_fa",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"arabic_normalization\",\"persian_normalization\",\"persian_stop\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_pt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_pt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_pt",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_pt",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"portuguese_stop\",\"portuguese_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_ro",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_ro",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_ro",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_ro",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"romanian_stop\",\"romanian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_ru",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_ru",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_ru",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_ru",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"russian_stop\",\"russian_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_es",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_es",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_es",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_es",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"spanish_stop\",\"spanish_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_sv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_sv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_sv",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_sv",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"swedish_stop\",\"swedish_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_tr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_tr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\"}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "normalize_analyzer_tr",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\",\"apostrophe\",\"turkish_lowercase\",\"turkish_stemmer\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_tr",
+                "{\"type\":\"custom\",\"tokenizer\":\"standard\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"apostrophe\",\"turkish_lowercase\",\"turkish_stop\",\"turkish_keywords\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_analyzer_th",
+                "{\"type\":\"custom\",\"tokenizer\":\"thai\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "reading_term_analyzer_th",
+                "{\"type\":\"custom\",\"tokenizer\":\"thai\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "analyzer", "normalize_analyzer_th",
+                "{\"type\":\"custom\",\"tokenizer\":\"keyword\",\"char_filter\":[\"mapping_char\"],\"filter\":[\"lowercase\"]}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "analyzer",
+                "contents_analyzer_th",
+                "{\"type\":\"custom\",\"tokenizer\":\"thai\",\"filter\":[\"lowercase\",\"stopword_en_filter\",\"content_length_filter\",\"limit_token_count_filter\",\"thai_stop\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "stemmer_en_filter", "{\"type\":\"stemmer\",\"name\":\"english\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "arabic_stop", "{\"type\":\"stop\",\"stopwords\":\"_arabic_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "arabic_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}ar/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "arabic_stemmer", "{\"type\":\"stemmer\",\"language\":\"arabic\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "catalan_elision",
+                "{\"type\":\"elision\",\"articles\":[\"d\",\"l\",\"m\",\"n\",\"s\",\"t\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "catalan_stop", "{\"type\":\"stop\",\"stopwords\":\"_catalan_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "catalan_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}ca/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "catalan_stemmer", "{\"type\":\"stemmer\",\"language\":\"catalan\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "czech_stop", "{\"type\":\"stop\",\"stopwords\":\"_czech_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "czech_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}cs/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "czech_stemmer", "{\"type\":\"stemmer\",\"language\":\"czech\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "danish_stop", "{\"type\":\"stop\",\"stopwords\":\"_danish_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "danish_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}da/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "danish_stemmer", "{\"type\":\"stemmer\",\"language\":\"danish\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "dutch_stop", "{\"type\":\"stop\",\"stopwords\":\"_dutch_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "dutch_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}nl/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "dutch_stemmer", "{\"type\":\"stemmer\",\"language\":\"dutch\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "dutch_override",
+                "{\"type\":\"stemmer_override\",\"rules\":[\"fiets=>fiets\",\"bromfiets=>bromfiets\",\"ei=>eier\",\"kind=>kinder\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "english_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords\":[\"hello\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "finnish_stop", "{\"type\":\"stop\",\"stopwords\":\"_finnish_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "finnish_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords\":[\"Hei\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "finnish_stemmer", "{\"type\":\"stemmer\",\"language\":\"finnish\"}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "filter",
+                "french_elision",
+                "{\"type\":\"elision\",\"articles_case\":true,\"articles\":[\"l\",\"m\",\"t\",\"qu\",\"n\",\"s\",\"j\",\"d\",\"c\",\"jusqu\",\"quoiqu\",\"lorsqu\",\"puisqu\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "french_stop", "{\"type\":\"stop\",\"stopwords\":\"_french_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "french_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}fr/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "french_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"light_french\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "german_stop", "{\"type\":\"stop\",\"stopwords\":\"_german_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "german_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}de/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "german_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"light_german\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "greek_stop", "{\"type\":\"stop\",\"stopwords\":\"_greek_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "greek_lowercase", "{\"type\":\"lowercase\",\"language\":\"greek\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "greek_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}el/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "greek_stemmer", "{\"type\":\"stemmer\",\"language\":\"greek\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "hindi_stop", "{\"type\":\"stop\",\"stopwords\":\"_hindi_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "hungarian_stop", "{\"type\":\"stop\",\"stopwords\":\"_hungarian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "hungarian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}hu/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "hungarian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"hungarian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "indonesian_stop",
+                "{\"type\":\"stop\",\"stopwords\":\"_indonesian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "indonesian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}id/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "indonesian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"indonesian\"}");
+        updateAnalysis(
+                indicesClient,
+                suggestAnalyzerIndex,
+                "filter",
+                "italian_elision",
+                "{\"type\":\"elision\",\"articles\":[\"c\",\"l\",\"all\",\"dall\",\"dell\",\"nell\",\"sull\",\"coll\",\"pell\",\"gl\",\"agl\",\"dagl\",\"degl\",\"negl\",\"sugl\",\"un\",\"m\",\"t\",\"s\",\"v\",\"d\"]}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "italian_stop", "{\"type\":\"stop\",\"stopwords\":\"_italian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "italian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}it/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "italian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"light_italian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "latvian_stop", "{\"type\":\"stop\",\"stopwords\":\"_latvian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "latvian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}lv/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "latvian_stemmer", "{\"type\":\"stemmer\",\"language\":\"latvian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "lithuanian_stop",
+                "{\"type\":\"stop\",\"stopwords\":\"_lithuanian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "lithuanian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}lt/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "lithuanian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"lithuanian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "norwegian_stop", "{\"type\":\"stop\",\"stopwords\":\"_norwegian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "norwegian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}no/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "norwegian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"norwegian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "persian_stop", "{\"type\":\"stop\",\"stopwords\":\"_persian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "portuguese_stop",
+                "{\"type\":\"stop\",\"stopwords\":\"_portuguese_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "portuguese_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}pt/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "portuguese_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"light_portuguese\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "romanian_stop", "{\"type\":\"stop\",\"stopwords\":\"_romanian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "romanian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}ro/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "romanian_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"romanian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "russian_stop", "{\"type\":\"stop\",\"stopwords\":\"_russian_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "russian_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}ru/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "russian_stemmer", "{\"type\":\"stemmer\",\"language\":\"russian\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "spanish_stop", "{\"type\":\"stop\",\"stopwords\":\"_spanish_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "spanish_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}es/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "spanish_stemmer",
+                "{\"type\":\"stemmer\",\"language\":\"light_spanish\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "swedish_stop", "{\"type\":\"stop\",\"stopwords\":\"_swedish_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "swedish_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}sv/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "swedish_stemmer", "{\"type\":\"stemmer\",\"language\":\"swedish\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "turkish_stop", "{\"type\":\"stop\",\"stopwords\":\"_turkish_\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "turkish_lowercase",
+                "{\"type\":\"lowercase\",\"language\":\"turkish\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "turkish_keywords",
+                "{\"type\":\"keyword_marker\",\"keywords_path\":\"${fess.dictionary.path}tr/protwords.txt\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "turkish_stemmer", "{\"type\":\"stemmer\",\"language\":\"turkish\"}");
+        updateAnalysis(indicesClient, suggestAnalyzerIndex, "filter", "thai_stop", "{\"type\":\"stop\",\"stopwords\":\"_thai_\"}");
+        indicesClient.open(new OpenIndexRequest(suggestAnalyzerIndex));
 
         // data migration
         addData(configIndex,
@@ -531,6 +973,20 @@ public class AdminUpgradeAction extends FessAdminAction {
             } catch (final Exception e) {
                 logger.warn("Failed to add " + field + " to " + index + "/" + type, e);
             }
+        }
+    }
+
+    private void updateAnalysis(final IndicesAdminClient indicesClient, final String index, final String type, final String name,
+            final String source) {
+        try {
+            XContentParser contentParser = XContentFactory.xContent(XContentType.JSON).createParser(source.getBytes());
+            contentParser.close();
+            XContentBuilder builder =
+                    jsonBuilder().startObject().startObject("analysis").startObject(type).field(name).copyCurrentStructure(contentParser)
+                            .endObject().endObject().endObject();
+            indicesClient.prepareUpdateSettings(index).setSettings(builder.string()).execute().actionGet();
+        } catch (Exception e) {
+            logger.warn("Failed to set analyzer to " + index, e);
         }
     }
 
