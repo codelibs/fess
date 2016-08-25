@@ -62,7 +62,7 @@ import org.elasticsearch.search.SearchHits;
 public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends ConditionBean> extends AbstractBehaviorWritable<ENTITY, CB> {
 
     @Resource
-    protected Client client;
+    private Client client;
 
     protected int sizeForDelete = 100;
     protected String scrollForDelete = "1m";

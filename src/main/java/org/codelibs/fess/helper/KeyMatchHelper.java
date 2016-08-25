@@ -38,8 +38,12 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeyMatchHelper {
+    private static final Logger logger = LoggerFactory.getLogger(KeyMatchHelper.class);
+
     protected volatile Map<String, Pair<QueryBuilder, ScoreFunctionBuilder>> keyMatchQueryMap = Collections.emptyMap();
 
     protected long reloadInterval = 1000L;
@@ -78,7 +82,9 @@ public class KeyMatchHelper {
                                 try {
                                     Thread.sleep(reloadInterval);
                                 } catch (final InterruptedException e) {
-                                    // ignore
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("Interrupted.", e);
+                                    }
                                 }
                             }
                         });

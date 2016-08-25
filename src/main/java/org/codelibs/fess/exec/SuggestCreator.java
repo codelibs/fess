@@ -17,7 +17,6 @@ package org.codelibs.fess.exec;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
@@ -42,8 +41,7 @@ import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SuggestCreator implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class SuggestCreator {
 
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
 
@@ -196,7 +194,11 @@ public class SuggestCreator implements Serializable {
 
         try {
             latch.await();
-        } catch (final InterruptedException ignore) {}
+        } catch (final InterruptedException ignore) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Interrupted.", ignore);
+            }
+        }
 
         return result.get();
     }

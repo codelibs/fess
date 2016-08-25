@@ -53,7 +53,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
 
     protected volatile Pattern[] excludedDocPathPatterns;
 
-    protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
+    protected transient volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
     private volatile List<LabelType> labelTypeList;
 

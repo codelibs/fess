@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.admin.searchlist;
 
 import static org.codelibs.core.stream.StreamUtil.stream;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -37,7 +36,7 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  * @author shinsuke
  * @author Keiichi Watanabe
  */
-public class ListForm implements SearchRequestParams, Serializable {
+public class ListForm implements SearchRequestParams {
 
     private static final long serialVersionUID = 1L;
 

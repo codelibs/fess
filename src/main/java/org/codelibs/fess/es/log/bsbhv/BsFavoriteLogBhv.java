@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.log.allcommon.EsAbstractBehavior;
-import org.codelibs.fess.es.log.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.log.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.log.bsentity.dbmeta.FavoriteLogDbm;
 import org.codelibs.fess.es.log.cbean.FavoriteLogCB;
@@ -180,9 +179,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     }
 
     public void insert(FavoriteLog entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsert(entity, null);
     }
 
@@ -191,9 +188,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     }
 
     public void update(FavoriteLog entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doUpdate(entity, null);
     }
 
@@ -202,9 +197,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     }
 
     public void insertOrUpdate(FavoriteLog entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsertOrUpdate(entity, null, null);
     }
 
@@ -213,9 +206,7 @@ public abstract class BsFavoriteLogBhv extends EsAbstractBehavior<FavoriteLog, F
     }
 
     public void delete(FavoriteLog entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().deleteOption(opLambda);
-        }
+        entity.asDocMeta().deleteOption(opLambda);
         doDelete(entity, null);
     }
 

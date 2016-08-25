@@ -134,7 +134,9 @@ public class DataIndexHelper {
                 try {
                     Thread.sleep(crawlingExecutionInterval);
                 } catch (final InterruptedException e) {
-                    // NOP
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Interrupted.", e);
+                    }
                 }
                 continue;
             }
@@ -150,7 +152,9 @@ public class DataIndexHelper {
             try {
                 Thread.sleep(crawlingExecutionInterval);
             } catch (final InterruptedException e) {
-                // NOP
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupted.", e);
+                }
             }
         }
 
@@ -286,13 +290,21 @@ public class DataIndexHelper {
         public void awaitTermination() {
             try {
                 join();
-            } catch (final InterruptedException e) {}
+            } catch (final InterruptedException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupted.", e);
+                }
+            }
         }
 
         public void awaitTermination(final long mills) {
             try {
                 join(mills);
-            } catch (final InterruptedException e) {}
+            } catch (final InterruptedException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupted.", e);
+                }
+            }
         }
     }
 }

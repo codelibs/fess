@@ -236,9 +236,9 @@ public abstract class EsAbstractEntity implements Entity, Serializable, Cloneabl
 
         protected Long version;
 
-        private RequestOptionCall<IndexRequestBuilder> indexOption;
+        private transient RequestOptionCall<IndexRequestBuilder> indexOption;
 
-        private RequestOptionCall<DeleteRequestBuilder> deleteOption;
+        private transient RequestOptionCall<DeleteRequestBuilder> deleteOption;
 
         public DocMeta id(String id) {
             this.id = id;

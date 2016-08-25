@@ -245,7 +245,9 @@ public class SystemHelper {
         try {
             Thread.sleep(sec * 1000L);
         } catch (final InterruptedException e) {
-            // ignore
+            if (logger.isDebugEnabled()) {
+                logger.debug("Interrupted.", e);
+            }
         }
     }
 

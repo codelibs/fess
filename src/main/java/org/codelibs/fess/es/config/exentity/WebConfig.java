@@ -51,7 +51,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
 
     protected volatile Pattern[] excludedDocUrlPatterns;
 
-    protected volatile Map<ConfigName, Map<String, String>> configParameterMap;
+    protected transient volatile Map<ConfigName, Map<String, String>> configParameterMap;
 
     private volatile List<LabelType> labelTypeList;
 

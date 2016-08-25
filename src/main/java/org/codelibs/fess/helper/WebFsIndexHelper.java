@@ -423,7 +423,9 @@ public class WebFsIndexHelper {
                 try {
                     Thread.sleep(crawlingExecutionInterval);
                 } catch (final InterruptedException e) {
-                    // NOP
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Interrupted.", e);
+                    }
                 }
                 continue;
             }
@@ -442,7 +444,9 @@ public class WebFsIndexHelper {
             try {
                 Thread.sleep(crawlingExecutionInterval);
             } catch (final InterruptedException e) {
-                // NOP
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interrupted.", e);
+                }
             }
         }
 

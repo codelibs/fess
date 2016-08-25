@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.user.allcommon.EsAbstractBehavior;
-import org.codelibs.fess.es.user.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.user.bsentity.dbmeta.GroupDbm;
 import org.codelibs.fess.es.user.cbean.GroupCB;
@@ -177,9 +176,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public void insert(Group entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsert(entity, null);
     }
 
@@ -188,9 +185,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public void update(Group entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doUpdate(entity, null);
     }
 
@@ -199,9 +194,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public void insertOrUpdate(Group entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsertOrUpdate(entity, null, null);
     }
 
@@ -210,9 +203,7 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
     }
 
     public void delete(Group entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().deleteOption(opLambda);
-        }
+        entity.asDocMeta().deleteOption(opLambda);
         doDelete(entity, null);
     }
 

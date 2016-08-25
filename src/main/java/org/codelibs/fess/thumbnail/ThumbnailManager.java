@@ -75,7 +75,7 @@ public class ThumbnailManager {
 
     protected int thumbnailTaskQueueSize = 10000;
 
-    protected long noImageExpired = 24 * 60 * 60 * 1000; // 24 hours
+    protected long noImageExpired = 24 * 60 * 60 * 1000L; // 24 hours
 
     @PostConstruct
     public void init() {

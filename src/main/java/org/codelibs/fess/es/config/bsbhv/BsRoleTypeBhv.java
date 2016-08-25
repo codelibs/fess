@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
-import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.config.bsentity.dbmeta.RoleTypeDbm;
 import org.codelibs.fess.es.config.cbean.RoleTypeCB;
@@ -182,9 +181,7 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
     }
 
     public void insert(RoleType entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsert(entity, null);
     }
 
@@ -193,9 +190,7 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
     }
 
     public void update(RoleType entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doUpdate(entity, null);
     }
 
@@ -204,9 +199,7 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
     }
 
     public void insertOrUpdate(RoleType entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsertOrUpdate(entity, null, null);
     }
 
@@ -215,9 +208,7 @@ public abstract class BsRoleTypeBhv extends EsAbstractBehavior<RoleType, RoleTyp
     }
 
     public void delete(RoleType entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().deleteOption(opLambda);
-        }
+        entity.asDocMeta().deleteOption(opLambda);
         doDelete(entity, null);
     }
 

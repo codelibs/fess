@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.user.allcommon.EsAbstractBehavior;
-import org.codelibs.fess.es.user.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.user.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.user.bsentity.dbmeta.RoleDbm;
 import org.codelibs.fess.es.user.cbean.RoleCB;
@@ -176,9 +175,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     }
 
     public void insert(Role entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsert(entity, null);
     }
 
@@ -187,9 +184,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     }
 
     public void update(Role entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doUpdate(entity, null);
     }
 
@@ -198,9 +193,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     }
 
     public void insertOrUpdate(Role entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsertOrUpdate(entity, null, null);
     }
 
@@ -209,9 +202,7 @@ public abstract class BsRoleBhv extends EsAbstractBehavior<Role, RoleCB> {
     }
 
     public void delete(Role entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().deleteOption(opLambda);
-        }
+        entity.asDocMeta().deleteOption(opLambda);
         doDelete(entity, null);
     }
 

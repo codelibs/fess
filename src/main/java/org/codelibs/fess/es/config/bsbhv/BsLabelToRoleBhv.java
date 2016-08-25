@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractBehavior;
-import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity.RequestOptionCall;
 import org.codelibs.fess.es.config.bsentity.dbmeta.LabelToRoleDbm;
 import org.codelibs.fess.es.config.cbean.LabelToRoleCB;
@@ -177,9 +176,7 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
     }
 
     public void insert(LabelToRole entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsert(entity, null);
     }
 
@@ -188,9 +185,7 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
     }
 
     public void update(LabelToRole entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doUpdate(entity, null);
     }
 
@@ -199,9 +194,7 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
     }
 
     public void insertOrUpdate(LabelToRole entity, RequestOptionCall<IndexRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().indexOption(opLambda);
-        }
+        entity.asDocMeta().indexOption(opLambda);
         doInsertOrUpdate(entity, null, null);
     }
 
@@ -210,9 +203,7 @@ public abstract class BsLabelToRoleBhv extends EsAbstractBehavior<LabelToRole, L
     }
 
     public void delete(LabelToRole entity, RequestOptionCall<DeleteRequestBuilder> opLambda) {
-        if (entity instanceof EsAbstractEntity) {
-            entity.asDocMeta().deleteOption(opLambda);
-        }
+        entity.asDocMeta().deleteOption(opLambda);
         doDelete(entity, null);
     }
 
