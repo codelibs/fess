@@ -413,8 +413,8 @@ public class FessEsClient implements Client {
 
             final String updatedIndexName;
             if (isFessIndex) {
-                client.admin().indices().prepareRefresh(fessConfig.getIndexDocumentUpdateIndex()).execute()
-                        .actionGet(fessConfig.getIndexIndicesTimeout());
+                client.admin().cluster().prepareHealth(fessConfig.getIndexDocumentUpdateIndex()).setWaitForYellowStatus().execute()
+                        .actionGet();
                 final GetIndexResponse response =
                         client.admin().indices().prepareGetIndex().addIndices(fessConfig.getIndexDocumentUpdateIndex()).execute()
                                 .actionGet(fessConfig.getIndexIndicesTimeout());
