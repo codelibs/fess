@@ -33,6 +33,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exbhv.DataConfigBhv;
@@ -49,13 +50,16 @@ import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -119,6 +123,9 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     @Resource
     protected FessEsClient fessEsClient;
+
+    @Resource
+    private ScheduledJobService scheduledJobService;
 
     // ===================================================================================
     //                                                                               Hook
@@ -662,7 +669,8 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"name\":\"Thumbnail Purger\",\"target\":\"all\",\"cronExpression\":\"0 0 * * *\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"purgeThumbnailJob\\\").expiry(30 * 24 * 60 * 60 * 1000).execute();\",\"jobLogging\":true,\"crawler\":false,\"available\":true,\"sortOrder\":6,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
 
         // alias
-        if (!existsIndex(indicesClient, searchIndex)) {
+        IndicesOptions indexOrAliasOptions = IndicesOptions.fromOptions(false, false, true, true);
+        if (!existsIndex(indicesClient, searchIndex, indexOrAliasOptions)) {
             try {
                 final IndicesAliasesResponse response =
                         indicesClient.prepareAliases().addAlias(oldDocIndex, searchIndex).execute()
@@ -676,7 +684,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 logger.warn("Failed to create " + searchIndex + " alias for fess.", e);
             }
         }
-        if (!existsIndex(indicesClient, updateIndex)) {
+        if (!existsIndex(indicesClient, updateIndex, indexOrAliasOptions)) {
             try {
                 final IndicesAliasesResponse response =
                         indicesClient.prepareAliases().addAlias(oldDocIndex, updateIndex).execute()
@@ -691,6 +699,34 @@ public class AdminUpgradeAction extends FessAdminAction {
             }
         }
 
+        // fess.suggest
+        final String suggestIndex = fessConfig.getIndexDocumentSuggestIndex();
+        if (existsIndex(indicesClient, suggestIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+            indicesClient.prepareDelete(suggestIndex).execute(new ActionListener<DeleteIndexResponse>() {
+
+                @Override
+                public void onResponse(DeleteIndexResponse response) {
+                    scheduledJobService.getScheduledJob("suggest_indexer").ifPresent(entity -> {
+                        if (!entity.isEnabled() || entity.isRunning()) {
+                            logger.warn("suggest_indexer job is running.");
+                            return;
+                        }
+                        try {
+                            entity.start();
+                        } catch (final Exception e) {
+                            logger.warn("Failed to start suggest_indexer job.", e);
+                        }
+                    }).orElse(() -> {
+                        logger.warn("No suggest_indexer job.");
+                    });
+                }
+
+                @Override
+                public void onFailure(Throwable e) {
+                    logger.warn("Failed to delete " + suggestIndex + " index.", e);
+                }
+            });
+        }
     }
 
     private void upgradeFrom10_0() {
@@ -999,10 +1035,10 @@ public class AdminUpgradeAction extends FessAdminAction {
         }
     }
 
-    private boolean existsIndex(IndicesAdminClient indicesClient, String index) {
+    private boolean existsIndex(IndicesAdminClient indicesClient, String index, IndicesOptions options) {
         try {
             final IndicesExistsResponse response =
-                    indicesClient.prepareExists(index).execute().actionGet(fessConfig.getIndexSearchTimeout());
+                    indicesClient.prepareExists(index).setIndicesOptions(options).execute().actionGet(fessConfig.getIndexSearchTimeout());
             return response.isExists();
         } catch (final Exception e) {
             // ignore
