@@ -348,10 +348,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. site_path */
     String RESPONSE_FIELD_site_path = "response.field.site_path";
 
-    /** The key of the configuration. e.g. fess */
+    /** The key of the configuration. e.g. fess.search */
     String INDEX_DOCUMENT_SEARCH_INDEX = "index.document.search.index";
 
-    /** The key of the configuration. e.g. fess */
+    /** The key of the configuration. e.g. fess.update */
     String INDEX_DOCUMENT_UPDATE_INDEX = "index.document.update.index";
 
     /** The key of the configuration. e.g. doc */
@@ -2006,7 +2006,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.document.search.index'. <br>
-     * The value is, e.g. fess <br>
+     * The value is, e.g. fess.search <br>
      * comment: document index
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -2014,7 +2014,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'index.document.update.index'. <br>
-     * The value is, e.g. fess <br>
+     * The value is, e.g. fess.update <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentUpdateIndex();
