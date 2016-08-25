@@ -86,7 +86,7 @@ public class SuggestHelper {
 
         fessEsClient.admin().cluster().prepareHealth().setWaitForYellowStatus().execute().actionGet(fessConfig.getIndexHealthTimeout());
 
-        suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSearchIndex());
+        suggester = Suggester.builder().build(fessEsClient, fessConfig.getIndexDocumentSuggestIndex());
         suggester.settings().array().delete(SuggestSettings.DefaultKeys.SUPPORTED_FIELDS);
         split(fessConfig.getSuggestFieldIndexContents(), ",").of(
                 stream -> stream.filter(StringUtil::isNotBlank).forEach(
