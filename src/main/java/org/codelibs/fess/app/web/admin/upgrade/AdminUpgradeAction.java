@@ -48,6 +48,7 @@ import org.codelibs.fess.es.user.exbhv.RoleBhv;
 import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -175,34 +176,36 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String indexConfigPath = "fess_indices";
         final String configIndex = ".fess_config";
         final String logIndex = "fess_log";
-        final String docIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String updateIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String searchIndex = fessConfig.getIndexDocumentSearchIndex();
+        final String oldDocIndex = "fess";
 
         // file
-        uploadResource(indexConfigPath, docIndex, "ja/mapping.txt");
-        uploadResource(indexConfigPath, docIndex, "ar/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "ca/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "cs/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "da/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "de/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "el/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "es/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "fa/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "fi/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "fr/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "hi/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "hu/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "id/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "it/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "lt/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "lv/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "nl/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "no/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "pt/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "ro/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "ru/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "sv/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "th/protwords.txt");
-        uploadResource(indexConfigPath, docIndex, "tr/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "ja/mapping.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "ar/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "ca/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "cs/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "da/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "de/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "el/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "es/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "fa/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "fi/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "fr/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "hi/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "hu/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "id/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "it/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "lt/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "lv/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "nl/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "no/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "pt/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "ro/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "ru/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "sv/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "th/protwords.txt");
+        uploadResource(indexConfigPath, oldDocIndex, "tr/protwords.txt");
 
         // update mapping
         addFieldMapping(indicesClient, configIndex, "path_mapping", "userAgent",
@@ -215,6 +218,37 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "scheduled_job",
                 "thumbnail_purger",
                 "{\"name\":\"Thumbnail Purger\",\"target\":\"all\",\"cronExpression\":\"0 0 * * *\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"purgeThumbnailJob\\\").expiry(30 * 24 * 60 * 60 * 1000).execute();\",\"jobLogging\":true,\"crawler\":false,\"available\":true,\"sortOrder\":6,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
+
+        // alias
+        if (!existsIndex(indicesClient, searchIndex)) {
+            try {
+                final IndicesAliasesResponse response =
+                        indicesClient.prepareAliases().addAlias(oldDocIndex, searchIndex).execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                if (response.isAcknowledged()) {
+                    logger.info("Created " + searchIndex + " alias for fess.");
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to create " + searchIndex + " alias for fess.");
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to create " + searchIndex + " alias for fess.", e);
+            }
+        }
+        if (!existsIndex(indicesClient, updateIndex)) {
+            try {
+                final IndicesAliasesResponse response =
+                        indicesClient.prepareAliases().addAlias(oldDocIndex, updateIndex).execute()
+                                .actionGet(fessConfig.getIndexIndicesTimeout());
+                if (response.isAcknowledged()) {
+                    logger.info("Created " + updateIndex + " alias for fess.");
+                } else if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to create " + updateIndex + " alias for fess.");
+                }
+            } catch (final Exception e) {
+                logger.warn("Failed to create " + updateIndex + " alias for fess.", e);
+            }
+        }
+
     }
 
     private void upgradeFrom10_0() {
@@ -507,6 +541,17 @@ public class AdminUpgradeAction extends FessAdminAction {
         } catch (Exception e) {
             logger.warn("Failed to add " + id + " to " + index + "/" + type, e);
         }
+    }
+
+    private boolean existsIndex(IndicesAdminClient indicesClient, String index) {
+        try {
+            final IndicesExistsResponse response =
+                    indicesClient.prepareExists(index).execute().actionGet(fessConfig.getIndexSearchTimeout());
+            return response.isExists();
+        } catch (final Exception e) {
+            // ignore
+        }
+        return false;
     }
 
 }
