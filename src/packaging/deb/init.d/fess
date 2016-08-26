@@ -156,13 +156,13 @@ case "$1" in
 	# Prepare environment
 	mkdir -p "$LOG_DIR" "$DATA_DIR" && chown "$FESS_USER":"$FESS_GROUP" "$LOG_DIR" "$DATA_DIR"
 
-    # Ensure that the PID_DIR exists (it is cleaned at OS startup time)
-    if [ -n "$PID_DIR" ] && [ ! -e "$PID_DIR" ]; then
-        mkdir -p "$PID_DIR" && chown "$FESS_USER":"$FESS_GROUP" "$PID_DIR"
-    fi
-    if [ -n "$PID_FILE" ] && [ ! -e "$PID_FILE" ]; then
-        touch "$PID_FILE" && chown "$FESS_USER":"$FESS_GROUP" "$PID_FILE"
-    fi
+	# Ensure that the PID_DIR exists (it is cleaned at OS startup time)
+	if [ -n "$PID_DIR" ] && [ ! -e "$PID_DIR" ]; then
+		mkdir -p "$PID_DIR" && chown "$FESS_USER":"$FESS_GROUP" "$PID_DIR"
+	fi
+	if [ -n "$PID_FILE" ] && [ ! -e "$PID_FILE" ]; then
+		touch "$PID_FILE" && chown "$FESS_USER":"$FESS_GROUP" "$PID_FILE"
+	fi
 
 	if [ -n "$MAX_OPEN_FILES" ]; then
 		ulimit -n $MAX_OPEN_FILES
@@ -179,12 +179,11 @@ case "$1" in
 	# Start Daemon
 	start-stop-daemon -d $FESS_HOME --start -b --user "$FESS_USER" -c "$FESS_USER" --pidfile "$PID_FILE" --exec $DAEMON -- $DAEMON_OPTS
 	return=$?
-	if [ $return -eq 0 ]
-	then
+	if [ $return -eq 0 ]; then
 		i=0
 		timeout=10
 		# Wait for the process to be properly started before exiting
-		until { cat "$PID_FILE" | xargs kill -0; } >/dev/null 2>&1
+		until { kill -0 `cat "$PID_FILE"`; } >/dev/null 2>&1
 		do
 			sleep 1
 			i=$(($i + 1))
@@ -193,9 +192,9 @@ case "$1" in
 				exit 1
 			fi
 		done
-	else
-		log_end_msg $return
 	fi
+	log_end_msg $return
+	exit $return
 	;;		
   stop)
 	log_daemon_msg "Stopping $DESC"
@@ -203,7 +202,8 @@ case "$1" in
 	if [ -f "$PID_FILE" ]; then 
 		start-stop-daemon --stop --pidfile "$PID_FILE" \
 			--user "$FESS_USER" \
-			--retry=TERM/20/KILL/5 >/dev/null
+			--quiet \
+			--retry forever/TERM/20 > /dev/null
 		if [ $? -eq 1 ]; then
 			log_progress_msg "$DESC is not running but pid file exists, cleaning up"
 		elif [ $? -eq 3 ]; then

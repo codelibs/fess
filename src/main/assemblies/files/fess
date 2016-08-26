@@ -111,6 +111,9 @@ launch_service()
     else
         exec "$JAVA" $JAVA_OPTS $FESS_JAVA_OPTS $fess_parms -Dfess.es.dir="$ES_HOME" -cp "$FESS_CLASSPATH" $props \
                 org.codelibs.fess.FessBoot $FESS_OPTS <&- > /dev/null 2>&1 &
+        if [ x"$pidfile" != "x" ] ; then
+            echo $! > $pidfile
+        fi
         return $?
     fi
 }
