@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -1015,9 +1016,12 @@ public class AdminUpgradeAction extends FessAdminAction {
     private void updateAnalysis(final IndicesAdminClient indicesClient, final String index, final String type, final String name,
             final String source) {
         try {
-            XContentParser contentParser = XContentFactory.xContent(XContentType.JSON).createParser(source.getBytes());
+            final String dictionaryPath = System.getProperty("fess.dictionary.path", StringUtil.EMPTY);
+            final XContentParser contentParser =
+                    XContentFactory.xContent(XContentType.JSON).createParser(
+                            source.replaceAll(Pattern.quote("${fess.dictionary.path}"), dictionaryPath).getBytes());
             contentParser.close();
-            XContentBuilder builder =
+            final XContentBuilder builder =
                     jsonBuilder().startObject().startObject("analysis").startObject(type).field(name).copyCurrentStructure(contentParser)
                             .endObject().endObject().endObject();
             indicesClient.prepareUpdateSettings(index).setSettings(builder.string()).execute().actionGet();
@@ -1028,7 +1032,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
     private void addData(final String index, final String type, final String id, final String source) {
         try {
-            IndexRequest indexRequest = new IndexRequest(index, type, id).source(source);
+            final IndexRequest indexRequest = new IndexRequest(index, type, id).source(source);
             fessEsClient.index(indexRequest).actionGet();
         } catch (Exception e) {
             logger.warn("Failed to add " + id + " to " + index + "/" + type, e);
