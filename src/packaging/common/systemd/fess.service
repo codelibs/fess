@@ -7,7 +7,7 @@ Requires=elasticsearch.service
 
 [Service]
 Environment=FESS_HOME=${packaging.fess.home.dir}
-EnvironmentFile=-/etc/sysconfig/fess
+EnvironmentFile=-${packaging.env.file}
 
 User=${packaging.fess.user}
 Group=${packaging.fess.group}
