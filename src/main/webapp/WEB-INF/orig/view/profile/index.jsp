@@ -78,7 +78,7 @@
 					<!-- /.col -->
 					<div class="col-xs-8">
 						<la:link href="/"
-							styleClass="btn btn-secondary">
+							styleClass="btn btn-default">
 							<i class="fa fa-arrow-circle-left"></i>
 							<la:message key="labels.profile.back" />
 						</la:link>

@@ -18,7 +18,7 @@ ${fe:facetForm()}${fe:geoForm()}
 						class="btn btn-primary">
 						<i class="fa fa-search"></i>
 					</button>
-					<button type="button" class="btn btn-default"
+					<button type="button" class="btn btn-secondary"
 						data-toggle="control-options" data-target="#searchOptions"
 						id="searchOptionsButton">
 						<i class="fa fa-cog"></i> <span class="sr-only"><la:message
@@ -38,9 +38,11 @@ ${fe:facetForm()}${fe:geoForm()}
 								<span>${username}</span>
 							</a>
 							<div class="dropdown-menu" aria-labelledby="userMenu">
-								<la:link href="/profile" styleClass="dropdown-item">
-									<la:message key="labels.profile" />
-								</la:link>
+								<c:if test="${editableUser == true}">
+									<la:link href="/profile" styleClass="dropdown-item">
+										<la:message key="labels.profile" />
+									</la:link>
+								</c:if>
 								<c:if test="${adminUser == true}">
 									<la:link href="/admin" styleClass="dropdown-item">
 										<la:message key="labels.administration" />
