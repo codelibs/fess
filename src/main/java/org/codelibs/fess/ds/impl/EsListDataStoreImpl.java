@@ -42,8 +42,9 @@ public class EsListDataStoreImpl extends EsDataStoreImpl {
         }
         final CrawlerClientFactory crawlerClientFactory = ComponentUtil.getCrawlerClientFactory();
         dataConfig.initializeClientFactory(crawlerClientFactory);
-        try (final FileListIndexUpdateCallbackImpl fileListIndexUpdateCallback =
-                new FileListIndexUpdateCallbackImpl(callback, crawlerClientFactory, nThreads)) {
+        try {
+            final FileListIndexUpdateCallbackImpl fileListIndexUpdateCallback =
+                    new FileListIndexUpdateCallbackImpl(callback, crawlerClientFactory, nThreads);
             super.storeData(dataConfig, fileListIndexUpdateCallback, paramMap, scriptMap, defaultDataMap);
             fileListIndexUpdateCallback.commit();
         } catch (final Exception e) {

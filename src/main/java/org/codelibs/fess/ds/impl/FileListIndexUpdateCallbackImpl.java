@@ -50,20 +50,22 @@ import org.lastaflute.di.core.SingletonLaContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, AutoCloseable {
+public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
     private static final Logger logger = LoggerFactory.getLogger(FileListIndexUpdateCallbackImpl.class);
 
     protected IndexUpdateCallback indexUpdateCallback;
 
     protected CrawlerClientFactory crawlerClientFactory;
 
-    protected List<String> deleteIdList = new ArrayList<>(100);
+    protected List<String> deleteUrlList = new ArrayList<>(100);
 
     protected int maxDeleteDocumentCacheSize = 100;
 
     protected int maxRedirectCount = 10;
 
     private final ExecutorService executor;
+
+    private int executorTerminationTimeout = 300;
 
     protected FileListIndexUpdateCallbackImpl(final IndexUpdateCallback indexUpdateCallback,
             final CrawlerClientFactory crawlerClientFactory, final int nThreads) {
@@ -202,18 +204,10 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         }
 
         synchronized (indexUpdateCallback) {
-            deleteIdList.add(ComponentUtil.getCrawlingInfoHelper().generateId(dataMap));
+            deleteUrlList.add(dataMap.get(fessConfig.getIndexFieldUrl()).toString());
 
-            if (deleteIdList.size() >= maxDeleteDocumentCacheSize) {
-                final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
-                final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-                for (final String id : deleteIdList) {
-                    indexingHelper.deleteDocument(fessEsClient, id);
-                }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Deleted " + deleteIdList);
-                }
-                deleteIdList.clear();
+            if (deleteUrlList.size() >= maxDeleteDocumentCacheSize) {
+                deleteDocuments();
             }
 
         }
@@ -222,17 +216,36 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
 
     @Override
     public void commit() {
-        if (!deleteIdList.isEmpty()) {
-            final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
-            final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
-            for (final String id : deleteIdList) {
-                indexingHelper.deleteDocument(fessEsClient, id);
-            }
+        try {
             if (logger.isDebugEnabled()) {
-                logger.debug("Deleted " + deleteIdList);
+                logger.debug("Shutting down thread executor.");
             }
+            executor.shutdown();
+            executor.awaitTermination(executorTerminationTimeout, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to interrupt executor.", e);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        if (!deleteUrlList.isEmpty()) {
+            deleteDocuments();
         }
         indexUpdateCallback.commit();
+    }
+
+    protected void deleteDocuments() {
+        final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();
+        final IndexingHelper indexingHelper = ComponentUtil.getIndexingHelper();
+        for (final String url : deleteUrlList) {
+            indexingHelper.deleteDocumentByUrl(fessEsClient, url);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Deleted " + deleteUrlList);
+        }
+        deleteUrlList.clear();
     }
 
     @Override
@@ -253,16 +266,8 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback, Aut
         this.maxRedirectCount = maxRedirectCount;
     }
 
-    @Override
-    public void close() throws Exception {
-        try {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Shutting down thread executor.");
-            }
-            executor.shutdown();
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } finally {
-            executor.shutdownNow();
-        }
+    public void setExecutorTerminationTimeout(int executorTerminationTimeout) {
+        this.executorTerminationTimeout = executorTerminationTimeout;
     }
+
 }
