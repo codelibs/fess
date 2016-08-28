@@ -7,7 +7,7 @@ StringBuilder redirectPage = new StringBuilder();
 redirectPage.append(((javax.servlet.http.HttpServletRequest)request).getContextPath());
 if("systemError".equals(type)) {
 	if(requestUri != null && !requestUri.endsWith("systemError")) {
-		redirectPage.append("/error/systemerror");
+		redirectPage.append("/error/systemerror/");
 		response.sendRedirect(redirectPage.toString());
 	} else {
 		response.sendError(statusCode);
@@ -16,10 +16,10 @@ if("systemError".equals(type)) {
 	redirectPage.append("/login/?type=logout&code=" + statusCode);
 	response.sendRedirect(redirectPage.toString());
 } else if("badRequest".equals(type)) {
-	redirectPage.append("/error/badrequest");
+	redirectPage.append("/error/badrequest/");
 	response.sendRedirect(redirectPage.toString());
 } else if(!"badAuth".equals(type)) {
-	redirectPage.append("/error/notfound?url=");
+	redirectPage.append("/error/notfound/?url=");
 	redirectPage.append(java.net.URLEncoder.encode(requestUri , "UTF-8"));
 	response.sendRedirect(redirectPage.toString());
 }
