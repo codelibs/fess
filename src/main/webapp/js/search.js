@@ -196,7 +196,7 @@ $(function() {
 						searchForm : $('#searchForm')
 					});
 
-	IMG_LOADING_DELAY = 5000;
+	IMG_LOADING_DELAY = 200;
 	IMG_LOADING_MAX = 5;
 	var loadImage = function(img, url, limit) {
 		var imgData = new Image();
