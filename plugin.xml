@@ -17,8 +17,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
@@ -26,8 +26,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-ja" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
@@ -35,8 +35,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
@@ -44,8 +44,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="2.3.1" />
-			<param name="plugin.zip.version" value="2.3.1" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
@@ -53,8 +53,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- groovy -->
 		<antcall target="install.plugin">
@@ -71,8 +71,8 @@
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="2.3.0" />
-			<param name="plugin.zip.version" value="2.3.0" />
+			<param name="plugin.version" value="2.4.0" />
+			<param name="plugin.zip.version" value="2.4.0" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}">
@@ -93,6 +93,7 @@
 	<target name="remove.jars" if="with.fess">
 		<delete>
 			<fileset dir="${plugins.dir}">
+				<include name="dataformat/curvesapi-*" />
 				<include name="dataformat/poi-*" />
 				<include name="dataformat/xmlbeans-*" />
 				<include name="dataformat/stax-api-*" />
