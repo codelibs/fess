@@ -38,8 +38,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
  */
 public class ListForm implements SearchRequestParams {
 
-    private static final long serialVersionUID = 1L;
-
     @Size(max = 1000)
     public String q;
 

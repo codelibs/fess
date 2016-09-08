@@ -73,8 +73,6 @@ public class QueryHelper {
 
     protected static final String SCORE_SORT_VALUE = "score";
 
-    protected static final long serialVersionUID = 1L;
-
     protected static final String SCORE_FIELD = "score";
 
     protected static final String INURL_FIELD = "inurl";
