@@ -93,6 +93,8 @@ public class QueryHelper {
 
     protected Set<String> highlightFieldSet = new HashSet<>();
 
+    protected Set<String> notAnalyzedFieldSet;
+
     protected String[] responseFields;
 
     protected String[] cacheResponseFields;
@@ -136,62 +138,145 @@ public class QueryHelper {
     @PostConstruct
     public void init() {
         if (responseFields == null) {
-            responseFields =
-                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
-                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
-                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
-                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
-                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldHasCache() };
+            responseFields = new String[] { SCORE_FIELD, //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldDigest(), //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldConfigId(), //
+                    fessConfig.getIndexFieldLang(), //
+                    fessConfig.getIndexFieldHasCache() };
         }
         if (cacheResponseFields == null) {
-            cacheResponseFields =
-                    new String[] { SCORE_FIELD, fessConfig.getIndexFieldId(), fessConfig.getIndexFieldDocId(),
-                            fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldHost(),
-                            fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldCreated(),
-                            fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(), fessConfig.getIndexFieldUrl(),
-                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount(),
-                            fessConfig.getIndexFieldConfigId(), fessConfig.getIndexFieldLang(), fessConfig.getIndexFieldCache() };
+            cacheResponseFields = new String[] { SCORE_FIELD, //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldDigest(), //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldConfigId(), //
+                    fessConfig.getIndexFieldLang(), //
+                    fessConfig.getIndexFieldCache() };
         }
         if (responseDocValuesFields == null) {
-            responseDocValuesFields = new String[] { fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
+            responseDocValuesFields = new String[] {//
+                    fessConfig.getIndexFieldClickCount(), //
+                            fessConfig.getIndexFieldFavoriteCount() };
         }
         if (highlightedFields == null) {
             highlightedFields = new String[] { fessConfig.getIndexFieldContent() };
         }
         if (searchFields == null) {
-            searchFields =
-                    new String[] { INURL_FIELD, fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldDocId(),
-                            fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldContent(),
-                            fessConfig.getIndexFieldContentLength(), fessConfig.getIndexFieldLastModified(),
-                            fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
-                            fessConfig.getIndexFieldLabel(), fessConfig.getIndexFieldSegment(), fessConfig.getIndexFieldClickCount(),
-                            fessConfig.getIndexFieldFavoriteCount(), fessConfig.getIndexFieldLang() };
+            searchFields = new String[] { INURL_FIELD, //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldContent(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldLabel(), //
+                    fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldLang() };
         }
         if (facetFields == null) {
-            facetFields =
-                    new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldTitle(),
-                            fessConfig.getIndexFieldContent(), fessConfig.getIndexFieldContentLength(),
-                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                            fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(), fessConfig.getIndexFieldLabel(),
+            facetFields = new String[] {//
+                    fessConfig.getIndexFieldUrl(), //
+                            fessConfig.getIndexFieldHost(), //
+                            fessConfig.getIndexFieldTitle(), //
+                            fessConfig.getIndexFieldContent(), //
+                            fessConfig.getIndexFieldContentLength(), //
+                            fessConfig.getIndexFieldLastModified(), //
+                            fessConfig.getIndexFieldTimestamp(), //
+                            fessConfig.getIndexFieldMimetype(), //
+                            fessConfig.getIndexFieldFiletype(), //
+                            fessConfig.getIndexFieldLabel(), //
                             fessConfig.getIndexFieldSegment() };
         }
         if (supportedSortFields == null) {
-            supportedSortFields =
-                    new String[] { SCORE_SORT_VALUE, fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldContentLength(),
-                            fessConfig.getIndexFieldLastModified(), fessConfig.getIndexFieldTimestamp(),
-                            fessConfig.getIndexFieldClickCount(), fessConfig.getIndexFieldFavoriteCount() };
+            supportedSortFields = new String[] { SCORE_SORT_VALUE, //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldFavoriteCount() };
         }
         if (apiResponseFieldSet == null) {
-            setApiResponseFields(new String[] { fessConfig.getResponseFieldContentDescription(), fessConfig.getResponseFieldContentTitle(),
-                    fessConfig.getResponseFieldSitePath(), fessConfig.getResponseFieldUrlLink(), fessConfig.getIndexFieldId(),
-                    fessConfig.getIndexFieldDocId(), fessConfig.getIndexFieldBoost(), fessConfig.getIndexFieldContentLength(),
-                    fessConfig.getIndexFieldHost(), fessConfig.getIndexFieldSite(), fessConfig.getIndexFieldLastModified(),
-                    fessConfig.getIndexFieldTimestamp(), fessConfig.getIndexFieldMimetype(), fessConfig.getIndexFieldFiletype(),
-                    fessConfig.getIndexFieldCreated(), fessConfig.getIndexFieldTitle(), fessConfig.getIndexFieldDigest(),
+            setApiResponseFields(new String[] {//
+            fessConfig.getResponseFieldContentDescription(), //
+                    fessConfig.getResponseFieldContentTitle(), //
+                    fessConfig.getResponseFieldSitePath(), //
+                    fessConfig.getResponseFieldUrlLink(), //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldDigest(), //
                     fessConfig.getIndexFieldUrl() });
+        }
+        if (notAnalyzedFieldSet == null) {
+            setNotAnalyzedFields(new String[] {//
+            fessConfig.getIndexFieldAnchor(), //
+                    fessConfig.getIndexFieldBoost(), //
+                    fessConfig.getIndexFieldClickCount(), //
+                    fessConfig.getIndexFieldConfigId(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldCreated(), //
+                    fessConfig.getIndexFieldDocId(), //
+                    fessConfig.getIndexFieldExpires(), //
+                    fessConfig.getIndexFieldFavoriteCount(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldHasCache(), //
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldId(), //
+                    fessConfig.getIndexFieldLabel(), //
+                    fessConfig.getIndexFieldLang(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldParentId(), //
+                    fessConfig.getIndexFieldRole(), //
+                    fessConfig.getIndexFieldSegment(), //
+                    fessConfig.getIndexFieldSite(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldUrl(), //
+                    fessConfig.getIndexFieldVersion() });
         }
     }
 
@@ -440,7 +525,11 @@ public class QueryHelper {
         } else if (isSearchField(field)) {
             context.addFieldLog(field, text);
             context.addHighlightedQuery(text);
-            return QueryBuilders.matchPhraseQuery(field, text).boost(boost);
+            if (notAnalyzedFieldSet.contains(field)) {
+                return QueryBuilders.termQuery(field, text).boost(boost);
+            } else {
+                return QueryBuilders.matchPhraseQuery(field, text).boost(boost);
+            }
         } else {
             final String origQuery = termQuery.toString();
             context.addFieldLog(Constants.DEFAULT_FIELD, origQuery);
@@ -537,6 +626,13 @@ public class QueryHelper {
         apiResponseFieldSet = new HashSet<>();
         for (final String field : fields) {
             apiResponseFieldSet.add(field);
+        }
+    }
+
+    public void setNotAnalyzedFields(final String[] fields) {
+        notAnalyzedFieldSet = new HashSet<>();
+        for (final String field : fields) {
+            notAnalyzedFieldSet.add(field);
         }
     }
 
