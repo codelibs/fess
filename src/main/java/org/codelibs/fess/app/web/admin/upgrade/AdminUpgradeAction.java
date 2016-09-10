@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.File;
@@ -31,7 +32,6 @@ import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.service.ScheduledJobService;
@@ -941,9 +941,8 @@ public class AdminUpgradeAction extends FessAdminAction {
                         .filter(e -> StringUtil.isNotBlank(e.getTargetRole()))
                         .map(e -> {
                             final String[] permissions =
-                                    StreamUtil
-                                            .stream(e.getTargetRole().split(","))
-                                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(
+                                    split(e.getTargetRole(), ",").get(
+                                            stream -> stream.filter(StringUtil::isNotBlank).map(
                                                     s -> fessConfig.getRoleSearchRolePrefix() + s)).toArray(n -> new String[n]);
                             e.setPermissions(permissions);
                             e.setTargetRole(null);

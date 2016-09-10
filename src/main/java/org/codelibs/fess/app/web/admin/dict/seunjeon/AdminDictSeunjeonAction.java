@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.dict.seunjeon;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.io.File;
 import java.io.IOException;
@@ -359,7 +359,7 @@ public class AdminDictSeunjeonAction extends FessAdminAction {
         if (StringUtil.isBlank(value)) {
             return StringUtil.EMPTY_STRINGS;
         }
-        return stream(value.split(",")).get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
+        return split(value, ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).toArray(n -> new String[n]));
     }
 
     // ===================================================================================

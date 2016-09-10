@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.dataconfig;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
@@ -298,7 +299,7 @@ public class AdminDataconfigAction extends FessAdminAction {
                     copyBeanToBean(form, entity, op -> op.exclude(Stream.concat(Stream.of(Constants.COMMON_CONVERSION_RULE),
                             Stream.of(Constants.PERMISSIONS)).toArray(n -> new String[n])));
                     final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
-                    entity.setPermissions(stream(form.permissions.split("\n")).get(
+                    entity.setPermissions(split(form.permissions, "\n").get(
                             stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
                                     .toArray(n -> new String[n])));
                     return entity;
