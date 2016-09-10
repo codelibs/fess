@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.job;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.File;
@@ -330,7 +331,7 @@ public class CrawlJob {
         }
 
         if (StringUtil.isNotBlank(jvmOptions)) {
-            stream(jvmOptions.split(" ")).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
+            split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
         }
 
         cmdList.add(Crawler.class.getCanonicalName());
