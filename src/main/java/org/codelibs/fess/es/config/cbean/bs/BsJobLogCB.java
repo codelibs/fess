@@ -178,5 +178,9 @@ public class BsJobLogCB extends EsAbstractConditionBean {
         public void columnTarget() {
             doColumn("target");
         }
+
+        public void columnLastUpdated() {
+            doColumn("lastUpdated");
+        }
     }
 }

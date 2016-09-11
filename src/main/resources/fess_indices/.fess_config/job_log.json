@@ -31,6 +31,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "lastUpdated": {
+        "type": "long"
+      },
       "startTime": {
         "type": "long"
       },

@@ -16,6 +16,7 @@
 package org.codelibs.fess.app.job;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exentity.JobLog;
 import org.codelibs.fess.es.config.exentity.ScheduledJob;
@@ -74,9 +75,11 @@ public class ScriptExecutorJob implements LaJob {
             return;
         }
 
+        TimeoutTask task = null;
         try {
             if (scheduledJob.isLoggingEnabled()) {
                 jobHelper.store(jobLog);
+                task = jobHelper.startMonitorTask(jobLog);
             }
 
             if (logger.isDebugEnabled()) {
@@ -102,6 +105,13 @@ public class ScriptExecutorJob implements LaJob {
             jobLog.setJobStatus(Constants.FAIL);
             jobLog.setScriptResult(systemHelper.abbreviateLongText(t.getLocalizedMessage()));
         } finally {
+            if (task != null) {
+                try {
+                    task.stop();
+                } catch (Exception e) {
+                    logger.warn("Failed to stop " + jobLog, e);
+                }
+            }
             jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
             if (logger.isDebugEnabled()) {
                 logger.debug("jobLog: " + jobLog);
