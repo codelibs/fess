@@ -168,4 +168,37 @@ public interface FessTransformer {
         return getFessConfig().getCrawlerDocumentMaxSiteLengthAsInteger();
     }
 
+    public default String getFileName(final String url, final String encoding) {
+        if (StringUtil.isBlank(url)) {
+            return StringUtil.EMPTY;
+        }
+
+        String u = url;
+
+        int idx = u.lastIndexOf('?');
+        if (idx >= 0) {
+            u = u.substring(0, idx);
+        }
+
+        idx = u.lastIndexOf('#');
+        if (idx >= 0) {
+            u = u.substring(0, idx);
+        }
+
+        idx = u.lastIndexOf('/');
+        if (idx >= 0) {
+            if (u.length() > idx + 1) {
+                u = u.substring(idx + 1);
+            } else {
+                u = StringUtil.EMPTY;
+            }
+        }
+
+        try {
+            u = URLDecoder.decode(u, encoding);
+        } catch (final Exception e) {
+            // ignore
+        }
+        return u;
+    }
 }

@@ -155,6 +155,13 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<label for="filename" class="col-sm-3 control-label">filename</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.filename" />
+											<la:text property="doc.filename" styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label for="content" class="col-sm-3 control-label">content</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.content" />

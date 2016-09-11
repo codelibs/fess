@@ -149,6 +149,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -171,6 +172,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -201,6 +203,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldLabel(), //
                     fessConfig.getIndexFieldSegment(), //
                     fessConfig.getIndexFieldClickCount(), //
@@ -223,6 +226,7 @@ public class QueryHelper {
         }
         if (supportedSortFields == null) {
             supportedSortFields = new String[] { SCORE_SORT_VALUE, //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldContentLength(), //
                     fessConfig.getIndexFieldLastModified(), //
@@ -246,6 +250,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldMimetype(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
@@ -263,6 +268,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldExpires(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldHasCache(), //
                     fessConfig.getIndexFieldHost(), //
                     fessConfig.getIndexFieldId(), //

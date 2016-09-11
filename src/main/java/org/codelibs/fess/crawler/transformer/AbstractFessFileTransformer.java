@@ -257,6 +257,11 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldHost(), getHostOnFile(url));
         // site
         putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSiteOnFile(url, urlEncoding));
+        // filename
+        final String fileName = getFileName(url, urlEncoding);
+        if (StringUtil.isNotBlank(fileName)) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldFilename(), fileName);
+        }
         // url
         putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created

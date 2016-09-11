@@ -336,6 +336,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. filetype */
     String INDEX_FIELD_FILETYPE = "index.field.filetype";
 
+    /** The key of the configuration. e.g. filename */
+    String INDEX_FIELD_FILENAME = "index.field.filename";
+
     /** The key of the configuration. e.g. content_title */
     String RESPONSE_FIELD_content_title = "response.field.content_title";
 
@@ -1978,6 +1981,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldFiletype();
+
+    /**
+     * Get the value for the key 'index.field.filename'. <br>
+     * The value is, e.g. filename <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldFilename();
 
     /**
      * Get the value for the key 'response.field.content_title'. <br>
@@ -4642,6 +4652,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexFieldFiletype() {
             return get(FessConfig.INDEX_FIELD_FILETYPE);
+        }
+
+        public String getIndexFieldFilename() {
+            return get(FessConfig.INDEX_FIELD_FILENAME);
         }
 
         public String getResponseFieldContentTitle() {
