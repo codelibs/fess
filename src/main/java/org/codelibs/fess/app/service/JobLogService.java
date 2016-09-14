@@ -34,6 +34,8 @@ public class JobLogService {
     @Resource
     protected JobLogBhv jobLogBhv;
 
+    protected long expiredJobInterval = 2 * 60 * 60 * 1000L; // 2hours
+
     public List<JobLog> getJobLogList(final JobLogPager jobLogPager) {
 
         final PagingResultBean<JobLog> jobLogList = jobLogBhv.selectPage(cb -> {
@@ -96,6 +98,28 @@ public class JobLogService {
         jobLogBhv.queryDelete(cb -> {
             cb.query().setJobStatus_InScope(jobStatusList);
         });
+    }
+
+    public void updateStatus() {
+        final long expiry = ComponentUtil.getSystemHelper().getCurrentTimeAsLong() - expiredJobInterval;
+        final List<JobLog> list = jobLogBhv.selectList(cb -> {
+            cb.query().bool((must, should, mustNot, filter) -> {
+                must.setLastUpdated_LessEqual(expiry);
+                mustNot.setEndTime_Exists();
+            });
+        });
+        if (!list.isEmpty()) {
+            list.forEach(jobLog -> {
+                jobLog.setJobStatus(Constants.FAIL);
+                jobLog.setScriptResult("No response from Job.");
+                jobLog.setEndTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+            });
+            jobLogBhv.batchUpdate(list);
+        }
+    }
+
+    public void setExpiredJobInterval(long expiredJobInterval) {
+        this.expiredJobInterval = expiredJobInterval;
     }
 
 }

@@ -22,13 +22,17 @@ import org.codelibs.fess.es.user.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.user.cbean.cq.GroupCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -267,6 +271,28 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_Wildcard(String name) {
+        setName_Wildcard(name, null);
+    }
+
+    public void setName_Wildcard(String name, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Regexp(String name) {
+        setName_Regexp(name, null);
+    }
+
+    public void setName_Regexp(String name, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -306,6 +332,28 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
 
     public void setName_LessEqual(String name, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("name", ConditionKey.CK_LESS_EQUAL, name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Exists() {
+        setName_Exists(null);
+    }
+
+    public void setName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("name");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_CommonTerms(String name) {
+        setName_CommonTerms(name, null);
+    }
+
+    public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,6 +506,28 @@ public abstract class BsGroupCQ extends EsAbstractConditionQuery {
 
     public void setGidNumber_LessEqual(Long gidNumber, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("gidNumber", ConditionKey.CK_LESS_EQUAL, gidNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_Exists() {
+        setGidNumber_Exists(null);
+    }
+
+    public void setGidNumber_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("gidNumber");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGidNumber_CommonTerms(Long gidNumber) {
+        setGidNumber_CommonTerms(gidNumber, null);
+    }
+
+    public void setGidNumber_CommonTerms(Long gidNumber, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("gidNumber", gidNumber);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

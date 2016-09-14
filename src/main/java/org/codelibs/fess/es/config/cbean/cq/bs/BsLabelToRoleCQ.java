@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.LabelToRoleCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -267,6 +271,28 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setLabelTypeId_Wildcard(String labelTypeId) {
+        setLabelTypeId_Wildcard(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Wildcard(String labelTypeId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Regexp(String labelTypeId) {
+        setLabelTypeId_Regexp(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Regexp(String labelTypeId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setLabelTypeId_GreaterThan(String labelTypeId) {
         setLabelTypeId_GreaterThan(labelTypeId, null);
     }
@@ -306,6 +332,28 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
 
     public void setLabelTypeId_LessEqual(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_LESS_EQUAL, labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Exists() {
+        setLabelTypeId_Exists(null);
+    }
+
+    public void setLabelTypeId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_CommonTerms(String labelTypeId) {
+        setLabelTypeId_CommonTerms(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_CommonTerms(String labelTypeId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -430,6 +478,28 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setRoleTypeId_Wildcard(String roleTypeId) {
+        setRoleTypeId_Wildcard(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Wildcard(String roleTypeId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("roleTypeId", roleTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoleTypeId_Regexp(String roleTypeId) {
+        setRoleTypeId_Regexp(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_Regexp(String roleTypeId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("roleTypeId", roleTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setRoleTypeId_GreaterThan(String roleTypeId) {
         setRoleTypeId_GreaterThan(roleTypeId, null);
     }
@@ -469,6 +539,28 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
 
     public void setRoleTypeId_LessEqual(String roleTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("roleTypeId", ConditionKey.CK_LESS_EQUAL, roleTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoleTypeId_Exists() {
+        setRoleTypeId_Exists(null);
+    }
+
+    public void setRoleTypeId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("roleTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoleTypeId_CommonTerms(String roleTypeId) {
+        setRoleTypeId_CommonTerms(roleTypeId, null);
+    }
+
+    public void setRoleTypeId_CommonTerms(String roleTypeId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

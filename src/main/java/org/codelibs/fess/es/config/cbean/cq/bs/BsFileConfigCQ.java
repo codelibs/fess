@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.FileConfigCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -300,6 +304,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Exists() {
+        setAvailable_Exists(null);
+    }
+
+    public void setAvailable_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("available");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAvailable_CommonTerms(Boolean available) {
+        setAvailable_CommonTerms(available, null);
+    }
+
+    public void setAvailable_CommonTerms(Boolean available, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("available", available);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_Available_Asc() {
         regOBA("available");
         return this;
@@ -452,6 +478,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setBoost_Exists() {
+        setBoost_Exists(null);
+    }
+
+    public void setBoost_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("boost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setBoost_CommonTerms(Float boost) {
+        setBoost_CommonTerms(boost, null);
+    }
+
+    public void setBoost_CommonTerms(Float boost, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("boost", boost);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_Boost_Asc() {
         regOBA("boost");
         return this;
@@ -571,6 +619,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setConfigParameter_Wildcard(String configParameter) {
+        setConfigParameter_Wildcard(configParameter, null);
+    }
+
+    public void setConfigParameter_Wildcard(String configParameter, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_Regexp(String configParameter) {
+        setConfigParameter_Regexp(configParameter, null);
+    }
+
+    public void setConfigParameter_Regexp(String configParameter, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setConfigParameter_GreaterThan(String configParameter) {
         setConfigParameter_GreaterThan(configParameter, null);
     }
@@ -610,6 +680,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setConfigParameter_LessEqual(String configParameter, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("configParameter", ConditionKey.CK_LESS_EQUAL, configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_Exists() {
+        setConfigParameter_Exists(null);
+    }
+
+    public void setConfigParameter_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("configParameter");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_CommonTerms(String configParameter) {
+        setConfigParameter_CommonTerms(configParameter, null);
+    }
+
+    public void setConfigParameter_CommonTerms(String configParameter, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("configParameter", configParameter);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -734,6 +826,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_Wildcard(String createdBy) {
+        setCreatedBy_Wildcard(createdBy, null);
+    }
+
+    public void setCreatedBy_Wildcard(String createdBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Regexp(String createdBy) {
+        setCreatedBy_Regexp(createdBy, null);
+    }
+
+    public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
@@ -773,6 +887,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Exists() {
+        setCreatedBy_Exists(null);
+    }
+
+    public void setCreatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy) {
+        setCreatedBy_CommonTerms(createdBy, null);
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -930,6 +1066,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Exists() {
+        setCreatedTime_Exists(null);
+    }
+
+    public void setCreatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime) {
+        setCreatedTime_CommonTerms(createdTime, null);
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
@@ -1082,6 +1240,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDepth_Exists() {
+        setDepth_Exists(null);
+    }
+
+    public void setDepth_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("depth");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDepth_CommonTerms(Integer depth) {
+        setDepth_CommonTerms(depth, null);
+    }
+
+    public void setDepth_CommonTerms(Integer depth, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("depth", depth);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_Depth_Asc() {
         regOBA("depth");
         return this;
@@ -1201,6 +1381,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedDocPaths_Wildcard(String excludedDocPaths) {
+        setExcludedDocPaths_Wildcard(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_Wildcard(String excludedDocPaths, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("excludedDocPaths", excludedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocPaths_Regexp(String excludedDocPaths) {
+        setExcludedDocPaths_Regexp(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_Regexp(String excludedDocPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("excludedDocPaths", excludedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedDocPaths_GreaterThan(String excludedDocPaths) {
         setExcludedDocPaths_GreaterThan(excludedDocPaths, null);
     }
@@ -1240,6 +1442,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedDocPaths_LessEqual(String excludedDocPaths, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("excludedDocPaths", ConditionKey.CK_LESS_EQUAL, excludedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocPaths_Exists() {
+        setExcludedDocPaths_Exists(null);
+    }
+
+    public void setExcludedDocPaths_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("excludedDocPaths");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocPaths_CommonTerms(String excludedDocPaths) {
+        setExcludedDocPaths_CommonTerms(excludedDocPaths, null);
+    }
+
+    public void setExcludedDocPaths_CommonTerms(String excludedDocPaths, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("excludedDocPaths", excludedDocPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1364,6 +1588,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedPaths_Wildcard(String excludedPaths) {
+        setExcludedPaths_Wildcard(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_Wildcard(String excludedPaths, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("excludedPaths", excludedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedPaths_Regexp(String excludedPaths) {
+        setExcludedPaths_Regexp(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_Regexp(String excludedPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("excludedPaths", excludedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedPaths_GreaterThan(String excludedPaths) {
         setExcludedPaths_GreaterThan(excludedPaths, null);
     }
@@ -1403,6 +1649,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedPaths_LessEqual(String excludedPaths, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("excludedPaths", ConditionKey.CK_LESS_EQUAL, excludedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedPaths_Exists() {
+        setExcludedPaths_Exists(null);
+    }
+
+    public void setExcludedPaths_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("excludedPaths");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedPaths_CommonTerms(String excludedPaths) {
+        setExcludedPaths_CommonTerms(excludedPaths, null);
+    }
+
+    public void setExcludedPaths_CommonTerms(String excludedPaths, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("excludedPaths", excludedPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1527,6 +1795,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedDocPaths_Wildcard(String includedDocPaths) {
+        setIncludedDocPaths_Wildcard(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_Wildcard(String includedDocPaths, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("includedDocPaths", includedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocPaths_Regexp(String includedDocPaths) {
+        setIncludedDocPaths_Regexp(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_Regexp(String includedDocPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("includedDocPaths", includedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedDocPaths_GreaterThan(String includedDocPaths) {
         setIncludedDocPaths_GreaterThan(includedDocPaths, null);
     }
@@ -1566,6 +1856,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedDocPaths_LessEqual(String includedDocPaths, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("includedDocPaths", ConditionKey.CK_LESS_EQUAL, includedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocPaths_Exists() {
+        setIncludedDocPaths_Exists(null);
+    }
+
+    public void setIncludedDocPaths_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("includedDocPaths");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocPaths_CommonTerms(String includedDocPaths) {
+        setIncludedDocPaths_CommonTerms(includedDocPaths, null);
+    }
+
+    public void setIncludedDocPaths_CommonTerms(String includedDocPaths, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("includedDocPaths", includedDocPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1690,6 +2002,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedPaths_Wildcard(String includedPaths) {
+        setIncludedPaths_Wildcard(includedPaths, null);
+    }
+
+    public void setIncludedPaths_Wildcard(String includedPaths, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("includedPaths", includedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedPaths_Regexp(String includedPaths) {
+        setIncludedPaths_Regexp(includedPaths, null);
+    }
+
+    public void setIncludedPaths_Regexp(String includedPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("includedPaths", includedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedPaths_GreaterThan(String includedPaths) {
         setIncludedPaths_GreaterThan(includedPaths, null);
     }
@@ -1729,6 +2063,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedPaths_LessEqual(String includedPaths, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("includedPaths", ConditionKey.CK_LESS_EQUAL, includedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedPaths_Exists() {
+        setIncludedPaths_Exists(null);
+    }
+
+    public void setIncludedPaths_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("includedPaths");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedPaths_CommonTerms(String includedPaths) {
+        setIncludedPaths_CommonTerms(includedPaths, null);
+    }
+
+    public void setIncludedPaths_CommonTerms(String includedPaths, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("includedPaths", includedPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1886,6 +2242,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIntervalTime_Exists() {
+        setIntervalTime_Exists(null);
+    }
+
+    public void setIntervalTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("intervalTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIntervalTime_CommonTerms(Integer intervalTime) {
+        setIntervalTime_CommonTerms(intervalTime, null);
+    }
+
+    public void setIntervalTime_CommonTerms(Integer intervalTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("intervalTime", intervalTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_IntervalTime_Asc() {
         regOBA("intervalTime");
         return this;
@@ -2033,6 +2411,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setTimeToLive_LessEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_EQUAL, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Exists() {
+        setTimeToLive_Exists(null);
+    }
+
+    public void setTimeToLive_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive) {
+        setTimeToLive_CommonTerms(timeToLive, null);
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("timeToLive", timeToLive);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2190,6 +2590,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setMaxAccessCount_Exists() {
+        setMaxAccessCount_Exists(null);
+    }
+
+    public void setMaxAccessCount_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("maxAccessCount");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMaxAccessCount_CommonTerms(Long maxAccessCount) {
+        setMaxAccessCount_CommonTerms(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_CommonTerms(Long maxAccessCount, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("maxAccessCount", maxAccessCount);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_MaxAccessCount_Asc() {
         regOBA("maxAccessCount");
         return this;
@@ -2309,6 +2731,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_Wildcard(String name) {
+        setName_Wildcard(name, null);
+    }
+
+    public void setName_Wildcard(String name, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Regexp(String name) {
+        setName_Regexp(name, null);
+    }
+
+    public void setName_Regexp(String name, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -2348,6 +2792,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setName_LessEqual(String name, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("name", ConditionKey.CK_LESS_EQUAL, name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Exists() {
+        setName_Exists(null);
+    }
+
+    public void setName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("name");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_CommonTerms(String name) {
+        setName_CommonTerms(name, null);
+    }
+
+    public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2505,6 +2971,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setNumOfThread_Exists() {
+        setNumOfThread_Exists(null);
+    }
+
+    public void setNumOfThread_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("numOfThread");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setNumOfThread_CommonTerms(Integer numOfThread) {
+        setNumOfThread_CommonTerms(numOfThread, null);
+    }
+
+    public void setNumOfThread_CommonTerms(Integer numOfThread, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("numOfThread", numOfThread);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_NumOfThread_Asc() {
         regOBA("numOfThread");
         return this;
@@ -2624,6 +3112,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPaths_Wildcard(String paths) {
+        setPaths_Wildcard(paths, null);
+    }
+
+    public void setPaths_Wildcard(String paths, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("paths", paths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPaths_Regexp(String paths) {
+        setPaths_Regexp(paths, null);
+    }
+
+    public void setPaths_Regexp(String paths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("paths", paths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPaths_GreaterThan(String paths) {
         setPaths_GreaterThan(paths, null);
     }
@@ -2663,6 +3173,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setPaths_LessEqual(String paths, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("paths", ConditionKey.CK_LESS_EQUAL, paths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPaths_Exists() {
+        setPaths_Exists(null);
+    }
+
+    public void setPaths_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("paths");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPaths_CommonTerms(String paths) {
+        setPaths_CommonTerms(paths, null);
+    }
+
+    public void setPaths_CommonTerms(String paths, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("paths", paths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2787,6 +3319,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPermissions_Wildcard(String permissions) {
+        setPermissions_Wildcard(permissions, null);
+    }
+
+    public void setPermissions_Wildcard(String permissions, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Regexp(String permissions) {
+        setPermissions_Regexp(permissions, null);
+    }
+
+    public void setPermissions_Regexp(String permissions, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPermissions_GreaterThan(String permissions) {
         setPermissions_GreaterThan(permissions, null);
     }
@@ -2826,6 +3380,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setPermissions_LessEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Exists() {
+        setPermissions_Exists(null);
+    }
+
+    public void setPermissions_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_CommonTerms(String permissions) {
+        setPermissions_CommonTerms(permissions, null);
+    }
+
+    public void setPermissions_CommonTerms(String permissions, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2983,6 +3559,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSortOrder_Exists() {
+        setSortOrder_Exists(null);
+    }
+
+    public void setSortOrder_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder) {
+        setSortOrder_CommonTerms(sortOrder, null);
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsFileConfigCQ addOrderBy_SortOrder_Asc() {
         regOBA("sortOrder");
         return this;
@@ -3102,6 +3700,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_Wildcard(String updatedBy) {
+        setUpdatedBy_Wildcard(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Wildcard(String updatedBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy) {
+        setUpdatedBy_Regexp(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
@@ -3141,6 +3761,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Exists() {
+        setUpdatedBy_Exists(null);
+    }
+
+    public void setUpdatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy) {
+        setUpdatedBy_CommonTerms(updatedBy, null);
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3293,6 +3935,28 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_Exists() {
+        setUpdatedTime_Exists(null);
+    }
+
+    public void setUpdatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime) {
+        setUpdatedTime_CommonTerms(updatedTime, null);
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

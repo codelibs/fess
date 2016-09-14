@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.ScheduledJobCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -300,6 +304,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Exists() {
+        setAvailable_Exists(null);
+    }
+
+    public void setAvailable_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("available");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAvailable_CommonTerms(Boolean available) {
+        setAvailable_CommonTerms(available, null);
+    }
+
+    public void setAvailable_CommonTerms(Boolean available, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("available", available);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsScheduledJobCQ addOrderBy_Available_Asc() {
         regOBA("available");
         return this;
@@ -452,6 +478,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCrawler_Exists() {
+        setCrawler_Exists(null);
+    }
+
+    public void setCrawler_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("crawler");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCrawler_CommonTerms(Boolean crawler) {
+        setCrawler_CommonTerms(crawler, null);
+    }
+
+    public void setCrawler_CommonTerms(Boolean crawler, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("crawler", crawler);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsScheduledJobCQ addOrderBy_Crawler_Asc() {
         regOBA("crawler");
         return this;
@@ -571,6 +619,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_Wildcard(String createdBy) {
+        setCreatedBy_Wildcard(createdBy, null);
+    }
+
+    public void setCreatedBy_Wildcard(String createdBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Regexp(String createdBy) {
+        setCreatedBy_Regexp(createdBy, null);
+    }
+
+    public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
@@ -610,6 +680,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Exists() {
+        setCreatedBy_Exists(null);
+    }
+
+    public void setCreatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy) {
+        setCreatedBy_CommonTerms(createdBy, null);
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -767,6 +859,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Exists() {
+        setCreatedTime_Exists(null);
+    }
+
+    public void setCreatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime) {
+        setCreatedTime_CommonTerms(createdTime, null);
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsScheduledJobCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
@@ -886,6 +1000,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCronExpression_Wildcard(String cronExpression) {
+        setCronExpression_Wildcard(cronExpression, null);
+    }
+
+    public void setCronExpression_Wildcard(String cronExpression, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("cronExpression", cronExpression);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCronExpression_Regexp(String cronExpression) {
+        setCronExpression_Regexp(cronExpression, null);
+    }
+
+    public void setCronExpression_Regexp(String cronExpression, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("cronExpression", cronExpression);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCronExpression_GreaterThan(String cronExpression) {
         setCronExpression_GreaterThan(cronExpression, null);
     }
@@ -925,6 +1061,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setCronExpression_LessEqual(String cronExpression, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("cronExpression", ConditionKey.CK_LESS_EQUAL, cronExpression);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCronExpression_Exists() {
+        setCronExpression_Exists(null);
+    }
+
+    public void setCronExpression_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("cronExpression");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCronExpression_CommonTerms(String cronExpression) {
+        setCronExpression_CommonTerms(cronExpression, null);
+    }
+
+    public void setCronExpression_CommonTerms(String cronExpression, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("cronExpression", cronExpression);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1082,6 +1240,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setJobLogging_Exists() {
+        setJobLogging_Exists(null);
+    }
+
+    public void setJobLogging_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("jobLogging");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobLogging_CommonTerms(Boolean jobLogging) {
+        setJobLogging_CommonTerms(jobLogging, null);
+    }
+
+    public void setJobLogging_CommonTerms(Boolean jobLogging, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("jobLogging", jobLogging);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsScheduledJobCQ addOrderBy_JobLogging_Asc() {
         regOBA("jobLogging");
         return this;
@@ -1201,6 +1381,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_Wildcard(String name) {
+        setName_Wildcard(name, null);
+    }
+
+    public void setName_Wildcard(String name, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Regexp(String name) {
+        setName_Regexp(name, null);
+    }
+
+    public void setName_Regexp(String name, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -1240,6 +1442,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setName_LessEqual(String name, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("name", ConditionKey.CK_LESS_EQUAL, name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Exists() {
+        setName_Exists(null);
+    }
+
+    public void setName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("name");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_CommonTerms(String name) {
+        setName_CommonTerms(name, null);
+    }
+
+    public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1364,6 +1588,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptData_Wildcard(String scriptData) {
+        setScriptData_Wildcard(scriptData, null);
+    }
+
+    public void setScriptData_Wildcard(String scriptData, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Regexp(String scriptData) {
+        setScriptData_Regexp(scriptData, null);
+    }
+
+    public void setScriptData_Regexp(String scriptData, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptData_GreaterThan(String scriptData) {
         setScriptData_GreaterThan(scriptData, null);
     }
@@ -1403,6 +1649,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setScriptData_LessEqual(String scriptData, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("scriptData", ConditionKey.CK_LESS_EQUAL, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Exists() {
+        setScriptData_Exists(null);
+    }
+
+    public void setScriptData_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptData");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_CommonTerms(String scriptData) {
+        setScriptData_CommonTerms(scriptData, null);
+    }
+
+    public void setScriptData_CommonTerms(String scriptData, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptData", scriptData);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1527,6 +1795,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptType_Wildcard(String scriptType) {
+        setScriptType_Wildcard(scriptType, null);
+    }
+
+    public void setScriptType_Wildcard(String scriptType, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Regexp(String scriptType) {
+        setScriptType_Regexp(scriptType, null);
+    }
+
+    public void setScriptType_Regexp(String scriptType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptType_GreaterThan(String scriptType) {
         setScriptType_GreaterThan(scriptType, null);
     }
@@ -1566,6 +1856,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setScriptType_LessEqual(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_LESS_EQUAL, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Exists() {
+        setScriptType_Exists(null);
+    }
+
+    public void setScriptType_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_CommonTerms(String scriptType) {
+        setScriptType_CommonTerms(scriptType, null);
+    }
+
+    public void setScriptType_CommonTerms(String scriptType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptType", scriptType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1723,6 +2035,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSortOrder_Exists() {
+        setSortOrder_Exists(null);
+    }
+
+    public void setSortOrder_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder) {
+        setSortOrder_CommonTerms(sortOrder, null);
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsScheduledJobCQ addOrderBy_SortOrder_Asc() {
         regOBA("sortOrder");
         return this;
@@ -1842,6 +2176,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTarget_Wildcard(String target) {
+        setTarget_Wildcard(target, null);
+    }
+
+    public void setTarget_Wildcard(String target, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Regexp(String target) {
+        setTarget_Regexp(target, null);
+    }
+
+    public void setTarget_Regexp(String target, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTarget_GreaterThan(String target) {
         setTarget_GreaterThan(target, null);
     }
@@ -1881,6 +2237,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setTarget_LessEqual(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_LESS_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Exists() {
+        setTarget_Exists(null);
+    }
+
+    public void setTarget_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_CommonTerms(String target) {
+        setTarget_CommonTerms(target, null);
+    }
+
+    public void setTarget_CommonTerms(String target, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("target", target);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2005,6 +2383,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_Wildcard(String updatedBy) {
+        setUpdatedBy_Wildcard(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Wildcard(String updatedBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy) {
+        setUpdatedBy_Regexp(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
@@ -2044,6 +2444,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Exists() {
+        setUpdatedBy_Exists(null);
+    }
+
+    public void setUpdatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy) {
+        setUpdatedBy_CommonTerms(updatedBy, null);
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2196,6 +2618,28 @@ public abstract class BsScheduledJobCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_Exists() {
+        setUpdatedTime_Exists(null);
+    }
+
+    public void setUpdatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime) {
+        setUpdatedTime_CommonTerms(updatedTime, null);
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

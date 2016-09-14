@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.JobLogCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -300,6 +304,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setEndTime_Exists() {
+        setEndTime_Exists(null);
+    }
+
+    public void setEndTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("endTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEndTime_CommonTerms(Long endTime) {
+        setEndTime_CommonTerms(endTime, null);
+    }
+
+    public void setEndTime_CommonTerms(Long endTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("endTime", endTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsJobLogCQ addOrderBy_EndTime_Asc() {
         regOBA("endTime");
         return this;
@@ -419,6 +445,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setJobName_Wildcard(String jobName) {
+        setJobName_Wildcard(jobName, null);
+    }
+
+    public void setJobName_Wildcard(String jobName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("jobName", jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_Regexp(String jobName) {
+        setJobName_Regexp(jobName, null);
+    }
+
+    public void setJobName_Regexp(String jobName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("jobName", jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setJobName_GreaterThan(String jobName) {
         setJobName_GreaterThan(jobName, null);
     }
@@ -458,6 +506,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setJobName_LessEqual(String jobName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("jobName", ConditionKey.CK_LESS_EQUAL, jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_Exists() {
+        setJobName_Exists(null);
+    }
+
+    public void setJobName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("jobName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobName_CommonTerms(String jobName) {
+        setJobName_CommonTerms(jobName, null);
+    }
+
+    public void setJobName_CommonTerms(String jobName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("jobName", jobName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -582,6 +652,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setJobStatus_Wildcard(String jobStatus) {
+        setJobStatus_Wildcard(jobStatus, null);
+    }
+
+    public void setJobStatus_Wildcard(String jobStatus, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("jobStatus", jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_Regexp(String jobStatus) {
+        setJobStatus_Regexp(jobStatus, null);
+    }
+
+    public void setJobStatus_Regexp(String jobStatus, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("jobStatus", jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setJobStatus_GreaterThan(String jobStatus) {
         setJobStatus_GreaterThan(jobStatus, null);
     }
@@ -621,6 +713,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setJobStatus_LessEqual(String jobStatus, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("jobStatus", ConditionKey.CK_LESS_EQUAL, jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_Exists() {
+        setJobStatus_Exists(null);
+    }
+
+    public void setJobStatus_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("jobStatus");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_CommonTerms(String jobStatus) {
+        setJobStatus_CommonTerms(jobStatus, null);
+    }
+
+    public void setJobStatus_CommonTerms(String jobStatus, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("jobStatus", jobStatus);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -745,6 +859,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptData_Wildcard(String scriptData) {
+        setScriptData_Wildcard(scriptData, null);
+    }
+
+    public void setScriptData_Wildcard(String scriptData, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Regexp(String scriptData) {
+        setScriptData_Regexp(scriptData, null);
+    }
+
+    public void setScriptData_Regexp(String scriptData, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptData_GreaterThan(String scriptData) {
         setScriptData_GreaterThan(scriptData, null);
     }
@@ -784,6 +920,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setScriptData_LessEqual(String scriptData, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("scriptData", ConditionKey.CK_LESS_EQUAL, scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_Exists() {
+        setScriptData_Exists(null);
+    }
+
+    public void setScriptData_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptData");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptData_CommonTerms(String scriptData) {
+        setScriptData_CommonTerms(scriptData, null);
+    }
+
+    public void setScriptData_CommonTerms(String scriptData, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptData", scriptData);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -908,6 +1066,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptResult_Wildcard(String scriptResult) {
+        setScriptResult_Wildcard(scriptResult, null);
+    }
+
+    public void setScriptResult_Wildcard(String scriptResult, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptResult", scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_Regexp(String scriptResult) {
+        setScriptResult_Regexp(scriptResult, null);
+    }
+
+    public void setScriptResult_Regexp(String scriptResult, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptResult", scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptResult_GreaterThan(String scriptResult) {
         setScriptResult_GreaterThan(scriptResult, null);
     }
@@ -947,6 +1127,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setScriptResult_LessEqual(String scriptResult, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("scriptResult", ConditionKey.CK_LESS_EQUAL, scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_Exists() {
+        setScriptResult_Exists(null);
+    }
+
+    public void setScriptResult_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptResult");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptResult_CommonTerms(String scriptResult) {
+        setScriptResult_CommonTerms(scriptResult, null);
+    }
+
+    public void setScriptResult_CommonTerms(String scriptResult, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptResult", scriptResult);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1071,6 +1273,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptType_Wildcard(String scriptType) {
+        setScriptType_Wildcard(scriptType, null);
+    }
+
+    public void setScriptType_Wildcard(String scriptType, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Regexp(String scriptType) {
+        setScriptType_Regexp(scriptType, null);
+    }
+
+    public void setScriptType_Regexp(String scriptType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptType_GreaterThan(String scriptType) {
         setScriptType_GreaterThan(scriptType, null);
     }
@@ -1110,6 +1334,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setScriptType_LessEqual(String scriptType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("scriptType", ConditionKey.CK_LESS_EQUAL, scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_Exists() {
+        setScriptType_Exists(null);
+    }
+
+    public void setScriptType_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("scriptType");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_CommonTerms(String scriptType) {
+        setScriptType_CommonTerms(scriptType, null);
+    }
+
+    public void setScriptType_CommonTerms(String scriptType, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("scriptType", scriptType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1267,6 +1513,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setStartTime_Exists() {
+        setStartTime_Exists(null);
+    }
+
+    public void setStartTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("startTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setStartTime_CommonTerms(Long startTime) {
+        setStartTime_CommonTerms(startTime, null);
+    }
+
+    public void setStartTime_CommonTerms(Long startTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("startTime", startTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsJobLogCQ addOrderBy_StartTime_Asc() {
         regOBA("startTime");
         return this;
@@ -1386,6 +1654,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTarget_Wildcard(String target) {
+        setTarget_Wildcard(target, null);
+    }
+
+    public void setTarget_Wildcard(String target, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Regexp(String target) {
+        setTarget_Regexp(target, null);
+    }
+
+    public void setTarget_Regexp(String target, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTarget_GreaterThan(String target) {
         setTarget_GreaterThan(target, null);
     }
@@ -1425,6 +1715,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setTarget_LessEqual(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_LESS_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Exists() {
+        setTarget_Exists(null);
+    }
+
+    public void setTarget_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_CommonTerms(String target) {
+        setTarget_CommonTerms(target, null);
+    }
+
+    public void setTarget_CommonTerms(String target, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("target", target);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1577,6 +1889,28 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setLastUpdated_LessEqual(Long lastUpdated, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("lastUpdated", ConditionKey.CK_LESS_EQUAL, lastUpdated);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_Exists() {
+        setLastUpdated_Exists(null);
+    }
+
+    public void setLastUpdated_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("lastUpdated");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLastUpdated_CommonTerms(Long lastUpdated) {
+        setLastUpdated_CommonTerms(lastUpdated, null);
+    }
+
+    public void setLastUpdated_CommonTerms(Long lastUpdated, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("lastUpdated", lastUpdated);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

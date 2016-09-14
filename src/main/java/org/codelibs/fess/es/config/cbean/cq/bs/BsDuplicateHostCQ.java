@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.DuplicateHostCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -267,6 +271,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_Wildcard(String createdBy) {
+        setCreatedBy_Wildcard(createdBy, null);
+    }
+
+    public void setCreatedBy_Wildcard(String createdBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Regexp(String createdBy) {
+        setCreatedBy_Regexp(createdBy, null);
+    }
+
+    public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
@@ -306,6 +332,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Exists() {
+        setCreatedBy_Exists(null);
+    }
+
+    public void setCreatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy) {
+        setCreatedBy_CommonTerms(createdBy, null);
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -463,6 +511,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Exists() {
+        setCreatedTime_Exists(null);
+    }
+
+    public void setCreatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime) {
+        setCreatedTime_CommonTerms(createdTime, null);
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsDuplicateHostCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
@@ -582,6 +652,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDuplicateHostName_Wildcard(String duplicateHostName) {
+        setDuplicateHostName_Wildcard(duplicateHostName, null);
+    }
+
+    public void setDuplicateHostName_Wildcard(String duplicateHostName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("duplicateHostName", duplicateHostName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDuplicateHostName_Regexp(String duplicateHostName) {
+        setDuplicateHostName_Regexp(duplicateHostName, null);
+    }
+
+    public void setDuplicateHostName_Regexp(String duplicateHostName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("duplicateHostName", duplicateHostName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setDuplicateHostName_GreaterThan(String duplicateHostName) {
         setDuplicateHostName_GreaterThan(duplicateHostName, null);
     }
@@ -621,6 +713,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setDuplicateHostName_LessEqual(String duplicateHostName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("duplicateHostName", ConditionKey.CK_LESS_EQUAL, duplicateHostName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDuplicateHostName_Exists() {
+        setDuplicateHostName_Exists(null);
+    }
+
+    public void setDuplicateHostName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("duplicateHostName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDuplicateHostName_CommonTerms(String duplicateHostName) {
+        setDuplicateHostName_CommonTerms(duplicateHostName, null);
+    }
+
+    public void setDuplicateHostName_CommonTerms(String duplicateHostName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("duplicateHostName", duplicateHostName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -745,6 +859,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setRegularName_Wildcard(String regularName) {
+        setRegularName_Wildcard(regularName, null);
+    }
+
+    public void setRegularName_Wildcard(String regularName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("regularName", regularName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRegularName_Regexp(String regularName) {
+        setRegularName_Regexp(regularName, null);
+    }
+
+    public void setRegularName_Regexp(String regularName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("regularName", regularName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setRegularName_GreaterThan(String regularName) {
         setRegularName_GreaterThan(regularName, null);
     }
@@ -784,6 +920,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setRegularName_LessEqual(String regularName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("regularName", ConditionKey.CK_LESS_EQUAL, regularName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRegularName_Exists() {
+        setRegularName_Exists(null);
+    }
+
+    public void setRegularName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("regularName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRegularName_CommonTerms(String regularName) {
+        setRegularName_CommonTerms(regularName, null);
+    }
+
+    public void setRegularName_CommonTerms(String regularName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("regularName", regularName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -941,6 +1099,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSortOrder_Exists() {
+        setSortOrder_Exists(null);
+    }
+
+    public void setSortOrder_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder) {
+        setSortOrder_CommonTerms(sortOrder, null);
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsDuplicateHostCQ addOrderBy_SortOrder_Asc() {
         regOBA("sortOrder");
         return this;
@@ -1060,6 +1240,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_Wildcard(String updatedBy) {
+        setUpdatedBy_Wildcard(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Wildcard(String updatedBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy) {
+        setUpdatedBy_Regexp(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
@@ -1099,6 +1301,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Exists() {
+        setUpdatedBy_Exists(null);
+    }
+
+    public void setUpdatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy) {
+        setUpdatedBy_CommonTerms(updatedBy, null);
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1251,6 +1475,28 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_Exists() {
+        setUpdatedTime_Exists(null);
+    }
+
+    public void setUpdatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime) {
+        setUpdatedTime_CommonTerms(updatedTime, null);
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.WebConfigToLabelCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -267,6 +271,28 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setLabelTypeId_Wildcard(String labelTypeId) {
+        setLabelTypeId_Wildcard(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Wildcard(String labelTypeId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Regexp(String labelTypeId) {
+        setLabelTypeId_Regexp(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_Regexp(String labelTypeId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setLabelTypeId_GreaterThan(String labelTypeId) {
         setLabelTypeId_GreaterThan(labelTypeId, null);
     }
@@ -306,6 +332,28 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
 
     public void setLabelTypeId_LessEqual(String labelTypeId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("labelTypeId", ConditionKey.CK_LESS_EQUAL, labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Exists() {
+        setLabelTypeId_Exists(null);
+    }
+
+    public void setLabelTypeId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_CommonTerms(String labelTypeId) {
+        setLabelTypeId_CommonTerms(labelTypeId, null);
+    }
+
+    public void setLabelTypeId_CommonTerms(String labelTypeId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -430,6 +478,28 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setWebConfigId_Wildcard(String webConfigId) {
+        setWebConfigId_Wildcard(webConfigId, null);
+    }
+
+    public void setWebConfigId_Wildcard(String webConfigId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("webConfigId", webConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setWebConfigId_Regexp(String webConfigId) {
+        setWebConfigId_Regexp(webConfigId, null);
+    }
+
+    public void setWebConfigId_Regexp(String webConfigId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("webConfigId", webConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setWebConfigId_GreaterThan(String webConfigId) {
         setWebConfigId_GreaterThan(webConfigId, null);
     }
@@ -469,6 +539,28 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
 
     public void setWebConfigId_LessEqual(String webConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("webConfigId", ConditionKey.CK_LESS_EQUAL, webConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setWebConfigId_Exists() {
+        setWebConfigId_Exists(null);
+    }
+
+    public void setWebConfigId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("webConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setWebConfigId_CommonTerms(String webConfigId) {
+        setWebConfigId_CommonTerms(webConfigId, null);
+    }
+
+    public void setWebConfigId_CommonTerms(String webConfigId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
