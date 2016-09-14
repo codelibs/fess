@@ -16,7 +16,7 @@ Fess is Elasticsearch based search server, but knowledge/experience about Elasti
 
 Please file an [issue](https://github.com/codelibs/fess/issues "issue").
 (Japanese forum is [here](https://github.com/codelibs/codelibs-ja-forum "here").)
-For questions, see [label:question](https://github.com/codelibs/fess/issues?q=label%3Aquestion%20 "label:question").
+For submitted questions, see [label:question](https://github.com/codelibs/fess/issues?q=label%3Aquestion%20 "label:question").
 
 ## Getting Started
 
