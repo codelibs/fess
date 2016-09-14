@@ -363,6 +363,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. fess */
     String INDEX_DOCUMENT_SUGGEST_INDEX = "index.document.suggest.index";
 
+    /** The key of the configuration. e.g. .crawler */
+    String INDEX_DOCUMENT_CRAWLER_INDEX = "index.document.crawler.index";
+
     /** The key of the configuration. e.g. lang,role,label,anchor */
     String INDEX_ADMIN_ARRAY_FIELDS = "index.admin.array.fields";
 
@@ -2045,6 +2048,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexDocumentSuggestIndex();
+
+    /**
+     * Get the value for the key 'index.document.crawler.index'. <br>
+     * The value is, e.g. .crawler <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexDocumentCrawlerIndex();
 
     /**
      * Get the value for the key 'index.admin.array.fields'. <br>
@@ -4688,6 +4698,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexDocumentSuggestIndex() {
             return get(FessConfig.INDEX_DOCUMENT_SUGGEST_INDEX);
+        }
+
+        public String getIndexDocumentCrawlerIndex() {
+            return get(FessConfig.INDEX_DOCUMENT_CRAWLER_INDEX);
         }
 
         public String getIndexAdminArrayFields() {
