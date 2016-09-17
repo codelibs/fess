@@ -18,7 +18,6 @@ package org.codelibs.fess.app.web.admin.reqheader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -31,7 +30,6 @@ import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.RequestHeader;
 import org.codelibs.fess.es.config.exentity.WebConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -39,7 +37,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author shinsuke
@@ -126,7 +123,6 @@ public class AdminReqheaderAction extends FessAdminAction {
                 form.crudMode = CrudMode.CREATE;
             });
         }).renderWith(data -> {
-            registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
         });
     }
@@ -272,15 +268,6 @@ public class AdminReqheaderAction extends FessAdminAction {
         });
     }
 
-    protected void registerProtocolSchemeItems(final RenderData data) {
-        final List<Map<String, String>> itemList = new ArrayList<>();
-        final Locale locale = LaRequestUtil.getRequest().getLocale();
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
-        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_ntlm"), Constants.NTLM));
-        RenderDataUtil.register(data, "protocolSchemeItems", itemList);
-    }
-
     protected void registerWebConfigItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
         final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList(false, false, false, null);
@@ -326,14 +313,12 @@ public class AdminReqheaderAction extends FessAdminAction {
 
     private HtmlResponse asEditHtml() {
         return asHtml(path_AdminReqheader_AdminReqheaderEditJsp).renderWith(data -> {
-            registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
         });
     }
 
     private HtmlResponse asDetailsHtml() {
         return asHtml(path_AdminReqheader_AdminReqheaderDetailsJsp).renderWith(data -> {
-            registerProtocolSchemeItems(data);
             registerWebConfigItems(data);
         });
     }
