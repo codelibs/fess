@@ -1214,6 +1214,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: NTLM */
     public static final String LABELS_webauth_scheme_ntlm = "{labels.webauth_scheme_ntlm}";
 
+    /** The key of the message: Form */
+    public static final String LABELS_webauth_scheme_form = "{labels.webauth_scheme_form}";
+
     /** The key of the message: Log Files */
     public static final String LABELS_log_configuration = "{labels.log_configuration}";
 

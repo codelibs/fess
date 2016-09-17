@@ -29,6 +29,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.WebConfigService;
 import org.codelibs.fess.crawler.client.http.Authentication;
+import org.codelibs.fess.crawler.client.http.form.FormScheme;
 import org.codelibs.fess.crawler.client.http.impl.AuthenticationImpl;
 import org.codelibs.fess.crawler.client.http.ntlm.JcifsEngine;
 import org.codelibs.fess.crawler.exception.CrawlerSystemException;
@@ -54,12 +55,16 @@ public class WebAuthentication extends BsWebAuthentication {
     }
 
     private AuthScheme getAuthScheme() {
-        if (Constants.BASIC.equals(getProtocolScheme())) {
+        final String scheme = getProtocolScheme();
+        if (Constants.BASIC.equals(scheme)) {
             return new BasicScheme();
-        } else if (Constants.DIGEST.equals(getProtocolScheme())) {
+        } else if (Constants.DIGEST.equals(scheme)) {
             return new DigestScheme();
-        } else if (Constants.NTLM.equals(getProtocolScheme())) {
+        } else if (Constants.NTLM.equals(scheme)) {
             return new NTLMScheme(new JcifsEngine());
+        } else if (Constants.FORM.equals(scheme)) {
+            final Map<String, String> parameterMap = ParameterUtil.parse(getParameters());
+            return new FormScheme(parameterMap);
         }
         return null;
     }
