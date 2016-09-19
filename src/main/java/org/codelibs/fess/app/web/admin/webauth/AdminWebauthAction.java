@@ -167,6 +167,9 @@ public class AdminWebauthAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
         });
     }
 
