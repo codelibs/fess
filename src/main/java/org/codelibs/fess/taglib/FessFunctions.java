@@ -223,7 +223,7 @@ public class FessFunctions {
         if (value == null) {
             return StringUtil.EMPTY;
         }
-        return Base64.getEncoder().encodeToString(value.getBytes(Constants.CHARSET_UTF_8));
+        return Base64.getUrlEncoder().encodeToString(value.getBytes(Constants.CHARSET_UTF_8));
     }
 
     public static boolean fileExists(final String path) {
