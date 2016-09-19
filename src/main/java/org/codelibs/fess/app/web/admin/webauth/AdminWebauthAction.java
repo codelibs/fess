@@ -167,6 +167,9 @@ public class AdminWebauthAction extends FessAdminAction {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
             });
+        }).renderWith(data -> {
+            registerProtocolSchemeItems(data);
+            registerWebConfigItems(data);
         });
     }
 
@@ -276,6 +279,7 @@ public class AdminWebauthAction extends FessAdminAction {
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_ntlm"), Constants.NTLM));
+        itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_form"), Constants.FORM));
         RenderDataUtil.register(data, "protocolSchemeItems", itemList);
     }
 

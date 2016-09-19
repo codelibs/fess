@@ -15,7 +15,7 @@
  */
 package org.codelibs.fess.ds.impl;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
+import static org.codelibs.core.stream.StreamUtil.split;
 
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -90,7 +90,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                                         Collectors.toMap(e -> e.getKey().replaceFirst("^settings\\.", StringUtil.EMPTY), e -> e.getValue())))
                         .build();
         logger.info("Connecting to " + hostsStr + " with [" + settings.toDelimitedString(',') + "]");
-        final InetSocketTransportAddress[] addresses = stream(hostsStr.split(",")).get(stream -> stream.map(h -> {
+        final InetSocketTransportAddress[] addresses = split(hostsStr, ",").get(stream -> stream.map(h -> {
             final String[] values = h.trim().split(":");
             try {
                 if (values.length == 1) {

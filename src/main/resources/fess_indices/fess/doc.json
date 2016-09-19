@@ -477,6 +477,10 @@
       "favorite_count": {
         "type": "long"
       },
+      "filename": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
       "filetype": {
         "type": "string",
         "index": "not_analyzed"

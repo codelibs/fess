@@ -61,6 +61,9 @@ public class BsJobLog extends EsAbstractEntity {
     /** target */
     protected String target;
 
+    /** lastUpdated */
+    protected Long lastUpdated;
+
     // [Referrers] *comment only
 
     // ===================================================================================
@@ -106,6 +109,9 @@ public class BsJobLog extends EsAbstractEntity {
         if (target != null) {
             sourceMap.put("target", target);
         }
+        if (lastUpdated != null) {
+            sourceMap.put("lastUpdated", lastUpdated);
+        }
         return sourceMap;
     }
 
@@ -123,6 +129,7 @@ public class BsJobLog extends EsAbstractEntity {
         sb.append(dm).append(scriptType);
         sb.append(dm).append(startTime);
         sb.append(dm).append(target);
+        sb.append(dm).append(lastUpdated);
         if (sb.length() > dm.length()) {
             sb.delete(0, dm.length());
         }
@@ -211,5 +218,15 @@ public class BsJobLog extends EsAbstractEntity {
     public void setTarget(String value) {
         registerModifiedProperty("target");
         this.target = value;
+    }
+
+    public Long getLastUpdated() {
+        checkSpecifiedProperty("lastUpdated");
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long value) {
+        registerModifiedProperty("lastUpdated");
+        this.lastUpdated = value;
     }
 }

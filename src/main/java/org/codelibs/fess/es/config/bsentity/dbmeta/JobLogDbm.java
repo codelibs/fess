@@ -90,6 +90,8 @@ public class JobLogDbm extends AbstractDBMeta {
                 "scriptType");
         setupEpg(_epgMap, et -> ((JobLog) et).getStartTime(), (et, vl) -> ((JobLog) et).setStartTime(DfTypeUtil.toLong(vl)), "startTime");
         setupEpg(_epgMap, et -> ((JobLog) et).getTarget(), (et, vl) -> ((JobLog) et).setTarget(DfTypeUtil.toString(vl)), "target");
+        setupEpg(_epgMap, et -> ((JobLog) et).getLastUpdated(), (et, vl) -> ((JobLog) et).setLastUpdated(DfTypeUtil.toLong(vl)),
+                "lastUpdated");
     }
 
     @Override
@@ -142,6 +144,8 @@ public class JobLogDbm extends AbstractDBMeta {
             false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
             "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnLastUpdated = cci("lastUpdated", "lastUpdated", null, null, Long.class, "lastUpdated", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnEndTime() {
         return _columnEndTime;
@@ -175,6 +179,10 @@ public class JobLogDbm extends AbstractDBMeta {
         return _columnTarget;
     }
 
+    public ColumnInfo columnLastUpdated() {
+        return _columnLastUpdated;
+    }
+
     protected List<ColumnInfo> ccil() {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnEndTime());
@@ -185,6 +193,7 @@ public class JobLogDbm extends AbstractDBMeta {
         ls.add(columnScriptType());
         ls.add(columnStartTime());
         ls.add(columnTarget());
+        ls.add(columnLastUpdated());
         return ls;
     }
 

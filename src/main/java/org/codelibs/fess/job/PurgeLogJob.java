@@ -84,6 +84,14 @@ public class PurgeLogJob {
             resultBuf.append(e.getMessage()).append("\n");
         }
 
+        // update job logs
+        try {
+            jobLogService.updateStatus();
+        } catch (final Exception e) {
+            logger.error("Failed to purge job logs.", e);
+            resultBuf.append(e.getMessage()).append("\n");
+        }
+
         return resultBuf.toString();
     }
 

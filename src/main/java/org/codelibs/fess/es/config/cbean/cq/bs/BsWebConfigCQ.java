@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.WebConfigCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -300,6 +304,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setAvailable_Exists() {
+        setAvailable_Exists(null);
+    }
+
+    public void setAvailable_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("available");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setAvailable_CommonTerms(Boolean available) {
+        setAvailable_CommonTerms(available, null);
+    }
+
+    public void setAvailable_CommonTerms(Boolean available, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("available", available);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_Available_Asc() {
         regOBA("available");
         return this;
@@ -452,6 +478,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setBoost_Exists() {
+        setBoost_Exists(null);
+    }
+
+    public void setBoost_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("boost");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setBoost_CommonTerms(Float boost) {
+        setBoost_CommonTerms(boost, null);
+    }
+
+    public void setBoost_CommonTerms(Float boost, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("boost", boost);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_Boost_Asc() {
         regOBA("boost");
         return this;
@@ -571,6 +619,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setConfigParameter_Wildcard(String configParameter) {
+        setConfigParameter_Wildcard(configParameter, null);
+    }
+
+    public void setConfigParameter_Wildcard(String configParameter, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_Regexp(String configParameter) {
+        setConfigParameter_Regexp(configParameter, null);
+    }
+
+    public void setConfigParameter_Regexp(String configParameter, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setConfigParameter_GreaterThan(String configParameter) {
         setConfigParameter_GreaterThan(configParameter, null);
     }
@@ -610,6 +680,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setConfigParameter_LessEqual(String configParameter, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("configParameter", ConditionKey.CK_LESS_EQUAL, configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_Exists() {
+        setConfigParameter_Exists(null);
+    }
+
+    public void setConfigParameter_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("configParameter");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigParameter_CommonTerms(String configParameter) {
+        setConfigParameter_CommonTerms(configParameter, null);
+    }
+
+    public void setConfigParameter_CommonTerms(String configParameter, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("configParameter", configParameter);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -734,6 +826,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_Wildcard(String createdBy) {
+        setCreatedBy_Wildcard(createdBy, null);
+    }
+
+    public void setCreatedBy_Wildcard(String createdBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Regexp(String createdBy) {
+        setCreatedBy_Regexp(createdBy, null);
+    }
+
+    public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
@@ -773,6 +887,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_Exists() {
+        setCreatedBy_Exists(null);
+    }
+
+    public void setCreatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy) {
+        setCreatedBy_CommonTerms(createdBy, null);
+    }
+
+    public void setCreatedBy_CommonTerms(String createdBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -930,6 +1066,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Exists() {
+        setCreatedTime_Exists(null);
+    }
+
+    public void setCreatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime) {
+        setCreatedTime_CommonTerms(createdTime, null);
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
@@ -1082,6 +1240,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDepth_Exists() {
+        setDepth_Exists(null);
+    }
+
+    public void setDepth_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("depth");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDepth_CommonTerms(Integer depth) {
+        setDepth_CommonTerms(depth, null);
+    }
+
+    public void setDepth_CommonTerms(Integer depth, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("depth", depth);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_Depth_Asc() {
         regOBA("depth");
         return this;
@@ -1201,6 +1381,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedDocUrls_Wildcard(String excludedDocUrls) {
+        setExcludedDocUrls_Wildcard(excludedDocUrls, null);
+    }
+
+    public void setExcludedDocUrls_Wildcard(String excludedDocUrls, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("excludedDocUrls", excludedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocUrls_Regexp(String excludedDocUrls) {
+        setExcludedDocUrls_Regexp(excludedDocUrls, null);
+    }
+
+    public void setExcludedDocUrls_Regexp(String excludedDocUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("excludedDocUrls", excludedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedDocUrls_GreaterThan(String excludedDocUrls) {
         setExcludedDocUrls_GreaterThan(excludedDocUrls, null);
     }
@@ -1240,6 +1442,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedDocUrls_LessEqual(String excludedDocUrls, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("excludedDocUrls", ConditionKey.CK_LESS_EQUAL, excludedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocUrls_Exists() {
+        setExcludedDocUrls_Exists(null);
+    }
+
+    public void setExcludedDocUrls_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("excludedDocUrls");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedDocUrls_CommonTerms(String excludedDocUrls) {
+        setExcludedDocUrls_CommonTerms(excludedDocUrls, null);
+    }
+
+    public void setExcludedDocUrls_CommonTerms(String excludedDocUrls, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("excludedDocUrls", excludedDocUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1364,6 +1588,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedUrls_Wildcard(String excludedUrls) {
+        setExcludedUrls_Wildcard(excludedUrls, null);
+    }
+
+    public void setExcludedUrls_Wildcard(String excludedUrls, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("excludedUrls", excludedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedUrls_Regexp(String excludedUrls) {
+        setExcludedUrls_Regexp(excludedUrls, null);
+    }
+
+    public void setExcludedUrls_Regexp(String excludedUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("excludedUrls", excludedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedUrls_GreaterThan(String excludedUrls) {
         setExcludedUrls_GreaterThan(excludedUrls, null);
     }
@@ -1403,6 +1649,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedUrls_LessEqual(String excludedUrls, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("excludedUrls", ConditionKey.CK_LESS_EQUAL, excludedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedUrls_Exists() {
+        setExcludedUrls_Exists(null);
+    }
+
+    public void setExcludedUrls_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("excludedUrls");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedUrls_CommonTerms(String excludedUrls) {
+        setExcludedUrls_CommonTerms(excludedUrls, null);
+    }
+
+    public void setExcludedUrls_CommonTerms(String excludedUrls, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("excludedUrls", excludedUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1527,6 +1795,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedDocUrls_Wildcard(String includedDocUrls) {
+        setIncludedDocUrls_Wildcard(includedDocUrls, null);
+    }
+
+    public void setIncludedDocUrls_Wildcard(String includedDocUrls, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("includedDocUrls", includedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocUrls_Regexp(String includedDocUrls) {
+        setIncludedDocUrls_Regexp(includedDocUrls, null);
+    }
+
+    public void setIncludedDocUrls_Regexp(String includedDocUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("includedDocUrls", includedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedDocUrls_GreaterThan(String includedDocUrls) {
         setIncludedDocUrls_GreaterThan(includedDocUrls, null);
     }
@@ -1566,6 +1856,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedDocUrls_LessEqual(String includedDocUrls, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("includedDocUrls", ConditionKey.CK_LESS_EQUAL, includedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocUrls_Exists() {
+        setIncludedDocUrls_Exists(null);
+    }
+
+    public void setIncludedDocUrls_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("includedDocUrls");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedDocUrls_CommonTerms(String includedDocUrls) {
+        setIncludedDocUrls_CommonTerms(includedDocUrls, null);
+    }
+
+    public void setIncludedDocUrls_CommonTerms(String includedDocUrls, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("includedDocUrls", includedDocUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1690,6 +2002,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedUrls_Wildcard(String includedUrls) {
+        setIncludedUrls_Wildcard(includedUrls, null);
+    }
+
+    public void setIncludedUrls_Wildcard(String includedUrls, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("includedUrls", includedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedUrls_Regexp(String includedUrls) {
+        setIncludedUrls_Regexp(includedUrls, null);
+    }
+
+    public void setIncludedUrls_Regexp(String includedUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("includedUrls", includedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedUrls_GreaterThan(String includedUrls) {
         setIncludedUrls_GreaterThan(includedUrls, null);
     }
@@ -1729,6 +2063,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedUrls_LessEqual(String includedUrls, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("includedUrls", ConditionKey.CK_LESS_EQUAL, includedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedUrls_Exists() {
+        setIncludedUrls_Exists(null);
+    }
+
+    public void setIncludedUrls_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("includedUrls");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedUrls_CommonTerms(String includedUrls) {
+        setIncludedUrls_CommonTerms(includedUrls, null);
+    }
+
+    public void setIncludedUrls_CommonTerms(String includedUrls, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("includedUrls", includedUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1886,6 +2242,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIntervalTime_Exists() {
+        setIntervalTime_Exists(null);
+    }
+
+    public void setIntervalTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("intervalTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIntervalTime_CommonTerms(Integer intervalTime) {
+        setIntervalTime_CommonTerms(intervalTime, null);
+    }
+
+    public void setIntervalTime_CommonTerms(Integer intervalTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("intervalTime", intervalTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_IntervalTime_Asc() {
         regOBA("intervalTime");
         return this;
@@ -2033,6 +2411,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setTimeToLive_LessEqual(Integer timeToLive, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("timeToLive", ConditionKey.CK_LESS_EQUAL, timeToLive);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_Exists() {
+        setTimeToLive_Exists(null);
+    }
+
+    public void setTimeToLive_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("timeToLive");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive) {
+        setTimeToLive_CommonTerms(timeToLive, null);
+    }
+
+    public void setTimeToLive_CommonTerms(Integer timeToLive, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("timeToLive", timeToLive);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2190,6 +2590,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setMaxAccessCount_Exists() {
+        setMaxAccessCount_Exists(null);
+    }
+
+    public void setMaxAccessCount_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("maxAccessCount");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMaxAccessCount_CommonTerms(Long maxAccessCount) {
+        setMaxAccessCount_CommonTerms(maxAccessCount, null);
+    }
+
+    public void setMaxAccessCount_CommonTerms(Long maxAccessCount, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("maxAccessCount", maxAccessCount);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_MaxAccessCount_Asc() {
         regOBA("maxAccessCount");
         return this;
@@ -2309,6 +2731,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_Wildcard(String name) {
+        setName_Wildcard(name, null);
+    }
+
+    public void setName_Wildcard(String name, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Regexp(String name) {
+        setName_Regexp(name, null);
+    }
+
+    public void setName_Regexp(String name, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -2348,6 +2792,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setName_LessEqual(String name, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("name", ConditionKey.CK_LESS_EQUAL, name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_Exists() {
+        setName_Exists(null);
+    }
+
+    public void setName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("name");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setName_CommonTerms(String name) {
+        setName_CommonTerms(name, null);
+    }
+
+    public void setName_CommonTerms(String name, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("name", name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2505,6 +2971,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setNumOfThread_Exists() {
+        setNumOfThread_Exists(null);
+    }
+
+    public void setNumOfThread_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("numOfThread");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setNumOfThread_CommonTerms(Integer numOfThread) {
+        setNumOfThread_CommonTerms(numOfThread, null);
+    }
+
+    public void setNumOfThread_CommonTerms(Integer numOfThread, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("numOfThread", numOfThread);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_NumOfThread_Asc() {
         regOBA("numOfThread");
         return this;
@@ -2624,6 +3112,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPermissions_Wildcard(String permissions) {
+        setPermissions_Wildcard(permissions, null);
+    }
+
+    public void setPermissions_Wildcard(String permissions, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Regexp(String permissions) {
+        setPermissions_Regexp(permissions, null);
+    }
+
+    public void setPermissions_Regexp(String permissions, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPermissions_GreaterThan(String permissions) {
         setPermissions_GreaterThan(permissions, null);
     }
@@ -2663,6 +3173,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setPermissions_LessEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Exists() {
+        setPermissions_Exists(null);
+    }
+
+    public void setPermissions_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_CommonTerms(String permissions) {
+        setPermissions_CommonTerms(permissions, null);
+    }
+
+    public void setPermissions_CommonTerms(String permissions, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2820,6 +3352,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSortOrder_Exists() {
+        setSortOrder_Exists(null);
+    }
+
+    public void setSortOrder_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("sortOrder");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder) {
+        setSortOrder_CommonTerms(sortOrder, null);
+    }
+
+    public void setSortOrder_CommonTerms(Integer sortOrder, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("sortOrder", sortOrder);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_SortOrder_Asc() {
         regOBA("sortOrder");
         return this;
@@ -2939,6 +3493,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_Wildcard(String updatedBy) {
+        setUpdatedBy_Wildcard(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Wildcard(String updatedBy, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy) {
+        setUpdatedBy_Regexp(updatedBy, null);
+    }
+
+    public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
@@ -2978,6 +3554,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_Exists() {
+        setUpdatedBy_Exists(null);
+    }
+
+    public void setUpdatedBy_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedBy");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy) {
+        setUpdatedBy_CommonTerms(updatedBy, null);
+    }
+
+    public void setUpdatedBy_CommonTerms(String updatedBy, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3135,6 +3733,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedTime_Exists() {
+        setUpdatedTime_Exists(null);
+    }
+
+    public void setUpdatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime) {
+        setUpdatedTime_CommonTerms(updatedTime, null);
+    }
+
+    public void setUpdatedTime_CommonTerms(Long updatedTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedTime", updatedTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsWebConfigCQ addOrderBy_UpdatedTime_Asc() {
         regOBA("updatedTime");
         return this;
@@ -3254,6 +3874,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUrls_Wildcard(String urls) {
+        setUrls_Wildcard(urls, null);
+    }
+
+    public void setUrls_Wildcard(String urls, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("urls", urls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrls_Regexp(String urls) {
+        setUrls_Regexp(urls, null);
+    }
+
+    public void setUrls_Regexp(String urls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("urls", urls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUrls_GreaterThan(String urls) {
         setUrls_GreaterThan(urls, null);
     }
@@ -3293,6 +3935,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setUrls_LessEqual(String urls, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("urls", ConditionKey.CK_LESS_EQUAL, urls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrls_Exists() {
+        setUrls_Exists(null);
+    }
+
+    public void setUrls_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("urls");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrls_CommonTerms(String urls) {
+        setUrls_CommonTerms(urls, null);
+    }
+
+    public void setUrls_CommonTerms(String urls, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("urls", urls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3417,6 +4081,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUserAgent_Wildcard(String userAgent) {
+        setUserAgent_Wildcard(userAgent, null);
+    }
+
+    public void setUserAgent_Wildcard(String userAgent, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Regexp(String userAgent) {
+        setUserAgent_Regexp(userAgent, null);
+    }
+
+    public void setUserAgent_Regexp(String userAgent, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUserAgent_GreaterThan(String userAgent) {
         setUserAgent_GreaterThan(userAgent, null);
     }
@@ -3456,6 +4142,28 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setUserAgent_LessEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_EQUAL, userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_Exists() {
+        setUserAgent_Exists(null);
+    }
+
+    public void setUserAgent_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("userAgent");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_CommonTerms(String userAgent) {
+        setUserAgent_CommonTerms(userAgent, null);
+    }
+
+    public void setUserAgent_CommonTerms(String userAgent, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

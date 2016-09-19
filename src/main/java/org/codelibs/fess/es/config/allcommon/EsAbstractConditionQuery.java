@@ -33,17 +33,22 @@ import org.dbflute.dbmeta.name.ColumnSqlName;
 import org.dbflute.exception.InvalidQueryRegisteredException;
 import org.dbflute.util.Srl;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -255,6 +260,39 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         } else if (ck.equals(ConditionKey.CK_LESS_EQUAL)) {
             builder.lte(value);
         }
+    }
+
+    protected ExistsQueryBuilder regExistsQ(String name) {
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(name);
+        regQ(existsQuery);
+        return existsQuery;
+    }
+
+    protected WildcardQueryBuilder regWildcardQ(String name, String wildcard) {
+        checkEsInvalidQuery(name, wildcard);
+        WildcardQueryBuilder wildcardQuery = QueryBuilders.wildcardQuery(name, wildcard);
+        regQ(wildcardQuery);
+        return wildcardQuery;
+    }
+
+    protected RegexpQueryBuilder regRegexpQ(String name, String regexp) {
+        checkEsInvalidQuery(name, regexp);
+        RegexpQueryBuilder regexpQuery = QueryBuilders.regexpQuery(name, regexp);
+        regQ(regexpQuery);
+        return regexpQuery;
+    }
+
+    protected CommonTermsQueryBuilder regCommonTermsQ(String name, Object text) {
+        checkEsInvalidQuery(name, text);
+        CommonTermsQueryBuilder commonTermsQuery = QueryBuilders.commonTermsQuery(name, text);
+        regQ(commonTermsQuery);
+        return commonTermsQuery;
+    }
+
+    protected MoreLikeThisQueryBuilder regMoreLikeThisQueryQ(String name) {
+        MoreLikeThisQueryBuilder moreLikeThisQuery = QueryBuilders.moreLikeThisQuery(name);
+        regQ(moreLikeThisQuery);
+        return moreLikeThisQuery;
     }
 
     protected void regQ(QueryBuilder builder) {

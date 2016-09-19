@@ -81,6 +81,7 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
             result.setScriptType(DfTypeUtil.toString(source.get("scriptType")));
             result.setStartTime(DfTypeUtil.toLong(source.get("startTime")));
             result.setTarget(DfTypeUtil.toString(source.get("target")));
+            result.setLastUpdated(DfTypeUtil.toLong(source.get("lastUpdated")));
             return result;
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();

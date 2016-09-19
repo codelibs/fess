@@ -22,6 +22,8 @@ import org.codelibs.fess.es.log.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.log.cbean.cq.UserInfoCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -299,6 +301,28 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedAt_Exists() {
+        setCreatedAt_Exists(null);
+    }
+
+    public void setCreatedAt_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedAt_CommonTerms(LocalDateTime createdAt) {
+        setCreatedAt_CommonTerms(createdAt, null);
+    }
+
+    public void setCreatedAt_CommonTerms(LocalDateTime createdAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdAt", createdAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsUserInfoCQ addOrderBy_CreatedAt_Asc() {
         regOBA("createdAt");
         return this;
@@ -446,6 +470,28 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedAt_LessEqual(LocalDateTime updatedAt, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("updatedAt", ConditionKey.CK_LESS_EQUAL, updatedAt);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedAt_Exists() {
+        setUpdatedAt_Exists(null);
+    }
+
+    public void setUpdatedAt_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("updatedAt");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedAt_CommonTerms(LocalDateTime updatedAt) {
+        setUpdatedAt_CommonTerms(updatedAt, null);
+    }
+
+    public void setUpdatedAt_CommonTerms(LocalDateTime updatedAt, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("updatedAt", updatedAt);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

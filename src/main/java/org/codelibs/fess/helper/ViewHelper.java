@@ -148,11 +148,12 @@ public class ViewHelper {
     public String getContentTitle(final Map<String, Object> document) {
         final int size = titleLength;
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        String title;
-        if (StringUtil.isNotBlank(DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class))) {
-            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
-        } else {
-            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+        String title = DocumentUtil.getValue(document, fessConfig.getIndexFieldTitle(), String.class);
+        if (StringUtil.isBlank(title)) {
+            title = DocumentUtil.getValue(document, fessConfig.getIndexFieldFilename(), String.class);
+            if (StringUtil.isBlank(title)) {
+                title = DocumentUtil.getValue(document, fessConfig.getIndexFieldUrl(), String.class);
+            }
         }
         return StringUtils.abbreviate(title, size);
     }

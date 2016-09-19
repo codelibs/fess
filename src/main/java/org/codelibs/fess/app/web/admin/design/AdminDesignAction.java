@@ -17,7 +17,6 @@ package org.codelibs.fess.app.web.admin.design;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +42,8 @@ import org.slf4j.LoggerFactory;
  * @author codelibs
  * @author jflute
  */
-public class AdminDesignAction extends FessAdminAction implements Serializable {
+public class AdminDesignAction extends FessAdminAction {
 
-    private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(AdminDesignAction.class);
 
     // ===================================================================================

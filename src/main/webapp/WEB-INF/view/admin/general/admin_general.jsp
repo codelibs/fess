@@ -150,14 +150,6 @@
 									<%-- Crawler --%>
 									<h4><la:message key="labels.general_menu_crawler" /></h4>
 									<div class="form-group">
-										<label for="purgeByBots" class="col-sm-3 control-label"><la:message
-												key="labels.purge_by_bots" /></label>
-										<div class="col-sm-9">
-											<la:errors property="purgeByBots" />
-											<la:text property="purgeByBots" styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
 										<label for="incrementalCrawling" class="col-sm-3 control-label"><la:message
 												key="labels.incremental_crawling" /></label>
 										<div class="col-sm-9">
@@ -280,6 +272,14 @@
 												value="${f:h(purgeUserInfoDay)}" class="form-control"
 												min="-1" max="3650">
 											<la:message key="labels.day" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="purgeByBots" class="col-sm-3 control-label"><la:message
+												key="labels.purge_by_bots" /></label>
+										<div class="col-sm-9">
+											<la:errors property="purgeByBots" />
+											<la:text property="purgeByBots" styleClass="form-control" />
 										</div>
 									</div>
 									<%-- Suggest --%>

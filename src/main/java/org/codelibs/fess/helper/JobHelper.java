@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.timer.TimeoutManager;
+import org.codelibs.core.timer.TimeoutTarget;
+import org.codelibs.core.timer.TimeoutTask;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exbhv.ScheduledJobBhv;
@@ -38,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class JobHelper {
     private static final Logger logger = LoggerFactory.getLogger(JobHelper.class);
+    private int monitorInterval = 60 * 60;// 1hour
 
     public void register(final ScheduledJob scheduledJob) {
         final JobManager jobManager = ComponentUtil.getJobManager();
@@ -130,6 +134,38 @@ public class JobHelper {
         ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
             op.setRefresh(true);
         });
+    }
+
+    public TimeoutTask startMonitorTask(final JobLog jobLog) {
+        TimeoutTarget target = new MonitorTarget(jobLog);
+        return TimeoutManager.getInstance().addTimeoutTarget(target, monitorInterval, true);
+    }
+
+    public void setMonitorInterval(int monitorInterval) {
+        this.monitorInterval = monitorInterval;
+    }
+
+    static class MonitorTarget implements TimeoutTarget {
+
+        private JobLog jobLog;
+
+        public MonitorTarget(final JobLog jobLog) {
+            this.jobLog = jobLog;
+        }
+
+        @Override
+        public void expired() {
+            if (jobLog.getEndTime() == null) {
+                jobLog.setLastUpdated(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Update " + jobLog);
+                }
+                ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
+                    op.setRefresh(true);
+                });
+            }
+        }
+
     }
 
 }

@@ -1067,10 +1067,10 @@ public class FessLabels extends UserMessages {
     /** The key of the message: System Configuration */
     public static final String LABELS_dashboard_title_configuration = "{labels.dashboard_title_configuration}";
 
-    /** The key of the message: Suggest by Search Words */
+    /** The key of the message: Suggest from Search Words */
     public static final String LABELS_suggest_search_log_enabled = "{labels.suggest_search_log_enabled}";
 
-    /** The key of the message: Suggest by Documents */
+    /** The key of the message: Suggest from Documents */
     public static final String LABELS_suggest_documents_enabled = "{labels.suggest_documents_enabled}";
 
     /** The key of the message: Purge Suggest Documents Before */
@@ -1213,6 +1213,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: NTLM */
     public static final String LABELS_webauth_scheme_ntlm = "{labels.webauth_scheme_ntlm}";
+
+    /** The key of the message: Form */
+    public static final String LABELS_webauth_scheme_form = "{labels.webauth_scheme_form}";
 
     /** The key of the message: Log Files */
     public static final String LABELS_log_configuration = "{labels.log_configuration}";

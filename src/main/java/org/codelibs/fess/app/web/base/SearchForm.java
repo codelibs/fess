@@ -34,8 +34,6 @@ import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
 public class SearchForm implements SearchRequestParams {
 
-    private static final long serialVersionUID = 1L;
-
     public Map<String, String[]> fields = new HashMap<>();
 
     @Size(max = 1000)

@@ -22,13 +22,17 @@ import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
 import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoParamCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.CommonTermsQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -268,6 +272,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCrawlingInfoId_Wildcard(String crawlingInfoId) {
+        setCrawlingInfoId_Wildcard(crawlingInfoId, null);
+    }
+
+    public void setCrawlingInfoId_Wildcard(String crawlingInfoId, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("crawlingInfoId", crawlingInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCrawlingInfoId_Regexp(String crawlingInfoId) {
+        setCrawlingInfoId_Regexp(crawlingInfoId, null);
+    }
+
+    public void setCrawlingInfoId_Regexp(String crawlingInfoId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("crawlingInfoId", crawlingInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCrawlingInfoId_GreaterThan(String crawlingInfoId) {
         setCrawlingInfoId_GreaterThan(crawlingInfoId, null);
     }
@@ -307,6 +333,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
 
     public void setCrawlingInfoId_LessEqual(String crawlingInfoId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("crawlingInfoId", ConditionKey.CK_LESS_EQUAL, crawlingInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCrawlingInfoId_Exists() {
+        setCrawlingInfoId_Exists(null);
+    }
+
+    public void setCrawlingInfoId_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("crawlingInfoId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCrawlingInfoId_CommonTerms(String crawlingInfoId) {
+        setCrawlingInfoId_CommonTerms(crawlingInfoId, null);
+    }
+
+    public void setCrawlingInfoId_CommonTerms(String crawlingInfoId, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("crawlingInfoId", crawlingInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -464,6 +512,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedTime_Exists() {
+        setCreatedTime_Exists(null);
+    }
+
+    public void setCreatedTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("createdTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime) {
+        setCreatedTime_CommonTerms(createdTime, null);
+    }
+
+    public void setCreatedTime_CommonTerms(Long createdTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("createdTime", createdTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public BsCrawlingInfoParamCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
@@ -583,6 +653,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setKey_Wildcard(String key) {
+        setKey_Wildcard(key, null);
+    }
+
+    public void setKey_Wildcard(String key, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("key", key);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKey_Regexp(String key) {
+        setKey_Regexp(key, null);
+    }
+
+    public void setKey_Regexp(String key, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("key", key);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setKey_GreaterThan(String key) {
         setKey_GreaterThan(key, null);
     }
@@ -622,6 +714,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
 
     public void setKey_LessEqual(String key, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("key", ConditionKey.CK_LESS_EQUAL, key);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKey_Exists() {
+        setKey_Exists(null);
+    }
+
+    public void setKey_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("key");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setKey_CommonTerms(String key) {
+        setKey_CommonTerms(key, null);
+    }
+
+    public void setKey_CommonTerms(String key, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("key", key);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -746,6 +860,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setValue_Wildcard(String value) {
+        setValue_Wildcard(value, null);
+    }
+
+    public void setValue_Wildcard(String value, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("value", value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setValue_Regexp(String value) {
+        setValue_Regexp(value, null);
+    }
+
+    public void setValue_Regexp(String value, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("value", value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setValue_GreaterThan(String value) {
         setValue_GreaterThan(value, null);
     }
@@ -785,6 +921,28 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
 
     public void setValue_LessEqual(String value, ConditionOptionCall<RangeQueryBuilder> opLambda) {
         RangeQueryBuilder builder = regRangeQ("value", ConditionKey.CK_LESS_EQUAL, value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setValue_Exists() {
+        setValue_Exists(null);
+    }
+
+    public void setValue_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("value");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setValue_CommonTerms(String value) {
+        setValue_CommonTerms(value, null);
+    }
+
+    public void setValue_CommonTerms(String value, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("value", value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

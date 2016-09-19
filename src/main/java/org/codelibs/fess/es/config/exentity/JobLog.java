@@ -38,6 +38,7 @@ public class JobLog extends BsJobLog {
         setScriptType(scheduledJob.getScriptType());
         setScriptData(scheduledJob.getScriptData());
         setStartTime(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
+        setLastUpdated(ComponentUtil.getSystemHelper().getCurrentTimeAsLong());
         setJobStatus(Constants.RUNNING);
         final String myName = ComponentUtil.getFessConfig().getSchedulerTargetName();
         setTarget(StringUtil.isNotBlank(myName) ? myName : Constants.DEFAULT_JOB_TARGET);

@@ -228,6 +228,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
                 } else if (Constants.NTLM.equals(scheme)) {
                     authScheme = new NTLMScheme(new JcifsEngine());
                 }
+                // TODO FORM
 
                 AuthScope authScope;
                 if (StringUtil.isBlank(hostname)) {

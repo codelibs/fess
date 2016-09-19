@@ -250,6 +250,11 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         putResultDataBody(dataMap, fessConfig.getIndexFieldHost(), getHost(url));
         // site
         putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSite(url, urlEncoding));
+        // filename
+        String fileName = getFileName(url, urlEncoding);
+        if (StringUtil.isNotBlank(fileName)) {
+            putResultDataBody(dataMap, fessConfig.getIndexFieldFilename(), fileName);
+        }
         // url
         putResultDataBody(dataMap, fessConfig.getIndexFieldUrl(), url);
         // created

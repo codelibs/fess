@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,6 @@ import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
 import org.codelibs.core.io.FileUtil;
 import org.codelibs.core.io.ResourceUtil;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.core.stream.StreamUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.service.ScheduledJobService;
@@ -78,6 +79,8 @@ public class AdminUpgradeAction extends FessAdminAction {
     //                                                                            Constant
     //
     private static final Logger logger = LoggerFactory.getLogger(AdminUpgradeAction.class);
+
+    private static final String VERSION_10_2 = "10.2";
 
     private static final String VERSION_10_1 = "10.1";
 
@@ -158,9 +161,23 @@ public class AdminUpgradeAction extends FessAdminAction {
         });
         verifyToken(() -> asIndexHtml());
 
-        if (VERSION_10_1.equals(form.targetVersion)) {
+        if (VERSION_10_2.equals(form.targetVersion)) {
+            try {
+                upgradeFrom10_2();
+                upgradeFromAll();
+
+                saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
+
+                fessEsClient.refresh();
+            } catch (final Exception e) {
+                logger.warn("Failed to upgrade data.", e);
+                saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_1, e.getLocalizedMessage()));
+            }
+        } else if (VERSION_10_1.equals(form.targetVersion)) {
             try {
                 upgradeFrom10_1();
+                upgradeFrom10_2();
+                upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
@@ -173,6 +190,8 @@ public class AdminUpgradeAction extends FessAdminAction {
             try {
                 upgradeFrom10_0();
                 upgradeFrom10_1();
+                upgradeFrom10_2();
+                upgradeFromAll();
 
                 saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
@@ -187,6 +206,20 @@ public class AdminUpgradeAction extends FessAdminAction {
         return redirect(getClass());
     }
 
+    private void upgradeFromAll() {
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String crawlerIndex = fessConfig.getIndexDocumentCrawlerIndex();
+
+        // .crawler
+        if (existsIndex(indicesClient, crawlerIndex, IndicesOptions.fromOptions(false, true, true, true))) {
+            deleteIndex(indicesClient, crawlerIndex, response -> {});
+        }
+    }
+
+    private void upgradeFrom10_2() {
+        // TODO 
+    }
+
     private void upgradeFrom10_1() {
         final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
         final String indexConfigPath = "fess_indices";
@@ -196,6 +229,7 @@ public class AdminUpgradeAction extends FessAdminAction {
         final String searchIndex = fessConfig.getIndexDocumentSearchIndex();
         final String oldDocIndex = "fess";
         final String suggestAnalyzerIndex = ".suggest.analyzer";
+        final String suggestIndex = fessConfig.getIndexDocumentSuggestIndex();
 
         // file
         uploadResource(indexConfigPath, oldDocIndex, "ja/mapping.txt");
@@ -701,31 +735,21 @@ public class AdminUpgradeAction extends FessAdminAction {
         }
 
         // fess.suggest
-        final String suggestIndex = fessConfig.getIndexDocumentSuggestIndex();
         if (existsIndex(indicesClient, suggestIndex, IndicesOptions.fromOptions(false, true, true, true))) {
-            indicesClient.prepareDelete(suggestIndex).execute(new ActionListener<DeleteIndexResponse>() {
-
-                @Override
-                public void onResponse(DeleteIndexResponse response) {
-                    scheduledJobService.getScheduledJob("suggest_indexer").ifPresent(entity -> {
-                        if (!entity.isEnabled() || entity.isRunning()) {
-                            logger.warn("suggest_indexer job is running.");
-                            return;
-                        }
-                        try {
-                            entity.start();
-                        } catch (final Exception e) {
-                            logger.warn("Failed to start suggest_indexer job.", e);
-                        }
-                    }).orElse(() -> {
-                        logger.warn("No suggest_indexer job.");
-                    });
-                }
-
-                @Override
-                public void onFailure(Throwable e) {
-                    logger.warn("Failed to delete " + suggestIndex + " index.", e);
-                }
+            deleteIndex(indicesClient, suggestIndex, response -> {
+                scheduledJobService.getScheduledJob("suggest_indexer").ifPresent(entity -> {
+                    if (!entity.isEnabled() || entity.isRunning()) {
+                        logger.warn("suggest_indexer job is running.");
+                        return;
+                    }
+                    try {
+                        entity.start();
+                    } catch (final Exception e) {
+                        logger.warn("Failed to start suggest_indexer job.", e);
+                    }
+                }).orElse(() -> {
+                    logger.warn("No suggest_indexer job.");
+                });
             });
         }
     }
@@ -941,9 +965,8 @@ public class AdminUpgradeAction extends FessAdminAction {
                         .filter(e -> StringUtil.isNotBlank(e.getTargetRole()))
                         .map(e -> {
                             final String[] permissions =
-                                    StreamUtil
-                                            .stream(e.getTargetRole().split(","))
-                                            .get(stream -> stream.filter(StringUtil::isNotBlank).map(
+                                    split(e.getTargetRole(), ",").get(
+                                            stream -> stream.filter(StringUtil::isNotBlank).map(
                                                     s -> fessConfig.getRoleSearchRolePrefix() + s)).toArray(n -> new String[n]);
                             e.setPermissions(permissions);
                             e.setTargetRole(null);
@@ -1048,6 +1071,22 @@ public class AdminUpgradeAction extends FessAdminAction {
             // ignore
         }
         return false;
+    }
+
+    private void deleteIndex(final IndicesAdminClient indicesClient, final String index, final Consumer<DeleteIndexResponse> comsumer) {
+        indicesClient.prepareDelete(index).execute(new ActionListener<DeleteIndexResponse>() {
+
+            @Override
+            public void onResponse(DeleteIndexResponse response) {
+                logger.info("Deleted " + index + " index.");
+                comsumer.accept(response);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                logger.warn("Failed to delete " + index + " index.", e);
+            }
+        });
     }
 
 }

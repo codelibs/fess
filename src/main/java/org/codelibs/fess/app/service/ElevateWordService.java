@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.service;
 
+import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.io.IOException;
@@ -197,7 +198,7 @@ public class ElevateWordService {
                 }
                 try {
                     final String[] permissions =
-                            stream(getValue(list, 2).split(",")).get(
+                            split(getValue(list, 2), ",").get(
                                     stream -> stream.map(permissionHelper::encode).filter(StringUtil::isNotBlank).distinct()
                                             .toArray(n -> new String[n]));
                     final String label = getValue(list, 3);
