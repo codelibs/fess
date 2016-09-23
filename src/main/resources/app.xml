@@ -54,6 +54,8 @@
 					"filetype:excel",
 					"filetype:powerpoint",
 					"filetype:pdf",
+					"filetype:epub",
+					"filetype:ibooks",
 					"filetype:others"
 				]</property>
 			</component>
