@@ -78,6 +78,14 @@
 			<arg>"powerpoint"</arg>
 		</postConstruct>
 		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.text"</arg>
+			<arg>"odt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.presentation"</arg>
+			<arg>"odp"</arg>
+		</postConstruct>		
+		<postConstruct name="add">
 			<arg>"application/pdf"</arg>
 			<arg>"pdf"</arg>
 		</postConstruct>
