@@ -81,6 +81,18 @@
 			<arg>"application/pdf"</arg>
 			<arg>"pdf"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-fictionbook+xml</arg>
+			<arg>"fb2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/e-pub+zip</arg>
+			<arg>"epub"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-ibooks+zip</arg>
+			<arg>"ibooks"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
