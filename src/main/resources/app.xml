@@ -61,6 +61,7 @@
 					"filetype:epub",
 					"filetype:ibooks",
 					"filetype:txt",
+					"filetype:rtf",
 					"filetype:chm",
 					"filetype:others"
 				]</property>
@@ -175,6 +176,10 @@
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_txt"</arg>
 						<arg>"filetype:txt"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_rtf"</arg>
+						<arg>"filetype:rtf"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_chm"</arg>
