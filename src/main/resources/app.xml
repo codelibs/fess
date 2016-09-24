@@ -53,7 +53,12 @@
 					"filetype:word",
 					"filetype:excel",
 					"filetype:powerpoint",
+					"filetype:odt",
+					"filetype:odp",
 					"filetype:pdf",
+					"filetype:fb2",
+					"filetype:epub",
+					"filetype:ibooks",
 					"filetype:others"
 				]</property>
 			</component>
@@ -100,7 +105,7 @@
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_contentLength_10kto100k"</arg>
 						<arg>"content_length:[10000 TO 99999]"</arg>
-					</postConstruct>
+					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_contentLength_100kto500k"</arg>
 						<arg>"content_length:[100000 TO 499999]"</arg>
