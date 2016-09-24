@@ -60,6 +60,8 @@
 					"filetype:fb2",
 					"filetype:epub",
 					"filetype:ibooks",
+					"filetype:txt",
+					"filetype:chm",
 					"filetype:others"
 				]</property>
 			</component>
@@ -169,6 +171,14 @@
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_ibooks"</arg>
 						<arg>"filetype:ibooks"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_txt"</arg>
+						<arg>"filetype:txt"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_chm"</arg>
+						<arg>"filetype:chm"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>
