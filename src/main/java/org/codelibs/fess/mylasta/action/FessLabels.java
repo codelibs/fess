@@ -716,7 +716,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: ODF Spreadsheet */
     public static final String LABELS_facet_filetype_ods = "{labels.facet_filetype_ods}";
 
-    /** The key of the message: ODP Presentation */
+    /** The key of the message: ODF Presentation */
     public static final String LABELS_facet_filetype_odp = "{labels.facet_filetype_odp}";
 
     /** The key of the message: PDF */
