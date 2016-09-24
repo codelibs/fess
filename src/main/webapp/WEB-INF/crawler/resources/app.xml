@@ -110,6 +110,10 @@
 			<arg>"txt"</arg>
 		</postConstruct>
 		<postConstruct name="add">
+			<arg>"application/rtf"</arg>
+			<arg>"rtf"</arg>
+		</postConstruct>
+		<postConstruct name="add">
 			<arg>"application/chm</arg>
 		    <!--<arg>"application/vnd.ms-htmlhelp"</arg>
 			<arg>"application/x-chm</arg>-->			
