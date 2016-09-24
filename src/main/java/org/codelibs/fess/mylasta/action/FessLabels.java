@@ -701,17 +701,35 @@ public class FessLabels extends UserMessages {
     /** The key of the message: HTML */
     public static final String LABELS_facet_filetype_html = "{labels.facet_filetype_html}";
 
-    /** The key of the message: Word */
+    /** The key of the message: MS Word */
     public static final String LABELS_facet_filetype_word = "{labels.facet_filetype_word}";
 
-    /** The key of the message: Excel */
+    /** The key of the message: MS Excel */
     public static final String LABELS_facet_filetype_excel = "{labels.facet_filetype_excel}";
 
-    /** The key of the message: PowerPoint */
+    /** The key of the message: MS PowerPoint */
     public static final String LABELS_facet_filetype_powerpoint = "{labels.facet_filetype_powerpoint}";
+
+    /** The key of the message: ODF Word */
+    public static final String LABELS_facet_filetype_odt = "{labels.facet_filetype_odt}";
+
+    /** The key of the message: ODF Spreadsheet */
+    public static final String LABELS_facet_filetype_ods = "{labels.facet_filetype_ods}";
+
+    /** The key of the message: ODP Presentation */
+    public static final String LABELS_facet_filetype_odp = "{labels.facet_filetype_odp}";
 
     /** The key of the message: PDF */
     public static final String LABELS_facet_filetype_pdf = "{labels.facet_filetype_pdf}";
+
+    /** The key of the message: FictionBook */
+    public static final String LABELS_facet_filetype_fb2 = "{labels.facet_filetype_fb2}";
+
+    /** The key of the message: EPUB */
+    public static final String LABELS_facet_filetype_epub = "{labels.facet_filetype_epub}";
+
+    /** The key of the message: iBooks */
+    public static final String LABELS_facet_filetype_ibooks = "{labels.facet_filetype_ibooks}";
 
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";

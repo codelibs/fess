@@ -82,6 +82,10 @@
 			<arg>"odt"</arg>
 		</postConstruct>
 		<postConstruct name="add">
+			<arg>"application/vnd.oasis.opendocument.spreadsheet"</arg>
+			<arg>"ods"</arg>
+		</postConstruct>
+		<postConstruct name="add">
 			<arg>"application/vnd.oasis.opendocument.presentation"</arg>
 			<arg>"odp"</arg>
 		</postConstruct>		
