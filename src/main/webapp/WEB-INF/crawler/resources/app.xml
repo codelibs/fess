@@ -105,6 +105,16 @@
 			<arg>"application/x-ibooks+zip</arg>
 			<arg>"ibooks"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"text/plain"</arg>
+			<arg>"txt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/chm</arg>
+		    <!--<arg>"application/vnd.ms-htmlhelp"</arg>
+			<arg>"application/x-chm</arg>-->			
+			<arg>"chm"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
