@@ -730,6 +730,12 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: iBooks */
     public static final String LABELS_facet_filetype_ibooks = "{labels.facet_filetype_ibooks}";
+    
+	/** The key of the message: Plain text */
+	public static final String LABELS_facet_filetype_txt = "{labels.facet_filetype_txt}";
+	
+	/** The key of the message: Help Format */
+	public static final String LABELS_facet_filetype_chm = "{labels.facet_filetype_chm}";
 
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
