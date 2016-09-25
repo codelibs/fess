@@ -81,6 +81,18 @@
 			<arg>"application/pdf"</arg>
 			<arg>"pdf"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"text/plain"</arg>
+			<arg>"txt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/rtf"</arg>
+			<arg>"rtf"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/vnd.ms-htmlhelp"</arg>
+			<arg>"chm"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
