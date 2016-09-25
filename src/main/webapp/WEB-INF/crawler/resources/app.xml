@@ -114,9 +114,7 @@
 			<arg>"rtf"</arg>
 		</postConstruct>
 		<postConstruct name="add">
-			<arg>"application/chm</arg>
-		    <!--<arg>"application/vnd.ms-htmlhelp"</arg>
-			<arg>"application/x-chm</arg>-->			
+			<arg>"application/vnd.ms-htmlhelp"</arg>
 			<arg>"chm"</arg>
 		</postConstruct>
 	</component>
