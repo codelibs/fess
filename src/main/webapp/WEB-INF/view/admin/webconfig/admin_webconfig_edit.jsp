@@ -114,7 +114,7 @@
 											<la:errors property="depth" />
 											<input type="number" name="depth"
 												value="${f:h(depth)}" class="form-control"
-												min="0" max="10000">
+												data-validation="custom" data-validation-regexp="(^[1-9]?\d{0,2}$|^1000$)" >
 										</div>
 									</div>
 									<div class="form-group">
@@ -124,7 +124,7 @@
 											<la:errors property="maxAccessCount" />
 											<input type="number" name="maxAccessCount"
 												value="${f:h(maxAccessCount)}" class="form-control"
-												min="0" max="1000000000">
+												data-validation="custom" data-validation-regexp="(^[1-9]?\d{0,8}$|^1[0]{9}$)">
 										</div>
 									</div>
 									<div class="form-group">
@@ -142,7 +142,7 @@
 											<la:errors property="numOfThread" />
 											<input type="number" name="numOfThread"
 												value="${f:h(numOfThread)}" class="form-control"
-												min="0" max="1000">
+												data-validation="number" data-validation-allowing="range[0;1000]">
 										</div>
 									</div>
 									<div class="form-group">
@@ -152,7 +152,7 @@
 											<la:errors property="intervalTime" />
 											<input type="number" name="intervalTime"
 												value="${f:h(intervalTime)}" class="form-control"
-												min="0" step="1000">
+												data-validation="number" data-validation-min="0" data-validation-step="1000">
 											<la:message key="labels.millisec" />
 										</div>
 									</div>

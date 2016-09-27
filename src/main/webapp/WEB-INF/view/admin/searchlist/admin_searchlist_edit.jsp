@@ -83,7 +83,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.doc_id" />
 											<la:text property="doc.doc_id" styleClass="form-control"
-												required="required" />
+												required="required" data-validation="custom" data-validation-regexp="^(\w+)$" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -107,7 +107,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.role" />
 											<la:textarea property="doc.role" styleClass="form-control"
-												required="required" />
+												required="required"  data-validation="custom" data-validation-regexp="^[U|R|G](\w+)$"/>
 										</div>
 									</div>
 									<div class="form-group">
@@ -115,7 +115,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.boost" />
 											<la:text property="doc.boost" styleClass="form-control"
-												pattern="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
+												data-validation="custom" data-validation-regexp="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
 												title="Floating point number" required="required" />
 										</div>
 									</div>
@@ -253,7 +253,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_length" />
 											<la:text property="doc.content_length"
-												styleClass="form-control" pattern="\d+" title="Integer" />
+												styleClass="form-control" data-validation="number" title="Integer" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -275,7 +275,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.favorite_count" />
 											<la:text property="doc.favorite_count"
-												styleClass="form-control" pattern="\d+" title="Integer" />
+												styleClass="form-control" data-validation="number" title="Integer" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -283,7 +283,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.click_count" />
 											<la:text property="doc.click_count" styleClass="form-control"
-												pattern="\d+" title="Integer"/>
+												data-validation="number" title="Integer"/>
 										</div>
 									</div>
 									<div class="form-group">
@@ -291,7 +291,7 @@
 									    <div class="col-sm-9">
 										<la:errors property="doc.created" />
 											<la:text property="doc.created" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												data-validation="custom" data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
@@ -300,7 +300,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.timestamp" />
 											<la:text property="doc.timestamp" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												data-validation="custom" data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
@@ -310,7 +310,7 @@
 										<la:errors property="doc.last_modified" />
 											<la:text property="doc.last_modified"
 												styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												data-validation="custom" data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 									    </div>
 									</div>
@@ -319,7 +319,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.expires" />
 											<la:text property="doc.expires" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
+												data-validation="custom" data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
 												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>

@@ -85,7 +85,7 @@
 											<la:errors property="sortOrder" />
 											<input type="number" name="sortOrder"
 												value="${f:h(sortOrder)}" class="form-control"
-												min="0" max="100000">
+												data-validation="number" data-validation-min="0" data-validation-max="100000">
 										</div>
 									</div>
 									<div class="form-group">
