@@ -169,7 +169,7 @@
 											<la:errors property="crawlingThreadCount" />
 											<input type="number" name="crawlingThreadCount"
 												value="${f:h(crawlingThreadCount)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[1;1000]">
+												min="1" max="1000">
 										</div>
 									</div>
 									<div class="form-group">
@@ -179,7 +179,7 @@
 											<la:errors property="dayForCleanup" />
 											<input type="number" name="dayForCleanup"
 												value="${f:h(dayForCleanup)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;3650],negative">
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>
@@ -200,7 +200,7 @@
 											<la:errors property="failureCountThreshold" />
 											<input type="number" name="failureCountThreshold"
 												value="${f:h(failureCountThreshold)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;1000],negative">
+												min="-1" max="1000">
 										</div>
 									</div>
 									<%-- Logging --%>
@@ -248,7 +248,7 @@
 											<la:errors property="purgeSearchLogDay" />
 											<input type="number" name="purgeSearchLogDay"
 												value="${f:h(purgeSearchLogDay)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;3650],negative">
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>
@@ -259,7 +259,7 @@
 											<la:errors property="purgeJobLogDay" />
 											<input type="number" name="purgeJobLogDay"
 												value="${f:h(purgeJobLogDay)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;3650],negative">
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>
@@ -270,7 +270,7 @@
 											<la:errors property="purgeUserInfoDay" />
 											<input type="number" name="purgeUserInfoDay"
 												value="${f:h(purgeUserInfoDay)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;3650],negative">
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>
@@ -316,7 +316,7 @@
 											<la:errors property="purgeSuggestSearchLogDay" />
 											<input type="number" name="purgeSuggestSearchLogDay"
 												value="${f:h(purgeSuggestSearchLogDay)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[-1;3650],negative">
+												min="-1" max="3650">
 											<la:message key="labels.day" />
 										</div>
 									</div>

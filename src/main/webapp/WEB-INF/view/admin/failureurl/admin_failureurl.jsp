@@ -54,14 +54,14 @@
 											<la:errors property="errorCountMin" />
 											<input type="number" name="errorCountMin"
 												value="${f:h(errorCountMin)}" class="form-control"
-												data-validation="custom" data-validation-regexp="(^[1-9]?\d{0,4}$|^1[0]{5}$)">
+												min="0" max="100000">
 										</div>
 										<div class="pull-left">-</div>
 										<div class="col-xs-2">
 											<la:errors property="errorCountMax" />
 											<input type="number" name="errorCountMax"
 												value="${f:h(errorCountMax)}" class="form-control"
-												data-validation="custom" data-validation-regexp="(^[1-9]?\d{0,4}$|^1[0]{5}$)">
+												min="0" max="100000">
 										</div>
 									</div>
 									<div class="form-group">

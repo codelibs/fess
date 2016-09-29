@@ -67,7 +67,7 @@
 											<la:errors property="maxSize" />
 											<input type="number" name="maxSize"
 												value="${f:h(maxSize)}" class="form-control"
-												data-validation="number" data-validation-allowing="range[0;10000000]" data-validation-step="10">
+												min="0" max="10000000" step="10">
 										</div>
 									</div>
 									<div class="form-group">
