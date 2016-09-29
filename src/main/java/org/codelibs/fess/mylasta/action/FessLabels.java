@@ -602,6 +602,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Score */
     public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
 
+    /** The key of the message: File Name (ascending) */
+    public static final String LABELS_search_result_sort_filename_asc = "{labels.search_result_sort_filename_asc}";
+
+    /** The key of the message: File Name (descending) */
+    public static final String LABELS_search_result_sort_filename_desc = "{labels.search_result_sort_filename_desc}";
+
     /** The key of the message: Date (ascending) */
     public static final String LABELS_search_result_sort_created_asc = "{labels.search_result_sort_created_asc}";
 
