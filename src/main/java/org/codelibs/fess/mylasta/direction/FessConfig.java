@@ -140,9 +140,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String CRAWLER_DOCUMENT_DUPLICATE_TERM_REMOVED = "crawler.document.duplicate.term.removed";
 
-    /** The key of the configuration. e.g. 	
-    
-       ᠎           ​  　﻿�¶ */
+    /** The key of the configuration. e.g. u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu202Fu205Fu3000uFEFFuFFFDu00B6 */
     String CRAWLER_DOCUMENT_SPACE_CHARS = "crawler.document.space.chars";
 
     /** The key of the configuration. e.g. UTF-8 */
@@ -1358,9 +1356,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.document.space.chars'. <br>
-     * The value is, e.g. 	
-    
-       ᠎           ​  　﻿�¶ <br>
+     * The value is, e.g. u0009u000Au000Bu000Cu000Du001Cu001Du001Eu001Fu0020u00A0u1680u180Eu2000u2001u2002u2003u2004u2005u2006u2007u2008u2009u200Au200Bu202Fu205Fu3000uFEFFuFFFDu00B6 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerDocumentSpaceChars();

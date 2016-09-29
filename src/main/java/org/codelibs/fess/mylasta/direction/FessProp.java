@@ -1305,10 +1305,18 @@ public interface FessProp {
     public default int[] getCrawlerDocumentSpaceCharsAsArray() {
         int[] spaceChars = (int[]) propMap.get(CRAWLER_DOCUMENT_SPACE_CHARS);
         if (spaceChars == null) {
-            final int length = getCrawlerDocumentSpaceChars().length();
-            spaceChars = new int[length];
-            for (int i = 0; i < length; i++) {
-                spaceChars[i] = getCrawlerDocumentSpaceChars().codePointAt(i);
+            String spaceStr = getCrawlerDocumentSpaceChars();
+            if (spaceStr.startsWith("u")) {
+                spaceChars =
+                        split(spaceStr, "u").get(
+                                stream -> stream.filter(StringUtil::isNotBlank).mapToInt(s -> Integer.parseInt(s, 16)).toArray());
+            } else {
+                // backward compatibility
+                final int length = spaceStr.length();
+                spaceChars = new int[length];
+                for (int i = 0; i < length; i++) {
+                    spaceChars[i] = spaceStr.codePointAt(i);
+                }
             }
             propMap.put(CRAWLER_DOCUMENT_SPACE_CHARS, spaceChars);
         }
