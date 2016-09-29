@@ -109,7 +109,7 @@ public class FessPropTest extends UnitFessTestCase {
         FessConfig fessConfig = new FessConfig.SimpleImpl() {
             @Override
             public String getCrawlerDocumentSpaceChars() {
-                return "\u0020\u3000";
+                return "u0020u3000";
             }
         };
 
@@ -118,4 +118,5 @@ public class FessPropTest extends UnitFessTestCase {
         assertEquals(32, spaceChars[0]);
         assertEquals(12288, spaceChars[1]);
     }
+
 }
