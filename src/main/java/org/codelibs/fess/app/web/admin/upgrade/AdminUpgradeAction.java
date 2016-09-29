@@ -58,6 +58,7 @@ import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -217,7 +218,17 @@ public class AdminUpgradeAction extends FessAdminAction {
     }
 
     private void upgradeFrom10_2() {
-        // TODO 
+        final IndicesAdminClient indicesClient = fessEsClient.admin().indices();
+        final String configIndex = ".fess_config";
+        final String updateIndex = fessConfig.getIndexDocumentUpdateIndex();
+        final String searchIndex = fessConfig.getIndexDocumentSearchIndex();
+
+        // update mapping
+        addFieldMapping(indicesClient, updateIndex, "doc", "filename",
+                "{\"properties\":{\"filename\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, searchIndex, "doc", "filename",
+                "{\"properties\":{\"filename\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(indicesClient, configIndex, "job_log", "lastUpdated", "{\"properties\":{\"lastUpdated\":{\"type\":\"long\"}}}");
     }
 
     private void upgradeFrom10_1() {
@@ -1023,7 +1034,8 @@ public class AdminUpgradeAction extends FessAdminAction {
             final String source) {
         final GetFieldMappingsResponse gfmResponse =
                 indicesClient.prepareGetFieldMappings(index).addTypes(type).setFields(field).execute().actionGet();
-        if (gfmResponse.fieldMappings(index, type, field).isNull()) {
+        final FieldMappingMetaData fieldMappings = gfmResponse.fieldMappings(index, type, field);
+        if (fieldMappings == null || fieldMappings.isNull()) {
             try {
                 final PutMappingResponse pmResponse =
                         indicesClient.preparePutMapping(index).setType(type).setSource(source).execute().actionGet();

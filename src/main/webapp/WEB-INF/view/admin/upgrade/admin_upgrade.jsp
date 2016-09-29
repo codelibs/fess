@@ -44,6 +44,7 @@
 										<div class="col-sm-9">
 											<la:errors property="targetVersion" />
 											<la:select property="targetVersion" styleClass="form-control">
+												<la:option value="10.2">10.2</la:option>
 												<la:option value="10.1">10.1</la:option>
 												<la:option value="10.0">10.0</la:option>
 											</la:select>
