@@ -309,8 +309,8 @@ public class AdminDictMappingAction extends FessAdminAction {
     @Execute
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS, form.dictId);
-        verifyToken(() -> asDetailsHtml());
         validate(form, messages -> {}, () -> asDetailsHtml());
+        verifyToken(() -> asDetailsHtml());
         charMappingService
                 .getCharMappingItem(form.dictId, form.id)
                 .ifPresent(
