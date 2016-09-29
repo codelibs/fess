@@ -63,7 +63,7 @@
 		<suggest.version>2.3.0</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>2.4.0</elasticsearch.version>
+		<elasticsearch.version>2.4.1</elasticsearch.version>
 		<cluster.runner.version>2.4.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
