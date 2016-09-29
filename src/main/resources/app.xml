@@ -63,6 +63,11 @@
 					"filetype:txt",
 					"filetype:rtf",
 					"filetype:chm",
+					"filetype:zip",
+					"filetype:7z",
+					"filetype:bz",
+					"filetype:bz2",
+					"filetype:tar",
 					"filetype:others"
 				]</property>
 			</component>
@@ -184,6 +189,26 @@
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_chm"</arg>
 						<arg>"filetype:chm"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_zip"</arg>
+						<arg>"filetype:zip"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_7z"</arg>
+						<arg>"filetype:7z"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_bz"</arg>
+						<arg>"filetype:bz"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_bz2"</arg>
+						<arg>"filetype:bz2"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_tar"</arg>
+						<arg>"filetype:tar"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>

@@ -103,6 +103,12 @@ ${fe:facetForm()}${fe:geoForm()}
 						<la:option value="score.desc">
 							<la:message key="labels.search_result_sort_score_desc" />
 						</la:option>
+						<la:option value="filename.asc">
+							<la:message key="labels.search_result_sort_filename_asc" />
+						</la:option>
+						<la:option value="filename.desc">
+							<la:message key="labels.search_result_sort_filename_desc" />
+						</la:option>
 						<la:option value="created.asc">
 							<la:message key="labels.search_result_sort_created_asc" />
 						</la:option>

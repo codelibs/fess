@@ -602,6 +602,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Score */
     public static final String LABELS_search_result_sort_score_desc = "{labels.search_result_sort_score_desc}";
 
+    /** The key of the message: File Name (ascending) */
+    public static final String LABELS_search_result_sort_filename_asc = "{labels.search_result_sort_filename_asc}";
+
+    /** The key of the message: File Name (descending) */
+    public static final String LABELS_search_result_sort_filename_desc = "{labels.search_result_sort_filename_desc}";
+
     /** The key of the message: Date (ascending) */
     public static final String LABELS_search_result_sort_created_asc = "{labels.search_result_sort_created_asc}";
 
@@ -739,6 +745,21 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Compiled HTML Help */
     public static final String LABELS_facet_filetype_chm = "{labels.facet_filetype_chm}";
+
+    /** The key of the message: ZIP Archive */
+    public static final String LABELS_facet_filetype_zip = "{labels.facet_filetype_zip}";
+
+    /** The key of the message: 7z Archive */
+    public static final String LABELS_facet_filetype_7z = "{labels.facet_filetype_7z}";
+
+    /** The key of the message: Bz Archive */
+    public static final String LABELS_facet_filetype_bz = "{labels.facet_filetype_bz}";
+
+    /** The key of the message: Bz2 Archive */
+    public static final String LABELS_facet_filetype_bz2 = "{labels.facet_filetype_bz2}";
+
+    /** The key of the message: TAR Archive */
+    public static final String LABELS_facet_filetype_tar = "{labels.facet_filetype_tar}";
 
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
