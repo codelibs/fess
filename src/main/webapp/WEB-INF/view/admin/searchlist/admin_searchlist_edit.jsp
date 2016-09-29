@@ -110,7 +110,8 @@
 											<la:errors property="doc.role" />
 											<la:textarea property="doc.role" styleClass="form-control"
 												required="required" data-validation="custom"
-												data-validation-regexp="^[U|R|G](\w+)$" value="Rguest" />
+												data-validation-regexp="^[1|2|R](\w+)$"
+												data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -121,7 +122,7 @@
 												title="Floating point number" required="required"
 												data-validation="custom"
 												data-validation-regexp="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
-												data-validation-help="number (Float)" value="1.0" />
+												data-validation-help="number (Float)" />
 										</div>
 									</div>
 									<div class="form-group">

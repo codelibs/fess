@@ -225,6 +225,7 @@
 					<webappDirectory>${project.build.directory}/${project.build.finalName}-compress</webappDirectory>
 					<excludes>
 						<exclude>**/*min.js</exclude>
+						<exclude>**/form-validator/**/*.js</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
