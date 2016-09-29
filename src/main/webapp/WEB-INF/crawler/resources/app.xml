@@ -117,6 +117,26 @@
 			<arg>"application/vnd.ms-htmlhelp"</arg>
 			<arg>"chm"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/zip"</arg>
+			<arg>"zip"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-7z-comressed"</arg>
+			<arg>"7z"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-bzip"</arg>
+			<arg>"bz"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-bzip2"</arg>
+			<arg>"bz2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-tar"</arg>
+			<arg>"tar"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">

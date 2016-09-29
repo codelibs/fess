@@ -740,6 +740,22 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Compiled HTML Help */
     public static final String LABELS_facet_filetype_chm = "{labels.facet_filetype_chm}";
 
+    /** The key of the message: Zip Archive */
+    public static final String LABELS_facet_filetype_zip = "{labels.facet_filetype_zip}";
+
+    /** The key of the message: 7-Zip Archive */
+    public static final String LABELS_facet_filetype_7z = "{labels.facet_filetype_7z}";
+
+    /** The key of the message: Bzip Archive */
+    public static final String LABELS_facet_filetype_bz = "{labels.facet_filetype_bz}";
+
+    /** The key of the message: Bzip2 Archive */
+    public static final String LABELS_facet_filetype_bz2 = "{labels.facet_filetype_bz2}";
+
+    /** The key of the message: Tar Archive */
+    public static final String LABELS_facet_filetype_tar = "{labels.facet_filetype_tar}";
+
+
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 

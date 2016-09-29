@@ -186,6 +186,26 @@
 						<arg>"filetype:chm"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_zip"</arg>
+						<arg>"filetype:zip"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_7z"</arg>
+						<arg>"filetype:7z"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_bz"</arg>
+						<arg>"filetype:bz"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_bz2"</arg>
+						<arg>"filetype:bz2"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_tar"</arg>
+						<arg>"filetype:tar"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>
 						<arg>"filetype:others"</arg>
 					</postConstruct>
