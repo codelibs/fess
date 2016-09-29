@@ -48,6 +48,10 @@
   <filter>
     <filter-name>lastaShowbaseFilter</filter-name>
     <filter-class>org.lastaflute.web.servlet.filter.LastaShowbaseFilter</filter-class>
+    <init-param>
+      <param-name>errorLogging</param-name>
+      <param-value>false</param-value>
+    </init-param>
   </filter>
 
   <filter>
