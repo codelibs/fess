@@ -53,7 +53,16 @@
 					"filetype:word",
 					"filetype:excel",
 					"filetype:powerpoint",
+					"filetype:odt",
+					"filetype:ods",
+					"filetype:odp",
 					"filetype:pdf",
+					"filetype:fb2",
+					"filetype:epub",
+					"filetype:ibooks",
+					"filetype:txt",
+					"filetype:rtf",
+					"filetype:chm",
 					"filetype:others"
 				]</property>
 			</component>
@@ -137,8 +146,44 @@
 						<arg>"filetype:powerpoint"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_odt"</arg>
+						<arg>"filetype:odt"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_ods"</arg>
+						<arg>"filetype:ods"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_odp"</arg>
+						<arg>"filetype:odp"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_pdf"</arg>
 						<arg>"filetype:pdf"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_fb2"</arg>
+						<arg>"filetype:fb2"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_epub"</arg>
+						<arg>"filetype:epub"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_ibooks"</arg>
+						<arg>"filetype:ibooks"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_txt"</arg>
+						<arg>"filetype:txt"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_rtf"</arg>
+						<arg>"filetype:rtf"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_chm"</arg>
+						<arg>"filetype:chm"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>

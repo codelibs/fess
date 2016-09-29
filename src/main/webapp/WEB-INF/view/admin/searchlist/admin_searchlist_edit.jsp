@@ -83,7 +83,9 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.doc_id" />
 											<la:text property="doc.doc_id" styleClass="form-control"
-												required="required" />
+												required="required" data-validation="custom"
+												data-validation-regexp="^([a-z0-9]+)$"
+												data-validation-help="[a-z] or [0-9]" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -91,7 +93,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.url" />
 											<la:text property="doc.url" styleClass="form-control"
-												required="required" />
+												required="required" data-validation="required" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -99,7 +101,7 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.title" />
 											<la:text property="doc.title" styleClass="form-control"
-												required="required" />
+												required="required" data-validation="required" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -107,7 +109,9 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.role" />
 											<la:textarea property="doc.role" styleClass="form-control"
-												required="required" />
+												required="required" data-validation="custom"
+												data-validation-regexp="^[1|2|R](\w+)$"
+												data-validation-help="1(username) | 2(groupname) | R(rolename)  e.g. Rguest" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -115,8 +119,10 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.boost" />
 											<la:text property="doc.boost" styleClass="form-control"
-												pattern="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
-												title="Floating point number" required="required" />
+												title="Floating point number" required="required"
+												data-validation="custom"
+												data-validation-regexp="(\+|\-)?\d+(\.\d+)?((e|E)(\+|\-)?\d+)?"
+												data-validation-help="number (Float)" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -253,7 +259,9 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.content_length" />
 											<la:text property="doc.content_length"
-												styleClass="form-control" pattern="\d+" title="Integer" />
+												styleClass="form-control" title="Integer"
+												data-validation="custom" data-validation-regexp="^(\d+)?$"
+												data-validation-help="number (Integer)" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -275,7 +283,9 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.favorite_count" />
 											<la:text property="doc.favorite_count"
-												styleClass="form-control" pattern="\d+" title="Integer" />
+												styleClass="form-control" title="Integer"
+												data-validation="custom" data-validation-regexp="^(\d+)?$"
+												data-validation-help="number (Integer)" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -283,16 +293,19 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.click_count" />
 											<la:text property="doc.click_count" styleClass="form-control"
-												pattern="\d+" title="Integer"/>
+												title="Integer" data-validation="custom" data-validation-regexp="^(\d+)?$"
+												data-validation-help="number (Integer)" />
 										</div>
 									</div>
 									<div class="form-group">
-									    <label for="created" class="col-sm-3 control-label">created</label>
-									    <div class="col-sm-9">
-										<la:errors property="doc.created" />
+										<label for="created" class="col-sm-3 control-label">created</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.created" />
 											<la:text property="doc.created" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
-												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+												data-validation="custom"
+												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
+												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -300,27 +313,32 @@
 										<div class="col-sm-9">
 											<la:errors property="doc.timestamp" />
 											<la:text property="doc.timestamp" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
-												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+												data-validation="custom"
+												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
+												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
 									<div class="form-group">
-									    <label for="last_modified" class="col-sm-3 control-label">last_modified</label>
-									    <div class="col-sm-9">
-										<la:errors property="doc.last_modified" />
-											<la:text property="doc.last_modified"
-												styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
-												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
-									    </div>
+										<label for="last_modified" class="col-sm-3 control-label">last_modified</label>
+										<div class="col-sm-9">
+											<la:errors property="doc.last_modified" />
+											<la:text property="doc.last_modified" styleClass="form-control"
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+												data-validation="custom"
+												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
+												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
+										</div>
 									</div>
 									<div class="form-group">
 										<label for="expires" class="col-sm-3 control-label">expires</label>
 										<div class="col-sm-9">
 											<la:errors property="doc.expires" />
 											<la:text property="doc.expires" styleClass="form-control"
-												pattern="\d\d\d\d\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d\d\dZ"
-												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
+												title="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+												data-validation="custom"
+												data-validation-regexp="(^$|^[1-9]\d{3}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d\.\d{3}Z$)"
+												data-validation-help="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" />
 										</div>
 									</div>
 								</div>
@@ -360,5 +378,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/footer.jsp"></jsp:include>
 	</div>
 	<jsp:include page="/WEB-INF/view/common/admin/foot.jsp"></jsp:include>
+	<script src="${f:url('/js/admin/form-validator/jquery.form-validator.min.js')}" type="text/javascript"></script>
+	<script src="${f:url('/js/admin/load-validator.js')}" type="text/javascript"></script>
 </body>
 </html>
