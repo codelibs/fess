@@ -63,6 +63,11 @@
 					"filetype:txt",
 					"filetype:rtf",
 					"filetype:chm",
+					"filetype:zip",
+					"filetype:7z",
+					"filetype:bz",
+					"filetype:bz2",
+					"filetype:tar",
 					"filetype:others"
 				]</property>
 			</component>
