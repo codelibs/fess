@@ -761,6 +761,72 @@ public class FessLabels extends UserMessages {
     /** The key of the message: TAR Archive */
     public static final String LABELS_facet_filetype_tar = "{labels.facet_filetype_tar}";
 
+    /** The key of the message: RAR Archive */
+    public static final String LABELS_facet_filetype_rar = "{labels.facet_filetype_rar}";
+
+    /** The key of the message: 3gp Video */
+    public static final String LABELS_facet_filetype_3gp = "{labels.facet_filetype_3gp}";
+
+    /** The key of the message: 3g2 Video */
+    public static final String LABELS_facet_filetype_3g2 = "{labels.facet_filetype_3g2}";
+
+    /** The key of the message: AVI Video */
+    public static final String LABELS_facet_filetype_avi = "{labels.facet_filetype_avi}";
+
+    /** The key of the message: FLV Video */
+    public static final String LABELS_facet_filetype_flv = "{labels.facet_filetype_flv}";
+
+    /** The key of the message: MPEG Video */
+    public static final String LABELS_facet_filetype_mpeg = "{labels.facet_filetype_mpeg}";
+
+    /** The key of the message: MP4 Video */
+    public static final String LABELS_facet_filetype_mp4 = "{labels.facet_filetype_mp4}";
+
+    /** The key of the message: M4V Video */
+    public static final String LABELS_facet_filetype_m4v = "{labels.facet_filetype_m4v}";
+
+    /** The key of the message: OGV Video */
+    public static final String LABELS_facet_filetype_ogv = "{labels.facet_filetype_ogv}";
+
+    /** The key of the message: QT Video */
+    public static final String LABELS_facet_filetype_qt = "{labels.facet_filetype_qt}";
+
+    /** The key of the message: WAV Audio */
+    public static final String LABELS_facet_filetype_wav = "{labels.facet_filetype_wav}";
+
+    /** The key of the message: AIF Audio */
+    public static final String LABELS_facet_filetype_aif = "{labels.facet_filetype_aif}";
+
+    /** The key of the message: MID Audio */
+    public static final String LABELS_facet_filetype_mid = "{labels.facet_filetype_mid}";
+
+    /** The key of the message: MPGA Audio */
+    public static final String LABELS_facet_filetype_mpga = "{labels.facet_filetype_mpga}";
+
+    /** The key of the message: MP4A Audio */
+    public static final String LABELS_facet_filetype_mp4a = "{labels.facet_filetype_mp4a}";
+
+    /** The key of the message: OGA Audio */
+    public static final String LABELS_facet_filetype_oga = "{labels.facet_filetype_oga}";
+
+    /** The key of the message: BMP image */
+    public static final String LABELS_facet_filetype_bmp = "{labels.facet_filetype_bmp}";
+
+    /** The key of the message: ICO image */
+    public static final String LABELS_facet_filetype_ico = "{labels.facet_filetype_ico}";
+
+    /** The key of the message: PNG image */
+    public static final String LABELS_facet_filetype_png = "{labels.facet_filetype_png}";
+
+    /** The key of the message: SVG image */
+    public static final String LABELS_facet_filetype_svg = "{labels.facet_filetype_svg}";
+
+    /** The key of the message: WEBP image */
+    public static final String LABELS_facet_filetype_webp = "{labels.facet_filetype_webp}";
+
+    /** The key of the message: TIFF image */
+    public static final String LABELS_facet_filetype_tiff = "{labels.facet_filetype_tiff}";
+
     /** The key of the message: Others */
     public static final String LABELS_facet_filetype_others = "{labels.facet_filetype_others}";
 

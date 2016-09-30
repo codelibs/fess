@@ -68,6 +68,28 @@
 					"filetype:bz",
 					"filetype:bz2",
 					"filetype:tar",
+					"filetype:rar",
+					"filetype:3gp",
+					"filetype:3g2",
+					"filetype:avi",
+					"filetype:flv",
+					"filetype:mpeg",
+					"filetype:mp4",
+					"filetype:ogv",
+					"filetype:qt",
+					"filetype:m4v",
+					"filetype:aif",
+					"filetype:mid",
+					"filetype:mpga",
+					"filetype:mp4a",
+					"filetype:oga",
+					"filetype:wav",
+					"filetype:webp",
+					"filetype:bmp",
+					"filetype:ico",
+					"filetype:png",
+					"filetype:svg",
+					"filetype:tiff",
 					"filetype:others"
 				]</property>
 			</component>
@@ -211,9 +233,94 @@
 						<arg>"filetype:tar"</arg>
 					</postConstruct>
 					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_rar"</arg>
+						<arg>"filetype:rar"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_3gp"</arg>
+						<arg>"filetype:3gp"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_3g2"</arg>
+						<arg>"filetype:3g2"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_avi"</arg>
+						<arg>"filetype:avi"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_flv"</arg>
+						<arg>"filetype:flv"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_mpeg"</arg>
+						<arg>"filetype:mpeg"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_mp4"</arg>
+						<arg>"filetype:mp4"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_ogv"</arg>
+						<arg>"filetype:ogv"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_qt"</arg>
+						<arg>"filetype:qt"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_m4v"</arg>
+						<arg>"filetype:m4v"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_aif"</arg>
+						<arg>"filetype:aif"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_mid"</arg>
+						<arg>"filetype:mid"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_mpga"</arg>
+						<arg>"filetype:mpga"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_ogg"</arg>
+						<arg>"filetype:ogg"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_wav"</arg>
+						<arg>"filetype:wav"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_webp"</arg>
+						<arg>"filetype:webp"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_bmp"</arg>
+						<arg>"filetype:bmp"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_ico"</arg>
+						<arg>"filetype:ico"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_png"</arg>
+						<arg>"filetype:png"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_svg"</arg>
+						<arg>"filetype:svg"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
+						<arg>"labels.facet_filetype_tiff"</arg>
+						<arg>"filetype:tiff"</arg>
+					</postConstruct>
+					<postConstruct name="addQuery">
 						<arg>"labels.facet_filetype_others"</arg>
 						<arg>"filetype:others"</arg>
 					</postConstruct>
+
 				</component>
 			</arg>
 		</postConstruct>
