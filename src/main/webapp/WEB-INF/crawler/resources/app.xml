@@ -137,6 +137,98 @@
 			<arg>"application/x-tar"</arg>
 			<arg>"tar"</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"application/x-rar-compressed"</arg>
+			<arg>"rar"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/3gp"</arg>
+			<arg>"3gp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/3g2"</arg>
+			<arg>"3g2"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-msvideo"</arg>
+			<arg>"avi"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-flv"</arg>
+			<arg>"flv"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/mpeg"</arg>
+			<arg>"mpeg"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/mp4"</arg>
+			<arg>"mp4"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/ogv"</arg>
+			<arg>"ogv"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/quicktime"</arg>
+			<arg>"qt"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"video/x-m4v"</arg>
+			<arg>"m4v"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/x-aif"</arg>
+			<arg>"aif"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/midi"</arg>
+			<arg>"midi"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/mpga"</arg>
+			<arg>"mpga"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/mp4"</arg>
+			<arg>"mp4a"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/ogg"</arg>
+			<arg>"oga"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"audio/x-wav"</arg>
+			<arg>"wav"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/webp"</arg>
+			<arg>"webp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/bmp"</arg>
+			<arg>"bmp"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/x-icon"</arg>
+			<arg>"ico"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/x-icon"</arg>
+			<arg>"ico"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/png"</arg>
+			<arg>"png"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/svg+xml"</arg>
+			<arg>"svg"</arg>
+		</postConstruct>
+		<postConstruct name="add">
+			<arg>"image/tiff"</arg>
+			<arg>"tiff"</arg>
+		</postConstruct>
 	</component>
 	<component name="fessCrawler" class="org.codelibs.fess.exec.Crawler"
 		instance="prototype">
