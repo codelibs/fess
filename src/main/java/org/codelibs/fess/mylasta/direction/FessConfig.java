@@ -469,16 +469,16 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     */
     String QUERY_LANGUAGE_MAPPING = "query.language.mapping";
 
-    /** The key of the configuration. e.g. 1.6 */
+    /** The key of the configuration. e.g. 0.2 */
     String QUERY_BOOST_TITLE = "query.boost.title";
 
-    /** The key of the configuration. e.g. 2.0 */
+    /** The key of the configuration. e.g. 1.0 */
     String QUERY_BOOST_TITLE_LANG = "query.boost.title.lang";
 
-    /** The key of the configuration. e.g. 1.0 */
+    /** The key of the configuration. e.g. 0.1 */
     String QUERY_BOOST_CONTENT = "query.boost.content";
 
-    /** The key of the configuration. e.g. 1.3 */
+    /** The key of the configuration. e.g. 0.5 */
     String QUERY_BOOST_CONTENT_LANG = "query.boost.content.lang";
 
     /** The key of the configuration. e.g. true */
@@ -2278,7 +2278,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title'. <br>
-     * The value is, e.g. 1.6 <br>
+     * The value is, e.g. 0.2 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -2286,7 +2286,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 1.6 <br>
+     * The value is, e.g. 0.2 <br>
      * comment: boost
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
@@ -2295,14 +2295,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.title.lang'. <br>
-     * The value is, e.g. 2.0 <br>
+     * The value is, e.g. 1.0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostTitleLang();
 
     /**
      * Get the value for the key 'query.boost.title.lang' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 2.0 <br>
+     * The value is, e.g. 1.0 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -2310,14 +2310,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.content'. <br>
-     * The value is, e.g. 1.0 <br>
+     * The value is, e.g. 0.1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContent();
 
     /**
      * Get the value for the key 'query.boost.content' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 1.0 <br>
+     * The value is, e.g. 0.1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */
@@ -2325,14 +2325,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'query.boost.content.lang'. <br>
-     * The value is, e.g. 1.3 <br>
+     * The value is, e.g. 0.5 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryBoostContentLang();
 
     /**
      * Get the value for the key 'query.boost.content.lang' as {@link java.math.BigDecimal}. <br>
-     * The value is, e.g. 1.3 <br>
+     * The value is, e.g. 0.5 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not decimal.
      */

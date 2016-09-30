@@ -782,14 +782,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: MP4 Video */
     public static final String LABELS_facet_filetype_mp4 = "{labels.facet_filetype_mp4}";
 
-    /** The key of the message: M4V Video */
-    public static final String LABELS_facet_filetype_m4v = "{labels.facet_filetype_m4v}";
-
     /** The key of the message: OGV Video */
     public static final String LABELS_facet_filetype_ogv = "{labels.facet_filetype_ogv}";
 
-    /** The key of the message: QT Video */
+    /** The key of the message: QuickTime Video */
     public static final String LABELS_facet_filetype_qt = "{labels.facet_filetype_qt}";
+
+    /** The key of the message: M4V Video */
+    public static final String LABELS_facet_filetype_m4v = "{labels.facet_filetype_m4v}";
 
     /** The key of the message: WAV Audio */
     public static final String LABELS_facet_filetype_wav = "{labels.facet_filetype_wav}";
@@ -797,7 +797,7 @@ public class FessLabels extends UserMessages {
     /** The key of the message: AIF Audio */
     public static final String LABELS_facet_filetype_aif = "{labels.facet_filetype_aif}";
 
-    /** The key of the message: MID Audio */
+    /** The key of the message: MIDI Audio */
     public static final String LABELS_facet_filetype_mid = "{labels.facet_filetype_mid}";
 
     /** The key of the message: MPGA Audio */
@@ -809,22 +809,22 @@ public class FessLabels extends UserMessages {
     /** The key of the message: OGA Audio */
     public static final String LABELS_facet_filetype_oga = "{labels.facet_filetype_oga}";
 
-    /** The key of the message: BMP image */
+    /** The key of the message: WEBP Image */
+    public static final String LABELS_facet_filetype_wepb = "{labels.facet_filetype_wepb}";
+
+    /** The key of the message: BMP Image */
     public static final String LABELS_facet_filetype_bmp = "{labels.facet_filetype_bmp}";
 
-    /** The key of the message: ICO image */
+    /** The key of the message: ICO Image */
     public static final String LABELS_facet_filetype_ico = "{labels.facet_filetype_ico}";
 
-    /** The key of the message: PNG image */
+    /** The key of the message: PNG Image */
     public static final String LABELS_facet_filetype_png = "{labels.facet_filetype_png}";
 
-    /** The key of the message: SVG image */
+    /** The key of the message: SVG Image */
     public static final String LABELS_facet_filetype_svg = "{labels.facet_filetype_svg}";
 
-    /** The key of the message: WEBP image */
-    public static final String LABELS_facet_filetype_webp = "{labels.facet_filetype_webp}";
-
-    /** The key of the message: TIFF image */
+    /** The key of the message: TIFF Image */
     public static final String LABELS_facet_filetype_tiff = "{labels.facet_filetype_tiff}";
 
     /** The key of the message: Others */
