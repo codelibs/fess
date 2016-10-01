@@ -48,13 +48,9 @@ public class LabelTypeHelper {
 
     protected volatile List<LabelTypePattern> labelTypePatternList;
 
-    protected LabelTypeService getLabelTypeService() {
-        return ComponentUtil.getComponent(LabelTypeService.class);
-    }
-
     @PostConstruct
     public void init() {
-        final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeList();
+        final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
         buildLabelTypeItems(labelTypeList);
     }
 
@@ -112,7 +108,7 @@ public class LabelTypeHelper {
         if (labelTypePatternList == null) {
             synchronized (this) {
                 if (labelTypePatternList == null) {
-                    final List<LabelType> labelTypeList = getLabelTypeService().getLabelTypeList();
+                    final List<LabelType> labelTypeList = ComponentUtil.getComponent(LabelTypeService.class).getLabelTypeList();
                     final List<LabelTypePattern> list = new ArrayList<>();
                     for (final LabelType labelType : labelTypeList) {
                         final String includedPaths = labelType.getIncludedPaths();

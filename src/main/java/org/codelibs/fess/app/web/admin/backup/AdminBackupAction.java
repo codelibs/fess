@@ -81,6 +81,7 @@ public class AdminBackupAction extends FessAdminAction {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Bulk Response:\n" + response.getContentAsString());
                 }
+                systemHelper.reloadConfiguration();
             } catch (final Exception e) {
                 logger.warn("Failed to process bulk file: " + form.bulkFile.getFileName(), e);
             }
