@@ -791,6 +791,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: M4V Video */
     public static final String LABELS_facet_filetype_m4v = "{labels.facet_filetype_m4v}";
 
+    /** The key of the message: OGG Audio */
+    public static final String LABELS_facet_filetype_ogg = "{labels.facet_filetype_ogg}";
+
     /** The key of the message: WAV Audio */
     public static final String LABELS_facet_filetype_wav = "{labels.facet_filetype_wav}";
 
