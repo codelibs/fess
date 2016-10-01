@@ -297,4 +297,30 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         value = transformer.getSingleNodeValue(document, "//META[@name='keywords']/@content|//BODY", false);
         assertEquals("bbb aaa", value);
     }
+
+    public void test_normalizeCanonicalUrl() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        String value;
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/", "a");
+        assertEquals("http://hoge.com/a", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/", "aaa");
+        assertEquals("http://hoge.com/aaa", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/", "/aaa");
+        assertEquals("http://hoge.com/aaa", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/bbb", "aaa");
+        assertEquals("http://hoge.com/aaa", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/bbb/", "aaa");
+        assertEquals("http://hoge.com/bbb/aaa", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/bbb/", "/aaa");
+        assertEquals("http://hoge.com/aaa", value);
+
+        value = transformer.normalizeCanonicalUrl("http://hoge.com/bbb", "/aaa");
+        assertEquals("http://hoge.com/aaa", value);
+    }
 }
