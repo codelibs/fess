@@ -30,17 +30,23 @@ public class LoginAction extends FessLoginAction {
 
     @Execute
     public HtmlResponse index() {
+        return asIndexPage(null).useForm(LoginForm.class);
+    }
+
+    private HtmlResponse asIndexPage(final LoginForm form) {
+        if (form != null) {
+            form.clearSecurityInfo();
+        }
         return asHtml(path_Login_IndexJsp).renderWith(data -> {
             RenderDataUtil.register(data, "notification", fessConfig.getNotificationLogin());
-        }).useForm(LoginForm.class);
+            saveToken();
+        });
     }
 
     @Execute
     public HtmlResponse login(final LoginForm form) {
-        validate(form, messages -> {}, () -> {
-            form.clearSecurityInfo();
-            return asHtml(path_Login_IndexJsp);
-        });
+        validate(form, messages -> {}, () -> asIndexPage(form));
+        verifyToken(() -> asIndexPage(form));
         final String username = form.username;
         final String password = form.password;
         form.clearSecurityInfo();
@@ -50,9 +56,7 @@ public class LoginAction extends FessLoginAction {
                 return getHtmlResponse();
             });
         } catch (final LoginFailureException lfe) {
-            throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> {
-                return asHtml(path_Login_IndexJsp);
-            });
+            throwValidationError(messages -> messages.addErrorsLoginError(GLOBAL), () -> asIndexPage(form));
         }
         return redirect(getClass());
     }
