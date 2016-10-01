@@ -71,6 +71,8 @@ Run or debug org.codelibs.fess.FessBoot on IDE, and then access http://localhost
 Run package goal and then the release file is created in target/releases.
 
     $ mvn package
+    $ mvn rpm:rpm   # .rpm package
+    $ mvn jdeb:jdeb # .deb package
 
 ### Generate Source Code
 
