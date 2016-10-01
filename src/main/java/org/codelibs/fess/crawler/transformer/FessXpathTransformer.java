@@ -347,8 +347,20 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String getCanonicalUrl(final ResponseData responseData, final Document document) {
         final String canonicalUrl = getSingleNodeValue(document, fessConfig.getCrawlerDocumentHtmlCannonicalXpath(), false);
-        if (StringUtil.isNotBlank(canonicalUrl)) {
-            return canonicalUrl;
+        if (StringUtil.isBlank(canonicalUrl)) {
+            return null;
+        }
+        if (canonicalUrl.startsWith("/")) {
+            return normalizeCanonicalUrl(responseData.getUrl(), canonicalUrl);
+        }
+        return canonicalUrl;
+    }
+
+    protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
+        try {
+            return new URL(new URL(baseUrl), canonicalUrl).toString();
+        } catch (MalformedURLException e) {
+            logger.warn("Invalid canonical url: " + baseUrl + " : " + canonicalUrl, e);
         }
         return null;
     }
