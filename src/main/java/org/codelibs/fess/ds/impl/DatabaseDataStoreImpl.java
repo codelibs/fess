@@ -109,7 +109,7 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
                 final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.putAll(defaultDataMap);
                 for (final Map.Entry<String, String> entry : scriptMap.entrySet()) {
-                    final Object convertValue = convertValue(entry.getValue(), rs, paramMap);
+                    final Object convertValue = convertValue(config, entry.getValue(), rs, paramMap);
                     if (convertValue != null) {
                         dataMap.put(entry.getKey(), convertValue);
                     }
@@ -189,15 +189,16 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    protected Object convertValue(final String template, final ResultSet rs, final Map<String, String> paramMap) {
-        return convertValue(template, new ResultSetParamMap(rs, paramMap));
+    protected Object convertValue(final DataConfig config, final String template, final ResultSet rs, final Map<String, String> paramMap) {
+        return convertValue(template, new ResultSetParamMap(config, rs, paramMap));
     }
 
     protected static class ResultSetParamMap implements Map<String, Object> {
         private final Map<String, Object> paramMap = new HashMap<>();
 
-        public ResultSetParamMap(final ResultSet resultSet, final Map<String, String> paramMap) {
+        public ResultSetParamMap(final DataConfig config, final ResultSet resultSet, final Map<String, String> paramMap) {
             this.paramMap.putAll(paramMap);
+            this.paramMap.put("crawlingConfig", config);
 
             try {
                 final ResultSetMetaData metaData = resultSet.getMetaData();

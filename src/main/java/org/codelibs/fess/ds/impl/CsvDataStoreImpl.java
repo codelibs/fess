@@ -194,6 +194,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 resultMap.putAll(paramMap);
                 resultMap.put("csvfile", csvFile.getAbsolutePath());
                 resultMap.put("csvfilename", csvFile.getName());
+                resultMap.put("crawlingConfig", dataConfig);
                 boolean foundValues = false;
                 for (int i = 0; i < list.size(); i++) {
                     String key = null;

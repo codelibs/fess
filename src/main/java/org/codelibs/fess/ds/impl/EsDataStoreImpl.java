@@ -162,6 +162,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
                     resultMap.put("version", Long.valueOf(hit.getVersion()));
                     resultMap.put("hit", hit);
                     resultMap.put("source", hit.getSource());
+                    resultMap.put("crawlingConfig", dataConfig);
 
                     if (logger.isDebugEnabled()) {
                         for (final Map.Entry<String, Object> entry : resultMap.entrySet()) {
