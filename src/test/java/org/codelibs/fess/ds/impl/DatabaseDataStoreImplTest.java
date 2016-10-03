@@ -31,7 +31,7 @@ public class DatabaseDataStoreImplTest extends UnitFessTestCase {
 
     public void test_convertValue() {
         String value;
-        final Map<String, String> paramMap = new HashMap<String, String>();
+        final Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("param1", "PARAM1");
         paramMap.put("param2", "PARAM2+");
         paramMap.put("param3", "PARAM3*");

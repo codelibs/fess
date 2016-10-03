@@ -15,8 +15,10 @@
  */
 package org.codelibs.fess.util;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +33,10 @@ public final class GroovyUtil {
         // nothing
     }
 
-    public static <T> Object evaluate(final String template, final Map<String, T> paramMap) {
-        final GroovyShell groovyShell = new GroovyShell(new Binding(paramMap));
+    public static Object evaluate(final String template, final Map<String, Object> paramMap) {
+        final Map<String, Object> bindingMap = new HashMap<>(paramMap);
+        bindingMap.put("container", SingletonLaContainerFactory.getContainer());
+        final GroovyShell groovyShell = new GroovyShell(new Binding(bindingMap));
         try {
             return groovyShell.evaluate(template);
         } catch (final Exception e) {
