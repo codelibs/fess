@@ -295,7 +295,7 @@ public class SystemHelper {
         ComponentUtil.getPathMappingHelper().init();
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();
-        // TODO restart jobs
+        ComponentUtil.getJobManager().reboot();
     }
 
 }
