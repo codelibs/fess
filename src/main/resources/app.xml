@@ -83,6 +83,7 @@
 					"filetype:mpga",
 					"filetype:mp4a",
 					"filetype:oga",
+					"filetype:ogg",
 					"filetype:wav",
 					"filetype:webp",
 					"filetype:bmp",
