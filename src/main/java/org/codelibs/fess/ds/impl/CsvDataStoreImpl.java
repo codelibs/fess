@@ -190,7 +190,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
             while ((list = csvReader.readValues()) != null && loop && alive) {
                 final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.putAll(defaultDataMap);
-                final Map<String, String> resultMap = new LinkedHashMap<>();
+                final Map<String, Object> resultMap = new LinkedHashMap<>();
                 resultMap.putAll(paramMap);
                 resultMap.put("csvfile", csvFile.getAbsolutePath());
                 resultMap.put("csvfilename", csvFile.getName());
@@ -219,7 +219,7 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                 }
 
                 if (logger.isDebugEnabled()) {
-                    for (final Map.Entry<String, String> entry : resultMap.entrySet()) {
+                    for (final Map.Entry<String, Object> entry : resultMap.entrySet()) {
                         logger.debug(entry.getKey() + "=" + entry.getValue());
                     }
                 }

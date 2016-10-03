@@ -20,14 +20,12 @@ import java.util.Map;
 
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.util.GroovyUtil;
-import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 
 public class GroovyExecutor extends JobExecutor {
 
     @Override
     public Object execute(final String script) {
         final Map<String, Object> params = new HashMap<>();
-        params.put("container", SingletonLaContainerFactory.getContainer());
         params.put("executor", this);
 
         return GroovyUtil.evaluate(script, params);

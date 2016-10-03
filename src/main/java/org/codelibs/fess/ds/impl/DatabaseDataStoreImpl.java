@@ -193,8 +193,8 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         return convertValue(template, new ResultSetParamMap(rs, paramMap));
     }
 
-    protected static class ResultSetParamMap implements Map<String, String> {
-        private final Map<String, String> paramMap = new HashMap<>();
+    protected static class ResultSetParamMap implements Map<String, Object> {
+        private final Map<String, Object> paramMap = new HashMap<>();
 
         public ResultSetParamMap(final ResultSet resultSet, final Map<String, String> paramMap) {
             this.paramMap.putAll(paramMap);
@@ -233,12 +233,12 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
 
         @Override
-        public Set<java.util.Map.Entry<String, String>> entrySet() {
+        public Set<java.util.Map.Entry<String, Object>> entrySet() {
             return paramMap.entrySet();
         }
 
         @Override
-        public String get(final Object key) {
+        public Object get(final Object key) {
             return paramMap.get(key);
         }
 
@@ -253,17 +253,17 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
 
         @Override
-        public String put(final String key, final String value) {
+        public Object put(final String key, final Object value) {
             return paramMap.put(key, value);
         }
 
         @Override
-        public void putAll(final Map<? extends String, ? extends String> m) {
+        public void putAll(final Map<? extends String, ? extends Object> m) {
             paramMap.putAll(m);
         }
 
         @Override
-        public String remove(final Object key) {
+        public Object remove(final Object key) {
             return paramMap.remove(key);
         }
 
@@ -273,7 +273,7 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
 
         @Override
-        public Collection<String> values() {
+        public Collection<Object> values() {
             return paramMap.values();
         }
 
