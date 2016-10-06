@@ -94,7 +94,9 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     @Override
     public void destroy() {
         if (webDriver != null) {
-            webDriver.quit();
+            synchronized (this) {
+                webDriver.quit();
+            }
         }
     }
 
@@ -121,10 +123,12 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
 
         if (webDriver instanceof TakesScreenshot) {
-            webDriver.get(url);
-            final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
-            convert(thumbnail, outputFile);
-            return true;
+            synchronized (this) {
+                webDriver.get(url);
+                final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
+                convert(thumbnail, outputFile);
+                return true;
+            }
         } else {
             logger.warn("WebDriver is not instance of TakesScreenshot: " + webDriver);
             return false;
