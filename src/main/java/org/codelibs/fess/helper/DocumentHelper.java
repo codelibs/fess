@@ -104,8 +104,8 @@ public class DocumentHelper {
         }
     }
 
-    public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String sessionId, final String url) {
-        if (StringUtil.isBlank(sessionId)) {
+    public Map<String, Object> processRequest(final CrawlingConfig crawlingConfig, final String crawlingInfoId, final String url) {
+        if (StringUtil.isBlank(crawlingInfoId)) {
             throw new CrawlingAccessException("sessionId is null.");
         }
 
@@ -124,7 +124,7 @@ public class DocumentHelper {
                 throw new ChildUrlsException(childUrlList, "Redirected from " + url);
             }
             responseData.setExecutionTime(System.currentTimeMillis() - startTime);
-            responseData.setSessionId(sessionId);
+            responseData.setSessionId(crawlingInfoId);
 
             final RuleManager ruleManager = SingletonLaContainer.getComponent(RuleManager.class);
             final Rule rule = ruleManager.getRule(responseData);

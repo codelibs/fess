@@ -16,6 +16,7 @@
 package org.codelibs.fess.util;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
@@ -42,7 +43,7 @@ public class ParameterUtil {
     }
 
     public static Map<String, String> parse(final String value) {
-        final Map<String, String> paramMap = new HashMap<>();
+        final Map<String, String> paramMap = new LinkedHashMap<>();
         if (value != null) {
             final String[] lines = value.split("[\r\n]");
             for (final String line : lines) {
@@ -74,13 +75,13 @@ public class ParameterUtil {
 
     public static Map<ConfigName, Map<String, String>> createConfigParameterMap(final String configParameters) {
         final Map<ConfigName, Map<String, String>> map = new HashMap<>();
-        final Map<String, String> configConfigMap = new HashMap<>();
-        final Map<String, String> clientConfigMap = new HashMap<>();
-        final Map<String, String> xpathConfigMap = new HashMap<>();
-        final Map<String, String> metaConfigMap = new HashMap<>();
-        final Map<String, String> valueConfigMap = new HashMap<>();
-        final Map<String, String> scriptConfigMap = new HashMap<>();
-        final Map<String, String> fieldConfigMap = new HashMap<>();
+        final Map<String, String> configConfigMap = new LinkedHashMap<>();
+        final Map<String, String> clientConfigMap = new LinkedHashMap<>();
+        final Map<String, String> xpathConfigMap = new LinkedHashMap<>();
+        final Map<String, String> metaConfigMap = new LinkedHashMap<>();
+        final Map<String, String> valueConfigMap = new LinkedHashMap<>();
+        final Map<String, String> scriptConfigMap = new LinkedHashMap<>();
+        final Map<String, String> fieldConfigMap = new LinkedHashMap<>();
         map.put(ConfigName.CONFIG, configConfigMap);
         map.put(ConfigName.CLIENT, clientConfigMap);
         map.put(ConfigName.XPATH, xpathConfigMap);
