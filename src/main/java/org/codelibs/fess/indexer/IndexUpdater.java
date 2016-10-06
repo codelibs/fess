@@ -16,7 +16,6 @@
 package org.codelibs.fess.indexer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -99,8 +98,6 @@ public class IndexUpdater extends Thread {
     protected List<String> finishedSessionIdList = new ArrayList<>();
 
     private final List<DocBoostMatcher> docBoostMatcherList = new ArrayList<>();
-
-    private final Map<String, Object> docValueMap = new HashMap<>();
 
     private List<Crawler> crawlerList;
 
@@ -415,15 +412,6 @@ public class IndexUpdater extends Thread {
             addFavoriteCountField(map);
         }
 
-        // default values
-        for (final Map.Entry<String, Object> entry : docValueMap.entrySet()) {
-            final String key = entry.getKey();
-            final Object obj = map.get(key);
-            if (obj == null) {
-                map.put(key, entry.getValue());
-            }
-        }
-
         float documentBoost = 0.0f;
         for (final DocBoostMatcher docBoostMatcher : docBoostMatcherList) {
             if (docBoostMatcher.match(map)) {
@@ -598,10 +586,6 @@ public class IndexUpdater extends Thread {
 
     public void addDocBoostMatcher(final DocBoostMatcher rule) {
         docBoostMatcherList.add(rule);
-    }
-
-    public void addDefaultDocValue(final String fieldName, final Object value) {
-        docValueMap.put(fieldName, value);
     }
 
     public void setCrawlerList(final List<Crawler> crawlerList) {
