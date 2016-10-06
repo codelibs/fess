@@ -225,6 +225,9 @@ public class CsvDataStoreImpl extends AbstractDataStoreImpl {
                     }
                 }
 
+                final Map<String, Object> crawlingContext = new HashMap<>();
+                crawlingContext.put("doc", dataMap);
+                resultMap.put("crawlingContext", crawlingContext);
                 for (final Map.Entry<String, String> entry : scriptMap.entrySet()) {
                     final Object convertValue = convertValue(entry.getValue(), resultMap);
                     if (convertValue != null) {

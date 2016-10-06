@@ -108,8 +108,11 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
             while (rs.next() && loop && alive) {
                 final Map<String, Object> dataMap = new HashMap<>();
                 dataMap.putAll(defaultDataMap);
+                final Map<String, Object> crawlingContext = new HashMap<>();
+                crawlingContext.put("doc", dataMap);
                 for (final Map.Entry<String, String> entry : scriptMap.entrySet()) {
-                    final Object convertValue = convertValue(config, entry.getValue(), rs, paramMap);
+                    final Object convertValue =
+                            convertValue(entry.getValue(), new ResultSetParamMap(config, crawlingContext, rs, paramMap));
                     if (convertValue != null) {
                         dataMap.put(entry.getKey(), convertValue);
                     }
@@ -189,16 +192,14 @@ public class DatabaseDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    protected Object convertValue(final DataConfig config, final String template, final ResultSet rs, final Map<String, String> paramMap) {
-        return convertValue(template, new ResultSetParamMap(config, rs, paramMap));
-    }
-
     protected static class ResultSetParamMap implements Map<String, Object> {
         private final Map<String, Object> paramMap = new HashMap<>();
 
-        public ResultSetParamMap(final DataConfig config, final ResultSet resultSet, final Map<String, String> paramMap) {
+        public ResultSetParamMap(final DataConfig config, final Map<String, Object> crawlingContext, final ResultSet resultSet,
+                final Map<String, String> paramMap) {
             this.paramMap.putAll(paramMap);
             this.paramMap.put("crawlingConfig", config);
+            this.paramMap.put("crawlingContext", crawlingContext);
 
             try {
                 final ResultSetMetaData metaData = resultSet.getMetaData();

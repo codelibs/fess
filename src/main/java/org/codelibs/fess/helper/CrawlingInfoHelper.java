@@ -125,11 +125,13 @@ public class CrawlingInfoHelper {
     }
 
     public Date getDocumentExpires(final CrawlingConfig config) {
-        final Integer timeToLive = config.getTimeToLive();
-        if (timeToLive != null) {
-            // timeToLive minutes
-            final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-            return new Date(now + timeToLive.longValue() * 1000 * 60);
+        if (config != null) {
+            final Integer timeToLive = config.getTimeToLive();
+            if (timeToLive != null) {
+                // timeToLive minutes
+                final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
+                return new Date(now + timeToLive.longValue() * 1000 * 60);
+            }
         }
         return documentExpires != null ? new Date(documentExpires) : null;
     }
