@@ -22,8 +22,8 @@ public class ScheduledJobException extends FessSystemException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param message
-     * @param cause
+     * @param message Exception message.
+     * @param cause Root cause for this exception.
      */
     public ScheduledJobException(final String message, final Throwable cause) {
         super(message, cause);
@@ -31,7 +31,7 @@ public class ScheduledJobException extends FessSystemException {
     }
 
     /**
-     * @param message
+     * @param message Exception message.
      */
     public ScheduledJobException(final String message) {
         super(message);

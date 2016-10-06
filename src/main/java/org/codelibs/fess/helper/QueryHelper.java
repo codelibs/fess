@@ -736,8 +736,8 @@ public class QueryHelper {
     /**
      * @param sortFields the sortFields to set
      */
-    public void setSortFields(final String[] supportedSortFields) {
-        this.sortFields = supportedSortFields;
+    public void setSortFields(final String[] sortFields) {
+        this.sortFields = sortFields;
     }
 
     public void addHighlightField(final String field) {
