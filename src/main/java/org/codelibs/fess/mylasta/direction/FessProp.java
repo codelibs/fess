@@ -18,6 +18,7 @@ package org.codelibs.fess.mylasta.direction;
 import static org.codelibs.core.stream.StreamUtil.split;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1321,5 +1322,85 @@ public interface FessProp {
             propMap.put(CRAWLER_DOCUMENT_SPACE_CHARS, spaceChars);
         }
         return spaceChars;
+    }
+
+    String getQueryAdditionalResponseFields();
+
+    public default String[] getQueryAdditionalResponseFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalResponseFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalCacheResponseFields();
+
+    public default String[] getQueryAdditionalCacheResponseFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalCacheResponseFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalHighlightedFields();
+
+    public default String[] getQueryAdditionalHighlightedFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalHighlightedFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalSearchFields();
+
+    public default String[] getQueryAdditionalSearchFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalSearchFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalFacetFields();
+
+    public default String[] getQueryAdditionalFacetFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalFacetFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalSortFields();
+
+    public default String[] getQueryAdditionalSortFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalSortFields(), ",")
+                .of(stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalApiResponseFields();
+
+    public default String[] getQueryAdditionalApiResponseFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalApiResponseFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
+    }
+
+    String getQueryAdditionalNotAnalyzedFields();
+
+    public default String[] getQueryAdditionalNotAnalyzedFields(String... fields) {
+        final List<String> list = new ArrayList<>(fields.length + 10);
+        stream(fields).of(stream -> stream.forEach(list::add));
+        split(getQueryAdditionalNotAnalyzedFields(), ",").of(
+                stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
+        return list.toArray(new String[list.size()]);
     }
 }
