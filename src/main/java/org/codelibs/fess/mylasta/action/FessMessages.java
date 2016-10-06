@@ -320,6 +320,9 @@ public class FessMessages extends FessLabels {
     /** The key of the message: Invalid header: {0} */
     public static final String ERRORS_invalid_header_for_request_file = "{errors.invalid_header_for_request_file}";
 
+    /** The key of the message: Could not delete logged in user. */
+    public static final String ERRORS_could_not_delete_logged_in_user = "{errors.could_not_delete_logged_in_user}";
+
     /** The key of the message: The given query has unknown condition. */
     public static final String ERRORS_invalid_query_unknown = "{errors.invalid_query_unknown}";
 
@@ -1866,6 +1869,20 @@ public class FessMessages extends FessLabels {
     public FessMessages addErrorsInvalidHeaderForRequestFile(String property, String arg0) {
         assertPropertyNotNull(property);
         add(property, new UserMessage(ERRORS_invalid_header_for_request_file, arg0));
+        return this;
+    }
+
+    /**
+     * Add the created action message for the key 'errors.could_not_delete_logged_in_user' with parameters.
+     * <pre>
+     * message: Could not delete logged in user.
+     * </pre>
+     * @param property The property name for the message. (NotNull)
+     * @return this. (NotNull)
+     */
+    public FessMessages addErrorsCouldNotDeleteLoggedInUser(String property) {
+        assertPropertyNotNull(property);
+        add(property, new UserMessage(ERRORS_could_not_delete_logged_in_user));
         return this;
     }
 
