@@ -23,12 +23,16 @@
 			<arg>"EsListDataStore"</arg>
 			<arg>esListDataStore</arg>
 		</postConstruct>
+		<postConstruct name="add">
+			<arg>"GitBucketDataStore"</arg>
+			<arg>gitBucketDataStore</arg>
+		</postConstruct>
 	</component>
 
 	<component name="databaseDataStore" class="org.codelibs.fess.ds.impl.DatabaseDataStoreImpl">
 	</component>
 	<component name="csvDataStore" class="org.codelibs.fess.ds.impl.CsvDataStoreImpl">
-		<!-- 
+		<!--
 		<property name="csvFileSuffixs">new String[] { ".csv", ".tsv" }</property>
 		 -->
 	</component>
@@ -37,6 +41,8 @@
 	<component name="esDataStore" class="org.codelibs.fess.ds.impl.EsDataStoreImpl">
 	</component>
 	<component name="esListDataStore" class="org.codelibs.fess.ds.impl.EsListDataStoreImpl">
+	</component>
+	<component name="gitBucketDataStore" class="org.codelibs.fess.ds.impl.GitBucketDataStoreImpl">
 	</component>
 
 	<component name="indexUpdateCallback" class="org.codelibs.fess.ds.impl.IndexUpdateCallbackImpl" instance="prototype">
