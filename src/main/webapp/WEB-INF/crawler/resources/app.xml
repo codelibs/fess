@@ -42,10 +42,6 @@
 				</component>
 			</arg>
 		</postConstruct>
-		<postConstruct name="addDefaultDocValue">
-			<arg>"FieldName"</arg>
-			<arg>"VALUE"</arg>
-		</postConstruct>
 		 -->
 	</component>
 	<component name="fileTypeHelper" class="org.codelibs.fess.helper.FileTypeHelper">

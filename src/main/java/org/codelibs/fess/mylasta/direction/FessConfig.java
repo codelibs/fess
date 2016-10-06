@@ -416,6 +416,30 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
     /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_RESPONSE_FIELDS = "query.additional.response.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_API_RESPONSE_FIELDS = "query.additional.api.response.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS = "query.additional.cache.response.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_HIGHLIGHTED_FIELDS = "query.additional.highlighted.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_SEARCH_FIELDS = "query.additional.search.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_FACET_FIELDS = "query.additional.facet.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_SORT_FIELDS = "query.additional.sort.fields";
+
+    /** The key of the configuration. e.g.  */
+    String QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS = "query.additional.not.analyzed.fields";
+
+    /** The key of the configuration. e.g.  */
     String QUERY_DEFAULT_LANGUAGES = "query.default.languages";
 
     /** The key of the configuration. e.g. ar=ar
@@ -2205,6 +2229,126 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryReplaceTermWithPrefixQuery();
+
+    /**
+     * Get the value for the key 'query.additional.response.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalResponseFields();
+
+    /**
+     * Get the value for the key 'query.additional.response.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalResponseFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.api.response.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalApiResponseFields();
+
+    /**
+     * Get the value for the key 'query.additional.api.response.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalApiResponseFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.cache.response.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalCacheResponseFields();
+
+    /**
+     * Get the value for the key 'query.additional.cache.response.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalCacheResponseFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.highlighted.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalHighlightedFields();
+
+    /**
+     * Get the value for the key 'query.additional.highlighted.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalHighlightedFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.search.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalSearchFields();
+
+    /**
+     * Get the value for the key 'query.additional.search.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalSearchFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.facet.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalFacetFields();
+
+    /**
+     * Get the value for the key 'query.additional.facet.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalFacetFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.sort.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalSortFields();
+
+    /**
+     * Get the value for the key 'query.additional.sort.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalSortFieldsAsInteger();
+
+    /**
+     * Get the value for the key 'query.additional.not.analyzed.fields'. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryAdditionalNotAnalyzedFields();
+
+    /**
+     * Get the value for the key 'query.additional.not.analyzed.fields' as {@link Integer}. <br>
+     * The value is, e.g.  <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryAdditionalNotAnalyzedFieldsAsInteger();
 
     /**
      * Get the value for the key 'query.default.languages'. <br>
@@ -4782,6 +4926,70 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isQueryReplaceTermWithPrefixQuery() {
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
+        }
+
+        public String getQueryAdditionalResponseFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS);
+        }
+
+        public Integer getQueryAdditionalResponseFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_RESPONSE_FIELDS);
+        }
+
+        public String getQueryAdditionalApiResponseFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS);
+        }
+
+        public Integer getQueryAdditionalApiResponseFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_API_RESPONSE_FIELDS);
+        }
+
+        public String getQueryAdditionalCacheResponseFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS);
+        }
+
+        public Integer getQueryAdditionalCacheResponseFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_CACHE_RESPONSE_FIELDS);
+        }
+
+        public String getQueryAdditionalHighlightedFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_HIGHLIGHTED_FIELDS);
+        }
+
+        public Integer getQueryAdditionalHighlightedFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_HIGHLIGHTED_FIELDS);
+        }
+
+        public String getQueryAdditionalSearchFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_SEARCH_FIELDS);
+        }
+
+        public Integer getQueryAdditionalSearchFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_SEARCH_FIELDS);
+        }
+
+        public String getQueryAdditionalFacetFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_FACET_FIELDS);
+        }
+
+        public Integer getQueryAdditionalFacetFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_FACET_FIELDS);
+        }
+
+        public String getQueryAdditionalSortFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_SORT_FIELDS);
+        }
+
+        public Integer getQueryAdditionalSortFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_SORT_FIELDS);
+        }
+
+        public String getQueryAdditionalNotAnalyzedFields() {
+            return get(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS);
+        }
+
+        public Integer getQueryAdditionalNotAnalyzedFieldsAsInteger() {
+            return getAsInteger(FessConfig.QUERY_ADDITIONAL_NOT_ANALYZED_FIELDS);
         }
 
         public String getQueryDefaultLanguages() {

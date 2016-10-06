@@ -99,8 +99,6 @@ public class QueryHelper {
 
     protected String[] cacheResponseFields;
 
-    protected String[] responseDocValuesFields;
-
     protected String[] highlightedFields;
 
     protected String[] searchFields;
@@ -109,7 +107,7 @@ public class QueryHelper {
 
     protected String sortPrefix = "sort:";
 
-    protected String[] supportedSortFields;
+    protected String[] sortFields;
 
     protected int highlightFragmentSize = 100;
 
@@ -138,7 +136,8 @@ public class QueryHelper {
     @PostConstruct
     public void init() {
         if (responseFields == null) {
-            responseFields = new String[] { SCORE_FIELD, //
+            responseFields = fessConfig.getQueryAdditionalResponseFields(//
+                    SCORE_FIELD, //
                     fessConfig.getIndexFieldId(), //
                     fessConfig.getIndexFieldDocId(), //
                     fessConfig.getIndexFieldBoost(), //
@@ -158,10 +157,11 @@ public class QueryHelper {
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldConfigId(), //
                     fessConfig.getIndexFieldLang(), //
-                    fessConfig.getIndexFieldHasCache() };
+                    fessConfig.getIndexFieldHasCache());
         }
         if (cacheResponseFields == null) {
-            cacheResponseFields = new String[] { SCORE_FIELD, //
+            cacheResponseFields = fessConfig.getQueryAdditionalCacheResponseFields(//
+                    SCORE_FIELD, //
                     fessConfig.getIndexFieldId(), //
                     fessConfig.getIndexFieldDocId(), //
                     fessConfig.getIndexFieldBoost(), //
@@ -181,18 +181,14 @@ public class QueryHelper {
                     fessConfig.getIndexFieldFavoriteCount(), //
                     fessConfig.getIndexFieldConfigId(), //
                     fessConfig.getIndexFieldLang(), //
-                    fessConfig.getIndexFieldCache() };
-        }
-        if (responseDocValuesFields == null) {
-            responseDocValuesFields = new String[] {//
-                    fessConfig.getIndexFieldClickCount(), //
-                            fessConfig.getIndexFieldFavoriteCount() };
+                    fessConfig.getIndexFieldCache());
         }
         if (highlightedFields == null) {
-            highlightedFields = new String[] { fessConfig.getIndexFieldContent() };
+            highlightedFields = fessConfig.getQueryAdditionalHighlightedFields(fessConfig.getIndexFieldContent());
         }
         if (searchFields == null) {
-            searchFields = new String[] { INURL_FIELD, //
+            searchFields = fessConfig.getQueryAdditionalSearchFields(//
+                    INURL_FIELD, //
                     fessConfig.getIndexFieldUrl(), //
                     fessConfig.getIndexFieldDocId(), //
                     fessConfig.getIndexFieldHost(), //
@@ -208,35 +204,36 @@ public class QueryHelper {
                     fessConfig.getIndexFieldSegment(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldFavoriteCount(), //
-                    fessConfig.getIndexFieldLang() };
+                    fessConfig.getIndexFieldLang());
         }
         if (facetFields == null) {
-            facetFields = new String[] {//
+            facetFields = fessConfig.getQueryAdditionalFacetFields(//
                     fessConfig.getIndexFieldUrl(), //
-                            fessConfig.getIndexFieldHost(), //
-                            fessConfig.getIndexFieldTitle(), //
-                            fessConfig.getIndexFieldContent(), //
-                            fessConfig.getIndexFieldContentLength(), //
-                            fessConfig.getIndexFieldLastModified(), //
-                            fessConfig.getIndexFieldTimestamp(), //
-                            fessConfig.getIndexFieldMimetype(), //
-                            fessConfig.getIndexFieldFiletype(), //
-                            fessConfig.getIndexFieldLabel(), //
-                            fessConfig.getIndexFieldSegment() };
+                    fessConfig.getIndexFieldHost(), //
+                    fessConfig.getIndexFieldTitle(), //
+                    fessConfig.getIndexFieldContent(), //
+                    fessConfig.getIndexFieldContentLength(), //
+                    fessConfig.getIndexFieldLastModified(), //
+                    fessConfig.getIndexFieldTimestamp(), //
+                    fessConfig.getIndexFieldMimetype(), //
+                    fessConfig.getIndexFieldFiletype(), //
+                    fessConfig.getIndexFieldLabel(), //
+                    fessConfig.getIndexFieldSegment());
         }
-        if (supportedSortFields == null) {
-            supportedSortFields = new String[] { SCORE_SORT_VALUE, //
+        if (sortFields == null) {
+            sortFields = fessConfig.getQueryAdditionalSortFields(//
+                    SCORE_SORT_VALUE, //
                     fessConfig.getIndexFieldFilename(), //
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldContentLength(), //
                     fessConfig.getIndexFieldLastModified(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldClickCount(), //
-                    fessConfig.getIndexFieldFavoriteCount() };
+                    fessConfig.getIndexFieldFavoriteCount());
         }
         if (apiResponseFieldSet == null) {
-            setApiResponseFields(new String[] {//
-            fessConfig.getResponseFieldContentDescription(), //
+            setApiResponseFields(fessConfig.getQueryAdditionalApiResponseFields(//
+                    fessConfig.getResponseFieldContentDescription(), //
                     fessConfig.getResponseFieldContentTitle(), //
                     fessConfig.getResponseFieldSitePath(), //
                     fessConfig.getResponseFieldUrlLink(), //
@@ -254,11 +251,11 @@ public class QueryHelper {
                     fessConfig.getIndexFieldCreated(), //
                     fessConfig.getIndexFieldTitle(), //
                     fessConfig.getIndexFieldDigest(), //
-                    fessConfig.getIndexFieldUrl() });
+                    fessConfig.getIndexFieldUrl()));
         }
         if (notAnalyzedFieldSet == null) {
-            setNotAnalyzedFields(new String[] {//
-            fessConfig.getIndexFieldAnchor(), //
+            setNotAnalyzedFields(fessConfig.getQueryAdditionalNotAnalyzedFields(//
+                    fessConfig.getIndexFieldAnchor(), //
                     fessConfig.getIndexFieldBoost(), //
                     fessConfig.getIndexFieldClickCount(), //
                     fessConfig.getIndexFieldConfigId(), //
@@ -282,7 +279,7 @@ public class QueryHelper {
                     fessConfig.getIndexFieldSite(), //
                     fessConfig.getIndexFieldTimestamp(), //
                     fessConfig.getIndexFieldUrl(), //
-                    fessConfig.getIndexFieldVersion() });
+                    fessConfig.getIndexFieldVersion()));
         }
     }
 
@@ -603,7 +600,7 @@ public class QueryHelper {
     }
 
     private boolean isSortField(final String field) {
-        for (final String f : supportedSortFields) {
+        for (final String f : sortFields) {
             if (f.equals(field)) {
                 return true;
             }
@@ -668,14 +665,6 @@ public class QueryHelper {
         this.cacheResponseFields = cacheResponseFields;
     }
 
-    public String[] getResponseDocValuesFields() {
-        return responseDocValuesFields;
-    }
-
-    public void setResponseDocValuesFields(final String[] responseDocValuesFields) {
-        this.responseDocValuesFields = responseDocValuesFields;
-    }
-
     /**
      * @return the highlightedFields
      */
@@ -738,17 +727,17 @@ public class QueryHelper {
     }
 
     /**
-     * @return the supportedSortFields
+     * @return the sortFields
      */
-    public String[] getSupportedSortFields() {
-        return supportedSortFields;
+    public String[] getSortFields() {
+        return sortFields;
     }
 
     /**
-     * @param supportedSortFields the supportedSortFields to set
+     * @param sortFields the sortFields to set
      */
-    public void setSupportedSortFields(final String[] supportedSortFields) {
-        this.supportedSortFields = supportedSortFields;
+    public void setSortFields(final String[] supportedSortFields) {
+        this.sortFields = supportedSortFields;
     }
 
     public void addHighlightField(final String field) {
