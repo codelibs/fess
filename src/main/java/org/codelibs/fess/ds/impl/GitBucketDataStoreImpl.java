@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.ds.IndexUpdateCallback;
@@ -75,7 +76,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.warn("Failed to access to " + repository, e);
             }
         }
 
@@ -89,14 +90,14 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             }
             return url;
         }
-        return "";
+        return StringUtil.EMPTY;
     }
 
     protected String getAuthToken(final Map<String, String> paramMap) {
         if (paramMap.containsKey(TOKEN_PARAM)) {
             return paramMap.get(TOKEN_PARAM);
         }
-        return "";
+        return StringUtil.EMPTY;
     }
 
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
@@ -108,7 +109,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final List<Map<String, Object>> repoList = (List<Map<String, Object>>) map.get("repositories");
             return repoList;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Failed to access to " + rootURL, e);
             return Collections.emptyList();
         }
     }
@@ -129,7 +130,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         try (CurlResponse curlResponse = Curl.get(url).param("raw", "true").header("Authorization", "token " + authToken).execute()) {
             logger.info("Get a content from " + url);
-            // TODO Check mimetype
+            // TODO Use DoucmentHelper#processRequest and scriptMap
             final Map<String, Object> dataMap = new HashMap<>();
             dataMap.putAll(defaultDataMap);
             dataMap.put("title", owner + "/" + name + " : " + filename);
@@ -140,7 +141,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             callback.store(paramMap, dataMap);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            // TODO CrawlingAccessException?
+            logger.warn("Failed to parse " + url, e);
         }
         return;
     }
@@ -175,7 +177,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Failed to access to " + url, e);
         }
         return resultList;
     }
