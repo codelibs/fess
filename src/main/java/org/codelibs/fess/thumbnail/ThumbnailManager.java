@@ -222,6 +222,9 @@ public class ThumbnailManager {
     }
 
     public long purge(final long expiry) {
+        if (!baseDir.exists()) {
+            return 0;
+        }
         try {
             final FilePurgeVisitor visitor = new FilePurgeVisitor(expiry);
             Files.walkFileTree(baseDir.toPath(), visitor);
