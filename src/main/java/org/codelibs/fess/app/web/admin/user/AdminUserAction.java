@@ -236,10 +236,10 @@ public class AdminUserAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         getUserBean().ifPresent(u -> {
             if (u.getFessUser() instanceof User && form.name.equals(u.getUserId())) {
-                throwValidationError(messages -> messages.addErrorsCouldNotDeleteLoggedInUser(GLOBAL), () -> asEditHtml());
+                throwValidationError(messages -> messages.addErrorsCouldNotDeleteLoggedInUser(GLOBAL), () -> asDetailsHtml());
             }
         });
-        verifyToken(() -> asEditHtml());
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         userService
                 .getUser(id)
