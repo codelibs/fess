@@ -89,6 +89,10 @@ public class FessUserBean extends TypicalUserBean<String> { // #change_it also L
                 stream -> stream.anyMatch(s1 -> stream(acceptedGroups).get(s3 -> s3.anyMatch(s2 -> s2.equals(s1)))));
     }
 
+    public FessUser getFessUser() {
+        return user;
+    }
+
     public static FessUserBean empty() {
         return new FessUserBean(null) {
             private static final long serialVersionUID = 1L;

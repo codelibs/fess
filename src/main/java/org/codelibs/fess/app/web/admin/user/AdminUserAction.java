@@ -234,6 +234,12 @@ public class AdminUserAction extends FessAdminAction {
     public HtmlResponse delete(final EditForm form) {
         verifyCrudMode(form.crudMode, CrudMode.DETAILS);
         validate(form, messages -> {}, () -> asDetailsHtml());
+        getUserBean().ifPresent(u -> {
+            if (u.getFessUser() instanceof User && form.name.equals(u.getUserId())) {
+                throwValidationError(messages -> messages.addErrorsCouldNotDeleteLoggedInUser(GLOBAL), () -> asDetailsHtml());
+            }
+        });
+        verifyToken(() -> asDetailsHtml());
         final String id = form.id;
         userService
                 .getUser(id)
