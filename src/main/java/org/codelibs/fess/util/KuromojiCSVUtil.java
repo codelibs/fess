@@ -114,6 +114,9 @@ public final class KuromojiCSVUtil {
 
     /**
      * Quote and escape input value for CSV
+     * 
+     * @param original Original text.
+     * @return Escaped text.
      */
     public static String quoteEscape(final String original) {
         String result = original;
