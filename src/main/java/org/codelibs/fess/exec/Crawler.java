@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Resource;
 
@@ -63,6 +64,8 @@ public class Crawler {
     private static final String WEB_FS_CRAWLING_PROCESS = "WebFsCrawler";
 
     private static final String DATA_CRAWLING_PROCESS = "DataStoreCrawler";
+
+    private static AtomicBoolean running = new AtomicBoolean(false);
 
     @Resource
     protected FessEsClient fessEsClient;
@@ -182,6 +185,7 @@ public class Crawler {
 
         int exitCode;
         try {
+            running.set(true);
             SingletonLaContainerFactory.setConfigPath("app.xml");
             SingletonLaContainerFactory.setExternalContext(new GenericExternalContext());
             SingletonLaContainerFactory.setExternalContextComponentDefRegister(new GenericExternalContextComponentDefRegister());
@@ -190,9 +194,6 @@ public class Crawler {
             final Thread shutdownCallback = new Thread("ShutdownHook") {
                 @Override
                 public void run() {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Destroying LaContainer..");
-                    }
                     destroyContainer();
                 }
 
@@ -220,8 +221,12 @@ public class Crawler {
     }
 
     private static void destroyContainer() {
-        synchronized (SingletonLaContainerFactory.class) {
+        if (running.getAndSet(false)) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Destroying LaContainer...");
+            }
             SingletonLaContainerFactory.destroy();
+            logger.info("Destroyed LaContainer.");
         }
     }
 
