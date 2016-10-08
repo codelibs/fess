@@ -35,6 +35,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -147,6 +148,11 @@ public class SuggestApiManager extends BaseApiManager {
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a suggest request.", e);
+            }
+            if (e instanceof InvalidAccessTokenException) {
+                final InvalidAccessTokenException iate = (InvalidAccessTokenException) e;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setHeader("WWW-Authenticate", "Bearer error=\"" + iate.getType() + "\"");
             }
         }
 

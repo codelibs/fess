@@ -85,6 +85,8 @@ public class AccessTokenDbm extends AbstractDBMeta {
                 "permissions");
         setupEpg(_epgMap, et -> ((AccessToken) et).getParameterName(),
                 (et, vl) -> ((AccessToken) et).setParameterName(DfTypeUtil.toString(vl)), "parameterName");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getExpiredTime(), (et, vl) -> ((AccessToken) et).setExpiredTime(DfTypeUtil.toLong(vl)),
+                "expiredTime");
         setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedBy(), (et, vl) -> ((AccessToken) et).setCreatedBy(DfTypeUtil.toString(vl)),
                 "createdBy");
         setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedTime(), (et, vl) -> ((AccessToken) et).setCreatedTime(DfTypeUtil.toLong(vl)),
@@ -137,6 +139,8 @@ public class AccessTokenDbm extends AbstractDBMeta {
             false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnParameterName = cci("parameter_name", "parameter_name", null, null, String.class, "parameterName",
             null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnExpiredTime = cci("expiredTime", "expiredTime", null, null, Long.class, "expiredTime", null, false,
+            false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
@@ -162,6 +166,10 @@ public class AccessTokenDbm extends AbstractDBMeta {
         return _columnParameterName;
     }
 
+    public ColumnInfo columnExpiredTime() {
+        return _columnExpiredTime;
+    }
+
     public ColumnInfo columnCreatedBy() {
         return _columnCreatedBy;
     }
@@ -184,6 +192,7 @@ public class AccessTokenDbm extends AbstractDBMeta {
         ls.add(columnToken());
         ls.add(columnPermissions());
         ls.add(columnParameterName());
+        ls.add(columnExpiredTime());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
         ls.add(columnUpdatedBy());

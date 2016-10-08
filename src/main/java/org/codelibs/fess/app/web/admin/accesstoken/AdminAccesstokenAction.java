@@ -15,14 +15,22 @@
  */
 package org.codelibs.fess.app.web.admin.accesstoken;
 
+import static org.codelibs.core.stream.StreamUtil.split;
+import static org.codelibs.core.stream.StreamUtil.stream;
+
+import java.util.stream.Collectors;
+
 import javax.annotation.Resource;
 
+import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.pager.AccessTokenPager;
 import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.config.exentity.AccessToken;
+import org.codelibs.fess.helper.PermissionHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -35,6 +43,12 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
  * @author shinsuke
  */
 public class AdminAccesstokenAction extends FessAdminAction {
+
+    private static final String TOKEN = "token";
+
+    private static final String EXPIRES = "expires";
+
+    private static final String EXPIRED_TIME = "expiredTime";
 
     // ===================================================================================
     //                                                                           Attribute
@@ -120,18 +134,61 @@ public class AdminAccesstokenAction extends FessAdminAction {
     public HtmlResponse details(final int crudMode, final String id) {
         verifyCrudMode(crudMode, CrudMode.DETAILS);
         saveToken();
-        return asDetailsHtml().useForm(EditForm.class, op -> {
-            op.setup(form -> {
-                accessTokenService.getAccessToken(id).ifPresent(entity -> {
-                    copyBeanToBean(entity, form, copyOp -> {
-                        copyOp.excludeNull();
+        return asDetailsHtml().useForm(
+                EditForm.class,
+                op -> {
+                    op.setup(form -> {
+                        accessTokenService
+                                .getAccessToken(id)
+                                .ifPresent(
+                                        entity -> {
+                                            copyBeanToBean(entity, form, copyOp -> copyOp.exclude(Constants.PERMISSIONS, EXPIRED_TIME)
+                                                    .excludeNull().dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
+                                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                                            form.permissions =
+                                                    stream(entity.getPermissions()).get(
+                                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank)
+                                                                    .distinct().collect(Collectors.joining("\n")));
+                                            form.crudMode = crudMode;
+                                        })
+                                .orElse(() -> {
+                                    throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id),
+                                            () -> asListHtml());
+                                });
                     });
-                    form.crudMode = crudMode;
-                }).orElse(() -> {
+                });
+    }
+
+    @Execute
+    public HtmlResponse edit(final EditForm form) {
+        validate(form, messages -> {}, () -> asListHtml());
+        final String id = form.id;
+        accessTokenService
+                .getAccessToken(id)
+                .ifPresent(
+                        entity -> {
+                            copyBeanToBean(
+                                    entity,
+                                    form,
+                                    op -> op.exclude(Constants.PERMISSIONS, EXPIRED_TIME).dateConverter(Constants.DEFAULT_DATETIME_FORMAT,
+                                            EXPIRES));
+                            final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                            form.permissions =
+                                    stream(entity.getPermissions()).get(
+                                            stream -> stream.map(permissionHelper::decode).filter(StringUtil::isNotBlank).distinct()
+                                                    .collect(Collectors.joining("\n")));
+                        }).orElse(() -> {
                     throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, id), () -> asListHtml());
                 });
-            });
-        });
+        saveToken();
+        if (form.crudMode.intValue() == CrudMode.EDIT) {
+            // back
+            form.crudMode = CrudMode.DETAILS;
+            return asDetailsHtml();
+        } else {
+            form.crudMode = CrudMode.EDIT;
+            return asEditHtml();
+        }
     }
 
     // -----------------------------------------------------
@@ -154,6 +211,26 @@ public class AdminAccesstokenAction extends FessAdminAction {
                     }
                 }).orElse(() -> {
             throwValidationError(messages -> messages.addErrorsCrudFailedToCreateInstance(GLOBAL), () -> asEditHtml());
+        });
+        return redirect(getClass());
+    }
+
+    @Execute
+    public HtmlResponse update(final EditForm form) {
+        verifyCrudMode(form.crudMode, CrudMode.EDIT);
+        validate(form, messages -> {}, () -> asEditHtml());
+        verifyToken(() -> asEditHtml());
+        getAccessToken(form).ifPresent(
+                entity -> {
+                    try {
+                        accessTokenService.store(entity);
+                        saveInfo(messages -> messages.addSuccessCrudUpdateCrudTable(GLOBAL));
+                    } catch (final Exception e) {
+                        throwValidationError(messages -> messages.addErrorsCrudFailedToUpdateCrudTable(GLOBAL, buildThrowableMessage(e)),
+                                () -> asEditHtml());
+                    }
+                }).orElse(() -> {
+            throwValidationError(messages -> messages.addErrorsCrudCouldNotFindCrudTable(GLOBAL, form.id), () -> asEditHtml());
         });
         return redirect(getClass());
     }
@@ -208,12 +285,19 @@ public class AdminAccesstokenAction extends FessAdminAction {
     protected OptionalEntity<AccessToken> getAccessToken(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
-        return getEntity(form, username, currentTime).map(entity -> {
-            entity.setUpdatedBy(username);
-            entity.setUpdatedTime(currentTime);
-            copyBeanToBean(form, entity, op -> op.exclude(Constants.COMMON_CONVERSION_RULE));
-            return entity;
-        });
+        return getEntity(form, username, currentTime).map(
+                entity -> {
+                    entity.setUpdatedBy(username);
+                    entity.setUpdatedTime(currentTime);
+                    copyBeanToBean(form, entity,
+                            op -> op.exclude(Constants.COMMON_CONVERSION_RULE).exclude(TOKEN, Constants.PERMISSIONS, EXPIRED_TIME)
+                                    .dateConverter(Constants.DEFAULT_DATETIME_FORMAT, EXPIRES));
+                    final PermissionHelper permissionHelper = ComponentUtil.getPermissionHelper();
+                    entity.setPermissions(split(form.permissions, "\n").get(
+                            stream -> stream.map(s -> permissionHelper.encode(s)).filter(StringUtil::isNotBlank).distinct()
+                                    .toArray(n -> new String[n])));
+                    return entity;
+                });
     }
 
     // ===================================================================================

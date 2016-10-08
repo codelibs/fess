@@ -45,6 +45,7 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -62,6 +63,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.script.Script;
 import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -536,6 +538,13 @@ public class JsonApiManager extends BaseApiManager {
         if (t == null) {
             writeJsonResponse(status, body, (String) null);
             return;
+        }
+
+        if (t instanceof InvalidAccessTokenException) {
+            final InvalidAccessTokenException e = (InvalidAccessTokenException) t;
+            final HttpServletResponse response = LaResponseUtil.getResponse();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setHeader("WWW-Authenticate", "Bearer error=\"" + e.getType() + "\"");
         }
 
         final StringBuilder sb = new StringBuilder();

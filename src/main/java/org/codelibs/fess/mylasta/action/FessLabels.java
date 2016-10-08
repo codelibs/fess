@@ -197,6 +197,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Expired */
     public static final String LABELS_EXPIRED_TIME = "{labels.expiredTime}";
 
+    /** The key of the message: Expired */
+    public static final String LABELS_EXPIRES = "{labels.expires}";
+
     /** The key of the message: Failure Count */
     public static final String LABELS_FAILURE_COUNT_THRESHOLD = "{labels.failureCountThreshold}";
 
@@ -2096,6 +2099,12 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Token */
     public static final String LABELS_access_token_token = "{labels.access_token_token}";
+
+    /** The key of the message: Expired */
+    public static final String LABELS_access_token_expires = "{labels.access_token_expires}";
+
+    /** The key of the message: Parameter Name */
+    public static final String LABELS_access_token_parameter_name = "{labels.access_token_parameter_name}";
 
     /** The key of the message: Created */
     public static final String LABELS_access_token_updated_time = "{labels.access_token_updated_time}";
