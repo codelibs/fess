@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -69,6 +72,8 @@ public class SystemHelper {
     protected String[] supportedLanguages;
 
     protected List<Runnable> shutdownHookList = new ArrayList<>();
+
+    protected Random random = new SecureRandom();
 
     @PostConstruct
     public void init() {
@@ -296,6 +301,15 @@ public class SystemHelper {
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();
         ComponentUtil.getJobManager().reboot();
+    }
+
+    public String generateApiToken() {
+        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiTokenLengthAsInteger().intValue(), 0, 0, true, true, null,
+                random);
+    }
+
+    public void setRandom(Random random) {
+        this.random = random;
     }
 
 }

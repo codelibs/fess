@@ -1,0 +1,34 @@
+{
+  "api_token": {
+    "_source": {
+      "enabled": true
+    },
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "name": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "token": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createdBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+  }
+}

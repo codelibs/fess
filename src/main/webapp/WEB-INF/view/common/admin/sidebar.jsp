@@ -70,6 +70,12 @@
 							<span><la:message key="labels.menu_dict" /></span>
 						</la:link></li>
 
+					<li <c:if test="${param.menuType=='apiToken'}">class="active"</c:if>><la:link
+							href="/admin/apitoken/">
+							<i class='fa fa-circle-o'></i>
+							<span><la:message key="labels.menu_api_token" /></span>
+						</la:link></li>
+
 				</ul></li>
 			<li
 				class="treeview <c:if test="${param.menuCategoryType=='crawl'}">active</c:if>"><a

@@ -560,6 +560,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Back Up */
     public static final String LABELS_menu_backup = "{labels.menu_backup}";
 
+    /** The key of the message: API Token */
+    public static final String LABELS_menu_api_token = "{labels.menu_api_token}";
+
     /** The key of the message: Search... */
     public static final String LABELS_SIDEBAR_placeholder_search = "{labels.sidebar.placeholder_search}";
 
@@ -2078,6 +2081,24 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Sort Order */
     public static final String LABELS_boost_document_rule_sort_order = "{labels.boost_document_rule_sort_order}";
+
+    /** The key of the message: API Token */
+    public static final String LABELS_api_token_configuration = "{labels.api_token_configuration}";
+
+    /** The key of the message: API Token */
+    public static final String LABELS_api_token_title_details = "{labels.api_token_title_details}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_api_token_list_name = "{labels.api_token_list_name}";
+
+    /** The key of the message: Name */
+    public static final String LABELS_api_token_name = "{labels.api_token_name}";
+
+    /** The key of the message: Token */
+    public static final String LABELS_api_token_token = "{labels.api_token_token}";
+
+    /** The key of the message: Created */
+    public static final String LABELS_api_token_updated_time = "{labels.api_token_updated_time}";
 
     /** The key of the message: Additional Word */
     public static final String LABELS_elevate_word_configuration = "{labels.elevate_word_configuration}";

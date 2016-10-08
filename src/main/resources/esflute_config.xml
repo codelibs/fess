@@ -8,6 +8,7 @@
 	<component name="behaviorCommandInvoker" class="org.dbflute.bhv.core.BehaviorCommandInvoker"/>
 
     <!-- The components of Behavior. -->
+    <component name="apiTokenBhv" class="org.codelibs.fess.es.config.exbhv.ApiTokenBhv"/>
     <component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
     <component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
     <component name="crawlingInfoParamBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv"/>

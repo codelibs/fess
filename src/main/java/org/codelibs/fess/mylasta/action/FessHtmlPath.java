@@ -23,6 +23,15 @@ import org.lastaflute.web.response.next.HtmlNext;
  */
 public interface FessHtmlPath {
 
+    /** The path of the HTML: /admin/apitoken/admin_apitoken.jsp */
+    HtmlNext path_AdminApitoken_AdminApitokenJsp = new HtmlNext("/admin/apitoken/admin_apitoken.jsp");
+
+    /** The path of the HTML: /admin/apitoken/admin_apitoken_details.jsp */
+    HtmlNext path_AdminApitoken_AdminApitokenDetailsJsp = new HtmlNext("/admin/apitoken/admin_apitoken_details.jsp");
+
+    /** The path of the HTML: /admin/apitoken/admin_apitoken_edit.jsp */
+    HtmlNext path_AdminApitoken_AdminApitokenEditJsp = new HtmlNext("/admin/apitoken/admin_apitoken_edit.jsp");
+
     /** The path of the HTML: /admin/backup/admin_backup.jsp */
     HtmlNext path_AdminBackup_AdminBackupJsp = new HtmlNext("/admin/backup/admin_backup.jsp");
 

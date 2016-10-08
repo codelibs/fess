@@ -116,6 +116,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. ar,bg,ca,da,de,el,en,es,eu,fa,fi,fr,ga,gl,hi,hu,hy,id,it,ja,lv,ko,nl,no,pt,ro,ru,sv,th,tr,zh_CN,zh_TW,zh */
     String SUPPORTED_LANGUAGES = "supported.languages";
 
+    /** The key of the configuration. e.g. 60 */
+    String API_TOKEN_LENGTH = "api.token.length";
+
     /** The key of the configuration. e.g. 50 */
     String CRAWLER_DOCUMENT_MAX_SITE_LENGTH = "crawler.document.max.site.length";
 
@@ -772,6 +775,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. esreq */
     String ONLINE_HELP_NAME_ESREQ = "online.help.name.esreq";
 
+    /** The key of the configuration. e.g. apitoken */
+    String ONLINE_HELP_NAME_APITOKEN = "online.help.name.apitoken";
+
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -1274,6 +1280,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getSupportedLanguages();
+
+    /**
+     * Get the value for the key 'api.token.length'. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getApiTokenLength();
+
+    /**
+     * Get the value for the key 'api.token.length' as {@link Integer}. <br>
+     * The value is, e.g. 60 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getApiTokenLengthAsInteger();
 
     /**
      * Get the value for the key 'crawler.document.max.site.length'. <br>
@@ -3447,6 +3468,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameEsreq();
 
     /**
+     * Get the value for the key 'online.help.name.apitoken'. <br>
+     * The value is, e.g. apitoken <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameApitoken();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -4402,6 +4430,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getSupportedLanguages() {
             return get(FessConfig.SUPPORTED_LANGUAGES);
+        }
+
+        public String getApiTokenLength() {
+            return get(FessConfig.API_TOKEN_LENGTH);
+        }
+
+        public Integer getApiTokenLengthAsInteger() {
+            return getAsInteger(FessConfig.API_TOKEN_LENGTH);
         }
 
         public String getCrawlerDocumentMaxSiteLength() {
@@ -5550,6 +5586,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameEsreq() {
             return get(FessConfig.ONLINE_HELP_NAME_ESREQ);
+        }
+
+        public String getOnlineHelpNameApitoken() {
+            return get(FessConfig.ONLINE_HELP_NAME_APITOKEN);
         }
 
         public String getOnlineHelpSupportedLangs() {
