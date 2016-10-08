@@ -118,7 +118,7 @@ public class JobLogService {
         }
     }
 
-    public void setExpiredJobInterval(long expiredJobInterval) {
+    public void setExpiredJobInterval(final long expiredJobInterval) {
         this.expiredJobInterval = expiredJobInterval;
     }
 

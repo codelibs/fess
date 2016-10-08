@@ -18,7 +18,6 @@ package org.codelibs.fess.helper;
 import static org.codelibs.core.stream.StreamUtil.stream;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +30,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.codelibs.core.crypto.CachedCipher;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.app.service.AccessTokenService;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -48,6 +50,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class RoleQueryHelper {
+
+    private static final String USER_ROLES = "userRoles";
 
     private static final Logger logger = LoggerFactory.getLogger(RoleQueryHelper.class);
 
@@ -80,80 +84,125 @@ public class RoleQueryHelper {
         }));
     }
 
-    public Set<String> build() {
-        final Set<String> roleList = new HashSet<>();
+    public Set<String> build(final SearchRequestType searchRequestType) {
+        final Set<String> roleSet = new HashSet<>();
         final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
+        final boolean isApiRequest =
+                !SearchRequestType.SEARCH.equals(searchRequestType) && !SearchRequestType.ADMIN_SEARCH.equals(searchRequestType);
 
-        // request parameter
-        if (request != null && StringUtil.isNotBlank(parameterKey)) {
-            roleList.addAll(buildByParameter(request));
-        }
+        if (request != null) {
+            @SuppressWarnings("unchecked")
+            final Set<String> list = (Set<String>) request.getAttribute(USER_ROLES);
+            if (list != null) {
+                return list;
+            }
 
-        // request header
-        if (request != null && StringUtil.isNotBlank(headerKey)) {
-            roleList.addAll(buildByHeader(request));
-        }
+            // request parameter
+            if (StringUtil.isNotBlank(parameterKey)) {
+                processParameter(request, roleSet);
+            }
 
-        // cookie
-        if (request != null && StringUtil.isNotBlank(cookieKey)) {
-            roleList.addAll(buildByCookie(request));
-        }
+            // request header
+            if (StringUtil.isNotBlank(headerKey)) {
+                processHeader(request, roleSet);
+            }
 
-        // cookie mapping
-        if (cookieNameMap != null) {
-            roleList.addAll(buildByCookieNameMapping(request));
+            // cookie
+            if (StringUtil.isNotBlank(cookieKey)) {
+                processCookie(request, roleSet);
+            }
+
+            // cookie mapping
+            if (cookieNameMap != null) {
+                buildByCookieNameMapping(request, roleSet);
+            }
+
+            if (isApiRequest) {
+                processAccessToken(request, roleSet);
+            }
         }
 
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final RequestManager requestManager = ComponentUtil.getRequestManager();
         try {
             requestManager.findUserBean(FessUserBean.class)
-                    .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleList::add)))
-                    .orElse(() -> roleList.addAll(fessConfig.getSearchGuestPermissionList()));
+                    .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add)))
+                    .orElse(() -> {
+                        if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
+                            throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
+                        }
+                        roleSet.addAll(fessConfig.getSearchGuestPermissionList());
+                    });
         } catch (final RuntimeException e) {
             requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
             throw e;
         }
 
         if (defaultRoleList != null) {
-            roleList.addAll(defaultRoleList);
+            roleSet.addAll(defaultRoleList);
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("roleList: " + roleList);
+            logger.debug("roleSet: " + roleSet);
         }
 
-        return roleList;
+        if (request != null) {
+            request.setAttribute(USER_ROLES, roleSet);
+        }
+        return roleSet;
     }
 
-    protected Set<String> buildByParameter(final HttpServletRequest request) {
+    protected void processAccessToken(final HttpServletRequest request, final Set<String> roleSet) {
+        final String token = request.getHeader("Authorization");
+        if (StringUtil.isNotBlank(token)) {
+            final AccessTokenService accessTokenService = ComponentUtil.getComponent(AccessTokenService.class);
+            accessTokenService.getAccessTokenByToken(token).ifPresent(accessToken -> {
+                stream(accessToken.getPermissions()).of(stream -> stream.forEach(roleSet::add));
+                final String name = accessToken.getParameterName();
+                stream(request.getParameterValues(name)).of(stream -> stream.filter(StringUtil::isNotBlank).forEach(roleSet::add));
+            }).orElse(() -> {
+                throw new InvalidAccessTokenException("invalid_token", "Invalid token: " + token);
+            });
+        }
 
+    }
+
+    protected String getAccessToken(final HttpServletRequest request) {
+        final String token = request.getHeader("Authorization");
+        if (token != null) {
+            final String[] values = token.trim().split(" ");
+            if (values.length == 2 && "Bearer".equals(values[0])) {
+                return values[1];
+            }
+            throw new InvalidAccessTokenException("invalid_request", "Invalid format: " + token);
+        }
+        return request.getParameter("access_token");
+    }
+
+    protected void processParameter(final HttpServletRequest request, final Set<String> roleSet) {
         final String parameter = request.getParameter(parameterKey);
         if (logger.isDebugEnabled()) {
             logger.debug(parameterKey + ":" + parameter);
         }
         if (StringUtil.isNotEmpty(parameter)) {
-            return decodedRoleList(parameter, encryptedParameterValue);
+            parseRoleSet(parameter, encryptedParameterValue, roleSet);
         }
 
-        return Collections.emptySet();
     }
 
-    protected Set<String> buildByHeader(final HttpServletRequest request) {
+    protected void processHeader(final HttpServletRequest request, final Set<String> roleSet) {
 
         final String parameter = request.getHeader(headerKey);
         if (logger.isDebugEnabled()) {
             logger.debug(headerKey + ":" + parameter);
         }
         if (StringUtil.isNotEmpty(parameter)) {
-            return decodedRoleList(parameter, encryptedHeaderValue);
+            parseRoleSet(parameter, encryptedHeaderValue, roleSet);
         }
-
-        return Collections.emptySet();
 
     }
 
-    protected Set<String> buildByCookie(final HttpServletRequest request) {
+    protected void processCookie(final HttpServletRequest request, final Set<String> roleSet) {
 
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -164,26 +213,22 @@ public class RoleQueryHelper {
                         logger.debug(cookieKey + ":" + value);
                     }
                     if (StringUtil.isNotEmpty(value)) {
-                        return decodedRoleList(value, encryptedCookieValue);
+                        parseRoleSet(value, encryptedCookieValue, roleSet);
                     }
                 }
             }
         }
 
-        return Collections.emptySet();
     }
 
-    protected Set<String> buildByCookieNameMapping(final HttpServletRequest request) {
-
-        final Set<String> roleNameSet = new HashSet<>();
+    protected void buildByCookieNameMapping(final HttpServletRequest request, final Set<String> roleSet) {
         final Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
-                addRoleFromCookieMapping(roleNameSet, cookie);
+                addRoleFromCookieMapping(roleSet, cookie);
             }
         }
 
-        return roleNameSet;
     }
 
     protected void addRoleFromCookieMapping(final Set<String> roleNameList, final Cookie cookie) {
@@ -193,13 +238,12 @@ public class RoleQueryHelper {
         }
     }
 
-    protected Set<String> decodedRoleList(final String value, final boolean encrypted) {
+    protected void parseRoleSet(final String value, final boolean encrypted, final Set<String> roleSet) {
         String rolesStr = value;
         if (encrypted && cipher != null) {
             rolesStr = cipher.decryptoText(rolesStr);
         }
 
-        final Set<String> roleSet = new HashSet<>();
         if (valueSeparator.length() > 0) {
             final String[] values = rolesStr.split(valueSeparator);
             if (values.length > 1) {
@@ -218,7 +262,6 @@ public class RoleQueryHelper {
                 }
             }
         }
-        return roleSet;
     }
 
     public void addCookieNameMapping(final String cookieName, final String roleName) {

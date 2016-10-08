@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractEntity;
-import org.codelibs.fess.es.config.bsentity.dbmeta.ApiTokenDbm;
+import org.codelibs.fess.es.config.bsentity.dbmeta.AccessTokenDbm;
 
 /**
  * ${table.comment}
  * @author ESFlute (using FreeGen)
  */
-public class BsApiToken extends EsAbstractEntity {
+public class BsAccessToken extends EsAbstractEntity {
 
     // ===================================================================================
     //                                                                          Definition
@@ -42,6 +42,12 @@ public class BsApiToken extends EsAbstractEntity {
 
     /** token */
     protected String token;
+
+    /** permissions */
+    protected String[] permissions;
+
+    /** parameter_name */
+    protected String parameterName;
 
     /** createdBy */
     protected String createdBy;
@@ -61,13 +67,13 @@ public class BsApiToken extends EsAbstractEntity {
     //                                                                             DB Meta
     //                                                                             =======
     @Override
-    public ApiTokenDbm asDBMeta() {
-        return ApiTokenDbm.getInstance();
+    public AccessTokenDbm asDBMeta() {
+        return AccessTokenDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "api_token";
+        return "access_token";
     }
 
     // ===================================================================================
@@ -81,6 +87,12 @@ public class BsApiToken extends EsAbstractEntity {
         }
         if (token != null) {
             sourceMap.put("token", token);
+        }
+        if (permissions != null) {
+            sourceMap.put("permissions", permissions);
+        }
+        if (parameterName != null) {
+            sourceMap.put("parameter_name", parameterName);
         }
         if (createdBy != null) {
             sourceMap.put("createdBy", createdBy);
@@ -105,6 +117,8 @@ public class BsApiToken extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(name);
         sb.append(dm).append(token);
+        sb.append(dm).append(permissions);
+        sb.append(dm).append(parameterName);
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
         sb.append(dm).append(updatedBy);
@@ -137,6 +151,26 @@ public class BsApiToken extends EsAbstractEntity {
     public void setToken(String value) {
         registerModifiedProperty("token");
         this.token = value;
+    }
+
+    public String[] getPermissions() {
+        checkSpecifiedProperty("permissions");
+        return permissions;
+    }
+
+    public void setPermissions(String[] value) {
+        registerModifiedProperty("permissions");
+        this.permissions = value;
+    }
+
+    public String getParameterName() {
+        checkSpecifiedProperty("parameterName");
+        return convertEmptyToNull(parameterName);
+    }
+
+    public void setParameterName(String value) {
+        registerModifiedProperty("parameterName");
+        this.parameterName = value;
     }
 
     public String getCreatedBy() {

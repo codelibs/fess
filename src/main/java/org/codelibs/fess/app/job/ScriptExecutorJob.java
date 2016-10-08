@@ -108,7 +108,7 @@ public class ScriptExecutorJob implements LaJob {
             if (task != null) {
                 try {
                     task.stop();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     logger.warn("Failed to stop " + jobLog, e);
                 }
             }

@@ -70,10 +70,10 @@
 							<span><la:message key="labels.menu_dict" /></span>
 						</la:link></li>
 
-					<li <c:if test="${param.menuType=='apiToken'}">class="active"</c:if>><la:link
-							href="/admin/apitoken/">
+					<li <c:if test="${param.menuType=='accessToken'}">class="active"</c:if>><la:link
+							href="/admin/accesstoken/">
 							<i class='fa fa-circle-o'></i>
-							<span><la:message key="labels.menu_api_token" /></span>
+							<span><la:message key="labels.menu_access_token" /></span>
 						</la:link></li>
 
 				</ul></li>

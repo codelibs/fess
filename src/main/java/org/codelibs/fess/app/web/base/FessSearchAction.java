@@ -30,6 +30,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.sso.SsoAction;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
@@ -98,7 +99,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         runtime.registerData("favoriteSupport", favoriteSupport);
         runtime.registerData("thumbnailSupport", thumbnailSupport);
         if (fessConfig.isWebApiPopularWord()) {
-            runtime.registerData("popularWords", popularWordHelper.getWordList(null, null, null, null, null));
+            runtime.registerData("popularWords", popularWordHelper.getWordList(SearchRequestType.SEARCH, null, null, null, null, null));
         }
         return super.hookBefore(runtime);
     }
@@ -113,7 +114,7 @@ public abstract class FessSearchAction extends FessBaseAction {
         super.setupHtmlData(runtime);
         runtime.registerData("osddLink", openSearchHelper.hasOpenSearchFile());
 
-        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
         runtime.registerData("labelTypeItems", labelTypeItems);
         runtime.registerData("displayLabelTypeItems", labelTypeItems != null && !labelTypeItems.isEmpty());
 
@@ -143,7 +144,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected void buildFormParams(final SearchForm form) {
 
         // label
-        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+        final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH);
 
         if (!labelTypeItems.isEmpty() && !form.fields.containsKey(FessSearchAction.LABEL_FIELD)) {
             final String[] defaultLabelValues = fessConfig.getDefaultLabelValues(getUserBean());

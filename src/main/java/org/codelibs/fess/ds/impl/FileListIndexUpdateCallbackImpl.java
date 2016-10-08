@@ -222,7 +222,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
             }
             executor.shutdown();
             executor.awaitTermination(executorTerminationTimeout, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to interrupt executor.", e);
             }
@@ -266,7 +266,7 @@ public class FileListIndexUpdateCallbackImpl implements IndexUpdateCallback {
         this.maxRedirectCount = maxRedirectCount;
     }
 
-    public void setExecutorTerminationTimeout(int executorTerminationTimeout) {
+    public void setExecutorTerminationTimeout(final int executorTerminationTimeout) {
         this.executorTerminationTimeout = executorTerminationTimeout;
     }
 

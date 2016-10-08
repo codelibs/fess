@@ -137,17 +137,17 @@ public class JobHelper {
     }
 
     public TimeoutTask startMonitorTask(final JobLog jobLog) {
-        TimeoutTarget target = new MonitorTarget(jobLog);
+        final TimeoutTarget target = new MonitorTarget(jobLog);
         return TimeoutManager.getInstance().addTimeoutTarget(target, monitorInterval, true);
     }
 
-    public void setMonitorInterval(int monitorInterval) {
+    public void setMonitorInterval(final int monitorInterval) {
         this.monitorInterval = monitorInterval;
     }
 
     static class MonitorTarget implements TimeoutTarget {
 
-        private JobLog jobLog;
+        private final JobLog jobLog;
 
         public MonitorTarget(final JobLog jobLog) {
             this.jobLog = jobLog;

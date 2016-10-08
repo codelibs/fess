@@ -303,12 +303,12 @@ public class SystemHelper {
         ComponentUtil.getJobManager().reboot();
     }
 
-    public String generateApiToken() {
-        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiTokenLengthAsInteger().intValue(), 0, 0, true, true, null,
-                random);
+    public String generateAccessToken() {
+        return RandomStringUtils.random(ComponentUtil.getFessConfig().getApiAccessTokenLengthAsInteger().intValue(), 0, 0, true, true,
+                null, random);
     }
 
-    public void setRandom(Random random) {
+    public void setRandom(final Random random) {
         this.random = random;
     }
 

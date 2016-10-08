@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
-import org.codelibs.fess.es.config.bsentity.dbmeta.ApiTokenDbm;
-import org.codelibs.fess.es.config.cbean.ApiTokenCB;
-import org.codelibs.fess.es.config.cbean.cq.ApiTokenCQ;
-import org.codelibs.fess.es.config.cbean.cq.bs.BsApiTokenCQ;
+import org.codelibs.fess.es.config.bsentity.dbmeta.AccessTokenDbm;
+import org.codelibs.fess.es.config.cbean.AccessTokenCB;
+import org.codelibs.fess.es.config.cbean.cq.AccessTokenCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsAccessTokenCQ;
 import org.dbflute.cbean.ConditionQuery;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -31,25 +31,25 @@ import org.elasticsearch.index.query.QueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class BsApiTokenCB extends EsAbstractConditionBean {
+public class BsAccessTokenCB extends EsAbstractConditionBean {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected BsApiTokenCQ _conditionQuery;
+    protected BsAccessTokenCQ _conditionQuery;
     protected HpSpecification _specification;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
     @Override
-    public ApiTokenDbm asDBMeta() {
-        return ApiTokenDbm.getInstance();
+    public AccessTokenDbm asDBMeta() {
+        return AccessTokenDbm.getInstance();
     }
 
     @Override
     public String asTableDbName() {
-        return "api_token";
+        return "access_token";
     }
 
     @Override
@@ -65,11 +65,11 @@ public class BsApiTokenCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                         Primary Key
     //                                                                         ===========
-    public ApiTokenCB acceptPK(String id) {
+    public AccessTokenCB acceptPK(String id) {
         assertObjectNotNull("id", id);
-        BsApiTokenCB cb = this;
+        BsAccessTokenCB cb = this;
         cb.query().docMeta().setId_Equal(id);
-        return (ApiTokenCB) this;
+        return (AccessTokenCB) this;
     }
 
     @Override
@@ -103,20 +103,20 @@ public class BsApiTokenCB extends EsAbstractConditionBean {
     // ===================================================================================
     //                                                                               Query
     //                                                                               =====
-    public BsApiTokenCQ query() {
+    public BsAccessTokenCQ query() {
         assertQueryPurpose();
         return doGetConditionQuery();
     }
 
-    protected BsApiTokenCQ doGetConditionQuery() {
+    protected BsAccessTokenCQ doGetConditionQuery() {
         if (_conditionQuery == null) {
             _conditionQuery = createLocalCQ();
         }
         return _conditionQuery;
     }
 
-    protected BsApiTokenCQ createLocalCQ() {
-        return new ApiTokenCQ();
+    protected BsAccessTokenCQ createLocalCQ() {
+        return new AccessTokenCQ();
     }
 
     // ===================================================================================
@@ -153,6 +153,14 @@ public class BsApiTokenCB extends EsAbstractConditionBean {
 
         public void columnToken() {
             doColumn("token");
+        }
+
+        public void columnPermissions() {
+            doColumn("permissions");
+        }
+
+        public void columnParameterName() {
+            doColumn("parameter_name");
         }
 
         public void columnCreatedBy() {

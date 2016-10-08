@@ -33,6 +33,7 @@ import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.SearchService;
+import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.es.log.exbhv.ClickLogBhv;
 import org.codelibs.fess.es.log.exbhv.FavoriteLogBhv;
 import org.codelibs.fess.es.log.exbhv.SearchFieldLogBhv;
@@ -72,8 +73,8 @@ public class SearchLogHelper {
         userInfoCache = new LruHashMap<>(userInfoCacheSize);
     }
 
-    public void addSearchLog(final LocalDateTime requestedTime, final String queryId, final String query, final int pageStart,
-            final int pageSize, final QueryResponseList queryResponseList) {
+    public void addSearchLog(final SearchRequestParams params, final LocalDateTime requestedTime, final String queryId, final String query,
+            final int pageStart, final int pageSize, final QueryResponseList queryResponseList) {
 
         final RoleQueryHelper roleQueryHelper = ComponentUtil.getRoleQueryHelper();
         final UserInfoHelper userInfoHelper = ComponentUtil.getUserInfoHelper();
@@ -86,7 +87,7 @@ public class SearchLogHelper {
             }
         }
 
-        searchLog.setRoles(roleQueryHelper.build().stream().toArray(n -> new String[n]));
+        searchLog.setRoles(roleQueryHelper.build(params.getType()).stream().toArray(n -> new String[n]));
         searchLog.setQueryId(queryId);
         searchLog.setHitCount(queryResponseList.getAllRecordCount());
         searchLog.setResponseTime(queryResponseList.getExecTime());

@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.codelibs.fess.Constants;
 
-public class ApiTokenPager implements Serializable {
+public class AccessTokenPager implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int DEFAULT_CURRENT_PAGE_NUMBER = 1;

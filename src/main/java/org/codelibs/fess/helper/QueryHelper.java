@@ -53,6 +53,7 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -283,7 +284,7 @@ public class QueryHelper {
         }
     }
 
-    public QueryContext build(final String query, final Consumer<QueryContext> context) {
+    public QueryContext build(final SearchRequestType searchRequestType, final String query, final Consumer<QueryContext> context) {
         String q;
         if (additionalQuery != null && StringUtil.isNotBlank(query)) {
             q = query + " " + additionalQuery;
@@ -294,7 +295,7 @@ public class QueryHelper {
         final QueryContext queryContext = new QueryContext(q, true);
         buildBaseQuery(queryContext, context);
         buildBoostQuery(queryContext);
-        buildRoleQuery(queryContext);
+        buildRoleQuery(queryContext, searchRequestType);
 
         if (!queryContext.hasSorts() && defaultSortBuilders != null) {
             queryContext.addSorts(defaultSortBuilders);
@@ -302,9 +303,9 @@ public class QueryHelper {
         return queryContext;
     }
 
-    protected void buildRoleQuery(final QueryContext queryContext) {
+    protected void buildRoleQuery(final QueryContext queryContext, final SearchRequestType searchRequestType) {
         if (roleQueryHelper != null && queryContext.roleQueryEnabled()) {
-            final Set<String> roleSet = roleQueryHelper.build();
+            final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
             if (!roleSet.isEmpty()) {
                 queryContext.addQuery(boolQuery -> {
                     final BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();

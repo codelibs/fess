@@ -19,6 +19,7 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.ext.ExtendableQueryParser;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
@@ -100,7 +101,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     private QueryBuilder buildQuery(String query) {
-        return queryHelper.build(query, context -> {
+        return queryHelper.build(SearchRequestType.SEARCH, query, context -> {
             context.skipRoleQuery();
         }).getQueryBuilder();
     }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.api_token_configuration" /></title>
+		key="labels.access_token_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -11,17 +11,17 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="crawl" />
-			<jsp:param name="menuType" value="apiToken" />
+			<jsp:param name="menuType" value="accessToken" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.api_token_title_details" />
+					<la:message key="labels.access_token_title_details" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
 			<section class="content">
-				<la:form action="/admin/apitoken/" styleClass="form-horizontal">
+				<la:form action="/admin/accesstoken/" styleClass="form-horizontal">
 					<la:hidden property="crudMode" />
 					<c:if test="${crudMode==2}">
 						<la:hidden property="id" />
@@ -46,7 +46,7 @@
 									</div>
 									<div class="form-group">
 										<label for="name" class="col-sm-3 control-label"><la:message
-												key="labels.api_token_name" /></label>
+												key="labels.access_token_name" /></label>
 										<div class="col-sm-9">
 											<la:errors property="name" />
 											<la:text property="name" styleClass="form-control"/>

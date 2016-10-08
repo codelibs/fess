@@ -15,12 +15,14 @@
  */
 package org.codelibs.fess.es.config.exentity;
 
-import org.codelibs.fess.es.config.bsentity.BsApiToken;
+import java.util.Arrays;
+
+import org.codelibs.fess.es.config.bsentity.BsAccessToken;
 
 /**
  * @author ESFlute (using FreeGen)
  */
-public class ApiToken extends BsApiToken {
+public class AccessToken extends BsAccessToken {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,8 +44,9 @@ public class ApiToken extends BsApiToken {
 
     @Override
     public String toString() {
-        return "ApiToken [name=" + name + ", token=" + token + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", updatedBy="
-                + updatedBy + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
+        return "AccessToken [name=" + name + ", token=" + token + ", permissions=" + Arrays.toString(permissions) + ", parameterName="
+                + parameterName + ", createdBy=" + createdBy + ", createdTime=" + createdTime + ", updatedBy=" + updatedBy
+                + ", updatedTime=" + updatedTime + ", docMeta=" + docMeta + "]";
     }
 
 }

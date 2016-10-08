@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import org.codelibs.fess.es.config.exentity.ApiToken;
+import org.codelibs.fess.es.config.exentity.AccessToken;
 import org.dbflute.Entity;
 import org.dbflute.dbmeta.AbstractDBMeta;
 import org.dbflute.dbmeta.info.ColumnInfo;
@@ -32,19 +32,19 @@ import org.dbflute.util.DfTypeUtil;
 /**
  * @author ESFlute (using FreeGen)
  */
-public class ApiTokenDbm extends AbstractDBMeta {
+public class AccessTokenDbm extends AbstractDBMeta {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
     // ===================================================================================
     //                                                                           Singleton
     //                                                                           =========
-    private static final ApiTokenDbm _instance = new ApiTokenDbm();
+    private static final AccessTokenDbm _instance = new AccessTokenDbm();
 
-    private ApiTokenDbm() {
+    private AccessTokenDbm() {
     }
 
-    public static ApiTokenDbm getInstance() {
+    public static AccessTokenDbm getInstance() {
         return _instance;
     }
 
@@ -79,15 +79,19 @@ public class ApiTokenDbm extends AbstractDBMeta {
     //                                       ---------------
     protected final Map<String, PropertyGateway> _epgMap = newHashMap();
     {
-        setupEpg(_epgMap, et -> ((ApiToken) et).getName(), (et, vl) -> ((ApiToken) et).setName(DfTypeUtil.toString(vl)), "name");
-        setupEpg(_epgMap, et -> ((ApiToken) et).getToken(), (et, vl) -> ((ApiToken) et).setToken(DfTypeUtil.toString(vl)), "token");
-        setupEpg(_epgMap, et -> ((ApiToken) et).getCreatedBy(), (et, vl) -> ((ApiToken) et).setCreatedBy(DfTypeUtil.toString(vl)),
+        setupEpg(_epgMap, et -> ((AccessToken) et).getName(), (et, vl) -> ((AccessToken) et).setName(DfTypeUtil.toString(vl)), "name");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getToken(), (et, vl) -> ((AccessToken) et).setToken(DfTypeUtil.toString(vl)), "token");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getPermissions(), (et, vl) -> ((AccessToken) et).setPermissions((String[]) vl),
+                "permissions");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getParameterName(),
+                (et, vl) -> ((AccessToken) et).setParameterName(DfTypeUtil.toString(vl)), "parameterName");
+        setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedBy(), (et, vl) -> ((AccessToken) et).setCreatedBy(DfTypeUtil.toString(vl)),
                 "createdBy");
-        setupEpg(_epgMap, et -> ((ApiToken) et).getCreatedTime(), (et, vl) -> ((ApiToken) et).setCreatedTime(DfTypeUtil.toLong(vl)),
+        setupEpg(_epgMap, et -> ((AccessToken) et).getCreatedTime(), (et, vl) -> ((AccessToken) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
-        setupEpg(_epgMap, et -> ((ApiToken) et).getUpdatedBy(), (et, vl) -> ((ApiToken) et).setUpdatedBy(DfTypeUtil.toString(vl)),
+        setupEpg(_epgMap, et -> ((AccessToken) et).getUpdatedBy(), (et, vl) -> ((AccessToken) et).setUpdatedBy(DfTypeUtil.toString(vl)),
                 "updatedBy");
-        setupEpg(_epgMap, et -> ((ApiToken) et).getUpdatedTime(), (et, vl) -> ((ApiToken) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
+        setupEpg(_epgMap, et -> ((AccessToken) et).getUpdatedTime(), (et, vl) -> ((AccessToken) et).setUpdatedTime(DfTypeUtil.toLong(vl)),
                 "updatedTime");
     }
 
@@ -99,9 +103,9 @@ public class ApiTokenDbm extends AbstractDBMeta {
     // ===================================================================================
     //                                                                          Table Info
     //                                                                          ==========
-    protected final String _tableDbName = "api_token";
-    protected final String _tableDispName = "api_token";
-    protected final String _tablePropertyName = "ApiToken";
+    protected final String _tableDbName = "access_token";
+    protected final String _tableDispName = "access_token";
+    protected final String _tablePropertyName = "AccessToken";
 
     public String getTableDbName() {
         return _tableDbName;
@@ -129,6 +133,10 @@ public class ApiTokenDbm extends AbstractDBMeta {
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnToken = cci("token", "token", null, null, String.class, "token", null, false, false, false, "String",
             0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
+            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnParameterName = cci("parameter_name", "parameter_name", null, null, String.class, "parameterName",
+            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
@@ -144,6 +152,14 @@ public class ApiTokenDbm extends AbstractDBMeta {
 
     public ColumnInfo columnToken() {
         return _columnToken;
+    }
+
+    public ColumnInfo columnPermissions() {
+        return _columnPermissions;
+    }
+
+    public ColumnInfo columnParameterName() {
+        return _columnParameterName;
     }
 
     public ColumnInfo columnCreatedBy() {
@@ -166,6 +182,8 @@ public class ApiTokenDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnName());
         ls.add(columnToken());
+        ls.add(columnPermissions());
+        ls.add(columnParameterName());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
         ls.add(columnUpdatedBy());
@@ -196,17 +214,17 @@ public class ApiTokenDbm extends AbstractDBMeta {
     //                                                                           =========
     @Override
     public String getEntityTypeName() {
-        return "org.codelibs.fess.es.config.exentity.ApiToken";
+        return "org.codelibs.fess.es.config.exentity.AccessToken";
     }
 
     @Override
     public String getConditionBeanTypeName() {
-        return "org.codelibs.fess.es.config.cbean.ApiTokenCB";
+        return "org.codelibs.fess.es.config.cbean.AccessTokenCB";
     }
 
     @Override
     public String getBehaviorTypeName() {
-        return "org.codelibs.fess.es.config.exbhv.ApiTokenBhv";
+        return "org.codelibs.fess.es.config.exbhv.AccessTokenBhv";
     }
 
     // ===================================================================================
@@ -214,7 +232,7 @@ public class ApiTokenDbm extends AbstractDBMeta {
     //                                                                         ===========
     @Override
     public Class<? extends Entity> getEntityType() {
-        return ApiToken.class;
+        return AccessToken.class;
     }
 
     // ===================================================================================
@@ -222,7 +240,7 @@ public class ApiTokenDbm extends AbstractDBMeta {
     //                                                                     ===============
     @Override
     public Entity newEntity() {
-        return new ApiToken();
+        return new AccessToken();
     }
 
     // ===================================================================================

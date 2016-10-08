@@ -589,6 +589,12 @@ public interface FessProp {
         return Constants.TRUE.equalsIgnoreCase(getIndexerFavoriteCountEnabled());
     }
 
+    String getApiAccessTokenRequired();
+
+    public default boolean getApiAccessTokenRequiredAsBoolean() {
+        return Constants.TRUE.equalsIgnoreCase(getApiAccessTokenRequired());
+    }
+
     String getIndexerThreadDumpEnabled();
 
     public default boolean getIndexerThreadDumpEnabledAsBoolean() {
@@ -1306,7 +1312,7 @@ public interface FessProp {
     public default int[] getCrawlerDocumentSpaceCharsAsArray() {
         int[] spaceChars = (int[]) propMap.get(CRAWLER_DOCUMENT_SPACE_CHARS);
         if (spaceChars == null) {
-            String spaceStr = getCrawlerDocumentSpaceChars();
+            final String spaceStr = getCrawlerDocumentSpaceChars();
             if (spaceStr.startsWith("u")) {
                 spaceChars =
                         split(spaceStr, "u").get(
@@ -1326,7 +1332,7 @@ public interface FessProp {
 
     String getQueryAdditionalResponseFields();
 
-    public default String[] getQueryAdditionalResponseFields(String... fields) {
+    public default String[] getQueryAdditionalResponseFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalResponseFields(), ",").of(
@@ -1336,7 +1342,7 @@ public interface FessProp {
 
     String getQueryAdditionalCacheResponseFields();
 
-    public default String[] getQueryAdditionalCacheResponseFields(String... fields) {
+    public default String[] getQueryAdditionalCacheResponseFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalCacheResponseFields(), ",").of(
@@ -1346,7 +1352,7 @@ public interface FessProp {
 
     String getQueryAdditionalHighlightedFields();
 
-    public default String[] getQueryAdditionalHighlightedFields(String... fields) {
+    public default String[] getQueryAdditionalHighlightedFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalHighlightedFields(), ",").of(
@@ -1356,7 +1362,7 @@ public interface FessProp {
 
     String getQueryAdditionalSearchFields();
 
-    public default String[] getQueryAdditionalSearchFields(String... fields) {
+    public default String[] getQueryAdditionalSearchFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalSearchFields(), ",").of(
@@ -1366,7 +1372,7 @@ public interface FessProp {
 
     String getQueryAdditionalFacetFields();
 
-    public default String[] getQueryAdditionalFacetFields(String... fields) {
+    public default String[] getQueryAdditionalFacetFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalFacetFields(), ",").of(
@@ -1376,7 +1382,7 @@ public interface FessProp {
 
     String getQueryAdditionalSortFields();
 
-    public default String[] getQueryAdditionalSortFields(String... fields) {
+    public default String[] getQueryAdditionalSortFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalSortFields(), ",")
@@ -1386,7 +1392,7 @@ public interface FessProp {
 
     String getQueryAdditionalApiResponseFields();
 
-    public default String[] getQueryAdditionalApiResponseFields(String... fields) {
+    public default String[] getQueryAdditionalApiResponseFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalApiResponseFields(), ",").of(
@@ -1396,7 +1402,7 @@ public interface FessProp {
 
     String getQueryAdditionalNotAnalyzedFields();
 
-    public default String[] getQueryAdditionalNotAnalyzedFields(String... fields) {
+    public default String[] getQueryAdditionalNotAnalyzedFields(final String... fields) {
         final List<String> list = new ArrayList<>(fields.length + 10);
         stream(fields).of(stream -> stream.forEach(list::add));
         split(getQueryAdditionalNotAnalyzedFields(), ",").of(

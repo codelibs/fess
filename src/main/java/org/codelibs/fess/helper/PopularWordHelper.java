@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.request.popularwords.PopularWordsRequestBuilder;
 import org.codelibs.fess.util.ComponentUtil;
@@ -52,12 +53,12 @@ public class PopularWordHelper {
                         .expireAfterWrite(fessConfig.getSuggestPopularWordCacheExpireAsInteger().longValue(), TimeUnit.MINUTES).build();
     }
 
-    public List<String> getWordList(final String seed, final String[] tags, final String[] roles, final String[] fields,
-            final String[] excludes) {
+    public List<String> getWordList(final SearchRequestType searchRequestType, final String seed, final String[] tags,
+            final String[] roles, final String[] fields, final String[] excludes) {
         final String baseSeed = seed != null ? seed : fessConfig.getSuggestPopularWordSeed();
         final String[] baseTags = tags != null ? tags : fessConfig.getSuggestPopularWordTagsAsArray();
         final String[] baseRoles =
-                roles != null ? roles : ComponentUtil.getRoleQueryHelper().build().stream().filter(StringUtil::isNotBlank)
+                roles != null ? roles : ComponentUtil.getRoleQueryHelper().build(searchRequestType).stream().filter(StringUtil::isNotBlank)
                         .toArray(n -> new String[n]);
         final String[] baseFields = fields != null ? fields : fessConfig.getSuggestPopularWordFieldsAsArray();
         final String[] baseExcludes = excludes != null ? excludes : fessConfig.getSuggestPopularWordExcludesAsArray();

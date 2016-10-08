@@ -33,6 +33,7 @@ import javax.annotation.Resource;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.LabelTypeService;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.config.exentity.LabelType;
 import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
@@ -70,13 +71,13 @@ public class LabelTypeHelper {
         labelTypeItemList = itemList;
     }
 
-    public List<Map<String, String>> getLabelTypeItemList() {
+    public List<Map<String, String>> getLabelTypeItemList(final SearchRequestType searchRequestType) {
         if (labelTypeItemList == null) {
             init();
         }
 
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final Set<String> roleSet = roleQueryHelper.build();
+        final Set<String> roleSet = roleQueryHelper.build(searchRequestType);
         if (roleSet.isEmpty()) {
             for (final LabelTypeItem item : labelTypeItemList) {
                 if (item.getPermissions().length == 0) {

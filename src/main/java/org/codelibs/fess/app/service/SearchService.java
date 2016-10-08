@@ -101,8 +101,7 @@ public class SearchService {
                             return SearchConditionBuilder.builder(searchRequestBuilder)
                                     .query(StringUtil.isBlank(sortField) ? query : query + " sort:" + sortField).offset(pageStart)
                                     .size(pageSize).facetInfo(params.getFacetInfo()).geoInfo(params.getGeoInfo())
-                                    .responseFields(queryHelper.getResponseFields()).administrativeAccess(params.isAdministrativeAccess())
-                                    .build();
+                                    .responseFields(queryHelper.getResponseFields()).searchRequestType(params.getType()).build();
                         }, (searchRequestBuilder, execTime, searchResponse) -> {
                             final QueryResponseList queryResponseList = ComponentUtil.getQueryResponseList();
                             queryResponseList.init(searchResponse, pageStart, pageSize);
@@ -155,8 +154,8 @@ public class SearchService {
 
         // search log
         if (searchLogSupport) {
-            ComponentUtil.getSearchLogHelper().addSearchLog(DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart, pageSize,
-                    queryResponseList);
+            ComponentUtil.getSearchLogHelper().addSearchLog(params, DfTypeUtil.toLocalDateTime(requestedTime), queryId, query, pageStart,
+                    pageSize, queryResponseList);
         }
     }
 
@@ -165,7 +164,7 @@ public class SearchService {
         final String query =
                 QueryStringBuilder.query(params.getQuery()).extraQueries(params.getExtraQueries()).fields(params.getFields()).build();
 
-        final QueryContext queryContext = queryHelper.build(query, context -> {
+        final QueryContext queryContext = queryHelper.build(params.getType(), query, context -> {
             context.skipRoleQuery();
         });
         return fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),

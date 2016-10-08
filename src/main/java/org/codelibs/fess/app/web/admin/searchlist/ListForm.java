@@ -126,11 +126,6 @@ public class ListForm implements SearchRequestParams {
     }
 
     @Override
-    public boolean isAdministrativeAccess() {
-        return true;
-    }
-
-    @Override
     public Object getAttribute(final String name) {
         return LaRequestUtil.getRequest().getAttribute(name);
     }
@@ -138,5 +133,10 @@ public class ListForm implements SearchRequestParams {
     @Override
     public Locale getLocale() {
         return LaRequestUtil.getRequest().getLocale();
+    }
+
+    @Override
+    public SearchRequestType getType() {
+        return SearchRequestType.ADMIN_SEARCH;
     }
 }

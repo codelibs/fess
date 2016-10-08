@@ -506,11 +506,6 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         }
 
         @Override
-        public boolean isAdministrativeAccess() {
-            return false;
-        }
-
-        @Override
         public Object getAttribute(final String name) {
             return request.getAttribute(name);
         }
@@ -518,6 +513,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
         @Override
         public Locale getLocale() {
             return Locale.ROOT;
+        }
+
+        @Override
+        public SearchRequestType getType() {
+            return SearchRequestType.GSA;
         }
 
     }

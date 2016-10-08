@@ -43,6 +43,7 @@ import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
@@ -288,7 +289,7 @@ public class JsonApiManager extends BaseApiManager {
         Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
-            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList();
+            final List<Map<String, String>> labelTypeItems = labelTypeHelper.getLabelTypeItemList(SearchRequestType.JSON);
             buf.append("\"record_count\":");
             buf.append(labelTypeItems.size());
             if (!labelTypeItems.isEmpty()) {
@@ -338,7 +339,7 @@ public class JsonApiManager extends BaseApiManager {
         Exception err = null;
         final StringBuilder buf = new StringBuilder(255); // TODO replace response stream
         try {
-            final List<String> popularWordList = popularWordHelper.getWordList(seed, tags, null, fields, excludes);
+            final List<String> popularWordList = popularWordHelper.getWordList(SearchRequestType.JSON, seed, tags, null, fields, excludes);
 
             buf.append("\"result\":[");
             boolean first1 = true;
@@ -805,11 +806,6 @@ public class JsonApiManager extends BaseApiManager {
         }
 
         @Override
-        public boolean isAdministrativeAccess() {
-            return false;
-        }
-
-        @Override
         public Object getAttribute(final String name) {
             return request.getAttribute(name);
         }
@@ -817,6 +813,11 @@ public class JsonApiManager extends BaseApiManager {
         @Override
         public Locale getLocale() {
             return Locale.ROOT;
+        }
+
+        @Override
+        public SearchRequestType getType() {
+            return SearchRequestType.JSON;
         }
 
     }

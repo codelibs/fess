@@ -13,16 +13,16 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.app.web.admin.apitoken;
+package org.codelibs.fess.app.web.admin.accesstoken;
 
 import javax.annotation.Resource;
 
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.app.pager.ApiTokenPager;
-import org.codelibs.fess.app.service.ApiTokenService;
+import org.codelibs.fess.app.pager.AccessTokenPager;
+import org.codelibs.fess.app.service.AccessTokenService;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.app.web.base.FessAdminAction;
-import org.codelibs.fess.es.config.exentity.ApiToken;
+import org.codelibs.fess.es.config.exentity.AccessToken;
 import org.codelibs.fess.util.RenderDataUtil;
 import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
@@ -34,15 +34,15 @@ import org.lastaflute.web.ruts.process.ActionRuntime;
 /**
  * @author shinsuke
  */
-public class AdminApitokenAction extends FessAdminAction {
+public class AdminAccesstokenAction extends FessAdminAction {
 
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
     @Resource
-    private ApiTokenService apiTokenService;
+    private AccessTokenService accessTokenService;
     @Resource
-    private ApiTokenPager apiTokenPager;
+    private AccessTokenPager accessTokenPager;
 
     // ===================================================================================
     //                                                                               Hook
@@ -50,7 +50,7 @@ public class AdminApitokenAction extends FessAdminAction {
     @Override
     protected void setupHtmlData(final ActionRuntime runtime) {
         super.setupHtmlData(runtime);
-        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameApitoken()));
+        runtime.registerData("helpLink", systemHelper.getHelpLink(fessConfig.getOnlineHelpNameAccesstoken()));
     }
 
     // ===================================================================================
@@ -64,36 +64,36 @@ public class AdminApitokenAction extends FessAdminAction {
     @Execute
     public HtmlResponse list(final OptionalThing<Integer> pageNumber, final SearchForm form) {
         pageNumber.ifPresent(num -> {
-            apiTokenPager.setCurrentPageNumber(pageNumber.get());
+            accessTokenPager.setCurrentPageNumber(pageNumber.get());
         }).orElse(() -> {
-            apiTokenPager.setCurrentPageNumber(0);
+            accessTokenPager.setCurrentPageNumber(0);
         });
-        return asHtml(path_AdminApitoken_AdminApitokenJsp).renderWith(data -> {
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse search(final SearchForm form) {
-        copyBeanToBean(form, apiTokenPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
-        return asHtml(path_AdminApitoken_AdminApitokenJsp).renderWith(data -> {
+        copyBeanToBean(form, accessTokenPager, op -> op.exclude(Constants.PAGER_CONVERSION_RULE));
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     @Execute
     public HtmlResponse reset(final SearchForm form) {
-        apiTokenPager.clear();
-        return asHtml(path_AdminApitoken_AdminApitokenJsp).renderWith(data -> {
+        accessTokenPager.clear();
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenJsp).renderWith(data -> {
             searchPaging(data, form);
         });
     }
 
     protected void searchPaging(final RenderData data, final SearchForm form) {
-        RenderDataUtil.register(data, "apiTokenItems", apiTokenService.getApiTokenList(apiTokenPager)); // page navi
+        RenderDataUtil.register(data, "accessTokenItems", accessTokenService.getAccessTokenList(accessTokenPager)); // page navi
 
         // restore from pager
-        copyBeanToBean(apiTokenPager, form, op -> op.include("id"));
+        copyBeanToBean(accessTokenPager, form, op -> op.include("id"));
     }
 
     // ===================================================================================
@@ -122,7 +122,7 @@ public class AdminApitokenAction extends FessAdminAction {
         saveToken();
         return asDetailsHtml().useForm(EditForm.class, op -> {
             op.setup(form -> {
-                apiTokenService.getApiToken(id).ifPresent(entity -> {
+                accessTokenService.getAccessToken(id).ifPresent(entity -> {
                     copyBeanToBean(entity, form, copyOp -> {
                         copyOp.excludeNull();
                     });
@@ -142,11 +142,11 @@ public class AdminApitokenAction extends FessAdminAction {
         verifyCrudMode(form.crudMode, CrudMode.CREATE);
         validate(form, messages -> {}, () -> asEditHtml());
         verifyToken(() -> asEditHtml());
-        getApiToken(form).ifPresent(
+        getAccessToken(form).ifPresent(
                 entity -> {
-                    entity.setToken(systemHelper.generateApiToken());
+                    entity.setToken(systemHelper.generateAccessToken());
                     try {
-                        apiTokenService.store(entity);
+                        accessTokenService.store(entity);
                         saveInfo(messages -> messages.addSuccessCrudCreateCrudTable(GLOBAL));
                     } catch (final Exception e) {
                         throwValidationError(messages -> messages.addErrorsCrudFailedToCreateCrudTable(GLOBAL, buildThrowableMessage(e)),
@@ -164,12 +164,12 @@ public class AdminApitokenAction extends FessAdminAction {
         validate(form, messages -> {}, () -> asDetailsHtml());
         verifyToken(() -> asDetailsHtml());
         final String id = form.id;
-        apiTokenService
-                .getApiToken(id)
+        accessTokenService
+                .getAccessToken(id)
                 .ifPresent(
                         entity -> {
                             try {
-                                apiTokenService.delete(entity);
+                                accessTokenService.delete(entity);
                                 saveInfo(messages -> messages.addSuccessCrudDeleteCrudTable(GLOBAL));
                             } catch (final Exception e) {
                                 throwValidationError(
@@ -186,17 +186,17 @@ public class AdminApitokenAction extends FessAdminAction {
     //                                                                        Assist Logic
     //                                                                        ============
 
-    private OptionalEntity<ApiToken> getEntity(final CreateForm form, final String username, final long currentTime) {
+    private OptionalEntity<AccessToken> getEntity(final CreateForm form, final String username, final long currentTime) {
         switch (form.crudMode) {
         case CrudMode.CREATE:
-            return OptionalEntity.of(new ApiToken()).map(entity -> {
+            return OptionalEntity.of(new AccessToken()).map(entity -> {
                 entity.setCreatedBy(username);
                 entity.setCreatedTime(currentTime);
                 return entity;
             });
         case CrudMode.EDIT:
             if (form instanceof EditForm) {
-                return apiTokenService.getApiToken(((EditForm) form).id);
+                return accessTokenService.getAccessToken(((EditForm) form).id);
             }
             break;
         default:
@@ -205,7 +205,7 @@ public class AdminApitokenAction extends FessAdminAction {
         return OptionalEntity.empty();
     }
 
-    protected OptionalEntity<ApiToken> getApiToken(final CreateForm form) {
+    protected OptionalEntity<AccessToken> getAccessToken(final CreateForm form) {
         final String username = systemHelper.getUsername();
         final long currentTime = systemHelper.getCurrentTimeAsLong();
         return getEntity(form, username, currentTime).map(entity -> {
@@ -232,21 +232,21 @@ public class AdminApitokenAction extends FessAdminAction {
     //                                                                           =========
 
     private HtmlResponse asListHtml() {
-        return asHtml(path_AdminApitoken_AdminApitokenJsp).renderWith(data -> {
-            RenderDataUtil.register(data, "apiTokenItems", apiTokenService.getApiTokenList(apiTokenPager));
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenJsp).renderWith(data -> {
+            RenderDataUtil.register(data, "accessTokenItems", accessTokenService.getAccessTokenList(accessTokenPager));
         }).useForm(SearchForm.class, setup -> {
             setup.setup(form -> {
-                copyBeanToBean(apiTokenPager, form, op -> op.include("id"));
+                copyBeanToBean(accessTokenPager, form, op -> op.include("id"));
             });
         });
     }
 
     private HtmlResponse asEditHtml() {
-        return asHtml(path_AdminApitoken_AdminApitokenEditJsp);
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenEditJsp);
     }
 
     private HtmlResponse asDetailsHtml() {
-        return asHtml(path_AdminApitoken_AdminApitokenDetailsJsp);
+        return asHtml(path_AdminAccesstoken_AdminAccesstokenDetailsJsp);
     }
 
 }

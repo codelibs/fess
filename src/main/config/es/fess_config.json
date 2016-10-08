@@ -1,7 +1,7 @@
 {
   ".fess_config" : {
     "mappings" : {
-      "api_token": {
+      "access_token": {
         "_all": {
           "enabled": false
         },
@@ -11,6 +11,14 @@
             "index": "not_analyzed"
           },
           "token": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "permissions": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "parameter_name" : {
             "type": "string",
             "index": "not_analyzed"
           },
@@ -957,6 +965,13 @@
       "index" : {
         "refresh_interval" : "1s",
         "dbflute" : {
+          "access_token" : {
+            "properties" : {
+              "permissions" : {
+                "array" : "true"
+              }
+            }
+          },
           "data_config" : {
             "properties" : {
               "permissions" : {

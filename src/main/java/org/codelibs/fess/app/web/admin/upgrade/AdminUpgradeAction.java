@@ -715,7 +715,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"name\":\"Thumbnail Purger\",\"target\":\"all\",\"cronExpression\":\"0 0 * * *\",\"scriptType\":\"groovy\",\"scriptData\":\"return container.getComponent(\\\"purgeThumbnailJob\\\").expiry(30 * 24 * 60 * 60 * 1000).execute();\",\"jobLogging\":true,\"crawler\":false,\"available\":true,\"sortOrder\":6,\"createdBy\":\"system\",\"createdTime\":0,\"updatedBy\":\"system\",\"updatedTime\":0}");
 
         // alias
-        IndicesOptions indexOrAliasOptions = IndicesOptions.fromOptions(false, false, true, true);
+        final IndicesOptions indexOrAliasOptions = IndicesOptions.fromOptions(false, false, true, true);
         if (!existsIndex(indicesClient, searchIndex, indexOrAliasOptions)) {
             try {
                 final IndicesAliasesResponse response =
@@ -1060,7 +1060,7 @@ public class AdminUpgradeAction extends FessAdminAction {
                     jsonBuilder().startObject().startObject("analysis").startObject(type).field(name).copyCurrentStructure(contentParser)
                             .endObject().endObject().endObject();
             indicesClient.prepareUpdateSettings(index).setSettings(builder.string()).execute().actionGet();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to set analyzer to " + index, e);
         }
     }
@@ -1069,12 +1069,12 @@ public class AdminUpgradeAction extends FessAdminAction {
         try {
             final IndexRequest indexRequest = new IndexRequest(index, type, id).source(source);
             fessEsClient.index(indexRequest).actionGet();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to add " + id + " to " + index + "/" + type, e);
         }
     }
 
-    private boolean existsIndex(IndicesAdminClient indicesClient, String index, IndicesOptions options) {
+    private boolean existsIndex(final IndicesAdminClient indicesClient, final String index, final IndicesOptions options) {
         try {
             final IndicesExistsResponse response =
                     indicesClient.prepareExists(index).setIndicesOptions(options).execute().actionGet(fessConfig.getIndexSearchTimeout());
@@ -1089,13 +1089,13 @@ public class AdminUpgradeAction extends FessAdminAction {
         indicesClient.prepareDelete(index).execute(new ActionListener<DeleteIndexResponse>() {
 
             @Override
-            public void onResponse(DeleteIndexResponse response) {
+            public void onResponse(final DeleteIndexResponse response) {
                 logger.info("Deleted " + index + " index.");
                 comsumer.accept(response);
             }
 
             @Override
-            public void onFailure(Throwable e) {
+            public void onFailure(final Throwable e) {
                 logger.warn("Failed to delete " + index + " index.", e);
             }
         });

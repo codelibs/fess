@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.KeyMatchService;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.client.FessEsClient.SearchConditionBuilder;
 import org.codelibs.fess.es.config.exentity.KeyMatch;
@@ -100,8 +101,8 @@ public class KeyMatchHelper {
                         fessConfig.getIndexDocumentType(),
                         searchRequestBuilder -> {
                             return SearchConditionBuilder.builder(searchRequestBuilder.setPreference(Constants.SEARCH_PREFERENCE_PRIMARY))
-                                    .administrativeAccess(true).size(keyMatch.getMaxSize()).query(keyMatch.getQuery())
-                                    .responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
+                                    .searchRequestType(SearchRequestType.ADMIN_SEARCH).size(keyMatch.getMaxSize())
+                                    .query(keyMatch.getQuery()).responseFields(new String[] { fessConfig.getIndexFieldDocId() }).build();
                         });
         return documentList;
     }

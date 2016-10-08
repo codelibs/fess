@@ -34,6 +34,7 @@ import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.helper.RoleQueryHelper;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.codelibs.fess.suggest.entity.SuggestItem;
@@ -73,7 +74,7 @@ public class SuggestApiManager extends BaseApiManager {
             final SuggestRequestBuilder builder = suggestHelper.suggester().suggest();
             builder.setQuery(parameter.getQuery());
             stream(parameter.getSuggestFields()).of(stream -> stream.forEach(builder::addField));
-            roleQueryHelper.build().stream().forEach(builder::addRole);
+            roleQueryHelper.build(SearchRequestType.SUGGEST).stream().forEach(builder::addRole);
             builder.setSize(parameter.getNum());
             stream(langs).of(stream -> stream.forEach(builder::addLang));
 
@@ -238,11 +239,6 @@ public class SuggestApiManager extends BaseApiManager {
         }
 
         @Override
-        public boolean isAdministrativeAccess() {
-            return false;
-        }
-
-        @Override
         public String[] getExtraQueries() {
             throw new UnsupportedOperationException();
         }
@@ -255,6 +251,11 @@ public class SuggestApiManager extends BaseApiManager {
         @Override
         public Locale getLocale() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public SearchRequestType getType() {
+            return SearchRequestType.SUGGEST;
         }
     }
 }

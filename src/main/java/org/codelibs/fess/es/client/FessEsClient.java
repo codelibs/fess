@@ -52,6 +52,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.PingResponse;
 import org.codelibs.fess.entity.QueryContext;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
@@ -864,7 +865,7 @@ public class FessEsClient implements Client {
         private int size = Constants.DEFAULT_PAGE_SIZE;
         private GeoInfo geoInfo;
         private FacetInfo facetInfo;
-        private boolean administrativeAccess = false;
+        private SearchRequestType searchRequestType = SearchRequestType.SEARCH;
 
         public static SearchConditionBuilder builder(final SearchRequestBuilder searchRequestBuilder) {
             return new SearchConditionBuilder(searchRequestBuilder);
@@ -879,8 +880,8 @@ public class FessEsClient implements Client {
             return this;
         }
 
-        public SearchConditionBuilder administrativeAccess(final boolean administrativeAccess) {
-            this.administrativeAccess = administrativeAccess;
+        public SearchConditionBuilder searchRequestType(final SearchRequestType searchRequestType) {
+            this.searchRequestType = searchRequestType;
             return this;
         }
 
@@ -920,8 +921,8 @@ public class FessEsClient implements Client {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
-            final QueryContext queryContext = queryHelper.build(query, context -> {
-                if (administrativeAccess) {
+            final QueryContext queryContext = queryHelper.build(searchRequestType, query, context -> {
+                if (SearchRequestType.ADMIN_SEARCH.equals(searchRequestType)) {
                     context.skipRoleQuery();
                 }
                 // geo

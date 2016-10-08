@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title><la:message key="labels.admin_brand_title" /> | <la:message
-		key="labels.api_token_configuration" /></title>
+		key="labels.access_token_configuration" /></title>
 <jsp:include page="/WEB-INF/view/common/admin/head.jsp"></jsp:include>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -11,12 +11,12 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="crawl" />
-			<jsp:param name="menuType" value="apiToken" />
+			<jsp:param name="menuType" value="accessToken" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
 				<h1>
-					<la:message key="labels.api_token_configuration" />
+					<la:message key="labels.access_token_configuration" />
 				</h1>
 				<jsp:include page="/WEB-INF/view/common/admin/crud/breadcrumb.jsp"></jsp:include>
 			</section>
@@ -37,7 +37,7 @@
 									<la:errors />
 								</div>
 								<%-- List --%>
-								<c:if test="${apiTokenPager.allRecordCount == 0}">
+								<c:if test="${accessTokenPager.allRecordCount == 0}">
 									<div class="row top10">
 										<div class="col-sm-12">
 											<i class="fa fa-info-circle text-light-blue"></i>
@@ -45,21 +45,21 @@
 										</div>
 									</div>
 								</c:if>
-								<c:if test="${apiTokenPager.allRecordCount > 0}">
+								<c:if test="${accessTokenPager.allRecordCount > 0}">
 									<div class="row">
 										<div class="col-sm-12">
 											<table class="table table-bordered table-striped">
 												<thead>
 													<tr>
 														<th><la:message
-																key="labels.api_token_list_name" /></th>
+																key="labels.access_token_list_name" /></th>
 													</tr>
 												</thead>
 												<tbody>
 													<c:forEach var="data" varStatus="s"
-														items="${apiTokenItems}">
+														items="${accessTokenItems}">
 														<tr
-															data-href="${contextPath}/admin/apitoken/details/4/${f:u(data.id)}">
+															data-href="${contextPath}/admin/accesstoken/details/4/${f:u(data.id)}">
 															<td>${f:h(data.name)}</td>
 														</tr>
 													</c:forEach>
@@ -67,7 +67,7 @@
 											</table>
 										</div>
 									</div>
-									<c:set var="pager" value="${apiTokenPager}"
+									<c:set var="pager" value="${accessTokenPager}"
 										scope="request" />
 									<c:import url="/WEB-INF/view/common/admin/crud/pagination.jsp" />
 								</c:if>

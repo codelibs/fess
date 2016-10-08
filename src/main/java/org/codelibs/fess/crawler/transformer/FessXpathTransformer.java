@@ -251,7 +251,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         // site
         putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSite(url, urlEncoding));
         // filename
-        String fileName = getFileName(url, urlEncoding);
+        final String fileName = getFileName(url, urlEncoding);
         if (StringUtil.isNotBlank(fileName)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldFilename(), fileName);
         }
@@ -359,7 +359,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     protected String normalizeCanonicalUrl(final String baseUrl, final String canonicalUrl) {
         try {
             return new URL(new URL(baseUrl), canonicalUrl).toString();
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             logger.warn("Invalid canonical url: " + baseUrl + " : " + canonicalUrl, e);
         }
         return null;

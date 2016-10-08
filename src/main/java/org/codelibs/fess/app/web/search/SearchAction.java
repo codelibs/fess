@@ -32,6 +32,7 @@ import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.base.FessSearchAction;
 import org.codelibs.fess.app.web.base.SearchForm;
 import org.codelibs.fess.entity.SearchRenderData;
+import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.exception.InvalidQueryException;
 import org.codelibs.fess.exception.ResultOffsetExceededException;
 import org.codelibs.fess.util.RenderDataUtil;
@@ -136,7 +137,8 @@ public class SearchAction extends FessSearchAction {
                             thumbnailManager.storeRequest(queryId, documentItems);
                         }
                     }
-                    RenderDataUtil.register(data, "displayQuery", getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList()));
+                    RenderDataUtil.register(data, "displayQuery",
+                            getDisplayQuery(form, labelTypeHelper.getLabelTypeItemList(SearchRequestType.SEARCH)));
                     createPagingQuery(form);
                 });
         } catch (final InvalidQueryException e) {

@@ -66,16 +66,16 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             try {
                 final String name = (String) repository.get("name");
                 final String owner = (String) repository.get("owner");
-                final boolean isPrivate = (boolean) repository.get("is_private"); // TODO Use this info for roles
+                repository.get("is_private");
 
-                List<String> pathList = collectFileNames(rootURL, authToken, owner, name, "", 0, readInterval);
-                for (String path : pathList) {
+                final List<String> pathList = collectFileNames(rootURL, authToken, owner, name, "", 0, readInterval);
+                for (final String path : pathList) {
                     storeFileContent(rootURL, authToken, owner, name, path, dataConfig, callback, paramMap, scriptMap, defaultDataMap);
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("Failed to access to " + repository, e);
             }
         }
@@ -103,12 +103,12 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
         final String url = rootURL + "api/v3/fess/repos";
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
-            final String content = curlResponse.getContentAsString();
+            curlResponse.getContentAsString();
             final Map<String, Object> map = curlResponse.getContentAsMap();
             assert (map.containsKey("repositories"));
             final List<Map<String, Object>> repoList = (List<Map<String, Object>>) map.get("repositories");
             return repoList;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to access to " + rootURL, e);
             return Collections.emptyList();
         }
@@ -140,7 +140,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
             callback.store(paramMap, dataMap);
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // TODO CrawlingAccessException?
             logger.warn("Failed to parse " + url, e);
         }
@@ -154,15 +154,15 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return Collections.emptyList();
         }
 
-        List<String> resultList = new ArrayList<String>();
+        final List<String> resultList = new ArrayList<>();
         final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final InputStream iStream = curlResponse.getContentAsStream();
-            List<Object> fileList = parseList(iStream);
+            final List<Object> fileList = parseList(iStream);
 
             for (int i = 0; i < fileList.size(); ++i) {
-                Map<String, String> file = (Map<String, String>) fileList.get(i);
+                final Map<String, String> file = (Map<String, String>) fileList.get(i);
                 final String newPath = path.isEmpty() ? file.get("name") : path + "/" + file.get("name");
                 switch (file.get("type")) {
                 case "file":
@@ -176,7 +176,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     break;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.warn("Failed to access to " + url, e);
         }
         return resultList;

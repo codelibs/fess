@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
-import org.codelibs.fess.es.config.cbean.cq.ApiTokenCQ;
+import org.codelibs.fess.es.config.cbean.cq.AccessTokenCQ;
 import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.CommonTermsQueryBuilder;
@@ -37,7 +37,7 @@ import org.elasticsearch.index.query.WildcardQueryBuilder;
 /**
  * @author ESFlute (using FreeGen)
  */
-public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
+public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
 
     protected static final Class<?> suppressUnusedImportLocalDateTime = LocalDateTime.class;
 
@@ -46,44 +46,44 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
     //                                                                       =============
     @Override
     public String asTableDbName() {
-        return "api_token";
+        return "access_token";
     }
 
     @Override
     public String xgetAliasName() {
-        return "api_token";
+        return "access_token";
     }
 
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
-    public void filtered(FilteredCall<ApiTokenCQ, ApiTokenCQ> filteredLambda) {
+    public void filtered(FilteredCall<AccessTokenCQ, AccessTokenCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }
 
-    public void filtered(FilteredCall<ApiTokenCQ, ApiTokenCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+    public void filtered(FilteredCall<AccessTokenCQ, AccessTokenCQ> filteredLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter) -> {
             filteredLambda.callback(must, filter);
         }, opLambda);
     }
 
-    public void not(OperatorCall<ApiTokenCQ> notLambda) {
+    public void not(OperatorCall<AccessTokenCQ> notLambda) {
         not(notLambda, null);
     }
 
-    public void not(final OperatorCall<ApiTokenCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
+    public void not(final OperatorCall<AccessTokenCQ> notLambda, final ConditionOptionCall<BoolQueryBuilder> opLambda) {
         bool((must, should, mustNot, filter) -> notLambda.callback(mustNot), opLambda);
     }
 
-    public void bool(BoolCall<ApiTokenCQ> boolLambda) {
+    public void bool(BoolCall<AccessTokenCQ> boolLambda) {
         bool(boolLambda, null);
     }
 
-    public void bool(BoolCall<ApiTokenCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
-        ApiTokenCQ mustQuery = new ApiTokenCQ();
-        ApiTokenCQ shouldQuery = new ApiTokenCQ();
-        ApiTokenCQ mustNotQuery = new ApiTokenCQ();
-        ApiTokenCQ filterQuery = new ApiTokenCQ();
+    public void bool(BoolCall<AccessTokenCQ> boolLambda, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        AccessTokenCQ mustQuery = new AccessTokenCQ();
+        AccessTokenCQ shouldQuery = new AccessTokenCQ();
+        AccessTokenCQ mustNotQuery = new AccessTokenCQ();
+        AccessTokenCQ filterQuery = new AccessTokenCQ();
         boolLambda.callback(mustQuery, shouldQuery, mustNotQuery, filterQuery);
         if (mustQuery.hasQueries() || shouldQuery.hasQueries() || mustNotQuery.hasQueries() || filterQuery.hasQueries()) {
             BoolQueryBuilder builder =
@@ -152,12 +152,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         setId_Terms(idList, opLambda);
     }
 
-    public BsApiTokenCQ addOrderBy_Id_Asc() {
+    public BsAccessTokenCQ addOrderBy_Id_Asc() {
         regOBA("_id");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_Id_Desc() {
+    public BsAccessTokenCQ addOrderBy_Id_Desc() {
         regOBD("_id");
         return this;
     }
@@ -359,12 +359,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_Name_Asc() {
+    public BsAccessTokenCQ addOrderBy_Name_Asc() {
         regOBA("name");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_Name_Desc() {
+    public BsAccessTokenCQ addOrderBy_Name_Desc() {
         regOBD("name");
         return this;
     }
@@ -566,13 +566,427 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_Token_Asc() {
+    public BsAccessTokenCQ addOrderBy_Token_Asc() {
         regOBA("token");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_Token_Desc() {
+    public BsAccessTokenCQ addOrderBy_Token_Desc() {
         regOBD("token");
+        return this;
+    }
+
+    public void setPermissions_Equal(String permissions) {
+        setPermissions_Term(permissions, null);
+    }
+
+    public void setPermissions_Equal(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setPermissions_Term(permissions, opLambda);
+    }
+
+    public void setPermissions_Term(String permissions) {
+        setPermissions_Term(permissions, null);
+    }
+
+    public void setPermissions_Term(String permissions, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_NotEqual(String permissions) {
+        setPermissions_NotTerm(permissions, null);
+    }
+
+    public void setPermissions_NotTerm(String permissions) {
+        setPermissions_NotTerm(permissions, null);
+    }
+
+    public void setPermissions_NotEqual(String permissions, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setPermissions_NotTerm(permissions, opLambda);
+    }
+
+    public void setPermissions_NotTerm(String permissions, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setPermissions_Term(permissions), opLambda);
+    }
+
+    public void setPermissions_Terms(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
+    }
+
+    public void setPermissions_Terms(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("permissions", permissionsList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_InScope(Collection<String> permissionsList) {
+        setPermissions_Terms(permissionsList, null);
+    }
+
+    public void setPermissions_InScope(Collection<String> permissionsList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setPermissions_Terms(permissionsList, opLambda);
+    }
+
+    public void setPermissions_Match(String permissions) {
+        setPermissions_Match(permissions, null);
+    }
+
+    public void setPermissions_Match(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_MatchPhrase(String permissions) {
+        setPermissions_MatchPhrase(permissions, null);
+    }
+
+    public void setPermissions_MatchPhrase(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_MatchPhrasePrefix(String permissions) {
+        setPermissions_MatchPhrasePrefix(permissions, null);
+    }
+
+    public void setPermissions_MatchPhrasePrefix(String permissions, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Fuzzy(String permissions) {
+        setPermissions_Fuzzy(permissions, null);
+    }
+
+    public void setPermissions_Fuzzy(String permissions, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Prefix(String permissions) {
+        setPermissions_Prefix(permissions, null);
+    }
+
+    public void setPermissions_Prefix(String permissions, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Wildcard(String permissions) {
+        setPermissions_Wildcard(permissions, null);
+    }
+
+    public void setPermissions_Wildcard(String permissions, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Regexp(String permissions) {
+        setPermissions_Regexp(permissions, null);
+    }
+
+    public void setPermissions_Regexp(String permissions, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_GreaterThan(String permissions) {
+        setPermissions_GreaterThan(permissions, null);
+    }
+
+    public void setPermissions_GreaterThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_THAN, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_LessThan(String permissions) {
+        setPermissions_LessThan(permissions, null);
+    }
+
+    public void setPermissions_LessThan(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_THAN, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_GreaterEqual(String permissions) {
+        setPermissions_GreaterEqual(permissions, null);
+    }
+
+    public void setPermissions_GreaterEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_GREATER_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_LessEqual(String permissions) {
+        setPermissions_LessEqual(permissions, null);
+    }
+
+    public void setPermissions_LessEqual(String permissions, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("permissions", ConditionKey.CK_LESS_EQUAL, permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_Exists() {
+        setPermissions_Exists(null);
+    }
+
+    public void setPermissions_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("permissions");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_CommonTerms(String permissions) {
+        setPermissions_CommonTerms(permissions, null);
+    }
+
+    public void setPermissions_CommonTerms(String permissions, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsAccessTokenCQ addOrderBy_Permissions_Asc() {
+        regOBA("permissions");
+        return this;
+    }
+
+    public BsAccessTokenCQ addOrderBy_Permissions_Desc() {
+        regOBD("permissions");
+        return this;
+    }
+
+    public void setParameterName_Equal(String parameterName) {
+        setParameterName_Term(parameterName, null);
+    }
+
+    public void setParameterName_Equal(String parameterName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setParameterName_Term(parameterName, opLambda);
+    }
+
+    public void setParameterName_Term(String parameterName) {
+        setParameterName_Term(parameterName, null);
+    }
+
+    public void setParameterName_Term(String parameterName, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_NotEqual(String parameterName) {
+        setParameterName_NotTerm(parameterName, null);
+    }
+
+    public void setParameterName_NotTerm(String parameterName) {
+        setParameterName_NotTerm(parameterName, null);
+    }
+
+    public void setParameterName_NotEqual(String parameterName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setParameterName_NotTerm(parameterName, opLambda);
+    }
+
+    public void setParameterName_NotTerm(String parameterName, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setParameterName_Term(parameterName), opLambda);
+    }
+
+    public void setParameterName_Terms(Collection<String> parameterNameList) {
+        setParameterName_Terms(parameterNameList, null);
+    }
+
+    public void setParameterName_Terms(Collection<String> parameterNameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("parameter_name", parameterNameList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_InScope(Collection<String> parameterNameList) {
+        setParameterName_Terms(parameterNameList, null);
+    }
+
+    public void setParameterName_InScope(Collection<String> parameterNameList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setParameterName_Terms(parameterNameList, opLambda);
+    }
+
+    public void setParameterName_Match(String parameterName) {
+        setParameterName_Match(parameterName, null);
+    }
+
+    public void setParameterName_Match(String parameterName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_MatchPhrase(String parameterName) {
+        setParameterName_MatchPhrase(parameterName, null);
+    }
+
+    public void setParameterName_MatchPhrase(String parameterName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_MatchPhrasePrefix(String parameterName) {
+        setParameterName_MatchPhrasePrefix(parameterName, null);
+    }
+
+    public void setParameterName_MatchPhrasePrefix(String parameterName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_Fuzzy(String parameterName) {
+        setParameterName_Fuzzy(parameterName, null);
+    }
+
+    public void setParameterName_Fuzzy(String parameterName, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_Prefix(String parameterName) {
+        setParameterName_Prefix(parameterName, null);
+    }
+
+    public void setParameterName_Prefix(String parameterName, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("parameter_name", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_Wildcard(String parameterName) {
+        setParameterName_Wildcard(parameterName, null);
+    }
+
+    public void setParameterName_Wildcard(String parameterName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("parameterName", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_Regexp(String parameterName) {
+        setParameterName_Regexp(parameterName, null);
+    }
+
+    public void setParameterName_Regexp(String parameterName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("parameterName", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_GreaterThan(String parameterName) {
+        setParameterName_GreaterThan(parameterName, null);
+    }
+
+    public void setParameterName_GreaterThan(String parameterName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("parameter_name", ConditionKey.CK_GREATER_THAN, parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_LessThan(String parameterName) {
+        setParameterName_LessThan(parameterName, null);
+    }
+
+    public void setParameterName_LessThan(String parameterName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("parameter_name", ConditionKey.CK_LESS_THAN, parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_GreaterEqual(String parameterName) {
+        setParameterName_GreaterEqual(parameterName, null);
+    }
+
+    public void setParameterName_GreaterEqual(String parameterName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("parameter_name", ConditionKey.CK_GREATER_EQUAL, parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_LessEqual(String parameterName) {
+        setParameterName_LessEqual(parameterName, null);
+    }
+
+    public void setParameterName_LessEqual(String parameterName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("parameter_name", ConditionKey.CK_LESS_EQUAL, parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_Exists() {
+        setParameterName_Exists(null);
+    }
+
+    public void setParameterName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("parameterName");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setParameterName_CommonTerms(String parameterName) {
+        setParameterName_CommonTerms(parameterName, null);
+    }
+
+    public void setParameterName_CommonTerms(String parameterName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("parameterName", parameterName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsAccessTokenCQ addOrderBy_ParameterName_Asc() {
+        regOBA("parameter_name");
+        return this;
+    }
+
+    public BsAccessTokenCQ addOrderBy_ParameterName_Desc() {
+        regOBD("parameter_name");
         return this;
     }
 
@@ -773,12 +1187,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_CreatedBy_Asc() {
+    public BsAccessTokenCQ addOrderBy_CreatedBy_Asc() {
         regOBA("createdBy");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_CreatedBy_Desc() {
+    public BsAccessTokenCQ addOrderBy_CreatedBy_Desc() {
         regOBD("createdBy");
         return this;
     }
@@ -947,12 +1361,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_CreatedTime_Asc() {
+    public BsAccessTokenCQ addOrderBy_CreatedTime_Asc() {
         regOBA("createdTime");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_CreatedTime_Desc() {
+    public BsAccessTokenCQ addOrderBy_CreatedTime_Desc() {
         regOBD("createdTime");
         return this;
     }
@@ -1154,12 +1568,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_UpdatedBy_Asc() {
+    public BsAccessTokenCQ addOrderBy_UpdatedBy_Asc() {
         regOBA("updatedBy");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_UpdatedBy_Desc() {
+    public BsAccessTokenCQ addOrderBy_UpdatedBy_Desc() {
         regOBD("updatedBy");
         return this;
     }
@@ -1328,12 +1742,12 @@ public abstract class BsApiTokenCQ extends EsAbstractConditionQuery {
         }
     }
 
-    public BsApiTokenCQ addOrderBy_UpdatedTime_Asc() {
+    public BsAccessTokenCQ addOrderBy_UpdatedTime_Asc() {
         regOBA("updatedTime");
         return this;
     }
 
-    public BsApiTokenCQ addOrderBy_UpdatedTime_Desc() {
+    public BsAccessTokenCQ addOrderBy_UpdatedTime_Desc() {
         regOBD("updatedTime");
         return this;
     }

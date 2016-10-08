@@ -119,7 +119,7 @@ public class DocumentHelper {
         final long startTime = System.currentTimeMillis();
         try (final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build())) {
             if (responseData.getRedirectLocation() != null) {
-                Set<RequestData> childUrlList = new HashSet<>();
+                final Set<RequestData> childUrlList = new HashSet<>();
                 childUrlList.add(RequestDataBuilder.newRequestData().get().url(responseData.getRedirectLocation()).build());
                 throw new ChildUrlsException(childUrlList, "Redirected from " + url);
             }

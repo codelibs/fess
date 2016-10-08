@@ -13,12 +13,21 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.es.config.cbean.cq;
+package org.codelibs.fess.exception;
 
-import org.codelibs.fess.es.config.cbean.cq.bs.BsApiTokenCQ;
+public class InvalidAccessTokenException extends FessSystemException {
 
-/**
- * @author ESFlute (using FreeGen)
- */
-public class ApiTokenCQ extends BsApiTokenCQ {
+    private static final long serialVersionUID = 1L;
+
+    private final String type;
+
+    public InvalidAccessTokenException(final String type, final String message) {
+        super(message);
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
 }
