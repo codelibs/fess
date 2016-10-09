@@ -37,7 +37,7 @@ public interface CrawlingConfig {
 
     Integer getTimeToLive();
 
-    void initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
+    Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory);
 
     Map<String, String> getConfigParameterMap(ConfigName name);
 

@@ -16,6 +16,7 @@
 package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,12 @@ import java.util.function.Consumer;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.codelibs.fess.crawler.client.CrawlerClientFactory;
+import org.codelibs.fess.crawler.client.http.HcHttpClient;
+import org.codelibs.fess.crawler.client.http.RequestHeader;
 import org.codelibs.fess.ds.IndexUpdateCallback;
+import org.codelibs.fess.es.config.exentity.CrawlingConfig;
+import org.codelibs.fess.es.config.exentity.CrawlingConfigWrapper;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -62,14 +68,30 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return;
         }
 
+        final CrawlingConfig crawlingConfig = new CrawlingConfigWrapper(dataConfig) {
+            @Override
+            public Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory) {
+                final Map<String, Object> paramMap = super.initializeClientFactory(crawlerClientFactory);
+                List<RequestHeader> headerList = new ArrayList<>();
+                RequestHeader[] headers = (RequestHeader[]) paramMap.get(HcHttpClient.REQUERT_HEADERS_PROPERTY);
+                if (headers != null) {
+                    for (RequestHeader header : headers) {
+                        headerList.add(header);
+                    }
+                }
+                headerList.add(new RequestHeader("Authorization", "token " + authToken));
+                paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, headerList.toArray(new RequestHeader[headerList.size()]));
+                return paramMap;
+            }
+        };
         for (final Map<String, Object> repository : repositoryList) {
             try {
                 final String name = (String) repository.get("name");
                 final String owner = (String) repository.get("owner");
                 repository.get("is_private");
 
-                collectFileNames(rootURL, authToken, owner, name, "", 0, readInterval, path -> {
-                    storeFileContent(rootURL, authToken, owner, name, path, dataConfig, callback, paramMap, scriptMap, defaultDataMap);
+                collectFileNames(rootURL, authToken, owner, name, StringUtil.EMPTY, 0, readInterval, path -> {
+                    storeFileContent(rootURL, authToken, owner, name, path, crawlingConfig, callback, paramMap, scriptMap, defaultDataMap);
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
@@ -125,23 +147,20 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     private void storeFileContent(final String rootURL, final String authToken, final String owner, final String name, final String path,
-            final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
+            final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
         final String url = rootURL + owner + "/" + name + "/blob/master/" + path;
 
-        try (CurlResponse curlResponse = Curl.get(url).param("raw", "true").header("Authorization", "token " + authToken).execute()) {
+        if (logger.isInfoEnabled()) {
             logger.info("Get a content from " + url);
-            final Map<String, Object> dataMap = new HashMap<>();
-            dataMap.putAll(defaultDataMap);
-            dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(dataConfig, paramMap.get("crawlingInfoId"), url));
-            // TODO scriptMap
-
-            callback.store(paramMap, dataMap);
-
-        } catch (final Exception e) {
-            // TODO CrawlingAccessException?
-            logger.warn("Failed to parse " + url, e);
         }
+        final Map<String, Object> dataMap = new HashMap<>();
+        dataMap.putAll(defaultDataMap);
+        dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), url + "?raw=true"));
+        // TODO scriptMap
+
+        callback.store(paramMap, dataMap);
+
         return;
     }
 

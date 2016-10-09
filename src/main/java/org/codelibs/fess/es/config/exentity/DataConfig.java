@@ -182,7 +182,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
+    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
         final Map<String, String> paramMap = getHandlerParameterMap();
 
         final Map<String, Object> factoryParamMap = new HashMap<>();
@@ -353,6 +353,7 @@ public class DataConfig extends BsDataConfig implements CrawlingConfig {
             }
         }
 
+        return factoryParamMap;
     }
 
     @Override
