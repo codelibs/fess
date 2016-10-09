@@ -17,12 +17,14 @@ package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.commons.io.FilenameUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
@@ -33,7 +35,6 @@ import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfigWrapper;
 import org.codelibs.fess.es.config.exentity.DataConfig;
-import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,6 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
         final String url = rootURL + "api/v3/fess/repos";
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
-            curlResponse.getContentAsString();
             final Map<String, Object> map = curlResponse.getContentAsMap();
             assert (map.containsKey("repositories"));
             @SuppressWarnings("unchecked")
@@ -149,19 +149,46 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     private void storeFileContent(final String rootURL, final String authToken, final String owner, final String name, final String path,
             final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
-        final String url = rootURL + owner + "/" + name + "/blob/master/" + path;
+        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
 
         if (logger.isInfoEnabled()) {
             logger.info("Get a content from " + url);
         }
         final Map<String, Object> dataMap = new HashMap<>();
         dataMap.putAll(defaultDataMap);
-        dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), url + "?raw=true"));
+        // FIXME Use DocumentHelper
+        // dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), url));
+        dataMap.putAll(processContentRequest(authToken, url));
+        
         // TODO scriptMap
 
         callback.store(paramMap, dataMap);
 
         return;
+    }
+    
+    private Map<String, String> processContentRequest(final String authToken, final String url) { // FIXME should be replaced by DocumentHelper
+        final  Map<String, String> dataMap = new HashMap<>();
+        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+            final Map<String, Object> map = curlResponse.getContentAsMap();
+            String content = StringUtil.EMPTY;;
+            if (map.containsKey("content")) {
+                content = (String) map.get("content");
+            }
+            
+            if (map.containsKey("encoding") && map.get("encoding").equals("base64")) {
+                content = new String(Base64.getDecoder().decode(content));
+            }
+            
+            dataMap.put("title", FilenameUtils.getName(url));
+            dataMap.put("url", url);
+            dataMap.put("content", content);
+            
+            return dataMap;
+        } catch (final Exception e) {
+            logger.warn("Failed to get " + url, e);
+            return Collections.emptyMap();
+        }
     }
 
     protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name, final String path,
