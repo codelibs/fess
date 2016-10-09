@@ -16,18 +16,18 @@
 package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import org.apache.commons.io.FilenameUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +68,13 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 final String owner = (String) repository.get("owner");
                 repository.get("is_private");
 
-                final List<String> pathList = collectFileNames(rootURL, authToken, owner, name, "", 0, readInterval);
-                for (final String path : pathList) {
+                collectFileNames(rootURL, authToken, owner, name, "", 0, readInterval, path -> {
                     storeFileContent(rootURL, authToken, owner, name, path, dataConfig, callback, paramMap, scriptMap, defaultDataMap);
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
-                }
+
+                });
             } catch (final Exception e) {
                 logger.warn("Failed to access to " + repository, e);
             }
@@ -84,9 +84,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
     protected String getRootURL(final Map<String, String> paramMap) {
         if (paramMap.containsKey(GITBUCKET_URL_PARAM)) {
-            String url = paramMap.get(GITBUCKET_URL_PARAM);
-            if (url.charAt(url.length() - 1) != '/') {
-                url += "/";
+            final String url = paramMap.get(GITBUCKET_URL_PARAM);
+            if (!url.endsWith("/")) {
+                return url + "/";
             }
             return url;
         }
@@ -106,6 +106,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             curlResponse.getContentAsString();
             final Map<String, Object> map = curlResponse.getContentAsMap();
             assert (map.containsKey("repositories"));
+            @SuppressWarnings("unchecked")
             final List<Map<String, Object>> repoList = (List<Map<String, Object>>) map.get("repositories");
             return repoList;
         } catch (final Exception e) {
@@ -118,6 +119,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         try {
             return JsonXContent.jsonXContent.createParser(is).list();
         } catch (final Exception e) {
+            logger.warn("Failed to parse a list.", e);
             return Collections.emptyList();
         }
     }
@@ -126,17 +128,13 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final DataConfig dataConfig, final IndexUpdateCallback callback, final Map<String, String> paramMap,
             final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
         final String url = rootURL + owner + "/" + name + "/blob/master/" + path;
-        final String filename = FilenameUtils.getName(url);
 
         try (CurlResponse curlResponse = Curl.get(url).param("raw", "true").header("Authorization", "token " + authToken).execute()) {
             logger.info("Get a content from " + url);
-            // TODO Use DoucmentHelper#processRequest and scriptMap
             final Map<String, Object> dataMap = new HashMap<>();
             dataMap.putAll(defaultDataMap);
-            dataMap.put("title", owner + "/" + name + " : " + filename);
-            dataMap.put("url", url);
-            dataMap.put("content", curlResponse.getContentAsString());
-            dataMap.put("label", "GitBucket"); // TODO role
+            dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(dataConfig, paramMap.get("crawlingInfoId"), url));
+            // TODO scriptMap
 
             callback.store(paramMap, dataMap);
 
@@ -147,14 +145,13 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         return;
     }
 
-    protected List<String> collectFileNames(final String rootURL, final String authToken, final String owner, final String name,
-            final String path, final int depth, final long readInterval) {
+    protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name, final String path,
+            final int depth, final long readInterval, Consumer<String> consumer) {
 
         if (MAX_DEPTH <= depth) {
-            return Collections.emptyList();
+            return;
         }
 
-        final List<String> resultList = new ArrayList<>();
         final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
@@ -162,24 +159,24 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             final List<Object> fileList = parseList(iStream);
 
             for (int i = 0; i < fileList.size(); ++i) {
+                @SuppressWarnings("unchecked")
                 final Map<String, String> file = (Map<String, String>) fileList.get(i);
                 final String newPath = path.isEmpty() ? file.get("name") : path + "/" + file.get("name");
                 switch (file.get("type")) {
                 case "file":
-                    resultList.add(newPath);
+                    consumer.accept(newPath);
                     break;
                 case "dir":
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
-                    resultList.addAll(collectFileNames(rootURL, authToken, owner, name, newPath, depth + 1, readInterval));
+                    collectFileNames(rootURL, authToken, owner, name, newPath, depth + 1, readInterval, consumer);
                     break;
                 }
             }
         } catch (final Exception e) {
             logger.warn("Failed to access to " + url, e);
         }
-        return resultList;
     }
 
 }
