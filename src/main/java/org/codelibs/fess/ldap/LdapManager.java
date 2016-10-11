@@ -75,8 +75,8 @@ public class LdapManager {
     protected Hashtable<String, String> createAdminEnv() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createEnvironment(//
-                fessConfig.getLdapAdminInitialContextFactory(), //
-                fessConfig.getLdapAdminSecurityAuthentication(), fessConfig.getLdapAdminProviderUrl(), //
+                fessConfig.getLdapInitialContextFactory(), //
+                fessConfig.getLdapSecurityAuthentication(), fessConfig.getLdapProviderUrl(), //
                 fessConfig.getLdapAdminSecurityPrincipal(), //
                 fessConfig.getLdapAdminSecurityCredentials());
     }
@@ -93,8 +93,8 @@ public class LdapManager {
     protected Hashtable<String, String> createSearchEnv() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return createEnvironment(//
-                fessConfig.getLdapAdminInitialContextFactory(), //
-                fessConfig.getLdapAdminSecurityAuthentication(), fessConfig.getLdapAdminProviderUrl(), //
+                fessConfig.getLdapInitialContextFactory(), //
+                fessConfig.getLdapSecurityAuthentication(), fessConfig.getLdapProviderUrl(), //
                 fessConfig.getLdapAdminSecurityPrincipal(), //
                 fessConfig.getLdapAdminSecurityCredentials());
     }

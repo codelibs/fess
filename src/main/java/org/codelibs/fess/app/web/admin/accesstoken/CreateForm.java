@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.app.web.admin.accesstoken;
 
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
@@ -28,11 +29,20 @@ public class CreateForm {
     public Integer crudMode;
 
     @Required
-    @Size(max = 10000)
+    @Size(max = 1000)
     public String name;
 
     @Size(max = 10000)
     public String token;
+
+    @Size(max = 4000)
+    public String permissions;
+
+    @Size(max = 10000)
+    public String parameterName;
+
+    @Pattern(regexp = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]")
+    public String expires;
 
     @Required
     @Size(max = 1000)

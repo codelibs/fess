@@ -198,7 +198,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
+    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory clientFactory) {
         final FileAuthenticationService fileAuthenticationService = ComponentUtil.getComponent(FileAuthenticationService.class);
 
         //  Parameters
@@ -237,6 +237,7 @@ public class FileConfig extends BsFileConfig implements CrawlingConfig {
         paramMap.put(SmbClient.SMB_AUTHENTICATIONS_PROPERTY, smbAuthList.toArray(new SmbAuthentication[smbAuthList.size()]));
         paramMap.put(FtpClient.FTP_AUTHENTICATIONS_PROPERTY, ftpAuthList.toArray(new FtpAuthentication[ftpAuthList.size()]));
 
+        return paramMap;
     }
 
     @Override

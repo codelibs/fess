@@ -60,65 +60,31 @@
 												<td>${f:h(token)}</td>
 											</tr>
 											<tr>
+												<th><la:message key="labels.permissions" /></th>
+												<td>${f:br(f:h(permissions))}<la:hidden
+														property="permissions" /></td>
+											</tr>
+											<tr>
+												<th><la:message
+														key="labels.access_token_parameter_name" /></th>
+												<td>${f:h(parameterName)}</td>
+											</tr>
+											<tr>
+												<th><la:message
+														key="labels.access_token_expires" /></th>
+												<td>${f:h(expires)}<la:hidden property="expires" /></td>
+											</tr>
+											<tr>
 												<th><la:message
 														key="labels.access_token_updated_time" /></th>
-												<td>${fe:date(updatedTime)}</td>
+												<td><fmt:formatDate value="${fe:date(updatedTime)}" pattern="yyyy-MM-dd'T'HH:mm:ss" /></td>
 											</tr>
 										</tbody>
 									</table>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="submit" class="btn btn-default" name="list" value="back">
-										<i class="fa fa-arrow-circle-left"></i>
-										<la:message key="labels.crud_button_back" />
-									</button>
-									<%--
-									<button type="submit" class="btn btn-warning" name="edit"
-										value="<la:message key="labels.crud_button_edit" />">
-										<i class="fa fa-pencil"></i>
-										<la:message key="labels.crud_button_edit" />
-									</button>
-									 --%>
-									<button type="button" class="btn btn-danger" name="delete"
-										data-toggle="modal" data-target="#confirmToDelete"
-										value="<la:message key="labels.crud_button_delete" />">
-										<i class="fa fa-trash"></i>
-										<la:message key="labels.crud_button_delete" />
-									</button>
-									<div class="modal modal-danger fade" id="confirmToDelete" tabindex="-1"
-										role="dialog">
-										<div class="modal-dialog">
-											<div class="modal-content">
-												<div class="modal-header">
-													<button type="button" class="close" data-dismiss="modal"
-														aria-label="Close">
-														<span aria-hidden="true">×</span>
-													</button>
-													<h4 class="modal-title">
-														<la:message key="labels.crud_title_delete" />
-													</h4>
-												</div>
-												<div class="modal-body">
-													<p>
-														<la:message key="labels.crud_delete_confirmation" />
-													</p>
-												</div>
-												<div class="modal-footer">
-													<button type="button" class="btn btn-outline pull-left"
-														data-dismiss="modal">
-														<la:message key="labels.crud_button_cancel" />
-													</button>
-													<button type="submit" class="btn btn-outline btn-danger"
-														name="delete"
-														value="<la:message key="labels.crud_button_delete" />">
-														<i class="fa fa-trash"></i>
-														<la:message key="labels.crud_button_delete" />
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
+									<jsp:include page="/WEB-INF/view/common/admin/crud/buttons.jsp"></jsp:include>
 								</div>
 								<!-- /.box-footer -->
 							</div>

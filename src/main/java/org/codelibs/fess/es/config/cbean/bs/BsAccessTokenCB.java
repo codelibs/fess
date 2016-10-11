@@ -163,6 +163,10 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
             doColumn("parameter_name");
         }
 
+        public void columnExpiredTime() {
+            doColumn("expiredTime");
+        }
+
         public void columnCreatedBy() {
             doColumn("createdBy");
         }

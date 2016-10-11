@@ -197,6 +197,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Expired */
     public static final String LABELS_EXPIRED_TIME = "{labels.expiredTime}";
 
+    /** The key of the message: Expired */
+    public static final String LABELS_EXPIRES = "{labels.expires}";
+
     /** The key of the message: Failure Count */
     public static final String LABELS_FAILURE_COUNT_THRESHOLD = "{labels.failureCountThreshold}";
 
@@ -440,8 +443,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
 
-    /** The key of the message: Bind DN */
+    /** The key of the message: User DN */
     public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
+
+    /** The key of the message: Bind DN */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_PRINCIPAL = "{labels.ldapAdminSecurityPrincipal}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_CREDENTIALS = "{labels.ldapAdminSecurityCredentials}";
 
     /** The key of the message: Base DN */
     public static final String LABELS_LDAP_BASE_DN = "{labels.ldapBaseDn}";
@@ -2097,6 +2106,12 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Token */
     public static final String LABELS_access_token_token = "{labels.access_token_token}";
 
+    /** The key of the message: Expired */
+    public static final String LABELS_access_token_expires = "{labels.access_token_expires}";
+
+    /** The key of the message: Parameter Name */
+    public static final String LABELS_access_token_parameter_name = "{labels.access_token_parameter_name}";
+
     /** The key of the message: Created */
     public static final String LABELS_access_token_updated_time = "{labels.access_token_updated_time}";
 
@@ -2319,8 +2334,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
-    /** The key of the message: Bind DN */
+    /** The key of the message: User DN */
     public static final String LABELS_ldap_security_principal = "{labels.ldap_security_principal}";
+
+    /** The key of the message: Bind DN */
+    public static final String LABELS_ldap_admin_security_principal = "{labels.ldap_admin_security_principal}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_ldap_admin_security_credentials = "{labels.ldap_admin_security_credentials}";
 
     /** The key of the message: Base DN */
     public static final String LABELS_ldap_base_dn = "{labels.ldap_base_dn}";

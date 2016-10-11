@@ -49,6 +49,7 @@ import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
 import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
@@ -263,6 +264,11 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a search request.", e);
+            }
+            if (e instanceof InvalidAccessTokenException) {
+                final InvalidAccessTokenException iate = (InvalidAccessTokenException) e;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setHeader("WWW-Authenticate", "Bearer error=\"" + iate.getType() + "\"");
             }
         }
 

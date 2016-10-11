@@ -990,6 +990,180 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setExpiredTime_Equal(Long expiredTime) {
+        setExpiredTime_Term(expiredTime, null);
+    }
+
+    public void setExpiredTime_Equal(Long expiredTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setExpiredTime_Term(expiredTime, opLambda);
+    }
+
+    public void setExpiredTime_Term(Long expiredTime) {
+        setExpiredTime_Term(expiredTime, null);
+    }
+
+    public void setExpiredTime_Term(Long expiredTime, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_NotEqual(Long expiredTime) {
+        setExpiredTime_NotTerm(expiredTime, null);
+    }
+
+    public void setExpiredTime_NotTerm(Long expiredTime) {
+        setExpiredTime_NotTerm(expiredTime, null);
+    }
+
+    public void setExpiredTime_NotEqual(Long expiredTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setExpiredTime_NotTerm(expiredTime, opLambda);
+    }
+
+    public void setExpiredTime_NotTerm(Long expiredTime, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setExpiredTime_Term(expiredTime), opLambda);
+    }
+
+    public void setExpiredTime_Terms(Collection<Long> expiredTimeList) {
+        setExpiredTime_Terms(expiredTimeList, null);
+    }
+
+    public void setExpiredTime_Terms(Collection<Long> expiredTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("expiredTime", expiredTimeList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_InScope(Collection<Long> expiredTimeList) {
+        setExpiredTime_Terms(expiredTimeList, null);
+    }
+
+    public void setExpiredTime_InScope(Collection<Long> expiredTimeList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setExpiredTime_Terms(expiredTimeList, opLambda);
+    }
+
+    public void setExpiredTime_Match(Long expiredTime) {
+        setExpiredTime_Match(expiredTime, null);
+    }
+
+    public void setExpiredTime_Match(Long expiredTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_MatchPhrase(Long expiredTime) {
+        setExpiredTime_MatchPhrase(expiredTime, null);
+    }
+
+    public void setExpiredTime_MatchPhrase(Long expiredTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_MatchPhrasePrefix(Long expiredTime) {
+        setExpiredTime_MatchPhrasePrefix(expiredTime, null);
+    }
+
+    public void setExpiredTime_MatchPhrasePrefix(Long expiredTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_Fuzzy(Long expiredTime) {
+        setExpiredTime_Fuzzy(expiredTime, null);
+    }
+
+    public void setExpiredTime_Fuzzy(Long expiredTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_GreaterThan(Long expiredTime) {
+        setExpiredTime_GreaterThan(expiredTime, null);
+    }
+
+    public void setExpiredTime_GreaterThan(Long expiredTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("expiredTime", ConditionKey.CK_GREATER_THAN, expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_LessThan(Long expiredTime) {
+        setExpiredTime_LessThan(expiredTime, null);
+    }
+
+    public void setExpiredTime_LessThan(Long expiredTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("expiredTime", ConditionKey.CK_LESS_THAN, expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_GreaterEqual(Long expiredTime) {
+        setExpiredTime_GreaterEqual(expiredTime, null);
+    }
+
+    public void setExpiredTime_GreaterEqual(Long expiredTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("expiredTime", ConditionKey.CK_GREATER_EQUAL, expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_LessEqual(Long expiredTime) {
+        setExpiredTime_LessEqual(expiredTime, null);
+    }
+
+    public void setExpiredTime_LessEqual(Long expiredTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("expiredTime", ConditionKey.CK_LESS_EQUAL, expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_Exists() {
+        setExpiredTime_Exists(null);
+    }
+
+    public void setExpiredTime_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("expiredTime");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExpiredTime_CommonTerms(Long expiredTime) {
+        setExpiredTime_CommonTerms(expiredTime, null);
+    }
+
+    public void setExpiredTime_CommonTerms(Long expiredTime, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("expiredTime", expiredTime);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsAccessTokenCQ addOrderBy_ExpiredTime_Asc() {
+        regOBA("expiredTime");
+        return this;
+    }
+
+    public BsAccessTokenCQ addOrderBy_ExpiredTime_Desc() {
+        regOBD("expiredTime");
+        return this;
+    }
+
     public void setCreatedBy_Equal(String createdBy) {
         setCreatedBy_Term(createdBy, null);
     }

@@ -77,6 +77,7 @@ public abstract class BsAccessTokenBhv extends EsAbstractBehavior<AccessToken, A
             result.setToken(DfTypeUtil.toString(source.get("token")));
             result.setPermissions(toStringArray(source.get("permissions")));
             result.setParameterName(DfTypeUtil.toString(source.get("parameter_name")));
+            result.setExpiredTime(DfTypeUtil.toLong(source.get("expiredTime")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setUpdatedBy(DfTypeUtil.toString(source.get("updatedBy")));

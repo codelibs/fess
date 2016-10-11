@@ -363,6 +363,10 @@ public class Constants extends CoreLibConstants {
 
     public static final String LDAP_SECURITY_PRINCIPAL = "ldap.security.principal";
 
+    public static final String LDAP_ADMIN_SECURITY_PRINCIPAL = "ldap.admin.security.principal";
+
+    public static final String LDAP_ADMIN_SECURITY_CREDENTIALS = "ldap.admin.security.credentials";
+
     public static final String LDAP_PROVIDER_URL = "ldap.provider.url";
 
     public static final String LDAP_SECURITY_AUTHENTICATION = "ldap.security.authentication";
@@ -396,4 +400,6 @@ public class Constants extends CoreLibConstants {
     public static final String GSA_API_VERSION = "3.2";
 
     public static final String PERMISSIONS = "permissions";
+
+    public static final String CIPHER_PREFIX = "{cipher}";
 }

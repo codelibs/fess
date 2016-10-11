@@ -52,6 +52,40 @@
 											<la:text property="name" styleClass="form-control"/>
 										</div>
 									</div>
+									<c:if test="${crudMode==2}">
+									<div class="form-group">
+										<label for="token" class="col-sm-3 control-label"><la:message
+												key="labels.access_token_token" /></label>
+										<div class="col-sm-9">
+											${f:h(token)}
+										</div>
+									</div>
+									</c:if>
+									<div class="form-group">
+										<label for="permissions" class="col-sm-3 control-label"><la:message
+												key="labels.permissions" /></label>
+										<div class="col-sm-9">
+											<la:errors property="permissions" />
+											<la:textarea property="permissions" styleClass="form-control"
+												rows="5" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.access_token_parameter_name" /></label>
+										<div class="col-sm-9">
+											<la:errors property="parameterName" />
+											<la:text property="parameterName" styleClass="form-control"/>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="name" class="col-sm-3 control-label"><la:message
+												key="labels.access_token_expires" /></label>
+										<div class="col-sm-9">
+											<la:errors property="expires" />
+											<la:text property="expires" styleClass="form-control"/>
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

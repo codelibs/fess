@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.exentity;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.codelibs.fess.es.config.bsentity.BsAccessToken;
 
@@ -40,6 +41,17 @@ public class AccessToken extends BsAccessToken {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public Date getExpires() {
+        if (getExpiredTime() == null) {
+            return null;
+        }
+        return new Date(getExpiredTime().longValue());
+    }
+
+    public void setExpires(Date date) {
+        setExpiredTime(date != null ? date.getTime() : null);
     }
 
     @Override

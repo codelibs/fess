@@ -34,7 +34,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
 
-    /** The key of the configuration. e.g. __change_me__ */
+    /** The key of the configuration. e.g. ___change__me___ */
     String APP_CIPHER_KEY = "app.cipher.key";
 
     /** The key of the configuration. e.g. sha256 */
@@ -835,21 +835,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String LDAP_ADMIN_ENABLED = "ldap.admin.enabled";
 
-    /** The key of the configuration. e.g. com.sun.jndi.ldap.LdapCtxFactory */
-    String LDAP_ADMIN_INITIAL_CONTEXT_FACTORY = "ldap.admin.initial.context.factory";
-
-    /** The key of the configuration. e.g. simple */
-    String LDAP_ADMIN_SECURITY_AUTHENTICATION = "ldap.admin.security.authentication";
-
-    /** The key of the configuration. e.g. ldap://localhost:1389 */
-    String LDAP_ADMIN_PROVIDER_URL = "ldap.admin.provider.url";
-
-    /** The key of the configuration. e.g. cn=Directory Manager */
-    String LDAP_ADMIN_SECURITY_PRINCIPAL = "ldap.admin.security.principal";
-
-    /** The key of the configuration. e.g. password */
-    String LDAP_ADMIN_SECURITY_CREDENTIALS = "ldap.admin.security.credentials";
-
     /** The key of the configuration. e.g. uid=%s */
     String LDAP_ADMIN_USER_FILTER = "ldap.admin.user.filter";
 
@@ -1115,7 +1100,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'app.cipher.key'. <br>
-     * The value is, e.g. __change_me__ <br>
+     * The value is, e.g. ___change__me___ <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getAppCipherKey();
@@ -3717,41 +3702,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isLdapAdminEnabled();
 
     /**
-     * Get the value for the key 'ldap.admin.initial.context.factory'. <br>
-     * The value is, e.g. com.sun.jndi.ldap.LdapCtxFactory <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminInitialContextFactory();
-
-    /**
-     * Get the value for the key 'ldap.admin.security.authentication'. <br>
-     * The value is, e.g. simple <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminSecurityAuthentication();
-
-    /**
-     * Get the value for the key 'ldap.admin.provider.url'. <br>
-     * The value is, e.g. ldap://localhost:1389 <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminProviderUrl();
-
-    /**
-     * Get the value for the key 'ldap.admin.security.principal'. <br>
-     * The value is, e.g. cn=Directory Manager <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminSecurityPrincipal();
-
-    /**
-     * Get the value for the key 'ldap.admin.security.credentials'. <br>
-     * The value is, e.g. password <br>
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapAdminSecurityCredentials();
-
-    /**
      * Get the value for the key 'ldap.admin.user.filter'. <br>
      * The value is, e.g. uid=%s <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5735,26 +5685,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isLdapAdminEnabled() {
             return is(FessConfig.LDAP_ADMIN_ENABLED);
-        }
-
-        public String getLdapAdminInitialContextFactory() {
-            return get(FessConfig.LDAP_ADMIN_INITIAL_CONTEXT_FACTORY);
-        }
-
-        public String getLdapAdminSecurityAuthentication() {
-            return get(FessConfig.LDAP_ADMIN_SECURITY_AUTHENTICATION);
-        }
-
-        public String getLdapAdminProviderUrl() {
-            return get(FessConfig.LDAP_ADMIN_PROVIDER_URL);
-        }
-
-        public String getLdapAdminSecurityPrincipal() {
-            return get(FessConfig.LDAP_ADMIN_SECURITY_PRINCIPAL);
-        }
-
-        public String getLdapAdminSecurityCredentials() {
-            return get(FessConfig.LDAP_ADMIN_SECURITY_CREDENTIALS);
         }
 
         public String getLdapAdminUserFilter() {

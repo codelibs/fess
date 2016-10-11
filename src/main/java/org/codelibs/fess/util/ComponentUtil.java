@@ -62,6 +62,7 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
+import org.lastaflute.core.security.PrimaryCipher;
 import org.lastaflute.di.core.SingletonLaContainer;
 import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
 import org.lastaflute.di.core.smart.hot.HotdeployUtil;
@@ -374,6 +375,10 @@ public final class ComponentUtil {
 
     public static ThumbnailManager getThumbnailManager() {
         return getComponent(THUMBNAIL_MANAGER);
+    }
+
+    public static PrimaryCipher getPrimaryCipher() {
+        return getComponent(PrimaryCipher.class);
     }
 
     public static CrawlerClientFactory getCrawlerClientFactory() {

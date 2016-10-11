@@ -197,7 +197,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
     }
 
     @Override
-    public void initializeClientFactory(final CrawlerClientFactory clientFactory) {
+    public Map<String, Object> initializeClientFactory(final CrawlerClientFactory clientFactory) {
         final WebAuthenticationService webAuthenticationService = ComponentUtil.getComponent(WebAuthenticationService.class);
         final RequestHeaderService requestHeaderService = ComponentUtil.getComponent(RequestHeaderService.class);
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
@@ -237,6 +237,7 @@ public class WebConfig extends BsWebConfig implements CrawlingConfig {
         paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY,
                 rhList.toArray(new org.codelibs.fess.crawler.client.http.RequestHeader[rhList.size()]));
 
+        return paramMap;
     }
 
     @Override
