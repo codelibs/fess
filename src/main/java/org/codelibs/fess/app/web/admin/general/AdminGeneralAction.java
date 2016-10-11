@@ -156,6 +156,7 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setNotificationSearchTop(form.notificationSearchTop);
 
         fessConfig.storeSystemProperties();
+        ComponentUtil.getLdapManager().updateConfig();
         saveInfo(messages -> messages.addSuccessUpdateCrawlerParams(GLOBAL));
         return redirect(getClass());
     }

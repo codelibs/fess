@@ -61,6 +61,8 @@ public class LdapManager {
 
     protected ThreadLocal<DirContextHolder> contextLocal = new ThreadLocal<>();
 
+    protected volatile boolean isBind = false;
+
     protected Hashtable<String, String> createEnvironment(final String initialContextFactory, final String securityAuthentication,
             final String providerUrl, final String principal, final String credntials) {
         final Hashtable<String, String> env = new Hashtable<>();
@@ -99,10 +101,34 @@ public class LdapManager {
                 fessConfig.getLdapAdminSecurityCredentials());
     }
 
+    public void updateConfig() {
+        isBind = false;
+    }
+
+    protected boolean validate() {
+        if (!isBind) {
+            final Hashtable<String, String> env = createAdminEnv();
+            try (DirContextHolder holder = getDirContext(() -> env)) {
+                final DirContext context = holder.get();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Logged in as Bind DN.", context);
+                }
+                isBind = true;
+            } catch (final Exception e) {
+                logger.warn("LDAP configuration is wrong.", e);
+            }
+        }
+        return false;
+    }
+
     public OptionalEntity<FessUser> login(final String username, final String password) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         if (StringUtil.isBlank(fessConfig.getLdapProviderUrl())) {
+            return OptionalEntity.empty();
+        }
+
+        if (!validate()) {
             return OptionalEntity.empty();
         }
 
