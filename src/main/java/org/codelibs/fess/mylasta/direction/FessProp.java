@@ -492,6 +492,27 @@ public interface FessProp {
         return getSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL);
     }
 
+    public default void setLdapAdminSecurityPrincipal(final String value) {
+        setSystemProperty(Constants.LDAP_ADMIN_SECURITY_PRINCIPAL, value);
+    }
+
+    public default String getLdapAdminSecurityPrincipal() {
+        return getSystemProperty(Constants.LDAP_ADMIN_SECURITY_PRINCIPAL);
+    }
+
+    public default void setLdapAdminSecurityCredentials(final String value) {
+        setSystemProperty(Constants.LDAP_ADMIN_SECURITY_CREDENTIALS,
+                Constants.CIPHER_PREFIX + ComponentUtil.getPrimaryCipher().encrypt(value));
+    }
+
+    public default String getLdapAdminSecurityCredentials() {
+        final String value = getSystemProperty(Constants.LDAP_ADMIN_SECURITY_CREDENTIALS);
+        if (StringUtil.isNotBlank(value) && value.startsWith(Constants.CIPHER_PREFIX)) {
+            return ComponentUtil.getPrimaryCipher().decrypt(value.substring(Constants.CIPHER_PREFIX.length()));
+        }
+        return value;
+    }
+
     public default void setLdapBaseDn(final String value) {
         setSystemProperty(Constants.LDAP_BASE_DN, value);
     }

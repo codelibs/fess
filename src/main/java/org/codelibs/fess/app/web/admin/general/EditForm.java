@@ -128,6 +128,12 @@ public class EditForm {
     public String ldapSecurityPrincipal;
 
     @Size(max = 1000)
+    public String ldapAdminSecurityPrincipal;
+
+    @Size(max = 1000)
+    public String ldapAdminSecurityCredentials;
+
+    @Size(max = 1000)
     public String ldapBaseDn;
 
     @Size(max = 1000)

@@ -94,12 +94,21 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 final String owner = (String) repository.get("owner");
                 final List<String> roleList = createRoleList(owner, repository);
 
-                collectFileNames(rootURL, authToken, owner, name, StringUtil.EMPTY, 0, readInterval, path -> {
-                    storeFileContent(rootURL, authToken, owner, name, roleList, path, crawlingConfig, callback, paramMap, scriptMap, defaultDataMap);
-                    if (readInterval > 0) {
-                        sleep(readInterval);
-                    }
-                });
+                collectFileNames(
+                        rootURL,
+                        authToken,
+                        owner,
+                        name,
+                        StringUtil.EMPTY,
+                        0,
+                        readInterval,
+                        path -> {
+                            storeFileContent(rootURL, authToken, owner, name, roleList, path, crawlingConfig, callback, paramMap,
+                                    scriptMap, defaultDataMap);
+                            if (readInterval > 0) {
+                                sleep(readInterval);
+                            }
+                        });
             } catch (final Exception e) {
                 logger.warn("Failed to access to " + repository, e);
             }

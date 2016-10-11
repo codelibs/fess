@@ -443,8 +443,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_LDAP_PROVIDER_URL = "{labels.ldapProviderUrl}";
 
-    /** The key of the message: Bind DN */
+    /** The key of the message: User DN */
     public static final String LABELS_LDAP_SECURITY_PRINCIPAL = "{labels.ldapSecurityPrincipal}";
+
+    /** The key of the message: Bind DN */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_PRINCIPAL = "{labels.ldapAdminSecurityPrincipal}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_LDAP_ADMIN_SECURITY_CREDENTIALS = "{labels.ldapAdminSecurityCredentials}";
 
     /** The key of the message: Base DN */
     public static final String LABELS_LDAP_BASE_DN = "{labels.ldapBaseDn}";
@@ -2328,8 +2334,14 @@ public class FessLabels extends UserMessages {
     /** The key of the message: LDAP URL */
     public static final String LABELS_ldap_provider_url = "{labels.ldap_provider_url}";
 
-    /** The key of the message: Bind DN */
+    /** The key of the message: User DN */
     public static final String LABELS_ldap_security_principal = "{labels.ldap_security_principal}";
+
+    /** The key of the message: Bind DN */
+    public static final String LABELS_ldap_admin_security_principal = "{labels.ldap_admin_security_principal}";
+
+    /** The key of the message: Password */
+    public static final String LABELS_ldap_admin_security_credentials = "{labels.ldap_admin_security_credentials}";
 
     /** The key of the message: Base DN */
     public static final String LABELS_ldap_base_dn = "{labels.ldap_base_dn}";

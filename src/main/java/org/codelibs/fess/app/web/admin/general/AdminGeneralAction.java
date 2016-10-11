@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminGeneralAction extends FessAdminAction {
 
+    private static final String DUMMY_PASSWORD = "**********";
+
     private static final Logger logger = LoggerFactory.getLogger(AdminGeneralAction.class);
 
     // ===================================================================================
@@ -144,6 +146,10 @@ public class AdminGeneralAction extends FessAdminAction {
         fessConfig.setPurgeSuggestSearchLogDay(form.purgeSuggestSearchLogDay);
         fessConfig.setLdapProviderUrl(form.ldapProviderUrl);
         fessConfig.setLdapSecurityPrincipal(form.ldapSecurityPrincipal);
+        fessConfig.setLdapAdminSecurityPrincipal(form.ldapAdminSecurityPrincipal);
+        if (form.ldapAdminSecurityCredentials != null && StringUtil.isNotBlank(form.ldapAdminSecurityCredentials.replace("*", " "))) {
+            fessConfig.setLdapAdminSecurityCredentials(form.ldapAdminSecurityCredentials);
+        }
         fessConfig.setLdapBaseDn(form.ldapBaseDn);
         fessConfig.setLdapAccountFilter(form.ldapAccountFilter);
         fessConfig.setNotificationLogin(form.notificationLogin);
@@ -182,6 +188,8 @@ public class AdminGeneralAction extends FessAdminAction {
         form.purgeSuggestSearchLogDay = fessConfig.getPurgeSuggestSearchLogDay();
         form.ldapProviderUrl = fessConfig.getLdapProviderUrl();
         form.ldapSecurityPrincipal = fessConfig.getLdapSecurityPrincipal();
+        form.ldapAdminSecurityPrincipal = fessConfig.getLdapAdminSecurityPrincipal();
+        form.ldapAdminSecurityCredentials = DUMMY_PASSWORD;//fessConfig.getLdapAdminSecurityCredentials();
         form.ldapBaseDn = fessConfig.getLdapBaseDn();
         form.ldapAccountFilter = fessConfig.getLdapAccountFilter();
         form.notificationLogin = fessConfig.getNotificationLogin();

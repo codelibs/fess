@@ -333,22 +333,42 @@
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="ldapSecurityPrincipal"
-											class="col-sm-3 control-label"><la:message
-												key="labels.ldap_security_principal" /></label>
-										<div class="col-sm-9">
-											<la:errors property="ldapSecurityPrincipal" />
-											<la:text property="ldapSecurityPrincipal"
-												styleClass="form-control" />
-										</div>
-									</div>
-									<div class="form-group">
 										<label for="ldapBaseDn"
 											class="col-sm-3 control-label"><la:message
 												key="labels.ldap_base_dn" /></label>
 										<div class="col-sm-9">
 											<la:errors property="ldapBaseDn" />
 											<la:text property="ldapBaseDn"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapSecurityPrincipal"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_admin_security_principal" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapAdminSecurityPrincipal" />
+											<la:text property="ldapAdminSecurityPrincipal"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapSecurityPrincipal"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_admin_security_credentials" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapAdminSecurityCredentials" />
+											<la:password property="ldapAdminSecurityCredentials"
+												styleClass="form-control" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="ldapSecurityPrincipal"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_security_principal" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapSecurityPrincipal" />
+											<la:text property="ldapSecurityPrincipal"
 												styleClass="form-control" />
 										</div>
 									</div>
