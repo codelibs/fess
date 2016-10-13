@@ -139,6 +139,9 @@ public class EditForm {
     @Size(max = 1000)
     public String ldapAccountFilter;
 
+    @Size(max = 100)
+    public String ldapMemberofAttribute;
+
     @Size(max = 3000)
     public String notificationLogin;
 

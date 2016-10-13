@@ -473,6 +473,14 @@ public interface FessProp {
         setSystemProperty(Constants.LDAP_SECURITY_PRINCIPAL, value);
     }
 
+    public default String getLdapMemberofAttribute() {
+        return getSystemProperty(Constants.LDAP_MEMBEROF_ATTRIBUTE, "memberOf");
+    }
+
+    public default void setLdapMemberofAttribute(final String value) {
+        setSystemProperty(Constants.LDAP_MEMBEROF_ATTRIBUTE, value);
+    }
+
     Integer getLdapMaxUsernameLengthAsInteger();
 
     public default String getLdapSecurityPrincipal(final String username) {

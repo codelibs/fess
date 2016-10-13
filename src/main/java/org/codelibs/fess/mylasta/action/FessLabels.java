@@ -458,6 +458,9 @@ public class FessLabels extends UserMessages {
     /** The key of the message: Account Filter */
     public static final String LABELS_LDAP_ACCOUNT_FILTER = "{labels.ldapAccountFilter}";
 
+    /** The key of the message: memberOf Attribute */
+    public static final String LABELS_LDAP_MEMBEROF_ATTRIBUTE = "{labels.ldapMemberofAttribute}";
+
     /** The key of the message: Current Password */
     public static final String LABELS_OLD_PASSWORD = "{labels.oldPassword}";
 
@@ -2348,6 +2351,9 @@ public class FessLabels extends UserMessages {
 
     /** The key of the message: Account Filter */
     public static final String LABELS_ldap_account_filter = "{labels.ldap_account_filter}";
+
+    /** The key of the message: memberOf Attribute */
+    public static final String LABELS_ldap_memberof_attribute = "{labels.ldap_memberof_attribute}";
 
     /** The key of the message: Login page */
     public static final String LABELS_notification_login = "{labels.notification_login}";
