@@ -118,7 +118,7 @@ public class LdapManager {
                 logger.warn("LDAP configuration is wrong.", e);
             }
         }
-        return false;
+        return isBind;
     }
 
     public OptionalEntity<FessUser> login(final String username, final String password) {
