@@ -301,6 +301,7 @@ public class SystemHelper {
         ComponentUtil.getSuggestHelper().init();
         ComponentUtil.getPopularWordHelper().init();
         ComponentUtil.getJobManager().reboot();
+        ComponentUtil.getLdapManager().updateConfig();
     }
 
     public String generateAccessToken() {

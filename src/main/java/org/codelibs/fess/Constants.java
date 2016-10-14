@@ -375,6 +375,8 @@ public class Constants extends CoreLibConstants {
 
     public static final String LDAP_ACCOUNT_FILTER = "ldap.account.filter";
 
+    public static final String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
+
     public static final String NOTIFICATION_LOGIN = "notification.login";
 
     public static final String NOTIFICATION_SEARCH_TOP = "notification.search.top";

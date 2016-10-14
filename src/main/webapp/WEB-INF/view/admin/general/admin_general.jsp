@@ -382,6 +382,16 @@
 												styleClass="form-control" />
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="ldapMemberofAttribute"
+											class="col-sm-3 control-label"><la:message
+												key="labels.ldap_memberof_attribute" /></label>
+										<div class="col-sm-9">
+											<la:errors property="ldapMemberofAttribute" />
+											<la:text property="ldapMemberofAttribute"
+												styleClass="form-control" />
+										</div>
+									</div>
 									<%-- Nortification --%>
 									<h4><la:message key="labels.general_menu_notification" /></h4>
 									<div class="form-group">

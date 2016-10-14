@@ -868,9 +868,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. -1 */
     String LDAP_MAX_USERNAME_LENGTH = "ldap.max.username.length";
 
-    /** The key of the configuration. e.g. memberOf */
-    String LDAP_MEMBEROF_ATTRIBUTE = "ldap.memberof.attribute";
-
     /** The key of the configuration. e.g. true */
     String LDAP_ROLE_SEARCH_USER_ENABLED = "ldap.role.search.user.enabled";
 
@@ -3794,14 +3791,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getLdapMaxUsernameLengthAsInteger();
 
     /**
-     * Get the value for the key 'ldap.memberof.attribute'. <br>
-     * The value is, e.g. memberOf <br>
-     * comment: Active Directory
-     * @return The value of found property. (NotNull: if not found, exception but basically no way)
-     */
-    String getLdapMemberofAttribute();
-
-    /**
      * Get the value for the key 'ldap.role.search.user.enabled'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5737,10 +5726,6 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getLdapMaxUsernameLengthAsInteger() {
             return getAsInteger(FessConfig.LDAP_MAX_USERNAME_LENGTH);
-        }
-
-        public String getLdapMemberofAttribute() {
-            return get(FessConfig.LDAP_MEMBEROF_ATTRIBUTE);
         }
 
         public String getLdapRoleSearchUserEnabled() {
