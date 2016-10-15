@@ -40,9 +40,9 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.8.3</lastaflute.version>
+		<lastaflute.version>0.8.4</lastaflute.version>
 		<lasta.taglib.version>0.7.1</lasta.taglib.version>
-		<lasta.job.version>0.2.3-RC2</lasta.job.version>
+		<lasta.job.version>0.2.3-RC1</lasta.job.version>
 		<mailflute.version>0.5.1</mailflute.version>
 
 		<!-- Partner Library -->
@@ -54,7 +54,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<utflute.version>0.6.0F</utflute.version>
+		<utflute.version>0.6.1B</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.0.11</crawler.version>
@@ -67,7 +67,7 @@
 		<cluster.runner.version>2.4.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.4</tomcat.version>
+		<tomcat.version>8.5.5</tomcat.version>
 		<tomcat.boot.version>0.5.0</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
