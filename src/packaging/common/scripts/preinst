@@ -16,6 +16,7 @@ ${packaging.scripts.header}
 # Sets the default values for fess variables used in this script
 FESS_USER="${packaging.fess.user}"
 FESS_GROUP="${packaging.fess.group}"
+FESS_USER_HOME="${packaging.fess.var.dir}"
 
 # Source the default env file
 FESS_ENV_FILE="${packaging.env.file}"
@@ -44,6 +45,7 @@ case "$1" in
                     --ingroup "$FESS_GROUP" \
                     --disabled-password \
                     --shell /bin/false \
+                    -d "$FESS_USER_HOME"  \
                     "$FESS_USER"
             echo " OK"
         fi
@@ -69,6 +71,7 @@ case "$1" in
                     --gid "$FESS_GROUP" \
                     --shell /sbin/nologin \
                     --comment "fess user" \
+                    -d "$FESS_USER_HOME"  \
                     "$FESS_USER"
             echo " OK"
         fi
