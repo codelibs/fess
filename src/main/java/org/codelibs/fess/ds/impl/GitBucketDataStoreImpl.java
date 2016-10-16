@@ -17,7 +17,6 @@ package org.codelibs.fess.ds.impl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,8 @@ import org.codelibs.fess.ds.IndexUpdateCallback;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfigWrapper;
 import org.codelibs.fess.es.config.exentity.DataConfig;
+import org.codelibs.fess.helper.SystemHelper;
+import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     }
                 }
                 headerList.add(new RequestHeader("Authorization", "token " + authToken));
+                headerList.add(new RequestHeader("Accept", "application/vnd.github.v3.raw"));
                 paramMap.put(HcHttpClient.REQUERT_HEADERS_PROPERTY, headerList.toArray(new RequestHeader[headerList.size()]));
                 return paramMap;
             }
@@ -156,16 +158,12 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         if (!isPrivate) {
             return Collections.singletonList("Rguest");
         }
+
         @SuppressWarnings("unchecked")
         final List<String> collaboratorList = (List<String>) repository.get(COLLABORATORS_PARAM);
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         collaboratorList.add(owner);
-        return collaboratorList.stream().map(user -> "1" + user).collect(Collectors.toList());
-    }
-
-    private List<String> createLabelList(final String owner, final String name) {
-        final List<String> labelList = new ArrayList<String>();
-        Collections.addAll(labelList, "GitBucket", owner + "/" + name);
-        return labelList;
+        return collaboratorList.stream().map(user -> systemHelper.getSearchRoleByUser(user)).collect(Collectors.toList());
     }
 
     private List<Object> parseList(final InputStream is) { // TODO This function should be moved to CurlResponse
@@ -188,43 +186,18 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
         final Map<String, Object> dataMap = new HashMap<>();
         dataMap.putAll(defaultDataMap);
-        // FIXME Use DocumentHelper
-        // dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), url));
-        dataMap.putAll(processContentRequest(authToken, apiUrl, viewUrl));
+        dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"),
+                apiUrl + "?large_file=true"));
 
+        dataMap.put("title", FilenameUtils.getName(apiUrl));
+        dataMap.put("url", viewUrl);
         dataMap.put("role", roleList);
-        dataMap.put("label", createLabelList(owner, name));
 
         // TODO scriptMap
 
         callback.store(paramMap, dataMap);
 
         return;
-    }
-
-    private Map<String, String> processContentRequest(final String authToken, final String apiUrl, final String viewUrl) { // FIXME should be replaced by DocumentHelper
-        final Map<String, String> dataMap = new HashMap<>();
-        try (CurlResponse curlResponse = Curl.get(apiUrl).header("Authorization", "token " + authToken).execute()) {
-            final Map<String, Object> map = curlResponse.getContentAsMap();
-            String content = StringUtil.EMPTY;
-            ;
-            if (map.containsKey("content")) {
-                content = (String) map.get("content");
-            }
-
-            if (map.containsKey("encoding") && map.get("encoding").equals("base64")) {
-                content = new String(Base64.getDecoder().decode(content));
-            }
-
-            dataMap.put("title", FilenameUtils.getName(apiUrl));
-            dataMap.put("url", viewUrl);
-            dataMap.put("content", content);
-
-            return dataMap;
-        } catch (final Exception e) {
-            logger.warn("Failed to get " + apiUrl, e);
-            return Collections.emptyMap();
-        }
     }
 
     protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name, final String path,
