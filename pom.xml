@@ -1098,7 +1098,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.5</version>
+			<version>0.3.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
