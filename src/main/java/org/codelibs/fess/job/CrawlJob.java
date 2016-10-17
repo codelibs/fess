@@ -325,6 +325,7 @@ public class CrawlJob {
             ownTmpDir = new File(tmpDir, "fessTmpDir_" + sessionId);
             if (ownTmpDir.mkdirs()) {
                 cmdList.add("-Djava.io.tmpdir=" + ownTmpDir.getAbsolutePath());
+                cmdList.add("-Dpdfbox.fontcache=" + ownTmpDir.getAbsolutePath());
             } else {
                 ownTmpDir = null;
             }
