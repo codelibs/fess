@@ -51,7 +51,7 @@ public class CrawlerPostcard extends LaTypicalPostcard {
     @Override
     protected String[] getPropertyNames() {
         return new String[] { "hostname", "webFsCrawlStartTime", "webFsCrawlEndTime", "webFsCrawlExecTime", "webFsIndexExecTime",
-                "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataFsIndexSize",
+                "webFsIndexSize", "dataCrawlStartTime", "dataCrawlEndTime", "dataCrawlExecTime", "dataIndexExecTime", "dataIndexSize",
                 "crawlerStartTime", "crawlerEndTime", "crawlerExecTime", "status" };
     }
 
@@ -191,12 +191,12 @@ public class CrawlerPostcard extends LaTypicalPostcard {
     }
 
     /**
-     * Set the value of dataFsIndexSize, used in parameter comment. <br>
+     * Set the value of dataIndexSize, used in parameter comment. <br>
      * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param dataFsIndexSize The parameter value of dataFsIndexSize. (NotNull)
+     * @param dataIndexSize The parameter value of dataIndexSize. (NotNull)
      */
-    public void setDataFsIndexSize(String dataFsIndexSize) {
-        registerVariable("dataFsIndexSize", dataFsIndexSize);
+    public void setDataIndexSize(String dataIndexSize) {
+        registerVariable("dataIndexSize", dataIndexSize);
     }
 
     /**
