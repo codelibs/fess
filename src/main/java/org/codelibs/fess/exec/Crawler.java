@@ -331,7 +331,7 @@ public class Crawler {
                 postcard.setDataCrawlEndTime(getValueFromMap(dataMap, "dataCrawlEndTime", StringUtil.EMPTY));
                 postcard.setDataCrawlExecTime(getValueFromMap(dataMap, "dataCrawlExecTime", "0"));
                 postcard.setDataCrawlStartTime(getValueFromMap(dataMap, "dataCrawlStartTime", StringUtil.EMPTY));
-                postcard.setDataFsIndexSize(getValueFromMap(dataMap, "dataFsIndexSize", "0"));
+                postcard.setDataIndexSize(getValueFromMap(dataMap, "dataIndexSize", "0"));
                 postcard.setDataIndexExecTime(getValueFromMap(dataMap, "dataIndexExecTime", "0"));
                 postcard.setHostname(getValueFromMap(dataMap, "hostname", StringUtil.EMPTY));
                 postcard.setWebFsCrawlEndTime(getValueFromMap(dataMap, "webFsCrawlEndTime", StringUtil.EMPTY));

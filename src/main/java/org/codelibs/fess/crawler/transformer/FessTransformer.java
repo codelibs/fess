@@ -17,17 +17,26 @@ package org.codelibs.fess.crawler.transformer;
 
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.crawler.entity.AccessResult;
+import org.codelibs.fess.crawler.entity.AccessResultData;
+import org.codelibs.fess.crawler.entity.UrlQueue;
+import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.GroovyUtil;
 import org.slf4j.Logger;
 
 public interface FessTransformer {
+
+    public static Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
     FessConfig getFessConfig();
 
@@ -173,7 +182,7 @@ public interface FessTransformer {
             return StringUtil.EMPTY;
         }
 
-        String u = url;
+        String u = decodeUrlAsName(url, url.startsWith("file:"));
 
         int idx = u.lastIndexOf('?');
         if (idx >= 0) {
@@ -200,5 +209,57 @@ public interface FessTransformer {
             // ignore
         }
         return u;
+    }
+
+    public default String decodeUrlAsName(final String url, final boolean escapePlus) {
+        if (url == null) {
+            return null;
+        }
+
+        final FessConfig fessConfig = getFessConfig();
+        String enc = Constants.UTF_8;
+        if (StringUtil.isBlank(fessConfig.getCrawlerDocumentFileNameEncoding())) {
+            final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
+            if (urlQueue != null) {
+                final String parentUrl = urlQueue.getParentUrl();
+                if (StringUtil.isNotEmpty(parentUrl)) {
+                    final String sessionId = urlQueue.getSessionId();
+                    final String pageEnc = getParentEncoding(parentUrl, sessionId);
+                    if (pageEnc != null) {
+                        enc = pageEnc;
+                    } else if (urlQueue.getEncoding() != null) {
+                        enc = urlQueue.getEncoding();
+                    }
+                }
+            }
+        } else {
+            enc = fessConfig.getCrawlerDocumentFileNameEncoding();
+        }
+
+        final String escapedUrl = escapePlus ? url.replace("+", "%2B") : url;
+        try {
+            return URLDecoder.decode(escapedUrl, enc);
+        } catch (final Exception e) {
+            return url;
+        }
+    }
+
+    public default String getParentEncoding(final String parentUrl, final String sessionId) {
+        final String key = sessionId + ":" + parentUrl;
+        String enc = parentEncodingMap.get(key);
+        if (enc != null) {
+            return enc;
+        }
+
+        final AccessResult<?> accessResult = ComponentUtil.getDataService().getAccessResult(sessionId, parentUrl);
+        if (accessResult != null) {
+            final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
+            if (accessResultData != null && accessResultData.getEncoding() != null) {
+                enc = accessResultData.getEncoding();
+                parentEncodingMap.put(key, enc);
+                return enc;
+            }
+        }
+        return null;
     }
 }

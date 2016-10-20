@@ -23,7 +23,7 @@ Exec Time:  /*pmb.dataCrawlExecTime:orElse('-')*/ ms
 
 --- Data Store Indexer ---
 Exec Time:  /*pmb.dataIndexExecTime:orElse('-')*/ ms
-Num of Doc: /*pmb.dataFsIndexSize:orElse('-')*/ docs
+Num of Doc: /*pmb.dataIndexSize:orElse('-')*/ docs
 
 --- Total ---
 Start Time: /*pmb.crawlerStartTime:orElse('-')*/

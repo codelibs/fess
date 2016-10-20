@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
@@ -189,7 +188,6 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"),
                 apiUrl + "?large_file=true"));
 
-        dataMap.put("title", FilenameUtils.getName(apiUrl));
         dataMap.put("url", viewUrl);
         dataMap.put("role", roleList);
 

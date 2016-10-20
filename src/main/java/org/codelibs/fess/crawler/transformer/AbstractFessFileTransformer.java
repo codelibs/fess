@@ -20,7 +20,6 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,13 +30,11 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.TikaMetadataKeys;
-import org.codelibs.core.collection.LruHashMap;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.client.smb.SmbClient;
-import org.codelibs.fess.crawler.entity.AccessResult;
 import org.codelibs.fess.crawler.entity.AccessResultData;
 import org.codelibs.fess.crawler.entity.ExtractData;
 import org.codelibs.fess.crawler.entity.ResponseData;
@@ -70,8 +67,6 @@ import jcifs.smb.SID;
 public abstract class AbstractFessFileTransformer extends AbstractTransformer implements FessTransformer {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractFessFileTransformer.class);
-
-    public Map<String, String> parentEncodingMap = Collections.synchronizedMap(new LruHashMap<String, String>(1000));
 
     protected Map<String, String> metaContentMapping;
 
@@ -232,6 +227,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         putResultDataBody(dataMap, fessConfig.getIndexFieldDigest(),
                 documentHelper.getDigest(responseData, bodyBase, dataMap, fessConfig.getCrawlerDocumentFileMaxDigestLengthAsInteger()));
         // title
+        final String fileName = getFileName(url, urlEncoding);
         if (!dataMap.containsKey(fessConfig.getIndexFieldTitle())) {
             if (url.endsWith("/")) {
                 if (StringUtil.isNotBlank(content)) {
@@ -244,12 +240,10 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
                     putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fessConfig.getCrawlerDocumentFileNoTitleLabel());
                 }
             } else {
-                final String u = decodeUrlAsName(url, url.startsWith("file:"));
-                final int pos = u.lastIndexOf('/');
-                if (pos == -1) {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), u);
+                if (StringUtil.isBlank(fileName)) {
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), decodeUrlAsName(url, url.startsWith("file:")));
                 } else {
-                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), u.substring(pos + 1));
+                    putResultDataBody(dataMap, fessConfig.getIndexFieldTitle(), fileName);
                 }
             }
         }
@@ -258,7 +252,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         // site
         putResultDataBody(dataMap, fessConfig.getIndexFieldSite(), getSiteOnFile(url, urlEncoding));
         // filename
-        final String fileName = getFileName(url, urlEncoding);
         if (StringUtil.isNotBlank(fileName)) {
             putResultDataBody(dataMap, fessConfig.getIndexFieldFilename(), fileName);
         }
@@ -356,57 +349,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         } catch (final Exception e) {
             return name;
         }
-    }
-
-    protected String decodeUrlAsName(final String url, final boolean escapePlus) {
-        if (url == null) {
-            return null;
-        }
-
-        String enc = Constants.UTF_8;
-        if (StringUtil.isBlank(fessConfig.getCrawlerDocumentFileNameEncoding())) {
-            final UrlQueue<?> urlQueue = CrawlingParameterUtil.getUrlQueue();
-            if (urlQueue != null) {
-                final String parentUrl = urlQueue.getParentUrl();
-                if (StringUtil.isNotEmpty(parentUrl)) {
-                    final String sessionId = urlQueue.getSessionId();
-                    final String pageEnc = getParentEncoding(parentUrl, sessionId);
-                    if (pageEnc != null) {
-                        enc = pageEnc;
-                    } else if (urlQueue.getEncoding() != null) {
-                        enc = urlQueue.getEncoding();
-                    }
-                }
-            }
-        } else {
-            enc = fessConfig.getCrawlerDocumentFileNameEncoding();
-        }
-
-        final String escapedUrl = escapePlus ? url.replace("+", "%2B") : url;
-        try {
-            return URLDecoder.decode(escapedUrl, enc);
-        } catch (final Exception e) {
-            return url;
-        }
-    }
-
-    protected String getParentEncoding(final String parentUrl, final String sessionId) {
-        final String key = sessionId + ":" + parentUrl;
-        String enc = parentEncodingMap.get(key);
-        if (enc != null) {
-            return enc;
-        }
-
-        final AccessResult<?> accessResult = ComponentUtil.getDataService().getAccessResult(sessionId, parentUrl);
-        if (accessResult != null) {
-            final AccessResultData<?> accessResultData = accessResult.getAccessResultData();
-            if (accessResultData != null && accessResultData.getEncoding() != null) {
-                enc = accessResultData.getEncoding();
-                parentEncodingMap.put(key, enc);
-                return enc;
-            }
-        }
-        return null;
     }
 
     protected String getHostOnFile(final String url) {
