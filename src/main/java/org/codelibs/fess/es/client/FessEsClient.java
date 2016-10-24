@@ -19,6 +19,7 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -170,6 +171,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.lastaflute.core.message.UserMessages;
+import org.lastaflute.di.exception.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -328,6 +330,7 @@ public class FessEsClient implements Client {
                     // ignore
             }
             if (!exists) {
+                waitForConfigSyncStatus();
                 configListMap.getOrDefault(configIndex, Collections.emptyList()).forEach(
                         path -> {
                             String source = null;
@@ -340,7 +343,12 @@ public class FessEsClient implements Client {
                                     if (response.getHttpStatusCode() == 200) {
                                         logger.info("Register " + path + " to " + configIndex);
                                     } else {
-                                        logger.warn("Invalid request for " + path);
+                                        if (response.getContentException() != null) {
+                                            logger.warn("Invalid request for " + path + ".", response.getContentException());
+                                        } else {
+                                            logger.warn("Invalid request for " + path + ". The response is "
+                                                    + response.getContentAsString());
+                                        }
                                     }
                                 }
                             } catch (final Exception e) {
@@ -517,6 +525,24 @@ public class FessEsClient implements Client {
                         .actionGet(ComponentUtil.getFessConfig().getIndexHealthTimeout());
         if (logger.isDebugEnabled()) {
             logger.debug("Elasticsearch Cluster Status: " + response.getStatus());
+        }
+    }
+
+    private void waitForConfigSyncStatus() {
+        try (CurlResponse response =
+                Curl.get(org.codelibs.fess.util.ResourceUtil.getElasticsearchHttpUrl() + "/_configsync/wait").param("status", "green")
+                        .execute()) {
+            if (response.getHttpStatusCode() == 200) {
+                logger.info("ConfigSync is ready.");
+            } else {
+                if (response.getContentException() != null) {
+                    throw new FessSystemException("Configsync is not available.", response.getContentException());
+                } else {
+                    throw new FessSystemException("Configsync is not available.", response.getContentException());
+                }
+            }
+        } catch (final IOException e) {
+            throw new FessSystemException("Configsync is not available.", e);
         }
     }
 
