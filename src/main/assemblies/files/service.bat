@@ -130,7 +130,7 @@ set FESS_PARAMS=-Dfess;-Dfess.home="%FESS_HOME%";-Dfess.es.dir="%ES_HOME%";-Dfes
 set JVM_OPTS=%JAVA_OPTS: =;%
 
 if not "%FESS_JAVA_OPTS%" == "" set JVM_FESS_JAVA_OPTS=%FESS_JAVA_OPTS: =#%
-if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%
+if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%;
 
 if "%FESS_START_TYPE%" == "" set FESS_START_TYPE=manual
 if "%FESS_STOP_TIMEOUT%" == "" set FESS_STOP_TIMEOUT=0
