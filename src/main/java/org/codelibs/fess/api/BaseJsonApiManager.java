@@ -1,0 +1,131 @@
+package org.codelibs.fess.api;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.codelibs.core.CoreLibConstants;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.Constants;
+import org.codelibs.fess.exception.InvalidAccessTokenException;
+import org.lastaflute.web.util.LaRequestUtil;
+import org.lastaflute.web.util.LaResponseUtil;
+
+public abstract class BaseJsonApiManager extends BaseApiManager {
+
+    protected void writeJsonResponse(final int status, final String body, final Throwable t) {
+        if (t == null) {
+            writeJsonResponse(status, body, (String) null);
+            return;
+        }
+
+        if (t instanceof InvalidAccessTokenException) {
+            final InvalidAccessTokenException e = (InvalidAccessTokenException) t;
+            final HttpServletResponse response = LaResponseUtil.getResponse();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setHeader("WWW-Authenticate", "Bearer error=\"" + e.getType() + "\"");
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        if (StringUtil.isBlank(t.getMessage())) {
+            sb.append(t.getClass().getName());
+        } else {
+            sb.append(t.getMessage());
+        }
+        final StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        sb.append(" [ ").append(sw.toString()).append(" ]");
+        try {
+            sw.close();
+        } catch (final IOException ignore) {}
+        writeJsonResponse(status, body, sb.toString());
+    }
+
+    protected void writeJsonResponse(final int status, final String body, final String errMsg) {
+        final String callback = LaRequestUtil.getRequest().getParameter("callback");
+        final boolean isJsonp = StringUtil.isNotBlank(callback);
+
+        final StringBuilder buf = new StringBuilder(1000);
+        if (isJsonp) {
+            buf.append(escapeCallbackName(callback));
+            buf.append('(');
+        }
+        buf.append("{\"response\":");
+        buf.append("{\"version\":");
+        buf.append(Constants.WEB_API_VERSION);
+        buf.append(',');
+        buf.append("\"status\":");
+        buf.append(status);
+        if (status == 0) {
+            if (StringUtil.isNotBlank(body)) {
+                buf.append(',');
+                buf.append(body);
+            }
+        } else {
+            buf.append(',');
+            buf.append("\"message\":");
+            buf.append(escapeJson(errMsg));
+        }
+        buf.append('}');
+        buf.append('}');
+        if (isJsonp) {
+            buf.append(')');
+        }
+        write(buf.toString(), "text/javascript+json", Constants.UTF_8);
+
+    }
+
+    protected String escapeCallbackName(final String callbackName) {
+        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
+    }
+
+    protected String escapeJson(final Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+
+        final StringBuilder buf = new StringBuilder(255);
+        if (obj instanceof List<?>) {
+            buf.append('[');
+            boolean first = true;
+            for (final Object child : (List<?>) obj) {
+                if (first) {
+                    first = false;
+                } else {
+                    buf.append(',');
+                }
+                buf.append(escapeJson(child));
+            }
+            buf.append(']');
+        } else if (obj instanceof Map<?, ?>) {
+            buf.append('{');
+            boolean first = true;
+            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
+                if (first) {
+                    first = false;
+                } else {
+                    buf.append(',');
+                }
+                buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
+            }
+            buf.append('}');
+        } else if (obj instanceof Number) {
+            buf.append(obj);
+        } else if (obj instanceof Date) {
+            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
+            buf.append('\"').append(StringEscapeUtils.escapeJson(sdf.format(obj))).append('\"');
+        } else {
+            buf.append('\"').append(StringEscapeUtils.escapeJson(obj.toString())).append('\"');
+        }
+        return buf.toString();
+    }
+
+}

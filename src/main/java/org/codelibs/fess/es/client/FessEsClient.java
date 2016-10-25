@@ -171,7 +171,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.lastaflute.core.message.UserMessages;
-import org.lastaflute.di.exception.IORuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

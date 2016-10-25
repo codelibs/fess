@@ -16,12 +16,8 @@
 package org.codelibs.fess.api.json;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,10 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codelibs.core.CoreLibConstants;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
-import org.codelibs.fess.api.BaseApiManager;
+import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.FavoriteLogService;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
@@ -45,7 +40,6 @@ import org.codelibs.fess.entity.SearchRenderData;
 import org.codelibs.fess.entity.SearchRequestParams;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
 import org.codelibs.fess.es.client.FessEsClient;
-import org.codelibs.fess.exception.InvalidAccessTokenException;
 import org.codelibs.fess.exception.WebApiException;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -62,12 +56,10 @@ import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.script.Script;
-import org.lastaflute.web.util.LaRequestUtil;
-import org.lastaflute.web.util.LaResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonApiManager extends BaseApiManager {
+public class JsonApiManager extends BaseJsonApiManager {
 
     private static final Logger logger = LoggerFactory.getLogger(JsonApiManager.class);
 
@@ -532,187 +524,6 @@ public class JsonApiManager extends BaseApiManager {
 
         writeJsonResponse(status, body, err);
 
-    }
-
-    public static void writeJsonResponse(final int status, final String body, final Throwable t) {
-        if (t == null) {
-            writeJsonResponse(status, body, (String) null);
-            return;
-        }
-
-        if (t instanceof InvalidAccessTokenException) {
-            final InvalidAccessTokenException e = (InvalidAccessTokenException) t;
-            final HttpServletResponse response = LaResponseUtil.getResponse();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setHeader("WWW-Authenticate", "Bearer error=\"" + e.getType() + "\"");
-        }
-
-        final StringBuilder sb = new StringBuilder();
-        if (StringUtil.isBlank(t.getMessage())) {
-            sb.append(t.getClass().getName());
-        } else {
-            sb.append(t.getMessage());
-        }
-        final StringWriter sw = new StringWriter();
-        t.printStackTrace(new PrintWriter(sw));
-        sb.append(" [ ").append(sw.toString()).append(" ]");
-        try {
-            sw.close();
-        } catch (final IOException ignore) {}
-        writeJsonResponse(status, body, sb.toString());
-    }
-
-    public static void writeJsonResponse(final int status, final String body, final String errMsg) {
-        final String callback = LaRequestUtil.getRequest().getParameter("callback");
-        final boolean isJsonp = StringUtil.isNotBlank(callback);
-
-        final StringBuilder buf = new StringBuilder(1000);
-        if (isJsonp) {
-            buf.append(escapeCallbackName(callback));
-            buf.append('(');
-        }
-        buf.append("{\"response\":");
-        buf.append("{\"version\":");
-        buf.append(Constants.WEB_API_VERSION);
-        buf.append(',');
-        buf.append("\"status\":");
-        buf.append(status);
-        if (status == 0) {
-            if (StringUtil.isNotBlank(body)) {
-                buf.append(',');
-                buf.append(body);
-            }
-        } else {
-            buf.append(',');
-            buf.append("\"message\":");
-            buf.append(escapeJson(errMsg));
-        }
-        buf.append('}');
-        buf.append('}');
-        if (isJsonp) {
-            buf.append(')');
-        }
-        write(buf.toString(), "text/javascript+json", Constants.UTF_8);
-
-    }
-
-    public static String escapeCallbackName(final String callbackName) {
-        return "/**/" + callbackName.replaceAll("[^0-9a-zA-Z_\\$\\.]", StringUtil.EMPTY);
-    }
-
-    public static String escapeJson(final Object obj) {
-        if (obj == null) {
-            return "null";
-        }
-
-        final StringBuilder buf = new StringBuilder(255);
-        if (obj instanceof List<?>) {
-            buf.append('[');
-            boolean first = true;
-            for (final Object child : (List<?>) obj) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(',');
-                }
-                buf.append(escapeJson(child));
-            }
-            buf.append(']');
-        } else if (obj instanceof Map<?, ?>) {
-            buf.append('{');
-            boolean first = true;
-            for (final Map.Entry<?, ?> entry : ((Map<?, ?>) obj).entrySet()) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(',');
-                }
-                buf.append(escapeJson(entry.getKey())).append(':').append(escapeJson(entry.getValue()));
-            }
-            buf.append('}');
-        } else if (obj instanceof Number) {
-            buf.append(obj);
-        } else if (obj instanceof Date) {
-            final SimpleDateFormat sdf = new SimpleDateFormat(CoreLibConstants.DATE_FORMAT_ISO_8601_EXTEND, Locale.ROOT);
-            buf.append('\"').append(escapeJsonString(sdf.format(obj))).append('\"');
-        } else {
-            buf.append('\"').append(escapeJsonString(obj.toString())).append('\"');
-        }
-        return buf.toString();
-    }
-
-    public static String escapeJsonString(final String str) {
-
-        final StringBuilder out = new StringBuilder(str.length() * 2);
-        int sz;
-        sz = str.length();
-        for (int i = 0; i < sz; i++) {
-            final char ch = str.charAt(i);
-
-            // handle unicode
-            if (ch > 0xfff) {
-                out.append("\\u");
-                out.append(hex(ch));
-            } else if (ch > 0xff) {
-                out.append("\\u0");
-                out.append(hex(ch));
-            } else if (ch > 0x7f) {
-                out.append("\\u00");
-                out.append(hex(ch));
-            } else if (ch < 32) {
-                switch (ch) {
-                case '\b':
-                    out.append('\\');
-                    out.append('b');
-                    break;
-                case '\n':
-                    out.append('\\');
-                    out.append('n');
-                    break;
-                case '\t':
-                    out.append('\\');
-                    out.append('t');
-                    break;
-                case '\f':
-                    out.append('\\');
-                    out.append('f');
-                    break;
-                case '\r':
-                    out.append('\\');
-                    out.append('r');
-                    break;
-                default:
-                    if (ch > 0xf) {
-                        out.append("\\u00");
-                        out.append(hex(ch));
-                    } else {
-                        out.append("\\u000");
-                        out.append(hex(ch));
-                    }
-                    break;
-                }
-            } else {
-                switch (ch) {
-                case '"':
-                    out.append("\\u0022");
-                    break;
-                case '\\':
-                    out.append("\\u005C");
-                    break;
-                case '/':
-                    out.append("\\u002F");
-                    break;
-                default:
-                    out.append(ch);
-                    break;
-                }
-            }
-        }
-        return out.toString();
-    }
-
-    private static String hex(final char ch) {
-        return Integer.toHexString(ch).toUpperCase();
     }
 
     protected static class JsonRequestParams implements SearchRequestParams {

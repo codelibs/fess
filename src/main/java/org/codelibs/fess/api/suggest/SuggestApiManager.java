@@ -26,10 +26,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
-import org.codelibs.fess.api.BaseApiManager;
-import org.codelibs.fess.api.json.JsonApiManager;
+import org.codelibs.fess.api.BaseJsonApiManager;
 import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.entity.FacetInfo;
 import org.codelibs.fess.entity.GeoInfo;
@@ -45,7 +45,7 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SuggestApiManager extends BaseApiManager {
+public class SuggestApiManager extends BaseJsonApiManager {
     private static final Logger logger = LoggerFactory.getLogger(SuggestApiManager.class);
 
     public SuggestApiManager() {
@@ -106,13 +106,13 @@ public class SuggestApiManager extends BaseApiManager {
                     }
                     first = false;
 
-                    buf.append("{\"text\":\"").append(JsonApiManager.escapeJsonString(item.getText())).append('\"');
+                    buf.append("{\"text\":\"").append(StringEscapeUtils.escapeJson(item.getText())).append('\"');
                     buf.append(",\"tags\":[");
                     for (int i = 0; i < item.getTags().length; i++) {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getTags()[i])).append('\"');
+                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getTags()[i])).append('\"');
                     }
                     buf.append(']');
 
@@ -121,7 +121,7 @@ public class SuggestApiManager extends BaseApiManager {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getRoles()[i])).append('\"');
+                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getRoles()[i])).append('\"');
                     }
                     buf.append(']');
 
@@ -130,7 +130,7 @@ public class SuggestApiManager extends BaseApiManager {
                         if (i > 0) {
                             buf.append(',');
                         }
-                        buf.append('\"').append(JsonApiManager.escapeJsonString(item.getFields()[i])).append('\"');
+                        buf.append('\"').append(StringEscapeUtils.escapeJson(item.getFields()[i])).append('\"');
                     }
                     buf.append(']');
 
@@ -156,7 +156,7 @@ public class SuggestApiManager extends BaseApiManager {
             }
         }
 
-        JsonApiManager.writeJsonResponse(status, buf.toString(), errMsg);
+        writeJsonResponse(status, buf.toString(), errMsg);
     }
 
     protected static class RequestParameter implements SearchRequestParams {
@@ -179,7 +179,7 @@ public class SuggestApiManager extends BaseApiManager {
             final String query = request.getParameter("query");
             final String fieldsStr = request.getParameter("fields");
             final String[] fields;
-            if (StringUtils.isNotBlank(fieldsStr)) {
+            if (StringUtil.isNotBlank(fieldsStr)) {
                 fields = fieldsStr.split(",");
             } else {
                 fields = new String[0];
@@ -187,7 +187,7 @@ public class SuggestApiManager extends BaseApiManager {
 
             final String numStr = request.getParameter("num");
             final int num;
-            if (StringUtils.isNotBlank(numStr) && StringUtils.isNumeric(numStr)) {
+            if (StringUtil.isNotBlank(numStr) && StringUtils.isNumeric(numStr)) {
                 num = Integer.parseInt(numStr);
             } else {
                 num = 10;
