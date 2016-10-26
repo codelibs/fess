@@ -5,8 +5,6 @@ TITLE Fess Service 10.0.0-SNAPSHOT
 
 if NOT DEFINED JAVA_HOME goto err
 
-if not "%CONF_FILE%" == "" goto conffileset
-
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set FESS_HOME=%%~dpfI
 
@@ -212,10 +210,6 @@ rem convert to MB
 set /a conv=%conv% * 1024
 :mega
 set "%~2=%conv%"
-goto:eof
-
-:conffileset
-echo CONF_FILE setting is no longer supported. elasticsearch.yml must be placed in the config directory and cannot be renamed.
 goto:eof
 
 ENDLOCAL
