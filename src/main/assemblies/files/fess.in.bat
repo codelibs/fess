@@ -84,7 +84,7 @@ set APP_NAME=fess
 set ES_HOME=%FESS_HOME%/es
 
 set FESS_CLASSPATH=%FESS_HOME%\lib\classes
-set FESS_JAVA_OPTS=-Dfess
+set FESS_JAVA_OPTS=-Dfess%FESS_JAVA_OPTS%
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Des-foreground=yes
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.home="%FESS_HOME%"
 set FESS_JAVA_OPTS=%FESS_JAVA_OPTS% -Dfess.es.dir="%ES_HOME%"
