@@ -1,5 +1,5 @@
 @echo off
-SETLOCAL
+SETLOCAL enabledelayedexpansion
 
 TITLE Fess Service 10.0.0-SNAPSHOT
 
@@ -13,7 +13,15 @@ if not exist "%JAVA_HOME%\bin\java.exe" (
 echo JAVA_HOME points to an invalid Java installation (no java.exe found in "%JAVA_HOME%"^). Exiting...
 goto:eof
 )
-"%JAVA_HOME%\bin\java" -version 2>&1 | "%windir%\System32\find" "64-Bit" >nul:
+
+"%JAVA_HOME%\bin\java" -Xmx50M -version > nul 2>&1
+
+if errorlevel 1 (
+	echo Warning: Could not start JVM to detect version, defaulting to x86:
+	goto x86
+)
+
+"%JAVA_HOME%\bin\java" -Xmx50M -version 2>&1 | "%windir%\System32\find" "64-Bit" >nul:
 
 if errorlevel 1 goto x86
 set EXECUTABLE=%FESS_HOME%\bin\fess-service-x64.exe
@@ -75,6 +83,16 @@ goto:eof
 echo The service '%SERVICE_ID%' has been stopped
 goto:eof
 
+:doManagment
+set EXECUTABLE_MGR=%FESS_HOME%\bin\fess-service-mgr.exe
+"%EXECUTABLE_MGR%" //ES//%SERVICE_ID%
+if not errorlevel 1 goto managed
+echo Failed starting service manager for '%SERVICE_ID%'
+goto:eof
+:managed
+echo Successfully started service manager for '%SERVICE_ID%'.
+goto:eof
+
 :doRemove
 rem Remove the service
 "%EXECUTABLE%" //DS//%SERVICE_ID% %LOG_OPTS%
@@ -90,21 +108,24 @@ echo Installing service      :  "%SERVICE_ID%"
 echo Using JAVA_HOME (%ARCH%):  "%JAVA_HOME%"
 
 rem Check JVM server dll first
-set JVM_DLL=%JAVA_HOME%\jre\bin\server\jvm.dll
-if exist "%JVM_DLL%" goto foundJVM
+if exist "%JAVA_HOME%"\jre\bin\server\jvm.dll (
+	set JVM_DLL=\jre\bin\server\jvm.dll
+	goto foundJVM
+)
 
 rem Check 'server' JRE (JRE installed on Windows Server)
-set JVM_DLL=%JAVA_HOME%\bin\server\jvm.dll
-if exist "%JVM_DLL%" goto foundJVM
+if exist "%JAVA_HOME%"\bin\server\jvm.dll (
+	set JVM_DLL=\bin\server\jvm.dll
+	goto foundJVM
+)
 
 rem Fallback to 'client' JRE
-set JVM_DLL=%JAVA_HOME%\bin\client\jvm.dll
-
-if exist "%JVM_DLL%" (
-echo Warning: JAVA_HOME points to a JRE and not JDK installation; a client (not a server^) JVM will be used...
+if exist "%JAVA_HOME%"\bin\client\jvm.dll (
+	set JVM_DLL=\bin\client\jvm.dll
+	echo Warning: JAVA_HOME points to a JRE and not JDK installation; a client (not a server^) JVM will be used...
 ) else (
-echo JAVA_HOME points to an invalid Java installation (no jvm.dll found in "%JAVA_HOME%"^). Existing...
-goto:eof
+	echo JAVA_HOME points to an invalid Java installation (no jvm.dll found in "%JAVA_HOME%"^). Exiting...
+	goto:eof
 )
 
 :foundJVM
@@ -130,12 +151,21 @@ set FESS_PARAMS=-Dfess;-Dfess.home="%FESS_HOME%";-Dfess.es.dir="%ES_HOME%";-Dfes
 set JVM_OPTS=%JAVA_OPTS: =;%
 
 if not "%FESS_JAVA_OPTS%" == "" set JVM_FESS_JAVA_OPTS=%FESS_JAVA_OPTS: =#%
-if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%
+if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%;
 
 if "%FESS_START_TYPE%" == "" set FESS_START_TYPE=manual
 if "%FESS_STOP_TIMEOUT%" == "" set FESS_STOP_TIMEOUT=0
 
-"%EXECUTABLE%" //IS//%SERVICE_ID% --Startup %FESS_START_TYPE% --StopTimeout %FESS_STOP_TIMEOUT% --StartClass org.codelibs.fess.FessBoot --StopClass org.codelibs.fess.FessBoot --StartMethod main --StopMethod shutdown --Classpath "%FESS_CLASSPATH%" --JvmSs %JVM_SS% --JvmMs %JVM_XMS% --JvmMx %JVM_XMX% --JvmOptions %JVM_OPTS% ++JvmOptions %FESS_PARAMS% %LOG_OPTS% --PidFile "%SERVICE_ID%.pid" --DisplayName "Fess %FESS_VERSION% (%SERVICE_ID%)" --Description "Fess %FESS_VERSION% Windows Service - https://github.com/codelibs/fess" --Jvm "%JVM_DLL%" --StartMode jvm --StopMode jvm --StartPath "%FESS_HOME%"
+if "%SERVICE_DISPLAY_NAME%" == "" set SERVICE_DISPLAY_NAME=Fess %FESS_VERSION% (%SERVICE_ID%)
+if "%SERVICE_DESCRIPTION%" == "" set SERVICE_DESCRIPTION=Elasticsearch %FESS_VERSION% Windows Service - https://github.com/codelibs/fess
+
+if not "%SERVICE_USERNAME%" == "" (
+	if not "%SERVICE_PASSWORD%" == "" (
+		set SERVICE_PARAMS=%SERVICE_PARAMS% --ServiceUser "%SERVICE_USERNAME%" --ServicePassword "%SERVICE_PASSWORD%"
+	)
+)
+
+ "%EXECUTABLE%" //IS//%SERVICE_ID% --Startup %FESS_START_TYPE% --StopTimeout %FESS_STOP_TIMEOUT% --StartClass org.codelibs.fess.FessBoot --StopClass org.codelibs.fess.FessBoot --StartMethod main --StopMethod shutdown --Classpath "%FESS_CLASSPATH%" --JvmSs %JVM_SS% --JvmMs %JVM_XMS% --JvmMx %JVM_XMX% --JvmOptions %JVM_OPTS% ++JvmOptions %FESS_PARAMS% %LOG_OPTS% --PidFile "%SERVICE_ID%.pid" --DisplayName "%SERVICE_DISPLAY_NAME%" --Description "%SERVICE_DESCRIPTION%" --Jvm "%%JAVA_HOME%%%JVM_DLL%" --StartMode jvm --StopMode jvm --StartPath "%FESS_HOME%" %SERVICE_PARAMS% ++StartParams start
 
 if not errorlevel 1 goto installed
 echo Failed installing '%SERVICE_ID%' service
