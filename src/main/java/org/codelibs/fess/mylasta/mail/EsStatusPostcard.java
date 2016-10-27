@@ -50,7 +50,7 @@ public class EsStatusPostcard extends LaTypicalPostcard {
 
     @Override
     protected String[] getPropertyNames() {
-        return new String[] { "hostname", "server", "statusBefore", "statusAfter", "indexBefore", "indexAfter" };
+        return new String[] { "hostname", "clustername", "clusterstatus" };
     }
 
     // ===================================================================================
@@ -108,47 +108,20 @@ public class EsStatusPostcard extends LaTypicalPostcard {
     }
 
     /**
-     * Set the value of server, used in parameter comment. <br>
+     * Set the value of clustername, used in parameter comment. <br>
      * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param server The parameter value of server. (NotNull)
+     * @param clustername The parameter value of clustername. (NotNull)
      */
-    public void setServer(String server) {
-        registerVariable("server", server);
+    public void setClustername(String clustername) {
+        registerVariable("clustername", clustername);
     }
 
     /**
-     * Set the value of statusBefore, used in parameter comment. <br>
+     * Set the value of clusterstatus, used in parameter comment. <br>
      * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param statusBefore The parameter value of statusBefore. (NotNull)
+     * @param clusterstatus The parameter value of clusterstatus. (NotNull)
      */
-    public void setStatusBefore(String statusBefore) {
-        registerVariable("statusBefore", statusBefore);
-    }
-
-    /**
-     * Set the value of statusAfter, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param statusAfter The parameter value of statusAfter. (NotNull)
-     */
-    public void setStatusAfter(String statusAfter) {
-        registerVariable("statusAfter", statusAfter);
-    }
-
-    /**
-     * Set the value of indexBefore, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param indexBefore The parameter value of indexBefore. (NotNull)
-     */
-    public void setIndexBefore(String indexBefore) {
-        registerVariable("indexBefore", indexBefore);
-    }
-
-    /**
-     * Set the value of indexAfter, used in parameter comment. <br>
-     * Even if empty string, treated as empty plainly. So "IF pmb != null" is false if empty.
-     * @param indexAfter The parameter value of indexAfter. (NotNull)
-     */
-    public void setIndexAfter(String indexAfter) {
-        registerVariable("indexAfter", indexAfter);
+    public void setClusterstatus(String clusterstatus) {
+        registerVariable("clusterstatus", clusterstatus);
     }
 }

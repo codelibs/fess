@@ -89,6 +89,10 @@ public class PopularWordHelper {
         return Collections.emptyList();
     }
 
+    public void clearCache() {
+        cache.invalidateAll();
+    }
+
     protected String getCacheKey(final String seed, final String[] tags, final String[] roles, final String[] fields,
             final String[] excludes) {
         final StringBuilder buf = new StringBuilder(100);

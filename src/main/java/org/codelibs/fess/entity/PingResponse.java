@@ -15,18 +15,40 @@
  */
 package org.codelibs.fess.entity;
 
+import java.util.List;
+
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 
 public class PingResponse {
-    private int status = 0;
+    private int status;
+
+    private List<String> failures;
+
+    private String clusterName;
+
+    private String clusterStatus;
 
     public PingResponse(final ClusterHealthResponse response) {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
+        failures = response.getValidationFailures();
+        clusterName = response.getClusterName();
+        clusterStatus = response.getStatus().toString();
     }
 
     public int getStatus() {
         return status;
     }
 
+    public String[] getFailures() {
+        return failures.stream().toArray(n -> new String[n]);
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public String getClusterStatus() {
+        return clusterStatus;
+    }
 }

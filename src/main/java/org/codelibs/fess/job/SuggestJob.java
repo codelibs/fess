@@ -243,6 +243,7 @@ public class SuggestJob {
             if (exitValue != 0) {
                 throw new FessSystemException("Exit Code: " + exitValue + "\nOutput:\n" + it.getOutput());
             }
+            ComponentUtil.getPopularWordHelper().clearCache();
         } catch (final FessSystemException e) {
             throw e;
         } catch (final InterruptedException e) {
