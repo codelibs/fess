@@ -4,11 +4,9 @@
 subject: [FESS] Status Change: /*pmb.hostname:orElse('Unknown')*/
 >>>
 --- Server Info ---
+Cluster Name: /*pmb.clustername:orElse('Unknown')*/
 Host Name: /*pmb.hostname:orElse('Unknown')*/
 
-Elasticsearch: /*pmb.server*/
-
 --- Status ---
-/*IF pmb.statusBefore != null*/Status: /*pmb.statusBefore*/ -> /*pmb.statusAfter*//*END*/
-/*IF pmb.indexBefore != null*/Index: /*pmb.indexBefore*/ -> /*pmb.indexAfter*//*END*/
+Cluster Status: /*pmb.clusterstatus:orElse('Unknown')*/
 

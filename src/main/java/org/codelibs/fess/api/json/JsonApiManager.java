@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.api.json;
 
+import static org.codelibs.core.stream.StreamUtil.stream;
+
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -113,15 +116,19 @@ public class JsonApiManager extends BaseJsonApiManager {
         try {
             final PingResponse pingResponse = fessEsClient.ping();
             status = pingResponse.getStatus();
+            String errMsg = null;
+            if (status != 0) {
+                errMsg = stream(pingResponse.getFailures()).get(stream -> stream.collect(Collectors.joining()));
+            }
+            writeJsonResponse(status, null, errMsg);
         } catch (final Exception e) {
             status = 9;
             err = e;
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed to process a ping request.", e);
             }
+            writeJsonResponse(status, null, err);
         }
-
-        writeJsonResponse(status, null, err);
     }
 
     protected void processSearchRequest(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain) {

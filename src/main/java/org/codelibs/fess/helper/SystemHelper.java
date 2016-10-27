@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -74,6 +75,8 @@ public class SystemHelper {
     protected List<Runnable> shutdownHookList = new ArrayList<>();
 
     protected Random random = new SecureRandom();
+
+    protected AtomicInteger previousClusterState = new AtomicInteger(0);
 
     @PostConstruct
     public void init() {
@@ -311,6 +314,10 @@ public class SystemHelper {
 
     public void setRandom(final Random random) {
         this.random = random;
+    }
+
+    public boolean isChangedClusterState(int status) {
+        return previousClusterState.getAndSet(status) != status;
     }
 
 }
