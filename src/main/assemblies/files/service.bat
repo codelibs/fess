@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL enabledelayedexpansion
 
-TITLE Fess Service 10.0.0-SNAPSHOT
+TITLE Fess Service
 
 if NOT DEFINED JAVA_HOME goto err
 
@@ -39,8 +39,6 @@ if EXIST "%EXECUTABLE%" goto okExe
 echo fess-service-(x86|x64).exe was not found...
 
 :okExe
-set FESS_VERSION=10.0.0-SNAPSHOT
-
 if "%LOG_DIR%" == "" set LOG_DIR=%FESS_HOME%\logs
 
 if "x%1x" == "xx" goto displayUsage
@@ -156,8 +154,8 @@ if not "%FESS_JAVA_OPTS%" == "" set JVM_OPTS=%JVM_OPTS%;%JVM_FESS_JAVA_OPTS%;
 if "%FESS_START_TYPE%" == "" set FESS_START_TYPE=manual
 if "%FESS_STOP_TIMEOUT%" == "" set FESS_STOP_TIMEOUT=0
 
-if "%SERVICE_DISPLAY_NAME%" == "" set SERVICE_DISPLAY_NAME=Fess %FESS_VERSION% (%SERVICE_ID%)
-if "%SERVICE_DESCRIPTION%" == "" set SERVICE_DESCRIPTION=Elasticsearch %FESS_VERSION% Windows Service - https://github.com/codelibs/fess
+if "%SERVICE_DISPLAY_NAME%" == "" set SERVICE_DISPLAY_NAME=Fess (%SERVICE_ID%)
+if "%SERVICE_DESCRIPTION%" == "" set SERVICE_DESCRIPTION=Fess Service - https://github.com/codelibs/fess
 
 if not "%SERVICE_USERNAME%" == "" (
 	if not "%SERVICE_PASSWORD%" == "" (
