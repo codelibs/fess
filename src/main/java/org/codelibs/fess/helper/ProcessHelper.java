@@ -58,7 +58,7 @@ public class ProcessHelper {
         JobProcess jobProcess;
         try {
             jobProcess = new JobProcess(pb.start());
-            destroyProcess(runningProcessMap.putIfAbsent(sessionId, jobProcess));
+            destroyProcess(sessionId, runningProcessMap.putIfAbsent(sessionId, jobProcess));
             return jobProcess;
         } catch (final IOException e) {
             throw new FessSystemException("Crawler Process terminated.", e);
@@ -67,14 +67,14 @@ public class ProcessHelper {
 
     public boolean destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
-        return destroyProcess(jobProcess);
+        return destroyProcess(sessionId, jobProcess);
     }
 
     public boolean isProcessRunning() {
         return !runningProcessMap.isEmpty();
     }
 
-    protected boolean destroyProcess(final JobProcess jobProcess) {
+    protected boolean destroyProcess(final String sessionId, final JobProcess jobProcess) {
         if (jobProcess != null) {
             final InputStreamThread ist = jobProcess.getInputStreamThread();
             try {
@@ -83,26 +83,35 @@ public class ProcessHelper {
                 logger.warn("Could not interrupt a thread of an input stream.", e);
             }
 
-            final CountDownLatch latch = new CountDownLatch(1);
+            final CountDownLatch latch = new CountDownLatch(3);
             final Process process = jobProcess.getProcess();
-            new Thread((Runnable) () -> {
+            new Thread(() -> {
                 try {
                     IOUtils.closeQuietly(process.getInputStream());
-                } catch (final Exception e1) {
-                    logger.warn("Could not close a process input stream.", e1);
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process input stream.", e);
+                } finally {
+                    latch.countDown();
                 }
+            }, "ProcessCloser-input-" + sessionId).start();
+            new Thread(() -> {
                 try {
                     IOUtils.closeQuietly(process.getErrorStream());
-                } catch (final Exception e2) {
-                    logger.warn("Could not close a process error stream.", e2);
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process error stream.", e);
+                } finally {
+                    latch.countDown();
                 }
+            }, "ProcessCloser-error-" + sessionId).start();
+            new Thread(() -> {
                 try {
                     IOUtils.closeQuietly(process.getOutputStream());
-                } catch (final Exception e3) {
-                    logger.warn("Could not close a process output stream.", e3);
+                } catch (final Exception e) {
+                    logger.warn("Could not close a process output stream.", e);
+                } finally {
+                    latch.countDown();
                 }
-                latch.countDown();
-            }, "ProcessCloser").start();
+            }, "ProcessCloser-output-" + sessionId).start();
 
             try {
                 latch.await(10, TimeUnit.SECONDS);
