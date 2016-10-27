@@ -18,7 +18,12 @@ package org.codelibs.fess;
 // DO NOT DEPEND OTHER JARs
 
 import java.io.File;
+import java.util.Properties;
 
+import org.apache.catalina.Container;
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.startup.Tomcat;
 import org.codelibs.core.lang.StringUtil;
 import org.dbflute.tomcat.TomcatBoot;
 
@@ -117,5 +122,19 @@ public class FessBoot extends TomcatBoot {
 
     protected static String getTomcatConfigPath() {
         return System.getProperty(TOMCAT_CONFIG_PATH);
+    }
+
+    @Override
+    protected void reflectConfigToServer(Tomcat server, Connector connector, Properties props) {
+        super.reflectConfigToServer(server, connector, props);
+
+        final String sessionTimeout = props.getProperty("tomcat.sessionTimeout");
+        if (sessionTimeout != null) {
+            info(" tomcat.sessionTimeout = " + sessionTimeout);
+            Container container = server.getHost().findChild(contextPath);
+            if (container instanceof Context) {
+                ((Context) container).setSessionTimeout(Integer.parseInt(sessionTimeout));
+            }
+        }
     }
 }
