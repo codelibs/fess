@@ -20,6 +20,11 @@
         "type": {
           "value": "job_log"
         }
+      },
+      {
+        "type": {
+          "value": "thumbnail_queue"
+        }
       }
     ]
   }

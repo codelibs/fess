@@ -9,6 +9,7 @@
 
     <!-- The components of Behavior. -->
     <component name="accessTokenBhv" class="org.codelibs.fess.es.config.exbhv.AccessTokenBhv"/>
+    <component name="badWordBhv" class="org.codelibs.fess.es.config.exbhv.BadWordBhv"/>
     <component name="boostDocumentRuleBhv" class="org.codelibs.fess.es.config.exbhv.BoostDocumentRuleBhv"/>
     <component name="crawlingInfoBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv"/>
     <component name="crawlingInfoParamBhv" class="org.codelibs.fess.es.config.exbhv.CrawlingInfoParamBhv"/>
@@ -16,6 +17,8 @@
     <component name="dataConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigToRoleBhv"/>
     <component name="dataConfigBhv" class="org.codelibs.fess.es.config.exbhv.DataConfigBhv"/>
     <component name="duplicateHostBhv" class="org.codelibs.fess.es.config.exbhv.DuplicateHostBhv"/>
+    <component name="elevateWordToLabelBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv"/>
+    <component name="elevateWordBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordBhv"/>
     <component name="failureUrlBhv" class="org.codelibs.fess.es.config.exbhv.FailureUrlBhv"/>
     <component name="fileAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.FileAuthenticationBhv"/>
     <component name="fileConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.FileConfigToLabelBhv"/>
@@ -29,9 +32,7 @@
     <component name="requestHeaderBhv" class="org.codelibs.fess.es.config.exbhv.RequestHeaderBhv"/>
     <component name="roleTypeBhv" class="org.codelibs.fess.es.config.exbhv.RoleTypeBhv"/>
     <component name="scheduledJobBhv" class="org.codelibs.fess.es.config.exbhv.ScheduledJobBhv"/>
-    <component name="badWordBhv" class="org.codelibs.fess.es.config.exbhv.BadWordBhv"/>
-    <component name="elevateWordToLabelBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordToLabelBhv"/>
-    <component name="elevateWordBhv" class="org.codelibs.fess.es.config.exbhv.ElevateWordBhv"/>
+    <component name="thumbnailQueueBhv" class="org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv"/>
     <component name="webAuthenticationBhv" class="org.codelibs.fess.es.config.exbhv.WebAuthenticationBhv"/>
     <component name="webConfigToLabelBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigToLabelBhv"/>
     <component name="webConfigToRoleBhv" class="org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv"/>
