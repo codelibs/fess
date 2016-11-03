@@ -13,20 +13,12 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.thumbnail;
+package org.codelibs.fess.es.config.cbean.cq;
 
-import java.io.File;
-import java.util.Map;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsThumbnailQueueCQ;
 
-public interface ThumbnailGenerator {
-
-    String getName();
-
-    boolean generate(String url, File outputFile);
-
-    boolean isTarget(Map<String, Object> docMap);
-
-    boolean isAvailable();
-
-    void destroy();
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public class ThumbnailQueueCQ extends BsThumbnailQueueCQ {
 }

@@ -11,6 +11,7 @@
 		</postConstruct>
 	</component>
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.WebDriverGenerator">
+		<property name="name">"htmlThumbnailGenerator"</property>
 		<property name="generatorList">
 			["${path}/phantomjs"]
 		</property>
@@ -29,6 +30,7 @@
 	</component>
 <!--
 	<component name="htmlThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"htmlThumbnailGenerator"</property>
 		<property name="commandList">
 			["${path}/generate-thumbnail",
 			"html",
@@ -45,6 +47,7 @@
 	</component>
 -->
 	<component name="msofficeThumbnailGenerator" class="org.codelibs.fess.thumbnail.impl.CommandGenerator">
+		<property name="name">"msofficeThumbnailGenerator"</property>
 		<property name="commandList">
 			["${path}/generate-thumbnail",
 			"msoffice",

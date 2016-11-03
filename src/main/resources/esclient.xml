@@ -204,6 +204,9 @@
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_config/web_config_to_role"</arg>
 		</postConstruct>
+		<postConstruct name="addIndexConfig">
+			<arg>".fess_config/thumbnail_queue"</arg>
+		</postConstruct>
 		<!-- .fess_user index -->
 		<postConstruct name="addIndexConfig">
 			<arg>".fess_user/user"</arg>

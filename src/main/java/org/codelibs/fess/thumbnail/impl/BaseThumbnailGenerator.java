@@ -41,6 +41,8 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     protected Map<String, String> filePathMap = new HashMap<>();
 
+    protected String name;
+
     public void addCondition(final String key, final String regex) {
         conditionMap.put(key, regex);
     }
@@ -101,6 +103,14 @@ public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
 
     public void setGeneratorList(final List<String> generatorList) {
         this.generatorList = generatorList;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

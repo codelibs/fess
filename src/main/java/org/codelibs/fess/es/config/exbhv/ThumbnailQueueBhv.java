@@ -13,20 +13,13 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.fess.thumbnail;
+package org.codelibs.fess.es.config.exbhv;
 
-import java.io.File;
-import java.util.Map;
+import org.codelibs.fess.es.config.bsbhv.BsThumbnailQueueBhv;
 
-public interface ThumbnailGenerator {
+/**
+ * @author FreeGen
+ */
+public class ThumbnailQueueBhv extends BsThumbnailQueueBhv {
 
-    String getName();
-
-    boolean generate(String url, File outputFile);
-
-    boolean isTarget(Map<String, Object> docMap);
-
-    boolean isAvailable();
-
-    void destroy();
 }
