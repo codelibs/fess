@@ -197,7 +197,7 @@ $(function() {
 					});
 
 	IMG_LOADING_DELAY = 200;
-	IMG_LOADING_MAX = 5;
+	IMG_LOADING_MAX = 0;
 	var loadImage = function(img, url, limit) {
 		var imgData = new Image();
 		$(imgData).on("load", function() {
