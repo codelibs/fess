@@ -652,6 +652,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. true */
     String THUMBNAIL_HTML_PHANTOMJS_ENABLED = "thumbnail.html.phantomjs.enabled";
 
+    /** The key of the configuration. e.g. all */
+    String THUMBNAIL_GENERATOR_TARGETS = "thumbnail.generator.targets";
+
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
 
@@ -3164,6 +3167,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     boolean isThumbnailHtmlPhantomjsEnabled();
 
     /**
+     * Get the value for the key 'thumbnail.generator.targets'. <br>
+     * The value is, e.g. all <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailGeneratorTargets();
+
+    /**
      * Get the value for the key 'mail.from.name'. <br>
      * The value is, e.g. Administrator <br>
      * comment: From
@@ -5396,6 +5406,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isThumbnailHtmlPhantomjsEnabled() {
             return is(FessConfig.THUMBNAIL_HTML_PHANTOMJS_ENABLED);
+        }
+
+        public String getThumbnailGeneratorTargets() {
+            return get(FessConfig.THUMBNAIL_GENERATOR_TARGETS);
         }
 
         public String getMailFromName() {

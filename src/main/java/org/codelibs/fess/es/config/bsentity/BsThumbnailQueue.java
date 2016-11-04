@@ -43,6 +43,9 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     /** createdTime */
     protected Long createdTime;
 
+    /** target */
+    protected String target;
+
     /** generator */
     protected String generator;
 
@@ -79,6 +82,9 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         if (createdTime != null) {
             sourceMap.put("createdTime", createdTime);
         }
+        if (target != null) {
+            sourceMap.put("target", target);
+        }
         if (generator != null) {
             sourceMap.put("generator", generator);
         }
@@ -99,6 +105,7 @@ public class BsThumbnailQueue extends EsAbstractEntity {
         StringBuilder sb = new StringBuilder();
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
+        sb.append(dm).append(target);
         sb.append(dm).append(generator);
         sb.append(dm).append(path);
         sb.append(dm).append(url);
@@ -130,6 +137,16 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     public void setCreatedTime(Long value) {
         registerModifiedProperty("createdTime");
         this.createdTime = value;
+    }
+
+    public String getTarget() {
+        checkSpecifiedProperty("target");
+        return convertEmptyToNull(target);
+    }
+
+    public void setTarget(String value) {
+        registerModifiedProperty("target");
+        this.target = value;
     }
 
     public String getGenerator() {

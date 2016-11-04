@@ -75,6 +75,7 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
             final RESULT result = entityType.newInstance();
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setTarget(DfTypeUtil.toString(source.get("target")));
             result.setGenerator(DfTypeUtil.toString(source.get("generator")));
             result.setPath(DfTypeUtil.toString(source.get("path")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));

@@ -155,6 +155,10 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
+        public void columnTarget() {
+            doColumn("target");
+        }
+
         public void columnGenerator() {
             doColumn("generator");
         }

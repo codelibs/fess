@@ -975,6 +975,10 @@
           "createdTime" : {
             "type" : "long"
           },
+          "target" : {
+            "type" : "string",
+            "index" : "not_analyzed"
+          },
           "generator" : {
             "type" : "string",
             "index" : "not_analyzed"
