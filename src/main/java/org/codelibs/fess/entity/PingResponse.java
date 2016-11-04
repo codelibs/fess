@@ -21,13 +21,13 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 
 public class PingResponse {
-    private int status;
+    private final int status;
 
-    private List<String> failures;
+    private final List<String> failures;
 
-    private String clusterName;
+    private final String clusterName;
 
-    private String clusterStatus;
+    private final String clusterStatus;
 
     public PingResponse(final ClusterHealthResponse response) {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;

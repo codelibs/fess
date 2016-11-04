@@ -317,7 +317,7 @@ public class SystemHelper {
         this.random = random;
     }
 
-    public boolean isChangedClusterState(int status) {
+    public boolean isChangedClusterState(final int status) {
         return previousClusterState.getAndSet(status) != status;
     }
 

@@ -118,7 +118,7 @@ public class ThumbnailManager {
             final List<Tuple3<String, String, String>> taskList = new ArrayList<>();
             while (generating) {
                 try {
-                    Tuple3<String, String, String> task = thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
+                    final Tuple3<String, String, String> task = thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
                     if (task == null) {
                         if (!taskList.isEmpty()) {
                             storeQueue(taskList);
@@ -166,7 +166,7 @@ public class ThumbnailManager {
         final List<ThumbnailQueue> list = new ArrayList<>();
         taskList.stream().filter(entity -> entity != null).forEach(task -> {
             for (final String target : targets) {
-                ThumbnailQueue entity = new ThumbnailQueue();
+                final ThumbnailQueue entity = new ThumbnailQueue();
                 entity.setGenerator(task.getValue1());
                 entity.setUrl(task.getValue2());
                 entity.setPath(task.getValue3());
@@ -229,7 +229,7 @@ public class ThumbnailManager {
             if (generator.isTarget(docMap)) {
                 final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
                 final String path = getImageFilename(docMap);
-                Tuple3<String, String, String> task = new Tuple3<String, String, String>(generator.getName(), url, path);
+                final Tuple3<String, String, String> task = new Tuple3<>(generator.getName(), url, path);
                 thumbnailTaskQueue.offer(task);
                 break;
             }
