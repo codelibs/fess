@@ -172,7 +172,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
                 saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
-                fessEsClient.refresh();
+                systemHelper.reloadConfiguration();
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_1, e.getLocalizedMessage()));
@@ -185,7 +185,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
                 saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
-                fessEsClient.refresh();
+                systemHelper.reloadConfiguration();
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_1, e.getLocalizedMessage()));
@@ -199,7 +199,7 @@ public class AdminUpgradeAction extends FessAdminAction {
 
                 saveInfo(messages -> messages.addSuccessUpgradeFrom(GLOBAL));
 
-                fessEsClient.refresh();
+                systemHelper.reloadConfiguration();
             } catch (final Exception e) {
                 logger.warn("Failed to upgrade data.", e);
                 saveError(messages -> messages.addErrorsFailedToUpgradeFrom(GLOBAL, VERSION_10_0, e.getLocalizedMessage()));

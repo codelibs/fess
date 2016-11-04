@@ -299,6 +299,7 @@ public class SystemHelper {
     }
 
     public void reloadConfiguration() {
+        ComponentUtil.getFessEsClient().refresh();
         ComponentUtil.getLabelTypeHelper().init();
         ComponentUtil.getPathMappingHelper().init();
         ComponentUtil.getSuggestHelper().init();
