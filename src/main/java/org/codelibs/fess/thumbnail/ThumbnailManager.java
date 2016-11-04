@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -45,12 +44,15 @@ import org.codelibs.fess.es.config.exbhv.ThumbnailQueueBhv;
 import org.codelibs.fess.es.config.exentity.ThumbnailQueue;
 import org.codelibs.fess.exception.FessSystemException;
 import org.codelibs.fess.exception.JobProcessingException;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 public class ThumbnailManager {
     private static final String DEFAULT_SCREENSHOT_DIR = "/WEB-INF/thumbnails";
@@ -116,12 +118,12 @@ public class ThumbnailManager {
             final List<Tuple3<String, String, String>> taskList = new ArrayList<>();
             while (generating) {
                 try {
-                    Tuple3<String, String, String> task = thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
+                    final Tuple3<String, String, String> task = thumbnailTaskQueue.poll(thumbnailTaskQueueTimeout, TimeUnit.MILLISECONDS);
                     if (task == null) {
                         if (!taskList.isEmpty()) {
                             storeQueue(taskList);
                         }
-                    } else {
+                    } else if (!taskList.contains(task)) {
                         taskList.add(task);
                         if (taskList.size() > thumbnailTaskBulkSize) {
                             storeQueue(taskList);
@@ -158,13 +160,22 @@ public class ThumbnailManager {
     }
 
     protected void storeQueue(final List<Tuple3<String, String, String>> taskList) {
-        List<ThumbnailQueue> list = taskList.stream().filter(entity -> entity != null).map(task -> {
-            ThumbnailQueue entity = new ThumbnailQueue();
-            entity.setGenerator(task.getValue1());
-            entity.setUrl(task.getValue2());
-            entity.setPath(task.getValue3());
-            return entity;
-        }).collect(Collectors.toList());
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
+        final String[] targets = fessConfig.getThumbnailGeneratorTargetsAsArray();
+        final List<ThumbnailQueue> list = new ArrayList<>();
+        taskList.stream().filter(entity -> entity != null).forEach(task -> {
+            for (final String target : targets) {
+                final ThumbnailQueue entity = new ThumbnailQueue();
+                entity.setGenerator(task.getValue1());
+                entity.setUrl(task.getValue2());
+                entity.setPath(task.getValue3());
+                entity.setTarget(target);
+                entity.setCreatedBy(Constants.SYSTEM_USER);
+                entity.setCreatedTime(systemHelper.getCurrentTimeAsLong());
+                list.add(entity);
+            }
+        });
         taskList.clear();
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
         thumbnailQueueBhv.batchInsert(list);
@@ -175,6 +186,11 @@ public class ThumbnailManager {
         final List<String> idList = new ArrayList<>();
         final ThumbnailQueueBhv thumbnailQueueBhv = ComponentUtil.getComponent(ThumbnailQueueBhv.class);
         thumbnailQueueBhv.selectList(cb -> {
+            if (StringUtil.isBlank(fessConfig.getSchedulerTargetName())) {
+                cb.query().setTarget_Equal(Constants.DEFAULT_JOB_TARGET);
+            } else {
+                cb.query().setTarget_InScope(Lists.newArrayList(Constants.DEFAULT_JOB_TARGET, fessConfig.getSchedulerTargetName()));
+            }
             cb.query().addOrderBy_CreatedTime_Asc();
             cb.fetchFirst(fessConfig.getPageThumbnailQueueMaxFetchSizeAsInteger());
         }).forEach(entity -> {
@@ -213,7 +229,7 @@ public class ThumbnailManager {
             if (generator.isTarget(docMap)) {
                 final String url = DocumentUtil.getValue(docMap, fessConfig.getIndexFieldUrl(), String.class);
                 final String path = getImageFilename(docMap);
-                Tuple3<String, String, String> task = new Tuple3<String, String, String>(generator.getName(), url, path);
+                final Tuple3<String, String, String> task = new Tuple3<>(generator.getName(), url, path);
                 thumbnailTaskQueue.offer(task);
                 break;
             }

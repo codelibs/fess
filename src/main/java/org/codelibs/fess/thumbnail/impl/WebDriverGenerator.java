@@ -139,7 +139,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
                     convert(thumbnail, outputFile);
                     return true;
-                } catch (UnreachableBrowserException e) {
+                } catch (final UnreachableBrowserException e) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("WebDriver is not available.", e);
                     }
@@ -265,7 +265,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         this.thumbnailHeight = thumbnailHeight;
     }
 
-    public void setUnreachableCheckInterval(long unreachableCheckInterval) {
+    public void setUnreachableCheckInterval(final long unreachableCheckInterval) {
         this.unreachableCheckInterval = unreachableCheckInterval;
     }
 }

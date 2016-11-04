@@ -221,7 +221,7 @@ public class ElevateWordService {
                         elevateWord.setPermissions(permissions);
                         elevateWord.setTargetLabel(label);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
-                        elevateWord.setCreatedBy("system");
+                        elevateWord.setCreatedBy(Constants.SYSTEM_USER);
                         elevateWord.setCreatedTime(now);
                         elevateWordBhv.insert(elevateWord);
                     } else if (StringUtil.isBlank(reading) && StringUtil.isBlank(boost)) {
@@ -230,7 +230,7 @@ public class ElevateWordService {
                         elevateWord.setReading(reading);
                         elevateWord.setPermissions(permissions);
                         elevateWord.setBoost(StringUtil.isBlank(boost) ? 1.0f : Float.parseFloat(boost));
-                        elevateWord.setUpdatedBy("system");
+                        elevateWord.setUpdatedBy(Constants.SYSTEM_USER);
                         elevateWord.setUpdatedTime(now);
                         elevateWordBhv.update(elevateWord);
                     }

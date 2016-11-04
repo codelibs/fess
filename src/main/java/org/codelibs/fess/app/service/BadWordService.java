@@ -123,11 +123,11 @@ public class BadWordService {
                     } else if (badWord == null) {
                         badWord = new BadWord();
                         badWord.setSuggestWord(targetWord);
-                        badWord.setCreatedBy("system");
+                        badWord.setCreatedBy(Constants.SYSTEM_USER);
                         badWord.setCreatedTime(now);
                         badWordBhv.insert(badWord);
                     } else {
-                        badWord.setUpdatedBy("system");
+                        badWord.setUpdatedBy(Constants.SYSTEM_USER);
                         badWord.setUpdatedTime(now);
                         badWordBhv.update(badWord);
                     }

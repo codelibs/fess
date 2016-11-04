@@ -74,12 +74,12 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         final CrawlingConfig crawlingConfig = new CrawlingConfigWrapper(dataConfig) {
             @Override
-            public Map<String, Object> initializeClientFactory(CrawlerClientFactory crawlerClientFactory) {
+            public Map<String, Object> initializeClientFactory(final CrawlerClientFactory crawlerClientFactory) {
                 final Map<String, Object> paramMap = super.initializeClientFactory(crawlerClientFactory);
-                List<RequestHeader> headerList = new ArrayList<>();
-                RequestHeader[] headers = (RequestHeader[]) paramMap.get(HcHttpClient.REQUERT_HEADERS_PROPERTY);
+                final List<RequestHeader> headerList = new ArrayList<>();
+                final RequestHeader[] headers = (RequestHeader[]) paramMap.get(HcHttpClient.REQUERT_HEADERS_PROPERTY);
                 if (headers != null) {
-                    for (RequestHeader header : headers) {
+                    for (final RequestHeader header : headers) {
                         headerList.add(header);
                     }
                 }
@@ -175,7 +175,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     private void storeFileContent(final String rootURL, final String authToken, final String owner, final String name,
-            List<String> roleList, final String path, final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback,
+            final List<String> roleList, final String path, final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback,
             final Map<String, String> paramMap, final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
         final String apiUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
         final String viewUrl = rootURL + owner + "/" + name + "/blob/master/" + path;
@@ -199,7 +199,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name, final String path,
-            final int depth, final long readInterval, Consumer<String> consumer) {
+            final int depth, final long readInterval, final Consumer<String> consumer) {
 
         if (MAX_DEPTH <= depth) {
             return;

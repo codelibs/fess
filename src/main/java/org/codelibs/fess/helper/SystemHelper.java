@@ -299,6 +299,7 @@ public class SystemHelper {
     }
 
     public void reloadConfiguration() {
+        ComponentUtil.getFessEsClient().refresh();
         ComponentUtil.getLabelTypeHelper().init();
         ComponentUtil.getPathMappingHelper().init();
         ComponentUtil.getSuggestHelper().init();
@@ -316,7 +317,7 @@ public class SystemHelper {
         this.random = random;
     }
 
-    public boolean isChangedClusterState(int status) {
+    public boolean isChangedClusterState(final int status) {
         return previousClusterState.getAndSet(status) != status;
     }
 

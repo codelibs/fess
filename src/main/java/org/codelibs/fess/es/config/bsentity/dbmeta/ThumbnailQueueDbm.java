@@ -83,6 +83,8 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedBy(DfTypeUtil.toString(vl)), "createdBy");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getCreatedTime(),
                 (et, vl) -> ((ThumbnailQueue) et).setCreatedTime(DfTypeUtil.toLong(vl)), "createdTime");
+        setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getTarget(), (et, vl) -> ((ThumbnailQueue) et).setTarget(DfTypeUtil.toString(vl)),
+                "target");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getGenerator(),
                 (et, vl) -> ((ThumbnailQueue) et).setGenerator(DfTypeUtil.toString(vl)), "generator");
         setupEpg(_epgMap, et -> ((ThumbnailQueue) et).getPath(), (et, vl) -> ((ThumbnailQueue) et).setPath(DfTypeUtil.toString(vl)), "path");
@@ -127,6 +129,8 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
+            "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGenerator = cci("generator", "generator", null, null, String.class, "generator", null, false, false,
             false, "String", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0,
@@ -140,6 +144,10 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnTarget() {
+        return _columnTarget;
     }
 
     public ColumnInfo columnGenerator() {
@@ -158,6 +166,7 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
         List<ColumnInfo> ls = newArrayList();
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnTarget());
         ls.add(columnGenerator());
         ls.add(columnPath());
         ls.add(columnUrl());

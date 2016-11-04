@@ -77,7 +77,7 @@ public class AdminBackupAction extends FessAdminAction {
             if (fileName.startsWith("system") && fileName.endsWith(".properties")) {
                 try (final InputStream in = form.bulkFile.getInputStream()) {
                     ComponentUtil.getSystemProperties().load(in);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     logger.warn("Failed to process system.properties file: " + form.bulkFile.getFileName(), e);
                 }
             } else {

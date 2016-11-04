@@ -543,6 +543,213 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setTarget_Equal(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Equal(String target, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setTarget_Term(target, opLambda);
+    }
+
+    public void setTarget_Term(String target) {
+        setTarget_Term(target, null);
+    }
+
+    public void setTarget_Term(String target, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_NotEqual(String target) {
+        setTarget_NotTerm(target, null);
+    }
+
+    public void setTarget_NotTerm(String target) {
+        setTarget_NotTerm(target, null);
+    }
+
+    public void setTarget_NotEqual(String target, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setTarget_NotTerm(target, opLambda);
+    }
+
+    public void setTarget_NotTerm(String target, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setTarget_Term(target), opLambda);
+    }
+
+    public void setTarget_Terms(Collection<String> targetList) {
+        setTarget_Terms(targetList, null);
+    }
+
+    public void setTarget_Terms(Collection<String> targetList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("target", targetList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_InScope(Collection<String> targetList) {
+        setTarget_Terms(targetList, null);
+    }
+
+    public void setTarget_InScope(Collection<String> targetList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setTarget_Terms(targetList, opLambda);
+    }
+
+    public void setTarget_Match(String target) {
+        setTarget_Match(target, null);
+    }
+
+    public void setTarget_Match(String target, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_MatchPhrase(String target) {
+        setTarget_MatchPhrase(target, null);
+    }
+
+    public void setTarget_MatchPhrase(String target, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhraseQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_MatchPhrasePrefix(String target) {
+        setTarget_MatchPhrasePrefix(target, null);
+    }
+
+    public void setTarget_MatchPhrasePrefix(String target, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchPhrasePrefixQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Fuzzy(String target) {
+        setTarget_Fuzzy(target, null);
+    }
+
+    public void setTarget_Fuzzy(String target, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
+        FuzzyQueryBuilder builder = regFuzzyQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Prefix(String target) {
+        setTarget_Prefix(target, null);
+    }
+
+    public void setTarget_Prefix(String target, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Wildcard(String target) {
+        setTarget_Wildcard(target, null);
+    }
+
+    public void setTarget_Wildcard(String target, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Regexp(String target) {
+        setTarget_Regexp(target, null);
+    }
+
+    public void setTarget_Regexp(String target, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_GreaterThan(String target) {
+        setTarget_GreaterThan(target, null);
+    }
+
+    public void setTarget_GreaterThan(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_GREATER_THAN, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_LessThan(String target) {
+        setTarget_LessThan(target, null);
+    }
+
+    public void setTarget_LessThan(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_LESS_THAN, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_GreaterEqual(String target) {
+        setTarget_GreaterEqual(target, null);
+    }
+
+    public void setTarget_GreaterEqual(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_GREATER_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_LessEqual(String target) {
+        setTarget_LessEqual(target, null);
+    }
+
+    public void setTarget_LessEqual(String target, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        RangeQueryBuilder builder = regRangeQ("target", ConditionKey.CK_LESS_EQUAL, target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_Exists() {
+        setTarget_Exists(null);
+    }
+
+    public void setTarget_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("target");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_CommonTerms(String target) {
+        setTarget_CommonTerms(target, null);
+    }
+
+    public void setTarget_CommonTerms(String target, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public BsThumbnailQueueCQ addOrderBy_Target_Asc() {
+        regOBA("target");
+        return this;
+    }
+
+    public BsThumbnailQueueCQ addOrderBy_Target_Desc() {
+        regOBD("target");
+        return this;
+    }
+
     public void setGenerator_Equal(String generator) {
         setGenerator_Term(generator, null);
     }

@@ -1438,4 +1438,12 @@ public interface FessProp {
                 stream -> stream.filter(StringUtil::isNotBlank).map(s -> s.trim()).forEach(list::add));
         return list.toArray(new String[list.size()]);
     }
+
+    String getThumbnailGeneratorTargets();
+
+    public default String[] getThumbnailGeneratorTargetsAsArray() {
+        return getThumbnailGeneratorTargets().split(",");
+
+    }
+
 }
