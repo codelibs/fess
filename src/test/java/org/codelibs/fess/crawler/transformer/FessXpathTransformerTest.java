@@ -32,6 +32,7 @@ import org.codelibs.core.misc.ValueHolder;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
+import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.cyberneko.html.parsers.DOMParser;
@@ -121,6 +122,90 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final Node pruneNode = transformer.processGoogleOffOn(document, new ValueHolder<>(true));
         final String output = getXmlString(pruneNode).replaceAll(".*<BODY>", "").replaceAll("</BODY>.*", "");
         assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"></A><!--googleon: index-->foo5", output);
+    }
+
+    public void test_processMetaRobots_no() throws Exception {
+        final String data = "<html><body>foo</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        transformer.processMetaRobots(responseData, new ResultData(), document);
+        assertFalse(responseData.isNoFollow());
+    }
+
+    public void test_processMetaRobots_none() throws Exception {
+        final String data = "<meta name=\"robots\" content=\"none\" />";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        try {
+            transformer.processMetaRobots(responseData, new ResultData(), document);
+            fail();
+        } catch (ChildUrlsException e) {
+            assertTrue(e.getChildUrlList().isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    public void test_processMetaRobots_noindexnofollow() throws Exception {
+        final String data = "<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW\" />";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        try {
+            transformer.processMetaRobots(responseData, new ResultData(), document);
+            fail();
+        } catch (ChildUrlsException e) {
+            assertTrue(e.getChildUrlList().isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    public void test_processMetaRobots_noindex() throws Exception {
+        final String data = "<meta name=\"robots\" content=\"noindex\" /><a href=\"index.html\">aaa</a>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+        responseData.setResponseBody(data.getBytes());
+
+        try {
+            transformer.processMetaRobots(responseData, new ResultData(), document);
+            fail();
+        } catch (ChildUrlsException e) {
+            assertTrue(e.getChildUrlList().isEmpty());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    public void test_processMetaRobots_nofollow() throws Exception {
+        final String data = "<meta name=\"robots\" content=\"nofollow\" />";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final ResponseData responseData = new ResponseData();
+        responseData.setUrl("http://example.com/");
+
+        transformer.processMetaRobots(responseData, new ResultData(), document);
+        assertTrue(responseData.isNoFollow());
     }
 
     private Document getDocument(final String data) throws Exception {
