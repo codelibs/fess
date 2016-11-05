@@ -36,6 +36,7 @@ import org.apache.xpath.objects.XObject;
 import org.codelibs.core.io.InputStreamUtil;
 import org.codelibs.core.io.SerializeUtil;
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.misc.ValueHolder;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.AccessResultData;
@@ -79,6 +80,8 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     public Map<String, String> convertUrlMap = new HashMap<>();
 
     protected FessConfig fessConfig;
+
+    protected boolean useGoogleOffOn = true;
 
     @PostConstruct
     public void init() {
@@ -398,13 +401,14 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 } else {
                     buf.append(' ');
                 }
-                final Node node = list.item(i);
-                if (pruned) {
-                    final Node n = pruneNode(node.cloneNode(true));
-                    buf.append(n.getTextContent());
-                } else {
-                    buf.append(node.getTextContent());
+                Node node = list.item(i).cloneNode(true);
+                if (useGoogleOffOn) {
+                    node = processGoogleOffOn(node, new ValueHolder<Boolean>(true));
                 }
+                if (pruned) {
+                    node = pruneNode(node);
+                }
+                buf.append(node.getTextContent());
             }
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
@@ -413,6 +417,37 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             return null;
         }
         return buf.toUnsafeString().trim();
+    }
+
+    protected Node processGoogleOffOn(final Node node, final ValueHolder<Boolean> flag) {
+        final NodeList nodeList = node.getChildNodes();
+        List<Node> removedNodeList = null;
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final Node childNode = nodeList.item(i);
+            if (childNode.getNodeType() == Node.COMMENT_NODE) {
+                String comment = childNode.getNodeValue().trim();
+                if (comment.startsWith("googleoff:")) {
+                    flag.setValue(false);
+                } else if (comment.startsWith("googleon:")) {
+                    flag.setValue(true);
+                }
+            }
+
+            if (!flag.getValue() && childNode.getNodeType() == Node.TEXT_NODE) {
+                if (removedNodeList == null) {
+                    removedNodeList = new ArrayList<>();
+                }
+                removedNodeList.add(childNode);
+            } else {
+                processGoogleOffOn(childNode, flag);
+            }
+        }
+
+        if (removedNodeList != null) {
+            removedNodeList.stream().forEach(n -> node.removeChild(n));
+        }
+
+        return node;
     }
 
     protected Node pruneNode(final Node node) {
@@ -571,6 +606,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String[] getCrawlerDocumentHtmlPrunedTags() {
         return fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
+    }
+
+    public void setUseGoogleOffOn(boolean useGoogleOffOn) {
+        this.useGoogleOffOn = useGoogleOffOn;
     }
 
 }

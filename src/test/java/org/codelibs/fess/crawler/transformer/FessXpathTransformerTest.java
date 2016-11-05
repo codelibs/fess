@@ -28,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.codelibs.core.misc.ValueHolder;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
@@ -108,6 +109,18 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(pnString.contains("foo"));
         assertFalse(pnString.contains("<NOSCRIPT>"));
         assertFalse(pnString.contains("bar"));
+    }
+
+    public void test_processGoogleOffOn() throws Exception {
+        final String data =
+                "<html><body>foo1<!--googleoff: index-->foo2<a href=\"index.html\">foo3</a>foo4<!--googleon: index-->foo5</body></html>";
+        final Document document = getDocument(data);
+
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        final Node pruneNode = transformer.processGoogleOffOn(document, new ValueHolder<>(true));
+        final String output = getXmlString(pruneNode).replaceAll(".*<BODY>", "").replaceAll("</BODY>.*", "");
+        assertEquals("foo1<!--googleoff: index--><A href=\"index.html\"></A><!--googleon: index-->foo5", output);
     }
 
     private Document getDocument(final String data) throws Exception {
