@@ -658,6 +658,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. all */
     String THUMBNAIL_GENERATOR_TARGETS = "thumbnail.generator.targets";
 
+    /** The key of the configuration. e.g. false */
+    String THUMBNAIL_CRAWLER_ENABLED = "thumbnail.crawler.enabled";
+
     /** The key of the configuration. e.g. Administrator */
     String MAIL_FROM_NAME = "mail.from.name";
 
@@ -3191,6 +3194,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getThumbnailGeneratorTargets();
 
     /**
+     * Get the value for the key 'thumbnail.crawler.enabled'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getThumbnailCrawlerEnabled();
+
+    /**
+     * Is the property for the key 'thumbnail.crawler.enabled' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isThumbnailCrawlerEnabled();
+
+    /**
      * Get the value for the key 'mail.from.name'. <br>
      * The value is, e.g. Administrator <br>
      * comment: From
@@ -5435,6 +5452,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getThumbnailGeneratorTargets() {
             return get(FessConfig.THUMBNAIL_GENERATOR_TARGETS);
+        }
+
+        public String getThumbnailCrawlerEnabled() {
+            return get(FessConfig.THUMBNAIL_CRAWLER_ENABLED);
+        }
+
+        public boolean isThumbnailCrawlerEnabled() {
+            return is(FessConfig.THUMBNAIL_CRAWLER_ENABLED);
         }
 
         public String getMailFromName() {

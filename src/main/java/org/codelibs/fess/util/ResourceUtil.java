@@ -72,6 +72,10 @@ public class ResourceUtil {
         return getPath("dict", names);
     }
 
+    public static Path getThumbnailPath(final String... names) {
+        return getPath("thumbnails", names);
+    }
+
     protected static Path getPath(final String base, final String... names) {
 
         try {

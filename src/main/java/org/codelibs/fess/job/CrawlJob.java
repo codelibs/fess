@@ -331,6 +331,8 @@ public class CrawlJob {
             }
         }
 
+        cmdList.add(ComponentUtil.getThumbnailManager().getThumbnailPathOption());
+
         if (StringUtil.isNotBlank(jvmOptions)) {
             split(jvmOptions, " ").of(stream -> stream.filter(StringUtil::isNotBlank).forEach(s -> cmdList.add(s)));
         }

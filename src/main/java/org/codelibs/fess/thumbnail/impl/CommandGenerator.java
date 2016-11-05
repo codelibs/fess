@@ -25,6 +25,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -32,6 +34,9 @@ import org.slf4j.LoggerFactory;
 
 public class CommandGenerator extends BaseThumbnailGenerator {
     private static final Logger logger = LoggerFactory.getLogger(CommandGenerator.class);
+
+    @Resource
+    protected ServletContext application;
 
     public List<String> commandList;
 

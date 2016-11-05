@@ -7,6 +7,7 @@
 	<include path="fess.xml" />
 
 	<include path="crawler_es.xml" />
+	<include path="crawler_thumbnail.xml" />
 
 	<component name="indexingHelper" class="org.codelibs.fess.helper.IndexingHelper">
 	</component>
