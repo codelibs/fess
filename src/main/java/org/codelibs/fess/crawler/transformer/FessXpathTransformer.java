@@ -21,11 +21,13 @@ import java.io.BufferedInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,6 +75,14 @@ import org.xml.sax.InputSource;
 public class FessXpathTransformer extends XpathTransformer implements FessTransformer {
     private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformer.class);
 
+    private static final String META_NAME_ROBOTS_CONTENT = "//META[@name=\"robots\" or @name=\"ROBOTS\"]/@content";
+
+    private static final String META_ROBOTS_NONE = "none";
+
+    private static final String META_ROBOTS_NOINDEX = "noindex";
+
+    private static final String META_ROBOTS_NOFOLLOW = "nofollow";
+
     private static final int UTF8_BOM_SIZE = 3;
 
     public boolean prunedContent = true;
@@ -119,6 +129,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
         final Document document = parser.getDocument();
 
+        if (!fessConfig.isCrawlerIgnoreMetaRobots()) {
+            processMetaRobots(responseData, resultData, document);
+        }
+
         final Map<String, Object> dataMap = new LinkedHashMap<>();
         for (final Map.Entry<String, String> entry : fieldRuleMap.entrySet()) {
             final String path = entry.getValue();
@@ -161,6 +175,43 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             throw new CrawlingAccessException("Could not serialize object: " + responseData.getUrl(), e);
         }
         resultData.setEncoding(charsetName);
+    }
+
+    protected void processMetaRobots(final ResponseData responseData, final ResultData resultData, final Document document) {
+        try {
+            final Node value = getXPathAPI().selectSingleNode(document, META_NAME_ROBOTS_CONTENT);
+            if (value != null) {
+                final String content = value.getTextContent().toLowerCase(Locale.ROOT);
+                boolean noindex = false;
+                boolean nofollow = false;
+                if (content.contains(META_ROBOTS_NONE)) {
+                    noindex = true;
+                    nofollow = true;
+                } else {
+                    if (content.contains(META_ROBOTS_NOINDEX)) {
+                        noindex = true;
+                    }
+                    if (content.contains(META_ROBOTS_NOFOLLOW)) {
+                        nofollow = true;
+                    }
+                }
+
+                if (noindex && nofollow) {
+                    logger.info("META(robots=noindex,nofollow): " + responseData.getUrl());
+                    throw new ChildUrlsException(Collections.emptySet(), "#processMetaRobots(Document)");
+                } else if (noindex) {
+                    logger.info("META(robots=noindex): " + responseData.getUrl());
+                    storeChildUrls(responseData, resultData);
+                    throw new ChildUrlsException(resultData.getChildUrlSet(), "#processMetaRobots(Document)");
+                } else if (nofollow) {
+                    logger.info("META(robots=nofollow): " + responseData.getUrl());
+                    responseData.setNoFollow(true);
+                }
+            }
+        } catch (TransformerException e) {
+            logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT);
+        }
+
     }
 
     protected void putAdditionalData(final Map<String, Object> dataMap, final ResponseData responseData, final Document document) {

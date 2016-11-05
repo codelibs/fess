@@ -161,6 +161,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String CRAWLER_IGNORE_ROBOTS_TXT = "crawler.ignore.robots.txt";
 
+    /** The key of the configuration. e.g. false */
+    String CRAWLER_IGNORE_META_ROBOTS = "crawler.ignore.meta.robots";
+
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
     String CRAWLER_METADATA_CONTENT_EXCLUDES = "crawler.metadata.content.excludes";
 
@@ -1445,6 +1448,20 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreRobotsTxt();
+
+    /**
+     * Get the value for the key 'crawler.ignore.meta.robots'. <br>
+     * The value is, e.g. false <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getCrawlerIgnoreMetaRobots();
+
+    /**
+     * Is the property for the key 'crawler.ignore.meta.robots' true? <br>
+     * The value is, e.g. false <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isCrawlerIgnoreMetaRobots();
 
     /**
      * Get the value for the key 'crawler.metadata.content.excludes'. <br>
@@ -4510,6 +4527,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public boolean isCrawlerIgnoreRobotsTxt() {
             return is(FessConfig.CRAWLER_IGNORE_ROBOTS_TXT);
+        }
+
+        public String getCrawlerIgnoreMetaRobots() {
+            return get(FessConfig.CRAWLER_IGNORE_META_ROBOTS);
+        }
+
+        public boolean isCrawlerIgnoreMetaRobots() {
+            return is(FessConfig.CRAWLER_IGNORE_META_ROBOTS);
         }
 
         public String getCrawlerMetadataContentExcludes() {
