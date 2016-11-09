@@ -23,15 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
-
 import org.codelibs.fess.thumbnail.ThumbnailGenerator;
 
 public abstract class BaseThumbnailGenerator implements ThumbnailGenerator {
-
-    @Resource
-    protected ServletContext application;
 
     protected final Map<String, String> conditionMap = new HashMap<>();
 

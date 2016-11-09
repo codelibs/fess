@@ -15,6 +15,7 @@
  */
 package org.codelibs.fess.thumbnail.impl;
 
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -170,12 +171,17 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
             final BufferedImage image = loadImage(inputFile);
             final int height = thumbnailWidth * image.getHeight() / windowWidth;
             final BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
-            thumbnailImage.getGraphics().drawImage(image.getScaledInstance(thumbnailWidth, height, Image.SCALE_AREA_AVERAGING), 0, 0,
-                    thumbnailWidth, thumbnailHeight, null);
+            final Graphics g = thumbnailImage.getGraphics();
+            g.drawImage(image.getScaledInstance(thumbnailWidth, height, Image.SCALE_AREA_AVERAGING), 0, 0, thumbnailWidth, thumbnailHeight,
+                    null);
+            g.dispose();
+            image.flush();
 
             ImageIO.write(thumbnailImage, imageFormatName, outputFile);
-        } catch (final Exception e) {
-            logger.warn("Failed to convert " + inputFile.getAbsolutePath(), e);
+
+            thumbnailImage.flush();
+        } catch (final Throwable t) {
+            logger.warn("Failed to convert " + inputFile.getAbsolutePath(), t);
             inputFile.renameTo(outputFile);
         }
     }

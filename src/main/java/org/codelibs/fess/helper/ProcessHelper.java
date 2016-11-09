@@ -37,13 +37,15 @@ public class ProcessHelper {
 
     private final ConcurrentHashMap<String, JobProcess> runningProcessMap = new ConcurrentHashMap<>();
 
+    private int processDestroyTimeout = 10;
+
     @PreDestroy
     public void destroy() {
         for (final String sessionId : runningProcessMap.keySet()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Stopping process " + sessionId);
             }
-            if (destroyProcess(sessionId)) {
+            if (destroyProcess(sessionId) == 0) {
                 if (logger.isInfoEnabled()) {
                     logger.info("Stopped process " + sessionId);
                 }
@@ -65,7 +67,7 @@ public class ProcessHelper {
         }
     }
 
-    public boolean destroyProcess(final String sessionId) {
+    public int destroyProcess(final String sessionId) {
         final JobProcess jobProcess = runningProcessMap.remove(sessionId);
         return destroyProcess(sessionId, jobProcess);
     }
@@ -74,7 +76,7 @@ public class ProcessHelper {
         return !runningProcessMap.isEmpty();
     }
 
-    protected boolean destroyProcess(final String sessionId, final JobProcess jobProcess) {
+    protected int destroyProcess(final String sessionId, final JobProcess jobProcess) {
         if (jobProcess != null) {
             final InputStreamThread ist = jobProcess.getInputStreamThread();
             try {
@@ -119,17 +121,21 @@ public class ProcessHelper {
                 logger.warn("Interrupted to wait a process.", e);
             }
             try {
-                process.destroy();
-                return true;
+                process.destroyForcibly().waitFor(processDestroyTimeout, TimeUnit.SECONDS);
+                return process.exitValue();
             } catch (final Exception e) {
                 logger.error("Could not destroy a process correctly.", e);
             }
         }
-        return false;
+        return -1;
     }
 
     public Set<String> getRunningSessionIdSet() {
         return runningProcessMap.keySet();
+    }
+
+    public void setProcessDestroyTimeout(int processDestroyTimeout) {
+        this.processDestroyTimeout = processDestroyTimeout;
     }
 
 }

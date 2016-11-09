@@ -32,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
 import org.codelibs.core.collection.LruHashMap;
@@ -48,6 +46,7 @@ import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
+import org.codelibs.fess.util.ResourceUtil;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,14 +54,13 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 public class ThumbnailManager {
-    private static final String DEFAULT_SCREENSHOT_DIR = "/WEB-INF/thumbnails";
+    private static final String FESS_THUMBNAIL_PATH = "fess.thumbnail.path";
+
+    private static final String FESS_VAR_PATH = "fess.var.path";
 
     private static final String NOIMAGE_FILE_SUFFIX = ".txt";
 
     private static final Logger logger = LoggerFactory.getLogger(ThumbnailManager.class);
-
-    @Resource
-    protected ServletContext application;
 
     protected File baseDir;
 
@@ -72,7 +70,7 @@ public class ThumbnailManager {
 
     private volatile boolean generating;
 
-    private Thread thumbnailGeneratorThread;
+    private Thread thumbnailQueueThread;
 
     protected int thumbnailPathCacheSize = 10;
 
@@ -90,15 +88,15 @@ public class ThumbnailManager {
 
     @PostConstruct
     public void init() {
-        final String varPath = System.getProperty("fess.var.path");
-        if (varPath != null) {
-            baseDir = new File(varPath, "thumbnails");
+        final String thumbnailPath = System.getProperty(FESS_THUMBNAIL_PATH);
+        if (thumbnailPath != null) {
+            baseDir = new File(thumbnailPath);
         } else {
-            final String path = application.getRealPath(DEFAULT_SCREENSHOT_DIR);
-            if (StringUtil.isNotBlank(path)) {
-                baseDir = new File(path);
+            final String varPath = System.getProperty(FESS_VAR_PATH);
+            if (varPath != null) {
+                baseDir = new File(varPath, "thumbnails");
             } else {
-                baseDir = new File("." + DEFAULT_SCREENSHOT_DIR);
+                baseDir = ResourceUtil.getThumbnailPath().toFile();
             }
         }
         if (baseDir.mkdirs()) {
@@ -114,7 +112,7 @@ public class ThumbnailManager {
 
         thumbnailTaskQueue = new LinkedBlockingQueue<>(thumbnailTaskQueueSize);
         generating = true;
-        thumbnailGeneratorThread = new Thread((Runnable) () -> {
+        thumbnailQueueThread = new Thread((Runnable) () -> {
             final List<Tuple3<String, String, String>> taskList = new ArrayList<>();
             while (generating) {
                 try {
@@ -138,15 +136,15 @@ public class ThumbnailManager {
                 }
             }
         }, "ThumbnailGenerator");
-        thumbnailGeneratorThread.start();
+        thumbnailQueueThread.start();
     }
 
     @PreDestroy
     public void destroy() {
         generating = false;
-        thumbnailGeneratorThread.interrupt();
+        thumbnailQueueThread.interrupt();
         try {
-            thumbnailGeneratorThread.join(10000);
+            thumbnailQueueThread.join(10000);
         } catch (final InterruptedException e) {
             logger.warn("Thumbnail thread is timeouted.", e);
         }
@@ -157,6 +155,10 @@ public class ThumbnailManager {
                 logger.warn("Failed to stop thumbnail generator.", e);
             }
         });
+    }
+
+    public String getThumbnailPathOption() {
+        return "-D" + FESS_THUMBNAIL_PATH + "=" + baseDir.getAbsolutePath();
     }
 
     protected void storeQueue(final List<Tuple3<String, String, String>> taskList) {

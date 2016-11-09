@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocList;
 import org.codelibs.fess.util.MemoryUtil;
@@ -43,6 +44,7 @@ public class IndexingHelper {
         if (docList.isEmpty()) {
             return;
         }
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final long execTime = System.currentTimeMillis();
         if (logger.isDebugEnabled()) {
             logger.debug("Sending " + docList.size() + " documents to a server.");
@@ -50,8 +52,11 @@ public class IndexingHelper {
         try {
             synchronized (fessEsClient) {
                 deleteOldDocuments(fessEsClient, docList);
-                final FessConfig fessConfig = ComponentUtil.getFessConfig();
                 fessEsClient.addAll(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), docList);
+            }
+            if (fessConfig.isThumbnailCrawlerEnabled()) {
+                final ThumbnailManager thumbnailManager = ComponentUtil.getThumbnailManager();
+                docList.stream().forEach(doc -> thumbnailManager.offer(doc));
             }
             if (logger.isInfoEnabled()) {
                 if (docList.getContentSize() > 0) {
