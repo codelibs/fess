@@ -15,16 +15,19 @@
  */
 package org.codelibs.fess.thumbnail.impl;
 
-import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -167,19 +170,24 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     }
 
     protected void convert(final File inputFile, final File outputFile) {
-        try {
-            final BufferedImage image = loadImage(inputFile);
-            final int height = thumbnailWidth * image.getHeight() / windowWidth;
-            final BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, image.getType());
-            final Graphics g = thumbnailImage.getGraphics();
-            g.drawImage(image.getScaledInstance(thumbnailWidth, height, Image.SCALE_AREA_AVERAGING), 0, 0, thumbnailWidth, thumbnailHeight,
-                    null);
-            g.dispose();
-            image.flush();
-
-            ImageIO.write(thumbnailImage, imageFormatName, outputFile);
-
-            thumbnailImage.flush();
+        try (ImageInputStream input = ImageIO.createImageInputStream(inputFile)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (readers.hasNext()) {
+                ImageReader reader = readers.next();
+                try {
+                    reader.setInput(input);
+                    ImageReadParam param = reader.getDefaultReadParam();
+                    final int samplingWidth = reader.getWidth(0) / thumbnailWidth;
+                    final int samplingHeight = reader.getHeight(0) / thumbnailHeight;
+                    param.setSourceSubsampling(samplingWidth, samplingHeight, 0, 0);
+                    param.setSourceRegion(new Rectangle(windowWidth, thumbnailHeight * reader.getHeight(0) / thumbnailWidth));
+                    BufferedImage image = reader.read(0, param);
+                    ImageIO.write(image, imageFormatName, outputFile);
+                    image.flush();
+                } finally {
+                    reader.dispose();
+                }
+            }
         } catch (final Throwable t) {
             logger.warn("Failed to convert " + inputFile.getAbsolutePath(), t);
             inputFile.renameTo(outputFile);
