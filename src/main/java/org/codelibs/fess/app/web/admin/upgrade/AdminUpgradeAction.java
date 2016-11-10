@@ -234,6 +234,18 @@ public class AdminUpgradeAction extends FessAdminAction {
                 "{\"properties\":{\"filename\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
         addFieldMapping(indicesClient, searchIndex, "doc", "filename",
                 "{\"properties\":{\"filename\":{\"type\":\"string\",\"index\":\"not_analyzed\"}}}");
+        addFieldMapping(
+                indicesClient,
+                updateIndex,
+                "doc",
+                "important_content",
+                "{\"properties\":{\"important_content\":{\"type\":\"langstring\",\"lang_field\":\"lang\",\"lang_base_name\":\"content\",\"index\":\"no\"}}}");
+        addFieldMapping(
+                indicesClient,
+                searchIndex,
+                "doc",
+                "important_content",
+                "{\"properties\":{\"important_content\":{\"type\":\"langstring\",\"lang_field\":\"lang\",\"lang_base_name\":\"content\",\"index\":\"no\"}}}");
         addFieldMapping(indicesClient, configIndex, "job_log", "lastUpdated", "{\"properties\":{\"lastUpdated\":{\"type\":\"long\"}}}");
 
         // data migration

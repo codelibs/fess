@@ -61,6 +61,7 @@ import org.codelibs.fess.exception.SearchQueryException;
 import org.codelibs.fess.helper.QueryHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.DocMap;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
 import org.elasticsearch.ElasticsearchException;
@@ -858,7 +859,7 @@ public class FessEsClient implements Client {
         final BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
         for (final Map<String, Object> doc : docList) {
             final Object id = doc.remove(fessConfig.getIndexFieldId());
-            bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(doc));
+            bulkRequestBuilder.add(client.prepareIndex(index, type, id.toString()).setSource(new DocMap(doc)));
         }
         final BulkResponse response = bulkRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexBulkTimeout());
         if (response.hasFailures()) {
@@ -1027,12 +1028,12 @@ public class FessEsClient implements Client {
             if (id == null) {
                 // create
                 response =
-                        client.prepareIndex(index, type).setSource(source).setRefresh(true).setOpType(OpType.CREATE).execute()
+                        client.prepareIndex(index, type).setSource(new DocMap(source)).setRefresh(true).setOpType(OpType.CREATE).execute()
                                 .actionGet(fessConfig.getIndexIndexTimeout());
             } else {
                 // create or update
                 final IndexRequestBuilder builder =
-                        client.prepareIndex(index, type, id).setSource(source).setRefresh(true).setOpType(OpType.INDEX);
+                        client.prepareIndex(index, type, id).setSource(new DocMap(source)).setRefresh(true).setOpType(OpType.INDEX);
                 if (version != null && version.longValue() > 0) {
                     builder.setVersion(version);
                 }

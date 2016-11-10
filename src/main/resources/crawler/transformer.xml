@@ -9,7 +9,7 @@
 		<property name="featureMap">defaultFeatureMap</property>
 		<property name="propertyMap">defaultPropertyMap</property>
 		<property name="childUrlRuleMap">htmlUrlRuleMap</property>
-		<!-- 
+		<!--
 		<property name="invalidUrlPattern">@java.util.regex.Pattern@compile("^\\s*javascript:|^\\s*mailto:|^\\s*irc:|^\\s*skype:|^\\s*callto:",@java.util.regex.Pattern@CASE_INSENSITIVE)</property>
 		 -->
 		<property name="convertUrlMap">
@@ -19,6 +19,10 @@
 		<postConstruct name="addFieldRule">
 			<arg>"title"</arg>
 			<arg>"//TITLE"</arg>
+		</postConstruct>
+		<postConstruct name="addFieldRule">
+			<arg>"important_content"</arg>
+			<arg>"//*[self::H1 or self::H2 or self::H3]"</arg>
 		</postConstruct>
 	</component>
 

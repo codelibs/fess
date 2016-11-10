@@ -446,6 +446,12 @@
         "type": "string",
         "index": "not_analyzed"
       },
+      "important_content": {
+        "type": "langstring",
+        "lang_field": "lang",
+        "lang_base_name": "title",
+        "index": "no"
+      },
       "content": {
         "type": "langstring",
         "lang_field": "lang",

@@ -319,6 +319,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. parent_id */
     String INDEX_FIELD_parent_id = "index.field.parent_id";
 
+    /** The key of the configuration. e.g. important_content */
+    String INDEX_FIELD_important_content = "index.field.important_content";
+
     /** The key of the configuration. e.g. content */
     String INDEX_FIELD_CONTENT = "index.field.content";
 
@@ -1994,6 +1997,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getIndexFieldParentId();
+
+    /**
+     * Get the value for the key 'index.field.important_content'. <br>
+     * The value is, e.g. important_content <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getIndexFieldImportantContent();
 
     /**
      * Get the value for the key 'index.field.content'. <br>
@@ -4840,6 +4850,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexFieldParentId() {
             return get(FessConfig.INDEX_FIELD_parent_id);
+        }
+
+        public String getIndexFieldImportantContent() {
+            return get(FessConfig.INDEX_FIELD_important_content);
         }
 
         public String getIndexFieldContent() {
