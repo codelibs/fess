@@ -139,7 +139,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         esCb.request().build(builder);
         final SearchResponse response = esCb.build(builder).execute().actionGet(searchTimeout);
 
-        final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>();
+        final EsPagingResultBean<RESULT> list = new EsPagingResultBean<>(builder);
         final SearchHits searchHits = response.getHits();
         searchHits.forEach(hit -> {
             final Map<String, Object> source = hit.getSource();

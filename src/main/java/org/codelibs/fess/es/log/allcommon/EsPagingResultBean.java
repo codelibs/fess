@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.log.allcommon;
 
 import org.dbflute.cbean.result.PagingResultBean;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 
 /**
  * @param <ENTITY> The type of entity.
@@ -29,6 +30,15 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
     private int totalShards;
     private int successfulShards;
     private int failedShards;
+    private SearchRequestBuilder builder;
+
+    public EsPagingResultBean(final SearchRequestBuilder builder) {
+        this.builder = builder;
+    }
+
+    public String getQueryDsl() {
+        return builder.toString();
+    }
 
     public long getTook() {
         return took;

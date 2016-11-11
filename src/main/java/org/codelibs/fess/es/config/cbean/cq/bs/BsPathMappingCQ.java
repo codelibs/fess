@@ -153,12 +153,12 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public BsPathMappingCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsPathMappingCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 

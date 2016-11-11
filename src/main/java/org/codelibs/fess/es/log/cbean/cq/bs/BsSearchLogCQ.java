@@ -153,12 +153,12 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
     }
 
     public BsSearchLogCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsSearchLogCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 

@@ -153,12 +153,12 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
     }
 
     public BsDuplicateHostCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsDuplicateHostCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 

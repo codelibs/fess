@@ -154,12 +154,12 @@ public abstract class BsFileConfigToLabelCQ extends EsAbstractConditionQuery {
     }
 
     public BsFileConfigToLabelCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsFileConfigToLabelCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 
