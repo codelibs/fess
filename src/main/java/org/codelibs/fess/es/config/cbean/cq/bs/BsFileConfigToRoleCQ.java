@@ -153,12 +153,12 @@ public abstract class BsFileConfigToRoleCQ extends EsAbstractConditionQuery {
     }
 
     public BsFileConfigToRoleCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsFileConfigToRoleCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 

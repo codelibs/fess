@@ -154,12 +154,12 @@ public abstract class BsCrawlingInfoParamCQ extends EsAbstractConditionQuery {
     }
 
     public BsCrawlingInfoParamCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsCrawlingInfoParamCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 

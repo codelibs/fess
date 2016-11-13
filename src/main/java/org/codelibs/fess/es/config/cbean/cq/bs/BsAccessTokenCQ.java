@@ -153,12 +153,12 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
     }
 
     public BsAccessTokenCQ addOrderBy_Id_Asc() {
-        regOBA("_id");
+        regOBA("_uid");
         return this;
     }
 
     public BsAccessTokenCQ addOrderBy_Id_Desc() {
-        regOBD("_id");
+        regOBD("_uid");
         return this;
     }
 
@@ -897,7 +897,7 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameterName_Wildcard(String parameterName, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
-        WildcardQueryBuilder builder = regWildcardQ("parameterName", parameterName);
+        WildcardQueryBuilder builder = regWildcardQ("parameter_name", parameterName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -908,7 +908,7 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameterName_Regexp(String parameterName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
-        RegexpQueryBuilder builder = regRegexpQ("parameterName", parameterName);
+        RegexpQueryBuilder builder = regRegexpQ("parameter_name", parameterName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -963,7 +963,7 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameterName_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
-        ExistsQueryBuilder builder = regExistsQ("parameterName");
+        ExistsQueryBuilder builder = regExistsQ("parameter_name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -974,7 +974,7 @@ public abstract class BsAccessTokenCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameterName_CommonTerms(String parameterName, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
-        CommonTermsQueryBuilder builder = regCommonTermsQ("parameterName", parameterName);
+        CommonTermsQueryBuilder builder = regCommonTermsQ("parameter_name", parameterName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

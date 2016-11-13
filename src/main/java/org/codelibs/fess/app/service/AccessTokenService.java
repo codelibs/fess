@@ -83,7 +83,7 @@ public class AccessTokenService {
 
     public OptionalEntity<AccessToken> getAccessTokenByToken(final String token) {
         return accessTokenBhv.selectEntity(cb -> {
-            cb.query().setToken_CommonTerms(token);
+            cb.query().setToken_Term(token);
         });
     }
 
