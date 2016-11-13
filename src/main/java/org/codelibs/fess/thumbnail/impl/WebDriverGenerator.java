@@ -43,6 +43,7 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService.Builder;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.SessionNotFoundException;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +144,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
                     convert(thumbnail, outputFile);
                     return true;
-                } catch (final UnreachableBrowserException e) {
+                } catch (final UnreachableBrowserException | SessionNotFoundException e) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("WebDriver is not available.", e);
                     }
