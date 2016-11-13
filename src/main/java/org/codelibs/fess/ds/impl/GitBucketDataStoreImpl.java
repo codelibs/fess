@@ -92,8 +92,9 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         };
         for (final Map<String, Object> repository : repositoryList) {
             try {
-                final String name = (String) repository.get("name");
                 final String owner = (String) repository.get("owner");
+                final String name = (String) repository.get("name");
+                final String refStr = getGitRef(rootURL, authToken, owner, name, "master");
                 final List<String> roleList = createRoleList(owner, repository);
 
                 collectFileNames(
@@ -101,12 +102,13 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                         authToken,
                         owner,
                         name,
+                        refStr,
                         StringUtil.EMPTY,
                         0,
                         readInterval,
                         path -> {
-                            storeFileContent(rootURL, authToken, sourceLabels, owner, name, roleList, path, crawlingConfig, callback,
-                                    paramMap, scriptMap, defaultDataMap);
+                            storeFileContent(rootURL, authToken, sourceLabels, owner, name, refStr, roleList, path, crawlingConfig,
+                                    callback, paramMap, scriptMap, defaultDataMap);
                             if (readInterval > 0) {
                                 sleep(readInterval);
                             }
@@ -164,6 +166,21 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
+    protected String getGitRef(final String rootURL, final String authToken, final String owner, final String name, final String branch) {
+        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/git/refs/heads/" + branch;
+        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+            final Map<String, Object> map = curlResponse.getContentAsMap();
+            assert (map.containsKey("object"));
+            @SuppressWarnings("unchecked")
+            final Map<String, String> objmap = (Map<String, String>) map.get("object");
+            assert (objmap.containsKey("sha"));
+            return objmap.get("sha");
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + rootURL, e);
+            return branch;
+        }
+    }
+
     private List<String> createRoleList(final String owner, final Map<String, Object> repository) {
         Boolean isPrivate = true;
         if (repository.containsKey(PRIVATE_REPOSITORY_PARAM)) {
@@ -190,11 +207,11 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
     }
 
     private void storeFileContent(final String rootURL, final String authToken, final List<String> sourceLabels, final String owner,
-            final String name, final List<String> roleList, final String path, final CrawlingConfig crawlingConfig,
+            final String name, final String refStr, final List<String> roleList, final String path, final CrawlingConfig crawlingConfig,
             final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
         final String apiUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
-        final String viewUrl = rootURL + owner + "/" + name + "/blob/master/" + path;
+        final String viewUrl = rootURL + owner + "/" + name + "/blob/" + refStr + "/" + path;
 
         if (logger.isInfoEnabled()) {
             logger.info("Get a content from " + apiUrl);
@@ -202,7 +219,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         final Map<String, Object> dataMap = new HashMap<>();
         dataMap.putAll(defaultDataMap);
         dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"),
-                apiUrl + "?large_file=true"));
+                apiUrl + "?ref=" + refStr + "&large_file=true"));
 
         dataMap.put("url", viewUrl);
         dataMap.put("role", roleList);
@@ -215,14 +232,14 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         return;
     }
 
-    protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name, final String path,
-            final int depth, final long readInterval, final Consumer<String> consumer) {
+    protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name,
+            final String refStr, final String path, final int depth, final long readInterval, final Consumer<String> consumer) {
 
         if (MAX_DEPTH <= depth) {
             return;
         }
 
-        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
+        final String url = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path + "?ref=" + refStr;
 
         try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
             final InputStream iStream = curlResponse.getContentAsStream();
@@ -240,7 +257,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
-                    collectFileNames(rootURL, authToken, owner, name, newPath, depth + 1, readInterval, consumer);
+                    collectFileNames(rootURL, authToken, owner, name, refStr, newPath, depth + 1, readInterval, consumer);
                     break;
                 }
             }
