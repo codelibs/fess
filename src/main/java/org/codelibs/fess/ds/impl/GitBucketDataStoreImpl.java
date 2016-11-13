@@ -59,6 +59,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         final String rootURL = getRootURL(paramMap);
         final String authToken = getAuthToken(paramMap);
+        final List<String> sourceLabels = getSourceLabelList(rootURL, authToken);
         final long readInterval = getReadInterval(paramMap);
 
         if (rootURL.isEmpty() || authToken.isEmpty()) {
@@ -104,8 +105,8 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                         0,
                         readInterval,
                         path -> {
-                            storeFileContent(rootURL, authToken, owner, name, roleList, path, crawlingConfig, callback, paramMap,
-                                    scriptMap, defaultDataMap);
+                            storeFileContent(rootURL, authToken, sourceLabels, owner, name, roleList, path, crawlingConfig, callback,
+                                    paramMap, scriptMap, defaultDataMap);
                             if (readInterval > 0) {
                                 sleep(readInterval);
                             }
@@ -133,6 +134,20 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return paramMap.get(TOKEN_PARAM);
         }
         return StringUtil.EMPTY;
+    }
+
+    protected List<String> getSourceLabelList(final String rootURL, final String authToken) {
+        final String url = rootURL + "api/v3/fess/label";
+        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+            final Map<String, Object> map = curlResponse.getContentAsMap();
+            assert (map.containsKey("source_label"));
+            @SuppressWarnings("unchecked")
+            final List<String> sourceLabels = (List<String>) map.get("source_label");
+            return sourceLabels;
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + rootURL, e);
+            return Collections.emptyList();
+        }
     }
 
     protected List<Map<String, Object>> getRepositoryList(final String rootURL, final String authToken) {
@@ -174,9 +189,10 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    private void storeFileContent(final String rootURL, final String authToken, final String owner, final String name,
-            final List<String> roleList, final String path, final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback,
-            final Map<String, String> paramMap, final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap) {
+    private void storeFileContent(final String rootURL, final String authToken, final List<String> sourceLabels, final String owner,
+            final String name, final List<String> roleList, final String path, final CrawlingConfig crawlingConfig,
+            final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
+            final Map<String, Object> defaultDataMap) {
         final String apiUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/contents/" + path;
         final String viewUrl = rootURL + owner + "/" + name + "/blob/master/" + path;
 
@@ -190,6 +206,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         dataMap.put("url", viewUrl);
         dataMap.put("role", roleList);
+        dataMap.put("label", sourceLabels);
 
         // TODO scriptMap
 
