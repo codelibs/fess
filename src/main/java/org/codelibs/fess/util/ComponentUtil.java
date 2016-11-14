@@ -59,6 +59,7 @@ import org.codelibs.fess.indexer.IndexUpdater;
 import org.codelibs.fess.job.JobExecutor;
 import org.codelibs.fess.ldap.LdapManager;
 import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.mylasta.direction.FessProp;
 import org.codelibs.fess.sso.SsoManager;
 import org.codelibs.fess.thumbnail.ThumbnailManager;
 import org.lastaflute.core.message.MessageManager;
@@ -429,6 +430,9 @@ public final class ComponentUtil {
      */
     public static void setFessConfig(final FessConfig fessConfig) {
         ComponentUtil.fessConfig = fessConfig;
+        if (fessConfig == null) {
+            FessProp.propMap.clear();
+        }
     }
 
 }
