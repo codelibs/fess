@@ -64,6 +64,7 @@ import org.codelibs.fess.helper.PathMappingHelper;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.PrunedTag;
 import org.cyberneko.html.parsers.DOMParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -507,7 +508,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final List<Node> removedNodeList = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node childNode = nodeList.item(i);
-            if (isPrunedTag(childNode.getNodeName())) {
+            if (isPrunedTag(childNode)) {
                 removedNodeList.add(childNode);
             } else {
                 childNodeList.add(childNode);
@@ -525,9 +526,9 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return node;
     }
 
-    protected boolean isPrunedTag(final String tagName) {
-        for (final String name : getCrawlerDocumentHtmlPrunedTags()) {
-            if (name.equalsIgnoreCase(tagName)) {
+    protected boolean isPrunedTag(final Node node) {
+        for (final PrunedTag prunedTag : fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray()) {
+            if (prunedTag.matches(node)) {
                 return true;
             }
         }
@@ -653,10 +654,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     private boolean isUtf8BomBytes(final byte[] b) {
         return b[0] == (byte) 0xEF && b[1] == (byte) 0xBB && b[2] == (byte) 0xBF;
-    }
-
-    protected String[] getCrawlerDocumentHtmlPrunedTags() {
-        return fessConfig.getCrawlerDocumentHtmlPrunedTagsAsArray();
     }
 
     public void setUseGoogleOffOn(boolean useGoogleOffOn) {

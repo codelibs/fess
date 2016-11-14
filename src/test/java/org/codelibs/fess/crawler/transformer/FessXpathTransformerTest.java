@@ -34,7 +34,9 @@ import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
+import org.codelibs.fess.util.ComponentUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
 import org.w3c.dom.Document;
@@ -56,25 +58,36 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer() {
-            protected String[] getCrawlerDocumentHtmlPrunedTags() {
-                return new String[0];
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "";
             }
-        };
+        });
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         assertEquals(getXmlString(document), getXmlString(pruneNode));
+        ComponentUtil.setFessConfig(null);
     }
 
     public void test_pruneNode_removeNoScript() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer() {
-            protected String[] getCrawlerDocumentHtmlPrunedTags() {
-                return new String[] { "noscript" };
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "noscript";
             }
-        };
+        });
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         final String docString = getXmlString(document);
@@ -87,17 +100,23 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertTrue(pnString.contains("foo"));
         assertFalse(pnString.contains("<NOSCRIPT>"));
         assertFalse(pnString.contains("bar"));
+        ComponentUtil.setFessConfig(null);
     }
 
     public void test_pruneNode_removeScriptAndNoscript() throws Exception {
         final String data = "<html><body><br/><script>foo</script><noscript>bar</noscript></body></html>";
         final Document document = getDocument(data);
 
-        final FessXpathTransformer transformer = new FessXpathTransformer() {
-            protected String[] getCrawlerDocumentHtmlPrunedTags() {
-                return new String[] { "script", "noscript" };
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "script,noscript";
             }
-        };
+        });
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
 
         final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
         final String docString = getXmlString(document);
@@ -110,6 +129,65 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         assertFalse(pnString.contains("foo"));
         assertFalse(pnString.contains("<NOSCRIPT>"));
         assertFalse(pnString.contains("bar"));
+        ComponentUtil.setFessConfig(null);
+    }
+
+    public void test_pruneNode_removeDivId() throws Exception {
+        final String data = "<html><body><br/><div>foo</div><div id=\"barid\">bar</div></body></html>";
+        final Document document = getDocument(data);
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "div#barid";
+            }
+        });
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final String docString = getXmlString(document);
+        final String pnString = getXmlString(pruneNode);
+        assertTrue(docString.contains("<DIV>"));
+        assertTrue(docString.contains("foo"));
+        assertTrue(docString.contains("<DIV id=\"barid\">"));
+        assertTrue(docString.contains("bar"));
+        assertTrue(pnString.contains("<DIV>"));
+        assertTrue(pnString.contains("foo"));
+        assertFalse(pnString.contains("<DIV id=\"barid\">"));
+        assertFalse(pnString.contains("bar"));
+        ComponentUtil.setFessConfig(null);
+    }
+
+    public void test_pruneNode_removeDivClass() throws Exception {
+        final String data = "<html><body><br/><div>foo</div><div class=\"barcls\">bar</div></body></html>";
+        final Document document = getDocument(data);
+
+        ComponentUtil.setFessConfig(new FessConfig.SimpleImpl() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getCrawlerDocumentHtmlPrunedTags() {
+                return "div.barcls";
+            }
+        });
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+        transformer.init();
+
+        final Node pruneNode = transformer.pruneNode(document.cloneNode(true));
+        final String docString = getXmlString(document);
+        final String pnString = getXmlString(pruneNode);
+        assertTrue(docString.contains("<DIV>"));
+        assertTrue(docString.contains("foo"));
+        assertTrue(docString.contains("<DIV class=\"barcls\">"));
+        assertTrue(docString.contains("bar"));
+        assertTrue(pnString.contains("<DIV>"));
+        assertTrue(pnString.contains("foo"));
+        assertFalse(pnString.contains("<DIV class=\"barcls\">"));
+        assertFalse(pnString.contains("bar"));
+        ComponentUtil.setFessConfig(null);
     }
 
     public void test_processGoogleOffOn() throws Exception {

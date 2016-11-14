@@ -44,6 +44,7 @@ import org.codelibs.fess.helper.PermissionHelper;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.taglib.FessFunctions;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.PrunedTag;
 import org.dbflute.optional.OptionalThing;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.lastaflute.job.LaJob;
@@ -582,8 +583,31 @@ public interface FessProp {
 
     String getCrawlerDocumentHtmlPrunedTags();
 
-    public default String[] getCrawlerDocumentHtmlPrunedTagsAsArray() {
-        return getCrawlerDocumentHtmlPrunedTags().split(",");
+    public default PrunedTag[] getCrawlerDocumentHtmlPrunedTagsAsArray() {
+        PrunedTag[] tags = (PrunedTag[]) propMap.get("crawlerDocumentHtmlPrunedTags");
+        if (tags == null) {
+            tags = split(getCrawlerDocumentHtmlPrunedTags(), ",").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
+                final String[] cssValues = v.split("\\.", 2);
+                final String css;
+                if (cssValues.length == 2) {
+                    css = cssValues[1];
+                } else {
+                    css = null;
+                }
+
+                final String[] idValues = cssValues[0].split("#", 2);
+                final String id;
+                if (idValues.length == 2) {
+                    id = idValues[1];
+                } else {
+                    id = null;
+                }
+
+                return new PrunedTag(idValues[0], id, css);
+            }).toArray(n -> new PrunedTag[n]));
+            propMap.put("crawlerDocumentHtmlPrunedTags", tags);
+        }
+        return tags;
     }
 
     String getCrawlerDocumentCacheHtmlMimetypes();
