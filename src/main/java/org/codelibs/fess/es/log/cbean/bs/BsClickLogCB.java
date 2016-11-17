@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.log.bsentity.dbmeta.ClickLogDbm;
 import org.codelibs.fess.es.log.cbean.ClickLogCB;
+import org.codelibs.fess.es.log.cbean.ca.ClickLogCA;
+import org.codelibs.fess.es.log.cbean.ca.bs.BsClickLogCA;
 import org.codelibs.fess.es.log.cbean.cq.ClickLogCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsClickLogCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsClickLogCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsClickLogCQ _conditionQuery;
+    protected BsClickLogCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsClickLogCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsClickLogCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsClickLogCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsClickLogCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsClickLogCA createLocalCA() {
+        return new ClickLogCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsClickLogCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

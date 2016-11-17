@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.RequestHeaderDbm;
 import org.codelibs.fess.es.config.cbean.RequestHeaderCB;
+import org.codelibs.fess.es.config.cbean.ca.RequestHeaderCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsRequestHeaderCA;
 import org.codelibs.fess.es.config.cbean.cq.RequestHeaderCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsRequestHeaderCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsRequestHeaderCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsRequestHeaderCQ _conditionQuery;
+    protected BsRequestHeaderCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsRequestHeaderCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsRequestHeaderCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsRequestHeaderCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsRequestHeaderCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsRequestHeaderCA createLocalCA() {
+        return new RequestHeaderCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsRequestHeaderCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

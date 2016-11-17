@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.LabelTypeDbm;
 import org.codelibs.fess.es.config.cbean.LabelTypeCB;
+import org.codelibs.fess.es.config.cbean.ca.LabelTypeCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsLabelTypeCA;
 import org.codelibs.fess.es.config.cbean.cq.LabelTypeCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsLabelTypeCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsLabelTypeCQ _conditionQuery;
+    protected BsLabelTypeCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsLabelTypeCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsLabelTypeCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsLabelTypeCA createLocalCA() {
+        return new LabelTypeCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsLabelTypeCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

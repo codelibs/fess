@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.RoleTypeDbm;
 import org.codelibs.fess.es.config.cbean.RoleTypeCB;
+import org.codelibs.fess.es.config.cbean.ca.RoleTypeCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsRoleTypeCA;
 import org.codelibs.fess.es.config.cbean.cq.RoleTypeCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsRoleTypeCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsRoleTypeCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsRoleTypeCQ _conditionQuery;
+    protected BsRoleTypeCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsRoleTypeCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsRoleTypeCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsRoleTypeCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsRoleTypeCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsRoleTypeCA createLocalCA() {
+        return new RoleTypeCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsRoleTypeCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

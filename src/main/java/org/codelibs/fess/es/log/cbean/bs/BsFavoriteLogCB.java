@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.log.bsentity.dbmeta.FavoriteLogDbm;
 import org.codelibs.fess.es.log.cbean.FavoriteLogCB;
+import org.codelibs.fess.es.log.cbean.ca.FavoriteLogCA;
+import org.codelibs.fess.es.log.cbean.ca.bs.BsFavoriteLogCA;
 import org.codelibs.fess.es.log.cbean.cq.FavoriteLogCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsFavoriteLogCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsFavoriteLogCQ _conditionQuery;
+    protected BsFavoriteLogCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsFavoriteLogCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsFavoriteLogCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsFavoriteLogCA createLocalCA() {
+        return new FavoriteLogCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsFavoriteLogCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

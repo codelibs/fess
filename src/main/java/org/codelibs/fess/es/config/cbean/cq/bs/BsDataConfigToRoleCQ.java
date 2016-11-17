@@ -33,6 +33,7 @@ import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -57,6 +58,24 @@ public abstract class BsDataConfigToRoleCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
+    public void functionScore(OperatorCall<DataConfigToRoleCQ> queryLambda,
+            ScoreFunctionCall<ScoreFunctionCreator<DataConfigToRoleCQ>> functionsLambda,
+            final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
+        DataConfigToRoleCQ cq = new DataConfigToRoleCQ();
+        queryLambda.callback(cq);
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        if (functionsLambda != null) {
+            functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
+                DataConfigToRoleCQ cf = new DataConfigToRoleCQ();
+                cqLambda.callback(cf);
+                builder.add(cf.getQuery(), scoreFunctionBuilder);
+            });
+        }
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void filtered(FilteredCall<DataConfigToRoleCQ, DataConfigToRoleCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }

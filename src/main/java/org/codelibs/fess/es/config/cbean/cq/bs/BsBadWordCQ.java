@@ -33,6 +33,7 @@ import org.elasticsearch.index.query.RegexpQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -57,6 +58,23 @@ public abstract class BsBadWordCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
+    public void functionScore(OperatorCall<BadWordCQ> queryLambda, ScoreFunctionCall<ScoreFunctionCreator<BadWordCQ>> functionsLambda,
+            final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
+        BadWordCQ cq = new BadWordCQ();
+        queryLambda.callback(cq);
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        if (functionsLambda != null) {
+            functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
+                BadWordCQ cf = new BadWordCQ();
+                cqLambda.callback(cf);
+                builder.add(cf.getQuery(), scoreFunctionBuilder);
+            });
+        }
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void filtered(FilteredCall<BadWordCQ, BadWordCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }

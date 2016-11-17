@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -54,6 +55,23 @@ public abstract class BsUserInfoCQ extends EsAbstractConditionQuery {
     // ===================================================================================
     //                                                                       Query Control
     //                                                                       =============
+    public void functionScore(OperatorCall<UserInfoCQ> queryLambda, ScoreFunctionCall<ScoreFunctionCreator<UserInfoCQ>> functionsLambda,
+            final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
+        UserInfoCQ cq = new UserInfoCQ();
+        queryLambda.callback(cq);
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        if (functionsLambda != null) {
+            functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
+                UserInfoCQ cf = new UserInfoCQ();
+                cqLambda.callback(cf);
+                builder.add(cf.getQuery(), scoreFunctionBuilder);
+            });
+        }
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void filtered(FilteredCall<UserInfoCQ, UserInfoCQ> filteredLambda) {
         filtered(filteredLambda, null);
     }

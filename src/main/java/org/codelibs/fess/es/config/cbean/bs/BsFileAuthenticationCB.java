@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.FileAuthenticationDbm;
 import org.codelibs.fess.es.config.cbean.FileAuthenticationCB;
+import org.codelibs.fess.es.config.cbean.ca.FileAuthenticationCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsFileAuthenticationCA;
 import org.codelibs.fess.es.config.cbean.cq.FileAuthenticationCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsFileAuthenticationCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsFileAuthenticationCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsFileAuthenticationCQ _conditionQuery;
+    protected BsFileAuthenticationCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsFileAuthenticationCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsFileAuthenticationCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsFileAuthenticationCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsFileAuthenticationCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsFileAuthenticationCA createLocalCA() {
+        return new FileAuthenticationCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsFileAuthenticationCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

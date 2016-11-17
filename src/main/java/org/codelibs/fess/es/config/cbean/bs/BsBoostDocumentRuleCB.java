@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.BoostDocumentRuleDbm;
 import org.codelibs.fess.es.config.cbean.BoostDocumentRuleCB;
+import org.codelibs.fess.es.config.cbean.ca.BoostDocumentRuleCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsBoostDocumentRuleCA;
 import org.codelibs.fess.es.config.cbean.cq.BoostDocumentRuleCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsBoostDocumentRuleCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsBoostDocumentRuleCQ _conditionQuery;
+    protected BsBoostDocumentRuleCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsBoostDocumentRuleCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsBoostDocumentRuleCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsBoostDocumentRuleCA createLocalCA() {
+        return new BoostDocumentRuleCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsBoostDocumentRuleCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

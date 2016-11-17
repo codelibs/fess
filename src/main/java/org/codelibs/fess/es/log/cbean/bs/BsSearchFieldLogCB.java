@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.log.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.log.bsentity.dbmeta.SearchFieldLogDbm;
 import org.codelibs.fess.es.log.cbean.SearchFieldLogCB;
+import org.codelibs.fess.es.log.cbean.ca.SearchFieldLogCA;
+import org.codelibs.fess.es.log.cbean.ca.bs.BsSearchFieldLogCA;
 import org.codelibs.fess.es.log.cbean.cq.SearchFieldLogCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsSearchFieldLogCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsSearchFieldLogCQ _conditionQuery;
+    protected BsSearchFieldLogCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsSearchFieldLogCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsSearchFieldLogCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsSearchFieldLogCA createLocalCA() {
+        return new SearchFieldLogCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsSearchFieldLogCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

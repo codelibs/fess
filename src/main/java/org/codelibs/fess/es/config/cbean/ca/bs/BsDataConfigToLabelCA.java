@@ -1,0 +1,364 @@
+/*
+ * Copyright 2012-2016 CodeLibs Project and the Others.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+package org.codelibs.fess.es.config.cbean.ca.bs;
+
+import org.codelibs.fess.es.config.allcommon.EsAbstractConditionAggregation;
+import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
+import org.codelibs.fess.es.config.cbean.ca.DataConfigToLabelCA;
+import org.codelibs.fess.es.config.cbean.cq.DataConfigToLabelCQ;
+import org.codelibs.fess.es.config.cbean.cq.bs.BsDataConfigToLabelCQ;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+
+/**
+ * @author ESFlute (using FreeGen)
+ */
+public abstract class BsDataConfigToLabelCA extends EsAbstractConditionAggregation {
+
+    // ===================================================================================
+    //                                                                     Aggregation Set
+    //                                                                           =========
+
+    public void filter(String name, EsAbstractConditionQuery.OperatorCall<BsDataConfigToLabelCQ> queryLambda,
+            ConditionOptionCall<FilterAggregationBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        DataConfigToLabelCQ cq = new DataConfigToLabelCQ();
+        if (queryLambda != null) {
+            queryLambda.callback(cq);
+        }
+        FilterAggregationBuilder builder = regFilterA(name, cq.getQuery());
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        GlobalBuilder builder = regGlobalA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void sampler(String name, ConditionOptionCall<SamplerAggregationBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        SamplerAggregationBuilder builder = regSamplerA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
+        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
+        TopHitsBuilder builder = regTopHitsA(name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    // String dataConfigId
+
+    public void setDataConfigId_Terms() {
+        setDataConfigId_Terms(null);
+    }
+
+    public void setDataConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+        setDataConfigId_Terms("dataConfigId", opLambda, null);
+    }
+
+    public void setDataConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setDataConfigId_Terms("dataConfigId", opLambda, aggsLambda);
+    }
+
+    public void setDataConfigId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        TermsBuilder builder = regTermsA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDataConfigId_SignificantTerms() {
+        setDataConfigId_SignificantTerms(null);
+    }
+
+    public void setDataConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+        setDataConfigId_SignificantTerms("dataConfigId", opLambda, null);
+    }
+
+    public void setDataConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setDataConfigId_SignificantTerms("dataConfigId", opLambda, aggsLambda);
+    }
+
+    public void setDataConfigId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        SignificantTermsBuilder builder = regSignificantTermsA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDataConfigId_IpRange() {
+        setDataConfigId_IpRange(null);
+    }
+
+    public void setDataConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+        setDataConfigId_IpRange("dataConfigId", opLambda, null);
+    }
+
+    public void setDataConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setDataConfigId_IpRange("dataConfigId", opLambda, aggsLambda);
+    }
+
+    public void setDataConfigId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        IPv4RangeBuilder builder = regIpRangeA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setDataConfigId_Count() {
+        setDataConfigId_Count(null);
+    }
+
+    public void setDataConfigId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+        setDataConfigId_Count("dataConfigId", opLambda);
+    }
+
+    public void setDataConfigId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
+        ValueCountBuilder builder = regCountA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDataConfigId_Cardinality() {
+        setDataConfigId_Cardinality(null);
+    }
+
+    public void setDataConfigId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+        setDataConfigId_Cardinality("dataConfigId", opLambda);
+    }
+
+    public void setDataConfigId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
+        CardinalityBuilder builder = regCardinalityA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDataConfigId_Missing() {
+        setDataConfigId_Missing(null);
+    }
+
+    public void setDataConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+        setDataConfigId_Missing("dataConfigId", opLambda, null);
+    }
+
+    public void setDataConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setDataConfigId_Missing("dataConfigId", opLambda, aggsLambda);
+    }
+
+    public void setDataConfigId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        MissingBuilder builder = regMissingA(name, "dataConfigId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    // String labelTypeId
+
+    public void setLabelTypeId_Terms() {
+        setLabelTypeId_Terms(null);
+    }
+
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+        setLabelTypeId_Terms("labelTypeId", opLambda, null);
+    }
+
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setLabelTypeId_Terms("labelTypeId", opLambda, aggsLambda);
+    }
+
+    public void setLabelTypeId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        TermsBuilder builder = regTermsA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLabelTypeId_SignificantTerms() {
+        setLabelTypeId_SignificantTerms(null);
+    }
+
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+        setLabelTypeId_SignificantTerms("labelTypeId", opLambda, null);
+    }
+
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setLabelTypeId_SignificantTerms("labelTypeId", opLambda, aggsLambda);
+    }
+
+    public void setLabelTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        SignificantTermsBuilder builder = regSignificantTermsA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLabelTypeId_IpRange() {
+        setLabelTypeId_IpRange(null);
+    }
+
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+        setLabelTypeId_IpRange("labelTypeId", opLambda, null);
+    }
+
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setLabelTypeId_IpRange("labelTypeId", opLambda, aggsLambda);
+    }
+
+    public void setLabelTypeId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        IPv4RangeBuilder builder = regIpRangeA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+    public void setLabelTypeId_Count() {
+        setLabelTypeId_Count(null);
+    }
+
+    public void setLabelTypeId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+        setLabelTypeId_Count("labelTypeId", opLambda);
+    }
+
+    public void setLabelTypeId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
+        ValueCountBuilder builder = regCountA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Cardinality() {
+        setLabelTypeId_Cardinality(null);
+    }
+
+    public void setLabelTypeId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+        setLabelTypeId_Cardinality("labelTypeId", opLambda);
+    }
+
+    public void setLabelTypeId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
+        CardinalityBuilder builder = regCardinalityA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_Missing() {
+        setLabelTypeId_Missing(null);
+    }
+
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+        setLabelTypeId_Missing("labelTypeId", opLambda, null);
+    }
+
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        setLabelTypeId_Missing("labelTypeId", opLambda, aggsLambda);
+    }
+
+    public void setLabelTypeId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+            OperatorCall<BsDataConfigToLabelCA> aggsLambda) {
+        MissingBuilder builder = regMissingA(name, "labelTypeId");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigToLabelCA ca = new DataConfigToLabelCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
+}

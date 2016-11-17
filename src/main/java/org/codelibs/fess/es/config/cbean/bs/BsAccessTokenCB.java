@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.AccessTokenDbm;
 import org.codelibs.fess.es.config.cbean.AccessTokenCB;
+import org.codelibs.fess.es.config.cbean.ca.AccessTokenCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsAccessTokenCA;
 import org.codelibs.fess.es.config.cbean.cq.AccessTokenCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsAccessTokenCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsAccessTokenCQ _conditionQuery;
+    protected BsAccessTokenCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsAccessTokenCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsAccessTokenCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsAccessTokenCA createLocalCA() {
+        return new AccessTokenCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsAccessTokenCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

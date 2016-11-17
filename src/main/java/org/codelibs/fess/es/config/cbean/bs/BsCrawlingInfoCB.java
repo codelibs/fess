@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.CrawlingInfoDbm;
 import org.codelibs.fess.es.config.cbean.CrawlingInfoCB;
+import org.codelibs.fess.es.config.cbean.ca.CrawlingInfoCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsCrawlingInfoCA;
 import org.codelibs.fess.es.config.cbean.cq.CrawlingInfoCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsCrawlingInfoCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsCrawlingInfoCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsCrawlingInfoCQ _conditionQuery;
+    protected BsCrawlingInfoCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsCrawlingInfoCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsCrawlingInfoCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsCrawlingInfoCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsCrawlingInfoCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsCrawlingInfoCA createLocalCA() {
+        return new CrawlingInfoCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsCrawlingInfoCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

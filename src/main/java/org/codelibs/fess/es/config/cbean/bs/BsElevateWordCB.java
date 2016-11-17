@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordDbm;
 import org.codelibs.fess.es.config.cbean.ElevateWordCB;
+import org.codelibs.fess.es.config.cbean.ca.ElevateWordCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsElevateWordCA;
 import org.codelibs.fess.es.config.cbean.cq.ElevateWordCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsElevateWordCQ _conditionQuery;
+    protected BsElevateWordCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsElevateWordCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsElevateWordCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsElevateWordCA createLocalCA() {
+        return new ElevateWordCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsElevateWordCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {
