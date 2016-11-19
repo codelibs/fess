@@ -173,7 +173,7 @@ public class LabelTypeHelper {
         }
     }
 
-    protected static class LabelTypePattern {
+    public static class LabelTypePattern {
 
         private final String value;
 

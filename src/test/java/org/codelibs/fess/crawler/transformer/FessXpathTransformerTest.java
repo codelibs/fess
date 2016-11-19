@@ -17,7 +17,9 @@ package org.codelibs.fess.crawler.transformer;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,30 +30,90 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.codelibs.core.lang.ClassUtil;
+import org.codelibs.core.lang.FieldUtil;
 import org.codelibs.core.misc.ValueHolder;
 import org.codelibs.fess.crawler.builder.RequestDataBuilder;
 import org.codelibs.fess.crawler.entity.RequestData;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.codelibs.fess.crawler.entity.ResultData;
 import org.codelibs.fess.crawler.exception.ChildUrlsException;
+import org.codelibs.fess.es.config.exentity.LabelType;
+import org.codelibs.fess.es.config.exentity.WebConfig;
+import org.codelibs.fess.helper.CrawlingConfigHelper;
+import org.codelibs.fess.helper.CrawlingInfoHelper;
+import org.codelibs.fess.helper.DocumentHelper;
+import org.codelibs.fess.helper.FileTypeHelper;
+import org.codelibs.fess.helper.LabelTypeHelper;
+import org.codelibs.fess.helper.LabelTypeHelper.LabelTypePattern;
+import org.codelibs.fess.helper.PathMappingHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.unit.UnitFessTestCase;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.util.MemoryUtil;
 import org.cyberneko.html.parsers.DOMParser;
 import org.lastaflute.di.core.exception.ComponentNotFoundException;
+import org.lastaflute.di.core.factory.SingletonLaContainerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 public class FessXpathTransformerTest extends UnitFessTestCase {
-    public FessXpathTransformer fessXpathTransformer;
+    private static final Logger logger = LoggerFactory.getLogger(FessXpathTransformerTest.class);
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        fessXpathTransformer = new FessXpathTransformer();
+    public void test_transform() throws Exception {
+        String data = "<html><head><title>Test</title></head><body><h1>Header1</h1><p>This is a pen.</p></body></html>";
+
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
         fessXpathTransformer.init();
-        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
+        SingletonLaContainerFactory.getContainer().register(CrawlingInfoHelper.class, "crawlingInfoHelper");
+        SingletonLaContainerFactory.getContainer().register(PathMappingHelper.class, "pathMappingHelper");
+        SingletonLaContainerFactory.getContainer().register(CrawlingConfigHelper.class, "crawlingConfigHelper");
+        SingletonLaContainerFactory.getContainer().register(SystemHelper.class, "systemHelper");
+        SingletonLaContainerFactory.getContainer().register(FileTypeHelper.class, "fileTypeHelper");
+        SingletonLaContainerFactory.getContainer().register(DocumentHelper.class, "documentHelper");
+        SingletonLaContainerFactory.getContainer().register(LabelTypeHelper.class, "labelTypeHelper");
+
+        WebConfig webConfig = new WebConfig();
+        setValueToObject(webConfig, "labelTypeList", new ArrayList<LabelType>());
+        ComponentUtil.getCrawlingConfigHelper().store("test", webConfig);
+        setValueToObject(ComponentUtil.getLabelTypeHelper(), "labelTypePatternList", new ArrayList<LabelTypePattern>());
+
+        for (int i = 0; i < 10000; i++) {
+            if (i % 1000 == 0) {
+                logger.info(MemoryUtil.getMemoryUsageLog() + ":" + i);
+                System.gc();
+            }
+            ResponseData responseData = new ResponseData();
+            responseData.setCharSet("UTF-8");
+            responseData.setContentLength(data.length());
+            responseData.setExecutionTime(1000L);
+            responseData.setHttpStatusCode(200);
+            responseData.setLastModified(new Date());
+            responseData.setMethod("GET");
+            responseData.setMimeType("text/html");
+            responseData.setParentUrl("http://fess.codelibs.org/");
+            responseData.setResponseBody(data.getBytes());
+            responseData.setSessionId("test-1");
+            responseData.setStatus(0);
+            responseData.setUrl("http://fess.codelibs.org/test.html");
+            ResultData resultData = fessXpathTransformer.transform(responseData);
+            // System.out.println(resultData.toString());
+        }
+
+        System.gc();
+        Thread.sleep(1000L);
+        logger.info(MemoryUtil.getMemoryUsageLog());
+        assertTrue(MemoryUtil.getUsedMemory() < 100000000L);
+    }
+
+    private void setValueToObject(Object obj, String name, Object value) {
+        Field field = ClassUtil.getDeclaredField(obj.getClass(), name);
+        field.setAccessible(true);
+        FieldUtil.set(field, obj, value);
     }
 
     public void test_pruneNode() throws Exception {
@@ -311,6 +373,10 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_isValidPath_valid() {
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
+        fessXpathTransformer.init();
+        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
+
         String value;
 
         value = "foo.html";
@@ -331,6 +397,10 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_isValidPath_invalid() {
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
+        fessXpathTransformer.init();
+        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
+
         String value;
 
         value = "javascript:...";
@@ -365,6 +435,10 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_convertChildUrlList() {
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
+        fessXpathTransformer.init();
+        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
+
         List<RequestData> urlList = new ArrayList<>();
 
         urlList = fessXpathTransformer.convertChildUrlList(urlList);
@@ -395,6 +469,10 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
     }
 
     public void test_removeCommentTag() {
+        final FessXpathTransformer fessXpathTransformer = new FessXpathTransformer();
+        fessXpathTransformer.init();
+        fessXpathTransformer.convertUrlMap.put("feed:", "http:");
+
         assertEquals("", fessXpathTransformer.removeCommentTag(""));
         assertEquals(" ", fessXpathTransformer.removeCommentTag("<!-- - -->"));
         assertEquals("abc", fessXpathTransformer.removeCommentTag("abc"));
@@ -457,6 +535,20 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
             assertEquals(1, childUrlList.size());
             assertEquals("http://example.com/foo", childUrlList.iterator().next().getUrl());
         }
+    }
+
+    public void test_getSingleNodeValue() throws Exception {
+        final FessXpathTransformer transformer = new FessXpathTransformer();
+
+        String data = "<html><body>aaa<style>bbb</style>ccc</body></html>";
+        Document document = getDocument(data);
+        String value = transformer.getSingleNodeValue(document, "//BODY", false);
+        assertEquals("aaa bbb ccc", value);
+
+        data = "<html><body> aaa <p> bbb <b>ccc</b> </p> </body></html>";
+        document = getDocument(data);
+        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        assertEquals("aaa bbb ccc", value);
     }
 
     public void test_contentXpath() throws Exception {

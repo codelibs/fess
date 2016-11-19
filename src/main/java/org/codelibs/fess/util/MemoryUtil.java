@@ -35,4 +35,11 @@ public final class MemoryUtil {
     public static String byteCountToDisplaySize(final long size) {
         return FileUtils.byteCountToDisplaySize(size).replace(" ", StringUtil.EMPTY);
     }
+
+    public static long getUsedMemory() {
+        final Runtime runtime = Runtime.getRuntime();
+        final long freeBytes = runtime.freeMemory();
+        final long totalBytes = runtime.totalMemory();
+        return totalBytes - freeBytes;
+    }
 }
