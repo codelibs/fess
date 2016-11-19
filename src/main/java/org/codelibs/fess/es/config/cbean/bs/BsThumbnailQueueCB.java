@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.ThumbnailQueueDbm;
 import org.codelibs.fess.es.config.cbean.ThumbnailQueueCB;
+import org.codelibs.fess.es.config.cbean.ca.ThumbnailQueueCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsThumbnailQueueCA;
 import org.codelibs.fess.es.config.cbean.cq.ThumbnailQueueCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsThumbnailQueueCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsThumbnailQueueCQ _conditionQuery;
+    protected BsThumbnailQueueCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsThumbnailQueueCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsThumbnailQueueCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsThumbnailQueueCA createLocalCA() {
+        return new ThumbnailQueueCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsThumbnailQueueCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

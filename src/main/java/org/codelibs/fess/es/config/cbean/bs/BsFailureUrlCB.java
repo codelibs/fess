@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.FailureUrlDbm;
 import org.codelibs.fess.es.config.cbean.FailureUrlCB;
+import org.codelibs.fess.es.config.cbean.ca.FailureUrlCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsFailureUrlCA;
 import org.codelibs.fess.es.config.cbean.cq.FailureUrlCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsFailureUrlCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsFailureUrlCQ _conditionQuery;
+    protected BsFailureUrlCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsFailureUrlCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsFailureUrlCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsFailureUrlCA createLocalCA() {
+        return new FailureUrlCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsFailureUrlCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

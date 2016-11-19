@@ -109,7 +109,11 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     public void destroy() {
         if (webDriver != null) {
             synchronized (this) {
-                webDriver.quit();
+                try {
+                    webDriver.quit();
+                } catch (Throwable t) {
+                    logger.debug("Failed to quit webDriver.", t);
+                }
                 webDriver = null;
             }
         }

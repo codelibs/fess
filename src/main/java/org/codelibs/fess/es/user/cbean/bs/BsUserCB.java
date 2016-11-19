@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.user.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.user.bsentity.dbmeta.UserDbm;
 import org.codelibs.fess.es.user.cbean.UserCB;
+import org.codelibs.fess.es.user.cbean.ca.UserCA;
+import org.codelibs.fess.es.user.cbean.ca.bs.BsUserCA;
 import org.codelibs.fess.es.user.cbean.cq.UserCQ;
 import org.codelibs.fess.es.user.cbean.cq.bs.BsUserCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsUserCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsUserCQ _conditionQuery;
+    protected BsUserCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsUserCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsUserCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsUserCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsUserCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsUserCA createLocalCA() {
+        return new UserCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsUserCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

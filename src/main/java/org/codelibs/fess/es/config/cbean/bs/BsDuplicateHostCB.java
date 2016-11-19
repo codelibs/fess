@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.DuplicateHostDbm;
 import org.codelibs.fess.es.config.cbean.DuplicateHostCB;
+import org.codelibs.fess.es.config.cbean.ca.DuplicateHostCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsDuplicateHostCA;
 import org.codelibs.fess.es.config.cbean.cq.DuplicateHostCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsDuplicateHostCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsDuplicateHostCQ _conditionQuery;
+    protected BsDuplicateHostCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsDuplicateHostCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsDuplicateHostCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsDuplicateHostCA createLocalCA() {
+        return new DuplicateHostCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsDuplicateHostCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

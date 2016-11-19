@@ -237,6 +237,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         final SystemHelper systemHelper = ComponentUtil.getSystemHelper();
         final FileTypeHelper fileTypeHelper = ComponentUtil.getFileTypeHelper();
         final DocumentHelper documentHelper = ComponentUtil.getDocumentHelper();
+        final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         String url = responseData.getUrl();
         final String indexingTarget = crawlingConfig.getIndexingTarget(url);
         url = pathMappingHelper.replaceUrl(sessionId, url);
@@ -344,7 +345,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         for (final String labelType : crawlingConfig.getLabelTypeValues()) {
             labelTypeSet.add(labelType);
         }
-        final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
         labelTypeSet.addAll(labelTypeHelper.getMatchedLabelValueSet(url));
         putResultDataBody(dataMap, fessConfig.getIndexFieldLabel(), labelTypeSet);
         // role: roleType
@@ -450,8 +450,6 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             for (int i = 0; i < list.getLength(); i++) {
                 if (buf == null) {
                     buf = new UnsafeStringBuilder(1000);
-                } else {
-                    buf.append(' ');
                 }
                 Node node = list.item(i).cloneNode(true);
                 if (useGoogleOffOn) {
@@ -460,7 +458,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 if (pruned) {
                     node = pruneNode(node);
                 }
-                buf.append(node.getTextContent());
+                paseTextContent(node, buf);
             }
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
@@ -469,6 +467,24 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
             return null;
         }
         return buf.toUnsafeString().trim();
+    }
+
+    protected void paseTextContent(Node node, UnsafeStringBuilder buf) {
+        if (node.hasChildNodes()) {
+            final NodeList nodeList = node.getChildNodes();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                final Node childNode = nodeList.item(i);
+                paseTextContent(childNode, buf);
+            }
+        } else {
+            final String value = node.getTextContent();
+            if (value != null) {
+                final String content = value.trim();
+                if (content.length() > 0) {
+                    buf.append(' ').append(content);
+                }
+            }
+        }
     }
 
     protected Node processGoogleOffOn(final Node node, final ValueHolder<Boolean> flag) {

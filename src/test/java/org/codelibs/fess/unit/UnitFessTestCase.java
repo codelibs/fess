@@ -15,11 +15,18 @@
  */
 package org.codelibs.fess.unit;
 
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.utflute.lastaflute.WebContainerTestCase;
 
 public abstract class UnitFessTestCase extends WebContainerTestCase {
     @Override
     protected String prepareConfigFile() {
         return "test_app.xml";
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ComponentUtil.setFessConfig(null);
+        super.tearDown();
     }
 }

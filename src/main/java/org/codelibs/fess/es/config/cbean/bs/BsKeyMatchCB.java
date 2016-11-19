@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.KeyMatchDbm;
 import org.codelibs.fess.es.config.cbean.KeyMatchCB;
+import org.codelibs.fess.es.config.cbean.ca.KeyMatchCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsKeyMatchCA;
 import org.codelibs.fess.es.config.cbean.cq.KeyMatchCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsKeyMatchCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsKeyMatchCQ _conditionQuery;
+    protected BsKeyMatchCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsKeyMatchCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsKeyMatchCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsKeyMatchCA createLocalCA() {
+        return new KeyMatchCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsKeyMatchCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

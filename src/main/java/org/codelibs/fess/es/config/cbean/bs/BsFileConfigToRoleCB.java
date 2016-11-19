@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.FileConfigToRoleDbm;
 import org.codelibs.fess.es.config.cbean.FileConfigToRoleCB;
+import org.codelibs.fess.es.config.cbean.ca.FileConfigToRoleCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsFileConfigToRoleCA;
 import org.codelibs.fess.es.config.cbean.cq.FileConfigToRoleCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsFileConfigToRoleCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsFileConfigToRoleCQ _conditionQuery;
+    protected BsFileConfigToRoleCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsFileConfigToRoleCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsFileConfigToRoleCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsFileConfigToRoleCA createLocalCA() {
+        return new FileConfigToRoleCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsFileConfigToRoleCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

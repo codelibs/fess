@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.ElevateWordToLabelDbm;
 import org.codelibs.fess.es.config.cbean.ElevateWordToLabelCB;
+import org.codelibs.fess.es.config.cbean.ca.ElevateWordToLabelCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsElevateWordToLabelCA;
 import org.codelibs.fess.es.config.cbean.cq.ElevateWordToLabelCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsElevateWordToLabelCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsElevateWordToLabelCQ _conditionQuery;
+    protected BsElevateWordToLabelCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsElevateWordToLabelCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsElevateWordToLabelCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsElevateWordToLabelCA createLocalCA() {
+        return new ElevateWordToLabelCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsElevateWordToLabelCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

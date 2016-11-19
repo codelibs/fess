@@ -17,6 +17,7 @@ package org.codelibs.fess.es.config.allcommon;
 
 import org.dbflute.cbean.result.PagingResultBean;
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.search.aggregations.Aggregations;
 
 /**
  * @param <ENTITY> The type of entity.
@@ -30,6 +31,8 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
     private int totalShards;
     private int successfulShards;
     private int failedShards;
+    private Aggregations aggregations;
+
     private SearchRequestBuilder builder;
 
     public EsPagingResultBean(final SearchRequestBuilder builder) {
@@ -71,4 +74,13 @@ public class EsPagingResultBean<ENTITY> extends PagingResultBean<ENTITY> {
     public void setFailedShards(int failedShards) {
         this.failedShards = failedShards;
     }
+
+    public Aggregations getAggregations() {
+        return aggregations;
+    }
+
+    public void setAggregation(Aggregations aggregations) {
+        this.aggregations = aggregations;
+    }
+
 }

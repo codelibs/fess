@@ -22,6 +22,8 @@ import java.util.Map;
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionBean;
 import org.codelibs.fess.es.config.bsentity.dbmeta.ScheduledJobDbm;
 import org.codelibs.fess.es.config.cbean.ScheduledJobCB;
+import org.codelibs.fess.es.config.cbean.ca.ScheduledJobCA;
+import org.codelibs.fess.es.config.cbean.ca.bs.BsScheduledJobCA;
 import org.codelibs.fess.es.config.cbean.cq.ScheduledJobCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsScheduledJobCQ;
 import org.dbflute.cbean.ConditionQuery;
@@ -37,6 +39,7 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
     //                                                                           Attribute
     //                                                                           =========
     protected BsScheduledJobCQ _conditionQuery;
+    protected BsScheduledJobCA _conditionAggregation;
     protected HpSpecification _specification;
 
     // ===================================================================================
@@ -93,6 +96,10 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
             });
         }
 
+        if (_conditionAggregation != null) {
+            _conditionAggregation.getAggregationBuilderList().forEach(builder::addAggregation);
+        }
+
         if (_specification != null) {
             builder.setFetchSource(_specification.columnList.toArray(new String[_specification.columnList.size()]), null);
         }
@@ -120,6 +127,25 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
     }
 
     // ===================================================================================
+    //                                                                         Aggregation
+    //                                                                         ===========
+    public BsScheduledJobCA aggregation() {
+        assertAggregationPurpose();
+        return doGetConditionAggregation();
+    }
+
+    protected BsScheduledJobCA doGetConditionAggregation() {
+        if (_conditionAggregation == null) {
+            _conditionAggregation = createLocalCA();
+        }
+        return _conditionAggregation;
+    }
+
+    protected BsScheduledJobCA createLocalCA() {
+        return new ScheduledJobCA();
+    }
+
+    // ===================================================================================
     //                                                                             Specify
     //                                                                             =======
     public HpSpecification specify() {
@@ -131,6 +157,9 @@ public class BsScheduledJobCB extends EsAbstractConditionBean {
     }
 
     protected void assertQueryPurpose() {
+    }
+
+    protected void assertAggregationPurpose() {
     }
 
     protected void assertSpecifyPurpose() {

@@ -158,6 +158,9 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         list.setTotalShards(response.getTotalShards());
         list.setSuccessfulShards(response.getSuccessfulShards());
         list.setFailedShards(response.getFailedShards());
+
+        list.setAggregation(response.getAggregations());
+
         // #pending others
 
         return list;
