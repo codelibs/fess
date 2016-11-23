@@ -110,7 +110,8 @@ public class QueryHelper {
 
     protected String[] sortFields;
 
-    protected int highlightFragmentSize = 100;
+    @Deprecated
+    public int highlightFragmentSize = 100;
 
     protected String additionalQuery;
 
@@ -120,7 +121,8 @@ public class QueryHelper {
 
     protected Map<String, String[]> requestParameterMap = new HashMap<>();
 
-    protected int maxSearchResultOffset = 100000;
+    @Deprecated
+    public int maxSearchResultOffset = 100000;
 
     protected SortBuilder[] defaultSortBuilders;
 
@@ -682,7 +684,6 @@ public class QueryHelper {
 
     public void highlightedFields(final Consumer<Stream<String>> stream) {
         stream(highlightedFields).of(stream);
-        ;
     }
 
     /**
@@ -746,20 +747,6 @@ public class QueryHelper {
     }
 
     /**
-     * @return the highlightFragmentSize
-     */
-    public int getHighlightFragmentSize() {
-        return highlightFragmentSize;
-    }
-
-    /**
-     * @param highlightFragmentSize the highlightFragmentSize to set
-     */
-    public void setHighlightFragmentSize(final int highlightFragmentSize) {
-        this.highlightFragmentSize = highlightFragmentSize;
-    }
-
-    /**
      * @return the additionalQuery
      */
     public String getAdditionalQuery() {
@@ -799,14 +786,6 @@ public class QueryHelper {
 
     public Set<Entry<String, String[]>> getRequestParameterSet() {
         return requestParameterMap.entrySet();
-    }
-
-    public int getMaxSearchResultOffset() {
-        return maxSearchResultOffset;
-    }
-
-    public void setMaxSearchResultOffset(final int maxSearchResultOffset) {
-        this.maxSearchResultOffset = maxSearchResultOffset;
     }
 
     public void addDefaultSort(final String fieldName, final String order) {

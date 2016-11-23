@@ -51,6 +51,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
     -Djcifs.smb.client.connTimeout=60000
     -Djcifs.smb.client.soTimeout=35000
@@ -70,6 +71,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
     -Dgroovy.use.classvalue=true
     */
     String JVM_SUGGEST_OPTIONS = "jvm.suggest.options";
@@ -424,8 +426,17 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. location */
     String QUERY_GEO_FIELDS = "query.geo.fields";
 
+    /** The key of the configuration. e.g. browser_lang */
+    String QUERY_BROWSER_LANG_PARAMETER_NAME = "query.browser.lang.parameter.name";
+
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
+
+    /** The key of the configuration. e.g. 100 */
+    String QUERY_HIGHLIGHT_FRAGMENT_SIZE = "query.highlight.fragment.size";
+
+    /** The key of the configuration. e.g. 100000 */
+    String QUERY_MAX_SEARCH_RESULT_OFFSET = "query.max.search.result.offset";
 
     /** The key of the configuration. e.g.  */
     String QUERY_ADDITIONAL_RESPONSE_FIELDS = "query.additional.response.fields";
@@ -1137,6 +1148,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
     -XX:-OmitStackTraceInFastThrow
     -Djcifs.smb.client.connTimeout=60000
     -Djcifs.smb.client.soTimeout=35000
@@ -1161,6 +1173,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     -XX:+UseParNewGC
     -XX:+UseTLAB
     -XX:+DisableExplicitGC
+    -XX:+HeapDumpOnOutOfMemoryError
     -Dgroovy.use.classvalue=true
     <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2273,6 +2286,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getQueryGeoFields();
 
     /**
+     * Get the value for the key 'query.browser.lang.parameter.name'. <br>
+     * The value is, e.g. browser_lang <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBrowserLangParameterName();
+
+    /**
      * Get the value for the key 'query.replace.term.with.prefix.query'. <br>
      * The value is, e.g. true <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -2285,6 +2305,36 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isQueryReplaceTermWithPrefixQuery();
+
+    /**
+     * Get the value for the key 'query.highlight.fragment.size'. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryHighlightFragmentSize();
+
+    /**
+     * Get the value for the key 'query.highlight.fragment.size' as {@link Integer}. <br>
+     * The value is, e.g. 100 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryHighlightFragmentSizeAsInteger();
+
+    /**
+     * Get the value for the key 'query.max.search.result.offset'. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryMaxSearchResultOffset();
+
+    /**
+     * Get the value for the key 'query.max.search.result.offset' as {@link Integer}. <br>
+     * The value is, e.g. 100000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getQueryMaxSearchResultOffsetAsInteger();
 
     /**
      * Get the value for the key 'query.additional.response.fields'. <br>
@@ -5004,12 +5054,32 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
             return get(FessConfig.QUERY_GEO_FIELDS);
         }
 
+        public String getQueryBrowserLangParameterName() {
+            return get(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME);
+        }
+
         public String getQueryReplaceTermWithPrefixQuery() {
             return get(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
         }
 
         public boolean isQueryReplaceTermWithPrefixQuery() {
             return is(FessConfig.QUERY_REPLACE_TERM_WITH_PREFIX_QUERY);
+        }
+
+        public String getQueryHighlightFragmentSize() {
+            return get(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public Integer getQueryHighlightFragmentSizeAsInteger() {
+            return getAsInteger(FessConfig.QUERY_HIGHLIGHT_FRAGMENT_SIZE);
+        }
+
+        public String getQueryMaxSearchResultOffset() {
+            return get(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
+        }
+
+        public Integer getQueryMaxSearchResultOffsetAsInteger() {
+            return getAsInteger(FessConfig.QUERY_MAX_SEARCH_RESULT_OFFSET);
         }
 
         public String getQueryAdditionalResponseFields() {

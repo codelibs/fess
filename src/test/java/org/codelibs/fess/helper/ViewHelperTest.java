@@ -83,7 +83,6 @@ public class ViewHelperTest extends UnitFessTestCase {
 
     public void test_escapeHighlight() {
         viewHelper = new ViewHelper();
-        viewHelper.useHighlight = true;
         viewHelper.init();
 
         String text = "";
@@ -92,11 +91,12 @@ public class ViewHelperTest extends UnitFessTestCase {
         text = "aaa";
         assertEquals("aaa", viewHelper.escapeHighlight(text));
 
-        text = "<em>aaa</em>";
-        assertEquals("<em>aaa</em>", viewHelper.escapeHighlight(text));
+        text = viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost;
+        assertEquals(viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost, viewHelper.escapeHighlight(text));
 
-        text = "<em>aaa</em><b>bbb</b>";
-        assertEquals("<em>aaa</em>&lt;b&gt;bbb&lt;/b&gt;", viewHelper.escapeHighlight(text));
+        text = viewHelper.originalHighlightTagPre + "aaa" + viewHelper.originalHighlightTagPost + "<b>bbb</b>";
+        assertEquals(viewHelper.highlightTagPre + "aaa" + viewHelper.highlightTagPost + "&lt;b&gt;bbb&lt;/b&gt;",
+                viewHelper.escapeHighlight(text));
 
     }
 
