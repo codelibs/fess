@@ -17,17 +17,24 @@ package org.codelibs.fess.mylasta.direction.sponsor;
 
 import java.util.Locale;
 
+import org.apache.commons.lang3.LocaleUtils;
+import org.codelibs.core.lang.StringUtil;
+import org.codelibs.fess.mylasta.direction.FessConfig;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalObject;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.UserLocaleProcessProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jflute
  */
 public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider {
+    private static final Logger logger = LoggerFactory.getLogger(FessUserLocaleProcessProvider.class);
 
     @Override
     public boolean isAcceptCookieLocale() {
@@ -36,7 +43,16 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
 
     @Override
     public OptionalThing<Locale> findBusinessLocale(final ActionRuntime runtimeMeta, final RequestManager requestManager) {
-        return OptionalObject.empty(); // to next determination
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String name = fessConfig.getQueryBrowserLangParameterName();
+        if (StringUtil.isNotBlank(name)) {
+            try {
+                return requestManager.getParameter(name).filter(StringUtil::isNotBlank).map(LocaleUtils::toLocale);
+            } catch (Exception e) {
+                logger.debug("Failed to parse a value of " + name + ".", e);
+            }
+        }
+        return OptionalObject.empty();
     }
 
     @Override

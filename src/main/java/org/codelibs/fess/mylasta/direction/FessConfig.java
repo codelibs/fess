@@ -426,6 +426,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. location */
     String QUERY_GEO_FIELDS = "query.geo.fields";
 
+    /** The key of the configuration. e.g. browser_lang */
+    String QUERY_BROWSER_LANG_PARAMETER_NAME = "query.browser.lang.parameter.name";
+
     /** The key of the configuration. e.g. true */
     String QUERY_REPLACE_TERM_WITH_PREFIX_QUERY = "query.replace.term.with.prefix.query";
 
@@ -2281,6 +2284,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getQueryGeoFields();
+
+    /**
+     * Get the value for the key 'query.browser.lang.parameter.name'. <br>
+     * The value is, e.g. browser_lang <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getQueryBrowserLangParameterName();
 
     /**
      * Get the value for the key 'query.replace.term.with.prefix.query'. <br>
@@ -5042,6 +5052,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getQueryGeoFields() {
             return get(FessConfig.QUERY_GEO_FIELDS);
+        }
+
+        public String getQueryBrowserLangParameterName() {
+            return get(FessConfig.QUERY_BROWSER_LANG_PARAMETER_NAME);
         }
 
         public String getQueryReplaceTermWithPrefixQuery() {
