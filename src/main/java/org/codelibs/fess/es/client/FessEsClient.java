@@ -942,8 +942,9 @@ public class FessEsClient implements Client {
             }
 
             final QueryHelper queryHelper = ComponentUtil.getQueryHelper();
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
-            if (offset > queryHelper.getMaxSearchResultOffset()) {
+            if (offset > fessConfig.getQueryMaxSearchResultOffsetAsInteger()) {
                 throw new ResultOffsetExceededException("The number of result size is exceeded.");
             }
 
@@ -970,7 +971,7 @@ public class FessEsClient implements Client {
 
             // highlighting
             queryHelper.highlightedFields(stream -> stream.forEach(hf -> searchRequestBuilder.addHighlightedField(hf,
-                    queryHelper.getHighlightFragmentSize())));
+                    fessConfig.getQueryHighlightFragmentSizeAsInteger())));
 
             // facets
             if (facetInfo != null) {
