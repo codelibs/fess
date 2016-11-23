@@ -39,7 +39,6 @@ import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.response.render.RenderData;
 import org.lastaflute.web.ruts.process.ActionRuntime;
-import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author shinsuke
@@ -275,7 +274,7 @@ public class AdminWebauthAction extends FessAdminAction {
 
     protected void registerProtocolSchemeItems(final RenderData data) {
         final List<Map<String, String>> itemList = new ArrayList<>();
-        final Locale locale = LaRequestUtil.getRequest().getLocale();
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_basic"), Constants.BASIC));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_digest"), Constants.DIGEST));
         itemList.add(createItem(ComponentUtil.getMessageManager().getMessage(locale, "labels.webauth_scheme_ntlm"), Constants.NTLM));

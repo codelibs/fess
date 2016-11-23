@@ -50,7 +50,6 @@ import org.codelibs.fess.util.ComponentUtil;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.lastaflute.web.servlet.request.RequestManager;
-import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,19 +175,15 @@ public class SystemHelper {
 
     public String getHelpLink(final String name) {
         final String url = ComponentUtil.getFessConfig().getOnlineHelpBaseLink() + name + "-guide.html";
-        return LaRequestUtil
-                .getOptionalRequest()
-                .map(request -> {
-                    final Locale locale = request.getLocale();
-                    if (locale != null) {
-                        final String lang = locale.getLanguage();
-                        if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
-                            return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
-                                    Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
-                        }
-                    }
-                    return getDefaultHelpLink(url);
-                }).orElse(getDefaultHelpLink(url));
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
+        if (locale != null) {
+            final String lang = locale.getLanguage();
+            if (ComponentUtil.getFessConfig().isOnlineHelpSupportedLang(lang)) {
+                return url.replaceFirst("\\{lang\\}", lang).replaceFirst("\\{version\\}",
+                        Constants.MAJOR_VERSION + "." + Constants.MINOR_VERSION);
+            }
+        }
+        return getDefaultHelpLink(url);
     }
 
     protected String getDefaultHelpLink(final String url) {

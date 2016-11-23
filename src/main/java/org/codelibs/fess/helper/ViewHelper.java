@@ -317,7 +317,7 @@ public class ViewHelper {
     }
 
     public String getPagePath(final String page) {
-        final Locale locale = LaRequestUtil.getRequest().getLocale();
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         final String lang = locale.getLanguage();
         final String country = locale.getCountry();
 
@@ -378,7 +378,7 @@ public class ViewHelper {
         final FileTemplateLoader loader = new FileTemplateLoader(ResourceUtil.getViewTemplatePath().toFile());
         final Handlebars handlebars = new Handlebars(loader);
 
-        Locale locale = LaRequestUtil.getRequest().getLocale();
+        Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         if (locale == null) {
             locale = Locale.ENGLISH;
         }

@@ -132,7 +132,7 @@ public class ListForm implements SearchRequestParams {
 
     @Override
     public Locale getLocale() {
-        return LaRequestUtil.getRequest().getLocale();
+        return ComponentUtil.getRequestManager().getUserLocale();
     }
 
     @Override

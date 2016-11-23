@@ -21,7 +21,6 @@ import org.codelibs.fess.es.config.bsentity.BsCrawlingInfoParam;
 import org.codelibs.fess.es.config.exbhv.CrawlingInfoBhv;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalEntity;
-import org.lastaflute.web.util.LaRequestUtil;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -59,7 +58,7 @@ public class CrawlingInfoParam extends BsCrawlingInfoParam {
     }
 
     public String getKeyMsg() {
-        final Locale locale = LaRequestUtil.getRequest().getLocale();
+        final Locale locale = ComponentUtil.getRequestManager().getUserLocale();
         final String message = ComponentUtil.getMessageManager().getMessage(locale, "labels.crawling_info_" + getKey());
         if (message == null || message.startsWith("???")) {
             return getKey();
