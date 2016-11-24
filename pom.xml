@@ -57,7 +57,7 @@
 		<utflute.version>0.6.1B</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.12-SNAPSHOT</crawler.version>
+		<crawler.version>1.0.12</crawler.version>
 
 		<!-- Suggest -->
 		<suggest.version>2.3.1</suggest.version>
@@ -1098,7 +1098,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>corelib</artifactId>
-			<version>0.3.6-SNAPSHOT</version>
+			<version>0.3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codelibs</groupId>
