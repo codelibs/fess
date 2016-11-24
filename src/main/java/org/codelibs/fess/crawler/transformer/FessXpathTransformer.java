@@ -476,7 +476,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 final Node childNode = nodeList.item(i);
                 paseTextContent(childNode, buf);
             }
-        } else {
+        } else if (node.getNodeType() == Node.TEXT_NODE) {
             final String value = node.getTextContent();
             if (value != null) {
                 final String content = value.trim();
