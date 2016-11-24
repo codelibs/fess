@@ -22,16 +22,16 @@ For submitted questions, see [label:question](https://github.com/codelibs/fess/i
 
 ### Download
 
-Fess 10.2 is available.
+Fess 10.3 is available.
 The release page is [HERE](https://github.com/codelibs/fess/releases "download").
 
 ### Install/Run Fess
 
-    $ unzip fess-10.2.x.zip
-    $ cd fess-10.2.x
+    $ unzip fess-10.3.x.zip
+    $ cd fess-10.3.x
     $ ./bin/fess
 
-For the details, see [Installation Guide](http://fess.codelibs.org/10.2/install/index.html).
+For the details, see [Installation Guide](http://fess.codelibs.org/10.3/install/index.html).
 
 ### Access Fess
 
