@@ -549,6 +549,16 @@ public class FessXpathTransformerTest extends UnitFessTestCase {
         document = getDocument(data);
         value = transformer.getSingleNodeValue(document, "//BODY", false);
         assertEquals("aaa bbb ccc", value);
+
+        data = "<html><body> aaa <p> bbb <aaa>ccc</bbb> </p> </body></html>";
+        document = getDocument(data);
+        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        assertEquals("aaa bbb ccc", value);
+
+        data = "<html><body> aaa <p> bbb <!-- test -->ccc<!-- test --> </p> </body></html>";
+        document = getDocument(data);
+        value = transformer.getSingleNodeValue(document, "//BODY", false);
+        assertEquals("aaa bbb ccc", value);
     }
 
     public void test_contentXpath() throws Exception {
