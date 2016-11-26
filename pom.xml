@@ -40,9 +40,9 @@
 
 		<!-- Main Framework -->
 		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.8.4</lastaflute.version>
+		<lastaflute.version>0.8.6</lastaflute.version>
 		<lasta.taglib.version>0.7.1</lasta.taglib.version>
-		<lasta.job.version>0.2.4</lasta.job.version>
+		<lasta.job.version>0.2.5</lasta.job.version>
 		<mailflute.version>0.5.1</mailflute.version>
 
 		<!-- Partner Library -->
@@ -54,7 +54,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<utflute.version>0.6.1B</utflute.version>
+		<utflute.version>0.6.3</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.0.12-SNAPSHOT</crawler.version>
