@@ -333,9 +333,9 @@ public class LdapManager {
                         processSearchRoles(result, (entryDn, name) -> {
                             final String lowerEntryDn = entryDn.toLowerCase(Locale.ROOT);
                             if (lowerEntryDn.indexOf(lowerGroupDn) != -1) {
-                                groupList.add(Base64.getEncoder().encodeToString(name.getBytes(Constants.CHARSET_UTF_8)));
+                                groupList.add(Base64.getUrlEncoder().encodeToString(name.getBytes(Constants.CHARSET_UTF_8)));
                             } else if (lowerEntryDn.indexOf(lowerRoleDn) != -1) {
-                                roleList.add(Base64.getEncoder().encodeToString(name.getBytes(Constants.CHARSET_UTF_8)));
+                                roleList.add(Base64.getUrlEncoder().encodeToString(name.getBytes(Constants.CHARSET_UTF_8)));
                             }
                         });
                         user.setGroups(groupList.toArray(new String[groupList.size()]));

@@ -39,7 +39,7 @@ public abstract class DictionaryCreator {
     }
 
     protected String encodePath(final String path) {
-        return Base64.getEncoder().encodeToString(path.getBytes(Constants.CHARSET_UTF_8));
+        return Base64.getUrlEncoder().encodeToString(path.getBytes(Constants.CHARSET_UTF_8));
     }
 
     protected boolean isTarget(final String path) {
