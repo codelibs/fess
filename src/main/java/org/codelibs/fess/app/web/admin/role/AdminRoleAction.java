@@ -192,7 +192,7 @@ public class AdminRoleAction extends FessAdminAction {
         switch (form.crudMode) {
         case CrudMode.CREATE:
             return OptionalEntity.of(new Role()).map(entity -> {
-                entity.setId(Base64.getEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
+                entity.setId(Base64.getUrlEncoder().encodeToString(form.name.getBytes(Constants.CHARSET_UTF_8)));
                 return entity;
             });
         case CrudMode.EDIT:
