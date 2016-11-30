@@ -83,7 +83,7 @@ public class AdminLogAction extends FessAdminAction {
                 stream.filter(entry -> entry.getFileName().toString().endsWith(".log")).forEach(filePath -> {
                     final Map<String, Object> map = new HashMap<>();
                     final String name = filePath.getFileName().toString();
-                    map.put("id", Base64.getEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
+                    map.put("id", Base64.getUrlEncoder().encodeToString(name.getBytes(StandardCharsets.UTF_8)));
                     map.put("name", name);
                     try {
                         map.put("lastModified", new Date(Files.getLastModifiedTime(filePath).toMillis()));
