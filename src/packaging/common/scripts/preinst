@@ -45,7 +45,7 @@ case "$1" in
                     --ingroup "$FESS_GROUP" \
                     --disabled-password \
                     --shell /bin/false \
-                    -d "$FESS_USER_HOME"  \
+                    --home "$FESS_USER_HOME"  \
                     "$FESS_USER"
             echo " OK"
         fi
