@@ -262,6 +262,18 @@ public class JsonApiManager extends BaseJsonApiManager {
                     buf.append(toGeoRequestString(geoInfo));
                 }
             }
+            // geo
+            if (geoInfo != null && StringUtil.isNotEmpty(geoInfo.distance)) {
+                buf.append(',');
+                buf.append("\"geo_distance\":{\"location\":[");
+                buf.append(geoInfo.latitude);
+                buf.append(',');
+                buf.append(geoInfo.longitude);
+                buf.append("],\"distance\":\"");
+                buf.append(geoInfo.distance);
+                buf.append("\"}");
+            }
+
         } catch (final Exception e) {
             status = 1;
             err = e;
