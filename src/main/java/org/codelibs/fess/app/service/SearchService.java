@@ -47,6 +47,7 @@ import org.dbflute.optional.OptionalEntity;
 import org.dbflute.optional.OptionalThing;
 import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
@@ -215,7 +216,7 @@ public class SearchService {
             final OptionalThing<FessUserBean> userBean) {
         return fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
-            builder.addFields(fields);
+            builder.setFetchSource(fields, null);
             fessConfig.processSearchPreference(builder, userBean);
             return true;
         });
@@ -226,7 +227,7 @@ public class SearchService {
         return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), builder -> {
             builder.setQuery(QueryBuilders.termsQuery(fessConfig.getIndexFieldDocId(), docIds));
             builder.setSize(fessConfig.getPagingSearchPageMaxSizeAsInteger().intValue());
-            builder.addFields(fields);
+            builder.setFetchSource(fields, null);
             fessConfig.processSearchPreference(builder, userBean);
             return true;
         });
@@ -242,7 +243,7 @@ public class SearchService {
                     fessEsClient.prepareUpdate(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), id);
             builderLambda.accept(builder);
             final UpdateResponse response = builder.execute().actionGet(fessConfig.getIndexIndexTimeout());
-            return response.isCreated();
+            return response.getResult() == Result.CREATED || response.getResult() == Result.UPDATED;
         } catch (final ElasticsearchException e) {
             throw new FessEsClientException("Failed to update doc  " + id, e);
         }

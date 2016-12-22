@@ -59,7 +59,7 @@ public class JobLogService {
     public void store(final JobLog jobLog) {
 
         jobLogBhv.insertOrUpdate(jobLog, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -67,7 +67,7 @@ public class JobLogService {
     public void delete(final JobLog jobLog) {
 
         jobLogBhv.delete(jobLog, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

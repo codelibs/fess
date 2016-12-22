@@ -60,7 +60,7 @@ public class FileAuthenticationService {
     public void store(final FileAuthentication fileAuthentication) {
 
         fileAuthenticationBhv.insertOrUpdate(fileAuthentication, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class FileAuthenticationService {
     public void delete(final FileAuthentication fileAuthentication) {
 
         fileAuthenticationBhv.delete(fileAuthentication, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

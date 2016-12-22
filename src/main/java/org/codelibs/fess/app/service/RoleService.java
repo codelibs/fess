@@ -68,7 +68,7 @@ public class RoleService {
         ComponentUtil.getLdapManager().insert(role);
 
         roleBhv.insertOrUpdate(role, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -77,7 +77,7 @@ public class RoleService {
         ComponentUtil.getLdapManager().delete(role);
 
         roleBhv.delete(role, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         userBhv.selectCursor(

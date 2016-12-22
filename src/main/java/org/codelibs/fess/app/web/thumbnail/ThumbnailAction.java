@@ -58,7 +58,7 @@ public class ThumbnailAction extends FessSearchAction {
                         queryRequestBuilder -> {
                             final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                             queryRequestBuilder.setQuery(termQuery);
-                            queryRequestBuilder.addFields(queryHelper.getResponseFields());
+                            queryRequestBuilder.setFetchSource(queryHelper.getResponseFields(), null);
                             fessConfig.processSearchPreference(queryRequestBuilder, getUserBean());
                             return true;
                         }).orElse(null);

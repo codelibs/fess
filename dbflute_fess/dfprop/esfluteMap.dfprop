@@ -31,5 +31,5 @@ map:{
             }
         }
     }
-    ; elasticsearchVersion = 2.3.3
+    ; elasticsearchVersion = 5.0.2
 }

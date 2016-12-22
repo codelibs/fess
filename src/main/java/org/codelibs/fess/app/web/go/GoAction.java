@@ -77,11 +77,14 @@ public class GoAction extends FessSearchAction {
         Map<String, Object> doc = null;
         try {
             doc =
-                    fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+                    fessEsClient.getDocument(
+                            fessConfig.getIndexDocumentSearchIndex(),
+                            fessConfig.getIndexDocumentType(),
                             queryRequestBuilder -> {
                                 final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
                                 queryRequestBuilder.setQuery(termQuery);
-                                queryRequestBuilder.addFields(fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId());
+                                queryRequestBuilder.setFetchSource(
+                                        new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId() }, null);
                                 fessConfig.processSearchPreference(queryRequestBuilder, getUserBean());
                                 return true;
                             }).orElse(null);

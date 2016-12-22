@@ -126,16 +126,16 @@ public class ThumbnailQueueDbm extends AbstractDBMeta {
     //                                                                         Column Info
     //                                                                         ===========
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnGenerator = cci("generator", "generator", null, null, String.class, "generator", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "String", 0,
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnPath = cci("path", "path", null, null, String.class, "path", null, false, false, false, "keyword", 0,
             0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "String", 0, 0,
+    protected final ColumnInfo _columnUrl = cci("url", "url", null, null, String.class, "url", null, false, false, false, "keyword", 0, 0,
             null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnCreatedBy() {

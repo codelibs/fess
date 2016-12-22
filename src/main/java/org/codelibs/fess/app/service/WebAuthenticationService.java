@@ -60,7 +60,7 @@ public class WebAuthenticationService {
     public void store(final WebAuthentication webAuthentication) {
 
         webAuthenticationBhv.insertOrUpdate(webAuthentication, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class WebAuthenticationService {
     public void delete(final WebAuthentication webAuthentication) {
 
         webAuthenticationBhv.delete(webAuthentication, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

@@ -7,34 +7,28 @@
         },
         "properties": {
           "name": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "token": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "permissions": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "parameter_name" : {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "expiredTime" : {
             "type" : "long"
           },
           "createdBy": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "createdTime": {
             "type": "long"
           },
           "updatedBy": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime": {
             "type": "long"
@@ -47,12 +41,10 @@
         },
         "properties" : {
           "labelTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type" : "keyword"
           },
           "webConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type" : "keyword"
           }
         }
       },
@@ -62,12 +54,10 @@
         },
         "properties" : {
           "dataConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type" : "keyword"
           },
           "roleTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type" : "keyword"
           }
         }
       },
@@ -77,34 +67,28 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "processType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "regex" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "replacement" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "userAgent" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -117,12 +101,10 @@
         },
         "properties" : {
           "boostExpr" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
@@ -131,15 +113,13 @@
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "urlExpr" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -149,12 +129,10 @@
         },
         "properties" : {
           "fileConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "roleTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -167,31 +145,25 @@
             "type" : "long"
           },
           "jobName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "jobStatus" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "scriptData" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "scriptResult" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "scriptType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "startTime" : {
             "type" : "long"
           },
           "target" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "lastUpdated" : {
             "type" : "long"
@@ -204,29 +176,25 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -242,12 +210,10 @@
             "type" : "float"
           },
           "configParameter" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
@@ -256,20 +222,16 @@
             "type" : "integer"
           },
           "excludedDocUrls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "excludedUrls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "includedDocUrls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "includedUrls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "intervalTime" : {
             "type" : "integer"
@@ -281,33 +243,28 @@
             "type" : "long"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "numOfThread" : {
             "type" : "integer"
           },
           "permissions" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "urls" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userAgent" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -317,49 +274,40 @@
         },
         "properties" : {
           "authRealm" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "parameters" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "password" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "port" : {
             "type" : "integer"
           },
           "protocolScheme" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "username" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "webConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -369,12 +317,10 @@
         },
         "properties" : {
           "dataConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "labelTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -384,26 +330,22 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "duplicateHostName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "regularName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -416,30 +358,25 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "webConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -449,27 +386,22 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "suggestWord" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "targetLabel" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "targetRole" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -488,38 +420,31 @@
             "type" : "float"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "handlerName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "handlerParameter" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "handlerScript" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "permissions" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -532,19 +457,16 @@
         },
         "properties" : {
           "crawlingInfoId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "key" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -554,12 +476,10 @@
         },
         "properties" : {
           "roleTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "webConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -569,45 +489,37 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "fileConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "parameters" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "password" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "port" : {
             "type" : "integer"
           },
           "protocolScheme" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "username" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -623,12 +535,10 @@
             "type" : "long"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sessionId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -641,8 +551,7 @@
             "type" : "float"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
@@ -651,16 +560,13 @@
             "type" : "integer"
           },
           "query" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "term" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -673,12 +579,10 @@
         },
         "properties" : {
           "labelTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "roleTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -688,12 +592,10 @@
         },
         "properties" : {
           "elevateWordId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "labelTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -706,35 +608,28 @@
             "type" : "float"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "reading" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "suggestWord" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "targetLabel" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "targetRole" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "permissions" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -747,12 +642,10 @@
         },
         "properties" : {
           "fileConfigId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "labelTypeId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -768,12 +661,10 @@
             "type" : "float"
           },
           "configParameter" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
@@ -782,20 +673,16 @@
             "type" : "integer"
           },
           "excludedDocPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "excludedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "includedDocPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "includedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "intervalTime" : {
             "type" : "integer"
@@ -807,26 +694,22 @@
             "type" : "long"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "numOfThread" : {
             "type" : "integer"
           },
           "paths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "permissions" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -845,41 +728,34 @@
             "type" : "boolean"
           },
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "cronExpression" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "jobLogging" : {
             "type" : "boolean"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "scriptData" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "scriptType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "target" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
@@ -892,30 +768,25 @@
         },
         "properties" : {
           "configId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "errorCount" : {
             "type" : "integer"
           },
           "errorLog" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "errorName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "lastAccessTime" : {
             "type" : "long"
           },
           "threadName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -925,41 +796,34 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "excludedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "includedPaths" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "permissions" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "sortOrder" : {
             "type" : "integer"
           },
           "updatedBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "updatedTime" : {
             "type" : "long"
           },
           "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -969,27 +833,22 @@
         },
         "properties" : {
           "createdBy" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "createdTime" : {
             "type" : "long"
           },
           "target" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "generator" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "path" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       }

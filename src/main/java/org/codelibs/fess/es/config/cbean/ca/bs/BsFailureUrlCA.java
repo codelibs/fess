@@ -21,26 +21,26 @@ import org.codelibs.fess.es.config.cbean.ca.FailureUrlCA;
 import org.codelibs.fess.es.config.cbean.cq.FailureUrlCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsFailureUrlCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.HistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.RangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -68,8 +68,8 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -92,36 +92,35 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // String configId
 
     public void setConfigId_Terms() {
         setConfigId_Terms(null);
     }
 
-    public void setConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setConfigId_Terms("configId", opLambda, null);
     }
 
-    public void setConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setConfigId_Terms("configId", opLambda, aggsLambda);
     }
 
-    public void setConfigId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "configId");
+    public void setConfigId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -136,17 +135,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setConfigId_SignificantTerms(null);
     }
 
-    public void setConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setConfigId_SignificantTerms("configId", opLambda, null);
     }
 
-    public void setConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setConfigId_SignificantTerms("configId", opLambda, aggsLambda);
     }
 
-    public void setConfigId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setConfigId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "configId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -161,16 +161,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setConfigId_IpRange(null);
     }
 
-    public void setConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setConfigId_IpRange("configId", opLambda, null);
     }
 
-    public void setConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setConfigId_IpRange("configId", opLambda, aggsLambda);
     }
 
-    public void setConfigId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "configId");
+    public void setConfigId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -185,12 +186,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setConfigId_Count(null);
     }
 
-    public void setConfigId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setConfigId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setConfigId_Count("configId", opLambda);
     }
 
-    public void setConfigId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "configId");
+    public void setConfigId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -200,12 +201,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setConfigId_Cardinality(null);
     }
 
-    public void setConfigId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setConfigId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setConfigId_Cardinality("configId", opLambda);
     }
 
-    public void setConfigId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "configId");
+    public void setConfigId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -215,16 +216,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setConfigId_Missing(null);
     }
 
-    public void setConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setConfigId_Missing("configId", opLambda, null);
     }
 
-    public void setConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setConfigId_Missing("configId", opLambda, aggsLambda);
     }
 
-    public void setConfigId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "configId");
+    public void setConfigId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "configId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -235,17 +237,16 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Integer errorCount
     public void setErrorCount_Avg() {
         setErrorCount_Avg(null);
     }
 
-    public void setErrorCount_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setErrorCount_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setErrorCount_Avg("errorCount", opLambda);
     }
 
-    public void setErrorCount_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "errorCount");
+    public void setErrorCount_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -255,12 +256,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Max(null);
     }
 
-    public void setErrorCount_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setErrorCount_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setErrorCount_Max("errorCount", opLambda);
     }
 
-    public void setErrorCount_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "errorCount");
+    public void setErrorCount_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -270,12 +271,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Min(null);
     }
 
-    public void setErrorCount_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setErrorCount_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setErrorCount_Min("errorCount", opLambda);
     }
 
-    public void setErrorCount_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "errorCount");
+    public void setErrorCount_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -285,12 +286,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Sum(null);
     }
 
-    public void setErrorCount_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setErrorCount_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setErrorCount_Sum("errorCount", opLambda);
     }
 
-    public void setErrorCount_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "errorCount");
+    public void setErrorCount_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -300,12 +301,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_ExtendedStats(null);
     }
 
-    public void setErrorCount_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setErrorCount_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setErrorCount_ExtendedStats("errorCount", opLambda);
     }
 
-    public void setErrorCount_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "errorCount");
+    public void setErrorCount_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -315,12 +316,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Stats(null);
     }
 
-    public void setErrorCount_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setErrorCount_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setErrorCount_Stats("errorCount", opLambda);
     }
 
-    public void setErrorCount_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "errorCount");
+    public void setErrorCount_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -330,12 +331,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Percentiles(null);
     }
 
-    public void setErrorCount_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setErrorCount_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setErrorCount_Percentiles("errorCount", opLambda);
     }
 
-    public void setErrorCount_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "errorCount");
+    public void setErrorCount_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -345,12 +346,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_PercentileRanks(null);
     }
 
-    public void setErrorCount_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setErrorCount_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setErrorCount_PercentileRanks("errorCount", opLambda);
     }
 
-    public void setErrorCount_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "errorCount");
+    public void setErrorCount_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -360,16 +361,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Histogram(null);
     }
 
-    public void setErrorCount_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setErrorCount_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setErrorCount_Histogram("errorCount", opLambda, null);
     }
 
-    public void setErrorCount_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorCount_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorCount_Histogram("errorCount", opLambda, aggsLambda);
     }
 
-    public void setErrorCount_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "errorCount");
+    public void setErrorCount_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -384,16 +386,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Range(null);
     }
 
-    public void setErrorCount_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setErrorCount_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setErrorCount_Range("errorCount", opLambda, null);
     }
 
-    public void setErrorCount_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorCount_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorCount_Range("errorCount", opLambda, aggsLambda);
     }
 
-    public void setErrorCount_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "errorCount");
+    public void setErrorCount_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -408,12 +411,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Count(null);
     }
 
-    public void setErrorCount_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setErrorCount_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setErrorCount_Count("errorCount", opLambda);
     }
 
-    public void setErrorCount_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "errorCount");
+    public void setErrorCount_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -423,12 +426,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Cardinality(null);
     }
 
-    public void setErrorCount_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setErrorCount_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setErrorCount_Cardinality("errorCount", opLambda);
     }
 
-    public void setErrorCount_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "errorCount");
+    public void setErrorCount_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -438,16 +441,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorCount_Missing(null);
     }
 
-    public void setErrorCount_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setErrorCount_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setErrorCount_Missing("errorCount", opLambda, null);
     }
 
-    public void setErrorCount_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorCount_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorCount_Missing("errorCount", opLambda, aggsLambda);
     }
 
-    public void setErrorCount_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "errorCount");
+    public void setErrorCount_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "errorCount");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,22 +462,21 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String errorLog
-
     public void setErrorLog_Terms() {
         setErrorLog_Terms(null);
     }
 
-    public void setErrorLog_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setErrorLog_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setErrorLog_Terms("errorLog", opLambda, null);
     }
 
-    public void setErrorLog_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorLog_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorLog_Terms("errorLog", opLambda, aggsLambda);
     }
 
-    public void setErrorLog_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "errorLog");
+    public void setErrorLog_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -488,17 +491,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorLog_SignificantTerms(null);
     }
 
-    public void setErrorLog_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setErrorLog_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setErrorLog_SignificantTerms("errorLog", opLambda, null);
     }
 
-    public void setErrorLog_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorLog_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorLog_SignificantTerms("errorLog", opLambda, aggsLambda);
     }
 
-    public void setErrorLog_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setErrorLog_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "errorLog");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,16 +517,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorLog_IpRange(null);
     }
 
-    public void setErrorLog_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setErrorLog_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setErrorLog_IpRange("errorLog", opLambda, null);
     }
 
-    public void setErrorLog_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorLog_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorLog_IpRange("errorLog", opLambda, aggsLambda);
     }
 
-    public void setErrorLog_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "errorLog");
+    public void setErrorLog_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -537,12 +542,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorLog_Count(null);
     }
 
-    public void setErrorLog_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setErrorLog_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setErrorLog_Count("errorLog", opLambda);
     }
 
-    public void setErrorLog_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "errorLog");
+    public void setErrorLog_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -552,12 +557,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorLog_Cardinality(null);
     }
 
-    public void setErrorLog_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setErrorLog_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setErrorLog_Cardinality("errorLog", opLambda);
     }
 
-    public void setErrorLog_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "errorLog");
+    public void setErrorLog_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -567,16 +572,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorLog_Missing(null);
     }
 
-    public void setErrorLog_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setErrorLog_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setErrorLog_Missing("errorLog", opLambda, null);
     }
 
-    public void setErrorLog_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorLog_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorLog_Missing("errorLog", opLambda, aggsLambda);
     }
 
-    public void setErrorLog_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "errorLog");
+    public void setErrorLog_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "errorLog");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -587,22 +593,21 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String errorName
-
     public void setErrorName_Terms() {
         setErrorName_Terms(null);
     }
 
-    public void setErrorName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setErrorName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setErrorName_Terms("errorName", opLambda, null);
     }
 
-    public void setErrorName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorName_Terms("errorName", opLambda, aggsLambda);
     }
 
-    public void setErrorName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "errorName");
+    public void setErrorName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -617,17 +622,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorName_SignificantTerms(null);
     }
 
-    public void setErrorName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setErrorName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setErrorName_SignificantTerms("errorName", opLambda, null);
     }
 
-    public void setErrorName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorName_SignificantTerms("errorName", opLambda, aggsLambda);
     }
 
-    public void setErrorName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setErrorName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "errorName");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -642,16 +648,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorName_IpRange(null);
     }
 
-    public void setErrorName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setErrorName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setErrorName_IpRange("errorName", opLambda, null);
     }
 
-    public void setErrorName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorName_IpRange("errorName", opLambda, aggsLambda);
     }
 
-    public void setErrorName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "errorName");
+    public void setErrorName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -666,12 +673,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorName_Count(null);
     }
 
-    public void setErrorName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setErrorName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setErrorName_Count("errorName", opLambda);
     }
 
-    public void setErrorName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "errorName");
+    public void setErrorName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -681,12 +688,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorName_Cardinality(null);
     }
 
-    public void setErrorName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setErrorName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setErrorName_Cardinality("errorName", opLambda);
     }
 
-    public void setErrorName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "errorName");
+    public void setErrorName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -696,16 +703,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setErrorName_Missing(null);
     }
 
-    public void setErrorName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setErrorName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setErrorName_Missing("errorName", opLambda, null);
     }
 
-    public void setErrorName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setErrorName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setErrorName_Missing("errorName", opLambda, aggsLambda);
     }
 
-    public void setErrorName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "errorName");
+    public void setErrorName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "errorName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -716,17 +724,16 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long lastAccessTime
     public void setLastAccessTime_Avg() {
         setLastAccessTime_Avg(null);
     }
 
-    public void setLastAccessTime_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setLastAccessTime_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setLastAccessTime_Avg("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "lastAccessTime");
+    public void setLastAccessTime_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -736,12 +743,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Max(null);
     }
 
-    public void setLastAccessTime_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setLastAccessTime_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setLastAccessTime_Max("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "lastAccessTime");
+    public void setLastAccessTime_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -751,12 +758,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Min(null);
     }
 
-    public void setLastAccessTime_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setLastAccessTime_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setLastAccessTime_Min("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "lastAccessTime");
+    public void setLastAccessTime_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -766,12 +773,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Sum(null);
     }
 
-    public void setLastAccessTime_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setLastAccessTime_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setLastAccessTime_Sum("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "lastAccessTime");
+    public void setLastAccessTime_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -781,12 +788,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_ExtendedStats(null);
     }
 
-    public void setLastAccessTime_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setLastAccessTime_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setLastAccessTime_ExtendedStats("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "lastAccessTime");
+    public void setLastAccessTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -796,12 +803,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Stats(null);
     }
 
-    public void setLastAccessTime_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setLastAccessTime_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setLastAccessTime_Stats("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "lastAccessTime");
+    public void setLastAccessTime_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -811,12 +818,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Percentiles(null);
     }
 
-    public void setLastAccessTime_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setLastAccessTime_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setLastAccessTime_Percentiles("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "lastAccessTime");
+    public void setLastAccessTime_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -826,12 +833,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_PercentileRanks(null);
     }
 
-    public void setLastAccessTime_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setLastAccessTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setLastAccessTime_PercentileRanks("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "lastAccessTime");
+    public void setLastAccessTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -841,17 +848,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Histogram(null);
     }
 
-    public void setLastAccessTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setLastAccessTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setLastAccessTime_Histogram("lastAccessTime", opLambda, null);
     }
 
-    public void setLastAccessTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setLastAccessTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setLastAccessTime_Histogram("lastAccessTime", opLambda, aggsLambda);
     }
 
-    public void setLastAccessTime_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda,
+    public void setLastAccessTime_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "lastAccessTime");
+        HistogramAggregationBuilder builder = regHistogramA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -866,16 +874,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Range(null);
     }
 
-    public void setLastAccessTime_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setLastAccessTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setLastAccessTime_Range("lastAccessTime", opLambda, null);
     }
 
-    public void setLastAccessTime_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setLastAccessTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setLastAccessTime_Range("lastAccessTime", opLambda, aggsLambda);
     }
 
-    public void setLastAccessTime_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "lastAccessTime");
+    public void setLastAccessTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -890,12 +899,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Count(null);
     }
 
-    public void setLastAccessTime_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setLastAccessTime_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setLastAccessTime_Count("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "lastAccessTime");
+    public void setLastAccessTime_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -905,12 +914,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Cardinality(null);
     }
 
-    public void setLastAccessTime_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setLastAccessTime_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setLastAccessTime_Cardinality("lastAccessTime", opLambda);
     }
 
-    public void setLastAccessTime_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "lastAccessTime");
+    public void setLastAccessTime_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -920,16 +929,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setLastAccessTime_Missing(null);
     }
 
-    public void setLastAccessTime_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setLastAccessTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setLastAccessTime_Missing("lastAccessTime", opLambda, null);
     }
 
-    public void setLastAccessTime_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setLastAccessTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setLastAccessTime_Missing("lastAccessTime", opLambda, aggsLambda);
     }
 
-    public void setLastAccessTime_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "lastAccessTime");
+    public void setLastAccessTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "lastAccessTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -940,22 +950,21 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String threadName
-
     public void setThreadName_Terms() {
         setThreadName_Terms(null);
     }
 
-    public void setThreadName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setThreadName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setThreadName_Terms("threadName", opLambda, null);
     }
 
-    public void setThreadName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setThreadName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setThreadName_Terms("threadName", opLambda, aggsLambda);
     }
 
-    public void setThreadName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "threadName");
+    public void setThreadName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -970,18 +979,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setThreadName_SignificantTerms(null);
     }
 
-    public void setThreadName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setThreadName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setThreadName_SignificantTerms("threadName", opLambda, null);
     }
 
-    public void setThreadName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setThreadName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
         setThreadName_SignificantTerms("threadName", opLambda, aggsLambda);
     }
 
-    public void setThreadName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setThreadName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "threadName");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -996,16 +1005,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setThreadName_IpRange(null);
     }
 
-    public void setThreadName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setThreadName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setThreadName_IpRange("threadName", opLambda, null);
     }
 
-    public void setThreadName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setThreadName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setThreadName_IpRange("threadName", opLambda, aggsLambda);
     }
 
-    public void setThreadName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "threadName");
+    public void setThreadName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1020,12 +1030,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setThreadName_Count(null);
     }
 
-    public void setThreadName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setThreadName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setThreadName_Count("threadName", opLambda);
     }
 
-    public void setThreadName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "threadName");
+    public void setThreadName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1035,12 +1045,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setThreadName_Cardinality(null);
     }
 
-    public void setThreadName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setThreadName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setThreadName_Cardinality("threadName", opLambda);
     }
 
-    public void setThreadName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "threadName");
+    public void setThreadName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1050,16 +1060,17 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setThreadName_Missing(null);
     }
 
-    public void setThreadName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setThreadName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setThreadName_Missing("threadName", opLambda, null);
     }
 
-    public void setThreadName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setThreadName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setThreadName_Missing("threadName", opLambda, aggsLambda);
     }
 
-    public void setThreadName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "threadName");
+    public void setThreadName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "threadName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1070,22 +1081,20 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String url
-
     public void setUrl_Terms() {
         setUrl_Terms(null);
     }
 
-    public void setUrl_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setUrl_Terms("url", opLambda, null);
     }
 
-    public void setUrl_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setUrl_Terms("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "url");
+    public void setUrl_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1100,17 +1109,18 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_SignificantTerms(null);
     }
 
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setUrl_SignificantTerms("url", opLambda, null);
     }
 
-    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsFailureUrlCA> aggsLambda) {
         setUrl_SignificantTerms("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setUrl_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsFailureUrlCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "url");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1125,16 +1135,16 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_IpRange(null);
     }
 
-    public void setUrl_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setUrl_IpRange("url", opLambda, null);
     }
 
-    public void setUrl_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setUrl_IpRange("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "url");
+    public void setUrl_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1149,12 +1159,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_Count(null);
     }
 
-    public void setUrl_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUrl_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUrl_Count("url", opLambda);
     }
 
-    public void setUrl_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "url");
+    public void setUrl_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1164,12 +1174,12 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_Cardinality(null);
     }
 
-    public void setUrl_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUrl_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUrl_Cardinality("url", opLambda);
     }
 
-    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "url");
+    public void setUrl_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1179,16 +1189,16 @@ public abstract class BsFailureUrlCA extends EsAbstractConditionAggregation {
         setUrl_Missing(null);
     }
 
-    public void setUrl_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUrl_Missing("url", opLambda, null);
     }
 
-    public void setUrl_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+    public void setUrl_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
         setUrl_Missing("url", opLambda, aggsLambda);
     }
 
-    public void setUrl_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "url");
+    public void setUrl_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsFailureUrlCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "url");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

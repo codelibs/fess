@@ -15,33 +15,41 @@
  */
 package org.codelibs.fess.entity;
 
-import java.util.List;
+import java.io.IOException;
 
+import org.codelibs.core.lang.StringUtil;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 public class PingResponse {
     private final int status;
-
-    private final List<String> failures;
 
     private final String clusterName;
 
     private final String clusterStatus;
 
+    private String message = StringUtil.EMPTY;
+
     public PingResponse(final ClusterHealthResponse response) {
         status = response.getStatus() == ClusterHealthStatus.RED ? 1 : 0;
-        failures = response.getValidationFailures();
         clusterName = response.getClusterName();
         clusterStatus = response.getStatus().toString();
+        try {
+            XContentBuilder builder = XContentFactory.jsonBuilder();
+            builder.startObject();
+            response.toXContent(builder, ToXContent.EMPTY_PARAMS);
+            builder.endObject();
+            message = builder.string();
+        } catch (IOException e) {
+            message = "{ \"error\" : \"" + e.getMessage() + "\"}";
+        }
     }
 
     public int getStatus() {
         return status;
-    }
-
-    public String[] getFailures() {
-        return failures.stream().toArray(n -> new String[n]);
     }
 
     public String getClusterName() {
@@ -51,4 +59,9 @@ public class PingResponse {
     public String getClusterStatus() {
         return clusterStatus;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
 }

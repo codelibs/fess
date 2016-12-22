@@ -259,8 +259,8 @@ public class DataIndexHelper {
                     QueryBuilders
                             .boolQuery()
                             .must(QueryBuilders.termQuery(fessConfig.getIndexFieldConfigId(), dataConfig.getConfigId()))
-                            .must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).lte("now"))
-                                    .should(QueryBuilders.missingQuery(fessConfig.getIndexFieldExpires())))
+                            .must(QueryBuilders.boolQuery().mustNot(QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).gt("now"))
+                                    .mustNot(QueryBuilders.existsQuery(fessConfig.getIndexFieldExpires())))
                             .mustNot(QueryBuilders.termQuery(fessConfig.getIndexFieldSegment(), sessionId));
             try {
                 final FessEsClient fessEsClient = ComponentUtil.getFessEsClient();

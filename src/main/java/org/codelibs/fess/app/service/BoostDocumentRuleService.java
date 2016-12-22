@@ -57,13 +57,13 @@ public class BoostDocumentRuleService {
 
     public void store(final BoostDocumentRule boostDocumentRule) {
 
-        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> op.setRefresh(true));
+        boostDocumentRuleBhv.insertOrUpdate(boostDocumentRule, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
     public void delete(final BoostDocumentRule boostDocumentRule) {
 
-        boostDocumentRuleBhv.delete(boostDocumentRule, op -> op.setRefresh(true));
+        boostDocumentRuleBhv.delete(boostDocumentRule, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 

@@ -60,7 +60,7 @@ public class RequestHeaderService {
     public void store(final RequestHeader requestHeader) {
 
         requestHeaderBhv.insertOrUpdate(requestHeader, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class RequestHeaderService {
     public void delete(final RequestHeader requestHeader) {
 
         requestHeaderBhv.delete(requestHeader, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

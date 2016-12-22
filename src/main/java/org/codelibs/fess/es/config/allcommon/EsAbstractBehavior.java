@@ -39,6 +39,7 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.exception.FetchingOverSafetySizeException;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.util.DfTypeUtil;
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -266,7 +267,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
 
         final IndexResponse response = builder.execute().actionGet(indexTimeout);
         esEntity.asDocMeta().id(response.getId());
-        return response.isCreated() ? 1 : 0;
+        return response.getResult() == Result.CREATED ? 1 : 0;
     }
 
     protected IndexRequestBuilder createInsertRequest(final EsAbstractEntity esEntity) {
@@ -315,7 +316,7 @@ public abstract class EsAbstractBehavior<ENTITY extends Entity, CB extends Condi
         final DeleteRequestBuilder builder = createDeleteRequest(esEntity);
 
         final DeleteResponse response = builder.execute().actionGet(deleteTimeout);
-        return response.isFound() ? 1 : 0;
+        return response.getResult() == Result.DELETED ? 1 : 0;
     }
 
     protected DeleteRequestBuilder createDeleteRequest(final EsAbstractEntity esEntity) {

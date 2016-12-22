@@ -65,7 +65,7 @@ public class DataConfigService {
         final String dataConfigId = dataConfig.getId();
 
         dataConfigBhv.delete(dataConfig, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         dataConfigToLabelBhv.queryDelete(cb -> {
@@ -124,7 +124,7 @@ public class DataConfigService {
         final String[] labelTypeIds = dataConfig.getLabelTypeIds();
 
         dataConfigBhv.insertOrUpdate(dataConfig, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
         final String dataConfigId = dataConfig.getId();
         if (isNew) {
@@ -138,7 +138,7 @@ public class DataConfigService {
                     fctltmList.add(mapping);
                 }
                 dataConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         } else {
@@ -169,10 +169,10 @@ public class DataConfigService {
                 }
                 fctltmList.removeAll(matchedList);
                 dataConfigToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
                 dataConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         }

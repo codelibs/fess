@@ -21,26 +21,26 @@ import org.codelibs.fess.es.config.cbean.ca.RoleTypeCA;
 import org.codelibs.fess.es.config.cbean.cq.RoleTypeCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsRoleTypeCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.HistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.RangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -68,8 +68,8 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -92,36 +92,34 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // String createdBy
 
     public void setCreatedBy_Terms() {
         setCreatedBy_Terms(null);
     }
 
-    public void setCreatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setCreatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setCreatedBy_Terms("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedBy_Terms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "createdBy");
+    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -136,17 +134,18 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_SignificantTerms(null);
     }
 
-    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setCreatedBy_SignificantTerms("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedBy_SignificantTerms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setCreatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsRoleTypeCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "createdBy");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -161,16 +160,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_IpRange(null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "createdBy");
+    public void setCreatedBy_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -185,12 +185,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_Count(null);
     }
 
-    public void setCreatedBy_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCreatedBy_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCreatedBy_Count("createdBy", opLambda);
     }
 
-    public void setCreatedBy_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "createdBy");
+    public void setCreatedBy_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -200,12 +200,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_Cardinality(null);
     }
 
-    public void setCreatedBy_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCreatedBy_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCreatedBy_Cardinality("createdBy", opLambda);
     }
 
-    public void setCreatedBy_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "createdBy");
+    public void setCreatedBy_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -215,16 +215,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedBy_Missing(null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCreatedBy_Missing("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedBy_Missing("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "createdBy");
+    public void setCreatedBy_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -235,17 +236,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long createdTime
     public void setCreatedTime_Avg() {
         setCreatedTime_Avg(null);
     }
 
-    public void setCreatedTime_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setCreatedTime_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setCreatedTime_Avg("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "createdTime");
+    public void setCreatedTime_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -255,12 +255,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Max(null);
     }
 
-    public void setCreatedTime_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setCreatedTime_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setCreatedTime_Max("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "createdTime");
+    public void setCreatedTime_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -270,12 +270,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Min(null);
     }
 
-    public void setCreatedTime_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setCreatedTime_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setCreatedTime_Min("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "createdTime");
+    public void setCreatedTime_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -285,12 +285,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Sum(null);
     }
 
-    public void setCreatedTime_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setCreatedTime_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setCreatedTime_Sum("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "createdTime");
+    public void setCreatedTime_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -300,12 +300,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_ExtendedStats(null);
     }
 
-    public void setCreatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setCreatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setCreatedTime_ExtendedStats("createdTime", opLambda);
     }
 
-    public void setCreatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "createdTime");
+    public void setCreatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -315,12 +315,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Stats(null);
     }
 
-    public void setCreatedTime_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setCreatedTime_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setCreatedTime_Stats("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "createdTime");
+    public void setCreatedTime_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -330,12 +330,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Percentiles(null);
     }
 
-    public void setCreatedTime_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setCreatedTime_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setCreatedTime_Percentiles("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "createdTime");
+    public void setCreatedTime_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -345,12 +345,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks(null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setCreatedTime_PercentileRanks("createdTime", opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -360,16 +360,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram(null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "createdTime");
+    public void setCreatedTime_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -384,16 +385,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Range(null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "createdTime");
+    public void setCreatedTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -408,12 +410,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Count(null);
     }
 
-    public void setCreatedTime_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCreatedTime_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCreatedTime_Count("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "createdTime");
+    public void setCreatedTime_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -423,12 +425,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Cardinality(null);
     }
 
-    public void setCreatedTime_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCreatedTime_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCreatedTime_Cardinality("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "createdTime");
+    public void setCreatedTime_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -438,16 +440,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setCreatedTime_Missing(null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCreatedTime_Missing("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setCreatedTime_Missing("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "createdTime");
+    public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,22 +461,20 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String name
-
     public void setName_Terms() {
         setName_Terms(null);
     }
 
-    public void setName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setName_Terms("name", opLambda, null);
     }
 
-    public void setName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "name");
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -488,17 +489,18 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_SignificantTerms(null);
     }
 
-    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setName_SignificantTerms("name", opLambda, null);
     }
 
-    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         setName_SignificantTerms("name", opLambda, aggsLambda);
     }
 
-    public void setName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsRoleTypeCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "name");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,16 +515,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_IpRange(null);
     }
 
-    public void setName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setName_IpRange("name", opLambda, null);
     }
 
-    public void setName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setName_IpRange("name", opLambda, aggsLambda);
     }
 
-    public void setName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "name");
+    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -537,12 +539,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_Count(null);
     }
 
-    public void setName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setName_Count("name", opLambda);
     }
 
-    public void setName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "name");
+    public void setName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -552,12 +554,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_Cardinality(null);
     }
 
-    public void setName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setName_Cardinality("name", opLambda);
     }
 
-    public void setName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "name");
+    public void setName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -567,16 +569,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setName_Missing(null);
     }
 
-    public void setName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setName_Missing("name", opLambda, null);
     }
 
-    public void setName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setName_Missing("name", opLambda, aggsLambda);
     }
 
-    public void setName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "name");
+    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -587,17 +589,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Integer sortOrder
     public void setSortOrder_Avg() {
         setSortOrder_Avg(null);
     }
 
-    public void setSortOrder_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setSortOrder_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setSortOrder_Avg("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "sortOrder");
+    public void setSortOrder_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -607,12 +608,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Max(null);
     }
 
-    public void setSortOrder_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setSortOrder_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setSortOrder_Max("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "sortOrder");
+    public void setSortOrder_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -622,12 +623,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Min(null);
     }
 
-    public void setSortOrder_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setSortOrder_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setSortOrder_Min("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "sortOrder");
+    public void setSortOrder_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -637,12 +638,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Sum(null);
     }
 
-    public void setSortOrder_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setSortOrder_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setSortOrder_Sum("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "sortOrder");
+    public void setSortOrder_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -652,12 +653,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_ExtendedStats(null);
     }
 
-    public void setSortOrder_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setSortOrder_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setSortOrder_ExtendedStats("sortOrder", opLambda);
     }
 
-    public void setSortOrder_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "sortOrder");
+    public void setSortOrder_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -667,12 +668,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Stats(null);
     }
 
-    public void setSortOrder_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setSortOrder_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setSortOrder_Stats("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "sortOrder");
+    public void setSortOrder_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -682,12 +683,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Percentiles(null);
     }
 
-    public void setSortOrder_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setSortOrder_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setSortOrder_Percentiles("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "sortOrder");
+    public void setSortOrder_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -697,12 +698,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_PercentileRanks(null);
     }
 
-    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setSortOrder_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setSortOrder_PercentileRanks("sortOrder", opLambda);
     }
 
-    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "sortOrder");
+    public void setSortOrder_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -712,16 +713,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Histogram(null);
     }
 
-    public void setSortOrder_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setSortOrder_Histogram("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setSortOrder_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setSortOrder_Histogram("sortOrder", opLambda, aggsLambda);
     }
 
-    public void setSortOrder_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "sortOrder");
+    public void setSortOrder_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -736,16 +738,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Range(null);
     }
 
-    public void setSortOrder_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setSortOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setSortOrder_Range("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setSortOrder_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setSortOrder_Range("sortOrder", opLambda, aggsLambda);
     }
 
-    public void setSortOrder_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "sortOrder");
+    public void setSortOrder_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -760,12 +762,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Count(null);
     }
 
-    public void setSortOrder_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setSortOrder_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setSortOrder_Count("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "sortOrder");
+    public void setSortOrder_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -775,12 +777,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Cardinality(null);
     }
 
-    public void setSortOrder_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setSortOrder_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setSortOrder_Cardinality("sortOrder", opLambda);
     }
 
-    public void setSortOrder_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "sortOrder");
+    public void setSortOrder_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -790,16 +792,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setSortOrder_Missing(null);
     }
 
-    public void setSortOrder_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setSortOrder_Missing("sortOrder", opLambda, null);
     }
 
-    public void setSortOrder_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setSortOrder_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setSortOrder_Missing("sortOrder", opLambda, aggsLambda);
     }
 
-    public void setSortOrder_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "sortOrder");
+    public void setSortOrder_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "sortOrder");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -810,22 +813,20 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String updatedBy
-
     public void setUpdatedBy_Terms() {
         setUpdatedBy_Terms(null);
     }
 
-    public void setUpdatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setUpdatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setUpdatedBy_Terms("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedBy_Terms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "updatedBy");
+    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -840,17 +841,18 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_SignificantTerms(null);
     }
 
-    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setUpdatedBy_SignificantTerms("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedBy_SignificantTerms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setUpdatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsRoleTypeCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "updatedBy");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -865,16 +867,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_IpRange(null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "updatedBy");
+    public void setUpdatedBy_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -889,12 +892,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Count(null);
     }
 
-    public void setUpdatedBy_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUpdatedBy_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUpdatedBy_Count("updatedBy", opLambda);
     }
 
-    public void setUpdatedBy_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "updatedBy");
+    public void setUpdatedBy_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -904,12 +907,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Cardinality(null);
     }
 
-    public void setUpdatedBy_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUpdatedBy_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUpdatedBy_Cardinality("updatedBy", opLambda);
     }
 
-    public void setUpdatedBy_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "updatedBy");
+    public void setUpdatedBy_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -919,16 +922,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Missing(null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "updatedBy");
+    public void setUpdatedBy_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -939,17 +943,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long updatedTime
     public void setUpdatedTime_Avg() {
         setUpdatedTime_Avg(null);
     }
 
-    public void setUpdatedTime_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setUpdatedTime_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setUpdatedTime_Avg("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "updatedTime");
+    public void setUpdatedTime_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -959,12 +962,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Max(null);
     }
 
-    public void setUpdatedTime_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setUpdatedTime_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setUpdatedTime_Max("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "updatedTime");
+    public void setUpdatedTime_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -974,12 +977,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Min(null);
     }
 
-    public void setUpdatedTime_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setUpdatedTime_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setUpdatedTime_Min("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "updatedTime");
+    public void setUpdatedTime_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -989,12 +992,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Sum(null);
     }
 
-    public void setUpdatedTime_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setUpdatedTime_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setUpdatedTime_Sum("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "updatedTime");
+    public void setUpdatedTime_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1004,12 +1007,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_ExtendedStats(null);
     }
 
-    public void setUpdatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setUpdatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setUpdatedTime_ExtendedStats("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "updatedTime");
+    public void setUpdatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1019,12 +1022,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Stats(null);
     }
 
-    public void setUpdatedTime_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setUpdatedTime_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setUpdatedTime_Stats("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "updatedTime");
+    public void setUpdatedTime_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1034,12 +1037,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Percentiles(null);
     }
 
-    public void setUpdatedTime_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setUpdatedTime_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setUpdatedTime_Percentiles("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "updatedTime");
+    public void setUpdatedTime_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1049,12 +1052,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks(null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setUpdatedTime_PercentileRanks("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1064,16 +1067,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram(null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "updatedTime");
+    public void setUpdatedTime_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1088,16 +1092,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Range(null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "updatedTime");
+    public void setUpdatedTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1112,12 +1117,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Count(null);
     }
 
-    public void setUpdatedTime_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUpdatedTime_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUpdatedTime_Count("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "updatedTime");
+    public void setUpdatedTime_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1127,12 +1132,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Cardinality(null);
     }
 
-    public void setUpdatedTime_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUpdatedTime_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUpdatedTime_Cardinality("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "updatedTime");
+    public void setUpdatedTime_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1142,16 +1147,17 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Missing(null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "updatedTime");
+    public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1162,22 +1168,20 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String value
-
     public void setValue_Terms() {
         setValue_Terms(null);
     }
 
-    public void setValue_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setValue_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setValue_Terms("value", opLambda, null);
     }
 
-    public void setValue_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setValue_Terms("value", opLambda, aggsLambda);
     }
 
-    public void setValue_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "value");
+    public void setValue_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1192,17 +1196,18 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_SignificantTerms(null);
     }
 
-    public void setValue_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setValue_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setValue_SignificantTerms("value", opLambda, null);
     }
 
-    public void setValue_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsRoleTypeCA> aggsLambda) {
         setValue_SignificantTerms("value", opLambda, aggsLambda);
     }
 
-    public void setValue_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setValue_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsRoleTypeCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "value");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1217,16 +1222,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_IpRange(null);
     }
 
-    public void setValue_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setValue_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setValue_IpRange("value", opLambda, null);
     }
 
-    public void setValue_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setValue_IpRange("value", opLambda, aggsLambda);
     }
 
-    public void setValue_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "value");
+    public void setValue_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1241,12 +1246,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_Count(null);
     }
 
-    public void setValue_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setValue_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setValue_Count("value", opLambda);
     }
 
-    public void setValue_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "value");
+    public void setValue_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1256,12 +1261,12 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_Cardinality(null);
     }
 
-    public void setValue_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setValue_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setValue_Cardinality("value", opLambda);
     }
 
-    public void setValue_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "value");
+    public void setValue_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1271,16 +1276,16 @@ public abstract class BsRoleTypeCA extends EsAbstractConditionAggregation {
         setValue_Missing(null);
     }
 
-    public void setValue_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setValue_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setValue_Missing("value", opLambda, null);
     }
 
-    public void setValue_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+    public void setValue_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
         setValue_Missing("value", opLambda, aggsLambda);
     }
 
-    public void setValue_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "value");
+    public void setValue_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsRoleTypeCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "value");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

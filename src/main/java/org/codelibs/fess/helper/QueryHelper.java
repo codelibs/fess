@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -31,7 +30,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -63,6 +61,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -110,19 +109,11 @@ public class QueryHelper {
 
     protected String[] sortFields;
 
-    @Deprecated
-    public int highlightFragmentSize = 100;
-
     protected String additionalQuery;
 
     protected boolean lowercaseWildcard = true;
 
     protected long timeAllowed = -1;
-
-    protected Map<String, String[]> requestParameterMap = new HashMap<>();
-
-    @Deprecated
-    public int maxSearchResultOffset = 100000;
 
     protected SortBuilder[] defaultSortBuilders;
 
@@ -131,8 +122,6 @@ public class QueryHelper {
     protected FacetInfo defaultFacetInfo;
 
     protected GeoInfo defaultGeoInfo;
-
-    protected Map<String, String[]> queryRequestHeaderMap = new HashMap<>();
 
     protected Map<String, String> fieldBoostMap = new HashMap<>();
 
@@ -321,10 +310,10 @@ public class QueryHelper {
     }
 
     protected void buildBoostQuery(final QueryContext queryContext) {
-        queryContext.addFunctionScore(functionScoreQuery -> {
-            functionScoreQuery.add(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost()));
+        queryContext.addFunctionScore(list -> {
+            list.add(new FilterFunctionBuilder(ScoreFunctionBuilders.fieldValueFactorFunction(fessConfig.getIndexFieldBoost())));
             if (keyMatchHelper != null) {
-                keyMatchHelper.buildQuery(queryContext.getDefaultKeyword(), functionScoreQuery);
+                keyMatchHelper.buildQuery(queryContext.getDefaultKeyword(), list);
             }
         });
     }
@@ -774,20 +763,6 @@ public class QueryHelper {
         this.timeAllowed = timeAllowed;
     }
 
-    public void addRequestParameter(final String name, final String... values) {
-        requestParameterMap.put(name, values);
-    }
-
-    public void addRequestParameter(final String name, final String value) {
-        if (value != null) {
-            requestParameterMap.put(name, new String[] { value });
-        }
-    }
-
-    public Set<Entry<String, String[]>> getRequestParameterSet() {
-        return requestParameterMap.entrySet();
-    }
-
     public void addDefaultSort(final String fieldName, final String order) {
         final List<SortBuilder> list = new ArrayList<>();
         if (defaultSortBuilders != null) {
@@ -820,39 +795,6 @@ public class QueryHelper {
 
     public void setDefaultGeoInfo(final GeoInfo defaultGeoInfo) {
         this.defaultGeoInfo = defaultGeoInfo;
-    }
-
-    public Map<String, String[]> getQueryRequestHeaderMap() {
-        if (queryRequestHeaderMap.isEmpty()) {
-            return queryRequestHeaderMap;
-        }
-
-        final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
-        final Map<String, String[]> queryParamMap = new HashMap<>();
-        for (final Map.Entry<String, String[]> entry : queryRequestHeaderMap.entrySet()) {
-            final String[] values = entry.getValue();
-            final String[] newValues = new String[values.length];
-            for (int i = 0; i < values.length; i++) {
-                final String value = values[i];
-                if (value.length() > 1 && value.charAt(0) == '$' && request != null) {
-                    final String param = request.getParameter(value.substring(1));
-                    if (StringUtil.isNotBlank(param)) {
-                        newValues[i] = param;
-                    } else {
-                        newValues[i] = StringUtil.EMPTY;
-                    }
-                } else {
-                    newValues[i] = value;
-                }
-            }
-            queryParamMap.put(entry.getKey(), newValues);
-        }
-
-        return queryParamMap;
-    }
-
-    public void addQueryRequestHeader(final String key, final String[] values) {
-        queryRequestHeaderMap.put(key, values);
     }
 
     public String generateId() {

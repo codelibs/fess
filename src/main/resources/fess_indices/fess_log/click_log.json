@@ -8,20 +8,16 @@
     },
     "properties": {
       "docId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "queryId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "userSessionId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "url": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "order": {
         "type": "integer"

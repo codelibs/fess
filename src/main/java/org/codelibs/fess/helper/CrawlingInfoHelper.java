@@ -39,7 +39,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Order;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +165,7 @@ public class CrawlingInfoHelper {
                 fessConfig.getIndexDocumentType(),
                 queryRequestBuilder -> {
                     queryRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
-                    final TermsBuilder termsBuilder =
+                    final TermsAggregationBuilder termsBuilder =
                             AggregationBuilders.terms(fessConfig.getIndexFieldSegment()).field(fessConfig.getIndexFieldSegment())
                                     .size(maxSessionIdsInList).order(Order.term(false));
                     queryRequestBuilder.addAggregation(termsBuilder);

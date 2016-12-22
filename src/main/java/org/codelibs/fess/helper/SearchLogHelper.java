@@ -259,7 +259,7 @@ public class SearchLogHelper {
         final SearchLogBhv searchLogBhv = ComponentUtil.getComponent(SearchLogBhv.class);
         final SearchFieldLogBhv searchFieldLogBhv = ComponentUtil.getComponent(SearchFieldLogBhv.class);
         searchLogBhv.batchUpdate(searchLogList, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
         searchLogList.stream().forEach(searchLog -> {
             final List<SearchFieldLog> fieldLogList = new ArrayList<>();

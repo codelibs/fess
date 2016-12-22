@@ -21,16 +21,16 @@ import org.codelibs.fess.es.config.cbean.ca.WebConfigToLabelCA;
 import org.codelibs.fess.es.config.cbean.cq.WebConfigToLabelCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsWebConfigToLabelCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -58,8 +58,8 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -82,36 +82,35 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // String labelTypeId
 
     public void setLabelTypeId_Terms() {
         setLabelTypeId_Terms(null);
     }
 
-    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setLabelTypeId_Terms("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setLabelTypeId_Terms("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "labelTypeId");
+    public void setLabelTypeId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -126,18 +125,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setLabelTypeId_SignificantTerms(null);
     }
 
-    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setLabelTypeId_SignificantTerms("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setLabelTypeId_SignificantTerms("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setLabelTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "labelTypeId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -152,17 +151,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setLabelTypeId_IpRange(null);
     }
 
-    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setLabelTypeId_IpRange("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setLabelTypeId_IpRange("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setLabelTypeId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "labelTypeId");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -177,12 +177,12 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setLabelTypeId_Count(null);
     }
 
-    public void setLabelTypeId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setLabelTypeId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setLabelTypeId_Count("labelTypeId", opLambda);
     }
 
-    public void setLabelTypeId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "labelTypeId");
+    public void setLabelTypeId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -192,12 +192,12 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setLabelTypeId_Cardinality(null);
     }
 
-    public void setLabelTypeId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setLabelTypeId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setLabelTypeId_Cardinality("labelTypeId", opLambda);
     }
 
-    public void setLabelTypeId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "labelTypeId");
+    public void setLabelTypeId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -207,17 +207,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setLabelTypeId_Missing(null);
     }
 
-    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setLabelTypeId_Missing("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setLabelTypeId_Missing("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setLabelTypeId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "labelTypeId");
+        MissingAggregationBuilder builder = regMissingA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -228,22 +229,21 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         }
     }
 
-    // String webConfigId
-
     public void setWebConfigId_Terms() {
         setWebConfigId_Terms(null);
     }
 
-    public void setWebConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setWebConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setWebConfigId_Terms("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setWebConfigId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setWebConfigId_Terms("webConfigId", opLambda, aggsLambda);
     }
 
-    public void setWebConfigId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "webConfigId");
+    public void setWebConfigId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -258,18 +258,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setWebConfigId_SignificantTerms(null);
     }
 
-    public void setWebConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setWebConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setWebConfigId_SignificantTerms("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setWebConfigId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setWebConfigId_SignificantTerms("webConfigId", opLambda, aggsLambda);
     }
 
-    public void setWebConfigId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setWebConfigId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "webConfigId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -284,17 +284,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setWebConfigId_IpRange(null);
     }
 
-    public void setWebConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setWebConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setWebConfigId_IpRange("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setWebConfigId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setWebConfigId_IpRange("webConfigId", opLambda, aggsLambda);
     }
 
-    public void setWebConfigId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setWebConfigId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "webConfigId");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -309,12 +310,12 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setWebConfigId_Count(null);
     }
 
-    public void setWebConfigId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setWebConfigId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setWebConfigId_Count("webConfigId", opLambda);
     }
 
-    public void setWebConfigId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "webConfigId");
+    public void setWebConfigId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -324,12 +325,12 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setWebConfigId_Cardinality(null);
     }
 
-    public void setWebConfigId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setWebConfigId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setWebConfigId_Cardinality("webConfigId", opLambda);
     }
 
-    public void setWebConfigId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "webConfigId");
+    public void setWebConfigId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -339,17 +340,18 @@ public abstract class BsWebConfigToLabelCA extends EsAbstractConditionAggregatio
         setWebConfigId_Missing(null);
     }
 
-    public void setWebConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setWebConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setWebConfigId_Missing("webConfigId", opLambda, null);
     }
 
-    public void setWebConfigId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
+    public void setWebConfigId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
         setWebConfigId_Missing("webConfigId", opLambda, aggsLambda);
     }
 
-    public void setWebConfigId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setWebConfigId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsWebConfigToLabelCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "webConfigId");
+        MissingAggregationBuilder builder = regMissingA(name, "webConfigId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

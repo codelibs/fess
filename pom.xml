@@ -57,14 +57,14 @@
 		<utflute.version>0.6.3</utflute.version>
 
 		<!-- Crawler -->
-		<crawler.version>1.0.12-SNAPSHOT</crawler.version>
+		<crawler.version>1.1.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>2.3.1</suggest.version>
+		<suggest.version>5.0.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>2.4.2</elasticsearch.version>
-		<cluster.runner.version>2.4.0.0</cluster.runner.version>
+		<elasticsearch.version>5.0.2</elasticsearch.version>
+		<cluster.runner.version>5.0.2.0-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.5</tomcat.version>
@@ -1062,13 +1062,48 @@
 			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>transport</artifactId>
+			<version>${elasticsearch.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.elasticsearch.plugin</groupId>
+					<artifactId>lang-mustache-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.elasticsearch.plugin</groupId>
+					<artifactId>percolator-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.elasticsearch.plugin</groupId>
+					<artifactId>reindex-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.elasticsearch.plugin</groupId>
+					<artifactId>transport-netty3-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.elasticsearch.plugin</groupId>
+					<artifactId>transport-netty4-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>elasticsearch-cluster-runner</artifactId>
 			<version>${cluster.runner.version}</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
+					<groupId>org.ow2.asm</groupId>
+					<artifactId>asm-debug-all</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.groovy</groupId>
+					<artifactId>groovy</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

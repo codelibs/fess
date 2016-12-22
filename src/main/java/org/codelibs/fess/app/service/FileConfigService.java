@@ -68,7 +68,7 @@ public class FileConfigService {
         final String fileConfigId = fileConfig.getId();
 
         fileConfigBhv.delete(fileConfig, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         fileConfigToLabelBhv.queryDelete(cb -> {
@@ -129,7 +129,7 @@ public class FileConfigService {
         final String[] labelTypeIds = fileConfig.getLabelTypeIds();
 
         fileConfigBhv.insertOrUpdate(fileConfig, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
         final String fileConfigId = fileConfig.getId();
         if (isNew) {
@@ -143,7 +143,7 @@ public class FileConfigService {
                     fctltmList.add(mapping);
                 }
                 fileConfigToLabelBhv.batchInsert(fctltmList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         } else {
@@ -174,10 +174,10 @@ public class FileConfigService {
                 }
                 fctltmList.removeAll(matchedList);
                 fileConfigToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
                 fileConfigToLabelBhv.batchDelete(fctltmList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         }

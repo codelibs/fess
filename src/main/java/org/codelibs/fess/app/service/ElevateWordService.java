@@ -105,7 +105,7 @@ public class ElevateWordService {
         final String[] labelTypeIds = elevateWord.getLabelTypeIds();
 
         elevateWordBhv.insertOrUpdate(elevateWord, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
         final String elevateWordId = elevateWord.getId();
         if (isNew) {
@@ -119,7 +119,7 @@ public class ElevateWordService {
                     wctltmList.add(mapping);
                 }
                 elevateWordToLabelBhv.batchInsert(wctltmList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         } else {
@@ -150,10 +150,10 @@ public class ElevateWordService {
                 }
                 list.removeAll(matchedList);
                 elevateWordToLabelBhv.batchInsert(newList, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
                 elevateWordToLabelBhv.batchDelete(list, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         }
@@ -162,7 +162,7 @@ public class ElevateWordService {
     public void delete(final ElevateWord elevateWord) {
 
         elevateWordBhv.delete(elevateWord, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

@@ -145,25 +145,25 @@ public class ScheduledJobDbm extends AbstractDBMeta {
     protected final ColumnInfo _columnCrawler = cci("crawler", "crawler", null, null, Boolean.class, "crawler", null, false, false, false,
             "Boolean", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCronExpression = cci("cronExpression", "cronExpression", null, null, String.class, "cronExpression",
-            null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnJobLogging = cci("jobLogging", "jobLogging", null, null, Boolean.class, "jobLogging", null, false,
             false, false, "Boolean", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnScriptData = cci("scriptData", "scriptData", null, null, String.class, "scriptData", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnScriptType = cci("scriptType", "scriptType", null, null, String.class, "scriptType", null, false,
-            false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTarget = cci("target", "target", null, null, String.class, "target", null, false, false, false,
-            "String", 0, 0, null, false, null, null, null, null, null, false);
+            "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
 

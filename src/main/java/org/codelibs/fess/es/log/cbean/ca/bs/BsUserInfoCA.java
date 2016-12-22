@@ -21,15 +21,15 @@ import org.codelibs.fess.es.log.cbean.ca.UserInfoCA;
 import org.codelibs.fess.es.log.cbean.cq.UserInfoCQ;
 import org.codelibs.fess.es.log.cbean.cq.bs.BsUserInfoCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -57,8 +57,8 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -81,36 +81,35 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // LocalDateTime createdAt
 
     public void setCreatedAt_DateRange() {
         setCreatedAt_DateRange(null);
     }
 
-    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeBuilder> opLambda) {
+    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda) {
         setCreatedAt_DateRange("createdAt", opLambda, null);
     }
 
-    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setCreatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
         setCreatedAt_DateRange("createdAt", opLambda, aggsLambda);
     }
 
-    public void setCreatedAt_DateRange(String name, ConditionOptionCall<DateRangeBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
-        DateRangeBuilder builder = regDateRangeA(name, "createdAt");
+    public void setCreatedAt_DateRange(String name, ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
+        DateRangeAggregationBuilder builder = regDateRangeA(name, "createdAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -125,17 +124,18 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setCreatedAt_DateHistogram(null);
     }
 
-    public void setCreatedAt_DateHistogram(ConditionOptionCall<DateHistogramBuilder> opLambda) {
+    public void setCreatedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda) {
         setCreatedAt_DateHistogram("createdAt", opLambda, null);
     }
 
-    public void setCreatedAt_DateHistogram(ConditionOptionCall<DateHistogramBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setCreatedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
         setCreatedAt_DateHistogram("createdAt", opLambda, aggsLambda);
     }
 
-    public void setCreatedAt_DateHistogram(String name, ConditionOptionCall<DateHistogramBuilder> opLambda,
+    public void setCreatedAt_DateHistogram(String name, ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
             OperatorCall<BsUserInfoCA> aggsLambda) {
-        DateHistogramBuilder builder = regDateHistogramA(name, "createdAt");
+        DateHistogramAggregationBuilder builder = regDateHistogramA(name, "createdAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -150,12 +150,12 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setCreatedAt_Count(null);
     }
 
-    public void setCreatedAt_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCreatedAt_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCreatedAt_Count("createdAt", opLambda);
     }
 
-    public void setCreatedAt_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "createdAt");
+    public void setCreatedAt_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "createdAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -165,12 +165,12 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setCreatedAt_Cardinality(null);
     }
 
-    public void setCreatedAt_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCreatedAt_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCreatedAt_Cardinality("createdAt", opLambda);
     }
 
-    public void setCreatedAt_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "createdAt");
+    public void setCreatedAt_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "createdAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -180,16 +180,17 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setCreatedAt_Missing(null);
     }
 
-    public void setCreatedAt_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCreatedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCreatedAt_Missing("createdAt", opLambda, null);
     }
 
-    public void setCreatedAt_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setCreatedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
         setCreatedAt_Missing("createdAt", opLambda, aggsLambda);
     }
 
-    public void setCreatedAt_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "createdAt");
+    public void setCreatedAt_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "createdAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -200,22 +201,21 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // LocalDateTime updatedAt
-
     public void setUpdatedAt_DateRange() {
         setUpdatedAt_DateRange(null);
     }
 
-    public void setUpdatedAt_DateRange(ConditionOptionCall<DateRangeBuilder> opLambda) {
+    public void setUpdatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda) {
         setUpdatedAt_DateRange("updatedAt", opLambda, null);
     }
 
-    public void setUpdatedAt_DateRange(ConditionOptionCall<DateRangeBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setUpdatedAt_DateRange(ConditionOptionCall<DateRangeAggregationBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
         setUpdatedAt_DateRange("updatedAt", opLambda, aggsLambda);
     }
 
-    public void setUpdatedAt_DateRange(String name, ConditionOptionCall<DateRangeBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
-        DateRangeBuilder builder = regDateRangeA(name, "updatedAt");
+    public void setUpdatedAt_DateRange(String name, ConditionOptionCall<DateRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
+        DateRangeAggregationBuilder builder = regDateRangeA(name, "updatedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -230,17 +230,18 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setUpdatedAt_DateHistogram(null);
     }
 
-    public void setUpdatedAt_DateHistogram(ConditionOptionCall<DateHistogramBuilder> opLambda) {
+    public void setUpdatedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda) {
         setUpdatedAt_DateHistogram("updatedAt", opLambda, null);
     }
 
-    public void setUpdatedAt_DateHistogram(ConditionOptionCall<DateHistogramBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setUpdatedAt_DateHistogram(ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
         setUpdatedAt_DateHistogram("updatedAt", opLambda, aggsLambda);
     }
 
-    public void setUpdatedAt_DateHistogram(String name, ConditionOptionCall<DateHistogramBuilder> opLambda,
+    public void setUpdatedAt_DateHistogram(String name, ConditionOptionCall<DateHistogramAggregationBuilder> opLambda,
             OperatorCall<BsUserInfoCA> aggsLambda) {
-        DateHistogramBuilder builder = regDateHistogramA(name, "updatedAt");
+        DateHistogramAggregationBuilder builder = regDateHistogramA(name, "updatedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -255,12 +256,12 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setUpdatedAt_Count(null);
     }
 
-    public void setUpdatedAt_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUpdatedAt_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUpdatedAt_Count("updatedAt", opLambda);
     }
 
-    public void setUpdatedAt_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "updatedAt");
+    public void setUpdatedAt_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "updatedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -270,12 +271,12 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setUpdatedAt_Cardinality(null);
     }
 
-    public void setUpdatedAt_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUpdatedAt_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUpdatedAt_Cardinality("updatedAt", opLambda);
     }
 
-    public void setUpdatedAt_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "updatedAt");
+    public void setUpdatedAt_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "updatedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -285,16 +286,17 @@ public abstract class BsUserInfoCA extends EsAbstractConditionAggregation {
         setUpdatedAt_Missing(null);
     }
 
-    public void setUpdatedAt_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUpdatedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUpdatedAt_Missing("updatedAt", opLambda, null);
     }
 
-    public void setUpdatedAt_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
+    public void setUpdatedAt_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
         setUpdatedAt_Missing("updatedAt", opLambda, aggsLambda);
     }
 
-    public void setUpdatedAt_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserInfoCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "updatedAt");
+    public void setUpdatedAt_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserInfoCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "updatedAt");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

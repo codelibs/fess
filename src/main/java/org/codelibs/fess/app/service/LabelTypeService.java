@@ -58,7 +58,7 @@ public class LabelTypeService {
     public void delete(final LabelType labelType) {
 
         labelTypeBhv.delete(labelType, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();
@@ -90,7 +90,7 @@ public class LabelTypeService {
 
     public void store(final LabelType labelType) {
         labelTypeBhv.insertOrUpdate(labelType, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         final LabelTypeHelper labelTypeHelper = ComponentUtil.getLabelTypeHelper();

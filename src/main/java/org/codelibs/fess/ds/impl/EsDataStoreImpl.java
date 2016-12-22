@@ -38,11 +38,12 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,7 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
         final long readInterval = getReadInterval(paramMap);
 
         final Settings settings =
-                Settings.settingsBuilder()
+                Settings.builder()
                         .put(paramMap
                                 .entrySet()
                                 .stream()
@@ -103,7 +104,8 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
             }
             return null;
         }).filter(v -> v != null).toArray(n -> new InetSocketTransportAddress[n]));
-        try (Client client = TransportClient.builder().settings(settings).build().addTransportAddresses(addresses)) {
+        try (PreBuiltTransportClient client = new PreBuiltTransportClient(settings)) {
+            client.addTransportAddresses(addresses);
             processData(dataConfig, callback, paramMap, scriptMap, defaultDataMap, readInterval, client);
         }
     }
@@ -128,9 +130,10 @@ public class EsDataStoreImpl extends AbstractDataStoreImpl {
             builder.setSize(Integer.parseInt(paramMap.get(SIZE)));
         }
         if (paramMap.containsKey(FIELDS)) {
-            builder.addFields(paramMap.get(FIELDS).trim().split(","));
+            builder.setFetchSource(paramMap.get(FIELDS).trim().split(","), null);
         }
-        builder.setQuery(paramMap.containsKey(QUERY) ? paramMap.get(QUERY).trim() : "{\"query\":{\"match_all\":{}}}");
+        builder.setQuery(QueryBuilders.wrapperQuery(paramMap.containsKey(QUERY) ? paramMap.get(QUERY).trim()
+                : "{\"query\":{\"match_all\":{}}}"));
         builder.setScroll(scroll);
         builder.setPreference(paramMap.containsKey(PREFERENCE) ? paramMap.get(PREFERENCE).trim() : Constants.SEARCH_PREFERENCE_PRIMARY);
         try {

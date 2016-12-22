@@ -74,13 +74,13 @@ public class BadWordService {
 
     public void store(final BadWord badWord) {
 
-        badWordBhv.insertOrUpdate(badWord, op -> op.setRefresh(true));
+        badWordBhv.insertOrUpdate(badWord, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
     public void delete(final BadWord badWord) {
 
-        badWordBhv.delete(badWord, op -> op.setRefresh(true));
+        badWordBhv.delete(badWord, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 

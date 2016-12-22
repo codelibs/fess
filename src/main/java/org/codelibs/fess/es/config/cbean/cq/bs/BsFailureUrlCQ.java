@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.cbean.cq.bs;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
@@ -24,16 +25,19 @@ import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.CommonTermsQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
+import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -63,14 +67,15 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         FailureUrlCQ cq = new FailureUrlCQ();
         queryLambda.callback(cq);
-        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        final Collection<FilterFunctionBuilder> list = new ArrayList<>();
         if (functionsLambda != null) {
             functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
                 FailureUrlCQ cf = new FailureUrlCQ();
                 cqLambda.callback(cf);
-                builder.add(cf.getQuery(), scoreFunctionBuilder);
+                list.add(new FilterFunctionBuilder(cf.getQuery(), scoreFunctionBuilder));
             });
         }
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery(), list);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -250,8 +255,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setConfigId_MatchPhrase(configId, null);
     }
 
-    public void setConfigId_MatchPhrase(String configId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("configId", configId);
+    public void setConfigId_MatchPhrase(String configId, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("configId", configId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -261,8 +266,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setConfigId_MatchPhrasePrefix(configId, null);
     }
 
-    public void setConfigId_MatchPhrasePrefix(String configId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("configId", configId);
+    public void setConfigId_MatchPhrasePrefix(String configId, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("configId", configId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -272,8 +277,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setConfigId_Fuzzy(configId, null);
     }
 
-    public void setConfigId_Fuzzy(String configId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("configId", configId);
+    public void setConfigId_Fuzzy(String configId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("configId", configId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,12 +317,24 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setConfigId_SpanTerm(String configId) {
+        setConfigId_SpanTerm("configId", null);
+    }
+
+    public void setConfigId_SpanTerm(String configId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("configId", configId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setConfigId_GreaterThan(String configId) {
         setConfigId_GreaterThan(configId, null);
     }
 
     public void setConfigId_GreaterThan(String configId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_GREATER_THAN, configId);
+        final Object _value = configId;
+        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -328,7 +345,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setConfigId_LessThan(String configId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_LESS_THAN, configId);
+        final Object _value = configId;
+        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -339,7 +357,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setConfigId_GreaterEqual(String configId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_GREATER_EQUAL, configId);
+        final Object _value = configId;
+        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -350,7 +369,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setConfigId_LessEqual(String configId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_LESS_EQUAL, configId);
+        final Object _value = configId;
+        RangeQueryBuilder builder = regRangeQ("configId", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -457,8 +477,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorCount_MatchPhrase(errorCount, null);
     }
 
-    public void setErrorCount_MatchPhrase(Integer errorCount, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("errorCount", errorCount);
+    public void setErrorCount_MatchPhrase(Integer errorCount, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("errorCount", errorCount);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -468,8 +488,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorCount_MatchPhrasePrefix(errorCount, null);
     }
 
-    public void setErrorCount_MatchPhrasePrefix(Integer errorCount, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("errorCount", errorCount);
+    public void setErrorCount_MatchPhrasePrefix(Integer errorCount, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("errorCount", errorCount);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -479,8 +499,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorCount_Fuzzy(errorCount, null);
     }
 
-    public void setErrorCount_Fuzzy(Integer errorCount, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("errorCount", errorCount);
+    public void setErrorCount_Fuzzy(Integer errorCount, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("errorCount", errorCount);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -491,7 +511,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorCount_GreaterThan(Integer errorCount, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_GREATER_THAN, errorCount);
+        final Object _value = errorCount;
+        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -502,7 +523,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorCount_LessThan(Integer errorCount, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_LESS_THAN, errorCount);
+        final Object _value = errorCount;
+        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,7 +535,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorCount_GreaterEqual(Integer errorCount, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_GREATER_EQUAL, errorCount);
+        final Object _value = errorCount;
+        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -524,7 +547,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorCount_LessEqual(Integer errorCount, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_LESS_EQUAL, errorCount);
+        final Object _value = errorCount;
+        RangeQueryBuilder builder = regRangeQ("errorCount", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -631,8 +655,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorLog_MatchPhrase(errorLog, null);
     }
 
-    public void setErrorLog_MatchPhrase(String errorLog, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("errorLog", errorLog);
+    public void setErrorLog_MatchPhrase(String errorLog, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("errorLog", errorLog);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -642,8 +666,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorLog_MatchPhrasePrefix(errorLog, null);
     }
 
-    public void setErrorLog_MatchPhrasePrefix(String errorLog, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("errorLog", errorLog);
+    public void setErrorLog_MatchPhrasePrefix(String errorLog, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("errorLog", errorLog);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -653,8 +677,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorLog_Fuzzy(errorLog, null);
     }
 
-    public void setErrorLog_Fuzzy(String errorLog, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("errorLog", errorLog);
+    public void setErrorLog_Fuzzy(String errorLog, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("errorLog", errorLog);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -693,12 +717,24 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setErrorLog_SpanTerm(String errorLog) {
+        setErrorLog_SpanTerm("errorLog", null);
+    }
+
+    public void setErrorLog_SpanTerm(String errorLog, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("errorLog", errorLog);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setErrorLog_GreaterThan(String errorLog) {
         setErrorLog_GreaterThan(errorLog, null);
     }
 
     public void setErrorLog_GreaterThan(String errorLog, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_GREATER_THAN, errorLog);
+        final Object _value = errorLog;
+        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -709,7 +745,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorLog_LessThan(String errorLog, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_LESS_THAN, errorLog);
+        final Object _value = errorLog;
+        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -720,7 +757,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorLog_GreaterEqual(String errorLog, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_GREATER_EQUAL, errorLog);
+        final Object _value = errorLog;
+        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -731,7 +769,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorLog_LessEqual(String errorLog, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_LESS_EQUAL, errorLog);
+        final Object _value = errorLog;
+        RangeQueryBuilder builder = regRangeQ("errorLog", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -838,8 +877,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorName_MatchPhrase(errorName, null);
     }
 
-    public void setErrorName_MatchPhrase(String errorName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("errorName", errorName);
+    public void setErrorName_MatchPhrase(String errorName, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("errorName", errorName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -849,8 +888,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorName_MatchPhrasePrefix(errorName, null);
     }
 
-    public void setErrorName_MatchPhrasePrefix(String errorName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("errorName", errorName);
+    public void setErrorName_MatchPhrasePrefix(String errorName, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("errorName", errorName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -860,8 +899,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setErrorName_Fuzzy(errorName, null);
     }
 
-    public void setErrorName_Fuzzy(String errorName, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("errorName", errorName);
+    public void setErrorName_Fuzzy(String errorName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("errorName", errorName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -900,12 +939,24 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setErrorName_SpanTerm(String errorName) {
+        setErrorName_SpanTerm("errorName", null);
+    }
+
+    public void setErrorName_SpanTerm(String errorName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("errorName", errorName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setErrorName_GreaterThan(String errorName) {
         setErrorName_GreaterThan(errorName, null);
     }
 
     public void setErrorName_GreaterThan(String errorName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_GREATER_THAN, errorName);
+        final Object _value = errorName;
+        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -916,7 +967,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorName_LessThan(String errorName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_LESS_THAN, errorName);
+        final Object _value = errorName;
+        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -927,7 +979,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorName_GreaterEqual(String errorName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_GREATER_EQUAL, errorName);
+        final Object _value = errorName;
+        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -938,7 +991,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setErrorName_LessEqual(String errorName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_LESS_EQUAL, errorName);
+        final Object _value = errorName;
+        RangeQueryBuilder builder = regRangeQ("errorName", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1045,8 +1099,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setLastAccessTime_MatchPhrase(lastAccessTime, null);
     }
 
-    public void setLastAccessTime_MatchPhrase(Long lastAccessTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("lastAccessTime", lastAccessTime);
+    public void setLastAccessTime_MatchPhrase(Long lastAccessTime, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("lastAccessTime", lastAccessTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1056,8 +1110,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setLastAccessTime_MatchPhrasePrefix(lastAccessTime, null);
     }
 
-    public void setLastAccessTime_MatchPhrasePrefix(Long lastAccessTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("lastAccessTime", lastAccessTime);
+    public void setLastAccessTime_MatchPhrasePrefix(Long lastAccessTime, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("lastAccessTime", lastAccessTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1067,8 +1121,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setLastAccessTime_Fuzzy(lastAccessTime, null);
     }
 
-    public void setLastAccessTime_Fuzzy(Long lastAccessTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("lastAccessTime", lastAccessTime);
+    public void setLastAccessTime_Fuzzy(Long lastAccessTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("lastAccessTime", lastAccessTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1079,7 +1133,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setLastAccessTime_GreaterThan(Long lastAccessTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_GREATER_THAN, lastAccessTime);
+        final Object _value = lastAccessTime;
+        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1090,7 +1145,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setLastAccessTime_LessThan(Long lastAccessTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_LESS_THAN, lastAccessTime);
+        final Object _value = lastAccessTime;
+        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1101,7 +1157,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setLastAccessTime_GreaterEqual(Long lastAccessTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_GREATER_EQUAL, lastAccessTime);
+        final Object _value = lastAccessTime;
+        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1112,7 +1169,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setLastAccessTime_LessEqual(Long lastAccessTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_LESS_EQUAL, lastAccessTime);
+        final Object _value = lastAccessTime;
+        RangeQueryBuilder builder = regRangeQ("lastAccessTime", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1219,8 +1277,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setThreadName_MatchPhrase(threadName, null);
     }
 
-    public void setThreadName_MatchPhrase(String threadName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("threadName", threadName);
+    public void setThreadName_MatchPhrase(String threadName, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("threadName", threadName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1230,8 +1288,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setThreadName_MatchPhrasePrefix(threadName, null);
     }
 
-    public void setThreadName_MatchPhrasePrefix(String threadName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("threadName", threadName);
+    public void setThreadName_MatchPhrasePrefix(String threadName, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("threadName", threadName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1241,8 +1299,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setThreadName_Fuzzy(threadName, null);
     }
 
-    public void setThreadName_Fuzzy(String threadName, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("threadName", threadName);
+    public void setThreadName_Fuzzy(String threadName, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("threadName", threadName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1281,12 +1339,24 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setThreadName_SpanTerm(String threadName) {
+        setThreadName_SpanTerm("threadName", null);
+    }
+
+    public void setThreadName_SpanTerm(String threadName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("threadName", threadName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setThreadName_GreaterThan(String threadName) {
         setThreadName_GreaterThan(threadName, null);
     }
 
     public void setThreadName_GreaterThan(String threadName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_GREATER_THAN, threadName);
+        final Object _value = threadName;
+        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1297,7 +1367,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setThreadName_LessThan(String threadName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_LESS_THAN, threadName);
+        final Object _value = threadName;
+        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1308,7 +1379,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setThreadName_GreaterEqual(String threadName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_GREATER_EQUAL, threadName);
+        final Object _value = threadName;
+        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1319,7 +1391,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setThreadName_LessEqual(String threadName, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_LESS_EQUAL, threadName);
+        final Object _value = threadName;
+        RangeQueryBuilder builder = regRangeQ("threadName", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1426,8 +1499,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setUrl_MatchPhrase(url, null);
     }
 
-    public void setUrl_MatchPhrase(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("url", url);
+    public void setUrl_MatchPhrase(String url, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("url", url);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1437,8 +1510,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setUrl_MatchPhrasePrefix(url, null);
     }
 
-    public void setUrl_MatchPhrasePrefix(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("url", url);
+    public void setUrl_MatchPhrasePrefix(String url, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("url", url);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1448,8 +1521,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         setUrl_Fuzzy(url, null);
     }
 
-    public void setUrl_Fuzzy(String url, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("url", url);
+    public void setUrl_Fuzzy(String url, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("url", url);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1488,12 +1561,24 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUrl_SpanTerm(String url) {
+        setUrl_SpanTerm("url", null);
+    }
+
+    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUrl_GreaterThan(String url) {
         setUrl_GreaterThan(url, null);
     }
 
     public void setUrl_GreaterThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_THAN, url);
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1504,7 +1589,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setUrl_LessThan(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_THAN, url);
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1515,7 +1601,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setUrl_GreaterEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_EQUAL, url);
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1526,7 +1613,8 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
     }
 
     public void setUrl_LessEqual(String url, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_EQUAL, url);
+        final Object _value = url;
+        RangeQueryBuilder builder = regRangeQ("url", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

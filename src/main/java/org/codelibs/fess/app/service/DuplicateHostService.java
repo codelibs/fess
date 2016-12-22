@@ -60,7 +60,7 @@ public class DuplicateHostService {
     public void store(final DuplicateHost duplicateHost) {
 
         duplicateHostBhv.insertOrUpdate(duplicateHost, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class DuplicateHostService {
     public void delete(final DuplicateHost duplicateHost) {
 
         duplicateHostBhv.delete(duplicateHost, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

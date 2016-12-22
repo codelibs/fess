@@ -72,7 +72,7 @@ public class FailureUrlService {
     public void store(final FailureUrl failureUrl) {
 
         failureUrlBhv.insertOrUpdate(failureUrl, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -80,7 +80,7 @@ public class FailureUrlService {
     public void delete(final FailureUrl failureUrl) {
 
         failureUrlBhv.delete(failureUrl, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -193,7 +193,7 @@ public class FailureUrlService {
         failureUrl.setThreadName(Thread.currentThread().getName());
 
         bhv.insertOrUpdate(failureUrl, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
     }
 

@@ -64,8 +64,8 @@ public class GeoInfo {
                                                         try {
                                                             final double lat = Double.parseDouble(values[0]);
                                                             final double lon = Double.parseDouble(values[1]);
-                                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance).lat(lat)
-                                                                    .lon(lon));
+                                                            list.add(QueryBuilders.geoDistanceQuery(geoField).distance(distance)
+                                                                    .point(lat, lon));
                                                         } catch (final Exception ex) {
                                                             throw new InvalidQueryException(messages -> messages
                                                                     .addErrorsInvalidQueryUnknown(UserMessages.GLOBAL_PROPERTY_KEY), ex

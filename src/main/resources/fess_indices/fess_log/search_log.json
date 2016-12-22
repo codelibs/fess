@@ -8,20 +8,16 @@
     },
     "properties": {
       "user": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "roles": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "queryId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "searchWord": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "requestedAt": {
         "type": "date",
@@ -43,28 +39,22 @@
         "type": "integer"
       },
       "userAgent": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "referer": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "clientIp": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "userSessionId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "accessType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "userInfoId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "languages" : {
         "type" : "string",

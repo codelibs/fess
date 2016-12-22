@@ -7,16 +7,13 @@
         },
         "properties" : {
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "searchLogId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "value" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -30,20 +27,16 @@
             "format" : "date_optional_time"
           },
           "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "docId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "queryId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userInfoId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -61,20 +54,16 @@
             "format" : "date_optional_time"
           },
           "queryId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "docId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userSessionId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "url" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "order" : {
             "type" : "integer"
@@ -87,24 +76,19 @@
         },
         "properties" : {
           "accessType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "user" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "roles" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "queryId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "clientIp" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "hitCount" : {
             "type" : "long"
@@ -116,8 +100,7 @@
             "type" : "integer"
           },
           "referer" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "requestedAt" : {
             "type" : "date",
@@ -130,24 +113,19 @@
             "type" : "long"
           },
           "searchWord" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userAgent" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userInfoId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "userSessionId" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "languages" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },

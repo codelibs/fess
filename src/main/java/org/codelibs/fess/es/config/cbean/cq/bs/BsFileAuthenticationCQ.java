@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.cbean.cq.bs;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
@@ -24,16 +25,19 @@ import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.CommonTermsQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
+import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -63,14 +67,15 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         FileAuthenticationCQ cq = new FileAuthenticationCQ();
         queryLambda.callback(cq);
-        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        final Collection<FilterFunctionBuilder> list = new ArrayList<>();
         if (functionsLambda != null) {
             functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
                 FileAuthenticationCQ cf = new FileAuthenticationCQ();
                 cqLambda.callback(cf);
-                builder.add(cf.getQuery(), scoreFunctionBuilder);
+                list.add(new FilterFunctionBuilder(cf.getQuery(), scoreFunctionBuilder));
             });
         }
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery(), list);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -251,8 +256,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedBy_MatchPhrase(createdBy, null);
     }
 
-    public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
+    public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -262,8 +267,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedBy_MatchPhrasePrefix(createdBy, null);
     }
 
-    public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
+    public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -273,8 +278,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedBy_Fuzzy(createdBy, null);
     }
 
-    public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
+    public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -313,12 +318,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
 
     public void setCreatedBy_GreaterThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -329,7 +346,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_LessThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -340,7 +358,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -351,7 +370,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,8 +478,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedTime_MatchPhrase(createdTime, null);
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
+    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -469,8 +489,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedTime_MatchPhrasePrefix(createdTime, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
+    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -480,8 +500,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setCreatedTime_Fuzzy(createdTime, null);
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
+    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -492,7 +512,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -503,7 +524,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -514,7 +536,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -525,7 +548,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -632,8 +656,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setFileConfigId_MatchPhrase(fileConfigId, null);
     }
 
-    public void setFileConfigId_MatchPhrase(String fileConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("fileConfigId", fileConfigId);
+    public void setFileConfigId_MatchPhrase(String fileConfigId, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("fileConfigId", fileConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -643,8 +667,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setFileConfigId_MatchPhrasePrefix(fileConfigId, null);
     }
 
-    public void setFileConfigId_MatchPhrasePrefix(String fileConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("fileConfigId", fileConfigId);
+    public void setFileConfigId_MatchPhrasePrefix(String fileConfigId, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("fileConfigId", fileConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -654,8 +678,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setFileConfigId_Fuzzy(fileConfigId, null);
     }
 
-    public void setFileConfigId_Fuzzy(String fileConfigId, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("fileConfigId", fileConfigId);
+    public void setFileConfigId_Fuzzy(String fileConfigId, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("fileConfigId", fileConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -694,12 +718,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setFileConfigId_SpanTerm(String fileConfigId) {
+        setFileConfigId_SpanTerm("fileConfigId", null);
+    }
+
+    public void setFileConfigId_SpanTerm(String fileConfigId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("fileConfigId", fileConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setFileConfigId_GreaterThan(String fileConfigId) {
         setFileConfigId_GreaterThan(fileConfigId, null);
     }
 
     public void setFileConfigId_GreaterThan(String fileConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_GREATER_THAN, fileConfigId);
+        final Object _value = fileConfigId;
+        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -710,7 +746,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setFileConfigId_LessThan(String fileConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_LESS_THAN, fileConfigId);
+        final Object _value = fileConfigId;
+        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -721,7 +758,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setFileConfigId_GreaterEqual(String fileConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_GREATER_EQUAL, fileConfigId);
+        final Object _value = fileConfigId;
+        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -732,7 +770,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setFileConfigId_LessEqual(String fileConfigId, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_LESS_EQUAL, fileConfigId);
+        final Object _value = fileConfigId;
+        RangeQueryBuilder builder = regRangeQ("fileConfigId", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -839,8 +878,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setHostname_MatchPhrase(hostname, null);
     }
 
-    public void setHostname_MatchPhrase(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("hostname", hostname);
+    public void setHostname_MatchPhrase(String hostname, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -850,8 +889,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setHostname_MatchPhrasePrefix(hostname, null);
     }
 
-    public void setHostname_MatchPhrasePrefix(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("hostname", hostname);
+    public void setHostname_MatchPhrasePrefix(String hostname, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -861,8 +900,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setHostname_Fuzzy(hostname, null);
     }
 
-    public void setHostname_Fuzzy(String hostname, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("hostname", hostname);
+    public void setHostname_Fuzzy(String hostname, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("hostname", hostname);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -901,12 +940,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setHostname_SpanTerm(String hostname) {
+        setHostname_SpanTerm("hostname", null);
+    }
+
+    public void setHostname_SpanTerm(String hostname, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("hostname", hostname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHostname_GreaterThan(String hostname) {
         setHostname_GreaterThan(hostname, null);
     }
 
     public void setHostname_GreaterThan(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_THAN, hostname);
+        final Object _value = hostname;
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -917,7 +968,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setHostname_LessThan(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_THAN, hostname);
+        final Object _value = hostname;
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -928,7 +980,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setHostname_GreaterEqual(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_EQUAL, hostname);
+        final Object _value = hostname;
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -939,7 +992,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setHostname_LessEqual(String hostname, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_EQUAL, hostname);
+        final Object _value = hostname;
+        RangeQueryBuilder builder = regRangeQ("hostname", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1046,8 +1100,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setParameters_MatchPhrase(parameters, null);
     }
 
-    public void setParameters_MatchPhrase(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("parameters", parameters);
+    public void setParameters_MatchPhrase(String parameters, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1057,8 +1111,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setParameters_MatchPhrasePrefix(parameters, null);
     }
 
-    public void setParameters_MatchPhrasePrefix(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("parameters", parameters);
+    public void setParameters_MatchPhrasePrefix(String parameters, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1068,8 +1122,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setParameters_Fuzzy(parameters, null);
     }
 
-    public void setParameters_Fuzzy(String parameters, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("parameters", parameters);
+    public void setParameters_Fuzzy(String parameters, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("parameters", parameters);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1108,12 +1162,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setParameters_SpanTerm(String parameters) {
+        setParameters_SpanTerm("parameters", null);
+    }
+
+    public void setParameters_SpanTerm(String parameters, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("parameters", parameters);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setParameters_GreaterThan(String parameters) {
         setParameters_GreaterThan(parameters, null);
     }
 
     public void setParameters_GreaterThan(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_THAN, parameters);
+        final Object _value = parameters;
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1124,7 +1190,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameters_LessThan(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_THAN, parameters);
+        final Object _value = parameters;
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1135,7 +1202,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameters_GreaterEqual(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_EQUAL, parameters);
+        final Object _value = parameters;
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1146,7 +1214,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setParameters_LessEqual(String parameters, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_EQUAL, parameters);
+        final Object _value = parameters;
+        RangeQueryBuilder builder = regRangeQ("parameters", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1253,8 +1322,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPassword_MatchPhrase(password, null);
     }
 
-    public void setPassword_MatchPhrase(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("password", password);
+    public void setPassword_MatchPhrase(String password, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1264,8 +1333,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPassword_MatchPhrasePrefix(password, null);
     }
 
-    public void setPassword_MatchPhrasePrefix(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("password", password);
+    public void setPassword_MatchPhrasePrefix(String password, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1275,8 +1344,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPassword_Fuzzy(password, null);
     }
 
-    public void setPassword_Fuzzy(String password, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("password", password);
+    public void setPassword_Fuzzy(String password, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1315,12 +1384,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPassword_SpanTerm(String password) {
+        setPassword_SpanTerm("password", null);
+    }
+
+    public void setPassword_SpanTerm(String password, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("password", password);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPassword_GreaterThan(String password) {
         setPassword_GreaterThan(password, null);
     }
 
     public void setPassword_GreaterThan(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_THAN, password);
+        final Object _value = password;
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1331,7 +1412,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPassword_LessThan(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_THAN, password);
+        final Object _value = password;
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1342,7 +1424,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPassword_GreaterEqual(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_EQUAL, password);
+        final Object _value = password;
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1353,7 +1436,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPassword_LessEqual(String password, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_EQUAL, password);
+        final Object _value = password;
+        RangeQueryBuilder builder = regRangeQ("password", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1460,8 +1544,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPort_MatchPhrase(port, null);
     }
 
-    public void setPort_MatchPhrase(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("port", port);
+    public void setPort_MatchPhrase(Integer port, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1471,8 +1555,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPort_MatchPhrasePrefix(port, null);
     }
 
-    public void setPort_MatchPhrasePrefix(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("port", port);
+    public void setPort_MatchPhrasePrefix(Integer port, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1482,8 +1566,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setPort_Fuzzy(port, null);
     }
 
-    public void setPort_Fuzzy(Integer port, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("port", port);
+    public void setPort_Fuzzy(Integer port, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("port", port);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1494,7 +1578,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPort_GreaterThan(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_THAN, port);
+        final Object _value = port;
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1505,7 +1590,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPort_LessThan(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_THAN, port);
+        final Object _value = port;
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1516,7 +1602,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPort_GreaterEqual(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_EQUAL, port);
+        final Object _value = port;
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1527,7 +1614,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setPort_LessEqual(Integer port, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_EQUAL, port);
+        final Object _value = port;
+        RangeQueryBuilder builder = regRangeQ("port", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1634,8 +1722,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setProtocolScheme_MatchPhrase(protocolScheme, null);
     }
 
-    public void setProtocolScheme_MatchPhrase(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("protocolScheme", protocolScheme);
+    public void setProtocolScheme_MatchPhrase(String protocolScheme, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1645,8 +1733,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setProtocolScheme_MatchPhrasePrefix(protocolScheme, null);
     }
 
-    public void setProtocolScheme_MatchPhrasePrefix(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("protocolScheme", protocolScheme);
+    public void setProtocolScheme_MatchPhrasePrefix(String protocolScheme, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1656,8 +1744,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setProtocolScheme_Fuzzy(protocolScheme, null);
     }
 
-    public void setProtocolScheme_Fuzzy(String protocolScheme, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("protocolScheme", protocolScheme);
+    public void setProtocolScheme_Fuzzy(String protocolScheme, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("protocolScheme", protocolScheme);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1696,12 +1784,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setProtocolScheme_SpanTerm(String protocolScheme) {
+        setProtocolScheme_SpanTerm("protocolScheme", null);
+    }
+
+    public void setProtocolScheme_SpanTerm(String protocolScheme, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("protocolScheme", protocolScheme);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setProtocolScheme_GreaterThan(String protocolScheme) {
         setProtocolScheme_GreaterThan(protocolScheme, null);
     }
 
     public void setProtocolScheme_GreaterThan(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_THAN, protocolScheme);
+        final Object _value = protocolScheme;
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1712,7 +1812,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setProtocolScheme_LessThan(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_THAN, protocolScheme);
+        final Object _value = protocolScheme;
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1723,7 +1824,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setProtocolScheme_GreaterEqual(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_EQUAL, protocolScheme);
+        final Object _value = protocolScheme;
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1734,7 +1836,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setProtocolScheme_LessEqual(String protocolScheme, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_EQUAL, protocolScheme);
+        final Object _value = protocolScheme;
+        RangeQueryBuilder builder = regRangeQ("protocolScheme", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1841,8 +1944,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedBy_MatchPhrase(updatedBy, null);
     }
 
-    public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
+    public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1852,8 +1955,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedBy_MatchPhrasePrefix(updatedBy, null);
     }
 
-    public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
+    public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1863,8 +1966,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedBy_Fuzzy(updatedBy, null);
     }
 
-    public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
+    public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1903,12 +2006,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
 
     public void setUpdatedBy_GreaterThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1919,7 +2034,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1930,7 +2046,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1941,7 +2058,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2048,8 +2166,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedTime_MatchPhrase(updatedTime, null);
     }
 
-    public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
+    public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2059,8 +2177,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedTime_MatchPhrasePrefix(updatedTime, null);
     }
 
-    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
+    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2070,8 +2188,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUpdatedTime_Fuzzy(updatedTime, null);
     }
 
-    public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
+    public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2082,7 +2200,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2093,7 +2212,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2104,7 +2224,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2115,7 +2236,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2222,8 +2344,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUsername_MatchPhrase(username, null);
     }
 
-    public void setUsername_MatchPhrase(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("username", username);
+    public void setUsername_MatchPhrase(String username, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2233,8 +2355,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUsername_MatchPhrasePrefix(username, null);
     }
 
-    public void setUsername_MatchPhrasePrefix(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("username", username);
+    public void setUsername_MatchPhrasePrefix(String username, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2244,8 +2366,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         setUsername_Fuzzy(username, null);
     }
 
-    public void setUsername_Fuzzy(String username, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("username", username);
+    public void setUsername_Fuzzy(String username, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("username", username);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2284,12 +2406,24 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUsername_SpanTerm(String username) {
+        setUsername_SpanTerm("username", null);
+    }
+
+    public void setUsername_SpanTerm(String username, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("username", username);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUsername_GreaterThan(String username) {
         setUsername_GreaterThan(username, null);
     }
 
     public void setUsername_GreaterThan(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_THAN, username);
+        final Object _value = username;
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2300,7 +2434,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUsername_LessThan(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_THAN, username);
+        final Object _value = username;
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2311,7 +2446,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUsername_GreaterEqual(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_EQUAL, username);
+        final Object _value = username;
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2322,7 +2458,8 @@ public abstract class BsFileAuthenticationCQ extends EsAbstractConditionQuery {
     }
 
     public void setUsername_LessEqual(String username, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_EQUAL, username);
+        final Object _value = username;
+        RangeQueryBuilder builder = regRangeQ("username", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

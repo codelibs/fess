@@ -57,13 +57,13 @@ public class AccessTokenService {
 
     public void store(final AccessToken accessToken) {
 
-        accessTokenBhv.insertOrUpdate(accessToken, op -> op.setRefresh(true));
+        accessTokenBhv.insertOrUpdate(accessToken, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
     public void delete(final AccessToken accessToken) {
 
-        accessTokenBhv.delete(accessToken, op -> op.setRefresh(true));
+        accessTokenBhv.delete(accessToken, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 

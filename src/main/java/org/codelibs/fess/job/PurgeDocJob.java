@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.job;
 
-import java.util.Date;
-
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
@@ -36,7 +34,7 @@ public class PurgeDocJob {
         final StringBuilder resultBuf = new StringBuilder();
 
         // clean up
-        final QueryBuilder queryBuilder = QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to(new Date());
+        final QueryBuilder queryBuilder = QueryBuilders.rangeQuery(fessConfig.getIndexFieldExpires()).to("now");
         try {
             fessEsClient.deleteByQuery(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), queryBuilder);
 

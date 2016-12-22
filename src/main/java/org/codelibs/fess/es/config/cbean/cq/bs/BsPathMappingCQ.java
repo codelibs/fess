@@ -16,6 +16,7 @@
 package org.codelibs.fess.es.config.cbean.cq.bs;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.codelibs.fess.es.config.allcommon.EsAbstractConditionQuery;
@@ -24,16 +25,19 @@ import org.dbflute.cbean.ckey.ConditionKey;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.CommonTermsQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
+import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.elasticsearch.index.query.MatchPhraseQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -63,14 +67,15 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
             final ConditionOptionCall<FunctionScoreQueryBuilder> opLambda) {
         PathMappingCQ cq = new PathMappingCQ();
         queryLambda.callback(cq);
-        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery());
+        final Collection<FilterFunctionBuilder> list = new ArrayList<>();
         if (functionsLambda != null) {
             functionsLambda.callback((cqLambda, scoreFunctionBuilder) -> {
                 PathMappingCQ cf = new PathMappingCQ();
                 cqLambda.callback(cf);
-                builder.add(cf.getQuery(), scoreFunctionBuilder);
+                list.add(new FilterFunctionBuilder(cf.getQuery(), scoreFunctionBuilder));
             });
         }
+        final FunctionScoreQueryBuilder builder = regFunctionScoreQ(cq.getQuery(), list);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -250,8 +255,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedBy_MatchPhrase(createdBy, null);
     }
 
-    public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
+    public void setCreatedBy_MatchPhrase(String createdBy, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -261,8 +266,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedBy_MatchPhrasePrefix(createdBy, null);
     }
 
-    public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
+    public void setCreatedBy_MatchPhrasePrefix(String createdBy, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -272,8 +277,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedBy_Fuzzy(createdBy, null);
     }
 
-    public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
+    public void setCreatedBy_Fuzzy(String createdBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -312,12 +317,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
 
     public void setCreatedBy_GreaterThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -328,7 +345,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_LessThan(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -339,7 +357,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_GreaterEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -350,7 +369,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedBy_LessEqual(String createdBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, createdBy);
+        final Object _value = createdBy;
+        RangeQueryBuilder builder = regRangeQ("createdBy", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -457,8 +477,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedTime_MatchPhrase(createdTime, null);
     }
 
-    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
+    public void setCreatedTime_MatchPhrase(Long createdTime, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -468,8 +488,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedTime_MatchPhrasePrefix(createdTime, null);
     }
 
-    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
+    public void setCreatedTime_MatchPhrasePrefix(Long createdTime, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -479,8 +499,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setCreatedTime_Fuzzy(createdTime, null);
     }
 
-    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
+    public void setCreatedTime_Fuzzy(Long createdTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("createdTime", createdTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -491,7 +511,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -502,7 +523,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_LessThan(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -513,7 +535,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_GreaterEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -524,7 +547,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setCreatedTime_LessEqual(Long createdTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, createdTime);
+        final Object _value = createdTime;
+        RangeQueryBuilder builder = regRangeQ("createdTime", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -631,8 +655,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setProcessType_MatchPhrase(processType, null);
     }
 
-    public void setProcessType_MatchPhrase(String processType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("processType", processType);
+    public void setProcessType_MatchPhrase(String processType, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("processType", processType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -642,8 +666,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setProcessType_MatchPhrasePrefix(processType, null);
     }
 
-    public void setProcessType_MatchPhrasePrefix(String processType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("processType", processType);
+    public void setProcessType_MatchPhrasePrefix(String processType, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("processType", processType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -653,8 +677,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setProcessType_Fuzzy(processType, null);
     }
 
-    public void setProcessType_Fuzzy(String processType, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("processType", processType);
+    public void setProcessType_Fuzzy(String processType, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("processType", processType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -693,12 +717,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setProcessType_SpanTerm(String processType) {
+        setProcessType_SpanTerm("processType", null);
+    }
+
+    public void setProcessType_SpanTerm(String processType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("processType", processType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setProcessType_GreaterThan(String processType) {
         setProcessType_GreaterThan(processType, null);
     }
 
     public void setProcessType_GreaterThan(String processType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_GREATER_THAN, processType);
+        final Object _value = processType;
+        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -709,7 +745,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setProcessType_LessThan(String processType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_LESS_THAN, processType);
+        final Object _value = processType;
+        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -720,7 +757,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setProcessType_GreaterEqual(String processType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_GREATER_EQUAL, processType);
+        final Object _value = processType;
+        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -731,7 +769,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setProcessType_LessEqual(String processType, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_LESS_EQUAL, processType);
+        final Object _value = processType;
+        RangeQueryBuilder builder = regRangeQ("processType", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -838,8 +877,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setRegex_MatchPhrase(regex, null);
     }
 
-    public void setRegex_MatchPhrase(String regex, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("regex", regex);
+    public void setRegex_MatchPhrase(String regex, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("regex", regex);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -849,8 +888,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setRegex_MatchPhrasePrefix(regex, null);
     }
 
-    public void setRegex_MatchPhrasePrefix(String regex, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("regex", regex);
+    public void setRegex_MatchPhrasePrefix(String regex, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("regex", regex);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -860,8 +899,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setRegex_Fuzzy(regex, null);
     }
 
-    public void setRegex_Fuzzy(String regex, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("regex", regex);
+    public void setRegex_Fuzzy(String regex, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("regex", regex);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -900,12 +939,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setRegex_SpanTerm(String regex) {
+        setRegex_SpanTerm("regex", null);
+    }
+
+    public void setRegex_SpanTerm(String regex, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("regex", regex);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setRegex_GreaterThan(String regex) {
         setRegex_GreaterThan(regex, null);
     }
 
     public void setRegex_GreaterThan(String regex, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_GREATER_THAN, regex);
+        final Object _value = regex;
+        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -916,7 +967,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setRegex_LessThan(String regex, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_LESS_THAN, regex);
+        final Object _value = regex;
+        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -927,7 +979,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setRegex_GreaterEqual(String regex, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_GREATER_EQUAL, regex);
+        final Object _value = regex;
+        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -938,7 +991,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setRegex_LessEqual(String regex, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_LESS_EQUAL, regex);
+        final Object _value = regex;
+        RangeQueryBuilder builder = regRangeQ("regex", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1045,8 +1099,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setReplacement_MatchPhrase(replacement, null);
     }
 
-    public void setReplacement_MatchPhrase(String replacement, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("replacement", replacement);
+    public void setReplacement_MatchPhrase(String replacement, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("replacement", replacement);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1056,8 +1110,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setReplacement_MatchPhrasePrefix(replacement, null);
     }
 
-    public void setReplacement_MatchPhrasePrefix(String replacement, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("replacement", replacement);
+    public void setReplacement_MatchPhrasePrefix(String replacement, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("replacement", replacement);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1067,8 +1121,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setReplacement_Fuzzy(replacement, null);
     }
 
-    public void setReplacement_Fuzzy(String replacement, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("replacement", replacement);
+    public void setReplacement_Fuzzy(String replacement, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("replacement", replacement);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1107,12 +1161,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setReplacement_SpanTerm(String replacement) {
+        setReplacement_SpanTerm("replacement", null);
+    }
+
+    public void setReplacement_SpanTerm(String replacement, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("replacement", replacement);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setReplacement_GreaterThan(String replacement) {
         setReplacement_GreaterThan(replacement, null);
     }
 
     public void setReplacement_GreaterThan(String replacement, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_GREATER_THAN, replacement);
+        final Object _value = replacement;
+        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1123,7 +1189,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setReplacement_LessThan(String replacement, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_LESS_THAN, replacement);
+        final Object _value = replacement;
+        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1134,7 +1201,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setReplacement_GreaterEqual(String replacement, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_GREATER_EQUAL, replacement);
+        final Object _value = replacement;
+        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1145,7 +1213,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setReplacement_LessEqual(String replacement, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_LESS_EQUAL, replacement);
+        final Object _value = replacement;
+        RangeQueryBuilder builder = regRangeQ("replacement", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1252,8 +1321,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setSortOrder_MatchPhrase(sortOrder, null);
     }
 
-    public void setSortOrder_MatchPhrase(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("sortOrder", sortOrder);
+    public void setSortOrder_MatchPhrase(Integer sortOrder, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1263,8 +1332,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setSortOrder_MatchPhrasePrefix(sortOrder, null);
     }
 
-    public void setSortOrder_MatchPhrasePrefix(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("sortOrder", sortOrder);
+    public void setSortOrder_MatchPhrasePrefix(Integer sortOrder, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1274,8 +1343,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setSortOrder_Fuzzy(sortOrder, null);
     }
 
-    public void setSortOrder_Fuzzy(Integer sortOrder, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("sortOrder", sortOrder);
+    public void setSortOrder_Fuzzy(Integer sortOrder, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("sortOrder", sortOrder);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1286,7 +1355,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setSortOrder_GreaterThan(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_THAN, sortOrder);
+        final Object _value = sortOrder;
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1297,7 +1367,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setSortOrder_LessThan(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_THAN, sortOrder);
+        final Object _value = sortOrder;
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1308,7 +1379,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setSortOrder_GreaterEqual(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_EQUAL, sortOrder);
+        final Object _value = sortOrder;
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1319,7 +1391,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setSortOrder_LessEqual(Integer sortOrder, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_EQUAL, sortOrder);
+        final Object _value = sortOrder;
+        RangeQueryBuilder builder = regRangeQ("sortOrder", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1426,8 +1499,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUserAgent_MatchPhrase(userAgent, null);
     }
 
-    public void setUserAgent_MatchPhrase(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("userAgent", userAgent);
+    public void setUserAgent_MatchPhrase(String userAgent, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1437,8 +1510,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUserAgent_MatchPhrasePrefix(userAgent, null);
     }
 
-    public void setUserAgent_MatchPhrasePrefix(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("userAgent", userAgent);
+    public void setUserAgent_MatchPhrasePrefix(String userAgent, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1448,8 +1521,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUserAgent_Fuzzy(userAgent, null);
     }
 
-    public void setUserAgent_Fuzzy(String userAgent, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("userAgent", userAgent);
+    public void setUserAgent_Fuzzy(String userAgent, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1488,12 +1561,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUserAgent_SpanTerm(String userAgent) {
+        setUserAgent_SpanTerm("userAgent", null);
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUserAgent_GreaterThan(String userAgent) {
         setUserAgent_GreaterThan(userAgent, null);
     }
 
     public void setUserAgent_GreaterThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_THAN, userAgent);
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1504,7 +1589,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUserAgent_LessThan(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_THAN, userAgent);
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1515,7 +1601,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUserAgent_GreaterEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_EQUAL, userAgent);
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1526,7 +1613,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUserAgent_LessEqual(String userAgent, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_EQUAL, userAgent);
+        final Object _value = userAgent;
+        RangeQueryBuilder builder = regRangeQ("userAgent", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1633,8 +1721,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedBy_MatchPhrase(updatedBy, null);
     }
 
-    public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
+    public void setUpdatedBy_MatchPhrase(String updatedBy, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1644,8 +1732,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedBy_MatchPhrasePrefix(updatedBy, null);
     }
 
-    public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
+    public void setUpdatedBy_MatchPhrasePrefix(String updatedBy, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1655,8 +1743,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedBy_Fuzzy(updatedBy, null);
     }
 
-    public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
+    public void setUpdatedBy_Fuzzy(String updatedBy, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1695,12 +1783,24 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
 
     public void setUpdatedBy_GreaterThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1711,7 +1811,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessThan(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1722,7 +1823,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_GreaterEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1733,7 +1835,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedBy_LessEqual(String updatedBy, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, updatedBy);
+        final Object _value = updatedBy;
+        RangeQueryBuilder builder = regRangeQ("updatedBy", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1840,8 +1943,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedTime_MatchPhrase(updatedTime, null);
     }
 
-    public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
+    public void setUpdatedTime_MatchPhrase(Long updatedTime, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1851,8 +1954,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedTime_MatchPhrasePrefix(updatedTime, null);
     }
 
-    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
-        MatchQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
+    public void setUpdatedTime_MatchPhrasePrefix(Long updatedTime, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1862,8 +1965,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
         setUpdatedTime_Fuzzy(updatedTime, null);
     }
 
-    public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<FuzzyQueryBuilder> opLambda) {
-        FuzzyQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
+    public void setUpdatedTime_Fuzzy(Long updatedTime, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("updatedTime", updatedTime);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1874,7 +1977,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1885,7 +1989,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessThan(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_THAN, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1896,7 +2001,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_GreaterEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_GREATER_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1907,7 +2013,8 @@ public abstract class BsPathMappingCQ extends EsAbstractConditionQuery {
     }
 
     public void setUpdatedTime_LessEqual(Long updatedTime, ConditionOptionCall<RangeQueryBuilder> opLambda) {
-        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, updatedTime);
+        final Object _value = updatedTime;
+        RangeQueryBuilder builder = regRangeQ("updatedTime", ConditionKey.CK_LESS_EQUAL, _value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

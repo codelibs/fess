@@ -1152,7 +1152,7 @@ public class AdminUpgradeAction extends FessAdminAction {
             }
 
             @Override
-            public void onFailure(final Throwable e) {
+            public void onFailure(final Exception e) {
                 logger.warn("Failed to delete " + index + " index.", e);
             }
         });

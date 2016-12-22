@@ -25,28 +25,28 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.HistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.RangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -58,148 +58,148 @@ public abstract class EsAbstractConditionAggregation {
     // ===================================================================================
     //                                                                           Attribute
     //                                                                           =========
-    protected List<AbstractAggregationBuilder> aggregationBuilderList;
+    protected List<AbstractAggregationBuilder> aggregationAggregationBuilderList;
 
     // ===================================================================================
     //                                                                             Control
     //                                                                             =======
 
     public boolean hasAggregations() {
-        return aggregationBuilderList != null && !aggregationBuilderList.isEmpty();
+        return aggregationAggregationBuilderList != null && !aggregationAggregationBuilderList.isEmpty();
     }
 
     public List<AbstractAggregationBuilder> getAggregationBuilderList() {
-        return aggregationBuilderList != null ? aggregationBuilderList : Collections.emptyList();
+        return aggregationAggregationBuilderList != null ? aggregationAggregationBuilderList : Collections.emptyList();
     }
 
     // ===================================================================================
     //                                                                         Aggregation
     //                                                                               =====
-    public void addAggregation(AbstractAggregationBuilder aggregationBuilder) {
-        assertObjectNotNull("aggregationBuilder", aggregationBuilder);
-        regA(aggregationBuilder);
+    public void addAggregation(AbstractAggregationBuilder aggregationAggregationBuilder) {
+        assertObjectNotNull("aggregationAggregationBuilder", aggregationAggregationBuilder);
+        regA(aggregationAggregationBuilder);
     }
 
     // ===================================================================================
     //                                                                            Register
     //                                                                            ========
 
-    protected AvgBuilder regAvgA(String name, String field) {
-        AvgBuilder builder = AggregationBuilders.avg(name).field(field);
+    protected AvgAggregationBuilder regAvgA(String name, String field) {
+        AvgAggregationBuilder builder = AggregationBuilders.avg(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected MaxBuilder regMaxA(String name, String field) {
-        MaxBuilder builder = AggregationBuilders.max(name).field(field);
+    protected MaxAggregationBuilder regMaxA(String name, String field) {
+        MaxAggregationBuilder builder = AggregationBuilders.max(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected MinBuilder regMinA(String name, String field) {
-        MinBuilder builder = AggregationBuilders.min(name).field(field);
+    protected MinAggregationBuilder regMinA(String name, String field) {
+        MinAggregationBuilder builder = AggregationBuilders.min(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected SumBuilder regSumA(String name, String field) {
-        SumBuilder builder = AggregationBuilders.sum(name).field(field);
+    protected SumAggregationBuilder regSumA(String name, String field) {
+        SumAggregationBuilder builder = AggregationBuilders.sum(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected ExtendedStatsBuilder regExtendedStatsA(String name, String field) {
-        ExtendedStatsBuilder builder = AggregationBuilders.extendedStats(name).field(field);
+    protected ExtendedStatsAggregationBuilder regExtendedStatsA(String name, String field) {
+        ExtendedStatsAggregationBuilder builder = AggregationBuilders.extendedStats(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected StatsBuilder regStatsA(String name, String field) {
-        StatsBuilder builder = AggregationBuilders.stats(name).field(field);
+    protected StatsAggregationBuilder regStatsA(String name, String field) {
+        StatsAggregationBuilder builder = AggregationBuilders.stats(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected PercentilesBuilder regPercentilesA(String name, String field) {
-        PercentilesBuilder builder = AggregationBuilders.percentiles(name).field(field);
+    protected PercentilesAggregationBuilder regPercentilesA(String name, String field) {
+        PercentilesAggregationBuilder builder = AggregationBuilders.percentiles(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected PercentileRanksBuilder regPercentileRanksA(String name, String field) {
-        PercentileRanksBuilder builder = AggregationBuilders.percentileRanks(name).field(field);
+    protected PercentileRanksAggregationBuilder regPercentileRanksA(String name, String field) {
+        PercentileRanksAggregationBuilder builder = AggregationBuilders.percentileRanks(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected CardinalityBuilder regCardinalityA(String name, String field) {
-        CardinalityBuilder builder = AggregationBuilders.cardinality(name).field(field);
+    protected CardinalityAggregationBuilder regCardinalityA(String name, String field) {
+        CardinalityAggregationBuilder builder = AggregationBuilders.cardinality(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected ValueCountBuilder regCountA(String name, String field) {
-        ValueCountBuilder builder = AggregationBuilders.count(name).field(field);
+    protected ValueCountAggregationBuilder regCountA(String name, String field) {
+        ValueCountAggregationBuilder builder = AggregationBuilders.count(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected TermsBuilder regTermsA(String name, String field) {
-        TermsBuilder builder = AggregationBuilders.terms(name).field(field);
+    protected TermsAggregationBuilder regTermsA(String name, String field) {
+        TermsAggregationBuilder builder = AggregationBuilders.terms(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected SignificantTermsBuilder regSignificantTermsA(String name, String field) {
-        SignificantTermsBuilder builder = AggregationBuilders.significantTerms(name).field(field);
+    protected SignificantTermsAggregationBuilder regSignificantTermsA(String name, String field) {
+        SignificantTermsAggregationBuilder builder = AggregationBuilders.significantTerms(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected HistogramBuilder regHistogramA(String name, String field) {
-        HistogramBuilder builder = AggregationBuilders.histogram(name).field(field);
+    protected HistogramAggregationBuilder regHistogramA(String name, String field) {
+        HistogramAggregationBuilder builder = AggregationBuilders.histogram(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected DateHistogramBuilder regDateHistogramA(String name, String field) {
-        DateHistogramBuilder builder = AggregationBuilders.dateHistogram(name).field(field);
+    protected DateHistogramAggregationBuilder regDateHistogramA(String name, String field) {
+        DateHistogramAggregationBuilder builder = AggregationBuilders.dateHistogram(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected RangeBuilder regRangeA(String name, String field) {
-        RangeBuilder builder = AggregationBuilders.range(name).field(field);
+    protected RangeAggregationBuilder regRangeA(String name, String field) {
+        RangeAggregationBuilder builder = AggregationBuilders.range(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected DateRangeBuilder regDateRangeA(String name, String field) {
-        DateRangeBuilder builder = AggregationBuilders.dateRange(name).field(field);
+    protected DateRangeAggregationBuilder regDateRangeA(String name, String field) {
+        DateRangeAggregationBuilder builder = AggregationBuilders.dateRange(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected IPv4RangeBuilder regIpRangeA(String name, String field) {
-        IPv4RangeBuilder builder = AggregationBuilders.ipRange(name).field(field);
+    protected IpRangeAggregationBuilder regIpRangeA(String name, String field) {
+        IpRangeAggregationBuilder builder = AggregationBuilders.ipRange(name).field(field);
         regA(builder);
         return builder;
     }
 
-    protected MissingBuilder regMissingA(String name, String field) {
-        MissingBuilder builder = AggregationBuilders.missing(name).field(field);
+    protected MissingAggregationBuilder regMissingA(String name, String field) {
+        MissingAggregationBuilder builder = AggregationBuilders.missing(name).field(field);
         regA(builder);
         return builder;
     }
 
     protected FilterAggregationBuilder regFilterA(String name, QueryBuilder filter) {
-        FilterAggregationBuilder builder = AggregationBuilders.filter(name).filter(filter);
+        FilterAggregationBuilder builder = AggregationBuilders.filter(name, filter);
         regA(builder);
         return builder;
     }
 
-    protected GlobalBuilder regGlobalA(String name) {
-        GlobalBuilder builder = AggregationBuilders.global(name);
+    protected GlobalAggregationBuilder regGlobalA(String name) {
+        GlobalAggregationBuilder builder = AggregationBuilders.global(name);
         regA(builder);
         return builder;
     }
@@ -210,24 +210,24 @@ public abstract class EsAbstractConditionAggregation {
         return builder;
     }
 
-    protected ScriptedMetricBuilder regScriptedMetricA(String name) {
-        ScriptedMetricBuilder builder = AggregationBuilders.scriptedMetric(name);
+    protected ScriptedMetricAggregationBuilder regScriptedMetricA(String name) {
+        ScriptedMetricAggregationBuilder builder = AggregationBuilders.scriptedMetric(name);
         regA(builder);
         return builder;
     }
 
-    protected TopHitsBuilder regTopHitsA(String name) {
-        TopHitsBuilder builder = AggregationBuilders.topHits(name);
+    protected TopHitsAggregationBuilder regTopHitsA(String name) {
+        TopHitsAggregationBuilder builder = AggregationBuilders.topHits(name);
         regA(builder);
         return builder;
     }
 
     protected void regA(AbstractAggregationBuilder builder) {
         assertObjectNotNull("builder", builder);
-        if (aggregationBuilderList == null) {
-            aggregationBuilderList = new ArrayList<>();
+        if (aggregationAggregationBuilderList == null) {
+            aggregationAggregationBuilderList = new ArrayList<>();
         }
-        aggregationBuilderList.add(builder);
+        aggregationAggregationBuilderList.add(builder);
     }
 
     // ===================================================================================

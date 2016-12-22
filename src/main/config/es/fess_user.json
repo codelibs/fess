@@ -7,8 +7,7 @@
         },
         "properties" : {
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -18,144 +17,109 @@
         },
         "properties" : {
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "password" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "surname" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "givenName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "employeeNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "mail" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "telephoneNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "homePhone" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "homePostalAddress" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "labeledURI" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "roomNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "description" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "title" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "pager" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "street" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "postalCode" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "physicalDeliveryOfficeName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "destinationIndicator" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "internationaliSDNNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "state" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "employeeType" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "facsimileTelephoneNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "postOfficeBox" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "initials" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "carLicense" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "mobile" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "postalAddress" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "city" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "teletexTerminalIdentifier" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "x121Address" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "businessCategory" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "registeredAddress" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "displayName" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "preferredLanguage" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "departmentNumber" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "uidNumber" : {
             "type" : "long"
@@ -164,16 +128,13 @@
             "type" : "long"
           },
           "homeDirectory" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "groups" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "roles" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           }
         }
       },
@@ -183,8 +144,7 @@
         },
         "properties" : {
           "name" : {
-            "type" : "string",
-            "index" : "not_analyzed"
+            "type": "keyword"
           },
           "gidNumber" : {
             "type" : "long"

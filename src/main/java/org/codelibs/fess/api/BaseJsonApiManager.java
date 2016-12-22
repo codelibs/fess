@@ -65,6 +65,18 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
     }
 
     protected void writeJsonResponse(final int status, final String body, final String errMsg) {
+        String content = null;
+        if (status == 0) {
+            if (StringUtil.isNotBlank(body)) {
+                content = body;
+            }
+        } else {
+            content = "\"message\":" + escapeJson(errMsg);
+        }
+        writeJsonResponse(status, content);
+    }
+
+    protected void writeJsonResponse(final int status, final String body) {
         final String callback = LaRequestUtil.getRequest().getParameter("callback");
         final boolean isJsonp = StringUtil.isNotBlank(callback);
 
@@ -79,15 +91,9 @@ public abstract class BaseJsonApiManager extends BaseApiManager {
         buf.append(',');
         buf.append("\"status\":");
         buf.append(status);
-        if (status == 0) {
-            if (StringUtil.isNotBlank(body)) {
-                buf.append(',');
-                buf.append(body);
-            }
-        } else {
+        if (StringUtil.isNotBlank(body)) {
             buf.append(',');
-            buf.append("\"message\":");
-            buf.append(escapeJson(errMsg));
+            buf.append(body);
         }
         buf.append('}');
         buf.append('}');

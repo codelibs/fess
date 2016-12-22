@@ -88,14 +88,14 @@ public class CrawlingInfoService {
     public void store(final CrawlingInfo crawlingInfo) {
         setupStoreCondition(crawlingInfo);
 
-        crawlingInfoBhv.insertOrUpdate(crawlingInfo, op -> op.setRefresh(true));
+        crawlingInfoBhv.insertOrUpdate(crawlingInfo, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
     public void delete(final CrawlingInfo crawlingInfo) {
         setupDeleteCondition(crawlingInfo);
 
-        crawlingInfoBhv.delete(crawlingInfo, op -> op.setRefresh(true));
+        crawlingInfoBhv.delete(crawlingInfo, op -> op.setRefreshPolicy(Constants.TRUE));
 
     }
 
@@ -146,7 +146,7 @@ public class CrawlingInfoService {
                 crawlingInfoIdList.add(cs.getId());
             }
             crawlingInfoParamBhv.queryDelete(cb2 -> cb2.query().setCrawlingInfoId_InScope(crawlingInfoIdList));
-            crawlingInfoBhv.batchDelete(crawlingInfoList, op -> op.setRefresh(true));
+            crawlingInfoBhv.batchDelete(crawlingInfoList, op -> op.setRefreshPolicy(Constants.TRUE));
         }
     }
 
@@ -161,7 +161,7 @@ public class CrawlingInfoService {
                 crawlingInfoParam.setCreatedTime(now);
             }
         }
-        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList, op -> op.setRefresh(true));
+        crawlingInfoParamBhv.batchInsert(crawlingInfoParamList, op -> op.setRefreshPolicy(Constants.TRUE));
     }
 
     public List<CrawlingInfoParam> getCrawlingInfoParamList(final String id) {
@@ -225,7 +225,7 @@ public class CrawlingInfoService {
                         crawlingInfo = new CrawlingInfo();
                         crawlingInfo.setSessionId(list.get(0));
                         crawlingInfo.setCreatedTime(formatter.parse(list.get(1)).getTime());
-                        crawlingInfoBhv.insert(crawlingInfo, op -> op.setRefresh(true));
+                        crawlingInfoBhv.insert(crawlingInfo, op -> op.setRefreshPolicy(Constants.TRUE));
                     }
 
                     final CrawlingInfoParam entity = new CrawlingInfoParam();
@@ -233,7 +233,7 @@ public class CrawlingInfoService {
                     entity.setKey(list.get(2));
                     entity.setValue(list.get(3));
                     entity.setCreatedTime(formatter.parse(list.get(4)).getTime());
-                    crawlingInfoParamBhv.insert(entity, op -> op.setRefresh(true));
+                    crawlingInfoParamBhv.insert(entity, op -> op.setRefreshPolicy(Constants.TRUE));
                 } catch (final Exception e) {
                     logger.warn("Failed to read a click log: " + list, e);
                 }

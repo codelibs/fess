@@ -93,7 +93,7 @@ public class QueryHelperTest extends UnitFessTestCase {
     }
 
     private QueryBuilder functionScoreQuery(QueryBuilder queryBuilder) {
-        return QueryBuilders.functionScoreQuery(queryBuilder).add(ScoreFunctionBuilders.fieldValueFactorFunction("boost"));
+        return QueryBuilders.functionScoreQuery(queryBuilder, ScoreFunctionBuilders.fieldValueFactorFunction("boost"));
     }
 
     private void assertQuery(QueryBuilder query1, QueryBuilder query2) {

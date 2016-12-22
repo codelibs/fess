@@ -158,43 +158,43 @@ public class WebConfigDbm extends AbstractDBMeta {
     protected final ColumnInfo _columnBoost = cci("boost", "boost", null, null, Float.class, "boost", null, false, false, false, "Float",
             0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnConfigParameter = cci("configParameter", "configParameter", null, null, String.class,
-            "configParameter", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            "configParameter", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedBy = cci("createdBy", "createdBy", null, null, String.class, "createdBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnDepth = cci("depth", "depth", null, null, Integer.class, "depth", null, false, false, false,
             "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedDocUrls = cci("excludedDocUrls", "excludedDocUrls", null, null, String.class,
-            "excludedDocUrls", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            "excludedDocUrls", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnExcludedUrls = cci("excludedUrls", "excludedUrls", null, null, String.class, "excludedUrls", null,
-            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedDocUrls = cci("includedDocUrls", "includedDocUrls", null, null, String.class,
-            "includedDocUrls", null, false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            "includedDocUrls", null, false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIncludedUrls = cci("includedUrls", "includedUrls", null, null, String.class, "includedUrls", null,
-            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnIntervalTime = cci("intervalTime", "intervalTime", null, null, Integer.class, "intervalTime", null,
             false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnTimeToLive = cci("timeToLive", "timeToLive", null, null, Integer.class, "timeToLive", null, false,
             false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnMaxAccessCount = cci("maxAccessCount", "maxAccessCount", null, null, Long.class, "maxAccessCount",
             null, false, false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "String", 0,
+    protected final ColumnInfo _columnName = cci("name", "name", null, null, String.class, "name", null, false, false, false, "keyword", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnNumOfThread = cci("numOfThread", "numOfThread", null, null, Integer.class, "numOfThread", null,
             false, false, false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnPermissions = cci("permissions", "permissions", null, null, String[].class, "permissions", null,
-            false, false, false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnSortOrder = cci("sortOrder", "sortOrder", null, null, Integer.class, "sortOrder", null, false, false,
             false, "Integer", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedBy = cci("updatedBy", "updatedBy", null, null, String.class, "updatedBy", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUpdatedTime = cci("updatedTime", "updatedTime", null, null, Long.class, "updatedTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
-    protected final ColumnInfo _columnUrls = cci("urls", "urls", null, null, String.class, "urls", null, false, false, false, "String", 0,
+    protected final ColumnInfo _columnUrls = cci("urls", "urls", null, null, String.class, "urls", null, false, false, false, "keyword", 0,
             0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnUserAgent = cci("userAgent", "userAgent", null, null, String.class, "userAgent", null, false, false,
-            false, "String", 0, 0, null, false, null, null, null, null, null, false);
+            false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
 
     public ColumnInfo columnAvailable() {
         return _columnAvailable;

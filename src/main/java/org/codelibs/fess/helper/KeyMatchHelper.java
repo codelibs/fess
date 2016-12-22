@@ -36,7 +36,7 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.slf4j.Logger;
@@ -115,11 +115,11 @@ public class KeyMatchHelper {
         this.reloadInterval = reloadInterval;
     }
 
-    public void buildQuery(final List<String> keywordList, final FunctionScoreQueryBuilder functionScoreQuery) {
+    public void buildQuery(final List<String> keywordList, final List<FilterFunctionBuilder> list) {
         keywordList.stream().forEach(keyword -> {
             final Pair<QueryBuilder, ScoreFunctionBuilder> pair = keyMatchQueryMap.get(toLowerCase(keyword));
             if (pair != null) {
-                functionScoreQuery.add(pair.getFirst(), pair.getSecond());
+                list.add(new FilterFunctionBuilder(pair.getFirst(), pair.getSecond()));
             }
         });
     }

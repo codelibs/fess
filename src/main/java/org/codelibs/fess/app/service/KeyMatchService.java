@@ -60,7 +60,7 @@ public class KeyMatchService {
     public void store(final KeyMatch keyMatch) {
 
         keyMatchBhv.insertOrUpdate(keyMatch, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class KeyMatchService {
     public void delete(final KeyMatch keyMatch) {
 
         keyMatchBhv.delete(keyMatch, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

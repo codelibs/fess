@@ -31,7 +31,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.lastaflute.web.util.LaRequestUtil;
 
@@ -64,10 +64,10 @@ public class QueryContext {
         }
     }
 
-    public void addFunctionScore(final Consumer<FunctionScoreQueryBuilder> functionScoreQuery) {
-        final FunctionScoreQueryBuilder builder = QueryBuilders.functionScoreQuery(queryBuilder);
-        functionScoreQuery.accept(builder);
-        queryBuilder = builder;
+    public void addFunctionScore(final Consumer<List<FilterFunctionBuilder>> functionScoreQuery) {
+        List<FilterFunctionBuilder> list = new ArrayList<>();
+        functionScoreQuery.accept(list);
+        queryBuilder = QueryBuilders.functionScoreQuery(queryBuilder, list.toArray(new FilterFunctionBuilder[list.size()]));
     }
 
     public void addQuery(final Consumer<BoolQueryBuilder> boolQuery) {

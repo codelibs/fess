@@ -71,7 +71,7 @@ public class GroupService {
         ComponentUtil.getLdapManager().insert(group);
 
         groupBhv.insertOrUpdate(group, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -80,7 +80,7 @@ public class GroupService {
         ComponentUtil.getLdapManager().delete(group);
 
         groupBhv.delete(group, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         userBhv.selectCursor(

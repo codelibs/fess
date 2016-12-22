@@ -21,26 +21,26 @@ import org.codelibs.fess.es.user.cbean.ca.UserCA;
 import org.codelibs.fess.es.user.cbean.cq.UserCQ;
 import org.codelibs.fess.es.user.cbean.cq.bs.BsUserCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.HistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.RangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -68,8 +68,8 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -92,36 +92,34 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // String name
 
     public void setName_Terms() {
         setName_Terms(null);
     }
 
-    public void setName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setName_Terms("name", opLambda, null);
     }
 
-    public void setName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setName_Terms("name", opLambda, aggsLambda);
     }
 
-    public void setName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "name");
+    public void setName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -136,17 +134,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setName_SignificantTerms(null);
     }
 
-    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setName_SignificantTerms("name", opLambda, null);
     }
 
-    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setName_SignificantTerms("name", opLambda, aggsLambda);
     }
 
-    public void setName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "name");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -161,16 +159,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setName_IpRange(null);
     }
 
-    public void setName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setName_IpRange("name", opLambda, null);
     }
 
-    public void setName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setName_IpRange("name", opLambda, aggsLambda);
     }
 
-    public void setName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "name");
+    public void setName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -185,12 +183,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setName_Count(null);
     }
 
-    public void setName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setName_Count("name", opLambda);
     }
 
-    public void setName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "name");
+    public void setName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -200,12 +198,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setName_Cardinality(null);
     }
 
-    public void setName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setName_Cardinality("name", opLambda);
     }
 
-    public void setName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "name");
+    public void setName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -215,16 +213,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setName_Missing(null);
     }
 
-    public void setName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setName_Missing("name", opLambda, null);
     }
 
-    public void setName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setName_Missing("name", opLambda, aggsLambda);
     }
 
-    public void setName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "name");
+    public void setName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "name");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -235,22 +233,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String password
-
     public void setPassword_Terms() {
         setPassword_Terms(null);
     }
 
-    public void setPassword_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPassword_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPassword_Terms("password", opLambda, null);
     }
 
-    public void setPassword_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPassword_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPassword_Terms("password", opLambda, aggsLambda);
     }
 
-    public void setPassword_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "password");
+    public void setPassword_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -265,17 +261,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPassword_SignificantTerms(null);
     }
 
-    public void setPassword_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPassword_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPassword_SignificantTerms("password", opLambda, null);
     }
 
-    public void setPassword_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPassword_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPassword_SignificantTerms("password", opLambda, aggsLambda);
     }
 
-    public void setPassword_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPassword_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "password");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -290,16 +287,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPassword_IpRange(null);
     }
 
-    public void setPassword_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPassword_IpRange("password", opLambda, null);
     }
 
-    public void setPassword_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPassword_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPassword_IpRange("password", opLambda, aggsLambda);
     }
 
-    public void setPassword_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "password");
+    public void setPassword_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -314,12 +311,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPassword_Count(null);
     }
 
-    public void setPassword_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPassword_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPassword_Count("password", opLambda);
     }
 
-    public void setPassword_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "password");
+    public void setPassword_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -329,12 +326,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPassword_Cardinality(null);
     }
 
-    public void setPassword_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPassword_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPassword_Cardinality("password", opLambda);
     }
 
-    public void setPassword_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "password");
+    public void setPassword_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -344,16 +341,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPassword_Missing(null);
     }
 
-    public void setPassword_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPassword_Missing("password", opLambda, null);
     }
 
-    public void setPassword_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPassword_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPassword_Missing("password", opLambda, aggsLambda);
     }
 
-    public void setPassword_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "password");
+    public void setPassword_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "password");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -364,22 +361,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String surname
-
     public void setSurname_Terms() {
         setSurname_Terms(null);
     }
 
-    public void setSurname_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setSurname_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setSurname_Terms("surname", opLambda, null);
     }
 
-    public void setSurname_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setSurname_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setSurname_Terms("surname", opLambda, aggsLambda);
     }
 
-    public void setSurname_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "surname");
+    public void setSurname_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -394,17 +389,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setSurname_SignificantTerms(null);
     }
 
-    public void setSurname_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setSurname_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setSurname_SignificantTerms("surname", opLambda, null);
     }
 
-    public void setSurname_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setSurname_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setSurname_SignificantTerms("surname", opLambda, aggsLambda);
     }
 
-    public void setSurname_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setSurname_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "surname");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -419,16 +415,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setSurname_IpRange(null);
     }
 
-    public void setSurname_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setSurname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setSurname_IpRange("surname", opLambda, null);
     }
 
-    public void setSurname_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setSurname_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setSurname_IpRange("surname", opLambda, aggsLambda);
     }
 
-    public void setSurname_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "surname");
+    public void setSurname_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -443,12 +439,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setSurname_Count(null);
     }
 
-    public void setSurname_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setSurname_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setSurname_Count("surname", opLambda);
     }
 
-    public void setSurname_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "surname");
+    public void setSurname_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,12 +454,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setSurname_Cardinality(null);
     }
 
-    public void setSurname_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setSurname_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setSurname_Cardinality("surname", opLambda);
     }
 
-    public void setSurname_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "surname");
+    public void setSurname_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -473,16 +469,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setSurname_Missing(null);
     }
 
-    public void setSurname_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setSurname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setSurname_Missing("surname", opLambda, null);
     }
 
-    public void setSurname_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setSurname_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setSurname_Missing("surname", opLambda, aggsLambda);
     }
 
-    public void setSurname_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "surname");
+    public void setSurname_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "surname");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -493,22 +489,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String givenName
-
     public void setGivenName_Terms() {
         setGivenName_Terms(null);
     }
 
-    public void setGivenName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setGivenName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setGivenName_Terms("givenName", opLambda, null);
     }
 
-    public void setGivenName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGivenName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGivenName_Terms("givenName", opLambda, aggsLambda);
     }
 
-    public void setGivenName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "givenName");
+    public void setGivenName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -523,17 +517,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGivenName_SignificantTerms(null);
     }
 
-    public void setGivenName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setGivenName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setGivenName_SignificantTerms("givenName", opLambda, null);
     }
 
-    public void setGivenName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGivenName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setGivenName_SignificantTerms("givenName", opLambda, aggsLambda);
     }
 
-    public void setGivenName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setGivenName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "givenName");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -548,16 +543,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGivenName_IpRange(null);
     }
 
-    public void setGivenName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setGivenName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setGivenName_IpRange("givenName", opLambda, null);
     }
 
-    public void setGivenName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGivenName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGivenName_IpRange("givenName", opLambda, aggsLambda);
     }
 
-    public void setGivenName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "givenName");
+    public void setGivenName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -572,12 +567,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGivenName_Count(null);
     }
 
-    public void setGivenName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setGivenName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setGivenName_Count("givenName", opLambda);
     }
 
-    public void setGivenName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "givenName");
+    public void setGivenName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -587,12 +582,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGivenName_Cardinality(null);
     }
 
-    public void setGivenName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setGivenName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setGivenName_Cardinality("givenName", opLambda);
     }
 
-    public void setGivenName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "givenName");
+    public void setGivenName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -602,16 +597,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGivenName_Missing(null);
     }
 
-    public void setGivenName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setGivenName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setGivenName_Missing("givenName", opLambda, null);
     }
 
-    public void setGivenName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGivenName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGivenName_Missing("givenName", opLambda, aggsLambda);
     }
 
-    public void setGivenName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "givenName");
+    public void setGivenName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "givenName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -622,22 +617,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String employeeNumber
-
     public void setEmployeeNumber_Terms() {
         setEmployeeNumber_Terms(null);
     }
 
-    public void setEmployeeNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setEmployeeNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setEmployeeNumber_Terms("employeeNumber", opLambda, null);
     }
 
-    public void setEmployeeNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeNumber_Terms("employeeNumber", opLambda, aggsLambda);
     }
 
-    public void setEmployeeNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "employeeNumber");
+    public void setEmployeeNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -652,17 +646,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeNumber_SignificantTerms(null);
     }
 
-    public void setEmployeeNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setEmployeeNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setEmployeeNumber_SignificantTerms("employeeNumber", opLambda, null);
     }
 
-    public void setEmployeeNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeNumber_SignificantTerms("employeeNumber", opLambda, aggsLambda);
     }
 
-    public void setEmployeeNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setEmployeeNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "employeeNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -677,16 +672,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeNumber_IpRange(null);
     }
 
-    public void setEmployeeNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setEmployeeNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setEmployeeNumber_IpRange("employeeNumber", opLambda, null);
     }
 
-    public void setEmployeeNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeNumber_IpRange("employeeNumber", opLambda, aggsLambda);
     }
 
-    public void setEmployeeNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "employeeNumber");
+    public void setEmployeeNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -701,12 +697,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeNumber_Count(null);
     }
 
-    public void setEmployeeNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setEmployeeNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setEmployeeNumber_Count("employeeNumber", opLambda);
     }
 
-    public void setEmployeeNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "employeeNumber");
+    public void setEmployeeNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -716,12 +712,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeNumber_Cardinality(null);
     }
 
-    public void setEmployeeNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setEmployeeNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setEmployeeNumber_Cardinality("employeeNumber", opLambda);
     }
 
-    public void setEmployeeNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "employeeNumber");
+    public void setEmployeeNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -731,16 +727,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeNumber_Missing(null);
     }
 
-    public void setEmployeeNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setEmployeeNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setEmployeeNumber_Missing("employeeNumber", opLambda, null);
     }
 
-    public void setEmployeeNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeNumber_Missing("employeeNumber", opLambda, aggsLambda);
     }
 
-    public void setEmployeeNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "employeeNumber");
+    public void setEmployeeNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "employeeNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -751,22 +748,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String mail
-
     public void setMail_Terms() {
         setMail_Terms(null);
     }
 
-    public void setMail_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setMail_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setMail_Terms("mail", opLambda, null);
     }
 
-    public void setMail_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMail_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMail_Terms("mail", opLambda, aggsLambda);
     }
 
-    public void setMail_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "mail");
+    public void setMail_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -781,17 +776,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMail_SignificantTerms(null);
     }
 
-    public void setMail_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setMail_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setMail_SignificantTerms("mail", opLambda, null);
     }
 
-    public void setMail_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMail_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMail_SignificantTerms("mail", opLambda, aggsLambda);
     }
 
-    public void setMail_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setMail_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "mail");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -806,16 +801,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMail_IpRange(null);
     }
 
-    public void setMail_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setMail_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setMail_IpRange("mail", opLambda, null);
     }
 
-    public void setMail_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMail_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMail_IpRange("mail", opLambda, aggsLambda);
     }
 
-    public void setMail_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "mail");
+    public void setMail_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -830,12 +825,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMail_Count(null);
     }
 
-    public void setMail_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setMail_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setMail_Count("mail", opLambda);
     }
 
-    public void setMail_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "mail");
+    public void setMail_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -845,12 +840,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMail_Cardinality(null);
     }
 
-    public void setMail_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setMail_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setMail_Cardinality("mail", opLambda);
     }
 
-    public void setMail_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "mail");
+    public void setMail_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -860,16 +855,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMail_Missing(null);
     }
 
-    public void setMail_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setMail_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setMail_Missing("mail", opLambda, null);
     }
 
-    public void setMail_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMail_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMail_Missing("mail", opLambda, aggsLambda);
     }
 
-    public void setMail_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "mail");
+    public void setMail_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "mail");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -880,22 +875,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String telephoneNumber
-
     public void setTelephoneNumber_Terms() {
         setTelephoneNumber_Terms(null);
     }
 
-    public void setTelephoneNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setTelephoneNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setTelephoneNumber_Terms("telephoneNumber", opLambda, null);
     }
 
-    public void setTelephoneNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTelephoneNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTelephoneNumber_Terms("telephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setTelephoneNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "telephoneNumber");
+    public void setTelephoneNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -910,17 +904,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTelephoneNumber_SignificantTerms(null);
     }
 
-    public void setTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setTelephoneNumber_SignificantTerms("telephoneNumber", opLambda, null);
     }
 
-    public void setTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setTelephoneNumber_SignificantTerms("telephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setTelephoneNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setTelephoneNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "telephoneNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -935,16 +930,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTelephoneNumber_IpRange(null);
     }
 
-    public void setTelephoneNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setTelephoneNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setTelephoneNumber_IpRange("telephoneNumber", opLambda, null);
     }
 
-    public void setTelephoneNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTelephoneNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTelephoneNumber_IpRange("telephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setTelephoneNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "telephoneNumber");
+    public void setTelephoneNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -959,12 +955,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTelephoneNumber_Count(null);
     }
 
-    public void setTelephoneNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setTelephoneNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setTelephoneNumber_Count("telephoneNumber", opLambda);
     }
 
-    public void setTelephoneNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "telephoneNumber");
+    public void setTelephoneNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -974,12 +970,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTelephoneNumber_Cardinality(null);
     }
 
-    public void setTelephoneNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setTelephoneNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setTelephoneNumber_Cardinality("telephoneNumber", opLambda);
     }
 
-    public void setTelephoneNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "telephoneNumber");
+    public void setTelephoneNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -989,16 +985,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTelephoneNumber_Missing(null);
     }
 
-    public void setTelephoneNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setTelephoneNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setTelephoneNumber_Missing("telephoneNumber", opLambda, null);
     }
 
-    public void setTelephoneNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTelephoneNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTelephoneNumber_Missing("telephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setTelephoneNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "telephoneNumber");
+    public void setTelephoneNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "telephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1009,22 +1006,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String homePhone
-
     public void setHomePhone_Terms() {
         setHomePhone_Terms(null);
     }
 
-    public void setHomePhone_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setHomePhone_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setHomePhone_Terms("homePhone", opLambda, null);
     }
 
-    public void setHomePhone_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePhone_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePhone_Terms("homePhone", opLambda, aggsLambda);
     }
 
-    public void setHomePhone_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "homePhone");
+    public void setHomePhone_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1039,17 +1034,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePhone_SignificantTerms(null);
     }
 
-    public void setHomePhone_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setHomePhone_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setHomePhone_SignificantTerms("homePhone", opLambda, null);
     }
 
-    public void setHomePhone_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePhone_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setHomePhone_SignificantTerms("homePhone", opLambda, aggsLambda);
     }
 
-    public void setHomePhone_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setHomePhone_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "homePhone");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1064,16 +1060,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePhone_IpRange(null);
     }
 
-    public void setHomePhone_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setHomePhone_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setHomePhone_IpRange("homePhone", opLambda, null);
     }
 
-    public void setHomePhone_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePhone_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePhone_IpRange("homePhone", opLambda, aggsLambda);
     }
 
-    public void setHomePhone_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "homePhone");
+    public void setHomePhone_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1088,12 +1084,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePhone_Count(null);
     }
 
-    public void setHomePhone_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setHomePhone_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setHomePhone_Count("homePhone", opLambda);
     }
 
-    public void setHomePhone_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "homePhone");
+    public void setHomePhone_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1103,12 +1099,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePhone_Cardinality(null);
     }
 
-    public void setHomePhone_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setHomePhone_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setHomePhone_Cardinality("homePhone", opLambda);
     }
 
-    public void setHomePhone_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "homePhone");
+    public void setHomePhone_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1118,16 +1114,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePhone_Missing(null);
     }
 
-    public void setHomePhone_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setHomePhone_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setHomePhone_Missing("homePhone", opLambda, null);
     }
 
-    public void setHomePhone_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePhone_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePhone_Missing("homePhone", opLambda, aggsLambda);
     }
 
-    public void setHomePhone_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "homePhone");
+    public void setHomePhone_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "homePhone");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1138,22 +1134,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String homePostalAddress
-
     public void setHomePostalAddress_Terms() {
         setHomePostalAddress_Terms(null);
     }
 
-    public void setHomePostalAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setHomePostalAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setHomePostalAddress_Terms("homePostalAddress", opLambda, null);
     }
 
-    public void setHomePostalAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePostalAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePostalAddress_Terms("homePostalAddress", opLambda, aggsLambda);
     }
 
-    public void setHomePostalAddress_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "homePostalAddress");
+    public void setHomePostalAddress_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1168,18 +1163,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePostalAddress_SignificantTerms(null);
     }
 
-    public void setHomePostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setHomePostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setHomePostalAddress_SignificantTerms("homePostalAddress", opLambda, null);
     }
 
-    public void setHomePostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setHomePostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setHomePostalAddress_SignificantTerms("homePostalAddress", opLambda, aggsLambda);
     }
 
-    public void setHomePostalAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setHomePostalAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "homePostalAddress");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1194,16 +1189,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePostalAddress_IpRange(null);
     }
 
-    public void setHomePostalAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setHomePostalAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setHomePostalAddress_IpRange("homePostalAddress", opLambda, null);
     }
 
-    public void setHomePostalAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePostalAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePostalAddress_IpRange("homePostalAddress", opLambda, aggsLambda);
     }
 
-    public void setHomePostalAddress_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "homePostalAddress");
+    public void setHomePostalAddress_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1218,12 +1214,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePostalAddress_Count(null);
     }
 
-    public void setHomePostalAddress_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setHomePostalAddress_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setHomePostalAddress_Count("homePostalAddress", opLambda);
     }
 
-    public void setHomePostalAddress_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "homePostalAddress");
+    public void setHomePostalAddress_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1233,12 +1229,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePostalAddress_Cardinality(null);
     }
 
-    public void setHomePostalAddress_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setHomePostalAddress_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setHomePostalAddress_Cardinality("homePostalAddress", opLambda);
     }
 
-    public void setHomePostalAddress_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "homePostalAddress");
+    public void setHomePostalAddress_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1248,16 +1244,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomePostalAddress_Missing(null);
     }
 
-    public void setHomePostalAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setHomePostalAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setHomePostalAddress_Missing("homePostalAddress", opLambda, null);
     }
 
-    public void setHomePostalAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomePostalAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomePostalAddress_Missing("homePostalAddress", opLambda, aggsLambda);
     }
 
-    public void setHomePostalAddress_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "homePostalAddress");
+    public void setHomePostalAddress_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "homePostalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1268,22 +1265,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String labeledURI
-
     public void setLabeledURI_Terms() {
         setLabeledURI_Terms(null);
     }
 
-    public void setLabeledURI_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setLabeledURI_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setLabeledURI_Terms("labeledURI", opLambda, null);
     }
 
-    public void setLabeledURI_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setLabeledURI_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setLabeledURI_Terms("labeledURI", opLambda, aggsLambda);
     }
 
-    public void setLabeledURI_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "labeledURI");
+    public void setLabeledURI_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1298,17 +1293,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setLabeledURI_SignificantTerms(null);
     }
 
-    public void setLabeledURI_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setLabeledURI_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setLabeledURI_SignificantTerms("labeledURI", opLambda, null);
     }
 
-    public void setLabeledURI_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setLabeledURI_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setLabeledURI_SignificantTerms("labeledURI", opLambda, aggsLambda);
     }
 
-    public void setLabeledURI_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setLabeledURI_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "labeledURI");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1323,16 +1319,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setLabeledURI_IpRange(null);
     }
 
-    public void setLabeledURI_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setLabeledURI_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setLabeledURI_IpRange("labeledURI", opLambda, null);
     }
 
-    public void setLabeledURI_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setLabeledURI_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setLabeledURI_IpRange("labeledURI", opLambda, aggsLambda);
     }
 
-    public void setLabeledURI_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "labeledURI");
+    public void setLabeledURI_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1347,12 +1344,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setLabeledURI_Count(null);
     }
 
-    public void setLabeledURI_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setLabeledURI_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setLabeledURI_Count("labeledURI", opLambda);
     }
 
-    public void setLabeledURI_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "labeledURI");
+    public void setLabeledURI_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1362,12 +1359,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setLabeledURI_Cardinality(null);
     }
 
-    public void setLabeledURI_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setLabeledURI_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setLabeledURI_Cardinality("labeledURI", opLambda);
     }
 
-    public void setLabeledURI_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "labeledURI");
+    public void setLabeledURI_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1377,16 +1374,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setLabeledURI_Missing(null);
     }
 
-    public void setLabeledURI_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setLabeledURI_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setLabeledURI_Missing("labeledURI", opLambda, null);
     }
 
-    public void setLabeledURI_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setLabeledURI_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setLabeledURI_Missing("labeledURI", opLambda, aggsLambda);
     }
 
-    public void setLabeledURI_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "labeledURI");
+    public void setLabeledURI_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "labeledURI");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1397,22 +1395,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String roomNumber
-
     public void setRoomNumber_Terms() {
         setRoomNumber_Terms(null);
     }
 
-    public void setRoomNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setRoomNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setRoomNumber_Terms("roomNumber", opLambda, null);
     }
 
-    public void setRoomNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoomNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoomNumber_Terms("roomNumber", opLambda, aggsLambda);
     }
 
-    public void setRoomNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "roomNumber");
+    public void setRoomNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1427,17 +1423,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoomNumber_SignificantTerms(null);
     }
 
-    public void setRoomNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setRoomNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setRoomNumber_SignificantTerms("roomNumber", opLambda, null);
     }
 
-    public void setRoomNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoomNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setRoomNumber_SignificantTerms("roomNumber", opLambda, aggsLambda);
     }
 
-    public void setRoomNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRoomNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "roomNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1452,16 +1449,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoomNumber_IpRange(null);
     }
 
-    public void setRoomNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setRoomNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setRoomNumber_IpRange("roomNumber", opLambda, null);
     }
 
-    public void setRoomNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoomNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoomNumber_IpRange("roomNumber", opLambda, aggsLambda);
     }
 
-    public void setRoomNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "roomNumber");
+    public void setRoomNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1476,12 +1474,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoomNumber_Count(null);
     }
 
-    public void setRoomNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setRoomNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setRoomNumber_Count("roomNumber", opLambda);
     }
 
-    public void setRoomNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "roomNumber");
+    public void setRoomNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1491,12 +1489,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoomNumber_Cardinality(null);
     }
 
-    public void setRoomNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setRoomNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setRoomNumber_Cardinality("roomNumber", opLambda);
     }
 
-    public void setRoomNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "roomNumber");
+    public void setRoomNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1506,16 +1504,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoomNumber_Missing(null);
     }
 
-    public void setRoomNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setRoomNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setRoomNumber_Missing("roomNumber", opLambda, null);
     }
 
-    public void setRoomNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoomNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoomNumber_Missing("roomNumber", opLambda, aggsLambda);
     }
 
-    public void setRoomNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "roomNumber");
+    public void setRoomNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "roomNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1526,22 +1525,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String description
-
     public void setDescription_Terms() {
         setDescription_Terms(null);
     }
 
-    public void setDescription_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setDescription_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setDescription_Terms("description", opLambda, null);
     }
 
-    public void setDescription_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDescription_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDescription_Terms("description", opLambda, aggsLambda);
     }
 
-    public void setDescription_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "description");
+    public void setDescription_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1556,17 +1553,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDescription_SignificantTerms(null);
     }
 
-    public void setDescription_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setDescription_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setDescription_SignificantTerms("description", opLambda, null);
     }
 
-    public void setDescription_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDescription_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setDescription_SignificantTerms("description", opLambda, aggsLambda);
     }
 
-    public void setDescription_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDescription_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "description");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1581,16 +1579,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDescription_IpRange(null);
     }
 
-    public void setDescription_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setDescription_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setDescription_IpRange("description", opLambda, null);
     }
 
-    public void setDescription_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDescription_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDescription_IpRange("description", opLambda, aggsLambda);
     }
 
-    public void setDescription_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "description");
+    public void setDescription_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1605,12 +1604,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDescription_Count(null);
     }
 
-    public void setDescription_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setDescription_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setDescription_Count("description", opLambda);
     }
 
-    public void setDescription_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "description");
+    public void setDescription_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1620,12 +1619,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDescription_Cardinality(null);
     }
 
-    public void setDescription_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setDescription_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setDescription_Cardinality("description", opLambda);
     }
 
-    public void setDescription_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "description");
+    public void setDescription_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1635,16 +1634,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDescription_Missing(null);
     }
 
-    public void setDescription_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setDescription_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setDescription_Missing("description", opLambda, null);
     }
 
-    public void setDescription_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDescription_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDescription_Missing("description", opLambda, aggsLambda);
     }
 
-    public void setDescription_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "description");
+    public void setDescription_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "description");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1655,22 +1655,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String title
-
     public void setTitle_Terms() {
         setTitle_Terms(null);
     }
 
-    public void setTitle_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setTitle_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setTitle_Terms("title", opLambda, null);
     }
 
-    public void setTitle_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTitle_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTitle_Terms("title", opLambda, aggsLambda);
     }
 
-    public void setTitle_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "title");
+    public void setTitle_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1685,17 +1683,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTitle_SignificantTerms(null);
     }
 
-    public void setTitle_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setTitle_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setTitle_SignificantTerms("title", opLambda, null);
     }
 
-    public void setTitle_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTitle_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setTitle_SignificantTerms("title", opLambda, aggsLambda);
     }
 
-    public void setTitle_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setTitle_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "title");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1710,16 +1709,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTitle_IpRange(null);
     }
 
-    public void setTitle_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setTitle_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setTitle_IpRange("title", opLambda, null);
     }
 
-    public void setTitle_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTitle_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTitle_IpRange("title", opLambda, aggsLambda);
     }
 
-    public void setTitle_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "title");
+    public void setTitle_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1734,12 +1733,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTitle_Count(null);
     }
 
-    public void setTitle_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setTitle_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setTitle_Count("title", opLambda);
     }
 
-    public void setTitle_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "title");
+    public void setTitle_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1749,12 +1748,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTitle_Cardinality(null);
     }
 
-    public void setTitle_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setTitle_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setTitle_Cardinality("title", opLambda);
     }
 
-    public void setTitle_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "title");
+    public void setTitle_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1764,16 +1763,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTitle_Missing(null);
     }
 
-    public void setTitle_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setTitle_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setTitle_Missing("title", opLambda, null);
     }
 
-    public void setTitle_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTitle_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTitle_Missing("title", opLambda, aggsLambda);
     }
 
-    public void setTitle_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "title");
+    public void setTitle_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "title");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1784,22 +1783,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String pager
-
     public void setPager_Terms() {
         setPager_Terms(null);
     }
 
-    public void setPager_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPager_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPager_Terms("pager", opLambda, null);
     }
 
-    public void setPager_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPager_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPager_Terms("pager", opLambda, aggsLambda);
     }
 
-    public void setPager_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "pager");
+    public void setPager_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1814,17 +1811,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPager_SignificantTerms(null);
     }
 
-    public void setPager_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPager_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPager_SignificantTerms("pager", opLambda, null);
     }
 
-    public void setPager_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPager_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPager_SignificantTerms("pager", opLambda, aggsLambda);
     }
 
-    public void setPager_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPager_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "pager");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1839,16 +1837,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPager_IpRange(null);
     }
 
-    public void setPager_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPager_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPager_IpRange("pager", opLambda, null);
     }
 
-    public void setPager_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPager_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPager_IpRange("pager", opLambda, aggsLambda);
     }
 
-    public void setPager_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "pager");
+    public void setPager_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1863,12 +1861,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPager_Count(null);
     }
 
-    public void setPager_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPager_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPager_Count("pager", opLambda);
     }
 
-    public void setPager_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "pager");
+    public void setPager_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1878,12 +1876,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPager_Cardinality(null);
     }
 
-    public void setPager_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPager_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPager_Cardinality("pager", opLambda);
     }
 
-    public void setPager_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "pager");
+    public void setPager_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1893,16 +1891,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPager_Missing(null);
     }
 
-    public void setPager_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPager_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPager_Missing("pager", opLambda, null);
     }
 
-    public void setPager_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPager_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPager_Missing("pager", opLambda, aggsLambda);
     }
 
-    public void setPager_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "pager");
+    public void setPager_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "pager");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1913,22 +1911,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String street
-
     public void setStreet_Terms() {
         setStreet_Terms(null);
     }
 
-    public void setStreet_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setStreet_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setStreet_Terms("street", opLambda, null);
     }
 
-    public void setStreet_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setStreet_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setStreet_Terms("street", opLambda, aggsLambda);
     }
 
-    public void setStreet_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "street");
+    public void setStreet_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1943,17 +1939,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setStreet_SignificantTerms(null);
     }
 
-    public void setStreet_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setStreet_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setStreet_SignificantTerms("street", opLambda, null);
     }
 
-    public void setStreet_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setStreet_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setStreet_SignificantTerms("street", opLambda, aggsLambda);
     }
 
-    public void setStreet_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setStreet_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "street");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1968,16 +1965,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setStreet_IpRange(null);
     }
 
-    public void setStreet_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setStreet_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setStreet_IpRange("street", opLambda, null);
     }
 
-    public void setStreet_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setStreet_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setStreet_IpRange("street", opLambda, aggsLambda);
     }
 
-    public void setStreet_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "street");
+    public void setStreet_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1992,12 +1989,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setStreet_Count(null);
     }
 
-    public void setStreet_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setStreet_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setStreet_Count("street", opLambda);
     }
 
-    public void setStreet_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "street");
+    public void setStreet_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2007,12 +2004,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setStreet_Cardinality(null);
     }
 
-    public void setStreet_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setStreet_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setStreet_Cardinality("street", opLambda);
     }
 
-    public void setStreet_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "street");
+    public void setStreet_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2022,16 +2019,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setStreet_Missing(null);
     }
 
-    public void setStreet_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setStreet_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setStreet_Missing("street", opLambda, null);
     }
 
-    public void setStreet_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setStreet_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setStreet_Missing("street", opLambda, aggsLambda);
     }
 
-    public void setStreet_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "street");
+    public void setStreet_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "street");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2042,22 +2039,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String postalCode
-
     public void setPostalCode_Terms() {
         setPostalCode_Terms(null);
     }
 
-    public void setPostalCode_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPostalCode_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPostalCode_Terms("postalCode", opLambda, null);
     }
 
-    public void setPostalCode_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalCode_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalCode_Terms("postalCode", opLambda, aggsLambda);
     }
 
-    public void setPostalCode_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "postalCode");
+    public void setPostalCode_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2072,17 +2067,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalCode_SignificantTerms(null);
     }
 
-    public void setPostalCode_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPostalCode_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPostalCode_SignificantTerms("postalCode", opLambda, null);
     }
 
-    public void setPostalCode_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalCode_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPostalCode_SignificantTerms("postalCode", opLambda, aggsLambda);
     }
 
-    public void setPostalCode_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPostalCode_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "postalCode");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2097,16 +2093,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalCode_IpRange(null);
     }
 
-    public void setPostalCode_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPostalCode_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPostalCode_IpRange("postalCode", opLambda, null);
     }
 
-    public void setPostalCode_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalCode_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalCode_IpRange("postalCode", opLambda, aggsLambda);
     }
 
-    public void setPostalCode_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "postalCode");
+    public void setPostalCode_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2121,12 +2118,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalCode_Count(null);
     }
 
-    public void setPostalCode_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPostalCode_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPostalCode_Count("postalCode", opLambda);
     }
 
-    public void setPostalCode_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "postalCode");
+    public void setPostalCode_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2136,12 +2133,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalCode_Cardinality(null);
     }
 
-    public void setPostalCode_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPostalCode_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPostalCode_Cardinality("postalCode", opLambda);
     }
 
-    public void setPostalCode_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "postalCode");
+    public void setPostalCode_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2151,16 +2148,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalCode_Missing(null);
     }
 
-    public void setPostalCode_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPostalCode_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPostalCode_Missing("postalCode", opLambda, null);
     }
 
-    public void setPostalCode_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalCode_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalCode_Missing("postalCode", opLambda, aggsLambda);
     }
 
-    public void setPostalCode_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "postalCode");
+    public void setPostalCode_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "postalCode");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2171,23 +2169,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String physicalDeliveryOfficeName
-
     public void setPhysicalDeliveryOfficeName_Terms() {
         setPhysicalDeliveryOfficeName_Terms(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_Terms("physicalDeliveryOfficeName", opLambda, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPhysicalDeliveryOfficeName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPhysicalDeliveryOfficeName_Terms("physicalDeliveryOfficeName", opLambda, aggsLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda,
+    public void setPhysicalDeliveryOfficeName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "physicalDeliveryOfficeName");
+        TermsAggregationBuilder builder = regTermsA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2202,18 +2198,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPhysicalDeliveryOfficeName_SignificantTerms(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_SignificantTerms("physicalDeliveryOfficeName", opLambda, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPhysicalDeliveryOfficeName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setPhysicalDeliveryOfficeName_SignificantTerms("physicalDeliveryOfficeName", opLambda, aggsLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
-            OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "physicalDeliveryOfficeName");
+    public void setPhysicalDeliveryOfficeName_SignificantTerms(String name,
+            ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2228,17 +2224,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPhysicalDeliveryOfficeName_IpRange(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_IpRange("physicalDeliveryOfficeName", opLambda, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPhysicalDeliveryOfficeName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPhysicalDeliveryOfficeName_IpRange("physicalDeliveryOfficeName", opLambda, aggsLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setPhysicalDeliveryOfficeName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "physicalDeliveryOfficeName");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2253,12 +2250,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPhysicalDeliveryOfficeName_Count(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_Count("physicalDeliveryOfficeName", opLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "physicalDeliveryOfficeName");
+    public void setPhysicalDeliveryOfficeName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2268,12 +2265,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPhysicalDeliveryOfficeName_Cardinality(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_Cardinality("physicalDeliveryOfficeName", opLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "physicalDeliveryOfficeName");
+    public void setPhysicalDeliveryOfficeName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2283,17 +2280,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPhysicalDeliveryOfficeName_Missing(null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPhysicalDeliveryOfficeName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPhysicalDeliveryOfficeName_Missing("physicalDeliveryOfficeName", opLambda, null);
     }
 
-    public void setPhysicalDeliveryOfficeName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPhysicalDeliveryOfficeName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPhysicalDeliveryOfficeName_Missing("physicalDeliveryOfficeName", opLambda, aggsLambda);
     }
 
-    public void setPhysicalDeliveryOfficeName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setPhysicalDeliveryOfficeName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "physicalDeliveryOfficeName");
+        MissingAggregationBuilder builder = regMissingA(name, "physicalDeliveryOfficeName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2304,22 +2302,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String destinationIndicator
-
     public void setDestinationIndicator_Terms() {
         setDestinationIndicator_Terms(null);
     }
 
-    public void setDestinationIndicator_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setDestinationIndicator_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setDestinationIndicator_Terms("destinationIndicator", opLambda, null);
     }
 
-    public void setDestinationIndicator_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDestinationIndicator_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDestinationIndicator_Terms("destinationIndicator", opLambda, aggsLambda);
     }
 
-    public void setDestinationIndicator_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "destinationIndicator");
+    public void setDestinationIndicator_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2334,18 +2331,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDestinationIndicator_SignificantTerms(null);
     }
 
-    public void setDestinationIndicator_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setDestinationIndicator_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setDestinationIndicator_SignificantTerms("destinationIndicator", opLambda, null);
     }
 
-    public void setDestinationIndicator_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDestinationIndicator_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setDestinationIndicator_SignificantTerms("destinationIndicator", opLambda, aggsLambda);
     }
 
-    public void setDestinationIndicator_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDestinationIndicator_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "destinationIndicator");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2360,17 +2357,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDestinationIndicator_IpRange(null);
     }
 
-    public void setDestinationIndicator_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setDestinationIndicator_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setDestinationIndicator_IpRange("destinationIndicator", opLambda, null);
     }
 
-    public void setDestinationIndicator_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDestinationIndicator_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDestinationIndicator_IpRange("destinationIndicator", opLambda, aggsLambda);
     }
 
-    public void setDestinationIndicator_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setDestinationIndicator_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "destinationIndicator");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2385,12 +2382,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDestinationIndicator_Count(null);
     }
 
-    public void setDestinationIndicator_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setDestinationIndicator_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setDestinationIndicator_Count("destinationIndicator", opLambda);
     }
 
-    public void setDestinationIndicator_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "destinationIndicator");
+    public void setDestinationIndicator_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2400,12 +2397,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDestinationIndicator_Cardinality(null);
     }
 
-    public void setDestinationIndicator_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setDestinationIndicator_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setDestinationIndicator_Cardinality("destinationIndicator", opLambda);
     }
 
-    public void setDestinationIndicator_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "destinationIndicator");
+    public void setDestinationIndicator_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2415,16 +2412,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDestinationIndicator_Missing(null);
     }
 
-    public void setDestinationIndicator_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setDestinationIndicator_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setDestinationIndicator_Missing("destinationIndicator", opLambda, null);
     }
 
-    public void setDestinationIndicator_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDestinationIndicator_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDestinationIndicator_Missing("destinationIndicator", opLambda, aggsLambda);
     }
 
-    public void setDestinationIndicator_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "destinationIndicator");
+    public void setDestinationIndicator_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "destinationIndicator");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2435,22 +2433,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String internationaliSDNNumber
-
     public void setInternationaliSDNNumber_Terms() {
         setInternationaliSDNNumber_Terms(null);
     }
 
-    public void setInternationaliSDNNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setInternationaliSDNNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_Terms("internationaliSDNNumber", opLambda, null);
     }
 
-    public void setInternationaliSDNNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInternationaliSDNNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setInternationaliSDNNumber_Terms("internationaliSDNNumber", opLambda, aggsLambda);
     }
 
-    public void setInternationaliSDNNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "internationaliSDNNumber");
+    public void setInternationaliSDNNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2465,18 +2462,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInternationaliSDNNumber_SignificantTerms(null);
     }
 
-    public void setInternationaliSDNNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setInternationaliSDNNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_SignificantTerms("internationaliSDNNumber", opLambda, null);
     }
 
-    public void setInternationaliSDNNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setInternationaliSDNNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setInternationaliSDNNumber_SignificantTerms("internationaliSDNNumber", opLambda, aggsLambda);
     }
 
-    public void setInternationaliSDNNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setInternationaliSDNNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "internationaliSDNNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2491,17 +2488,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInternationaliSDNNumber_IpRange(null);
     }
 
-    public void setInternationaliSDNNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setInternationaliSDNNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_IpRange("internationaliSDNNumber", opLambda, null);
     }
 
-    public void setInternationaliSDNNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInternationaliSDNNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setInternationaliSDNNumber_IpRange("internationaliSDNNumber", opLambda, aggsLambda);
     }
 
-    public void setInternationaliSDNNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setInternationaliSDNNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "internationaliSDNNumber");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2516,12 +2514,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInternationaliSDNNumber_Count(null);
     }
 
-    public void setInternationaliSDNNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setInternationaliSDNNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_Count("internationaliSDNNumber", opLambda);
     }
 
-    public void setInternationaliSDNNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "internationaliSDNNumber");
+    public void setInternationaliSDNNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2531,12 +2529,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInternationaliSDNNumber_Cardinality(null);
     }
 
-    public void setInternationaliSDNNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setInternationaliSDNNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_Cardinality("internationaliSDNNumber", opLambda);
     }
 
-    public void setInternationaliSDNNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "internationaliSDNNumber");
+    public void setInternationaliSDNNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2546,17 +2544,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInternationaliSDNNumber_Missing(null);
     }
 
-    public void setInternationaliSDNNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setInternationaliSDNNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setInternationaliSDNNumber_Missing("internationaliSDNNumber", opLambda, null);
     }
 
-    public void setInternationaliSDNNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInternationaliSDNNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setInternationaliSDNNumber_Missing("internationaliSDNNumber", opLambda, aggsLambda);
     }
 
-    public void setInternationaliSDNNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setInternationaliSDNNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "internationaliSDNNumber");
+        MissingAggregationBuilder builder = regMissingA(name, "internationaliSDNNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2567,22 +2566,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String state
-
     public void setState_Terms() {
         setState_Terms(null);
     }
 
-    public void setState_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setState_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setState_Terms("state", opLambda, null);
     }
 
-    public void setState_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setState_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setState_Terms("state", opLambda, aggsLambda);
     }
 
-    public void setState_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "state");
+    public void setState_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2597,17 +2594,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setState_SignificantTerms(null);
     }
 
-    public void setState_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setState_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setState_SignificantTerms("state", opLambda, null);
     }
 
-    public void setState_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setState_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setState_SignificantTerms("state", opLambda, aggsLambda);
     }
 
-    public void setState_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setState_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "state");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2622,16 +2620,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setState_IpRange(null);
     }
 
-    public void setState_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setState_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setState_IpRange("state", opLambda, null);
     }
 
-    public void setState_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setState_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setState_IpRange("state", opLambda, aggsLambda);
     }
 
-    public void setState_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "state");
+    public void setState_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2646,12 +2644,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setState_Count(null);
     }
 
-    public void setState_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setState_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setState_Count("state", opLambda);
     }
 
-    public void setState_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "state");
+    public void setState_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2661,12 +2659,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setState_Cardinality(null);
     }
 
-    public void setState_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setState_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setState_Cardinality("state", opLambda);
     }
 
-    public void setState_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "state");
+    public void setState_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2676,16 +2674,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setState_Missing(null);
     }
 
-    public void setState_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setState_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setState_Missing("state", opLambda, null);
     }
 
-    public void setState_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setState_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setState_Missing("state", opLambda, aggsLambda);
     }
 
-    public void setState_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "state");
+    public void setState_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "state");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2696,22 +2694,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String employeeType
-
     public void setEmployeeType_Terms() {
         setEmployeeType_Terms(null);
     }
 
-    public void setEmployeeType_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setEmployeeType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setEmployeeType_Terms("employeeType", opLambda, null);
     }
 
-    public void setEmployeeType_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeType_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeType_Terms("employeeType", opLambda, aggsLambda);
     }
 
-    public void setEmployeeType_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "employeeType");
+    public void setEmployeeType_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2726,17 +2722,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeType_SignificantTerms(null);
     }
 
-    public void setEmployeeType_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setEmployeeType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setEmployeeType_SignificantTerms("employeeType", opLambda, null);
     }
 
-    public void setEmployeeType_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeType_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeType_SignificantTerms("employeeType", opLambda, aggsLambda);
     }
 
-    public void setEmployeeType_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setEmployeeType_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "employeeType");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2751,16 +2748,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeType_IpRange(null);
     }
 
-    public void setEmployeeType_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setEmployeeType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setEmployeeType_IpRange("employeeType", opLambda, null);
     }
 
-    public void setEmployeeType_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeType_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeType_IpRange("employeeType", opLambda, aggsLambda);
     }
 
-    public void setEmployeeType_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "employeeType");
+    public void setEmployeeType_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2775,12 +2773,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeType_Count(null);
     }
 
-    public void setEmployeeType_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setEmployeeType_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setEmployeeType_Count("employeeType", opLambda);
     }
 
-    public void setEmployeeType_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "employeeType");
+    public void setEmployeeType_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2790,12 +2788,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeType_Cardinality(null);
     }
 
-    public void setEmployeeType_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setEmployeeType_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setEmployeeType_Cardinality("employeeType", opLambda);
     }
 
-    public void setEmployeeType_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "employeeType");
+    public void setEmployeeType_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2805,16 +2803,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setEmployeeType_Missing(null);
     }
 
-    public void setEmployeeType_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setEmployeeType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setEmployeeType_Missing("employeeType", opLambda, null);
     }
 
-    public void setEmployeeType_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setEmployeeType_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setEmployeeType_Missing("employeeType", opLambda, aggsLambda);
     }
 
-    public void setEmployeeType_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "employeeType");
+    public void setEmployeeType_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "employeeType");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2825,22 +2824,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String facsimileTelephoneNumber
-
     public void setFacsimileTelephoneNumber_Terms() {
         setFacsimileTelephoneNumber_Terms(null);
     }
 
-    public void setFacsimileTelephoneNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_Terms("facsimileTelephoneNumber", opLambda, null);
     }
 
-    public void setFacsimileTelephoneNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setFacsimileTelephoneNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setFacsimileTelephoneNumber_Terms("facsimileTelephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setFacsimileTelephoneNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "facsimileTelephoneNumber");
+    public void setFacsimileTelephoneNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2855,18 +2853,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setFacsimileTelephoneNumber_SignificantTerms(null);
     }
 
-    public void setFacsimileTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_SignificantTerms("facsimileTelephoneNumber", opLambda, null);
     }
 
-    public void setFacsimileTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setFacsimileTelephoneNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setFacsimileTelephoneNumber_SignificantTerms("facsimileTelephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setFacsimileTelephoneNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setFacsimileTelephoneNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "facsimileTelephoneNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2881,17 +2879,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setFacsimileTelephoneNumber_IpRange(null);
     }
 
-    public void setFacsimileTelephoneNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_IpRange("facsimileTelephoneNumber", opLambda, null);
     }
 
-    public void setFacsimileTelephoneNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setFacsimileTelephoneNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setFacsimileTelephoneNumber_IpRange("facsimileTelephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setFacsimileTelephoneNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setFacsimileTelephoneNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "facsimileTelephoneNumber");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2906,12 +2905,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setFacsimileTelephoneNumber_Count(null);
     }
 
-    public void setFacsimileTelephoneNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_Count("facsimileTelephoneNumber", opLambda);
     }
 
-    public void setFacsimileTelephoneNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "facsimileTelephoneNumber");
+    public void setFacsimileTelephoneNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2921,12 +2920,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setFacsimileTelephoneNumber_Cardinality(null);
     }
 
-    public void setFacsimileTelephoneNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_Cardinality("facsimileTelephoneNumber", opLambda);
     }
 
-    public void setFacsimileTelephoneNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "facsimileTelephoneNumber");
+    public void setFacsimileTelephoneNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2936,17 +2935,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setFacsimileTelephoneNumber_Missing(null);
     }
 
-    public void setFacsimileTelephoneNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setFacsimileTelephoneNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setFacsimileTelephoneNumber_Missing("facsimileTelephoneNumber", opLambda, null);
     }
 
-    public void setFacsimileTelephoneNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setFacsimileTelephoneNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setFacsimileTelephoneNumber_Missing("facsimileTelephoneNumber", opLambda, aggsLambda);
     }
 
-    public void setFacsimileTelephoneNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setFacsimileTelephoneNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "facsimileTelephoneNumber");
+        MissingAggregationBuilder builder = regMissingA(name, "facsimileTelephoneNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2957,22 +2957,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String postOfficeBox
-
     public void setPostOfficeBox_Terms() {
         setPostOfficeBox_Terms(null);
     }
 
-    public void setPostOfficeBox_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPostOfficeBox_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPostOfficeBox_Terms("postOfficeBox", opLambda, null);
     }
 
-    public void setPostOfficeBox_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostOfficeBox_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostOfficeBox_Terms("postOfficeBox", opLambda, aggsLambda);
     }
 
-    public void setPostOfficeBox_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "postOfficeBox");
+    public void setPostOfficeBox_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2987,17 +2985,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostOfficeBox_SignificantTerms(null);
     }
 
-    public void setPostOfficeBox_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPostOfficeBox_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPostOfficeBox_SignificantTerms("postOfficeBox", opLambda, null);
     }
 
-    public void setPostOfficeBox_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostOfficeBox_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPostOfficeBox_SignificantTerms("postOfficeBox", opLambda, aggsLambda);
     }
 
-    public void setPostOfficeBox_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPostOfficeBox_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "postOfficeBox");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3012,16 +3011,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostOfficeBox_IpRange(null);
     }
 
-    public void setPostOfficeBox_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPostOfficeBox_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPostOfficeBox_IpRange("postOfficeBox", opLambda, null);
     }
 
-    public void setPostOfficeBox_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostOfficeBox_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostOfficeBox_IpRange("postOfficeBox", opLambda, aggsLambda);
     }
 
-    public void setPostOfficeBox_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "postOfficeBox");
+    public void setPostOfficeBox_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3036,12 +3036,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostOfficeBox_Count(null);
     }
 
-    public void setPostOfficeBox_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPostOfficeBox_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPostOfficeBox_Count("postOfficeBox", opLambda);
     }
 
-    public void setPostOfficeBox_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "postOfficeBox");
+    public void setPostOfficeBox_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3051,12 +3051,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostOfficeBox_Cardinality(null);
     }
 
-    public void setPostOfficeBox_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPostOfficeBox_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPostOfficeBox_Cardinality("postOfficeBox", opLambda);
     }
 
-    public void setPostOfficeBox_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "postOfficeBox");
+    public void setPostOfficeBox_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3066,16 +3066,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostOfficeBox_Missing(null);
     }
 
-    public void setPostOfficeBox_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPostOfficeBox_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPostOfficeBox_Missing("postOfficeBox", opLambda, null);
     }
 
-    public void setPostOfficeBox_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostOfficeBox_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostOfficeBox_Missing("postOfficeBox", opLambda, aggsLambda);
     }
 
-    public void setPostOfficeBox_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "postOfficeBox");
+    public void setPostOfficeBox_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "postOfficeBox");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3086,22 +3087,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String initials
-
     public void setInitials_Terms() {
         setInitials_Terms(null);
     }
 
-    public void setInitials_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setInitials_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setInitials_Terms("initials", opLambda, null);
     }
 
-    public void setInitials_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInitials_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setInitials_Terms("initials", opLambda, aggsLambda);
     }
 
-    public void setInitials_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "initials");
+    public void setInitials_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3116,17 +3115,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInitials_SignificantTerms(null);
     }
 
-    public void setInitials_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setInitials_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setInitials_SignificantTerms("initials", opLambda, null);
     }
 
-    public void setInitials_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInitials_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setInitials_SignificantTerms("initials", opLambda, aggsLambda);
     }
 
-    public void setInitials_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setInitials_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "initials");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3141,16 +3141,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInitials_IpRange(null);
     }
 
-    public void setInitials_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setInitials_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setInitials_IpRange("initials", opLambda, null);
     }
 
-    public void setInitials_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInitials_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setInitials_IpRange("initials", opLambda, aggsLambda);
     }
 
-    public void setInitials_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "initials");
+    public void setInitials_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3165,12 +3165,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInitials_Count(null);
     }
 
-    public void setInitials_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setInitials_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setInitials_Count("initials", opLambda);
     }
 
-    public void setInitials_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "initials");
+    public void setInitials_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3180,12 +3180,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInitials_Cardinality(null);
     }
 
-    public void setInitials_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setInitials_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setInitials_Cardinality("initials", opLambda);
     }
 
-    public void setInitials_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "initials");
+    public void setInitials_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3195,16 +3195,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setInitials_Missing(null);
     }
 
-    public void setInitials_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setInitials_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setInitials_Missing("initials", opLambda, null);
     }
 
-    public void setInitials_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setInitials_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setInitials_Missing("initials", opLambda, aggsLambda);
     }
 
-    public void setInitials_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "initials");
+    public void setInitials_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "initials");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3215,22 +3215,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String carLicense
-
     public void setCarLicense_Terms() {
         setCarLicense_Terms(null);
     }
 
-    public void setCarLicense_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setCarLicense_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setCarLicense_Terms("carLicense", opLambda, null);
     }
 
-    public void setCarLicense_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCarLicense_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCarLicense_Terms("carLicense", opLambda, aggsLambda);
     }
 
-    public void setCarLicense_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "carLicense");
+    public void setCarLicense_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3245,17 +3243,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCarLicense_SignificantTerms(null);
     }
 
-    public void setCarLicense_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setCarLicense_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setCarLicense_SignificantTerms("carLicense", opLambda, null);
     }
 
-    public void setCarLicense_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCarLicense_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setCarLicense_SignificantTerms("carLicense", opLambda, aggsLambda);
     }
 
-    public void setCarLicense_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setCarLicense_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "carLicense");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3270,16 +3269,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCarLicense_IpRange(null);
     }
 
-    public void setCarLicense_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setCarLicense_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setCarLicense_IpRange("carLicense", opLambda, null);
     }
 
-    public void setCarLicense_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCarLicense_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCarLicense_IpRange("carLicense", opLambda, aggsLambda);
     }
 
-    public void setCarLicense_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "carLicense");
+    public void setCarLicense_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3294,12 +3294,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCarLicense_Count(null);
     }
 
-    public void setCarLicense_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCarLicense_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCarLicense_Count("carLicense", opLambda);
     }
 
-    public void setCarLicense_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "carLicense");
+    public void setCarLicense_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3309,12 +3309,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCarLicense_Cardinality(null);
     }
 
-    public void setCarLicense_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCarLicense_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCarLicense_Cardinality("carLicense", opLambda);
     }
 
-    public void setCarLicense_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "carLicense");
+    public void setCarLicense_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3324,16 +3324,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCarLicense_Missing(null);
     }
 
-    public void setCarLicense_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCarLicense_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCarLicense_Missing("carLicense", opLambda, null);
     }
 
-    public void setCarLicense_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCarLicense_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCarLicense_Missing("carLicense", opLambda, aggsLambda);
     }
 
-    public void setCarLicense_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "carLicense");
+    public void setCarLicense_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "carLicense");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3344,22 +3345,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String mobile
-
     public void setMobile_Terms() {
         setMobile_Terms(null);
     }
 
-    public void setMobile_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setMobile_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setMobile_Terms("mobile", opLambda, null);
     }
 
-    public void setMobile_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMobile_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMobile_Terms("mobile", opLambda, aggsLambda);
     }
 
-    public void setMobile_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "mobile");
+    public void setMobile_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3374,17 +3373,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMobile_SignificantTerms(null);
     }
 
-    public void setMobile_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setMobile_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setMobile_SignificantTerms("mobile", opLambda, null);
     }
 
-    public void setMobile_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMobile_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setMobile_SignificantTerms("mobile", opLambda, aggsLambda);
     }
 
-    public void setMobile_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setMobile_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "mobile");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3399,16 +3399,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMobile_IpRange(null);
     }
 
-    public void setMobile_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setMobile_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setMobile_IpRange("mobile", opLambda, null);
     }
 
-    public void setMobile_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMobile_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMobile_IpRange("mobile", opLambda, aggsLambda);
     }
 
-    public void setMobile_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "mobile");
+    public void setMobile_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3423,12 +3423,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMobile_Count(null);
     }
 
-    public void setMobile_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setMobile_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setMobile_Count("mobile", opLambda);
     }
 
-    public void setMobile_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "mobile");
+    public void setMobile_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3438,12 +3438,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMobile_Cardinality(null);
     }
 
-    public void setMobile_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setMobile_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setMobile_Cardinality("mobile", opLambda);
     }
 
-    public void setMobile_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "mobile");
+    public void setMobile_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3453,16 +3453,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setMobile_Missing(null);
     }
 
-    public void setMobile_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setMobile_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setMobile_Missing("mobile", opLambda, null);
     }
 
-    public void setMobile_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setMobile_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setMobile_Missing("mobile", opLambda, aggsLambda);
     }
 
-    public void setMobile_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "mobile");
+    public void setMobile_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "mobile");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3473,22 +3473,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String postalAddress
-
     public void setPostalAddress_Terms() {
         setPostalAddress_Terms(null);
     }
 
-    public void setPostalAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPostalAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPostalAddress_Terms("postalAddress", opLambda, null);
     }
 
-    public void setPostalAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalAddress_Terms("postalAddress", opLambda, aggsLambda);
     }
 
-    public void setPostalAddress_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "postalAddress");
+    public void setPostalAddress_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3503,17 +3501,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalAddress_SignificantTerms(null);
     }
 
-    public void setPostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPostalAddress_SignificantTerms("postalAddress", opLambda, null);
     }
 
-    public void setPostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setPostalAddress_SignificantTerms("postalAddress", opLambda, aggsLambda);
     }
 
-    public void setPostalAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPostalAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "postalAddress");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3528,16 +3527,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalAddress_IpRange(null);
     }
 
-    public void setPostalAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPostalAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPostalAddress_IpRange("postalAddress", opLambda, null);
     }
 
-    public void setPostalAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalAddress_IpRange("postalAddress", opLambda, aggsLambda);
     }
 
-    public void setPostalAddress_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "postalAddress");
+    public void setPostalAddress_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3552,12 +3552,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalAddress_Count(null);
     }
 
-    public void setPostalAddress_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPostalAddress_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPostalAddress_Count("postalAddress", opLambda);
     }
 
-    public void setPostalAddress_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "postalAddress");
+    public void setPostalAddress_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3567,12 +3567,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalAddress_Cardinality(null);
     }
 
-    public void setPostalAddress_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPostalAddress_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPostalAddress_Cardinality("postalAddress", opLambda);
     }
 
-    public void setPostalAddress_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "postalAddress");
+    public void setPostalAddress_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3582,16 +3582,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPostalAddress_Missing(null);
     }
 
-    public void setPostalAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPostalAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPostalAddress_Missing("postalAddress", opLambda, null);
     }
 
-    public void setPostalAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPostalAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPostalAddress_Missing("postalAddress", opLambda, aggsLambda);
     }
 
-    public void setPostalAddress_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "postalAddress");
+    public void setPostalAddress_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "postalAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3602,22 +3603,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String city
-
     public void setCity_Terms() {
         setCity_Terms(null);
     }
 
-    public void setCity_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setCity_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setCity_Terms("city", opLambda, null);
     }
 
-    public void setCity_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCity_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCity_Terms("city", opLambda, aggsLambda);
     }
 
-    public void setCity_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "city");
+    public void setCity_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3632,17 +3631,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCity_SignificantTerms(null);
     }
 
-    public void setCity_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setCity_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setCity_SignificantTerms("city", opLambda, null);
     }
 
-    public void setCity_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCity_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCity_SignificantTerms("city", opLambda, aggsLambda);
     }
 
-    public void setCity_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setCity_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "city");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3657,16 +3656,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCity_IpRange(null);
     }
 
-    public void setCity_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setCity_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setCity_IpRange("city", opLambda, null);
     }
 
-    public void setCity_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCity_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCity_IpRange("city", opLambda, aggsLambda);
     }
 
-    public void setCity_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "city");
+    public void setCity_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3681,12 +3680,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCity_Count(null);
     }
 
-    public void setCity_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCity_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCity_Count("city", opLambda);
     }
 
-    public void setCity_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "city");
+    public void setCity_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3696,12 +3695,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCity_Cardinality(null);
     }
 
-    public void setCity_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCity_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCity_Cardinality("city", opLambda);
     }
 
-    public void setCity_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "city");
+    public void setCity_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3711,16 +3710,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setCity_Missing(null);
     }
 
-    public void setCity_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCity_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCity_Missing("city", opLambda, null);
     }
 
-    public void setCity_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setCity_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setCity_Missing("city", opLambda, aggsLambda);
     }
 
-    public void setCity_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "city");
+    public void setCity_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "city");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3731,23 +3730,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String teletexTerminalIdentifier
-
     public void setTeletexTerminalIdentifier_Terms() {
         setTeletexTerminalIdentifier_Terms(null);
     }
 
-    public void setTeletexTerminalIdentifier_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_Terms("teletexTerminalIdentifier", opLambda, null);
     }
 
-    public void setTeletexTerminalIdentifier_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTeletexTerminalIdentifier_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setTeletexTerminalIdentifier_Terms("teletexTerminalIdentifier", opLambda, aggsLambda);
     }
 
-    public void setTeletexTerminalIdentifier_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda,
+    public void setTeletexTerminalIdentifier_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "teletexTerminalIdentifier");
+        TermsAggregationBuilder builder = regTermsA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3762,18 +3759,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTeletexTerminalIdentifier_SignificantTerms(null);
     }
 
-    public void setTeletexTerminalIdentifier_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_SignificantTerms("teletexTerminalIdentifier", opLambda, null);
     }
 
-    public void setTeletexTerminalIdentifier_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setTeletexTerminalIdentifier_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setTeletexTerminalIdentifier_SignificantTerms("teletexTerminalIdentifier", opLambda, aggsLambda);
     }
 
-    public void setTeletexTerminalIdentifier_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
-            OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "teletexTerminalIdentifier");
+    public void setTeletexTerminalIdentifier_SignificantTerms(String name,
+            ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3788,17 +3785,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTeletexTerminalIdentifier_IpRange(null);
     }
 
-    public void setTeletexTerminalIdentifier_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_IpRange("teletexTerminalIdentifier", opLambda, null);
     }
 
-    public void setTeletexTerminalIdentifier_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTeletexTerminalIdentifier_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setTeletexTerminalIdentifier_IpRange("teletexTerminalIdentifier", opLambda, aggsLambda);
     }
 
-    public void setTeletexTerminalIdentifier_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda,
+    public void setTeletexTerminalIdentifier_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "teletexTerminalIdentifier");
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3813,12 +3811,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTeletexTerminalIdentifier_Count(null);
     }
 
-    public void setTeletexTerminalIdentifier_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_Count("teletexTerminalIdentifier", opLambda);
     }
 
-    public void setTeletexTerminalIdentifier_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "teletexTerminalIdentifier");
+    public void setTeletexTerminalIdentifier_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3828,12 +3826,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTeletexTerminalIdentifier_Cardinality(null);
     }
 
-    public void setTeletexTerminalIdentifier_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_Cardinality("teletexTerminalIdentifier", opLambda);
     }
 
-    public void setTeletexTerminalIdentifier_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "teletexTerminalIdentifier");
+    public void setTeletexTerminalIdentifier_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3843,17 +3841,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setTeletexTerminalIdentifier_Missing(null);
     }
 
-    public void setTeletexTerminalIdentifier_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setTeletexTerminalIdentifier_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setTeletexTerminalIdentifier_Missing("teletexTerminalIdentifier", opLambda, null);
     }
 
-    public void setTeletexTerminalIdentifier_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setTeletexTerminalIdentifier_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setTeletexTerminalIdentifier_Missing("teletexTerminalIdentifier", opLambda, aggsLambda);
     }
 
-    public void setTeletexTerminalIdentifier_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda,
+    public void setTeletexTerminalIdentifier_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "teletexTerminalIdentifier");
+        MissingAggregationBuilder builder = regMissingA(name, "teletexTerminalIdentifier");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3864,22 +3863,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String x121Address
-
     public void setX121Address_Terms() {
         setX121Address_Terms(null);
     }
 
-    public void setX121Address_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setX121Address_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setX121Address_Terms("x121Address", opLambda, null);
     }
 
-    public void setX121Address_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setX121Address_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setX121Address_Terms("x121Address", opLambda, aggsLambda);
     }
 
-    public void setX121Address_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "x121Address");
+    public void setX121Address_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3894,17 +3891,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setX121Address_SignificantTerms(null);
     }
 
-    public void setX121Address_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setX121Address_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setX121Address_SignificantTerms("x121Address", opLambda, null);
     }
 
-    public void setX121Address_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setX121Address_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setX121Address_SignificantTerms("x121Address", opLambda, aggsLambda);
     }
 
-    public void setX121Address_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setX121Address_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "x121Address");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3919,16 +3917,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setX121Address_IpRange(null);
     }
 
-    public void setX121Address_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setX121Address_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setX121Address_IpRange("x121Address", opLambda, null);
     }
 
-    public void setX121Address_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setX121Address_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setX121Address_IpRange("x121Address", opLambda, aggsLambda);
     }
 
-    public void setX121Address_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "x121Address");
+    public void setX121Address_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3943,12 +3942,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setX121Address_Count(null);
     }
 
-    public void setX121Address_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setX121Address_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setX121Address_Count("x121Address", opLambda);
     }
 
-    public void setX121Address_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "x121Address");
+    public void setX121Address_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3958,12 +3957,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setX121Address_Cardinality(null);
     }
 
-    public void setX121Address_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setX121Address_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setX121Address_Cardinality("x121Address", opLambda);
     }
 
-    public void setX121Address_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "x121Address");
+    public void setX121Address_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3973,16 +3972,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setX121Address_Missing(null);
     }
 
-    public void setX121Address_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setX121Address_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setX121Address_Missing("x121Address", opLambda, null);
     }
 
-    public void setX121Address_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setX121Address_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setX121Address_Missing("x121Address", opLambda, aggsLambda);
     }
 
-    public void setX121Address_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "x121Address");
+    public void setX121Address_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "x121Address");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3993,22 +3993,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String businessCategory
-
     public void setBusinessCategory_Terms() {
         setBusinessCategory_Terms(null);
     }
 
-    public void setBusinessCategory_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setBusinessCategory_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setBusinessCategory_Terms("businessCategory", opLambda, null);
     }
 
-    public void setBusinessCategory_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setBusinessCategory_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setBusinessCategory_Terms("businessCategory", opLambda, aggsLambda);
     }
 
-    public void setBusinessCategory_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "businessCategory");
+    public void setBusinessCategory_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4023,18 +4022,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setBusinessCategory_SignificantTerms(null);
     }
 
-    public void setBusinessCategory_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setBusinessCategory_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setBusinessCategory_SignificantTerms("businessCategory", opLambda, null);
     }
 
-    public void setBusinessCategory_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setBusinessCategory_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setBusinessCategory_SignificantTerms("businessCategory", opLambda, aggsLambda);
     }
 
-    public void setBusinessCategory_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setBusinessCategory_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "businessCategory");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4049,16 +4048,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setBusinessCategory_IpRange(null);
     }
 
-    public void setBusinessCategory_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setBusinessCategory_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setBusinessCategory_IpRange("businessCategory", opLambda, null);
     }
 
-    public void setBusinessCategory_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setBusinessCategory_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setBusinessCategory_IpRange("businessCategory", opLambda, aggsLambda);
     }
 
-    public void setBusinessCategory_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "businessCategory");
+    public void setBusinessCategory_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4073,12 +4073,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setBusinessCategory_Count(null);
     }
 
-    public void setBusinessCategory_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setBusinessCategory_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setBusinessCategory_Count("businessCategory", opLambda);
     }
 
-    public void setBusinessCategory_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "businessCategory");
+    public void setBusinessCategory_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4088,12 +4088,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setBusinessCategory_Cardinality(null);
     }
 
-    public void setBusinessCategory_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setBusinessCategory_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setBusinessCategory_Cardinality("businessCategory", opLambda);
     }
 
-    public void setBusinessCategory_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "businessCategory");
+    public void setBusinessCategory_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4103,16 +4103,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setBusinessCategory_Missing(null);
     }
 
-    public void setBusinessCategory_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setBusinessCategory_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setBusinessCategory_Missing("businessCategory", opLambda, null);
     }
 
-    public void setBusinessCategory_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setBusinessCategory_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setBusinessCategory_Missing("businessCategory", opLambda, aggsLambda);
     }
 
-    public void setBusinessCategory_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "businessCategory");
+    public void setBusinessCategory_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "businessCategory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4123,22 +4124,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String registeredAddress
-
     public void setRegisteredAddress_Terms() {
         setRegisteredAddress_Terms(null);
     }
 
-    public void setRegisteredAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setRegisteredAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setRegisteredAddress_Terms("registeredAddress", opLambda, null);
     }
 
-    public void setRegisteredAddress_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRegisteredAddress_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRegisteredAddress_Terms("registeredAddress", opLambda, aggsLambda);
     }
 
-    public void setRegisteredAddress_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "registeredAddress");
+    public void setRegisteredAddress_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4153,18 +4153,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRegisteredAddress_SignificantTerms(null);
     }
 
-    public void setRegisteredAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setRegisteredAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setRegisteredAddress_SignificantTerms("registeredAddress", opLambda, null);
     }
 
-    public void setRegisteredAddress_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRegisteredAddress_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setRegisteredAddress_SignificantTerms("registeredAddress", opLambda, aggsLambda);
     }
 
-    public void setRegisteredAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRegisteredAddress_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "registeredAddress");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4179,16 +4179,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRegisteredAddress_IpRange(null);
     }
 
-    public void setRegisteredAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setRegisteredAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setRegisteredAddress_IpRange("registeredAddress", opLambda, null);
     }
 
-    public void setRegisteredAddress_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRegisteredAddress_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRegisteredAddress_IpRange("registeredAddress", opLambda, aggsLambda);
     }
 
-    public void setRegisteredAddress_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "registeredAddress");
+    public void setRegisteredAddress_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4203,12 +4204,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRegisteredAddress_Count(null);
     }
 
-    public void setRegisteredAddress_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setRegisteredAddress_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setRegisteredAddress_Count("registeredAddress", opLambda);
     }
 
-    public void setRegisteredAddress_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "registeredAddress");
+    public void setRegisteredAddress_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4218,12 +4219,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRegisteredAddress_Cardinality(null);
     }
 
-    public void setRegisteredAddress_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setRegisteredAddress_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setRegisteredAddress_Cardinality("registeredAddress", opLambda);
     }
 
-    public void setRegisteredAddress_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "registeredAddress");
+    public void setRegisteredAddress_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4233,16 +4234,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRegisteredAddress_Missing(null);
     }
 
-    public void setRegisteredAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setRegisteredAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setRegisteredAddress_Missing("registeredAddress", opLambda, null);
     }
 
-    public void setRegisteredAddress_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRegisteredAddress_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRegisteredAddress_Missing("registeredAddress", opLambda, aggsLambda);
     }
 
-    public void setRegisteredAddress_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "registeredAddress");
+    public void setRegisteredAddress_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "registeredAddress");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4253,22 +4255,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String displayName
-
     public void setDisplayName_Terms() {
         setDisplayName_Terms(null);
     }
 
-    public void setDisplayName_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setDisplayName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setDisplayName_Terms("displayName", opLambda, null);
     }
 
-    public void setDisplayName_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDisplayName_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDisplayName_Terms("displayName", opLambda, aggsLambda);
     }
 
-    public void setDisplayName_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "displayName");
+    public void setDisplayName_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4283,17 +4283,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDisplayName_SignificantTerms(null);
     }
 
-    public void setDisplayName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setDisplayName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setDisplayName_SignificantTerms("displayName", opLambda, null);
     }
 
-    public void setDisplayName_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDisplayName_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setDisplayName_SignificantTerms("displayName", opLambda, aggsLambda);
     }
 
-    public void setDisplayName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDisplayName_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "displayName");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4308,16 +4309,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDisplayName_IpRange(null);
     }
 
-    public void setDisplayName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setDisplayName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setDisplayName_IpRange("displayName", opLambda, null);
     }
 
-    public void setDisplayName_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDisplayName_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDisplayName_IpRange("displayName", opLambda, aggsLambda);
     }
 
-    public void setDisplayName_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "displayName");
+    public void setDisplayName_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4332,12 +4334,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDisplayName_Count(null);
     }
 
-    public void setDisplayName_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setDisplayName_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setDisplayName_Count("displayName", opLambda);
     }
 
-    public void setDisplayName_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "displayName");
+    public void setDisplayName_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4347,12 +4349,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDisplayName_Cardinality(null);
     }
 
-    public void setDisplayName_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setDisplayName_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setDisplayName_Cardinality("displayName", opLambda);
     }
 
-    public void setDisplayName_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "displayName");
+    public void setDisplayName_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4362,16 +4364,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDisplayName_Missing(null);
     }
 
-    public void setDisplayName_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setDisplayName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setDisplayName_Missing("displayName", opLambda, null);
     }
 
-    public void setDisplayName_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDisplayName_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDisplayName_Missing("displayName", opLambda, aggsLambda);
     }
 
-    public void setDisplayName_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "displayName");
+    public void setDisplayName_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "displayName");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4382,22 +4385,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String preferredLanguage
-
     public void setPreferredLanguage_Terms() {
         setPreferredLanguage_Terms(null);
     }
 
-    public void setPreferredLanguage_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setPreferredLanguage_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setPreferredLanguage_Terms("preferredLanguage", opLambda, null);
     }
 
-    public void setPreferredLanguage_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPreferredLanguage_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPreferredLanguage_Terms("preferredLanguage", opLambda, aggsLambda);
     }
 
-    public void setPreferredLanguage_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "preferredLanguage");
+    public void setPreferredLanguage_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4412,18 +4414,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPreferredLanguage_SignificantTerms(null);
     }
 
-    public void setPreferredLanguage_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setPreferredLanguage_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setPreferredLanguage_SignificantTerms("preferredLanguage", opLambda, null);
     }
 
-    public void setPreferredLanguage_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPreferredLanguage_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setPreferredLanguage_SignificantTerms("preferredLanguage", opLambda, aggsLambda);
     }
 
-    public void setPreferredLanguage_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setPreferredLanguage_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "preferredLanguage");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4438,16 +4440,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPreferredLanguage_IpRange(null);
     }
 
-    public void setPreferredLanguage_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setPreferredLanguage_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setPreferredLanguage_IpRange("preferredLanguage", opLambda, null);
     }
 
-    public void setPreferredLanguage_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPreferredLanguage_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPreferredLanguage_IpRange("preferredLanguage", opLambda, aggsLambda);
     }
 
-    public void setPreferredLanguage_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "preferredLanguage");
+    public void setPreferredLanguage_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4462,12 +4465,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPreferredLanguage_Count(null);
     }
 
-    public void setPreferredLanguage_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setPreferredLanguage_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setPreferredLanguage_Count("preferredLanguage", opLambda);
     }
 
-    public void setPreferredLanguage_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "preferredLanguage");
+    public void setPreferredLanguage_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4477,12 +4480,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPreferredLanguage_Cardinality(null);
     }
 
-    public void setPreferredLanguage_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setPreferredLanguage_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setPreferredLanguage_Cardinality("preferredLanguage", opLambda);
     }
 
-    public void setPreferredLanguage_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "preferredLanguage");
+    public void setPreferredLanguage_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4492,16 +4495,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setPreferredLanguage_Missing(null);
     }
 
-    public void setPreferredLanguage_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setPreferredLanguage_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setPreferredLanguage_Missing("preferredLanguage", opLambda, null);
     }
 
-    public void setPreferredLanguage_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setPreferredLanguage_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setPreferredLanguage_Missing("preferredLanguage", opLambda, aggsLambda);
     }
 
-    public void setPreferredLanguage_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "preferredLanguage");
+    public void setPreferredLanguage_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "preferredLanguage");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4512,22 +4516,21 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String departmentNumber
-
     public void setDepartmentNumber_Terms() {
         setDepartmentNumber_Terms(null);
     }
 
-    public void setDepartmentNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setDepartmentNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setDepartmentNumber_Terms("departmentNumber", opLambda, null);
     }
 
-    public void setDepartmentNumber_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDepartmentNumber_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDepartmentNumber_Terms("departmentNumber", opLambda, aggsLambda);
     }
 
-    public void setDepartmentNumber_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "departmentNumber");
+    public void setDepartmentNumber_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4542,18 +4545,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDepartmentNumber_SignificantTerms(null);
     }
 
-    public void setDepartmentNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setDepartmentNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setDepartmentNumber_SignificantTerms("departmentNumber", opLambda, null);
     }
 
-    public void setDepartmentNumber_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDepartmentNumber_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
         setDepartmentNumber_SignificantTerms("departmentNumber", opLambda, aggsLambda);
     }
 
-    public void setDepartmentNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setDepartmentNumber_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "departmentNumber");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4568,16 +4571,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDepartmentNumber_IpRange(null);
     }
 
-    public void setDepartmentNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setDepartmentNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setDepartmentNumber_IpRange("departmentNumber", opLambda, null);
     }
 
-    public void setDepartmentNumber_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDepartmentNumber_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDepartmentNumber_IpRange("departmentNumber", opLambda, aggsLambda);
     }
 
-    public void setDepartmentNumber_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "departmentNumber");
+    public void setDepartmentNumber_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4592,12 +4596,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDepartmentNumber_Count(null);
     }
 
-    public void setDepartmentNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setDepartmentNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setDepartmentNumber_Count("departmentNumber", opLambda);
     }
 
-    public void setDepartmentNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "departmentNumber");
+    public void setDepartmentNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4607,12 +4611,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDepartmentNumber_Cardinality(null);
     }
 
-    public void setDepartmentNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setDepartmentNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setDepartmentNumber_Cardinality("departmentNumber", opLambda);
     }
 
-    public void setDepartmentNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "departmentNumber");
+    public void setDepartmentNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4622,16 +4626,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setDepartmentNumber_Missing(null);
     }
 
-    public void setDepartmentNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setDepartmentNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setDepartmentNumber_Missing("departmentNumber", opLambda, null);
     }
 
-    public void setDepartmentNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setDepartmentNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setDepartmentNumber_Missing("departmentNumber", opLambda, aggsLambda);
     }
 
-    public void setDepartmentNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "departmentNumber");
+    public void setDepartmentNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "departmentNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4642,17 +4647,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long uidNumber
     public void setUidNumber_Avg() {
         setUidNumber_Avg(null);
     }
 
-    public void setUidNumber_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setUidNumber_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setUidNumber_Avg("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "uidNumber");
+    public void setUidNumber_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4662,12 +4666,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Max(null);
     }
 
-    public void setUidNumber_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setUidNumber_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setUidNumber_Max("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "uidNumber");
+    public void setUidNumber_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4677,12 +4681,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Min(null);
     }
 
-    public void setUidNumber_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setUidNumber_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setUidNumber_Min("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "uidNumber");
+    public void setUidNumber_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4692,12 +4696,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Sum(null);
     }
 
-    public void setUidNumber_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setUidNumber_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setUidNumber_Sum("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "uidNumber");
+    public void setUidNumber_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4707,12 +4711,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_ExtendedStats(null);
     }
 
-    public void setUidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setUidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setUidNumber_ExtendedStats("uidNumber", opLambda);
     }
 
-    public void setUidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "uidNumber");
+    public void setUidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4722,12 +4726,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Stats(null);
     }
 
-    public void setUidNumber_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setUidNumber_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setUidNumber_Stats("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "uidNumber");
+    public void setUidNumber_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4737,12 +4741,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Percentiles(null);
     }
 
-    public void setUidNumber_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setUidNumber_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setUidNumber_Percentiles("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "uidNumber");
+    public void setUidNumber_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4752,12 +4756,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_PercentileRanks(null);
     }
 
-    public void setUidNumber_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setUidNumber_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setUidNumber_PercentileRanks("uidNumber", opLambda);
     }
 
-    public void setUidNumber_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "uidNumber");
+    public void setUidNumber_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4767,16 +4771,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Histogram(null);
     }
 
-    public void setUidNumber_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setUidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setUidNumber_Histogram("uidNumber", opLambda, null);
     }
 
-    public void setUidNumber_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setUidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setUidNumber_Histogram("uidNumber", opLambda, aggsLambda);
     }
 
-    public void setUidNumber_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "uidNumber");
+    public void setUidNumber_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4791,16 +4796,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Range(null);
     }
 
-    public void setUidNumber_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setUidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setUidNumber_Range("uidNumber", opLambda, null);
     }
 
-    public void setUidNumber_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setUidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setUidNumber_Range("uidNumber", opLambda, aggsLambda);
     }
 
-    public void setUidNumber_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "uidNumber");
+    public void setUidNumber_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4815,12 +4820,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Count(null);
     }
 
-    public void setUidNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUidNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUidNumber_Count("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "uidNumber");
+    public void setUidNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4830,12 +4835,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Cardinality(null);
     }
 
-    public void setUidNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUidNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUidNumber_Cardinality("uidNumber", opLambda);
     }
 
-    public void setUidNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "uidNumber");
+    public void setUidNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4845,16 +4850,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setUidNumber_Missing(null);
     }
 
-    public void setUidNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUidNumber_Missing("uidNumber", opLambda, null);
     }
 
-    public void setUidNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setUidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setUidNumber_Missing("uidNumber", opLambda, aggsLambda);
     }
 
-    public void setUidNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "uidNumber");
+    public void setUidNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "uidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4865,17 +4870,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long gidNumber
     public void setGidNumber_Avg() {
         setGidNumber_Avg(null);
     }
 
-    public void setGidNumber_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setGidNumber_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setGidNumber_Avg("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "gidNumber");
+    public void setGidNumber_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4885,12 +4889,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Max(null);
     }
 
-    public void setGidNumber_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setGidNumber_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setGidNumber_Max("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "gidNumber");
+    public void setGidNumber_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4900,12 +4904,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Min(null);
     }
 
-    public void setGidNumber_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setGidNumber_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setGidNumber_Min("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "gidNumber");
+    public void setGidNumber_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4915,12 +4919,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Sum(null);
     }
 
-    public void setGidNumber_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setGidNumber_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setGidNumber_Sum("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "gidNumber");
+    public void setGidNumber_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4930,12 +4934,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_ExtendedStats(null);
     }
 
-    public void setGidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setGidNumber_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setGidNumber_ExtendedStats("gidNumber", opLambda);
     }
 
-    public void setGidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "gidNumber");
+    public void setGidNumber_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4945,12 +4949,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Stats(null);
     }
 
-    public void setGidNumber_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setGidNumber_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setGidNumber_Stats("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "gidNumber");
+    public void setGidNumber_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4960,12 +4964,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Percentiles(null);
     }
 
-    public void setGidNumber_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setGidNumber_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setGidNumber_Percentiles("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "gidNumber");
+    public void setGidNumber_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4975,12 +4979,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_PercentileRanks(null);
     }
 
-    public void setGidNumber_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setGidNumber_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setGidNumber_PercentileRanks("gidNumber", opLambda);
     }
 
-    public void setGidNumber_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "gidNumber");
+    public void setGidNumber_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4990,16 +4994,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Histogram(null);
     }
 
-    public void setGidNumber_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setGidNumber_Histogram("gidNumber", opLambda, null);
     }
 
-    public void setGidNumber_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGidNumber_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGidNumber_Histogram("gidNumber", opLambda, aggsLambda);
     }
 
-    public void setGidNumber_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "gidNumber");
+    public void setGidNumber_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5014,16 +5019,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Range(null);
     }
 
-    public void setGidNumber_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setGidNumber_Range("gidNumber", opLambda, null);
     }
 
-    public void setGidNumber_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGidNumber_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGidNumber_Range("gidNumber", opLambda, aggsLambda);
     }
 
-    public void setGidNumber_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "gidNumber");
+    public void setGidNumber_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5038,12 +5043,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Count(null);
     }
 
-    public void setGidNumber_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setGidNumber_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setGidNumber_Count("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "gidNumber");
+    public void setGidNumber_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5053,12 +5058,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Cardinality(null);
     }
 
-    public void setGidNumber_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setGidNumber_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setGidNumber_Cardinality("gidNumber", opLambda);
     }
 
-    public void setGidNumber_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "gidNumber");
+    public void setGidNumber_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5068,16 +5073,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGidNumber_Missing(null);
     }
 
-    public void setGidNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setGidNumber_Missing("gidNumber", opLambda, null);
     }
 
-    public void setGidNumber_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGidNumber_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGidNumber_Missing("gidNumber", opLambda, aggsLambda);
     }
 
-    public void setGidNumber_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "gidNumber");
+    public void setGidNumber_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "gidNumber");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5088,22 +5093,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String homeDirectory
-
     public void setHomeDirectory_Terms() {
         setHomeDirectory_Terms(null);
     }
 
-    public void setHomeDirectory_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setHomeDirectory_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setHomeDirectory_Terms("homeDirectory", opLambda, null);
     }
 
-    public void setHomeDirectory_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomeDirectory_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomeDirectory_Terms("homeDirectory", opLambda, aggsLambda);
     }
 
-    public void setHomeDirectory_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "homeDirectory");
+    public void setHomeDirectory_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5118,17 +5121,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomeDirectory_SignificantTerms(null);
     }
 
-    public void setHomeDirectory_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setHomeDirectory_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setHomeDirectory_SignificantTerms("homeDirectory", opLambda, null);
     }
 
-    public void setHomeDirectory_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomeDirectory_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setHomeDirectory_SignificantTerms("homeDirectory", opLambda, aggsLambda);
     }
 
-    public void setHomeDirectory_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setHomeDirectory_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "homeDirectory");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5143,16 +5147,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomeDirectory_IpRange(null);
     }
 
-    public void setHomeDirectory_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setHomeDirectory_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setHomeDirectory_IpRange("homeDirectory", opLambda, null);
     }
 
-    public void setHomeDirectory_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomeDirectory_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomeDirectory_IpRange("homeDirectory", opLambda, aggsLambda);
     }
 
-    public void setHomeDirectory_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "homeDirectory");
+    public void setHomeDirectory_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5167,12 +5172,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomeDirectory_Count(null);
     }
 
-    public void setHomeDirectory_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setHomeDirectory_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setHomeDirectory_Count("homeDirectory", opLambda);
     }
 
-    public void setHomeDirectory_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "homeDirectory");
+    public void setHomeDirectory_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5182,12 +5187,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomeDirectory_Cardinality(null);
     }
 
-    public void setHomeDirectory_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setHomeDirectory_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setHomeDirectory_Cardinality("homeDirectory", opLambda);
     }
 
-    public void setHomeDirectory_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "homeDirectory");
+    public void setHomeDirectory_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5197,16 +5202,17 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setHomeDirectory_Missing(null);
     }
 
-    public void setHomeDirectory_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setHomeDirectory_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setHomeDirectory_Missing("homeDirectory", opLambda, null);
     }
 
-    public void setHomeDirectory_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setHomeDirectory_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setHomeDirectory_Missing("homeDirectory", opLambda, aggsLambda);
     }
 
-    public void setHomeDirectory_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "homeDirectory");
+    public void setHomeDirectory_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "homeDirectory");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5217,22 +5223,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String groups
-
     public void setGroups_Terms() {
         setGroups_Terms(null);
     }
 
-    public void setGroups_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setGroups_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setGroups_Terms("groups", opLambda, null);
     }
 
-    public void setGroups_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGroups_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGroups_Terms("groups", opLambda, aggsLambda);
     }
 
-    public void setGroups_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "groups");
+    public void setGroups_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5247,17 +5251,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGroups_SignificantTerms(null);
     }
 
-    public void setGroups_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setGroups_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setGroups_SignificantTerms("groups", opLambda, null);
     }
 
-    public void setGroups_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGroups_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setGroups_SignificantTerms("groups", opLambda, aggsLambda);
     }
 
-    public void setGroups_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setGroups_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "groups");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5272,16 +5277,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGroups_IpRange(null);
     }
 
-    public void setGroups_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setGroups_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setGroups_IpRange("groups", opLambda, null);
     }
 
-    public void setGroups_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGroups_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGroups_IpRange("groups", opLambda, aggsLambda);
     }
 
-    public void setGroups_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "groups");
+    public void setGroups_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5296,12 +5301,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGroups_Count(null);
     }
 
-    public void setGroups_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setGroups_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setGroups_Count("groups", opLambda);
     }
 
-    public void setGroups_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "groups");
+    public void setGroups_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5311,12 +5316,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGroups_Cardinality(null);
     }
 
-    public void setGroups_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setGroups_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setGroups_Cardinality("groups", opLambda);
     }
 
-    public void setGroups_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "groups");
+    public void setGroups_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5326,16 +5331,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setGroups_Missing(null);
     }
 
-    public void setGroups_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setGroups_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setGroups_Missing("groups", opLambda, null);
     }
 
-    public void setGroups_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setGroups_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setGroups_Missing("groups", opLambda, aggsLambda);
     }
 
-    public void setGroups_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "groups");
+    public void setGroups_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "groups");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5346,22 +5351,20 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String roles
-
     public void setRoles_Terms() {
         setRoles_Terms(null);
     }
 
-    public void setRoles_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setRoles_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setRoles_Terms("roles", opLambda, null);
     }
 
-    public void setRoles_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoles_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoles_Terms("roles", opLambda, aggsLambda);
     }
 
-    public void setRoles_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "roles");
+    public void setRoles_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5376,17 +5379,18 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoles_SignificantTerms(null);
     }
 
-    public void setRoles_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setRoles_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setRoles_SignificantTerms("roles", opLambda, null);
     }
 
-    public void setRoles_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoles_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsUserCA> aggsLambda) {
         setRoles_SignificantTerms("roles", opLambda, aggsLambda);
     }
 
-    public void setRoles_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRoles_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsUserCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "roles");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5401,16 +5405,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoles_IpRange(null);
     }
 
-    public void setRoles_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setRoles_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setRoles_IpRange("roles", opLambda, null);
     }
 
-    public void setRoles_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoles_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoles_IpRange("roles", opLambda, aggsLambda);
     }
 
-    public void setRoles_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "roles");
+    public void setRoles_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5425,12 +5429,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoles_Count(null);
     }
 
-    public void setRoles_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setRoles_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setRoles_Count("roles", opLambda);
     }
 
-    public void setRoles_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "roles");
+    public void setRoles_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5440,12 +5444,12 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoles_Cardinality(null);
     }
 
-    public void setRoles_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setRoles_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setRoles_Cardinality("roles", opLambda);
     }
 
-    public void setRoles_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "roles");
+    public void setRoles_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5455,16 +5459,16 @@ public abstract class BsUserCA extends EsAbstractConditionAggregation {
         setRoles_Missing(null);
     }
 
-    public void setRoles_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setRoles_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setRoles_Missing("roles", opLambda, null);
     }
 
-    public void setRoles_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+    public void setRoles_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
         setRoles_Missing("roles", opLambda, aggsLambda);
     }
 
-    public void setRoles_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "roles");
+    public void setRoles_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsUserCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "roles");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

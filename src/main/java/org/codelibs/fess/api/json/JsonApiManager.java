@@ -15,8 +15,6 @@
  */
 package org.codelibs.fess.api.json;
 
-import static org.codelibs.core.stream.StreamUtil.stream;
-
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -24,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -116,11 +113,7 @@ public class JsonApiManager extends BaseJsonApiManager {
         try {
             final PingResponse pingResponse = fessEsClient.ping();
             status = pingResponse.getStatus();
-            String errMsg = null;
-            if (status != 0) {
-                errMsg = stream(pingResponse.getFailures()).get(stream -> stream.collect(Collectors.joining()));
-            }
-            writeJsonResponse(status, null, errMsg);
+            writeJsonResponse(status, "\"message\":" + pingResponse.getMessage());
         } catch (final Exception e) {
             status = 9;
             err = e;
@@ -429,7 +422,7 @@ public class JsonApiManager extends BaseJsonApiManager {
                             final Map<String, Object> upsertMap = new HashMap<>();
                             upsertMap.put(fessConfig.getIndexFieldFavoriteCount(), 1);
                             builder.setUpsert(upsertMap);
-                            builder.setRefresh(true);
+                            builder.setRefreshPolicy(Constants.TRUE);
                         });
 
                         writeJsonResponse(0, "\"result\":\"ok\"", (String) null);

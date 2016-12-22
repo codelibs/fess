@@ -60,7 +60,7 @@ public class RoleTypeService {
     public void store(final RoleType roleType) {
 
         roleTypeBhv.insertOrUpdate(roleType, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }
@@ -68,7 +68,7 @@ public class RoleTypeService {
     public void delete(final RoleType roleType) {
 
         roleTypeBhv.delete(roleType, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
     }

@@ -21,16 +21,16 @@ import org.codelibs.fess.es.config.cbean.ca.LabelToRoleCA;
 import org.codelibs.fess.es.config.cbean.cq.LabelToRoleCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsLabelToRoleCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -58,8 +58,8 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -82,36 +82,35 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
-
-    // String labelTypeId
 
     public void setLabelTypeId_Terms() {
         setLabelTypeId_Terms(null);
     }
 
-    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setLabelTypeId_Terms("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setLabelTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setLabelTypeId_Terms("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "labelTypeId");
+    public void setLabelTypeId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -126,18 +125,18 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setLabelTypeId_SignificantTerms(null);
     }
 
-    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setLabelTypeId_SignificantTerms("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setLabelTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setLabelTypeId_SignificantTerms("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setLabelTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "labelTypeId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -152,16 +151,17 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setLabelTypeId_IpRange(null);
     }
 
-    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setLabelTypeId_IpRange("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setLabelTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setLabelTypeId_IpRange("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "labelTypeId");
+    public void setLabelTypeId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -176,12 +176,12 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setLabelTypeId_Count(null);
     }
 
-    public void setLabelTypeId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setLabelTypeId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setLabelTypeId_Count("labelTypeId", opLambda);
     }
 
-    public void setLabelTypeId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "labelTypeId");
+    public void setLabelTypeId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -191,12 +191,12 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setLabelTypeId_Cardinality(null);
     }
 
-    public void setLabelTypeId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setLabelTypeId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setLabelTypeId_Cardinality("labelTypeId", opLambda);
     }
 
-    public void setLabelTypeId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "labelTypeId");
+    public void setLabelTypeId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -206,16 +206,17 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setLabelTypeId_Missing(null);
     }
 
-    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setLabelTypeId_Missing("labelTypeId", opLambda, null);
     }
 
-    public void setLabelTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setLabelTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setLabelTypeId_Missing("labelTypeId", opLambda, aggsLambda);
     }
 
-    public void setLabelTypeId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "labelTypeId");
+    public void setLabelTypeId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "labelTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -226,22 +227,21 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String roleTypeId
-
     public void setRoleTypeId_Terms() {
         setRoleTypeId_Terms(null);
     }
 
-    public void setRoleTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setRoleTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setRoleTypeId_Terms("roleTypeId", opLambda, null);
     }
 
-    public void setRoleTypeId_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setRoleTypeId_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setRoleTypeId_Terms("roleTypeId", opLambda, aggsLambda);
     }
 
-    public void setRoleTypeId_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "roleTypeId");
+    public void setRoleTypeId_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -256,18 +256,18 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setRoleTypeId_SignificantTerms(null);
     }
 
-    public void setRoleTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setRoleTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setRoleTypeId_SignificantTerms("roleTypeId", opLambda, null);
     }
 
-    public void setRoleTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRoleTypeId_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setRoleTypeId_SignificantTerms("roleTypeId", opLambda, aggsLambda);
     }
 
-    public void setRoleTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setRoleTypeId_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "roleTypeId");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -282,16 +282,17 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setRoleTypeId_IpRange(null);
     }
 
-    public void setRoleTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setRoleTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setRoleTypeId_IpRange("roleTypeId", opLambda, null);
     }
 
-    public void setRoleTypeId_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setRoleTypeId_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setRoleTypeId_IpRange("roleTypeId", opLambda, aggsLambda);
     }
 
-    public void setRoleTypeId_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "roleTypeId");
+    public void setRoleTypeId_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -306,12 +307,12 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setRoleTypeId_Count(null);
     }
 
-    public void setRoleTypeId_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setRoleTypeId_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setRoleTypeId_Count("roleTypeId", opLambda);
     }
 
-    public void setRoleTypeId_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "roleTypeId");
+    public void setRoleTypeId_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -321,12 +322,12 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setRoleTypeId_Cardinality(null);
     }
 
-    public void setRoleTypeId_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setRoleTypeId_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setRoleTypeId_Cardinality("roleTypeId", opLambda);
     }
 
-    public void setRoleTypeId_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "roleTypeId");
+    public void setRoleTypeId_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -336,16 +337,17 @@ public abstract class BsLabelToRoleCA extends EsAbstractConditionAggregation {
         setRoleTypeId_Missing(null);
     }
 
-    public void setRoleTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setRoleTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setRoleTypeId_Missing("roleTypeId", opLambda, null);
     }
 
-    public void setRoleTypeId_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
+    public void setRoleTypeId_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
         setRoleTypeId_Missing("roleTypeId", opLambda, aggsLambda);
     }
 
-    public void setRoleTypeId_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsLabelToRoleCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "roleTypeId");
+    public void setRoleTypeId_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsLabelToRoleCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "roleTypeId");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

@@ -73,7 +73,7 @@ public class ScheduledJobService {
 
     public void delete(final ScheduledJob scheduledJob) {
         scheduledJobBhv.delete(scheduledJob, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
@@ -101,7 +101,7 @@ public class ScheduledJobService {
 
     public void store(final ScheduledJob scheduledJob) {
         scheduledJobBhv.insertOrUpdate(scheduledJob, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
     }
 

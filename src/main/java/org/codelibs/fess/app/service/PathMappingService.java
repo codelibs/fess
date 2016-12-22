@@ -62,7 +62,7 @@ public class PathMappingService {
     public void store(final PathMapping pathMapping) {
 
         pathMappingBhv.insertOrUpdate(pathMapping, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         ComponentUtil.getPathMappingHelper().init();
@@ -71,7 +71,7 @@ public class PathMappingService {
     public void delete(final PathMapping pathMapping) {
 
         pathMappingBhv.delete(pathMapping, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
 
         ComponentUtil.getPathMappingHelper().init();

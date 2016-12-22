@@ -21,26 +21,26 @@ import org.codelibs.fess.es.config.cbean.ca.KeyMatchCA;
 import org.codelibs.fess.es.config.cbean.cq.KeyMatchCQ;
 import org.codelibs.fess.es.config.cbean.cq.bs.BsKeyMatchCQ;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.GlobalBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.HistogramBuilder;
-import org.elasticsearch.search.aggregations.bucket.missing.MissingBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.RangeBuilder;
-import org.elasticsearch.search.aggregations.bucket.range.ipv4.IPv4RangeBuilder;
+import org.elasticsearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.HistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.missing.MissingAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.RangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.sampler.SamplerAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.avg.AvgBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
-import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksBuilder;
-import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesBuilder;
-import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsBuilder;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
-import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.elasticsearch.search.aggregations.bucket.significant.SignificantTermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.avg.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.max.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.min.MinAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentileRanksAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.percentiles.PercentilesAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.scripted.ScriptedMetricAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.StatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.stats.extended.ExtendedStatsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountAggregationBuilder;
 
 /**
  * @author ESFlute (using FreeGen)
@@ -68,8 +68,8 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void global(String name, ConditionOptionCall<GlobalBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        GlobalBuilder builder = regGlobalA(name);
+    public void global(String name, ConditionOptionCall<GlobalAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        GlobalAggregationBuilder builder = regGlobalA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -92,31 +92,30 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricBuilder> opLambda) {
-        ScriptedMetricBuilder builder = regScriptedMetricA(name);
+    public void scriptedMetric(String name, ConditionOptionCall<ScriptedMetricAggregationBuilder> opLambda) {
+        ScriptedMetricAggregationBuilder builder = regScriptedMetricA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    public void topHits(String name, ConditionOptionCall<TopHitsBuilder> opLambda) {
-        TopHitsBuilder builder = regTopHitsA(name);
+    public void topHits(String name, ConditionOptionCall<TopHitsAggregationBuilder> opLambda) {
+        TopHitsAggregationBuilder builder = regTopHitsA(name);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
     }
 
-    // Float boost
     public void setBoost_Avg() {
         setBoost_Avg(null);
     }
 
-    public void setBoost_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setBoost_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setBoost_Avg("boost", opLambda);
     }
 
-    public void setBoost_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "boost");
+    public void setBoost_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -126,12 +125,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Max(null);
     }
 
-    public void setBoost_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setBoost_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setBoost_Max("boost", opLambda);
     }
 
-    public void setBoost_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "boost");
+    public void setBoost_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -141,12 +140,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Min(null);
     }
 
-    public void setBoost_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setBoost_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setBoost_Min("boost", opLambda);
     }
 
-    public void setBoost_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "boost");
+    public void setBoost_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -156,12 +155,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Sum(null);
     }
 
-    public void setBoost_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setBoost_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setBoost_Sum("boost", opLambda);
     }
 
-    public void setBoost_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "boost");
+    public void setBoost_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -171,12 +170,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_ExtendedStats(null);
     }
 
-    public void setBoost_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setBoost_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setBoost_ExtendedStats("boost", opLambda);
     }
 
-    public void setBoost_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "boost");
+    public void setBoost_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -186,12 +185,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Stats(null);
     }
 
-    public void setBoost_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setBoost_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setBoost_Stats("boost", opLambda);
     }
 
-    public void setBoost_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "boost");
+    public void setBoost_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -201,12 +200,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Percentiles(null);
     }
 
-    public void setBoost_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setBoost_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setBoost_Percentiles("boost", opLambda);
     }
 
-    public void setBoost_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "boost");
+    public void setBoost_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -216,12 +215,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_PercentileRanks(null);
     }
 
-    public void setBoost_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setBoost_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setBoost_PercentileRanks("boost", opLambda);
     }
 
-    public void setBoost_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "boost");
+    public void setBoost_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -231,16 +230,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Histogram(null);
     }
 
-    public void setBoost_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setBoost_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setBoost_Histogram("boost", opLambda, null);
     }
 
-    public void setBoost_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setBoost_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setBoost_Histogram("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "boost");
+    public void setBoost_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -255,16 +255,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Range(null);
     }
 
-    public void setBoost_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setBoost_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setBoost_Range("boost", opLambda, null);
     }
 
-    public void setBoost_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setBoost_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setBoost_Range("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "boost");
+    public void setBoost_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -279,12 +279,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Count(null);
     }
 
-    public void setBoost_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setBoost_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setBoost_Count("boost", opLambda);
     }
 
-    public void setBoost_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "boost");
+    public void setBoost_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -294,12 +294,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Cardinality(null);
     }
 
-    public void setBoost_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setBoost_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setBoost_Cardinality("boost", opLambda);
     }
 
-    public void setBoost_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "boost");
+    public void setBoost_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -309,16 +309,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setBoost_Missing(null);
     }
 
-    public void setBoost_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setBoost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setBoost_Missing("boost", opLambda, null);
     }
 
-    public void setBoost_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setBoost_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setBoost_Missing("boost", opLambda, aggsLambda);
     }
 
-    public void setBoost_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "boost");
+    public void setBoost_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "boost");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -329,22 +329,20 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String createdBy
-
     public void setCreatedBy_Terms() {
         setCreatedBy_Terms(null);
     }
 
-    public void setCreatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setCreatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setCreatedBy_Terms("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedBy_Terms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "createdBy");
+    public void setCreatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -359,17 +357,18 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_SignificantTerms(null);
     }
 
-    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setCreatedBy_SignificantTerms("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedBy_SignificantTerms("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setCreatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsKeyMatchCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "createdBy");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -384,16 +383,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_IpRange(null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedBy_IpRange("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "createdBy");
+    public void setCreatedBy_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -408,12 +408,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_Count(null);
     }
 
-    public void setCreatedBy_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCreatedBy_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCreatedBy_Count("createdBy", opLambda);
     }
 
-    public void setCreatedBy_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "createdBy");
+    public void setCreatedBy_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -423,12 +423,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_Cardinality(null);
     }
 
-    public void setCreatedBy_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCreatedBy_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCreatedBy_Cardinality("createdBy", opLambda);
     }
 
-    public void setCreatedBy_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "createdBy");
+    public void setCreatedBy_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -438,16 +438,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedBy_Missing(null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCreatedBy_Missing("createdBy", opLambda, null);
     }
 
-    public void setCreatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedBy_Missing("createdBy", opLambda, aggsLambda);
     }
 
-    public void setCreatedBy_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "createdBy");
+    public void setCreatedBy_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "createdBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -458,17 +459,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long createdTime
     public void setCreatedTime_Avg() {
         setCreatedTime_Avg(null);
     }
 
-    public void setCreatedTime_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setCreatedTime_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setCreatedTime_Avg("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "createdTime");
+    public void setCreatedTime_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -478,12 +478,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Max(null);
     }
 
-    public void setCreatedTime_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setCreatedTime_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setCreatedTime_Max("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "createdTime");
+    public void setCreatedTime_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -493,12 +493,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Min(null);
     }
 
-    public void setCreatedTime_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setCreatedTime_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setCreatedTime_Min("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "createdTime");
+    public void setCreatedTime_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -508,12 +508,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Sum(null);
     }
 
-    public void setCreatedTime_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setCreatedTime_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setCreatedTime_Sum("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "createdTime");
+    public void setCreatedTime_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -523,12 +523,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_ExtendedStats(null);
     }
 
-    public void setCreatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setCreatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setCreatedTime_ExtendedStats("createdTime", opLambda);
     }
 
-    public void setCreatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "createdTime");
+    public void setCreatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -538,12 +538,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Stats(null);
     }
 
-    public void setCreatedTime_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setCreatedTime_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setCreatedTime_Stats("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "createdTime");
+    public void setCreatedTime_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -553,12 +553,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Percentiles(null);
     }
 
-    public void setCreatedTime_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setCreatedTime_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setCreatedTime_Percentiles("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "createdTime");
+    public void setCreatedTime_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -568,12 +568,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_PercentileRanks(null);
     }
 
-    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setCreatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setCreatedTime_PercentileRanks("createdTime", opLambda);
     }
 
-    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "createdTime");
+    public void setCreatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -583,16 +583,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Histogram(null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedTime_Histogram("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "createdTime");
+    public void setCreatedTime_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -607,16 +608,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Range(null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setCreatedTime_Range("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedTime_Range("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "createdTime");
+    public void setCreatedTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -631,12 +633,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Count(null);
     }
 
-    public void setCreatedTime_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setCreatedTime_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setCreatedTime_Count("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "createdTime");
+    public void setCreatedTime_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -646,12 +648,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Cardinality(null);
     }
 
-    public void setCreatedTime_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setCreatedTime_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setCreatedTime_Cardinality("createdTime", opLambda);
     }
 
-    public void setCreatedTime_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "createdTime");
+    public void setCreatedTime_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -661,16 +663,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setCreatedTime_Missing(null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setCreatedTime_Missing("createdTime", opLambda, null);
     }
 
-    public void setCreatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setCreatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setCreatedTime_Missing("createdTime", opLambda, aggsLambda);
     }
 
-    public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "createdTime");
+    public void setCreatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "createdTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -681,17 +684,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Integer maxSize
     public void setMaxSize_Avg() {
         setMaxSize_Avg(null);
     }
 
-    public void setMaxSize_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setMaxSize_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setMaxSize_Avg("maxSize", opLambda);
     }
 
-    public void setMaxSize_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "maxSize");
+    public void setMaxSize_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -701,12 +703,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Max(null);
     }
 
-    public void setMaxSize_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setMaxSize_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setMaxSize_Max("maxSize", opLambda);
     }
 
-    public void setMaxSize_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "maxSize");
+    public void setMaxSize_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -716,12 +718,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Min(null);
     }
 
-    public void setMaxSize_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setMaxSize_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setMaxSize_Min("maxSize", opLambda);
     }
 
-    public void setMaxSize_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "maxSize");
+    public void setMaxSize_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -731,12 +733,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Sum(null);
     }
 
-    public void setMaxSize_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setMaxSize_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setMaxSize_Sum("maxSize", opLambda);
     }
 
-    public void setMaxSize_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "maxSize");
+    public void setMaxSize_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -746,12 +748,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_ExtendedStats(null);
     }
 
-    public void setMaxSize_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setMaxSize_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setMaxSize_ExtendedStats("maxSize", opLambda);
     }
 
-    public void setMaxSize_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "maxSize");
+    public void setMaxSize_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -761,12 +763,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Stats(null);
     }
 
-    public void setMaxSize_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setMaxSize_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setMaxSize_Stats("maxSize", opLambda);
     }
 
-    public void setMaxSize_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "maxSize");
+    public void setMaxSize_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -776,12 +778,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Percentiles(null);
     }
 
-    public void setMaxSize_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setMaxSize_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setMaxSize_Percentiles("maxSize", opLambda);
     }
 
-    public void setMaxSize_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "maxSize");
+    public void setMaxSize_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -791,12 +793,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_PercentileRanks(null);
     }
 
-    public void setMaxSize_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setMaxSize_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setMaxSize_PercentileRanks("maxSize", opLambda);
     }
 
-    public void setMaxSize_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "maxSize");
+    public void setMaxSize_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -806,16 +808,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Histogram(null);
     }
 
-    public void setMaxSize_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setMaxSize_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setMaxSize_Histogram("maxSize", opLambda, null);
     }
 
-    public void setMaxSize_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setMaxSize_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setMaxSize_Histogram("maxSize", opLambda, aggsLambda);
     }
 
-    public void setMaxSize_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "maxSize");
+    public void setMaxSize_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -830,16 +833,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Range(null);
     }
 
-    public void setMaxSize_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setMaxSize_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setMaxSize_Range("maxSize", opLambda, null);
     }
 
-    public void setMaxSize_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setMaxSize_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setMaxSize_Range("maxSize", opLambda, aggsLambda);
     }
 
-    public void setMaxSize_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "maxSize");
+    public void setMaxSize_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -854,12 +857,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Count(null);
     }
 
-    public void setMaxSize_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setMaxSize_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setMaxSize_Count("maxSize", opLambda);
     }
 
-    public void setMaxSize_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "maxSize");
+    public void setMaxSize_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -869,12 +872,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Cardinality(null);
     }
 
-    public void setMaxSize_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setMaxSize_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setMaxSize_Cardinality("maxSize", opLambda);
     }
 
-    public void setMaxSize_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "maxSize");
+    public void setMaxSize_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -884,16 +887,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setMaxSize_Missing(null);
     }
 
-    public void setMaxSize_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setMaxSize_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setMaxSize_Missing("maxSize", opLambda, null);
     }
 
-    public void setMaxSize_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setMaxSize_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setMaxSize_Missing("maxSize", opLambda, aggsLambda);
     }
 
-    public void setMaxSize_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "maxSize");
+    public void setMaxSize_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "maxSize");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -904,22 +908,20 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String query
-
     public void setQuery_Terms() {
         setQuery_Terms(null);
     }
 
-    public void setQuery_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setQuery_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setQuery_Terms("query", opLambda, null);
     }
 
-    public void setQuery_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setQuery_Terms("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "query");
+    public void setQuery_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -934,17 +936,18 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_SignificantTerms(null);
     }
 
-    public void setQuery_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setQuery_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setQuery_SignificantTerms("query", opLambda, null);
     }
 
-    public void setQuery_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         setQuery_SignificantTerms("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setQuery_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsKeyMatchCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "query");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -959,16 +962,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_IpRange(null);
     }
 
-    public void setQuery_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setQuery_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setQuery_IpRange("query", opLambda, null);
     }
 
-    public void setQuery_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setQuery_IpRange("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "query");
+    public void setQuery_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -983,12 +986,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_Count(null);
     }
 
-    public void setQuery_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setQuery_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setQuery_Count("query", opLambda);
     }
 
-    public void setQuery_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "query");
+    public void setQuery_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -998,12 +1001,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_Cardinality(null);
     }
 
-    public void setQuery_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setQuery_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setQuery_Cardinality("query", opLambda);
     }
 
-    public void setQuery_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "query");
+    public void setQuery_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1013,16 +1016,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setQuery_Missing(null);
     }
 
-    public void setQuery_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setQuery_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setQuery_Missing("query", opLambda, null);
     }
 
-    public void setQuery_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setQuery_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setQuery_Missing("query", opLambda, aggsLambda);
     }
 
-    public void setQuery_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "query");
+    public void setQuery_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "query");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1033,22 +1036,20 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String term
-
     public void setTerm_Terms() {
         setTerm_Terms(null);
     }
 
-    public void setTerm_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setTerm_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setTerm_Terms("term", opLambda, null);
     }
 
-    public void setTerm_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setTerm_Terms("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "term");
+    public void setTerm_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1063,17 +1064,18 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_SignificantTerms(null);
     }
 
-    public void setTerm_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setTerm_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setTerm_SignificantTerms("term", opLambda, null);
     }
 
-    public void setTerm_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         setTerm_SignificantTerms("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setTerm_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsKeyMatchCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "term");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1088,16 +1090,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_IpRange(null);
     }
 
-    public void setTerm_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setTerm_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setTerm_IpRange("term", opLambda, null);
     }
 
-    public void setTerm_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setTerm_IpRange("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "term");
+    public void setTerm_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1112,12 +1114,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_Count(null);
     }
 
-    public void setTerm_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setTerm_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setTerm_Count("term", opLambda);
     }
 
-    public void setTerm_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "term");
+    public void setTerm_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1127,12 +1129,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_Cardinality(null);
     }
 
-    public void setTerm_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setTerm_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setTerm_Cardinality("term", opLambda);
     }
 
-    public void setTerm_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "term");
+    public void setTerm_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1142,16 +1144,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setTerm_Missing(null);
     }
 
-    public void setTerm_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setTerm_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setTerm_Missing("term", opLambda, null);
     }
 
-    public void setTerm_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setTerm_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setTerm_Missing("term", opLambda, aggsLambda);
     }
 
-    public void setTerm_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "term");
+    public void setTerm_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "term");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1162,22 +1164,20 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // String updatedBy
-
     public void setUpdatedBy_Terms() {
         setUpdatedBy_Terms(null);
     }
 
-    public void setUpdatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda) {
+    public void setUpdatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda) {
         setUpdatedBy_Terms("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Terms(ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedBy_Terms(ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedBy_Terms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        TermsBuilder builder = regTermsA(name, "updatedBy");
+    public void setUpdatedBy_Terms(String name, ConditionOptionCall<TermsAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+        TermsAggregationBuilder builder = regTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1192,17 +1192,18 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_SignificantTerms(null);
     }
 
-    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda) {
+    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda) {
         setUpdatedBy_SignificantTerms("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedBy_SignificantTerms(ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedBy_SignificantTerms("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsBuilder> opLambda,
+    public void setUpdatedBy_SignificantTerms(String name, ConditionOptionCall<SignificantTermsAggregationBuilder> opLambda,
             OperatorCall<BsKeyMatchCA> aggsLambda) {
-        SignificantTermsBuilder builder = regSignificantTermsA(name, "updatedBy");
+        SignificantTermsAggregationBuilder builder = regSignificantTermsA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1217,16 +1218,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_IpRange(null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_IpRange(ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedBy_IpRange(ConditionOptionCall<IpRangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedBy_IpRange("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_IpRange(String name, ConditionOptionCall<IPv4RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        IPv4RangeBuilder builder = regIpRangeA(name, "updatedBy");
+    public void setUpdatedBy_IpRange(String name, ConditionOptionCall<IpRangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        IpRangeAggregationBuilder builder = regIpRangeA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1241,12 +1243,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Count(null);
     }
 
-    public void setUpdatedBy_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUpdatedBy_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUpdatedBy_Count("updatedBy", opLambda);
     }
 
-    public void setUpdatedBy_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "updatedBy");
+    public void setUpdatedBy_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1256,12 +1258,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Cardinality(null);
     }
 
-    public void setUpdatedBy_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUpdatedBy_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUpdatedBy_Cardinality("updatedBy", opLambda);
     }
 
-    public void setUpdatedBy_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "updatedBy");
+    public void setUpdatedBy_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1271,16 +1273,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedBy_Missing(null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, null);
     }
 
-    public void setUpdatedBy_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedBy_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedBy_Missing("updatedBy", opLambda, aggsLambda);
     }
 
-    public void setUpdatedBy_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "updatedBy");
+    public void setUpdatedBy_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "updatedBy");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1291,17 +1294,16 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         }
     }
 
-    // Long updatedTime
     public void setUpdatedTime_Avg() {
         setUpdatedTime_Avg(null);
     }
 
-    public void setUpdatedTime_Avg(ConditionOptionCall<AvgBuilder> opLambda) {
+    public void setUpdatedTime_Avg(ConditionOptionCall<AvgAggregationBuilder> opLambda) {
         setUpdatedTime_Avg("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Avg(String name, ConditionOptionCall<AvgBuilder> opLambda) {
-        AvgBuilder builder = regAvgA(name, "updatedTime");
+    public void setUpdatedTime_Avg(String name, ConditionOptionCall<AvgAggregationBuilder> opLambda) {
+        AvgAggregationBuilder builder = regAvgA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1311,12 +1313,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Max(null);
     }
 
-    public void setUpdatedTime_Max(ConditionOptionCall<MaxBuilder> opLambda) {
+    public void setUpdatedTime_Max(ConditionOptionCall<MaxAggregationBuilder> opLambda) {
         setUpdatedTime_Max("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Max(String name, ConditionOptionCall<MaxBuilder> opLambda) {
-        MaxBuilder builder = regMaxA(name, "updatedTime");
+    public void setUpdatedTime_Max(String name, ConditionOptionCall<MaxAggregationBuilder> opLambda) {
+        MaxAggregationBuilder builder = regMaxA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1326,12 +1328,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Min(null);
     }
 
-    public void setUpdatedTime_Min(ConditionOptionCall<MinBuilder> opLambda) {
+    public void setUpdatedTime_Min(ConditionOptionCall<MinAggregationBuilder> opLambda) {
         setUpdatedTime_Min("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Min(String name, ConditionOptionCall<MinBuilder> opLambda) {
-        MinBuilder builder = regMinA(name, "updatedTime");
+    public void setUpdatedTime_Min(String name, ConditionOptionCall<MinAggregationBuilder> opLambda) {
+        MinAggregationBuilder builder = regMinA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1341,12 +1343,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Sum(null);
     }
 
-    public void setUpdatedTime_Sum(ConditionOptionCall<SumBuilder> opLambda) {
+    public void setUpdatedTime_Sum(ConditionOptionCall<SumAggregationBuilder> opLambda) {
         setUpdatedTime_Sum("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Sum(String name, ConditionOptionCall<SumBuilder> opLambda) {
-        SumBuilder builder = regSumA(name, "updatedTime");
+    public void setUpdatedTime_Sum(String name, ConditionOptionCall<SumAggregationBuilder> opLambda) {
+        SumAggregationBuilder builder = regSumA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1356,12 +1358,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_ExtendedStats(null);
     }
 
-    public void setUpdatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
+    public void setUpdatedTime_ExtendedStats(ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
         setUpdatedTime_ExtendedStats("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsBuilder> opLambda) {
-        ExtendedStatsBuilder builder = regExtendedStatsA(name, "updatedTime");
+    public void setUpdatedTime_ExtendedStats(String name, ConditionOptionCall<ExtendedStatsAggregationBuilder> opLambda) {
+        ExtendedStatsAggregationBuilder builder = regExtendedStatsA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1371,12 +1373,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Stats(null);
     }
 
-    public void setUpdatedTime_Stats(ConditionOptionCall<StatsBuilder> opLambda) {
+    public void setUpdatedTime_Stats(ConditionOptionCall<StatsAggregationBuilder> opLambda) {
         setUpdatedTime_Stats("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Stats(String name, ConditionOptionCall<StatsBuilder> opLambda) {
-        StatsBuilder builder = regStatsA(name, "updatedTime");
+    public void setUpdatedTime_Stats(String name, ConditionOptionCall<StatsAggregationBuilder> opLambda) {
+        StatsAggregationBuilder builder = regStatsA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1386,12 +1388,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Percentiles(null);
     }
 
-    public void setUpdatedTime_Percentiles(ConditionOptionCall<PercentilesBuilder> opLambda) {
+    public void setUpdatedTime_Percentiles(ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
         setUpdatedTime_Percentiles("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Percentiles(String name, ConditionOptionCall<PercentilesBuilder> opLambda) {
-        PercentilesBuilder builder = regPercentilesA(name, "updatedTime");
+    public void setUpdatedTime_Percentiles(String name, ConditionOptionCall<PercentilesAggregationBuilder> opLambda) {
+        PercentilesAggregationBuilder builder = regPercentilesA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1401,12 +1403,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_PercentileRanks(null);
     }
 
-    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksBuilder> opLambda) {
+    public void setUpdatedTime_PercentileRanks(ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
         setUpdatedTime_PercentileRanks("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksBuilder> opLambda) {
-        PercentileRanksBuilder builder = regPercentileRanksA(name, "updatedTime");
+    public void setUpdatedTime_PercentileRanks(String name, ConditionOptionCall<PercentileRanksAggregationBuilder> opLambda) {
+        PercentileRanksAggregationBuilder builder = regPercentileRanksA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1416,16 +1418,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Histogram(null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedTime_Histogram(ConditionOptionCall<HistogramAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedTime_Histogram("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Histogram(String name, ConditionOptionCall<HistogramBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        HistogramBuilder builder = regHistogramA(name, "updatedTime");
+    public void setUpdatedTime_Histogram(String name, ConditionOptionCall<HistogramAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        HistogramAggregationBuilder builder = regHistogramA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1440,16 +1443,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Range(null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Range(ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedTime_Range(ConditionOptionCall<RangeAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedTime_Range("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Range(String name, ConditionOptionCall<RangeBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        RangeBuilder builder = regRangeA(name, "updatedTime");
+    public void setUpdatedTime_Range(String name, ConditionOptionCall<RangeAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        RangeAggregationBuilder builder = regRangeA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1464,12 +1468,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Count(null);
     }
 
-    public void setUpdatedTime_Count(ConditionOptionCall<ValueCountBuilder> opLambda) {
+    public void setUpdatedTime_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
         setUpdatedTime_Count("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Count(String name, ConditionOptionCall<ValueCountBuilder> opLambda) {
-        ValueCountBuilder builder = regCountA(name, "updatedTime");
+    public void setUpdatedTime_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1479,12 +1483,12 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Cardinality(null);
     }
 
-    public void setUpdatedTime_Cardinality(ConditionOptionCall<CardinalityBuilder> opLambda) {
+    public void setUpdatedTime_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
         setUpdatedTime_Cardinality("updatedTime", opLambda);
     }
 
-    public void setUpdatedTime_Cardinality(String name, ConditionOptionCall<CardinalityBuilder> opLambda) {
-        CardinalityBuilder builder = regCardinalityA(name, "updatedTime");
+    public void setUpdatedTime_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1494,16 +1498,17 @@ public abstract class BsKeyMatchCA extends EsAbstractConditionAggregation {
         setUpdatedTime_Missing(null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, null);
     }
 
-    public void setUpdatedTime_Missing(ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
+    public void setUpdatedTime_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
         setUpdatedTime_Missing("updatedTime", opLambda, aggsLambda);
     }
 
-    public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingBuilder> opLambda, OperatorCall<BsKeyMatchCA> aggsLambda) {
-        MissingBuilder builder = regMissingA(name, "updatedTime");
+    public void setUpdatedTime_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsKeyMatchCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "updatedTime");
         if (opLambda != null) {
             opLambda.callback(builder);
         }

@@ -132,7 +132,7 @@ public class JobHelper {
 
     public void store(final JobLog jobLog) {
         ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
-            op.setRefresh(true);
+            op.setRefreshPolicy(Constants.TRUE);
         });
     }
 
@@ -161,7 +161,7 @@ public class JobHelper {
                     logger.debug("Update " + jobLog);
                 }
                 ComponentUtil.getComponent(JobLogBhv.class).insertOrUpdate(jobLog, op -> {
-                    op.setRefresh(true);
+                    op.setRefreshPolicy(Constants.TRUE);
                 });
             }
         }
