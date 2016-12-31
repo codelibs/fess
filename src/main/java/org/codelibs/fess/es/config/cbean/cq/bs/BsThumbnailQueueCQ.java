@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -307,6 +308,17 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -693,6 +705,17 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTarget_SpanTerm(String target) {
+        setTarget_SpanTerm("target", null);
+    }
+
+    public void setTarget_SpanTerm(String target, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTarget_GreaterThan(String target) {
         setTarget_GreaterThan(target, null);
     }
@@ -895,6 +918,17 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
 
     public void setGenerator_Regexp(String generator, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("generator", generator);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGenerator_SpanTerm(String generator) {
+        setGenerator_SpanTerm("generator", null);
+    }
+
+    public void setGenerator_SpanTerm(String generator, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("generator", generator);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1107,6 +1141,17 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPath_SpanTerm(String path) {
+        setPath_SpanTerm("path", null);
+    }
+
+    public void setPath_SpanTerm(String path, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("path", path);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPath_GreaterThan(String path) {
         setPath_GreaterThan(path, null);
     }
@@ -1309,6 +1354,17 @@ public abstract class BsThumbnailQueueCQ extends EsAbstractConditionQuery {
 
     public void setUrl_Regexp(String url, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_SpanTerm(String url) {
+        setUrl_SpanTerm("url", null);
+    }
+
+    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

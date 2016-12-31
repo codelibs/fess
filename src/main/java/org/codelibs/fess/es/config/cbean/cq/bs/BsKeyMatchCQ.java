@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -480,6 +481,17 @@ public abstract class BsKeyMatchCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1040,6 +1052,17 @@ public abstract class BsKeyMatchCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setQuery_SpanTerm(String query) {
+        setQuery_SpanTerm("query", null);
+    }
+
+    public void setQuery_SpanTerm(String query, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("query", query);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setQuery_GreaterThan(String query) {
         setQuery_GreaterThan(query, null);
     }
@@ -1247,6 +1270,17 @@ public abstract class BsKeyMatchCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTerm_SpanTerm(String term) {
+        setTerm_SpanTerm("term", null);
+    }
+
+    public void setTerm_SpanTerm(String term, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("term", term);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTerm_GreaterThan(String term) {
         setTerm_GreaterThan(term, null);
     }
@@ -1449,6 +1483,17 @@ public abstract class BsKeyMatchCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

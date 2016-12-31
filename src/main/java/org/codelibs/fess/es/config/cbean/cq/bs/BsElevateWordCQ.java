@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -486,6 +487,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setCreatedBy_GreaterThan(String createdBy) {
         setCreatedBy_GreaterThan(createdBy, null);
     }
@@ -867,6 +879,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setReading_SpanTerm(String reading) {
+        setReading_SpanTerm("reading", null);
+    }
+
+    public void setReading_SpanTerm(String reading, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("reading", reading);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setReading_GreaterThan(String reading) {
         setReading_GreaterThan(reading, null);
     }
@@ -1069,6 +1092,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
 
     public void setSuggestWord_Regexp(String suggestWord, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("suggestWord", suggestWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setSuggestWord_SpanTerm(String suggestWord) {
+        setSuggestWord_SpanTerm("suggestWord", null);
+    }
+
+    public void setSuggestWord_SpanTerm(String suggestWord, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("suggestWord", suggestWord);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1281,6 +1315,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTargetLabel_SpanTerm(String targetLabel) {
+        setTargetLabel_SpanTerm("targetLabel", null);
+    }
+
+    public void setTargetLabel_SpanTerm(String targetLabel, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("targetLabel", targetLabel);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTargetLabel_GreaterThan(String targetLabel) {
         setTargetLabel_GreaterThan(targetLabel, null);
     }
@@ -1483,6 +1528,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
 
     public void setTargetRole_Regexp(String targetRole, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("targetRole", targetRole);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTargetRole_SpanTerm(String targetRole) {
+        setTargetRole_SpanTerm("targetRole", null);
+    }
+
+    public void setTargetRole_SpanTerm(String targetRole, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("targetRole", targetRole);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1695,6 +1751,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPermissions_SpanTerm(String permissions) {
+        setPermissions_SpanTerm("permissions", null);
+    }
+
+    public void setPermissions_SpanTerm(String permissions, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPermissions_GreaterThan(String permissions) {
         setPermissions_GreaterThan(permissions, null);
     }
@@ -1897,6 +1964,17 @@ public abstract class BsElevateWordCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

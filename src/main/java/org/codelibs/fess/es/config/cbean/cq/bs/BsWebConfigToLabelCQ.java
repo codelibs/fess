@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -312,6 +313,17 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setLabelTypeId_SpanTerm(String labelTypeId) {
+        setLabelTypeId_SpanTerm("labelTypeId", null);
+    }
+
+    public void setLabelTypeId_SpanTerm(String labelTypeId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setLabelTypeId_GreaterThan(String labelTypeId) {
         setLabelTypeId_GreaterThan(labelTypeId, null);
     }
@@ -514,6 +526,17 @@ public abstract class BsWebConfigToLabelCQ extends EsAbstractConditionQuery {
 
     public void setWebConfigId_Regexp(String webConfigId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("webConfigId", webConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setWebConfigId_SpanTerm(String webConfigId) {
+        setWebConfigId_SpanTerm("webConfigId", null);
+    }
+
+    public void setWebConfigId_SpanTerm(String webConfigId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

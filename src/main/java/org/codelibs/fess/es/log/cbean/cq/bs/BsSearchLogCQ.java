@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -311,6 +312,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setAccessType_SpanTerm(String accessType) {
+        setAccessType_SpanTerm("accessType", null);
+    }
+
+    public void setAccessType_SpanTerm(String accessType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("accessType", accessType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setAccessType_GreaterThan(String accessType) {
         setAccessType_GreaterThan(accessType, null);
     }
@@ -513,6 +525,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
 
     public void setUser_Regexp(String user, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("user", user);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUser_SpanTerm(String user) {
+        setUser_SpanTerm("user", null);
+    }
+
+    public void setUser_SpanTerm(String user, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("user", user);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -725,6 +748,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setRoles_SpanTerm(String roles) {
+        setRoles_SpanTerm("roles", null);
+    }
+
+    public void setRoles_SpanTerm(String roles, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setRoles_GreaterThan(String roles) {
         setRoles_GreaterThan(roles, null);
     }
@@ -932,6 +966,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setQueryId_SpanTerm(String queryId) {
+        setQueryId_SpanTerm("queryId", null);
+    }
+
+    public void setQueryId_SpanTerm(String queryId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setQueryId_GreaterThan(String queryId) {
         setQueryId_GreaterThan(queryId, null);
     }
@@ -1134,6 +1179,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
 
     public void setClientIp_Regexp(String clientIp, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("clientIp", clientIp);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setClientIp_SpanTerm(String clientIp) {
+        setClientIp_SpanTerm("clientIp", null);
+    }
+
+    public void setClientIp_SpanTerm(String clientIp, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("clientIp", clientIp);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1868,6 +1924,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setReferer_SpanTerm(String referer) {
+        setReferer_SpanTerm("referer", null);
+    }
+
+    public void setReferer_SpanTerm(String referer, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("referer", referer);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setReferer_GreaterThan(String referer) {
         setReferer_GreaterThan(referer, null);
     }
@@ -2597,6 +2664,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSearchWord_SpanTerm(String searchWord) {
+        setSearchWord_SpanTerm("searchWord", null);
+    }
+
+    public void setSearchWord_SpanTerm(String searchWord, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("searchWord", searchWord);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setSearchWord_GreaterThan(String searchWord) {
         setSearchWord_GreaterThan(searchWord, null);
     }
@@ -2799,6 +2877,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
 
     public void setUserAgent_Regexp(String userAgent, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent) {
+        setUserAgent_SpanTerm("userAgent", null);
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3011,6 +3100,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUserInfoId_SpanTerm(String userInfoId) {
+        setUserInfoId_SpanTerm("userInfoId", null);
+    }
+
+    public void setUserInfoId_SpanTerm(String userInfoId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userInfoId", userInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUserInfoId_GreaterThan(String userInfoId) {
         setUserInfoId_GreaterThan(userInfoId, null);
     }
@@ -3218,6 +3318,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUserSessionId_SpanTerm(String userSessionId) {
+        setUserSessionId_SpanTerm("userSessionId", null);
+    }
+
+    public void setUserSessionId_SpanTerm(String userSessionId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userSessionId", userSessionId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUserSessionId_GreaterThan(String userSessionId) {
         setUserSessionId_GreaterThan(userSessionId, null);
     }
@@ -3420,6 +3531,17 @@ public abstract class BsSearchLogCQ extends EsAbstractConditionQuery {
 
     public void setLanguages_Regexp(String languages, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("languages", languages);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLanguages_SpanTerm(String languages) {
+        setLanguages_SpanTerm("languages", null);
+    }
+
+    public void setLanguages_SpanTerm(String languages, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("languages", languages);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -312,6 +313,17 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setLabelTypeId_SpanTerm(String labelTypeId) {
+        setLabelTypeId_SpanTerm("labelTypeId", null);
+    }
+
+    public void setLabelTypeId_SpanTerm(String labelTypeId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setLabelTypeId_GreaterThan(String labelTypeId) {
         setLabelTypeId_GreaterThan(labelTypeId, null);
     }
@@ -514,6 +526,17 @@ public abstract class BsLabelToRoleCQ extends EsAbstractConditionQuery {
 
     public void setRoleTypeId_Regexp(String roleTypeId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("roleTypeId", roleTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoleTypeId_SpanTerm(String roleTypeId) {
+        setRoleTypeId_SpanTerm("roleTypeId", null);
+    }
+
+    public void setRoleTypeId_SpanTerm(String roleTypeId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("roleTypeId", roleTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

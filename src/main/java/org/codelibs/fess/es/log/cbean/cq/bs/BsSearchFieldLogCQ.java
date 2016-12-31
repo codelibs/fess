@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -312,6 +313,17 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_SpanTerm(String name) {
+        setName_SpanTerm("name", null);
+    }
+
+    public void setName_SpanTerm(String name, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -519,6 +531,17 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSearchLogId_SpanTerm(String searchLogId) {
+        setSearchLogId_SpanTerm("searchLogId", null);
+    }
+
+    public void setSearchLogId_SpanTerm(String searchLogId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("searchLogId", searchLogId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setSearchLogId_GreaterThan(String searchLogId) {
         setSearchLogId_GreaterThan(searchLogId, null);
     }
@@ -721,6 +744,17 @@ public abstract class BsSearchFieldLogCQ extends EsAbstractConditionQuery {
 
     public void setValue_Regexp(String value, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("value", value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setValue_SpanTerm(String value) {
+        setValue_SpanTerm("value", null);
+    }
+
+    public void setValue_SpanTerm(String value, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("value", value);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

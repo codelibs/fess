@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -307,6 +308,17 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setConfigId_Regexp(String configId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("configId", configId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setConfigId_SpanTerm(String configId) {
+        setConfigId_SpanTerm("configId", null);
+    }
+
+    public void setConfigId_SpanTerm(String configId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("configId", configId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -693,6 +705,17 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setErrorLog_SpanTerm(String errorLog) {
+        setErrorLog_SpanTerm("errorLog", null);
+    }
+
+    public void setErrorLog_SpanTerm(String errorLog, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("errorLog", errorLog);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setErrorLog_GreaterThan(String errorLog) {
         setErrorLog_GreaterThan(errorLog, null);
     }
@@ -895,6 +918,17 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setErrorName_Regexp(String errorName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("errorName", errorName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setErrorName_SpanTerm(String errorName) {
+        setErrorName_SpanTerm("errorName", null);
+    }
+
+    public void setErrorName_SpanTerm(String errorName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("errorName", errorName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1281,6 +1315,17 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setThreadName_SpanTerm(String threadName) {
+        setThreadName_SpanTerm("threadName", null);
+    }
+
+    public void setThreadName_SpanTerm(String threadName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("threadName", threadName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setThreadName_GreaterThan(String threadName) {
         setThreadName_GreaterThan(threadName, null);
     }
@@ -1483,6 +1528,17 @@ public abstract class BsFailureUrlCQ extends EsAbstractConditionQuery {
 
     public void setUrl_Regexp(String url, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUrl_SpanTerm(String url) {
+        setUrl_SpanTerm("url", null);
+    }
+
+    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

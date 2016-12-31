@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -485,6 +486,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setJobName_SpanTerm(String jobName) {
+        setJobName_SpanTerm("jobName", null);
+    }
+
+    public void setJobName_SpanTerm(String jobName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("jobName", jobName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setJobName_GreaterThan(String jobName) {
         setJobName_GreaterThan(jobName, null);
     }
@@ -687,6 +699,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setJobStatus_Regexp(String jobStatus, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("jobStatus", jobStatus);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setJobStatus_SpanTerm(String jobStatus) {
+        setJobStatus_SpanTerm("jobStatus", null);
+    }
+
+    public void setJobStatus_SpanTerm(String jobStatus, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("jobStatus", jobStatus);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -899,6 +922,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptData_SpanTerm(String scriptData) {
+        setScriptData_SpanTerm("scriptData", null);
+    }
+
+    public void setScriptData_SpanTerm(String scriptData, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("scriptData", scriptData);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptData_GreaterThan(String scriptData) {
         setScriptData_GreaterThan(scriptData, null);
     }
@@ -1106,6 +1140,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setScriptResult_SpanTerm(String scriptResult) {
+        setScriptResult_SpanTerm("scriptResult", null);
+    }
+
+    public void setScriptResult_SpanTerm(String scriptResult, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("scriptResult", scriptResult);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setScriptResult_GreaterThan(String scriptResult) {
         setScriptResult_GreaterThan(scriptResult, null);
     }
@@ -1308,6 +1353,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setScriptType_Regexp(String scriptType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("scriptType", scriptType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setScriptType_SpanTerm(String scriptType) {
+        setScriptType_SpanTerm("scriptType", null);
+    }
+
+    public void setScriptType_SpanTerm(String scriptType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("scriptType", scriptType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1689,6 +1745,17 @@ public abstract class BsJobLogCQ extends EsAbstractConditionQuery {
 
     public void setTarget_Regexp(String target, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("target", target);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setTarget_SpanTerm(String target) {
+        setTarget_SpanTerm("target", null);
+    }
+
+    public void setTarget_SpanTerm(String target, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("target", target);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

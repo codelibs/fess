@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -307,6 +308,17 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -693,6 +705,17 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDuplicateHostName_SpanTerm(String duplicateHostName) {
+        setDuplicateHostName_SpanTerm("duplicateHostName", null);
+    }
+
+    public void setDuplicateHostName_SpanTerm(String duplicateHostName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("duplicateHostName", duplicateHostName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setDuplicateHostName_GreaterThan(String duplicateHostName) {
         setDuplicateHostName_GreaterThan(duplicateHostName, null);
     }
@@ -895,6 +918,17 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setRegularName_Regexp(String regularName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("regularName", regularName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRegularName_SpanTerm(String regularName) {
+        setRegularName_SpanTerm("regularName", null);
+    }
+
+    public void setRegularName_SpanTerm(String regularName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("regularName", regularName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1276,6 +1310,17 @@ public abstract class BsDuplicateHostCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

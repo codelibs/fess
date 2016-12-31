@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -313,6 +314,17 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setElevateWordId_SpanTerm(String elevateWordId) {
+        setElevateWordId_SpanTerm("elevateWordId", null);
+    }
+
+    public void setElevateWordId_SpanTerm(String elevateWordId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("elevateWordId", elevateWordId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setElevateWordId_GreaterThan(String elevateWordId) {
         setElevateWordId_GreaterThan(elevateWordId, null);
     }
@@ -515,6 +527,17 @@ public abstract class BsElevateWordToLabelCQ extends EsAbstractConditionQuery {
 
     public void setLabelTypeId_Regexp(String labelTypeId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("labelTypeId", labelTypeId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabelTypeId_SpanTerm(String labelTypeId) {
+        setLabelTypeId_SpanTerm("labelTypeId", null);
+    }
+
+    public void setLabelTypeId_SpanTerm(String labelTypeId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("labelTypeId", labelTypeId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

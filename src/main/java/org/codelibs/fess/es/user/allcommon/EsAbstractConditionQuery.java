@@ -46,6 +46,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -301,6 +302,13 @@ public abstract class EsAbstractConditionQuery implements ConditionQuery {
         MoreLikeThisQueryBuilder moreLikeThisQuery = QueryBuilders.moreLikeThisQuery(name);
         regQ(moreLikeThisQuery);
         return moreLikeThisQuery;
+    }
+
+    protected SpanTermQueryBuilder regSpanTermQ(String name, String value) {
+        checkEsInvalidQuery(name, value);
+        SpanTermQueryBuilder spanTermQuery = QueryBuilders.spanTermQuery(name, value);
+        regQ(spanTermQuery);
+        return spanTermQuery;
     }
 
     protected void regQ(QueryBuilder builder) {

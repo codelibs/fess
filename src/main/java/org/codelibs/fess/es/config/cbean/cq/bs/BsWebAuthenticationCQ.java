@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -313,6 +314,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setAuthRealm_SpanTerm(String authRealm) {
+        setAuthRealm_SpanTerm("authRealm", null);
+    }
+
+    public void setAuthRealm_SpanTerm(String authRealm, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("authRealm", authRealm);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setAuthRealm_GreaterThan(String authRealm) {
         setAuthRealm_GreaterThan(authRealm, null);
     }
@@ -515,6 +527,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -901,6 +924,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setHostname_SpanTerm(String hostname) {
+        setHostname_SpanTerm("hostname", null);
+    }
+
+    public void setHostname_SpanTerm(String hostname, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("hostname", hostname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHostname_GreaterThan(String hostname) {
         setHostname_GreaterThan(hostname, null);
     }
@@ -1108,6 +1142,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setParameters_SpanTerm(String parameters) {
+        setParameters_SpanTerm("parameters", null);
+    }
+
+    public void setParameters_SpanTerm(String parameters, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("parameters", parameters);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setParameters_GreaterThan(String parameters) {
         setParameters_GreaterThan(parameters, null);
     }
@@ -1310,6 +1355,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setPassword_Regexp(String password, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("password", password);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPassword_SpanTerm(String password) {
+        setPassword_SpanTerm("password", null);
+    }
+
+    public void setPassword_SpanTerm(String password, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1696,6 +1752,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setProtocolScheme_SpanTerm(String protocolScheme) {
+        setProtocolScheme_SpanTerm("protocolScheme", null);
+    }
+
+    public void setProtocolScheme_SpanTerm(String protocolScheme, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("protocolScheme", protocolScheme);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setProtocolScheme_GreaterThan(String protocolScheme) {
         setProtocolScheme_GreaterThan(protocolScheme, null);
     }
@@ -1898,6 +1965,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2284,6 +2362,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUsername_SpanTerm(String username) {
+        setUsername_SpanTerm("username", null);
+    }
+
+    public void setUsername_SpanTerm(String username, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("username", username);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUsername_GreaterThan(String username) {
         setUsername_GreaterThan(username, null);
     }
@@ -2486,6 +2575,17 @@ public abstract class BsWebAuthenticationCQ extends EsAbstractConditionQuery {
 
     public void setWebConfigId_Regexp(String webConfigId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("webConfigId", webConfigId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setWebConfigId_SpanTerm(String webConfigId) {
+        setWebConfigId_SpanTerm("webConfigId", null);
+    }
+
+    public void setWebConfigId_SpanTerm(String webConfigId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("webConfigId", webConfigId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

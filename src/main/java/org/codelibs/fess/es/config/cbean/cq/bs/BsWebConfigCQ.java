@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -659,6 +660,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setConfigParameter_SpanTerm(String configParameter) {
+        setConfigParameter_SpanTerm("configParameter", null);
+    }
+
+    public void setConfigParameter_SpanTerm(String configParameter, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setConfigParameter_GreaterThan(String configParameter) {
         setConfigParameter_GreaterThan(configParameter, null);
     }
@@ -861,6 +873,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1421,6 +1444,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedDocUrls_SpanTerm(String excludedDocUrls) {
+        setExcludedDocUrls_SpanTerm("excludedDocUrls", null);
+    }
+
+    public void setExcludedDocUrls_SpanTerm(String excludedDocUrls, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("excludedDocUrls", excludedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedDocUrls_GreaterThan(String excludedDocUrls) {
         setExcludedDocUrls_GreaterThan(excludedDocUrls, null);
     }
@@ -1623,6 +1657,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedUrls_Regexp(String excludedUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("excludedUrls", excludedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedUrls_SpanTerm(String excludedUrls) {
+        setExcludedUrls_SpanTerm("excludedUrls", null);
+    }
+
+    public void setExcludedUrls_SpanTerm(String excludedUrls, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("excludedUrls", excludedUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1835,6 +1880,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedDocUrls_SpanTerm(String includedDocUrls) {
+        setIncludedDocUrls_SpanTerm("includedDocUrls", null);
+    }
+
+    public void setIncludedDocUrls_SpanTerm(String includedDocUrls, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("includedDocUrls", includedDocUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedDocUrls_GreaterThan(String includedDocUrls) {
         setIncludedDocUrls_GreaterThan(includedDocUrls, null);
     }
@@ -2037,6 +2093,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedUrls_Regexp(String includedUrls, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("includedUrls", includedUrls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedUrls_SpanTerm(String includedUrls) {
+        setIncludedUrls_SpanTerm("includedUrls", null);
+    }
+
+    public void setIncludedUrls_SpanTerm(String includedUrls, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("includedUrls", includedUrls);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2771,6 +2838,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_SpanTerm(String name) {
+        setName_SpanTerm("name", null);
+    }
+
+    public void setName_SpanTerm(String name, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -3147,6 +3225,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setPermissions_Regexp(String permissions, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_SpanTerm(String permissions) {
+        setPermissions_SpanTerm("permissions", null);
+    }
+
+    public void setPermissions_SpanTerm(String permissions, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3533,6 +3622,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUpdatedBy_GreaterThan(String updatedBy) {
         setUpdatedBy_GreaterThan(updatedBy, null);
     }
@@ -3914,6 +4014,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUrls_SpanTerm(String urls) {
+        setUrls_SpanTerm("urls", null);
+    }
+
+    public void setUrls_SpanTerm(String urls, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("urls", urls);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUrls_GreaterThan(String urls) {
         setUrls_GreaterThan(urls, null);
     }
@@ -4116,6 +4227,17 @@ public abstract class BsWebConfigCQ extends EsAbstractConditionQuery {
 
     public void setUserAgent_Regexp(String userAgent, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("userAgent", userAgent);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent) {
+        setUserAgent_SpanTerm("userAgent", null);
+    }
+
+    public void setUserAgent_SpanTerm(String userAgent, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userAgent", userAgent);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

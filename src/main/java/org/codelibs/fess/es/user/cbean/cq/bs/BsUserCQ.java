@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -311,6 +312,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_SpanTerm(String name) {
+        setName_SpanTerm("name", null);
+    }
+
+    public void setName_SpanTerm(String name, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -513,6 +525,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setPassword_Regexp(String password, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("password", password);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPassword_SpanTerm(String password) {
+        setPassword_SpanTerm("password", null);
+    }
+
+    public void setPassword_SpanTerm(String password, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("password", password);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -725,6 +748,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setSurname_SpanTerm(String surname) {
+        setSurname_SpanTerm("surname", null);
+    }
+
+    public void setSurname_SpanTerm(String surname, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("surname", surname);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setSurname_GreaterThan(String surname) {
         setSurname_GreaterThan(surname, null);
     }
@@ -927,6 +961,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setGivenName_Regexp(String givenName, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("givenName", givenName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setGivenName_SpanTerm(String givenName) {
+        setGivenName_SpanTerm("givenName", null);
+    }
+
+    public void setGivenName_SpanTerm(String givenName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("givenName", givenName);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1139,6 +1184,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setEmployeeNumber_SpanTerm(String employeeNumber) {
+        setEmployeeNumber_SpanTerm("employeeNumber", null);
+    }
+
+    public void setEmployeeNumber_SpanTerm(String employeeNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("employeeNumber", employeeNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setEmployeeNumber_GreaterThan(String employeeNumber) {
         setEmployeeNumber_GreaterThan(employeeNumber, null);
     }
@@ -1341,6 +1397,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setMail_Regexp(String mail, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("mail", mail);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setMail_SpanTerm(String mail) {
+        setMail_SpanTerm("mail", null);
+    }
+
+    public void setMail_SpanTerm(String mail, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("mail", mail);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1553,6 +1620,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTelephoneNumber_SpanTerm(String telephoneNumber) {
+        setTelephoneNumber_SpanTerm("telephoneNumber", null);
+    }
+
+    public void setTelephoneNumber_SpanTerm(String telephoneNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("telephoneNumber", telephoneNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTelephoneNumber_GreaterThan(String telephoneNumber) {
         setTelephoneNumber_GreaterThan(telephoneNumber, null);
     }
@@ -1755,6 +1833,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setHomePhone_Regexp(String homePhone, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("homePhone", homePhone);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setHomePhone_SpanTerm(String homePhone) {
+        setHomePhone_SpanTerm("homePhone", null);
+    }
+
+    public void setHomePhone_SpanTerm(String homePhone, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("homePhone", homePhone);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1967,6 +2056,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setHomePostalAddress_SpanTerm(String homePostalAddress) {
+        setHomePostalAddress_SpanTerm("homePostalAddress", null);
+    }
+
+    public void setHomePostalAddress_SpanTerm(String homePostalAddress, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("homePostalAddress", homePostalAddress);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHomePostalAddress_GreaterThan(String homePostalAddress) {
         setHomePostalAddress_GreaterThan(homePostalAddress, null);
     }
@@ -2169,6 +2269,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setLabeledURI_Regexp(String labeledURI, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("labeledURI", labeledURI);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setLabeledURI_SpanTerm(String labeledURI) {
+        setLabeledURI_SpanTerm("labeledURI", null);
+    }
+
+    public void setLabeledURI_SpanTerm(String labeledURI, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("labeledURI", labeledURI);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2381,6 +2492,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setRoomNumber_SpanTerm(String roomNumber) {
+        setRoomNumber_SpanTerm("roomNumber", null);
+    }
+
+    public void setRoomNumber_SpanTerm(String roomNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("roomNumber", roomNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setRoomNumber_GreaterThan(String roomNumber) {
         setRoomNumber_GreaterThan(roomNumber, null);
     }
@@ -2583,6 +2705,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setDescription_Regexp(String description, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_SpanTerm(String description) {
+        setDescription_SpanTerm("description", null);
+    }
+
+    public void setDescription_SpanTerm(String description, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("description", description);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2795,6 +2928,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTitle_SpanTerm(String title) {
+        setTitle_SpanTerm("title", null);
+    }
+
+    public void setTitle_SpanTerm(String title, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("title", title);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTitle_GreaterThan(String title) {
         setTitle_GreaterThan(title, null);
     }
@@ -2997,6 +3141,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setPager_Regexp(String pager, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("pager", pager);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPager_SpanTerm(String pager) {
+        setPager_SpanTerm("pager", null);
+    }
+
+    public void setPager_SpanTerm(String pager, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("pager", pager);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3209,6 +3364,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setStreet_SpanTerm(String street) {
+        setStreet_SpanTerm("street", null);
+    }
+
+    public void setStreet_SpanTerm(String street, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("street", street);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setStreet_GreaterThan(String street) {
         setStreet_GreaterThan(street, null);
     }
@@ -3411,6 +3577,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setPostalCode_Regexp(String postalCode, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("postalCode", postalCode);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPostalCode_SpanTerm(String postalCode) {
+        setPostalCode_SpanTerm("postalCode", null);
+    }
+
+    public void setPostalCode_SpanTerm(String postalCode, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("postalCode", postalCode);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3626,6 +3803,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPhysicalDeliveryOfficeName_SpanTerm(String physicalDeliveryOfficeName) {
+        setPhysicalDeliveryOfficeName_SpanTerm("physicalDeliveryOfficeName", null);
+    }
+
+    public void setPhysicalDeliveryOfficeName_SpanTerm(String physicalDeliveryOfficeName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("physicalDeliveryOfficeName", physicalDeliveryOfficeName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPhysicalDeliveryOfficeName_GreaterThan(String physicalDeliveryOfficeName) {
         setPhysicalDeliveryOfficeName_GreaterThan(physicalDeliveryOfficeName, null);
     }
@@ -3830,6 +4018,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setDestinationIndicator_Regexp(String destinationIndicator, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("destinationIndicator", destinationIndicator);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDestinationIndicator_SpanTerm(String destinationIndicator) {
+        setDestinationIndicator_SpanTerm("destinationIndicator", null);
+    }
+
+    public void setDestinationIndicator_SpanTerm(String destinationIndicator, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("destinationIndicator", destinationIndicator);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4044,6 +4243,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setInternationaliSDNNumber_SpanTerm(String internationaliSDNNumber) {
+        setInternationaliSDNNumber_SpanTerm("internationaliSDNNumber", null);
+    }
+
+    public void setInternationaliSDNNumber_SpanTerm(String internationaliSDNNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("internationaliSDNNumber", internationaliSDNNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setInternationaliSDNNumber_GreaterThan(String internationaliSDNNumber) {
         setInternationaliSDNNumber_GreaterThan(internationaliSDNNumber, null);
     }
@@ -4251,6 +4461,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setState_SpanTerm(String state) {
+        setState_SpanTerm("state", null);
+    }
+
+    public void setState_SpanTerm(String state, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("state", state);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setState_GreaterThan(String state) {
         setState_GreaterThan(state, null);
     }
@@ -4453,6 +4674,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setEmployeeType_Regexp(String employeeType, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("employeeType", employeeType);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setEmployeeType_SpanTerm(String employeeType) {
+        setEmployeeType_SpanTerm("employeeType", null);
+    }
+
+    public void setEmployeeType_SpanTerm(String employeeType, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("employeeType", employeeType);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -4668,6 +4900,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setFacsimileTelephoneNumber_SpanTerm(String facsimileTelephoneNumber) {
+        setFacsimileTelephoneNumber_SpanTerm("facsimileTelephoneNumber", null);
+    }
+
+    public void setFacsimileTelephoneNumber_SpanTerm(String facsimileTelephoneNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("facsimileTelephoneNumber", facsimileTelephoneNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setFacsimileTelephoneNumber_GreaterThan(String facsimileTelephoneNumber) {
         setFacsimileTelephoneNumber_GreaterThan(facsimileTelephoneNumber, null);
     }
@@ -4871,6 +5114,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setPostOfficeBox_Regexp(String postOfficeBox, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("postOfficeBox", postOfficeBox);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPostOfficeBox_SpanTerm(String postOfficeBox) {
+        setPostOfficeBox_SpanTerm("postOfficeBox", null);
+    }
+
+    public void setPostOfficeBox_SpanTerm(String postOfficeBox, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("postOfficeBox", postOfficeBox);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5083,6 +5337,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setInitials_SpanTerm(String initials) {
+        setInitials_SpanTerm("initials", null);
+    }
+
+    public void setInitials_SpanTerm(String initials, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("initials", initials);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setInitials_GreaterThan(String initials) {
         setInitials_GreaterThan(initials, null);
     }
@@ -5285,6 +5550,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setCarLicense_Regexp(String carLicense, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("carLicense", carLicense);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCarLicense_SpanTerm(String carLicense) {
+        setCarLicense_SpanTerm("carLicense", null);
+    }
+
+    public void setCarLicense_SpanTerm(String carLicense, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("carLicense", carLicense);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -5497,6 +5773,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setMobile_SpanTerm(String mobile) {
+        setMobile_SpanTerm("mobile", null);
+    }
+
+    public void setMobile_SpanTerm(String mobile, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("mobile", mobile);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setMobile_GreaterThan(String mobile) {
         setMobile_GreaterThan(mobile, null);
     }
@@ -5704,6 +5991,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPostalAddress_SpanTerm(String postalAddress) {
+        setPostalAddress_SpanTerm("postalAddress", null);
+    }
+
+    public void setPostalAddress_SpanTerm(String postalAddress, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("postalAddress", postalAddress);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPostalAddress_GreaterThan(String postalAddress) {
         setPostalAddress_GreaterThan(postalAddress, null);
     }
@@ -5906,6 +6204,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setCity_Regexp(String city, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("city", city);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCity_SpanTerm(String city) {
+        setCity_SpanTerm("city", null);
+    }
+
+    public void setCity_SpanTerm(String city, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("city", city);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -6121,6 +6430,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setTeletexTerminalIdentifier_SpanTerm(String teletexTerminalIdentifier) {
+        setTeletexTerminalIdentifier_SpanTerm("teletexTerminalIdentifier", null);
+    }
+
+    public void setTeletexTerminalIdentifier_SpanTerm(String teletexTerminalIdentifier, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("teletexTerminalIdentifier", teletexTerminalIdentifier);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setTeletexTerminalIdentifier_GreaterThan(String teletexTerminalIdentifier) {
         setTeletexTerminalIdentifier_GreaterThan(teletexTerminalIdentifier, null);
     }
@@ -6324,6 +6644,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setX121Address_Regexp(String x121Address, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("x121Address", x121Address);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setX121Address_SpanTerm(String x121Address) {
+        setX121Address_SpanTerm("x121Address", null);
+    }
+
+    public void setX121Address_SpanTerm(String x121Address, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("x121Address", x121Address);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -6536,6 +6867,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setBusinessCategory_SpanTerm(String businessCategory) {
+        setBusinessCategory_SpanTerm("businessCategory", null);
+    }
+
+    public void setBusinessCategory_SpanTerm(String businessCategory, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("businessCategory", businessCategory);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setBusinessCategory_GreaterThan(String businessCategory) {
         setBusinessCategory_GreaterThan(businessCategory, null);
     }
@@ -6738,6 +7080,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setRegisteredAddress_Regexp(String registeredAddress, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("registeredAddress", registeredAddress);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRegisteredAddress_SpanTerm(String registeredAddress) {
+        setRegisteredAddress_SpanTerm("registeredAddress", null);
+    }
+
+    public void setRegisteredAddress_SpanTerm(String registeredAddress, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("registeredAddress", registeredAddress);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -6950,6 +7303,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setDisplayName_SpanTerm(String displayName) {
+        setDisplayName_SpanTerm("displayName", null);
+    }
+
+    public void setDisplayName_SpanTerm(String displayName, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("displayName", displayName);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setDisplayName_GreaterThan(String displayName) {
         setDisplayName_GreaterThan(displayName, null);
     }
@@ -7157,6 +7521,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPreferredLanguage_SpanTerm(String preferredLanguage) {
+        setPreferredLanguage_SpanTerm("preferredLanguage", null);
+    }
+
+    public void setPreferredLanguage_SpanTerm(String preferredLanguage, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("preferredLanguage", preferredLanguage);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPreferredLanguage_GreaterThan(String preferredLanguage) {
         setPreferredLanguage_GreaterThan(preferredLanguage, null);
     }
@@ -7359,6 +7734,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setDepartmentNumber_Regexp(String departmentNumber, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("departmentNumber", departmentNumber);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDepartmentNumber_SpanTerm(String departmentNumber) {
+        setDepartmentNumber_SpanTerm("departmentNumber", null);
+    }
+
+    public void setDepartmentNumber_SpanTerm(String departmentNumber, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("departmentNumber", departmentNumber);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -7919,6 +8305,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setHomeDirectory_SpanTerm(String homeDirectory) {
+        setHomeDirectory_SpanTerm("homeDirectory", null);
+    }
+
+    public void setHomeDirectory_SpanTerm(String homeDirectory, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("homeDirectory", homeDirectory);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHomeDirectory_GreaterThan(String homeDirectory) {
         setHomeDirectory_GreaterThan(homeDirectory, null);
     }
@@ -8126,6 +8523,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setGroups_SpanTerm(String groups) {
+        setGroups_SpanTerm("groups", null);
+    }
+
+    public void setGroups_SpanTerm(String groups, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("groups", groups);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setGroups_GreaterThan(String groups) {
         setGroups_GreaterThan(groups, null);
     }
@@ -8328,6 +8736,17 @@ public abstract class BsUserCQ extends EsAbstractConditionQuery {
 
     public void setRoles_Regexp(String roles, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("roles", roles);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setRoles_SpanTerm(String roles) {
+        setRoles_SpanTerm("roles", null);
+    }
+
+    public void setRoles_SpanTerm(String roles, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("roles", roles);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

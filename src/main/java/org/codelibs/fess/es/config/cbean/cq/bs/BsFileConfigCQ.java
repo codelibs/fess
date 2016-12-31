@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -660,6 +661,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setConfigParameter_SpanTerm(String configParameter) {
+        setConfigParameter_SpanTerm("configParameter", null);
+    }
+
+    public void setConfigParameter_SpanTerm(String configParameter, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("configParameter", configParameter);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setConfigParameter_GreaterThan(String configParameter) {
         setConfigParameter_GreaterThan(configParameter, null);
     }
@@ -862,6 +874,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setCreatedBy_Regexp(String createdBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("createdBy", createdBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy) {
+        setCreatedBy_SpanTerm("createdBy", null);
+    }
+
+    public void setCreatedBy_SpanTerm(String createdBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("createdBy", createdBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1422,6 +1445,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setExcludedDocPaths_SpanTerm(String excludedDocPaths) {
+        setExcludedDocPaths_SpanTerm("excludedDocPaths", null);
+    }
+
+    public void setExcludedDocPaths_SpanTerm(String excludedDocPaths, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("excludedDocPaths", excludedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setExcludedDocPaths_GreaterThan(String excludedDocPaths) {
         setExcludedDocPaths_GreaterThan(excludedDocPaths, null);
     }
@@ -1624,6 +1658,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setExcludedPaths_Regexp(String excludedPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("excludedPaths", excludedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setExcludedPaths_SpanTerm(String excludedPaths) {
+        setExcludedPaths_SpanTerm("excludedPaths", null);
+    }
+
+    public void setExcludedPaths_SpanTerm(String excludedPaths, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("excludedPaths", excludedPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -1836,6 +1881,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setIncludedDocPaths_SpanTerm(String includedDocPaths) {
+        setIncludedDocPaths_SpanTerm("includedDocPaths", null);
+    }
+
+    public void setIncludedDocPaths_SpanTerm(String includedDocPaths, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("includedDocPaths", includedDocPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setIncludedDocPaths_GreaterThan(String includedDocPaths) {
         setIncludedDocPaths_GreaterThan(includedDocPaths, null);
     }
@@ -2038,6 +2094,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setIncludedPaths_Regexp(String includedPaths, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("includedPaths", includedPaths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setIncludedPaths_SpanTerm(String includedPaths) {
+        setIncludedPaths_SpanTerm("includedPaths", null);
+    }
+
+    public void setIncludedPaths_SpanTerm(String includedPaths, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("includedPaths", includedPaths);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -2772,6 +2839,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setName_SpanTerm(String name) {
+        setName_SpanTerm("name", null);
+    }
+
+    public void setName_SpanTerm(String name, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("name", name);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setName_GreaterThan(String name) {
         setName_GreaterThan(name, null);
     }
@@ -3153,6 +3231,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setPaths_SpanTerm(String paths) {
+        setPaths_SpanTerm("paths", null);
+    }
+
+    public void setPaths_SpanTerm(String paths, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("paths", paths);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setPaths_GreaterThan(String paths) {
         setPaths_GreaterThan(paths, null);
     }
@@ -3355,6 +3444,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setPermissions_Regexp(String permissions, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("permissions", permissions);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setPermissions_SpanTerm(String permissions) {
+        setPermissions_SpanTerm("permissions", null);
+    }
+
+    public void setPermissions_SpanTerm(String permissions, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("permissions", permissions);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -3736,6 +3836,17 @@ public abstract class BsFileConfigCQ extends EsAbstractConditionQuery {
 
     public void setUpdatedBy_Regexp(String updatedBy, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("updatedBy", updatedBy);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy) {
+        setUpdatedBy_SpanTerm("updatedBy", null);
+    }
+
+    public void setUpdatedBy_SpanTerm(String updatedBy, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("updatedBy", updatedBy);
         if (opLambda != null) {
             opLambda.callback(builder);
         }

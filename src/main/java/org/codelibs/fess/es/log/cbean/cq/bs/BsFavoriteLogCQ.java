@@ -30,6 +30,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.RegexpQueryBuilder;
+import org.elasticsearch.index.query.SpanTermQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.WildcardQueryBuilder;
@@ -486,6 +487,17 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setUrl_SpanTerm(String url) {
+        setUrl_SpanTerm("url", null);
+    }
+
+    public void setUrl_SpanTerm(String url, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("url", url);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setUrl_GreaterThan(String url) {
         setUrl_GreaterThan(url, null);
     }
@@ -688,6 +700,17 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
 
     public void setDocId_Regexp(String docId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("docId", docId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDocId_SpanTerm(String docId) {
+        setDocId_SpanTerm("docId", null);
+    }
+
+    public void setDocId_SpanTerm(String docId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("docId", docId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
@@ -900,6 +923,17 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
         }
     }
 
+    public void setQueryId_SpanTerm(String queryId) {
+        setQueryId_SpanTerm("queryId", null);
+    }
+
+    public void setQueryId_SpanTerm(String queryId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("queryId", queryId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setQueryId_GreaterThan(String queryId) {
         setQueryId_GreaterThan(queryId, null);
     }
@@ -1102,6 +1136,17 @@ public abstract class BsFavoriteLogCQ extends EsAbstractConditionQuery {
 
     public void setUserInfoId_Regexp(String userInfoId, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
         RegexpQueryBuilder builder = regRegexpQ("userInfoId", userInfoId);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setUserInfoId_SpanTerm(String userInfoId) {
+        setUserInfoId_SpanTerm("userInfoId", null);
+    }
+
+    public void setUserInfoId_SpanTerm(String userInfoId, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("userInfoId", userInfoId);
         if (opLambda != null) {
             opLambda.callback(builder);
         }
