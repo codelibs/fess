@@ -76,6 +76,10 @@ public class ResourceUtil {
         return getPath("thumbnails", names);
     }
 
+    public static Path getSitePath(final String... names) {
+        return getPath("site", names);
+    }
+
     protected static Path getPath(final String base, final String... names) {
 
         try {

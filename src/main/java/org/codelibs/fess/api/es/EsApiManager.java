@@ -18,6 +18,8 @@ package org.codelibs.fess.api.es;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -95,9 +97,6 @@ public class EsApiManager extends BaseApiManager {
     }
 
     protected void processRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
-        final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
-        final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
-
         if (StringUtil.isNotBlank(path)) {
             final String lowerPath = path.toLowerCase(Locale.ROOT);
             if (lowerPath.endsWith(".html")) {
@@ -108,6 +107,14 @@ public class EsApiManager extends BaseApiManager {
                 response.setContentType("text/css");
             }
         }
+
+        if (path.startsWith("/_plugin/") || path.equals("/_plugin")) {
+            processPluginRequest(request, response, path.replaceFirst("^/_plugin", StringUtil.EMPTY));
+            return;
+        }
+
+        final Method httpMethod = Method.valueOf(request.getMethod().toUpperCase(Locale.ROOT));
+        final CurlRequest curlRequest = new CurlRequest(httpMethod, ResourceUtil.getElasticsearchHttpUrl() + path);
 
         request.getParameterMap().entrySet().stream().forEach(entry -> {
             if (entry.getValue().length > 1) {
@@ -144,6 +151,33 @@ public class EsApiManager extends BaseApiManager {
         }
     }
 }       );
+    }
+
+    private void processPluginRequest(HttpServletRequest request, HttpServletResponse response, String path) {
+        Path filePath = ResourceUtil.getSitePath(path.replaceAll("\\.\\.+", StringUtil.EMPTY).replaceAll("/+", "/").split("/"));
+        if (Files.isDirectory(filePath)) {
+            filePath = filePath.resolve("index.html");
+        }
+        if (Files.exists(filePath)) {
+            try (InputStream in = Files.newInputStream(filePath); ServletOutputStream out = response.getOutputStream()) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                CopyUtil.copy(in, out);
+            } catch (final ClientAbortException e) {
+                logger.debug("Client aborts this request.", e);
+            } catch (IOException e) {
+                logger.error("Failed to read " + path + " from " + filePath);
+                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            }
+        } else {
+            try {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, path + " is not found.");
+            } catch (final ClientAbortException e) {
+                logger.debug("Client aborts this request.", e);
+            } catch (IOException e) {
+                logger.error("Failed to read " + path + " from " + filePath);
+                throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            }
+        }
     }
 
     public void setAcceptedRoles(final String[] acceptedRoles) {

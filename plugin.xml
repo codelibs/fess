@@ -2,6 +2,8 @@
 <project name="plugin" basedir=".">
 	<property name="plugins.dir" value="${basedir}/plugins" />
 	<property name="target.dir" value="${basedir}/target/plugins" />
+	<property name="site.dir" value="${basedir}/src/main/webapp/WEB-INF/site" />
+	<property name="kopf.branch" value="fess-5.0" />
 
 	<!-- Maven Repository -->
 	<property name="maven.snapshot.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
@@ -65,6 +67,17 @@
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
 			<param name="plugin.zip.version" value="5.0.0-20161222.135357-2" />
 		</antcall>
+		<!-- kopf -->
+		<get dest="${target.dir}/kopf.zip">
+			<url url="https://github.com/codelibs/elasticsearch-kopf/archive/${kopf.branch}.zip" />
+		</get>
+		<delete dir="${site.dir}/kopf" />
+		<unzip dest="${site.dir}/kopf" src="${target.dir}/kopf.zip">
+			<patternset>
+				<include name="elasticsearch-kopf-${kopf.branch}/_site/**" />
+			</patternset>
+			<cutdirsmapper dirs="2" />
+		</unzip>
 
 		<antcall target="remove.jars" />
 	</target>

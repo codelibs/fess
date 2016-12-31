@@ -5,6 +5,8 @@
 /solr/data/
 /src/main/webapp/WEB-INF/classes/
 /src/main/webapp/WEB-INF/lib/
+/src/main/webapp/WEB-INF/site/
+/src/main/webapp/WEB-INF/thumbnails/
 /src/main/webapp/jar/
 /dbflute_fess/log/*.log
 /dbflute_h2/log/*.log

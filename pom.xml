@@ -226,6 +226,7 @@
 					<excludes>
 						<exclude>**/*min.js</exclude>
 						<exclude>**/form-validator/**/*.js</exclude>
+						<exclude>**/WEB-INF/site/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
