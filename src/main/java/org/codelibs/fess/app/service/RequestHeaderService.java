@@ -47,7 +47,7 @@ public class RequestHeaderService {
         // update pager
         BeanUtil.copyBeanToBean(requestHeaderList, requestHeaderPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         requestHeaderPager.setPageNumberList(requestHeaderList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return requestHeaderList;

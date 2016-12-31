@@ -54,7 +54,7 @@ public class UserService {
         // update pager
         BeanUtil.copyBeanToBean(userList, userPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         userPager.setPageNumberList(userList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return userList;

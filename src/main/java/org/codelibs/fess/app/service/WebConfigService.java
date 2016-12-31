@@ -61,7 +61,7 @@ public class WebConfigService {
         // update pager
         BeanUtil.copyBeanToBean(webConfigList, webConfigPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         webConfigPager.setPageNumberList(webConfigList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return webConfigList;

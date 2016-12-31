@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class BoostDocPager implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -138,7 +139,7 @@ public class BoostDocPager implements Serializable {
     }
 
     protected int getDefaultPageSize() {
-        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
+        return ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
     }
 
 }

@@ -46,7 +46,8 @@ public class AccessTokenService {
 
         // update pager
         BeanUtil.copyBeanToBean(accessTokenList, accessTokenPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        accessTokenPager.setPageNumberList(accessTokenList.pageRange(op -> op.rangeSize(5)).createPageNumberList());
+        accessTokenPager.setPageNumberList(accessTokenList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
+                .createPageNumberList());
 
         return accessTokenList;
     }

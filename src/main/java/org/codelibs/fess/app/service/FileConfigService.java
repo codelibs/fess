@@ -57,7 +57,7 @@ public class FileConfigService {
         // update pager
         BeanUtil.copyBeanToBean(fileConfigList, fileConfigPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         fileConfigPager.setPageNumberList(fileConfigList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return fileConfigList;

@@ -49,7 +49,7 @@ public class PathMappingService {
         // update pager
         BeanUtil.copyBeanToBean(pathMappingList, pathMappingPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         pathMappingPager.setPageNumberList(pathMappingList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return pathMappingList;

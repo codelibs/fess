@@ -18,7 +18,7 @@ package org.codelibs.fess.app.pager;
 import java.io.Serializable;
 import java.util.List;
 
-import org.codelibs.fess.Constants;
+import org.codelibs.fess.util.ComponentUtil;
 
 public class FileConfigPager implements Serializable {
 
@@ -153,7 +153,7 @@ public class FileConfigPager implements Serializable {
     }
 
     protected int getDefaultPageSize() {
-        return Constants.DEFAULT_ADMIN_PAGE_SIZE;
+        return ComponentUtil.getFessConfig().getPagingPageSizeAsInteger();
     }
 
 }

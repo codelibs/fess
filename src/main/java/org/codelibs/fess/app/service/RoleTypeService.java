@@ -47,7 +47,7 @@ public class RoleTypeService {
         // update pager
         BeanUtil.copyBeanToBean(roleTypeList, roleTypePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         roleTypePager.setPageNumberList(roleTypeList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return roleTypeList;

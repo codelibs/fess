@@ -54,7 +54,7 @@ public class GroupService {
         // update pager
         BeanUtil.copyBeanToBean(groupList, groupPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         groupPager.setPageNumberList(groupList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return groupList;

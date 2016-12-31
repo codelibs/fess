@@ -76,7 +76,7 @@ public class ElevateWordService {
         // update pager
         BeanUtil.copyBeanToBean(elevateWordList, elevateWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         elevateWordPager.setPageNumberList(elevateWordList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return elevateWordList;

@@ -47,7 +47,7 @@ public class FileAuthenticationService {
         // update pager
         BeanUtil.copyBeanToBean(fileAuthenticationList, fileAuthenticationPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         fileAuthenticationPager.setPageNumberList(fileAuthenticationList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return fileAuthenticationList;

@@ -54,7 +54,7 @@ public class DataConfigService {
         // update pager
         BeanUtil.copyBeanToBean(dataConfigList, dataConfigPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         dataConfigPager.setPageNumberList(dataConfigList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return dataConfigList;

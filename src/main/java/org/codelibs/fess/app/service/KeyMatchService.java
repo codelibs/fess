@@ -47,7 +47,7 @@ public class KeyMatchService {
         // update pager
         BeanUtil.copyBeanToBean(keyMatchList, keyMatchPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         keyMatchPager.setPageNumberList(keyMatchList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return keyMatchList;
