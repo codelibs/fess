@@ -2,7 +2,8 @@
 <project name="dbflute" basedir=".">
 	<property name="mydbflute.dir" value="${basedir}/mydbflute" />
 	<property name="target.dir" value="${basedir}/target" />
-	<property name="mydbflute.url" value="https://github.com/lastaflute/lastaflute-example-waterfront/archive/master.zip" />
+	<property name="branch.name" value="master" />
+	<property name="mydbflute.url" value="https://github.com/lastaflute/lastaflute-example-waterfront/archive/${branch.name}.zip" />
 
 	<target name="mydbflute.check">
 		<condition property="mydbflute.exists">
@@ -17,7 +18,7 @@
 		</get>
 		<unzip dest="${mydbflute.dir}" src="${target.dir}/mydbflute.zip">
 			<patternset>
-				<include name="lastaflute-example-waterfront-master/mydbflute/dbflute-1.x/**" />
+				<include name="lastaflute-example-waterfront-${branch.name}/mydbflute/dbflute-1.x/**" />
 			</patternset>
 			<cutdirsmapper dirs="2" />
 		</unzip>
