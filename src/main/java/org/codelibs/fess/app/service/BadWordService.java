@@ -31,6 +31,7 @@ import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.cbean.BadWordCB;
 import org.codelibs.fess.es.config.exbhv.BadWordBhv;
 import org.codelibs.fess.es.config.exentity.BadWord;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.bhv.readable.EntityRowHandler;
 import org.dbflute.cbean.result.PagingResultBean;
@@ -54,6 +55,9 @@ public class BadWordService {
     @Resource
     protected FessEsClient fessEsClient;
 
+    @Resource
+    protected FessConfig fessConfig;
+
     public List<BadWord> getBadWordList(final BadWordPager badWordPager) {
 
         final PagingResultBean<BadWord> badWordList = badWordBhv.selectPage(cb -> {
@@ -63,7 +67,8 @@ public class BadWordService {
 
         // update pager
         BeanUtil.copyBeanToBean(badWordList, badWordPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-        badWordPager.setPageNumberList(badWordList.pageRange(op -> op.rangeSize(5)).createPageNumberList());
+        badWordPager.setPageNumberList(badWordList.pageRange(op -> op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger()))
+                .createPageNumberList());
 
         return badWordList;
     }

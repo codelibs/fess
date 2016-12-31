@@ -27,11 +27,15 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.kuromoji.KuromojiFile;
 import org.codelibs.fess.dict.kuromoji.KuromojiItem;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 
 public class KuromojiService {
     @Resource
     protected DictionaryManager dictionaryManager;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<KuromojiItem> getKuromojiList(final String dictId, final KuromojiPager kuromojiPager) {
         return getKuromojiFile(dictId).map(file -> {
@@ -40,7 +44,7 @@ public class KuromojiService {
 
             // update pager
                 BeanUtil.copyBeanToBean(kuromojiList, kuromojiPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                kuromojiList.setPageRangeSize(5);
+                kuromojiList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
                 kuromojiPager.setPageNumberList(kuromojiList.createPageNumberList());
 
                 return (List<KuromojiItem>) kuromojiList;

@@ -49,7 +49,7 @@ public class LabelTypeService {
         // update pager
         BeanUtil.copyBeanToBean(labelTypeList, labelTypePager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         labelTypePager.setPageNumberList(labelTypeList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return labelTypeList;

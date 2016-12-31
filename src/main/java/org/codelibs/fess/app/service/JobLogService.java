@@ -25,6 +25,7 @@ import org.codelibs.fess.app.pager.JobLogPager;
 import org.codelibs.fess.es.config.cbean.JobLogCB;
 import org.codelibs.fess.es.config.exbhv.JobLogBhv;
 import org.codelibs.fess.es.config.exentity.JobLog;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.optional.OptionalEntity;
@@ -33,6 +34,9 @@ public class JobLogService {
 
     @Resource
     protected JobLogBhv jobLogBhv;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     protected long expiredJobInterval = 2 * 60 * 60 * 1000L; // 2hours
 
@@ -46,7 +50,7 @@ public class JobLogService {
         // update pager
         BeanUtil.copyBeanToBean(jobLogList, jobLogPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         jobLogPager.setPageNumberList(jobLogList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return jobLogList;

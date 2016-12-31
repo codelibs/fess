@@ -27,11 +27,15 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.protwords.ProtwordsFile;
 import org.codelibs.fess.dict.protwords.ProtwordsItem;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 
 public class ProtwordsService {
     @Resource
     protected DictionaryManager dictionaryManager;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<ProtwordsItem> getProtwordsList(final String dictId, final ProtwordsPager protwordsPager) {
         return getProtwordsFile(dictId).map(
@@ -42,7 +46,7 @@ public class ProtwordsService {
 
                     // update pager
                     BeanUtil.copyBeanToBean(protwordsList, protwordsPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                    protwordsList.setPageRangeSize(5);
+                    protwordsList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
                     protwordsPager.setPageNumberList(protwordsList.createPageNumberList());
 
                     return (List<ProtwordsItem>) protwordsList;

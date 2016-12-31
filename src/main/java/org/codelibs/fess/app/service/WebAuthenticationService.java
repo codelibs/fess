@@ -47,7 +47,7 @@ public class WebAuthenticationService {
         // update pager
         BeanUtil.copyBeanToBean(webAuthenticationList, webAuthenticationPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         webAuthenticationPager.setPageNumberList(webAuthenticationList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return webAuthenticationList;

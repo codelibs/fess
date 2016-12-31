@@ -59,7 +59,7 @@ public class FailureUrlService {
         // update pager
         BeanUtil.copyBeanToBean(failureUrlList, failureUrlPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         failureUrlPager.setPageNumberList(failureUrlList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return failureUrlList;

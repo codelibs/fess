@@ -53,7 +53,7 @@ public class ScheduledJobService {
         // update pager
         BeanUtil.copyBeanToBean(scheduledJobList, scheduledJobPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         scheduledJobPager.setPageNumberList(scheduledJobList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return scheduledJobList;

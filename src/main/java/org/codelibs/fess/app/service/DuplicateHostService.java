@@ -47,7 +47,7 @@ public class DuplicateHostService {
         // update pager
         BeanUtil.copyBeanToBean(duplicateHostList, duplicateHostPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
         duplicateHostPager.setPageNumberList(duplicateHostList.pageRange(op -> {
-            op.rangeSize(5);
+            op.rangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
         }).createPageNumberList());
 
         return duplicateHostList;

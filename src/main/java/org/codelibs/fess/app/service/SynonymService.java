@@ -27,11 +27,15 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.synonym.SynonymFile;
 import org.codelibs.fess.dict.synonym.SynonymItem;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 
 public class SynonymService {
     @Resource
     protected DictionaryManager dictionaryManager;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<SynonymItem> getSynonymList(final String dictId, final SynonymPager synonymPager) {
         return getSynonymFile(dictId).map(file -> {
@@ -40,7 +44,7 @@ public class SynonymService {
 
             // update pager
                 BeanUtil.copyBeanToBean(synonymList, synonymPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                synonymList.setPageRangeSize(5);
+                synonymList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
                 synonymPager.setPageNumberList(synonymList.createPageNumberList());
 
                 return (List<SynonymItem>) synonymList;

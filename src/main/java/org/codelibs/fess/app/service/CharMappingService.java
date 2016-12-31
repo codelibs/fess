@@ -27,11 +27,15 @@ import org.codelibs.fess.dict.DictionaryFile.PagingList;
 import org.codelibs.fess.dict.DictionaryManager;
 import org.codelibs.fess.dict.mapping.CharMappingFile;
 import org.codelibs.fess.dict.mapping.CharMappingItem;
+import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.optional.OptionalEntity;
 
 public class CharMappingService {
     @Resource
     protected DictionaryManager dictionaryManager;
+
+    @Resource
+    protected FessConfig fessConfig;
 
     public List<CharMappingItem> getCharMappingList(final String dictId, final CharMappingPager charMappingPager) {
         return getCharMappingFile(dictId).map(
@@ -42,7 +46,7 @@ public class CharMappingService {
 
                     // update pager
                     BeanUtil.copyBeanToBean(charMappingList, charMappingPager, option -> option.include(Constants.PAGER_CONVERSION_RULE));
-                    charMappingList.setPageRangeSize(5);
+                    charMappingList.setPageRangeSize(fessConfig.getPagingPageRangeSizeAsInteger());
                     charMappingPager.setPageNumberList(charMappingList.createPageNumberList());
 
                     return (List<CharMappingItem>) charMappingList;
