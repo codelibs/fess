@@ -18,7 +18,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161215.133315-1" />
+			<param name="plugin.zip.version" value="5.0.0-20161222.133436-2" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
@@ -27,7 +27,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-ja" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161215.132732-1" />
+			<param name="plugin.zip.version" value="5.0.0-20161222.133758-2" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
@@ -36,7 +36,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-synonym" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161215.131354-1" />
+			<param name="plugin.zip.version" value="5.0.0-20161222.134704-2" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
@@ -54,7 +54,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161222.135233-2" />
+			<param name="plugin.zip.version" value="5.0.0-20161226.141608-5" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
@@ -63,7 +63,7 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161215.132043-1" />
+			<param name="plugin.zip.version" value="5.0.0-20161222.135357-2" />
 		</antcall>
 
 		<antcall target="remove.jars" />
