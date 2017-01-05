@@ -15,39 +15,39 @@
 		<mkdir dir="${plugins.dir}" />
 		<!-- analysis-fess -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-fess" />
-			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161222.133436-2" />
+			<param name="plugin.version" value="5.0.0" />
+			<param name="plugin.zip.version" value="5.0.0" />
 		</antcall>
 		<!-- analysis-ja -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-ja" />
-			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161222.133758-2" />
+			<param name="plugin.version" value="5.0.0" />
+			<param name="plugin.zip.version" value="5.0.0" />
 		</antcall>
 		<!-- analysis-synonym -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="analysis-synonym" />
-			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161222.134704-2" />
+			<param name="plugin.version" value="5.0.0" />
+			<param name="plugin.zip.version" value="5.0.0" />
 		</antcall>
 		<!-- configsync -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="configsync" />
-			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161231.223057-4" />
+			<param name="plugin.version" value="5.0.0" />
+			<param name="plugin.zip.version" value="5.0.0" />
 		</antcall>
 		<!-- dataformat -->
 		<antcall target="install.plugin">
@@ -56,16 +56,16 @@
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="dataformat" />
 			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161226.141608-5" />
+			<param name="plugin.zip.version" value="5.0.0-20170105.123548-6" />
 		</antcall>
 		<!-- langfield -->
 		<antcall target="install.plugin">
-			<param name="repo.url" value="${maven.snapshot.repo.url}" />
+			<param name="repo.url" value="${maven.release.repo.url}" />
 			<param name="plugin.groupId" value="org/codelibs" />
 			<param name="plugin.name.prefix" value="elasticsearch-" />
 			<param name="plugin.name" value="langfield" />
-			<param name="plugin.version" value="5.0.0-SNAPSHOT" />
-			<param name="plugin.zip.version" value="5.0.0-20161222.135357-2" />
+			<param name="plugin.version" value="5.0.0" />
+			<param name="plugin.zip.version" value="5.0.0" />
 		</antcall>
 		<!-- kopf -->
 		<get dest="${target.dir}/kopf.zip">
@@ -86,7 +86,12 @@
 		<get dest="${target.dir}">
 			<url url="${repo.url}/${plugin.groupId}/${plugin.name.prefix}${plugin.name}/${plugin.version}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
 		</get>
-		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip" />
+		<unzip dest="${plugins.dir}/${plugin.name}" src="${target.dir}/${plugin.name.prefix}${plugin.name}-${plugin.zip.version}.zip">
+			<patternset>
+				<include name="elasticsearch/**" />
+			</patternset>
+			<cutdirsmapper dirs="1" />
+		</unzip>
 	</target>
 
 	<target name="remove.jars" if="with.fess">
