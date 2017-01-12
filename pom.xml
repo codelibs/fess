@@ -60,11 +60,11 @@
 		<crawler.version>1.1.0-SNAPSHOT</crawler.version>
 
 		<!-- Suggest -->
-		<suggest.version>5.0.0-SNAPSHOT</suggest.version>
+		<suggest.version>5.1.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.0.2</elasticsearch.version>
-		<cluster.runner.version>5.0.2.1</cluster.runner.version>
+		<elasticsearch.version>5.1.1</elasticsearch.version>
+		<cluster.runner.version>5.1.1.0</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.5</tomcat.version>
