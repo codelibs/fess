@@ -22,6 +22,7 @@ import javax.validation.constraints.Size;
 
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.validation.CustomSize;
 import org.lastaflute.web.validation.Required;
 import org.lastaflute.web.validation.theme.conversion.ValidateTypeFailure;
 
@@ -44,13 +45,13 @@ public class CreateForm {
     @Pattern(regexp = "^[a-zA-Z0-9_-| ]+$")
     public String value;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String includedPaths;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String excludedPaths;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
     @Min(value = 0)

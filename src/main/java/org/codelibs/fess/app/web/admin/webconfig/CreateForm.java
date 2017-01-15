@@ -23,6 +23,7 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.web.CrudMode;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.validation.CustomSize;
 import org.codelibs.fess.validation.UriType;
 import org.codelibs.fess.validation.UriTypeValidator.ProtocolType;
 import org.lastaflute.web.validation.Required;
@@ -46,22 +47,22 @@ public class CreateForm {
 
     @Required
     @UriType(protocolType = ProtocolType.WEB)
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String urls;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String includedUrls;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String excludedUrls;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String includedDocUrls;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String excludedDocUrls;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String configParameter;
 
     @Min(value = 0)
@@ -98,7 +99,7 @@ public class CreateForm {
     @Size(max = 5)
     public String available;
 
-    @Size(max = 4000)
+    @CustomSize(maxKey = "form.admin.max.input.size")
     public String permissions;
 
     @Required
