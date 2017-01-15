@@ -156,12 +156,12 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     protected void saveInfo(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
-        sessionManager.info().save(messages);
+        sessionManager.info().saveMessages(messages);
     }
 
     protected void saveError(final VaMessenger<FessMessages> validationMessagesLambda) {
         final FessMessages messages = createMessages();
         validationMessagesLambda.message(messages);
-        sessionManager.errors().save(messages);
+        sessionManager.errors().saveMessages(messages);
     }
 }

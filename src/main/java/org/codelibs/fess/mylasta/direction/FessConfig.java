@@ -537,6 +537,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. .fess_basic_config.bulk,.fess_config.bulk,.fess_user.bulk,system.properties */
     String INDEX_BACKUP_TARGETS = "index.backup.targets";
 
+    /** The key of the configuration. e.g. 4000 */
+    String FORM_ADMIN_MAX_INPUT_SIZE = "form.admin.max.input.size";
+
     /** The key of the configuration. e.g. admin */
     String AUTHENTICATION_ADMIN_USERS = "authentication.admin.users";
 
@@ -573,10 +576,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. FES */
     String COOKIE_REMEMBER_ME_HARBOR_KEY = "cookie.remember.me.harbor.key";
 
-    /** The key of the configuration. e.g. 4 */
+    /** The key of the configuration. e.g. 25 */
     String PAGING_PAGE_SIZE = "paging.page.size";
 
-    /** The key of the configuration. e.g. 3 */
+    /** The key of the configuration. e.g. 5 */
     String PAGING_PAGE_RANGE_SIZE = "paging.page.range.size";
 
     /** The key of the configuration. e.g. true */
@@ -2628,6 +2631,21 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getIndexBackupTargets();
 
     /**
+     * Get the value for the key 'form.admin.max.input.size'. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getFormAdminMaxInputSize();
+
+    /**
+     * Get the value for the key 'form.admin.max.input.size' as {@link Integer}. <br>
+     * The value is, e.g. 4000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getFormAdminMaxInputSizeAsInteger();
+
+    /**
      * Get the value for the key 'authentication.admin.users'. <br>
      * The value is, e.g. admin <br>
      * comment: ------
@@ -2760,7 +2778,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'paging.page.size'. <br>
-     * The value is, e.g. 4 <br>
+     * The value is, e.g. 25 <br>
      * comment: The size of one page for paging
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -2768,7 +2786,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'paging.page.size' as {@link Integer}. <br>
-     * The value is, e.g. 4 <br>
+     * The value is, e.g. 25 <br>
      * comment: The size of one page for paging
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
@@ -2777,7 +2795,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'paging.page.range.size'. <br>
-     * The value is, e.g. 3 <br>
+     * The value is, e.g. 5 <br>
      * comment: The size of page range for paging
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
@@ -2785,7 +2803,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'paging.page.range.size' as {@link Integer}. <br>
-     * The value is, e.g. 3 <br>
+     * The value is, e.g. 5 <br>
      * comment: The size of page range for paging
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      * @throws NumberFormatException When the property is not integer.
@@ -5208,6 +5226,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getIndexBackupTargets() {
             return get(FessConfig.INDEX_BACKUP_TARGETS);
+        }
+
+        public String getFormAdminMaxInputSize() {
+            return get(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE);
+        }
+
+        public Integer getFormAdminMaxInputSizeAsInteger() {
+            return getAsInteger(FessConfig.FORM_ADMIN_MAX_INPUT_SIZE);
         }
 
         public String getAuthenticationAdminUsers() {

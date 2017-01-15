@@ -39,11 +39,11 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<!-- Main Framework -->
-		<dbflute.version>1.1.1</dbflute.version>
-		<lastaflute.version>0.8.6</lastaflute.version>
+		<dbflute.version>1.1.2</dbflute.version>
+		<lastaflute.version>0.8.8</lastaflute.version>
 		<lasta.taglib.version>0.7.1</lasta.taglib.version>
 		<lasta.job.version>0.2.5</lasta.job.version>
-		<mailflute.version>0.5.1</mailflute.version>
+		<mailflute.version>0.5.2</mailflute.version>
 
 		<!-- Partner Library -->
 		<slf4j.version>1.7.21</slf4j.version>
@@ -54,7 +54,7 @@
 
 		<!-- Testing -->
 		<junit.version>4.12</junit.version>
-		<utflute.version>0.6.3</utflute.version>
+		<utflute.version>0.6.6</utflute.version>
 
 		<!-- Crawler -->
 		<crawler.version>1.1.0-SNAPSHOT</crawler.version>
@@ -63,12 +63,12 @@
 		<suggest.version>5.1.0-SNAPSHOT</suggest.version>
 
 		<!-- Elasticsearch -->
-		<elasticsearch.version>5.1.1</elasticsearch.version>
-		<cluster.runner.version>5.1.1.0</cluster.runner.version>
+		<elasticsearch.version>5.1.2</elasticsearch.version>
+		<cluster.runner.version>5.1.2.0</cluster.runner.version>
 
 		<!-- Tomcat -->
-		<tomcat.version>8.5.5</tomcat.version>
-		<tomcat.boot.version>0.5.0</tomcat.boot.version>
+		<tomcat.version>8.5.9</tomcat.version>
+		<tomcat.boot.version>0.5.1</tomcat.boot.version>
 
 		<!-- DEB & RPM build -->
 		<packaging.fess.home.dir>/usr/share/fess</packaging.fess.home.dir>

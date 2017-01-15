@@ -572,6 +572,19 @@ public abstract class EsAbstractConditionBean implements ConditionBean {
         // do nothing
     }
 
+    // no annotation for compatible with 1.1.1
+    public void enableSpecifyColumnRequired() {
+        // do nothing
+    }
+
+    public void disableSpecifyColumnRequired() {
+        // do nothing
+    }
+
+    public void xcheckSpecifyColumnRequiredIfNeeds() {
+        // do nothing
+    }
+
     @Override
     public boolean hasSpecifiedLocalColumn() {
         return false;
