@@ -8,12 +8,10 @@
     },
     "properties": {
       "fileConfigId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "roleTypeId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }

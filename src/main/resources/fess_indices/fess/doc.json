@@ -448,7 +448,7 @@
         "type": "langstring",
         "lang_field": "lang",
         "lang_base_name": "title",
-        "index": "no"
+        "index": false
       },
       "content": {
         "type": "langstring",
@@ -473,7 +473,7 @@
       },
       "digest": {
         "type": "text",
-        "index": "no"
+        "index": false
       },
       "doc_id": {
         "type": "keyword"

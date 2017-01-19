@@ -8,34 +8,28 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "token": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "permissions": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "parameter_name" : {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "expiredTime": {
         "type": "long"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

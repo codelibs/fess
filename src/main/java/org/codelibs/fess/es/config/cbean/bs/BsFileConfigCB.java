@@ -200,6 +200,10 @@ public class BsFileConfigCB extends EsAbstractConditionBean {
             doColumn("depth");
         }
 
+        public void columnDescription() {
+            doColumn("description");
+        }
+
         public void columnExcludedDocPaths() {
             doColumn("excludedDocPaths");
         }

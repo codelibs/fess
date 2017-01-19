@@ -8,32 +8,25 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "paths": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "includedPaths": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "excludedPaths": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "includedDocPaths": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "excludedDocPaths": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "configParameter": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "depth": {
         "type": "integer"
@@ -57,25 +50,25 @@
         "type": "boolean"
       },
       "permissions": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "sortOrder": {
         "type": "integer"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"
+      },
+      "description" : {
+        "type": "text"
       }
     }
   }

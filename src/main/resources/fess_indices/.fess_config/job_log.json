@@ -8,28 +8,22 @@
     },
     "properties": {
       "jobName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "jobStatus": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "target": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "scriptType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "scriptData": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "scriptResult": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "lastUpdated": {
         "type": "long"

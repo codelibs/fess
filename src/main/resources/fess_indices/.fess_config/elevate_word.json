@@ -8,38 +8,31 @@
     },
     "properties": {
       "suggestWord": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "reading": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "targetRole": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "targetLabel": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "permissions": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "boost": {
         "type": "float"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

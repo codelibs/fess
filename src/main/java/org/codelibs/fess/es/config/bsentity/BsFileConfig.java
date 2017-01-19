@@ -55,6 +55,9 @@ public class BsFileConfig extends EsAbstractEntity {
     /** depth */
     protected Integer depth;
 
+    /** description */
+    protected String description;
+
     /** excludedDocPaths */
     protected String excludedDocPaths;
 
@@ -136,6 +139,9 @@ public class BsFileConfig extends EsAbstractEntity {
         if (depth != null) {
             sourceMap.put("depth", depth);
         }
+        if (description != null) {
+            sourceMap.put("description", description);
+        }
         if (excludedDocPaths != null) {
             sourceMap.put("excludedDocPaths", excludedDocPaths);
         }
@@ -193,6 +199,7 @@ public class BsFileConfig extends EsAbstractEntity {
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
         sb.append(dm).append(depth);
+        sb.append(dm).append(description);
         sb.append(dm).append(excludedDocPaths);
         sb.append(dm).append(excludedPaths);
         sb.append(dm).append(includedDocPaths);
@@ -275,6 +282,16 @@ public class BsFileConfig extends EsAbstractEntity {
     public void setDepth(Integer value) {
         registerModifiedProperty("depth");
         this.depth = value;
+    }
+
+    public String getDescription() {
+        checkSpecifiedProperty("description");
+        return convertEmptyToNull(description);
+    }
+
+    public void setDescription(String value) {
+        registerModifiedProperty("description");
+        this.description = value;
     }
 
     public String getExcludedDocPaths() {

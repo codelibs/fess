@@ -8,12 +8,10 @@
     },
     "properties": {
       "term": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "query": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "maxSize": {
         "type": "integer"
@@ -22,15 +20,13 @@
         "type": "float"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

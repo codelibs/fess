@@ -8,16 +8,13 @@
     },
     "properties": {
       "crawlingInfoId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "key": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "value": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"

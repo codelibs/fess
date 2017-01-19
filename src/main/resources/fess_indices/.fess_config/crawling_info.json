@@ -8,12 +8,10 @@
     },
     "properties": {
       "sessionId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "expiredTime": {
         "type": "long"

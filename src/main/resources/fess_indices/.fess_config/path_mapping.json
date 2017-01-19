@@ -8,34 +8,28 @@
     },
     "properties": {
       "regex": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "replacement": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "processType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "sortOrder": {
         "type": "integer"
       },
       "userAgent": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

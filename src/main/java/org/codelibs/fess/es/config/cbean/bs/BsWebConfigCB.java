@@ -200,6 +200,10 @@ public class BsWebConfigCB extends EsAbstractConditionBean {
             doColumn("depth");
         }
 
+        public void columnDescription() {
+            doColumn("description");
+        }
+
         public void columnExcludedDocUrls() {
             doColumn("excludedDocUrls");
         }

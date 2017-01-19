@@ -8,27 +8,22 @@
     },
     "properties": {
       "url": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "path": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "generator": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "target": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }

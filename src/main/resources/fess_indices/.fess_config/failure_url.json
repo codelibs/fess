@@ -8,20 +8,16 @@
     },
     "properties": {
       "url": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "threadName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "errorName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "errorLog": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "errorCount": {
         "type": "integer"
@@ -30,8 +26,7 @@
         "type": "long"
       },
       "configId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }

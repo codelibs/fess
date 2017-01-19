@@ -79,6 +79,7 @@ public abstract class BsWebConfigBhv extends EsAbstractBehavior<WebConfig, WebCo
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setDepth(DfTypeUtil.toInteger(source.get("depth")));
+            result.setDescription(DfTypeUtil.toString(source.get("description")));
             result.setExcludedDocUrls(DfTypeUtil.toString(source.get("excludedDocUrls")));
             result.setExcludedUrls(DfTypeUtil.toString(source.get("excludedUrls")));
             result.setIncludedDocUrls(DfTypeUtil.toString(source.get("includedDocUrls")));

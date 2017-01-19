@@ -79,6 +79,7 @@ public abstract class BsFileConfigBhv extends EsAbstractBehavior<FileConfig, Fil
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
             result.setDepth(DfTypeUtil.toInteger(source.get("depth")));
+            result.setDescription(DfTypeUtil.toString(source.get("description")));
             result.setExcludedDocPaths(DfTypeUtil.toString(source.get("excludedDocPaths")));
             result.setExcludedPaths(DfTypeUtil.toString(source.get("excludedPaths")));
             result.setIncludedDocPaths(DfTypeUtil.toString(source.get("includedDocPaths")));

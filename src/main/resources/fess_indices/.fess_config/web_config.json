@@ -8,32 +8,25 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "urls": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "includedUrls": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "excludedUrls": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "includedDocUrls": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "excludedDocUrls": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "configParameter": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "depth": {
         "type": "integer"
@@ -42,8 +35,7 @@
         "type": "long"
       },
       "userAgent": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "numOfThread": {
         "type": "integer"
@@ -61,25 +53,25 @@
         "type": "boolean"
       },
       "permissions": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "sortOrder": {
         "type": "integer"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"
+      },
+      "description" : {
+        "type": "text"
       }
     }
   }

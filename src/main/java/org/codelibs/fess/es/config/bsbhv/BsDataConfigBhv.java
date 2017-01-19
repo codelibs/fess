@@ -77,6 +77,7 @@ public abstract class BsDataConfigBhv extends EsAbstractBehavior<DataConfig, Dat
             result.setBoost(DfTypeUtil.toFloat(source.get("boost")));
             result.setCreatedBy(DfTypeUtil.toString(source.get("createdBy")));
             result.setCreatedTime(DfTypeUtil.toLong(source.get("createdTime")));
+            result.setDescription(DfTypeUtil.toString(source.get("description")));
             result.setHandlerName(DfTypeUtil.toString(source.get("handlerName")));
             result.setHandlerParameter(DfTypeUtil.toString(source.get("handlerParameter")));
             result.setHandlerScript(DfTypeUtil.toString(source.get("handlerScript")));

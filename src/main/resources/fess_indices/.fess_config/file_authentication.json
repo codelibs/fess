@@ -8,42 +8,34 @@
     },
     "properties": {
       "hostname": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "port": {
         "type": "integer"
       },
       "protocolScheme": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "username": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "password": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "parameters": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "fileConfigId": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

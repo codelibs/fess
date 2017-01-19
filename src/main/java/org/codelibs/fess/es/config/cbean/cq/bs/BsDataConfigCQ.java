@@ -942,6 +942,218 @@ public abstract class BsDataConfigCQ extends EsAbstractConditionQuery {
         return this;
     }
 
+    public void setDescription_Equal(String description) {
+        setDescription_Term(description, null);
+    }
+
+    public void setDescription_Equal(String description, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        setDescription_Term(description, opLambda);
+    }
+
+    public void setDescription_Term(String description) {
+        setDescription_Term(description, null);
+    }
+
+    public void setDescription_Term(String description, ConditionOptionCall<TermQueryBuilder> opLambda) {
+        TermQueryBuilder builder = regTermQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_NotEqual(String description) {
+        setDescription_NotTerm(description, null);
+    }
+
+    public void setDescription_NotTerm(String description) {
+        setDescription_NotTerm(description, null);
+    }
+
+    public void setDescription_NotEqual(String description, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        setDescription_NotTerm(description, opLambda);
+    }
+
+    public void setDescription_NotTerm(String description, ConditionOptionCall<BoolQueryBuilder> opLambda) {
+        not(not -> not.setDescription_Term(description), opLambda);
+    }
+
+    public void setDescription_Terms(Collection<String> descriptionList) {
+        setDescription_Terms(descriptionList, null);
+    }
+
+    public void setDescription_Terms(Collection<String> descriptionList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        TermsQueryBuilder builder = regTermsQ("description", descriptionList);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_InScope(Collection<String> descriptionList) {
+        setDescription_Terms(descriptionList, null);
+    }
+
+    public void setDescription_InScope(Collection<String> descriptionList, ConditionOptionCall<TermsQueryBuilder> opLambda) {
+        setDescription_Terms(descriptionList, opLambda);
+    }
+
+    public void setDescription_Match(String description) {
+        setDescription_Match(description, null);
+    }
+
+    public void setDescription_Match(String description, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regMatchQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_MatchPhrase(String description) {
+        setDescription_MatchPhrase(description, null);
+    }
+
+    public void setDescription_MatchPhrase(String description, ConditionOptionCall<MatchPhraseQueryBuilder> opLambda) {
+        MatchPhraseQueryBuilder builder = regMatchPhraseQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_MatchPhrasePrefix(String description) {
+        setDescription_MatchPhrasePrefix(description, null);
+    }
+
+    public void setDescription_MatchPhrasePrefix(String description, ConditionOptionCall<MatchPhrasePrefixQueryBuilder> opLambda) {
+        MatchPhrasePrefixQueryBuilder builder = regMatchPhrasePrefixQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Fuzzy(String description) {
+        setDescription_Fuzzy(description, null);
+    }
+
+    public void setDescription_Fuzzy(String description, ConditionOptionCall<MatchQueryBuilder> opLambda) {
+        MatchQueryBuilder builder = regFuzzyQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Prefix(String description) {
+        setDescription_Prefix(description, null);
+    }
+
+    public void setDescription_Prefix(String description, ConditionOptionCall<PrefixQueryBuilder> opLambda) {
+        PrefixQueryBuilder builder = regPrefixQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Wildcard(String description) {
+        setDescription_Wildcard(description, null);
+    }
+
+    public void setDescription_Wildcard(String description, ConditionOptionCall<WildcardQueryBuilder> opLambda) {
+        WildcardQueryBuilder builder = regWildcardQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Regexp(String description) {
+        setDescription_Regexp(description, null);
+    }
+
+    public void setDescription_Regexp(String description, ConditionOptionCall<RegexpQueryBuilder> opLambda) {
+        RegexpQueryBuilder builder = regRegexpQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_SpanTerm(String description) {
+        setDescription_SpanTerm("description", null);
+    }
+
+    public void setDescription_SpanTerm(String description, ConditionOptionCall<SpanTermQueryBuilder> opLambda) {
+        SpanTermQueryBuilder builder = regSpanTermQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_GreaterThan(String description) {
+        setDescription_GreaterThan(description, null);
+    }
+
+    public void setDescription_GreaterThan(String description, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = description;
+        RangeQueryBuilder builder = regRangeQ("description", ConditionKey.CK_GREATER_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_LessThan(String description) {
+        setDescription_LessThan(description, null);
+    }
+
+    public void setDescription_LessThan(String description, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = description;
+        RangeQueryBuilder builder = regRangeQ("description", ConditionKey.CK_LESS_THAN, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_GreaterEqual(String description) {
+        setDescription_GreaterEqual(description, null);
+    }
+
+    public void setDescription_GreaterEqual(String description, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = description;
+        RangeQueryBuilder builder = regRangeQ("description", ConditionKey.CK_GREATER_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_LessEqual(String description) {
+        setDescription_LessEqual(description, null);
+    }
+
+    public void setDescription_LessEqual(String description, ConditionOptionCall<RangeQueryBuilder> opLambda) {
+        final Object _value = description;
+        RangeQueryBuilder builder = regRangeQ("description", ConditionKey.CK_LESS_EQUAL, _value);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Exists() {
+        setDescription_Exists(null);
+    }
+
+    public void setDescription_Exists(ConditionOptionCall<ExistsQueryBuilder> opLambda) {
+        ExistsQueryBuilder builder = regExistsQ("description");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_CommonTerms(String description) {
+        setDescription_CommonTerms(description, null);
+    }
+
+    public void setDescription_CommonTerms(String description, ConditionOptionCall<CommonTermsQueryBuilder> opLambda) {
+        CommonTermsQueryBuilder builder = regCommonTermsQ("description", description);
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
     public void setHandlerName_Equal(String handlerName) {
         setHandlerName_Term(handlerName, null);
     }

@@ -192,6 +192,10 @@ public class BsDataConfigCB extends EsAbstractConditionBean {
             doColumn("createdTime");
         }
 
+        public void columnDescription() {
+            doColumn("description");
+        }
+
         public void columnHandlerName() {
             doColumn("handlerName");
         }

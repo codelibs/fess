@@ -55,6 +55,9 @@ public class BsWebConfig extends EsAbstractEntity {
     /** depth */
     protected Integer depth;
 
+    /** description */
+    protected String description;
+
     /** excludedDocUrls */
     protected String excludedDocUrls;
 
@@ -139,6 +142,9 @@ public class BsWebConfig extends EsAbstractEntity {
         if (depth != null) {
             sourceMap.put("depth", depth);
         }
+        if (description != null) {
+            sourceMap.put("description", description);
+        }
         if (excludedDocUrls != null) {
             sourceMap.put("excludedDocUrls", excludedDocUrls);
         }
@@ -199,6 +205,7 @@ public class BsWebConfig extends EsAbstractEntity {
         sb.append(dm).append(createdBy);
         sb.append(dm).append(createdTime);
         sb.append(dm).append(depth);
+        sb.append(dm).append(description);
         sb.append(dm).append(excludedDocUrls);
         sb.append(dm).append(excludedUrls);
         sb.append(dm).append(includedDocUrls);
@@ -282,6 +289,16 @@ public class BsWebConfig extends EsAbstractEntity {
     public void setDepth(Integer value) {
         registerModifiedProperty("depth");
         this.depth = value;
+    }
+
+    public String getDescription() {
+        checkSpecifiedProperty("description");
+        return convertEmptyToNull(description);
+    }
+
+    public void setDescription(String value) {
+        registerModifiedProperty("description");
+        this.description = value;
     }
 
     public String getExcludedDocUrls() {

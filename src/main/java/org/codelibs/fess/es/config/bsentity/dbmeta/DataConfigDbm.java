@@ -86,6 +86,8 @@ public class DataConfigDbm extends AbstractDBMeta {
                 "createdBy");
         setupEpg(_epgMap, et -> ((DataConfig) et).getCreatedTime(), (et, vl) -> ((DataConfig) et).setCreatedTime(DfTypeUtil.toLong(vl)),
                 "createdTime");
+        setupEpg(_epgMap, et -> ((DataConfig) et).getDescription(), (et, vl) -> ((DataConfig) et).setDescription(DfTypeUtil.toString(vl)),
+                "description");
         setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerName(), (et, vl) -> ((DataConfig) et).setHandlerName(DfTypeUtil.toString(vl)),
                 "handlerName");
         setupEpg(_epgMap, et -> ((DataConfig) et).getHandlerParameter(),
@@ -145,6 +147,8 @@ public class DataConfigDbm extends AbstractDBMeta {
             false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnCreatedTime = cci("createdTime", "createdTime", null, null, Long.class, "createdTime", null, false,
             false, false, "Long", 0, 0, null, false, null, null, null, null, null, false);
+    protected final ColumnInfo _columnDescription = cci("description", "description", null, null, String.class, "description", null, false,
+            false, false, "text", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHandlerName = cci("handlerName", "handlerName", null, null, String.class, "handlerName", null, false,
             false, false, "keyword", 0, 0, null, false, null, null, null, null, null, false);
     protected final ColumnInfo _columnHandlerParameter = cci("handlerParameter", "handlerParameter", null, null, String.class,
@@ -176,6 +180,10 @@ public class DataConfigDbm extends AbstractDBMeta {
 
     public ColumnInfo columnCreatedTime() {
         return _columnCreatedTime;
+    }
+
+    public ColumnInfo columnDescription() {
+        return _columnDescription;
     }
 
     public ColumnInfo columnHandlerName() {
@@ -216,6 +224,7 @@ public class DataConfigDbm extends AbstractDBMeta {
         ls.add(columnBoost());
         ls.add(columnCreatedBy());
         ls.add(columnCreatedTime());
+        ls.add(columnDescription());
         ls.add(columnHandlerName());
         ls.add(columnHandlerParameter());
         ls.add(columnHandlerScript());

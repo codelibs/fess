@@ -911,6 +911,61 @@ public abstract class BsDataConfigCA extends EsAbstractConditionAggregation {
         }
     }
 
+    public void setDescription_Count() {
+        setDescription_Count(null);
+    }
+
+    public void setDescription_Count(ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        setDescription_Count("description", opLambda);
+    }
+
+    public void setDescription_Count(String name, ConditionOptionCall<ValueCountAggregationBuilder> opLambda) {
+        ValueCountAggregationBuilder builder = regCountA(name, "description");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Cardinality() {
+        setDescription_Cardinality(null);
+    }
+
+    public void setDescription_Cardinality(ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        setDescription_Cardinality("description", opLambda);
+    }
+
+    public void setDescription_Cardinality(String name, ConditionOptionCall<CardinalityAggregationBuilder> opLambda) {
+        CardinalityAggregationBuilder builder = regCardinalityA(name, "description");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+    }
+
+    public void setDescription_Missing() {
+        setDescription_Missing(null);
+    }
+
+    public void setDescription_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda) {
+        setDescription_Missing("description", opLambda, null);
+    }
+
+    public void setDescription_Missing(ConditionOptionCall<MissingAggregationBuilder> opLambda, OperatorCall<BsDataConfigCA> aggsLambda) {
+        setDescription_Missing("description", opLambda, aggsLambda);
+    }
+
+    public void setDescription_Missing(String name, ConditionOptionCall<MissingAggregationBuilder> opLambda,
+            OperatorCall<BsDataConfigCA> aggsLambda) {
+        MissingAggregationBuilder builder = regMissingA(name, "description");
+        if (opLambda != null) {
+            opLambda.callback(builder);
+        }
+        if (aggsLambda != null) {
+            DataConfigCA ca = new DataConfigCA();
+            aggsLambda.callback(ca);
+            ca.getAggregationBuilderList().forEach(builder::subAggregation);
+        }
+    }
+
     public void setHandlerName_Terms() {
         setHandlerName_Terms(null);
     }

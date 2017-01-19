@@ -8,20 +8,16 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "handlerName": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "handlerParameter": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "handlerScript": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "boost": {
         "type": "float"
@@ -30,25 +26,25 @@
         "type": "boolean"
       },
       "permissions": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "sortOrder": {
         "type": "integer"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"
+      },
+      "description" : {
+        "type": "text"
       }
     }
   }

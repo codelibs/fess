@@ -8,28 +8,22 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "target": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "cronExpression": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "scriptType": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "scriptData": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "crawler": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "jobLogging": {
         "type": "boolean"
@@ -41,15 +35,13 @@
         "type": "integer"
       },
       "createdBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "createdTime": {
         "type": "long"
       },
       "updatedBy": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       },
       "updatedTime": {
         "type": "long"

@@ -221,6 +221,9 @@
           "depth" : {
             "type" : "integer"
           },
+          "description" : {
+            "type": "text"
+          },
           "excludedDocUrls" : {
             "type": "keyword"
           },
@@ -424,6 +427,9 @@
           },
           "createdTime" : {
             "type" : "long"
+          },
+          "description" : {
+            "type": "text"
           },
           "handlerName" : {
             "type": "keyword"
@@ -671,6 +677,9 @@
           },
           "depth" : {
             "type" : "integer"
+          },
+          "description" : {
+            "type": "text"
           },
           "excludedDocPaths" : {
             "type": "keyword"
