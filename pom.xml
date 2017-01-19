@@ -63,7 +63,7 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>5.1.2</elasticsearch.version>
-		<cluster.runner.version>5.1.2.0</cluster.runner.version>
+		<cluster.runner.version>5.1.2.1-SNAPSHOT</cluster.runner.version>
 
 		<!-- Tomcat -->
 		<tomcat.version>8.5.9</tomcat.version>

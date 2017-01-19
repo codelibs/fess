@@ -239,6 +239,7 @@ public class FessEsClient implements Client {
                 if (esDir != null) {
                     config.basePath(esDir);
                 }
+                config.disableESLogger();
                 runner.onBuild((number, settingsBuilder) -> {
                     final File pluginDir = new File(esDir, "plugins");
                     if (pluginDir.isDirectory()) {
