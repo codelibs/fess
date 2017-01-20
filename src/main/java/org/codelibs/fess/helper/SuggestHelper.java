@@ -43,14 +43,18 @@ import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.suggest.Suggester;
 import org.codelibs.fess.suggest.constants.FieldNames;
 import org.codelibs.fess.suggest.entity.SuggestItem;
+import org.codelibs.fess.suggest.index.SuggestDeleteResponse;
 import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SuggestHelper {
+    private static final Logger logger = LoggerFactory.getLogger(SuggestHelper.class);
 
     private static final String TEXT_SEP = " ";
 
@@ -177,6 +181,48 @@ public class SuggestHelper {
         boolQueryBuilder.mustNot(QueryBuilders.termQuery(FieldNames.KINDS, SuggestItem.Kind.USER.toString()));
 
         SuggestUtil.deleteByQuery(fessEsClient, suggester.getIndex(), suggester.getType(), boolQueryBuilder);
+    }
+
+    public long getAllWordsNum() {
+        return suggester.getAllWordsNum();
+    }
+
+    public long getDocumentWordsNum() {
+        return suggester.getDocumentWordsNum();
+    }
+
+    public long getQueryWordsNum() {
+        return suggester.getQueryWordsNum();
+    }
+
+    public boolean deleteAllWords() {
+        final SuggestDeleteResponse response = suggester.indexer().deleteAll();
+        if (response.hasError()) {
+            logger.warn("Failed to delete all words.", response.getErrors().get(0));
+            return false;
+        }
+        suggester.refresh();
+        return true;
+    }
+
+    public boolean deleteDocumentWords() {
+        final SuggestDeleteResponse response = suggester.indexer().deleteDocumentWords();
+        if (response.hasError()) {
+            logger.warn("Failed to delete document words.", response.getErrors().get(0));
+            return false;
+        }
+        suggester.refresh();
+        return true;
+    }
+
+    public boolean deleteQueryWords() {
+        final SuggestDeleteResponse response = suggester.indexer().deleteQueryWords();
+        if (response.hasError()) {
+            logger.warn("Failed to delete query words.", response.getErrors().get(0));
+            return false;
+        }
+        suggester.refresh();
+        return true;
     }
 
     public void refreshWords() {

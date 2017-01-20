@@ -810,6 +810,9 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. accesstoken */
     String ONLINE_HELP_NAME_ACCESSTOKEN = "online.help.name.accesstoken";
 
+    /** The key of the configuration. e.g. suggest */
+    String ONLINE_HELP_NAME_SUGGEST = "online.help.name.suggest";
+
     /** The key of the configuration. e.g. ja */
     String ONLINE_HELP_SUPPORTED_LANGS = "online.help.supported.langs";
 
@@ -3614,6 +3617,13 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     String getOnlineHelpNameAccesstoken();
 
     /**
+     * Get the value for the key 'online.help.name.suggest'. <br>
+     * The value is, e.g. suggest <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getOnlineHelpNameSuggest();
+
+    /**
      * Get the value for the key 'online.help.supported.langs'. <br>
      * The value is, e.g. ja <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5754,6 +5764,10 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getOnlineHelpNameAccesstoken() {
             return get(FessConfig.ONLINE_HELP_NAME_ACCESSTOKEN);
+        }
+
+        public String getOnlineHelpNameSuggest() {
+            return get(FessConfig.ONLINE_HELP_NAME_SUGGEST);
         }
 
         public String getOnlineHelpSupportedLangs() {
