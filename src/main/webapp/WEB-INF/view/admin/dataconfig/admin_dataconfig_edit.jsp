@@ -130,6 +130,15 @@
 											</la:select>
 										</div>
 									</div>
+									<div class="form-group">
+										<label for="permissions" class="col-sm-3 control-label"><la:message
+												key="labels.description" /></label>
+										<div class="col-sm-9">
+											<la:errors property="description" />
+											<la:textarea property="description" styleClass="form-control"
+												rows="5" />
+										</div>
+									</div>
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">

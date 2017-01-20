@@ -108,6 +108,11 @@
 														<la:message key="labels.disabled" />
 													</c:if></td>
 											</tr>
+											<tr>
+												<th><la:message key="labels.description" /></th>
+												<td>${f:br(f:h(description))}<la:hidden
+														property="description" /></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>

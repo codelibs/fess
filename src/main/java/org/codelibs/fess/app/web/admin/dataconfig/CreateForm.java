@@ -40,6 +40,9 @@ public class CreateForm {
     @Size(max = 200)
     public String name;
 
+    @Size(max = 1000)
+    public String description;
+
     @Required
     @CustomSize(maxKey = "form.admin.max.input.size")
     public String handlerName;

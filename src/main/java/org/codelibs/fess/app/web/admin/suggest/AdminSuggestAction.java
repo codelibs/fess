@@ -16,6 +16,8 @@
 
 package org.codelibs.fess.app.web.admin.suggest;
 
+import javax.annotation.Resource;
+
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.helper.SuggestHelper;
 import org.lastaflute.web.Execute;
@@ -23,8 +25,6 @@ import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
 
 /**
  * @author yfujita
