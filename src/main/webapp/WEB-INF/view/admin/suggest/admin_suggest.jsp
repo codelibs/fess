@@ -11,7 +11,7 @@
 		<jsp:include page="/WEB-INF/view/common/admin/header.jsp"></jsp:include>
 		<jsp:include page="/WEB-INF/view/common/admin/sidebar.jsp">
 			<jsp:param name="menuCategoryType" value="suggest" />
-			<jsp:param name="menuType" value="badWord" />
+			<jsp:param name="menuType" value="suggestWord" />
 		</jsp:include>
 		<div class="content-wrapper">
 			<section class="content-header">
