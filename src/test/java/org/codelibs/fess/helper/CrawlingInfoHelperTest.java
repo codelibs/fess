@@ -63,4 +63,24 @@ public class CrawlingInfoHelperTest extends UnitFessTestCase {
 
         assertEquals("http://example.com/;role=admin,guest", crawlingInfoHelper.generateId(dataMap));
     }
+
+    public void test_generateId_long() {
+        StringBuilder buf = new StringBuilder(1000);
+        for (int i = 0; i < 550; i++) {
+            buf.append('x');
+        }
+
+        assertEquals(440, crawlingInfoHelper.generateId(buf.substring(0, 440), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 450), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 460), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 470), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 480), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 490), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 500), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 510), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.substring(0, 520), null).length());
+        assertEquals(509, crawlingInfoHelper.generateId(buf.toString(), null).length());
+
+    }
+
 }

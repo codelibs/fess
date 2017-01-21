@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.helper;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
+import org.codelibs.core.security.MessageDigestUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
 import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
@@ -52,7 +55,9 @@ public class CrawlingInfoHelper {
 
     protected Long documentExpires;
 
-    public int maxSessionIdsInList;
+    protected int maxSessionIdsInList;
+
+    protected int urlIdPrefixLength = 445;;
 
     protected CrawlingInfoService getCrawlingInfoService() {
         return ComponentUtil.getComponent(CrawlingInfoService.class);
@@ -186,25 +191,68 @@ public class CrawlingInfoHelper {
                 });
     }
 
-    private String generateId(final String url, final List<String> roleTypeList) {
+    String generateId(final String url, final List<String> roleTypeList) {
         final UnsafeStringBuilder buf = new UnsafeStringBuilder(1000);
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
             buf.append(";role=");
-            for (int i = 0; i < roleTypeList.size(); i++) {
-                if (i != 0) {
-                    buf.append(',');
+            buf.append(String.join(",", roleTypeList));
+        }
+        final String urlId = buf.toUnsafeString().trim();
+        StringBuilder encodedBuf = new StringBuilder(urlId.length() + 100);
+        for (int i = 0; i < urlId.length(); i++) {
+            char c = urlId.charAt(i);
+            if (c >= 'a' && c <= 'z' //
+                    || c >= 'A' && c <= 'Z' //
+                    || c >= '0' && c <= '9' //
+                    || c == '.' //
+                    || c == '-' //
+                    || c == '*' //
+                    || c == '_' //
+                    || c == ':' // added
+                    || c == '/' // added
+                    || c == '+' // added
+                    || c == '%' // added
+                    || c == '=' // added
+                    || c == '&' // added
+                    || c == '?' // added
+                    || c == '#' // added
+                    || c == '[' // added
+                    || c == ']' // added
+                    || c == '@' // added
+                    || c == '~' // added
+                    || c == '!' // added
+                    || c == '$' // added
+                    || c == '\'' // added
+                    || c == '(' // added
+                    || c == ')' // added
+                    || c == ',' // added
+                    || c == ';' // added
+            ) {
+                encodedBuf.append(c);
+            } else {
+                try {
+                    encodedBuf.append(URLEncoder.encode(String.valueOf(c), Constants.UTF_8));
+                } catch (final UnsupportedEncodingException e) {
+                    // NOP
                 }
-                buf.append(roleTypeList.get(i));
             }
         }
 
-        return normalize(buf.toUnsafeString().trim());
+        final String id = encodedBuf.toString();
+        if (id.length() <= urlIdPrefixLength) {
+            return id;
+        }
+        return id.substring(0, urlIdPrefixLength) + MessageDigestUtil.digest("SHA-256", id.substring(urlIdPrefixLength));
     }
 
-    private String normalize(final String value) {
-        return value.replace('"', ' ');
+    public void setMaxSessionIdsInList(int maxSessionIdsInList) {
+        this.maxSessionIdsInList = maxSessionIdsInList;
+    }
+
+    public void setUrlIdPrefixLength(int urlIdPrefixLength) {
+        this.urlIdPrefixLength = urlIdPrefixLength;
     }
 
 }
