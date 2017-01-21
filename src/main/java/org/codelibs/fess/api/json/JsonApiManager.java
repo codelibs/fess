@@ -54,7 +54,6 @@ import org.codelibs.fess.util.DocumentUtil;
 import org.codelibs.fess.util.FacetResponse;
 import org.codelibs.fess.util.FacetResponse.Field;
 import org.dbflute.optional.OptionalThing;
-import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -155,9 +154,12 @@ public class JsonApiManager extends BaseJsonApiManager {
             final List<Map<String, Object>> documentItems = data.getDocumentItems();
             final FacetResponse facetResponse = data.getFacetResponse();
             final GeoInfo geoInfo = params.getGeoInfo();
+            final String queryId = data.getQueryId();
 
             buf.append("\"q\":");
             buf.append(escapeJson(query));
+            buf.append(",\"query_id\":");
+            buf.append(escapeJson(queryId));
             buf.append(",\"exec_time\":");
             buf.append(execTime);
             buf.append(",\"query_time\":");
@@ -279,7 +281,32 @@ public class JsonApiManager extends BaseJsonApiManager {
             final XContentBuilder builder = XContentFactory.jsonBuilder();
             return geoInfo.toQueryBuilder().toXContent(builder, ToXContent.EMPTY_PARAMS).string();
         } catch (final Exception e) {
-            return "{\"error\":\"" + ExceptionsHelper.detailedMessage(e) + "\"}";
+            return "{\"error\":\"" + detailedMessage(e) + "\"}";
+        }
+    }
+
+    protected String detailedMessage(Throwable t) {
+        if (t == null) {
+            return "Unknown";
+        }
+        if (t.getCause() != null) {
+            StringBuilder sb = new StringBuilder();
+            while (t != null) {
+                sb.append(t.getClass().getSimpleName());
+                if (t.getMessage() != null) {
+                    sb.append("[");
+                    sb.append(t.getMessage());
+                    sb.append("]");
+                }
+                sb.append("; ");
+                t = t.getCause();
+                if (t != null) {
+                    sb.append("nested: ");
+                }
+            }
+            return sb.toString();
+        } else {
+            return t.getClass().getSimpleName() + "[" + t.getMessage() + "]";
         }
     }
 
