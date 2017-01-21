@@ -135,7 +135,6 @@ import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -573,7 +572,7 @@ public class FessEsClient implements Client {
         return count;
     }
 
-    public <T> T get(final String index, final String type, final String id, final SearchCondition<GetRequestBuilder> condition,
+    protected <T> T get(final String index, final String type, final String id, final SearchCondition<GetRequestBuilder> condition,
             final SearchResult<T, GetRequestBuilder, GetResponse> searchResult) {
         final long startTime = System.currentTimeMillis();
 
@@ -603,6 +602,9 @@ public class FessEsClient implements Client {
             }
 
             try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
+                }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -626,6 +628,7 @@ public class FessEsClient implements Client {
                     if (source != null) {
                         final Map<String, Object> docMap = new HashMap<>(source);
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
+                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
                         return docMap;
                     }
                     final Map<String, SearchHitField> fields = hit.getFields();
@@ -634,15 +637,19 @@ public class FessEsClient implements Client {
                                 fields.entrySet().stream()
                                         .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
                         docMap.put(fessConfig.getIndexFieldId(), hit.getId());
+                        docMap.put(fessConfig.getIndexFieldVersion(), hit.getVersion());
                         return docMap;
                     }
                     return null;
                 });
     }
 
-    public <T> OptionalEntity<T> getDocument(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
-            final EntityCreator<T, SearchResponse, SearchHit> creator) {
-        return search(index, type, condition, (queryBuilder, execTime, searchResponse) -> {
+    protected <T> OptionalEntity<T> getDocument(final String index, final String type,
+            final SearchCondition<SearchRequestBuilder> condition, final EntityCreator<T, SearchResponse, SearchHit> creator) {
+        return search(index, type, searchRequestBuilder -> {
+            searchRequestBuilder.setVersion(true);
+            return condition.build(searchRequestBuilder);
+        }, (queryBuilder, execTime, searchResponse) -> {
             return searchResponse.map(response -> {
                 final SearchHit[] hits = response.getHits().hits();
                 if (hits.length > 0) {
@@ -651,65 +658,6 @@ public class FessEsClient implements Client {
                 return null;
             });
         });
-    }
-
-    public OptionalEntity<Map<String, Object>> getDocument(final String index, final String type, final String id,
-            final SearchCondition<GetRequestBuilder> condition) {
-        return getDocument(
-                index,
-                type,
-                id,
-                condition,
-                (response, result) -> {
-                    final FessConfig fessConfig = ComponentUtil.getFessConfig();
-                    final Map<String, Object> source = response.getSource();
-                    if (source != null) {
-                        final Map<String, Object> docMap = new HashMap<>(source);
-                        docMap.put(fessConfig.getIndexFieldId(), response.getId());
-                        return docMap;
-                    }
-                    final Map<String, GetField> fields = response.getFields();
-                    if (fields != null) {
-                        final Map<String, Object> docMap =
-                                fields.entrySet().stream()
-                                        .collect(Collectors.toMap(e -> e.getKey(), e -> (Object) e.getValue().getValues()));
-                        docMap.put(fessConfig.getIndexFieldId(), response.getId());
-                        return docMap;
-                    }
-                    return null;
-
-                });
-    }
-
-    public <T> OptionalEntity<T> getDocument(final String index, final String type, final String id,
-            final SearchCondition<GetRequestBuilder> condition, final EntityCreator<T, GetResponse, GetResponse> creator) {
-        return get(index, type, id, condition, (queryBuilder, execTime, getResponse) -> {
-            return getResponse.map(response -> {
-                return creator.build(response, response);
-            });
-        });
-    }
-
-    public OptionalEntity<Map<String, Object>> getDocumentByQuery(final String index, final String type, final QueryBuilder queryBuilder) {
-
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final SearchResponse response =
-                client.prepareSearch(index).setTypes(type).setSize(1).setQuery(queryBuilder)
-                        .setFetchSource(new String[] { fessConfig.getIndexFieldId() }, null)
-                        .setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute().actionGet(fessConfig.getIndexSearchTimeout());
-        final SearchHits hits = response.getHits();
-        if (hits.getTotalHits() != 0) {
-            final SearchHit hit = hits.getAt(0);
-            final String id = hit.getId();
-            final GetResponse getResponse =
-                    client.prepareGet(index, type, id).setPreference(Constants.SEARCH_PREFERENCE_PRIMARY).execute()
-                            .actionGet(fessConfig.getIndexSearchTimeout());
-            final Map<String, Object> source = BeanUtil.copyMapToNewMap(getResponse.getSource());
-            source.put(fessConfig.getIndexFieldId(), id);
-            source.put(fessConfig.getIndexFieldVersion(), getResponse.getVersion());
-            return OptionalEntity.of(source);
-        }
-        return OptionalEntity.empty();
     }
 
     public List<Map<String, Object>> getDocumentList(final String index, final String type,
@@ -738,7 +686,7 @@ public class FessEsClient implements Client {
                 });
     }
 
-    public <T> List<T> getDocumentList(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
+    protected <T> List<T> getDocumentList(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
             final EntityCreator<T, SearchResponse, SearchHit> creator) {
         return search(index, type, condition, (searchRequestBuilder, execTime, searchResponse) -> {
             final List<T> list = new ArrayList<>();
@@ -823,7 +771,6 @@ public class FessEsClient implements Client {
                     for (int i = 0; i < requests.size(); i++) {
                         final BulkItemResponse resp = items[i];
                         if (resp.isFailed() && resp.getFailure() != null) {
-                            @SuppressWarnings("rawtypes")
                             final ActionRequest req = requests.get(i);
                             final Failure failure = resp.getFailure();
                             logger.debug("Failed Request: " + req + "\n=>" + failure.getMessage());
@@ -967,10 +914,6 @@ public class FessEsClient implements Client {
             }
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
-            if (logger.isDebugEnabled()) {
-                logger.debug("Query: " + searchRequestBuilder);
-            }
-
             return true;
         }
     }

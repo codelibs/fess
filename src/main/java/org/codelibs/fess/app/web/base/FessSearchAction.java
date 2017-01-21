@@ -29,9 +29,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.net.URLUtil;
 import org.codelibs.fess.Constants;
+import org.codelibs.fess.app.service.SearchService;
 import org.codelibs.fess.app.web.sso.SsoAction;
 import org.codelibs.fess.entity.SearchRequestParams.SearchRequestType;
-import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.helper.LabelTypeHelper;
 import org.codelibs.fess.helper.OpenSearchHelper;
 import org.codelibs.fess.helper.PopularWordHelper;
@@ -53,7 +53,7 @@ public abstract class FessSearchAction extends FessBaseAction {
     protected static final String LABEL_FIELD = "label";
 
     @Resource
-    protected FessEsClient fessEsClient;
+    protected SearchService searchService;
 
     @Resource
     protected ThumbnailManager thumbnailManager;

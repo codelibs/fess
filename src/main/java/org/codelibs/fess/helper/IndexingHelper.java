@@ -135,10 +135,11 @@ public class IndexingHelper {
 
     public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        return fessEsClient.getDocument(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(), id,
-                requestBuilder -> {
-                    return true;
-                }).orElse(null);
+        return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
+            builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id));
+            builder.setFetchSource(fields, null);
+            return true;
+        }).orElse(null);
     }
 
     public List<Map<String, Object>> getDocumentListByPrefixId(final FessEsClient fessEsClient, final String id, final String[] fields) {
@@ -164,12 +165,12 @@ public class IndexingHelper {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
 
         final SearchResponse countResponse =
-                fessEsClient.prepareSearch(fessConfig.getIndexDocumentSearchIndex()).setTypes(fessConfig.getIndexDocumentType())
+                fessEsClient.prepareSearch(fessConfig.getIndexDocumentUpdateIndex()).setTypes(fessConfig.getIndexDocumentType())
                         .setQuery(queryBuilder).setSize(0).execute().actionGet(fessConfig.getIndexSearchTimeout());
         final long numFound = countResponse.getHits().getTotalHits();
         // TODO max threshold
 
-        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentSearchIndex(), fessConfig.getIndexDocumentType(),
+        return fessEsClient.getDocumentList(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(),
                 requestBuilder -> {
                     requestBuilder.setQuery(queryBuilder).setSize((int) numFound);
                     if (fields != null) {

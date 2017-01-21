@@ -36,8 +36,6 @@ import org.codelibs.fess.helper.ViewHelper;
 import org.codelibs.fess.util.ComponentUtil;
 import org.codelibs.fess.util.DocumentUtil;
 import org.dbflute.util.DfTypeUtil;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.response.HtmlResponse;
@@ -77,17 +75,8 @@ public class GoAction extends FessSearchAction {
         Map<String, Object> doc = null;
         try {
             doc =
-                    fessEsClient.getDocument(
-                            fessConfig.getIndexDocumentSearchIndex(),
-                            fessConfig.getIndexDocumentType(),
-                            queryRequestBuilder -> {
-                                final TermQueryBuilder termQuery = QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), form.docId);
-                                queryRequestBuilder.setQuery(termQuery);
-                                queryRequestBuilder.setFetchSource(
-                                        new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId() }, null);
-                                fessConfig.processSearchPreference(queryRequestBuilder, getUserBean());
-                                return true;
-                            }).orElse(null);
+                    searchService.getDocumentByDocId(form.docId,
+                            new String[] { fessConfig.getIndexFieldUrl(), fessConfig.getIndexFieldConfigId() }, getUserBean()).orElse(null);
         } catch (final Exception e) {
             logger.warn("Failed to request: " + form.docId, e);
         }
