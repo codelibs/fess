@@ -653,6 +653,9 @@ public class FessEsClient implements Client {
             }
 
             try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Query DSL:\n" + searchRequestBuilder.toString());
+                }
                 searchResponse = searchRequestBuilder.execute().actionGet(ComponentUtil.getFessConfig().getIndexSearchTimeout());
             } catch (final SearchPhaseExecutionException e) {
                 throw new InvalidQueryException(messages -> messages.addErrorsInvalidQueryParseError(UserMessages.GLOBAL_PROPERTY_KEY),
@@ -690,8 +693,8 @@ public class FessEsClient implements Client {
                 });
     }
 
-    public <T> OptionalEntity<T> getDocument(final String index, final String type, final SearchCondition<SearchRequestBuilder> condition,
-            final EntityCreator<T, SearchResponse, SearchHit> creator) {
+    protected <T> OptionalEntity<T> getDocument(final String index, final String type,
+            final SearchCondition<SearchRequestBuilder> condition, final EntityCreator<T, SearchResponse, SearchHit> creator) {
         return search(index, type, condition, (queryBuilder, execTime, searchResponse) -> {
             return searchResponse.map(response -> {
                 final SearchHit[] hits = response.getHits().hits();
@@ -1011,10 +1014,6 @@ public class FessEsClient implements Client {
             }
 
             searchRequestBuilder.setQuery(queryContext.getQueryBuilder());
-            if (logger.isDebugEnabled()) {
-                logger.debug("Query: " + searchRequestBuilder);
-            }
-
             return true;
         }
     }
