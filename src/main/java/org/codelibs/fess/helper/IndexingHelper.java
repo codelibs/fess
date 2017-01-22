@@ -136,7 +136,7 @@ public class IndexingHelper {
     public Map<String, Object> getDocument(final FessEsClient fessEsClient, final String id, final String[] fields) {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         return fessEsClient.getDocument(fessConfig.getIndexDocumentUpdateIndex(), fessConfig.getIndexDocumentType(), builder -> {
-            builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), id));
+            builder.setQuery(QueryBuilders.idsQuery(fessConfig.getIndexDocumentType()).addIds(id));
             builder.setFetchSource(fields, null);
             return true;
         }).orElse(null);
