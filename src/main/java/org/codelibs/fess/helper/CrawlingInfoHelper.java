@@ -29,7 +29,6 @@ import org.codelibs.core.lang.StringUtil;
 import org.codelibs.core.security.MessageDigestUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.app.service.CrawlingInfoService;
-import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.es.client.FessEsClient;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingInfo;
@@ -192,14 +191,14 @@ public class CrawlingInfoHelper {
     }
 
     protected String generateId(final String url, final List<String> roleTypeList) {
-        final UnsafeStringBuilder buf = new UnsafeStringBuilder(1000);
+        final StringBuilder buf = new StringBuilder(1000);
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
             Collections.sort(roleTypeList);
             buf.append(";role=");
             buf.append(String.join(",", roleTypeList));
         }
-        final String urlId = buf.toUnsafeString().trim();
+        final String urlId = buf.toString().trim();
         StringBuilder encodedBuf = new StringBuilder(urlId.length() + 100);
         for (int i = 0; i < urlId.length(); i++) {
             char c = urlId.charAt(i);

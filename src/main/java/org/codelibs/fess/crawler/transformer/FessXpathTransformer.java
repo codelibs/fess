@@ -51,7 +51,6 @@ import org.codelibs.fess.crawler.exception.CrawlerSystemException;
 import org.codelibs.fess.crawler.exception.CrawlingAccessException;
 import org.codelibs.fess.crawler.transformer.impl.XpathTransformer;
 import org.codelibs.fess.crawler.util.CrawlingParameterUtil;
-import org.codelibs.fess.crawler.util.UnsafeStringBuilder;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig;
 import org.codelibs.fess.es.config.exentity.CrawlingConfig.ConfigName;
 import org.codelibs.fess.helper.CrawlingConfigHelper;
@@ -443,13 +442,13 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
     }
 
     protected String getSingleNodeValue(final Document document, final String xpath, final boolean pruned) {
-        UnsafeStringBuilder buf = null;
+        StringBuilder buf = null;
         NodeList list = null;
         try {
             list = getXPathAPI().selectNodeList(document, xpath);
             for (int i = 0; i < list.getLength(); i++) {
                 if (buf == null) {
-                    buf = new UnsafeStringBuilder(1000);
+                    buf = new StringBuilder(1000);
                 }
                 Node node = list.item(i).cloneNode(true);
                 if (useGoogleOffOn) {
@@ -466,10 +465,10 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         if (buf == null) {
             return null;
         }
-        return buf.toUnsafeString().trim();
+        return buf.toString().trim();
     }
 
-    protected void paseTextContent(Node node, UnsafeStringBuilder buf) {
+    protected void paseTextContent(Node node, StringBuilder buf) {
         if (node.hasChildNodes()) {
             final NodeList nodeList = node.getChildNodes();
             for (int i = 0; i < nodeList.getLength(); i++) {
@@ -553,7 +552,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
 
     protected String getMultipleNodeValue(final Document document, final String xpath) {
         NodeList nodeList = null;
-        final UnsafeStringBuilder buf = new UnsafeStringBuilder(100);
+        final StringBuilder buf = new StringBuilder(100);
         try {
             nodeList = getXPathAPI().selectNodeList(document, xpath);
             for (int i = 0; i < nodeList.getLength(); i++) {
@@ -564,7 +563,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
         }
-        return buf.toUnsafeString().trim();
+        return buf.toString().trim();
     }
 
     protected String replaceDuplicateHost(final String url) {
