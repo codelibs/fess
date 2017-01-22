@@ -191,7 +191,7 @@ public class CrawlingInfoHelper {
                 });
     }
 
-    String generateId(final String url, final List<String> roleTypeList) {
+    protected String generateId(final String url, final List<String> roleTypeList) {
         final UnsafeStringBuilder buf = new UnsafeStringBuilder(1000);
         buf.append(url);
         if (roleTypeList != null && !roleTypeList.isEmpty()) {
@@ -210,25 +210,24 @@ public class CrawlingInfoHelper {
                     || c == '-' //
                     || c == '*' //
                     || c == '_' //
-                    || c == ':' // added
-                    || c == '/' // added
-                    || c == '+' // added
-                    || c == '%' // added
-                    || c == '=' // added
-                    || c == '&' // added
-                    || c == '?' // added
-                    || c == '#' // added
-                    || c == '[' // added
-                    || c == ']' // added
-                    || c == '@' // added
-                    || c == '~' // added
-                    || c == '!' // added
-                    || c == '$' // added
-                    || c == '\'' // added
-                    || c == '(' // added
-                    || c == ')' // added
-                    || c == ',' // added
-                    || c == ';' // added
+                    || c == ':' //
+                    || c == '+' //
+                    || c == '%' //
+                    || c == '=' //
+                    || c == '&' //
+                    || c == '?' //
+                    || c == '#' //
+                    || c == '[' //
+                    || c == ']' //
+                    || c == '@' //
+                    || c == '~' //
+                    || c == '!' //
+                    || c == '$' //
+                    || c == '\'' //
+                    || c == '(' //
+                    || c == ')' //
+                    || c == ',' //
+                    || c == ';' //
             ) {
                 encodedBuf.append(c);
             } else {
