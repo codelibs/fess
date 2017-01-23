@@ -88,6 +88,7 @@ public class RoleQueryHelper {
     public Set<String> build(final SearchRequestType searchRequestType) {
         final Set<String> roleSet = new HashSet<>();
         final HttpServletRequest request = LaRequestUtil.getOptionalRequest().orElse(null);
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final boolean isApiRequest =
                 !SearchRequestType.SEARCH.equals(searchRequestType) && !SearchRequestType.ADMIN_SEARCH.equals(searchRequestType);
 
@@ -121,22 +122,25 @@ public class RoleQueryHelper {
             if (isApiRequest) {
                 processAccessToken(request, roleSet);
             }
-        }
 
-        final FessConfig fessConfig = ComponentUtil.getFessConfig();
-        final RequestManager requestManager = ComponentUtil.getRequestManager();
-        try {
-            requestManager.findUserBean(FessUserBean.class)
-                    .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add)))
-                    .orElse(() -> {
-                        if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
-                            throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
-                        }
-                        roleSet.addAll(fessConfig.getSearchGuestPermissionList());
-                    });
-        } catch (final RuntimeException e) {
-            requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
-            throw e;
+            final RequestManager requestManager = ComponentUtil.getRequestManager();
+            try {
+                requestManager.findUserBean(FessUserBean.class)
+                        .ifPresent(fessUserBean -> stream(fessUserBean.getPermissions()).of(stream -> stream.forEach(roleSet::add)))
+                        .orElse(() -> {
+                            if (isApiRequest && ComponentUtil.getFessConfig().getApiAccessTokenRequiredAsBoolean()) {
+                                throw new InvalidAccessTokenException("invalid_token", "Access token is requried.");
+                            }
+                            roleSet.addAll(fessConfig.getSearchGuestPermissionList());
+                        });
+            } catch (final RuntimeException e) {
+                try {
+                    requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
+                } catch (Exception e1) {
+                    // ignore
+                }
+                throw e;
+            }
         }
 
         if (defaultRoleList != null) {
