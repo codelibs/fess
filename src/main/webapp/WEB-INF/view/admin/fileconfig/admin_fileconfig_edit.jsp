@@ -144,7 +144,7 @@
 											<la:errors property="intervalTime" />
 											<input type="number" name="intervalTime"
 												value="${f:h(intervalTime)}" class="form-control"
-												min="0" step="1000">
+												min="0">
 											<la:message key="labels.millisec" />
 										</div>
 									</div>
