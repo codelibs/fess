@@ -1280,6 +1280,9 @@ public interface FessProp {
         return source.entrySet().stream().map(e -> {
             final String key = e.getKey();
             Object value = e.getValue();
+            if (value == null) {
+                value = StringUtil.EMPTY;
+            }
             if (value instanceof String || value == null) {
                 return new Pair<>(key, value);
             }
