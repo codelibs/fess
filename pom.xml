@@ -64,6 +64,7 @@
 
 		<!-- Elasticsearch -->
 		<elasticsearch.version>2.4.4</elasticsearch.version>
+		<elasticsearch.min.version>2.3.0</elasticsearch.min.version>
 		<cluster.runner.version>2.4.0.0</cluster.runner.version>
 
 		<!-- Tomcat -->
@@ -661,7 +662,7 @@
 					</keyPassphrase>
 					-->
 					<requires>
-						<require>elasticsearch &gt;= ${elasticsearch.version}</require>
+						<require>elasticsearch &gt;= ${elasticsearch.min.version}</require>
 					</requires>
 					<mappings>
 						<!-- app -->
