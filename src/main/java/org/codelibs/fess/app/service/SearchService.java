@@ -225,7 +225,7 @@ public class SearchService {
                     });
                     boolQuery.filter(roleQuery);
                 }
-                builder.setQuery(QueryBuilders.termQuery(fessConfig.getIndexFieldDocId(), docId));
+                builder.setQuery(boolQuery);
                 builder.addFields(fields);
                 fessConfig.processSearchPreference(builder, userBean);
                 return true;
