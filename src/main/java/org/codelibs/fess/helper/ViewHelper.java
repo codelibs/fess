@@ -515,6 +515,10 @@ public class ViewHelper {
         if (client == null) {
             throw new FessSystemException("No CrawlerClient: " + configId + ", url: " + url);
         }
+        return writeContent(configId, url, client);
+    }
+
+    protected StreamResponse writeContent(final String configId, final String url, final CrawlerClient client) {
         final ResponseData responseData = client.execute(RequestDataBuilder.newRequestData().get().url(url).build());
         final StreamResponse response = new StreamResponse(StringUtil.EMPTY);
         writeFileName(response, responseData);
@@ -531,6 +535,8 @@ public class ViewHelper {
                 if (!(e.getCause() instanceof ClientAbortException)) {
                     throw new FessSystemException("Failed to write a content. configId: " + configId + ", url: " + url, e);
                 }
+            } finally {
+                responseData.close();
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("Finished to write " + url);
