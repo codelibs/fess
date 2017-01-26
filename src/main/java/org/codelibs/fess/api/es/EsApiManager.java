@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public class EsApiManager extends BaseApiManager {
 }       );
     }
 
-    private void processPluginRequest(HttpServletRequest request, HttpServletResponse response, String path) {
+    private void processPluginRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) {
         Path filePath = ResourceUtil.getSitePath(path.replaceAll("\\.\\.+", StringUtil.EMPTY).replaceAll("/+", "/").split("/"));
         if (Files.isDirectory(filePath)) {
             filePath = filePath.resolve("index.html");
@@ -164,7 +164,7 @@ public class EsApiManager extends BaseApiManager {
                 CopyUtil.copy(in, out);
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.error("Failed to read " + path + " from " + filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
@@ -173,7 +173,7 @@ public class EsApiManager extends BaseApiManager {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, path + " is not found.");
             } catch (final ClientAbortException e) {
                 logger.debug("Client aborts this request.", e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 logger.error("Failed to read " + path + " from " + filePath);
                 throw new WebApiException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }

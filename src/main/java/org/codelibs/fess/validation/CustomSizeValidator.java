@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class CustomSizeValidator implements ConstraintValidator<CustomSize, Stri
 
     @Override
     public void initialize(final CustomSize constraintAnnotation) {
-        FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String minKey = constraintAnnotation.minKey();
         if (StringUtil.isNotBlank(minKey)) {
             min = Integer.parseInt(fessConfig.get(minKey));
@@ -49,11 +49,11 @@ public class CustomSizeValidator implements ConstraintValidator<CustomSize, Stri
             return true;
         }
 
-        HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
+        final HibernateConstraintValidatorContext hibernateContext = context.unwrap(HibernateConstraintValidatorContext.class);
         hibernateContext.disableDefaultConstraintViolation();
         hibernateContext.addExpressionVariable("min", min).addExpressionVariable("max", max).buildConstraintViolationWithTemplate(message)
                 .addConstraintViolation();
-        int length = value.length();
+        final int length = value.length();
         return length >= min && length <= max;
     }
 

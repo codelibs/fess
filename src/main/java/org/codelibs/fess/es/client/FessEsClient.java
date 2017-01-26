@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -869,7 +869,7 @@ public class FessEsClient implements Client {
             queryContext.sortBuilders().forEach(sortBuilder -> searchRequestBuilder.addSort(sortBuilder));
 
             // highlighting
-            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            final HighlightBuilder highlightBuilder = new HighlightBuilder();
             queryHelper.highlightedFields(stream -> stream.forEach(hf -> highlightBuilder.field(hf,
                     fessConfig.getQueryHighlightFragmentSizeAsInteger(), fessConfig.getQueryHighlightNumberOfFragmentsAsInteger())));
             searchRequestBuilder.highlighter(highlightBuilder);
@@ -1268,25 +1268,25 @@ public class FessEsClient implements Client {
     }
 
     @Override
-    public Client filterWithHeader(Map<String, String> headers) {
+    public Client filterWithHeader(final Map<String, String> headers) {
         return client.filterWithHeader(headers);
     }
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> ActionFuture<Response> execute(
-            Action<Request, Response, RequestBuilder> action, Request request) {
+            final Action<Request, Response, RequestBuilder> action, final Request request) {
         return client.execute(action, request);
     }
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(
-            Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
+            final Action<Request, Response, RequestBuilder> action, final Request request, final ActionListener<Response> listener) {
         client.execute(action, request, listener);
     }
 
     @Override
     public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> RequestBuilder prepareExecute(
-            Action<Request, Response, RequestBuilder> action) {
+            final Action<Request, Response, RequestBuilder> action) {
         return client.prepareExecute(action);
     }
 

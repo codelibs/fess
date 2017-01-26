@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class FessUserLocaleProcessProvider implements UserLocaleProcessProvider 
         if (StringUtil.isNotBlank(name)) {
             try {
                 return requestManager.getParameter(name).filter(StringUtil::isNotBlank).map(LocaleUtils::toLocale);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.debug("Failed to parse a value of " + name + ".", e);
             }
         }

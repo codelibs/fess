@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,23 +76,6 @@ public class WebFsIndexHelper {
     public int crawlerPriority = Thread.NORM_PRIORITY;
 
     private final List<Crawler> crawlerList = Collections.synchronizedList(new ArrayList<Crawler>());
-
-    // needed?
-    @Deprecated
-    public void crawl(final String sessionId) {
-        final List<WebConfig> webConfigList = webConfigService.getAllWebConfigList();
-        final List<FileConfig> fileConfigList = fileConfigService.getAllFileConfigList();
-
-        if (webConfigList.isEmpty() && fileConfigList.isEmpty()) {
-            // nothing
-            if (logger.isInfoEnabled()) {
-                logger.info("No crawling target urls.");
-            }
-            return;
-        }
-
-        doCrawl(sessionId, webConfigList, fileConfigList);
-    }
 
     public void crawl(final String sessionId, final List<String> webConfigIdList, final List<String> fileConfigIdList) {
         final boolean runAll = webConfigIdList == null && fileConfigIdList == null;

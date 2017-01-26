@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
             synchronized (this) {
                 try {
                     webDriver.quit();
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     logger.debug("Failed to quit webDriver.", t);
                 }
                 webDriver = null;
@@ -176,17 +176,17 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     protected void convert(final File inputFile, final File outputFile) {
         try (ImageInputStream input = ImageIO.createImageInputStream(inputFile)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            final Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
             if (readers.hasNext()) {
-                ImageReader reader = readers.next();
+                final ImageReader reader = readers.next();
                 try {
                     reader.setInput(input);
-                    ImageReadParam param = reader.getDefaultReadParam();
+                    final ImageReadParam param = reader.getDefaultReadParam();
                     final int samplingWidth = reader.getWidth(0) / thumbnailWidth;
                     final int samplingHeight = reader.getHeight(0) / thumbnailHeight;
                     param.setSourceSubsampling(samplingWidth, samplingHeight, 0, 0);
                     param.setSourceRegion(new Rectangle(windowWidth, thumbnailHeight * reader.getHeight(0) / thumbnailWidth));
-                    BufferedImage image = reader.read(0, param);
+                    final BufferedImage image = reader.read(0, param);
                     ImageIO.write(image, imageFormatName, outputFile);
                     image.flush();
                 } finally {

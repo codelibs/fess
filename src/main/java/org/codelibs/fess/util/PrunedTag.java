@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import org.codelibs.core.stream.StreamUtil;
 import org.w3c.dom.Node;
 
 public class PrunedTag {
-    private String tag;
-    private String id;
-    private String css;
+    private final String tag;
+    private final String id;
+    private final String css;
 
     public PrunedTag(final String tag, final String id, final String css) {
         this.tag = tag;
@@ -37,7 +37,7 @@ public class PrunedTag {
                 if (css == null) {
                     return true;
                 } else {
-                    Node classAttr = node.getAttributes().getNamedItem("class");
+                    final Node classAttr = node.getAttributes().getNamedItem("class");
                     if (classAttr != null) {
                         final String value = classAttr.getNodeValue();
                         if (StringUtil.isNotBlank(value)) {
@@ -46,7 +46,7 @@ public class PrunedTag {
                     }
                 }
             } else {
-                Node idAttr = node.getAttributes().getNamedItem("id");
+                final Node idAttr = node.getAttributes().getNamedItem("id");
                 if (idAttr != null) {
                     final String value = idAttr.getNodeValue();
                     return id.equals(value);
@@ -72,29 +72,38 @@ public class PrunedTag {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        PrunedTag other = (PrunedTag) obj;
+        }
+        final PrunedTag other = (PrunedTag) obj;
         if (css == null) {
-            if (other.css != null)
+            if (other.css != null) {
                 return false;
-        } else if (!css.equals(other.css))
+            }
+        } else if (!css.equals(other.css)) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
+        }
         if (tag == null) {
-            if (other.tag != null)
+            if (other.tag != null) {
                 return false;
-        } else if (!tag.equals(other.tag))
+            }
+        } else if (!tag.equals(other.tag)) {
             return false;
+        }
         return true;
     }
 }

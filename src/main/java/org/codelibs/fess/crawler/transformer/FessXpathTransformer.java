@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                     responseData.setNoFollow(true);
                 }
             }
-        } catch (TransformerException e) {
+        } catch (final TransformerException e) {
             logger.warn("Could not parse a value of " + META_NAME_ROBOTS_CONTENT);
         }
 
@@ -452,12 +452,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
                 }
                 Node node = list.item(i).cloneNode(true);
                 if (useGoogleOffOn) {
-                    node = processGoogleOffOn(node, new ValueHolder<Boolean>(true));
+                    node = processGoogleOffOn(node, new ValueHolder<>(true));
                 }
                 if (pruned) {
                     node = pruneNode(node);
                 }
-                paseTextContent(node, buf);
+                parseTextContent(node, buf);
             }
         } catch (final Exception e) {
             logger.warn("Could not parse a value of " + xpath);
@@ -468,12 +468,12 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return buf.toString().trim();
     }
 
-    protected void paseTextContent(Node node, StringBuilder buf) {
+    protected void parseTextContent(final Node node, final StringBuilder buf) {
         if (node.hasChildNodes()) {
             final NodeList nodeList = node.getChildNodes();
             for (int i = 0; i < nodeList.getLength(); i++) {
                 final Node childNode = nodeList.item(i);
-                paseTextContent(childNode, buf);
+                parseTextContent(childNode, buf);
             }
         } else if (node.getNodeType() == Node.TEXT_NODE) {
             final String value = node.getTextContent();
@@ -492,7 +492,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node childNode = nodeList.item(i);
             if (childNode.getNodeType() == Node.COMMENT_NODE) {
-                String comment = childNode.getNodeValue().trim();
+                final String comment = childNode.getNodeValue().trim();
                 if (comment.startsWith("googleoff:")) {
                     flag.setValue(false);
                 } else if (comment.startsWith("googleon:")) {
@@ -671,7 +671,7 @@ public class FessXpathTransformer extends XpathTransformer implements FessTransf
         return b[0] == (byte) 0xEF && b[1] == (byte) 0xBB && b[2] == (byte) 0xBF;
     }
 
-    public void setUseGoogleOffOn(boolean useGoogleOffOn) {
+    public void setUseGoogleOffOn(final boolean useGoogleOffOn) {
         this.useGoogleOffOn = useGoogleOffOn;
     }
 

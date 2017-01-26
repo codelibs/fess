@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class RoleQueryHelper {
             } catch (final RuntimeException e) {
                 try {
                     requestManager.findLoginManager(FessUserBean.class).ifPresent(manager -> manager.logout());
-                } catch (Exception e1) {
+                } catch (final Exception e1) {
                     // ignore
                 }
                 throw e;

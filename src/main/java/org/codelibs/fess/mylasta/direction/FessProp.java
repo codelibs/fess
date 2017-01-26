@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,7 @@ public interface FessProp {
                 map = Collections.emptyMap();
             } else {
                 final Set<String> keySet = new HashSet<>();
-                map = split(value, "\n").get(stream -> (Map<String, String>) stream.filter(StringUtil::isNotBlank).map(s -> {
+                map = split(value, "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(s -> {
                     final String[] pair = s.split("=");
                     if (pair.length == 1) {
                         return new Pair<>(StringUtil.EMPTY, pair[0].trim());
@@ -769,20 +769,18 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, Pair<String, String>> params = (Map<String, Pair<String, String>>) propMap.get(CRAWLER_METADATA_NAME_MAPPING);
         if (params == null) {
-            params =
-                    split(getCrawlerMetadataNameMapping(), "\n").get(
-                            stream -> (Map<String, Pair<String, String>>) stream.filter(StringUtil::isNotBlank).map(v -> {
-                                final String[] values = v.split("=");
-                                if (values.length == 2) {
-                                    final String[] subValues = values[1].split(":");
-                                    if (subValues.length == 2) {
-                                        return new Tuple3<>(values[0], subValues[0], subValues[1]);
-                                    } else {
-                                        return new Tuple3<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
-                                    }
-                                }
-                                return null;
-                            }).collect(Collectors.toMap(Tuple3::getValue1, d -> new Pair<>(d.getValue2(), d.getValue3()))));
+            params = split(getCrawlerMetadataNameMapping(), "\n").get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
+                final String[] values = v.split("=");
+                if (values.length == 2) {
+                    final String[] subValues = values[1].split(":");
+                    if (subValues.length == 2) {
+                        return new Tuple3<>(values[0], subValues[0], subValues[1]);
+                    } else {
+                        return new Tuple3<>(values[0], values[1], Constants.MAPPING_TYPE_ARRAY);
+                    }
+                }
+                return null;
+            }).collect(Collectors.toMap(Tuple3::getValue1, d -> new Pair<>(d.getValue2(), d.getValue3()))));
             propMap.put(CRAWLER_METADATA_NAME_MAPPING, params);
         }
         return params.get(name);
@@ -839,15 +837,13 @@ public interface FessProp {
         @SuppressWarnings("unchecked")
         Map<String, String> params = (Map<String, String>) propMap.get(QUERY_LANGUAGE_MAPPING);
         if (params == null) {
-            params =
-                    stream(getQueryLanguageMapping().split("\n")).get(
-                            stream -> (Map<String, String>) stream.filter(StringUtil::isNotBlank).map(v -> {
-                                final String[] values = v.split("=");
-                                if (values.length == 2) {
-                                    return new Pair<>(values[0], values[1]);
-                                }
-                                return null;
-                            }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
+            params = stream(getQueryLanguageMapping().split("\n")).get(stream -> stream.filter(StringUtil::isNotBlank).map(v -> {
+                final String[] values = v.split("=");
+                if (values.length == 2) {
+                    return new Pair<>(values[0], values[1]);
+                }
+                return null;
+            }).collect(Collectors.toMap(Pair::getFirst, d -> d.getSecond())));
             propMap.put(QUERY_LANGUAGE_MAPPING, params);
         }
 

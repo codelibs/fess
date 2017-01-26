@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,6 @@ public class ViewHelper {
     @Resource
     protected UserAgentHelper userAgentHelper;
 
-    @Deprecated
-    public int descriptionLength = 200;
-
     public int titleLength = 50;
 
     public int sitePathLength = 50;
@@ -109,9 +106,6 @@ public class ViewHelper {
     public String urlLinkEncoding = Constants.UTF_8;
 
     public String[] highlightedFields = new String[] { "hl_content", "digest" };
-
-    @Deprecated
-    public boolean useHighlight = false;
 
     public String originalHighlightTagPre = "<em>";
 

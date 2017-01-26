@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 CodeLibs Project and the Others.
+ * Copyright 2012-2017 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Set;
 public class DocMap implements Map<String, Object> {
 
     private static final String LANG_KEY = "lang";
-    private Map<String, Object> parent;
+    private final Map<String, Object> parent;
 
     public DocMap(final Map<String, Object> parent) {
         this.parent = parent;
@@ -43,32 +43,32 @@ public class DocMap implements Map<String, Object> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(final Object key) {
         return parent.containsKey(key);
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(final Object value) {
         return parent.containsValue(value);
     }
 
     @Override
-    public Object get(Object key) {
+    public Object get(final Object key) {
         return parent.get(key);
     }
 
     @Override
-    public Object put(String key, Object value) {
+    public Object put(final String key, final Object value) {
         return parent.put(key, value);
     }
 
     @Override
-    public Object remove(Object key) {
+    public Object remove(final Object key) {
         return parent.remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m) {
+    public void putAll(final Map<? extends String, ? extends Object> m) {
         parent.putAll(m);
     }
 
