@@ -48,8 +48,11 @@ import org.codelibs.fess.suggest.index.contents.document.ESSourceReader;
 import org.codelibs.fess.suggest.settings.SuggestSettings;
 import org.codelibs.fess.suggest.util.SuggestUtil;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +154,16 @@ public class SuggestHelper {
                             final ESSourceReader reader =
                                     new ESSourceReader(fessEsClient, suggester.settings(), fessConfig.getIndexDocumentSearchIndex(),
                                             fessConfig.getIndexDocumentType());
-                            reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger().intValue());
+                            reader.setScrollSize(fessConfig.getSuggestSourceReaderScrollSizeAsInteger());
+                            reader.setLimitDocNumPercentage(fessConfig.getSuggestUpdateContentsLimitNumPercentage());
+                            reader.setLimitNumber(fessConfig.getSuggestUpdateContentsLimitNumAsInteger());
+
+                            final List<FunctionScoreQueryBuilder.FilterFunctionBuilder> flist = new ArrayList<>();
+                            flist.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.randomFunction(System
+                                    .currentTimeMillis())));
+                            reader.setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
+                                    flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()])).boostMode(
+                                    CombineFunction.MULTIPLY));
                             return reader;
                         }, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue()).then(response -> {
                     suggester.refresh();
@@ -305,5 +317,4 @@ public class SuggestHelper {
     public void deleteBadWord(final String badWord) {
         suggester.indexer().deleteBadWord(badWord);
     }
-
 }

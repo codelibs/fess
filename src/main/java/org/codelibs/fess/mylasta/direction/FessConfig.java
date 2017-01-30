@@ -855,6 +855,12 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. 1 */
     String SUGGEST_UPDATE_REQUEST_INTERVAL = "suggest.update.request.interval";
 
+    /** The key of the configuration. e.g. 50% */
+    String SUGGEST_UPDATE_CONTENTS_LIMIT_NUM_PERCENTAGE = "suggest.update.contents.limit.num.percentage";
+
+    /** The key of the configuration. e.g. 10000 */
+    String SUGGEST_UPDATE_CONTENTS_LIMIT_NUM = "suggest.update.contents.limit.num";
+
     /** The key of the configuration. e.g. 1 */
     String SUGGEST_SOURCE_READER_SCROLL_SIZE = "suggest.source.reader.scroll.size";
 
@@ -3799,6 +3805,28 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     Integer getSuggestUpdateRequestIntervalAsInteger();
 
     /**
+     * Get the value for the key 'suggest.update.contents.limit.num.percentage'. <br>
+     * The value is, e.g. 50% <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestUpdateContentsLimitNumPercentage();
+
+    /**
+     * Get the value for the key 'suggest.update.contents.limit.num'. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getSuggestUpdateContentsLimitNum();
+
+    /**
+     * Get the value for the key 'suggest.update.contents.limit.num' as {@link Integer}. <br>
+     * The value is, e.g. 10000 <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     * @throws NumberFormatException When the property is not integer.
+     */
+    Integer getSuggestUpdateContentsLimitNumAsInteger();
+
+    /**
      * Get the value for the key 'suggest.source.reader.scroll.size'. <br>
      * The value is, e.g. 1 <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
@@ -5878,6 +5906,18 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public Integer getSuggestUpdateRequestIntervalAsInteger() {
             return getAsInteger(FessConfig.SUGGEST_UPDATE_REQUEST_INTERVAL);
+        }
+
+        public String getSuggestUpdateContentsLimitNumPercentage() {
+            return get(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM_PERCENTAGE);
+        }
+
+        public String getSuggestUpdateContentsLimitNum() {
+            return get(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM);
+        }
+
+        public Integer getSuggestUpdateContentsLimitNumAsInteger() {
+            return getAsInteger(FessConfig.SUGGEST_UPDATE_CONTENTS_LIMIT_NUM);
         }
 
         public String getSuggestSourceReaderScrollSize() {
