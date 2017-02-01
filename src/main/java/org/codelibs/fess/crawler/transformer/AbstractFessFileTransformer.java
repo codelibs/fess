@@ -74,6 +74,8 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     protected abstract Extractor getExtractor(ResponseData responseData);
 
+    public boolean storeEvenIfNotExtract = false;
+
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || !responseData.hasResponseBody()) {
@@ -104,7 +106,16 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
         try (final InputStream in = responseData.getResponseBody()) {
-            final ExtractData extractData = extractor.getText(in, params);
+            ExtractData textData = new ExtractData();
+            try {
+                textData = extractor.getText(in, params);
+            } catch (Exception e) {
+                if (storeEvenIfNotExtract == false) {
+                    throw e;
+                }
+                // ignore exception
+            }
+            final ExtractData extractData = textData;
             content = extractData.getContent();
             if (fessConfig.isCrawlerDocumentFileIgnoreEmptyContent() && StringUtil.isBlank(content)) {
                 return null;
