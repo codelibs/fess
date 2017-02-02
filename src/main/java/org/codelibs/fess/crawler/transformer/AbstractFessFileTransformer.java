@@ -106,16 +106,7 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         final Map<String, Object> metaDataMap = new HashMap<>();
         String content;
         try (final InputStream in = responseData.getResponseBody()) {
-            ExtractData textData = new ExtractData();
-            try {
-                textData = extractor.getText(in, params);
-            } catch (Exception e) {
-                if (storeEvenIfNotExtract == false) {
-                    throw e;
-                }
-                // ignore exception
-            }
-            final ExtractData extractData = textData;
+            final ExtractData extractData = getExtractData(extractor, in, params);
             content = extractData.getContent();
             if (fessConfig.isCrawlerDocumentFileIgnoreEmptyContent() && StringUtil.isBlank(content)) {
                 return null;
@@ -340,6 +331,17 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
         }
 
         return dataMap;
+    }
+
+    private ExtractData getExtractData(final Extractor extractor, final InputStream in, final Map<String, String> params) {
+        try {
+            return extractor.getText(in, params);
+        } catch (RuntimeException e) {
+            if (!fessConfig.isCrawlerIgnoreContentException()) {
+                throw e;
+            }
+        }
+        return new ExtractData();
     }
 
     private String getResourceName(final ResponseData responseData) {
