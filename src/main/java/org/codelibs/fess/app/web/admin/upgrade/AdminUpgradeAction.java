@@ -15,26 +15,8 @@
  */
 package org.codelibs.fess.app.web.admin.upgrade;
 
-import static org.codelibs.core.stream.StreamUtil.split;
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
 
-import org.codelibs.core.exception.ResourceNotFoundRuntimeException;
-import org.codelibs.core.io.FileUtil;
-import org.codelibs.core.io.ResourceUtil;
-import org.codelibs.core.lang.StringUtil;
-import org.codelibs.elasticsearch.runner.net.Curl;
-import org.codelibs.elasticsearch.runner.net.CurlResponse;
 import org.codelibs.fess.app.service.ScheduledJobService;
 import org.codelibs.fess.app.web.base.FessAdminAction;
 import org.codelibs.fess.es.client.FessEsClient;
@@ -48,29 +30,8 @@ import org.codelibs.fess.es.config.exbhv.LabelTypeBhv;
 import org.codelibs.fess.es.config.exbhv.RoleTypeBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigBhv;
 import org.codelibs.fess.es.config.exbhv.WebConfigToRoleBhv;
-import org.codelibs.fess.es.config.exentity.ElevateWord;
 import org.codelibs.fess.es.user.exbhv.RoleBhv;
-import org.codelibs.fess.es.user.exentity.Role;
 import org.codelibs.fess.mylasta.direction.FessConfig;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse;
-import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsResponse.FieldMappingMetaData;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
-import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.support.IndicesOptions;
-import org.elasticsearch.client.IndicesAdminClient;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.lastaflute.web.Execute;
 import org.lastaflute.web.response.HtmlResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
