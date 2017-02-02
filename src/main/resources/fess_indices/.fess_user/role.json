@@ -8,8 +8,7 @@
     },
     "properties": {
       "name": {
-        "type": "string",
-        "index": "not_analyzed"
+        "type": "keyword"
       }
     }
   }
