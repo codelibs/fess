@@ -5,8 +5,7 @@
 	<component name="fessEsClient" class="org.codelibs.fess.es.client.FessEsClient">
 		<property name="settings">
 			{"http.cors.enabled":"true",
-			 "http.cors.allow-origin":"*",
-			 "script.engine.groovy.inline.update":"on"}
+			 "http.cors.allow-origin":"*"}
 		</property>
 		<!-- Dictionaries -->
 		<postConstruct name="addConfigFile">
