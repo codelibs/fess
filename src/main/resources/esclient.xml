@@ -15,6 +15,10 @@
 		</postConstruct>
 		<postConstruct name="addConfigFile">
 			<arg>"fess"</arg>
+			<arg>"fa/mapping.txt"</arg>
+		</postConstruct>
+		<postConstruct name="addConfigFile">
+			<arg>"fess"</arg>
 			<arg>"ja/mapping.txt"</arg>
 		</postConstruct>
 		<postConstruct name="addConfigFile">

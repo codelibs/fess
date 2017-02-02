@@ -7,6 +7,10 @@
     },
     "analysis": {
       "char_filter": {
+        "mapping_fa_filter": {
+          "type": "mapping",
+          "mappings_path": "${fess.dictionary.path}fa/mapping.txt"
+        },
         "mapping_ja_filter": {
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}ja/mapping.txt"
@@ -576,7 +580,7 @@
         "persian_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
-          "char_filter": [ "zero_width_spaces" ],
+          "char_filter": [ "mapping_fa_filter" ],
           "filter": [
             "truncate20_filter",
             "lowercase",
