@@ -134,7 +134,7 @@
 											<la:errors property="numOfThread" />
 											<input type="number" name="numOfThread"
 												value="${f:h(numOfThread)}" class="form-control"
-												min="0" max="1000">
+												min="1" max="1000">
 										</div>
 									</div>
 									<div class="form-group">
