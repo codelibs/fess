@@ -34,7 +34,6 @@
 				<Pattern>${log.pattern}</Pattern>
 			</PatternLayout>
 			<Policies>
-				<OnStartupTriggeringPolicy />
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
@@ -47,7 +46,6 @@
 				<Pattern>${audit.log.pattern}</Pattern>
 			</PatternLayout>
 			<Policies>
-				<OnStartupTriggeringPolicy />
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
