@@ -36,6 +36,7 @@ import org.codelibs.fess.es.config.exentity.CrawlingConfigWrapper;
 import org.codelibs.fess.es.config.exentity.DataConfig;
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
+import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,7 +200,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
     private List<Object> parseList(final InputStream is) { // TODO This function should be moved to CurlResponse
         try {
-            return JsonXContent.jsonXContent.createParser(is).list();
+            return JsonXContent.jsonXContent.createParser(NamedXContentRegistry.EMPTY, is).list();
         } catch (final Exception e) {
             logger.warn("Failed to parse a list.", e);
             return Collections.emptyList();
