@@ -74,8 +74,6 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
 
     protected abstract Extractor getExtractor(ResponseData responseData);
 
-    public boolean storeEvenIfNotExtract = false;
-
     @Override
     public ResultData transform(final ResponseData responseData) {
         if (responseData == null || !responseData.hasResponseBody()) {
