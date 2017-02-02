@@ -34,4 +34,54 @@ $(function() {
 		$(this).find('.modal-body #delete-doc-url').text(url);
 		$(this).find('.modal-footer input#docId').val(docId);
 	});
+
+	// Date range picker
+	var lang = (window.navigator.userLanguage || window.navigator.language || window.navigator.browserLanguage)
+			.substr(0, 2);
+	moment.locale(lang);
+	$('input.form-control.date').daterangepicker({
+		autoUpdateInput : false,
+		timePicker : false,
+		singleDatePicker : true,
+		locale : {
+			format : 'YYYY-MM-DD'
+		}
+	}).on('apply.daterangepicker', function(ev, picker) {
+		$(this).val(picker.startDate.format('YYYY-MM-DD'));
+	});
+	$('input.form-control.daterange').daterangepicker({
+		timePicker : false,
+		singleDatePicker : false,
+		locale : {
+			format : 'YYYY-MM-DD'
+		}
+	}).on('apply.daterangepicker', function(ev, picker) {
+		$(this).val(picker.startDate.format('YYYY-MM-DD'));
+	});
+	$('input.form-control.datetime').daterangepicker({
+		timePicker : true,
+		timePickerIncrement : 10,
+		singleDatePicker : true,
+		locale : {
+			format : 'YYYY-MM-DD HH:mm'
+		}
+	}).on('apply.daterangepicker', function(ev, picker) {
+		$(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
+	});
+	$('input.form-control.datetimerange').daterangepicker({
+		timePicker : true,
+		timePickerIncrement : 10,
+		singleDatePicker : false,
+		locale : {
+			format : 'YYYY-MM-DD HH:mm'
+		}
+	}).on('apply.daterangepicker', function(ev, picker) {
+		$(this).val(picker.startDate.format('YYYY-MM-DD HH:mm'));
+	});
+
+	// Time picker
+	$("input.form-control.time").timepicker({
+		showInputs : false
+	});
+
 });
