@@ -337,6 +337,9 @@ public abstract class AbstractFessFileTransformer extends AbstractTransformer im
             if (!fessConfig.isCrawlerIgnoreContentException()) {
                 throw e;
             }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Could not get a text.", e);
+            }
         }
         return new ExtractData();
     }
