@@ -31,6 +31,15 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. http://localhost:9201 */
     String ELASTICSEARCH_HTTP_URL = "elasticsearch.http.url";
 
+    /** The key of the configuration. e.g. true */
+    String ELASTICSEARCH_TRANSPORT_SNIFF = "elasticsearch.transport.sniff";
+
+    /** The key of the configuration. e.g. 1m */
+    String ELASTICSEARCH_TRANSPORT_ping_timeout = "elasticsearch.transport.ping_timeout";
+
+    /** The key of the configuration. e.g. 5s */
+    String ELASTICSEARCH_TRANSPORT_nodes_sampler_interval = "elasticsearch.transport.nodes_sampler_interval";
+
     /** The key of the configuration. e.g. aes */
     String APP_CIPHER_ALGORISM = "app.cipher.algorism";
 
@@ -1130,6 +1139,34 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getElasticsearchHttpUrl();
+
+    /**
+     * Get the value for the key 'elasticsearch.transport.sniff'. <br>
+     * The value is, e.g. true <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchTransportSniff();
+
+    /**
+     * Is the property for the key 'elasticsearch.transport.sniff' true? <br>
+     * The value is, e.g. true <br>
+     * @return The determination, true or false. (if not found, exception but basically no way)
+     */
+    boolean isElasticsearchTransportSniff();
+
+    /**
+     * Get the value for the key 'elasticsearch.transport.ping_timeout'. <br>
+     * The value is, e.g. 1m <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchTransportPingTimeout();
+
+    /**
+     * Get the value for the key 'elasticsearch.transport.nodes_sampler_interval'. <br>
+     * The value is, e.g. 5s <br>
+     * @return The value of found property. (NotNull: if not found, exception but basically no way)
+     */
+    String getElasticsearchTransportNodesSamplerInterval();
 
     /**
      * Get the value for the key 'app.cipher.algorism'. <br>
@@ -4515,6 +4552,22 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
         public String getElasticsearchHttpUrl() {
             return get(FessConfig.ELASTICSEARCH_HTTP_URL);
+        }
+
+        public String getElasticsearchTransportSniff() {
+            return get(FessConfig.ELASTICSEARCH_TRANSPORT_SNIFF);
+        }
+
+        public boolean isElasticsearchTransportSniff() {
+            return is(FessConfig.ELASTICSEARCH_TRANSPORT_SNIFF);
+        }
+
+        public String getElasticsearchTransportPingTimeout() {
+            return get(FessConfig.ELASTICSEARCH_TRANSPORT_ping_timeout);
+        }
+
+        public String getElasticsearchTransportNodesSamplerInterval() {
+            return get(FessConfig.ELASTICSEARCH_TRANSPORT_nodes_sampler_interval);
         }
 
         public String getAppCipherAlgorism() {

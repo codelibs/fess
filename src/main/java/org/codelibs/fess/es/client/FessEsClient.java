@@ -257,6 +257,9 @@ public class FessEsClient implements Client {
         } else {
             final Builder settingsBuilder = Settings.builder();
             settingsBuilder.put("cluster.name", fessConfig.getElasticsearchClusterName());
+            settingsBuilder.put("client.transport.sniff", fessConfig.isElasticsearchTransportSniff());
+            settingsBuilder.put("client.transport.ping_timeout", fessConfig.getElasticsearchTransportPingTimeout());
+            settingsBuilder.put("client.transport.nodes_sampler_interval", fessConfig.getElasticsearchTransportNodesSamplerInterval());
             final Settings settings = settingsBuilder.build();
             final TransportClient transportClient = new PreBuiltTransportClient(settings);
             for (final TransportAddress address : transportAddressList) {
