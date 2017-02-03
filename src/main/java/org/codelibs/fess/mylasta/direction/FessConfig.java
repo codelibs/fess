@@ -166,7 +166,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. false */
     String CRAWLER_IGNORE_META_ROBOTS = "crawler.ignore.meta.robots";
 
-    /** The key of the configuration. e.g. true */
+    /** The key of the configuration. e.g. false */
     String CRAWLER_IGNORE_CONTENT_EXCEPTION = "crawler.ignore.content.exception";
 
     /** The key of the configuration. e.g. resourceName,X-Parsed-By,Content-Encoding.*,Content-Type.* */
@@ -1490,14 +1490,14 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'crawler.ignore.content.exception'. <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getCrawlerIgnoreContentException();
 
     /**
      * Is the property for the key 'crawler.ignore.content.exception' true? <br>
-     * The value is, e.g. true <br>
+     * The value is, e.g. false <br>
      * @return The determination, true or false. (if not found, exception but basically no way)
      */
     boolean isCrawlerIgnoreContentException();
