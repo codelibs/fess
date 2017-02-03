@@ -58,8 +58,8 @@
 										<label for="gidNumber" class="col-sm-3 control-label"><la:message
 												key="labels.group_gidNumber" /></label>
 										<div class="col-sm-9">
-											<la:errors property="gidNumber" />
-											<la:text property="gidNumber" styleClass="form-control" />
+											<la:errors property="attributes.gidNumber" />
+											<la:text property="attributes.gidNumber" styleClass="form-control" />
 										</div>
 									</div>
 								</div>

@@ -15,11 +15,31 @@
  */
 package org.codelibs.fess.es.user.exbhv;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.user.bsbhv.BsRoleBhv;
+import org.codelibs.fess.es.user.exentity.Role;
+import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class RoleBhv extends BsRoleBhv {
-
+    @Override
+    protected <RESULT extends Role> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        try {
+            final RESULT result = entityType.newInstance();
+            result.setName(DfTypeUtil.toString(source.get("name")));
+            result.setAttributes(source.entrySet().stream().filter(e -> !"name".equals(e.getKey()))
+                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
+                    .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
+    }
 }

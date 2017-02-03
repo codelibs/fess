@@ -54,7 +54,7 @@
 											</tr>
 											<tr>
 												<th class="col-xs-2"><la:message key="labels.group_gidNumber" /></th>
-												<td>${f:h(gidNumber)}<la:hidden property="gidNumber" /></td>
+												<td>${f:h(attributes.gidNumber)}<la:hidden property="attributes.gidNumber" /></td>
 											</tr>
 										</tbody>
 									</table>

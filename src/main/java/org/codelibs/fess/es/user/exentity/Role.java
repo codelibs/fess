@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.es.user.exentity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codelibs.fess.es.user.bsentity.BsRole;
 
 /**
@@ -23,6 +26,8 @@ import org.codelibs.fess.es.user.bsentity.BsRole;
 public class Role extends BsRole {
 
     private static final long serialVersionUID = 1L;
+
+    private Map<String, String> attributes;
 
     public Long getVersionNo() {
         return asDocMeta().version();
@@ -43,5 +48,25 @@ public class Role extends BsRole {
     @Override
     public String toString() {
         return "Role [name=" + name + "]";
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        if (attributes != null) {
+            sourceMap.putAll(attributes);
+        }
+        return sourceMap;
     }
 }

@@ -20,7 +20,9 @@ import static org.codelibs.core.stream.StreamUtil.stream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.entity.FessUser;
@@ -36,6 +38,8 @@ public class User extends BsUser implements FessUser {
     private static final long serialVersionUID = 1L;
 
     private String originalPassword;
+
+    private Map<String, String> attributes;
 
     public Long getVersionNo() {
         return asDocMeta().version();
@@ -96,4 +100,32 @@ public class User extends BsUser implements FessUser {
         return true;
     }
 
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (name != null) {
+            sourceMap.put("name", name);
+        }
+        if (password != null) {
+            sourceMap.put("password", password);
+        }
+        if (groups != null) {
+            sourceMap.put("groups", groups);
+        }
+        if (roles != null) {
+            sourceMap.put("roles", roles);
+        }
+        if (attributes != null) {
+            sourceMap.putAll(attributes);
+        }
+        return sourceMap;
+    }
 }

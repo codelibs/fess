@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.app.web.admin.role;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.Size;
 
 import org.lastaflute.web.validation.Required;
@@ -32,6 +35,8 @@ public class CreateForm {
     @Required
     @Size(max = 100)
     public String name;
+
+    public Map<String, String> attributes = new HashMap<>();
 
     public void initialize() {
     }

@@ -15,11 +15,45 @@
  */
 package org.codelibs.fess.es.user.exbhv;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.user.bsbhv.BsUserBhv;
+import org.codelibs.fess.es.user.exentity.User;
+import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class UserBhv extends BsUserBhv {
+
+    private static final String ROLES = "roles";
+    private static final String GROUPS = "groups";
+    private static final String PASSWORD = "password";
+    private static final String NAME = "name";
+
+    @Override
+    protected <RESULT extends User> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        try {
+            final RESULT result = entityType.newInstance();
+            result.setName(DfTypeUtil.toString(source.get(NAME)));
+            result.setPassword(DfTypeUtil.toString(source.get(PASSWORD)));
+            result.setGroups(toStringArray(source.get(GROUPS)));
+            result.setRoles(toStringArray(source.get(ROLES)));
+            result.setAttributes(source.entrySet().stream().filter(e -> isAttribute(e.getKey()))
+                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
+                    .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
+    }
+
+    private boolean isAttribute(final String key) {
+        return !NAME.equals(key) && !PASSWORD.equals(key) && !GROUPS.equals(key) && !ROLES.equals(key);
+    }
 
 }
