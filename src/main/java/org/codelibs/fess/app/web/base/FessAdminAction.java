@@ -49,9 +49,6 @@ public abstract class FessAdminAction extends FessBaseAction {
     protected SystemHelper systemHelper;
 
     @Resource
-    private MessageManager messageManager;
-
-    @Resource
     private RequestManager requestManager;
 
     // ===================================================================================
@@ -89,11 +86,7 @@ public abstract class FessAdminAction extends FessBaseAction {
     @SuppressWarnings("unchecked")
     @Override
     protected <MESSAGES extends UserMessages> ActionValidator<MESSAGES> createValidator(Class<?>... groups) { // for explicit groups
-        return systemHelper.createValidator(messageManager // to get validation message
-                , () -> requestManager.getUserLocale() // used with messageManager
-                , () -> (MESSAGES) createMessages() // for new user messages
-                , () -> handleApiValidationError() // apiFailureHook
-                , groups);
+        return systemHelper.createValidator(requestManager, () -> (MESSAGES) createMessages(), groups);
     }
 
     // ===================================================================================
