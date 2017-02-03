@@ -25,7 +25,6 @@ import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalThing;
-import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
