@@ -53,6 +53,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,6 +165,8 @@ public class SuggestHelper {
                             reader.setQuery(QueryBuilders.functionScoreQuery(QueryBuilders.matchAllQuery(),
                                     flist.toArray(new FunctionScoreQueryBuilder.FilterFunctionBuilder[flist.size()])).boostMode(
                                     CombineFunction.MULTIPLY));
+                            reader.addSort(SortBuilders.fieldSort(fessConfig.getIndexFieldClickCount()));
+                            reader.addSort(SortBuilders.scoreSort());
                             return reader;
                         }, 2, fessConfig.getSuggestUpdateRequestIntervalAsInteger().longValue()).then(response -> {
                     suggester.refresh();
