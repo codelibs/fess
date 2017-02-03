@@ -56,7 +56,7 @@ public class CrawlingInfoHelper {
 
     protected int maxSessionIdsInList;
 
-    protected int urlIdPrefixLength = 445;;
+    protected int urlIdPrefixLength = 445;
 
     protected CrawlingInfoService getCrawlingInfoService() {
         return ComponentUtil.getComponent(CrawlingInfoService.class);
