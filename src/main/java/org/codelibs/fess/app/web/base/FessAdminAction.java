@@ -25,11 +25,15 @@ import org.codelibs.core.beans.util.CopyOptions;
 import org.codelibs.fess.exception.UserRoleLoginException;
 import org.codelibs.fess.helper.SystemHelper;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.MessageManager;
+import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.di.util.LdiFileUtil;
 import org.lastaflute.web.login.LoginManager;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.util.LaServletContextUtil;
+import org.lastaflute.web.validation.ActionValidator;
 
 /**
  * @author codelibs
@@ -43,6 +47,12 @@ public abstract class FessAdminAction extends FessBaseAction {
 
     @Resource
     protected SystemHelper systemHelper;
+
+    @Resource
+    private MessageManager messageManager;
+
+    @Resource
+    private RequestManager requestManager;
 
     // ===================================================================================
     //                                                                        Small Helper
@@ -74,6 +84,16 @@ public abstract class FessAdminAction extends FessBaseAction {
             current = current.getCause();
         }
         return buf.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected <MESSAGES extends UserMessages> ActionValidator<MESSAGES> createValidator(Class<?>... groups) { // for explicit groups
+        return systemHelper.createValidator(messageManager // to get validation message
+                , () -> requestManager.getUserLocale() // used with messageManager
+                , () -> (MESSAGES) createMessages() // for new user messages
+                , () -> handleApiValidationError() // apiFailureHook
+                , groups);
     }
 
     // ===================================================================================
