@@ -44,11 +44,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
 import org.codelibs.fess.crawler.util.CharUtil;
+import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.codelibs.fess.validation.FessActionValidator;
 import org.lastaflute.core.message.MessageManager;
-import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.core.message.supplier.MessageLocaleProvider;
 import org.lastaflute.core.message.supplier.UserMessagesCreator;
 import org.lastaflute.web.TypicalAction;
@@ -322,10 +323,10 @@ public class SystemHelper {
         return previousClusterState.getAndSet(status) != status;
     }
 
-    public <MESSAGES extends UserMessages> ActionValidator<MESSAGES> createValidator(MessageManager messageManager,
-            MessageLocaleProvider messageLocaleProvider, UserMessagesCreator<MESSAGES> userMessagesCreator, VaErrorHook apiFailureHook,
-            Class<?>... runtimeGroups) {
-        return new ActionValidator<MESSAGES>(messageManager, messageLocaleProvider, userMessagesCreator, apiFailureHook, runtimeGroups);
+    public ActionValidator<FessMessages> createValidator(MessageManager messageManager, MessageLocaleProvider messageLocaleProvider,
+            UserMessagesCreator<FessMessages> userMessagesCreator, VaErrorHook apiFailureHook, Class<?>... runtimeGroups) {
+        return new FessActionValidator<FessMessages>(messageManager, messageLocaleProvider, userMessagesCreator, apiFailureHook,
+                runtimeGroups);
     }
 
 }

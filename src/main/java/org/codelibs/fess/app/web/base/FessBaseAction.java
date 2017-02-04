@@ -19,17 +19,20 @@ import javax.annotation.Resource;
 
 import org.codelibs.fess.app.web.base.login.FessLoginAssist;
 import org.codelibs.fess.helper.ActivityHelper;
+import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.mylasta.action.FessHtmlPath;
 import org.codelibs.fess.mylasta.action.FessMessages;
 import org.codelibs.fess.mylasta.action.FessUserBean;
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.dbflute.hook.AccessContext;
 import org.dbflute.optional.OptionalThing;
+import org.lastaflute.core.message.MessageManager;
 import org.lastaflute.core.time.TimeManager;
 import org.lastaflute.db.dbflute.accesscontext.AccessContextArranger;
 import org.lastaflute.web.TypicalAction;
 import org.lastaflute.web.response.ActionResponse;
 import org.lastaflute.web.ruts.process.ActionRuntime;
+import org.lastaflute.web.servlet.request.RequestManager;
 import org.lastaflute.web.servlet.request.ResponseManager;
 import org.lastaflute.web.servlet.session.SessionManager;
 import org.lastaflute.web.validation.ActionValidator;
@@ -71,6 +74,15 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
 
     @Resource
     protected TimeManager timeManager;
+
+    @Resource
+    protected SystemHelper systemHelper;
+
+    @Resource
+    private MessageManager messageManager;
+
+    @Resource
+    private RequestManager requestManager;
 
     // ===================================================================================
     //                                                                               Hook
@@ -141,7 +153,11 @@ public abstract class FessBaseAction extends TypicalAction // has several interf
     @SuppressWarnings("unchecked")
     @Override
     public ActionValidator<FessMessages> createValidator() {
-        return super.createValidator();
+        return systemHelper.createValidator(messageManager // to get validation message
+                , () -> requestManager.getUserLocale() // used with messageManager
+                , () -> createMessages() // for new user messages
+                , () -> handleApiValidationError() // apiFailureHook
+                , myValidationGroups());
     }
 
     @Override
