@@ -30,11 +30,6 @@
 	background-color: #f5f5f5;
 }
 
-.logo-mini img {
-	width: 80%;
-	height: 80%;
-}
-
 .logo-lg img {
 	width: 50%;
 	height: 50%;
@@ -44,7 +39,7 @@
 	margin: 20px 0;
 }
 
-.sidebar-mini.sidebar-collapse .main-header .logo>.logo-mini {
+.sidebar-mini.sidebar-collapse .main-header {
 	font-size: 13px;
 }
 
