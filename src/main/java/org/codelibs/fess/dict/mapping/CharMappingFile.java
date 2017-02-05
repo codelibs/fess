@@ -39,8 +39,12 @@ import org.codelibs.fess.Constants;
 import org.codelibs.fess.dict.DictionaryException;
 import org.codelibs.fess.dict.DictionaryFile;
 import org.dbflute.optional.OptionalEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CharMappingFile extends DictionaryFile<CharMappingItem> {
+    private static final Logger logger = LoggerFactory.getLogger(CharMappingFile.class);
+
     private static final String MAPPING = "mapping";
 
     List<CharMappingItem> mappingItemList;
@@ -124,10 +128,10 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 // Remove comments
-                line = line.replaceAll("#.*$", StringUtil.EMPTY);
+                final String replacedLine = line.replaceAll("#.*$", StringUtil.EMPTY).trim();
 
                 // Skip empty lines or comment lines
-                if (line.trim().length() == 0) {
+                if (replacedLine.length() == 0) {
                     if (updater != null) {
                         updater.write(line);
                     }
@@ -137,17 +141,25 @@ public class CharMappingFile extends DictionaryFile<CharMappingItem> {
                 String[] inputs;
                 String output;
 
-                final Matcher m = parsePattern.matcher(line.trim());
+                final Matcher m = parsePattern.matcher(replacedLine);
 
                 if (!m.find()) {
-                    throw new DictionaryException("Failed to parse " + path);
+                    logger.warn("Failed to parse " + line + " in " + path);
+                    if (updater != null) {
+                        updater.write("# " + line);
+                    }
+                    continue;
                 }
 
                 inputs = m.group(1).trim().split(",");
                 output = m.group(2).trim();
 
                 if (inputs == null || output == null || inputs.length == 0) {
-                    throw new DictionaryException("Failed to parse " + path);
+                    logger.warn("Failed to parse " + line + " in " + path);
+                    if (updater != null) {
+                        updater.write("# " + line);
+                    }
+                    continue;
                 }
 
                 id++;
