@@ -60,19 +60,26 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         final String rootURL = getRootURL(paramMap);
         final String authToken = getAuthToken(paramMap);
-        final List<String> sourceLabels = getSourceLabelList(rootURL, authToken);
         final long readInterval = getReadInterval(paramMap);
 
+        // Non-emptiness Check for URL and Token
         if (rootURL.isEmpty() || authToken.isEmpty()) {
             logger.warn("parameter \"" + TOKEN_PARAM + "\" and \"" + GITBUCKET_URL_PARAM + "\" are required");
             return;
         }
 
+        // Get List of Repositories
         final List<Map<String, Object>> repositoryList = getRepositoryList(rootURL, authToken);
         if (repositoryList.isEmpty()) {
             logger.warn("Token is invalid or no Repository");
             return;
         }
+
+        // Get Labels
+        final Map<String, String> pluginInfo = getFessPluginInfo(rootURL, authToken);
+        final String sourceLabel = pluginInfo.get("source_label");
+        final String issueLabel = pluginInfo.get("issue_label");
+        final String wikiLabel = pluginInfo.get("wiki_label");
 
         final CrawlingConfig crawlingConfig = new CrawlingConfigWrapper(dataConfig) {
             @Override
@@ -91,14 +98,20 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                 return paramMap;
             }
         };
+
+        // Crawl each repository
         for (final Map<String, Object> repository : repositoryList) {
             try {
                 final String owner = (String) repository.get("owner");
                 final String name = (String) repository.get("name");
                 final String refStr = getGitRef(rootURL, authToken, owner, name, "master");
+                final int issueCount = (int) repository.get("issue_count");
+                final int pullCount = (int) repository.get("pull_count");
                 final List<String> roleList = createRoleList(owner, repository);
 
-                collectFileNames(
+                logger.info("Crawl " + owner + "/" + name);
+                // crawl and store file contents recursively
+                crawlFileContents(
                         rootURL,
                         authToken,
                         owner,
@@ -108,12 +121,29 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                         0,
                         readInterval,
                         path -> {
-                            storeFileContent(rootURL, authToken, sourceLabels, owner, name, refStr, roleList, path, crawlingConfig,
+                            storeFileContent(rootURL, authToken, sourceLabel, owner, name, refStr, roleList, path, crawlingConfig,
                                     callback, paramMap, scriptMap, defaultDataMap);
                             if (readInterval > 0) {
                                 sleep(readInterval);
                             }
                         });
+
+                logger.info("Crawl issues in " + owner + "/" + name);
+                // store issues
+                for (int issueId = 1; issueId <= issueCount + pullCount; issueId++) {
+                    storeIssueById(rootURL, authToken, issueLabel, owner, name, new Integer(issueId), roleList, crawlingConfig, callback,
+                            paramMap, scriptMap, defaultDataMap);
+
+                    if (readInterval > 0) {
+                        sleep(readInterval);
+                    }
+                }
+
+                logger.info("Crawl Wiki in " + owner + "/" + name);
+                // crawl Wiki
+                storeWikiContents(rootURL, authToken, wikiLabel, owner, name, roleList, crawlingConfig, callback, paramMap, scriptMap,
+                        defaultDataMap, readInterval);
+
             } catch (final Exception e) {
                 logger.warn("Failed to access to " + repository, e);
             }
@@ -137,6 +167,21 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             return paramMap.get(TOKEN_PARAM);
         }
         return StringUtil.EMPTY;
+    }
+
+    protected Map<String, String> getFessPluginInfo(final String rootURL, final String authToken) {
+        final String url = rootURL + "api/v3/fess/info";
+        try (CurlResponse curlResponse = Curl.get(url).header("Authorization", "token " + authToken).execute()) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            final Map<String, String> map = (Map) curlResponse.getContentAsMap();
+            assert (map.containsKey("version"));
+            assert (map.containsKey("source_label") && map.containsKey("wiki_label") & map.containsKey("issue_label"));
+            return map;
+
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + rootURL, e);
+            return Collections.emptyMap();
+        }
     }
 
     protected List<String> getSourceLabelList(final String rootURL, final String authToken) {
@@ -207,7 +252,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         }
     }
 
-    private void storeFileContent(final String rootURL, final String authToken, final List<String> sourceLabels, final String owner,
+    private void storeFileContent(final String rootURL, final String authToken, final String sourceLabel, final String owner,
             final String name, final String refStr, final List<String> roleList, final String path, final CrawlingConfig crawlingConfig,
             final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
             final Map<String, Object> defaultDataMap) {
@@ -224,7 +269,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
 
         dataMap.put("url", viewUrl);
         dataMap.put("role", roleList);
-        dataMap.put("label", sourceLabels);
+        dataMap.put("label", Collections.singletonList(sourceLabel));
 
         // TODO scriptMap
 
@@ -233,7 +278,95 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
         return;
     }
 
-    protected void collectFileNames(final String rootURL, final String authToken, final String owner, final String name,
+    private void storeIssueById(final String rootURL, final String authToken, final String issueLabel, final String owner,
+            final String name, final Integer issueId, final List<String> roleList, final CrawlingConfig crawlingConfig,
+            final IndexUpdateCallback callback, final Map<String, String> paramMap, final Map<String, String> scriptMap,
+            final Map<String, Object> defaultDataMap) {
+
+        final String issueUrl = rootURL + "api/v3/repos/" + owner + "/" + name + "/issues/" + issueId.toString();
+        // final String commentsUrl = issueUrl + "/comments";
+        final String viewUrl = rootURL + owner + "/" + name + "/issues/" + issueId.toString();
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Get a content from " + issueUrl);
+        }
+
+        final Map<String, Object> dataMap = new HashMap<>();
+        String contentStr = "";
+        dataMap.putAll(defaultDataMap);
+
+        // Get issue description
+        // FIXME: Use `ComponentUtil.getDocumentHelper().processRequest` instead of `Curl.get`
+        try (CurlResponse curlResponse = Curl.get(issueUrl).header("Authorization", "token " + authToken).execute()) {
+            final Map<String, Object> map = curlResponse.getContentAsMap();
+            dataMap.put("title", map.getOrDefault("title", ""));
+            contentStr = (String) map.getOrDefault("body", "");
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + issueUrl, e);
+        }
+
+        // FIXME: Get issue comments from `commentsUrl`
+        // How to parse JSON-style list?
+
+        dataMap.put("content", contentStr);
+        dataMap.put("url", viewUrl);
+        dataMap.put("role", roleList);
+        dataMap.put("label", Collections.singletonList(issueLabel));
+
+        // TODO scriptMap
+
+        callback.store(paramMap, dataMap);
+
+        return;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void storeWikiContents(final String rootURL, final String authToken, final String wikiLabel, final String owner,
+            final String name, final List<String> roleList, final CrawlingConfig crawlingConfig, final IndexUpdateCallback callback,
+            final Map<String, String> paramMap, final Map<String, String> scriptMap, final Map<String, Object> defaultDataMap,
+            final long readInterval) {
+        final String wikiUrl = rootURL + "api/v3/fess/" + owner + "/" + name + "/wiki";
+
+        List<String> pageList = Collections.emptyList();
+
+        // Get list of pages
+        try (CurlResponse curlResponse = Curl.get(wikiUrl).header("Authorization", "token " + authToken).execute()) {
+            final Map<String, Object> map = curlResponse.getContentAsMap();
+            pageList = (List<String>) map.get("pages");
+        } catch (final Exception e) {
+            logger.warn("Failed to access to " + wikiUrl, e);
+        }
+
+        for (String page : pageList) {
+            // FIXME: URL encoding (e.g. page name that contains spaces)
+            final String pageUrl = wikiUrl + "/contents/" + page + ".md";
+            final String viewUrl = rootURL + owner + "/" + name + "/wiki/" + page;
+
+            if (logger.isInfoEnabled()) {
+                logger.info("Get a content from " + pageUrl);
+            }
+
+            final Map<String, Object> dataMap = new HashMap<>();
+            dataMap.putAll(defaultDataMap);
+            dataMap.putAll(ComponentUtil.getDocumentHelper().processRequest(crawlingConfig, paramMap.get("crawlingInfoId"), pageUrl));
+
+            dataMap.put("url", viewUrl);
+            dataMap.put("role", roleList);
+            dataMap.put("label", Collections.singletonList(wikiLabel));
+
+            // TODO scriptMap
+
+            callback.store(paramMap, dataMap);
+            logger.info("Stored " + pageUrl);
+
+            if (readInterval > 0) {
+                sleep(readInterval);
+            }
+        }
+
+    }
+
+    protected void crawlFileContents(final String rootURL, final String authToken, final String owner, final String name,
             final String refStr, final String path, final int depth, final long readInterval, final Consumer<String> consumer) {
 
         if (MAX_DEPTH <= depth) {
@@ -258,7 +391,7 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
                     if (readInterval > 0) {
                         sleep(readInterval);
                     }
-                    collectFileNames(rootURL, authToken, owner, name, refStr, newPath, depth + 1, readInterval, consumer);
+                    crawlFileContents(rootURL, authToken, owner, name, refStr, newPath, depth + 1, readInterval, consumer);
                     break;
                 }
             }
@@ -266,5 +399,4 @@ public class GitBucketDataStoreImpl extends AbstractDataStoreImpl {
             logger.warn("Failed to access to " + url, e);
         }
     }
-
 }
