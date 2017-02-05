@@ -121,17 +121,17 @@ public class KuromojiFile extends DictionaryFile<KuromojiItem> {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 // Remove comments
-                line = line.replaceAll("#.*$", StringUtil.EMPTY);
+                final String replacedLine = line.replaceAll("#.*$", StringUtil.EMPTY).trim();
 
                 // Skip empty lines or comment lines
-                if (line.trim().length() == 0) {
+                if (replacedLine.length() == 0) {
                     if (updater != null) {
                         updater.write(line);
                     }
                     continue;
                 }
 
-                final String[] values = KuromojiCSVUtil.parse(line);
+                final String[] values = KuromojiCSVUtil.parse(replacedLine);
                 String token = null;
                 String segmentation = null;
                 String reading = null;

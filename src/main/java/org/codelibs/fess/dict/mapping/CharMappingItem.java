@@ -33,7 +33,7 @@ public class CharMappingItem extends DictionaryItem {
     public CharMappingItem(final long id, final String[] inputs, final String output) {
         this.id = id;
         this.inputs = inputs;
-        this.output = output;
+        this.output = output == null ? null : output.replace("\n", " ");
         Arrays.sort(inputs);
 
         if (id == 0) {
@@ -56,7 +56,7 @@ public class CharMappingItem extends DictionaryItem {
     }
 
     public void setNewOutput(final String newOutput) {
-        this.newOutput = newOutput;
+        this.newOutput = newOutput == null ? null : newOutput.replace("\n", " ");
     }
 
     public String[] getInputs() {
