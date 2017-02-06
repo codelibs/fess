@@ -34,6 +34,12 @@
         "char_filter" : ["mapping_char"],
         "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
       },
+      "contents_reading_analyzer" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter", "reading_form"]
+      },
       "reading_analyzer_ja" : {
         "type" : "custom",
         "tokenizer" : "fess_japanese_normal",
@@ -54,6 +60,12 @@
         "tokenizer" : "fess_japanese_normal",
         "char_filter" : ["mapping_char"],
         "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter"]
+      },
+      "contents_reading_analyzer_ja" : {
+        "type" : "custom",
+        "tokenizer" : "fess_japanese_normal",
+        "char_filter" : ["mapping_char"],
+        "filter" : ["lowercase", "stopword_en_filter", "pos_filter", "content_length_filter", "limit_token_count_filter", "reading_form"]
       },
       "reading_analyzer_en" : {
         "type" : "custom",
