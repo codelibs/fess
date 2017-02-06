@@ -127,7 +127,7 @@ public class GsaApiManager extends BaseApiManager implements WebApiManager {
             final String ie = request.getCharacterEncoding();
             final String oe = "UTF-8";
             // IP address
-            final String ip = request.getRemoteAddr();
+            final String ip = ComponentUtil.getViewHelper().getClientIp(request);
             final String start = request.getParameter("start");
             long startNumber = 1;
             if (StringUtil.isNotBlank(start)) {

@@ -102,7 +102,7 @@ public class SearchLogHelper {
         });
 
         final HttpServletRequest request = LaRequestUtil.getRequest();
-        searchLog.setClientIp(StringUtils.abbreviate(request.getRemoteAddr(), 50));
+        searchLog.setClientIp(StringUtils.abbreviate(ComponentUtil.getViewHelper().getClientIp(request), 100));
         searchLog.setReferer(StringUtils.abbreviate(request.getHeader("referer"), 1000));
         searchLog.setUserAgent(StringUtils.abbreviate(request.getHeader("user-agent"), 255));
         final Object accessType = request.getAttribute(Constants.SEARCH_LOG_ACCESS_TYPE);

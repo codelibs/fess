@@ -20,8 +20,8 @@ import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
 
-import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.mylasta.action.FessUserBean;
+import org.codelibs.fess.util.ComponentUtil;
 import org.dbflute.optional.OptionalThing;
 import org.lastaflute.web.util.LaRequestUtil;
 import org.slf4j.Logger;
@@ -88,14 +88,7 @@ public class ActivityHelper {
     }
 
     protected static String getClientIp() {
-        return LaRequestUtil.getOptionalRequest().map(req -> {
-            final String value = req.getHeader("x-forwarded-for");
-            if (StringUtil.isNotBlank(value)) {
-                return value;
-            } else {
-                return req.getRemoteAddr();
-            }
-        }).orElse("-");
+        return LaRequestUtil.getOptionalRequest().map(req -> ComponentUtil.getViewHelper().getClientIp(req)).orElse("-");
     }
 
     protected enum Action {

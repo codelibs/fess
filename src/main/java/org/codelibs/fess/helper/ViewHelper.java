@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -606,6 +607,15 @@ public class ViewHelper {
             }
         }
         response.contentType(mimeType);
+    }
+
+    public String getClientIp(final HttpServletRequest request) {
+        final String value = request.getHeader("x-forwarded-for");
+        if (StringUtil.isNotBlank(value)) {
+            return value;
+        } else {
+            return request.getRemoteAddr();
+        }
     }
 
     public boolean isUseSession() {
