@@ -15,6 +15,9 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsentity.BsClickLog;
 
 /**
@@ -23,6 +26,8 @@ import org.codelibs.fess.es.log.bsentity.BsClickLog;
 public class ClickLog extends BsClickLog {
 
     private static final long serialVersionUID = 1L;
+
+    private Map<String, String> attributes;
 
     public String getId() {
         return asDocMeta().id();
@@ -38,6 +43,44 @@ public class ClickLog extends BsClickLog {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = new HashMap<>();
+        if (queryRequestedAt != null) {
+            sourceMap.put("queryRequestedAt", queryRequestedAt);
+        }
+        if (requestedAt != null) {
+            sourceMap.put("requestedAt", requestedAt);
+        }
+        if (queryId != null) {
+            sourceMap.put("queryId", queryId);
+        }
+        if (docId != null) {
+            sourceMap.put("docId", docId);
+        }
+        if (userSessionId != null) {
+            sourceMap.put("userSessionId", userSessionId);
+        }
+        if (url != null) {
+            sourceMap.put("url", url);
+        }
+        if (order != null) {
+            sourceMap.put("order", order);
+        }
+        if (attributes != null) {
+            sourceMap.putAll(attributes);
+        }
+        return sourceMap;
     }
 
     @Override

@@ -15,11 +15,45 @@
  */
 package org.codelibs.fess.es.log.exbhv;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.codelibs.core.misc.Pair;
 import org.codelibs.fess.es.log.bsbhv.BsClickLogBhv;
+import org.codelibs.fess.es.log.exentity.ClickLog;
+import org.dbflute.exception.IllegalBehaviorStateException;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class ClickLogBhv extends BsClickLogBhv {
 
+    private static final String QUERY_REQUESTED_AT = "queryRequestedAt";
+    private static final String REQUESTED_AT = "requestedAt";
+    private static final String QUERY_ID = "queryId";
+    private static final String DOC_ID = "docId";
+    private static final String USER_SESSION_ID = "userSessionId";
+    private static final String URL = "url";
+    private static final String ORDER = "order";
+
+    @Override
+    protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
+        try {
+            final RESULT result = entityType.newInstance();
+            result.setDocId(DfTypeUtil.toString(source.get(DOC_ID)));
+            result.setAttributes(source.entrySet().stream().filter(e -> isAttribute(e.getKey()))
+                    .map(e -> new Pair<>(e.getKey(), (String) e.getValue()))
+                    .collect(Collectors.toMap(t -> t.getFirst(), t -> t.getSecond())));
+            return result;
+        } catch (InstantiationException | IllegalAccessException e) {
+            final String msg = "Cannot create a new instance: " + entityType.getName();
+            throw new IllegalBehaviorStateException(msg, e);
+        }
+    }
+
+    private boolean isAttribute(final String key) {
+        return !QUERY_REQUESTED_AT.equals(key) && !REQUESTED_AT.equals(key) && !QUERY_ID.equals(key) && !DOC_ID.equals(key)
+                && !USER_SESSION_ID.equals(key) && !URL.equals(key) && !ORDER.equals(key);
+    }
 }

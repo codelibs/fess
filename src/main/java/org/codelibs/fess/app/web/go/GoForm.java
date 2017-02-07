@@ -49,4 +49,6 @@ public class GoForm {
     public String lang;
 
     public Map<String, String[]> fields = new HashMap<>();
+
+    public Map<String, String> attributes = new HashMap<>();
 }
