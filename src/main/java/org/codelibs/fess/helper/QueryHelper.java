@@ -63,6 +63,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder.FilterFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -70,6 +71,8 @@ import org.lastaflute.core.message.UserMessages;
 import org.lastaflute.web.util.LaRequestUtil;
 
 public class QueryHelper {
+
+    private static final String ES_SCORE_FIELD = "_score";
 
     protected static final String SCORE_SORT_VALUE = "score";
 
@@ -513,7 +516,7 @@ public class QueryHelper {
             } else {
                 sortOrder = SortOrder.ASC;
             }
-            context.addSorts(SortBuilders.fieldSort(SCORE_SORT_VALUE.equals(sortField) ? "_score" : sortField).order(sortOrder));
+            context.addSorts(createFieldSortBuilder(sortField, sortOrder));
             return null;
         } else if (INURL_FIELD.equals(field)) {
             return QueryBuilders.wildcardQuery(fessConfig.getIndexFieldUrl(), "*" + text + "*").boost(boost);
@@ -768,9 +771,17 @@ public class QueryHelper {
         if (defaultSortBuilders != null) {
             stream(defaultSortBuilders).of(stream -> stream.forEach(builder -> list.add(builder)));
         }
-        list.add(SortBuilders.fieldSort(fieldName)
-                .order(SortOrder.DESC.toString().equalsIgnoreCase(order) ? SortOrder.DESC : SortOrder.ASC));
+        list.add(createFieldSortBuilder(fieldName, SortOrder.DESC.toString().equalsIgnoreCase(order) ? SortOrder.DESC : SortOrder.ASC));
         defaultSortBuilders = list.toArray(new SortBuilder[list.size()]);
+    }
+
+    protected FieldSortBuilder createFieldSortBuilder(final String field, final SortOrder order) {
+        final String fieldName = SCORE_FIELD.equals(field) ? ES_SCORE_FIELD : field;
+        FieldSortBuilder builder = SortBuilders.fieldSort(fieldName);
+        if (ES_SCORE_FIELD.equals(fieldName)) {
+            builder.unmappedType("float");
+        }
+        return builder.order(order);
     }
 
     public void setHighlightPrefix(final String highlightPrefix) {
