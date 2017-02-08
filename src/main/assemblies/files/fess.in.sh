@@ -44,6 +44,12 @@ JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
 JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
 JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
 
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.recycler.maxCapacityPerThread=0"
+
+JAVA_OPTS="$JAVA_OPTS -Dlog4j.shutdownHookEnabled=false"
+JAVA_OPTS="$JAVA_OPTS -Dlog4j2.disable.jmx=true"
+JAVA_OPTS="$JAVA_OPTS -Dlog4j.skipJansi=true"
+
 # GC logging options
 if [ "x$FESS_USE_GC_LOGGING" != "x" ]; then
   JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDetails"

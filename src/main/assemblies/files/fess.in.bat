@@ -56,6 +56,12 @@ set JAVA_OPTS=%JAVA_OPTS% -XX:+UseConcMarkSweepGC
 set JAVA_OPTS=%JAVA_OPTS% -XX:CMSInitiatingOccupancyFraction=75
 set JAVA_OPTS=%JAVA_OPTS% -XX:+UseCMSInitiatingOccupancyOnly
 
+set JAVA_OPTS=%JAVA_OPTS% -Dio.netty.recycler.maxCapacityPerThread=0
+
+set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.shutdownHookEnabled=false
+set JAVA_OPTS=%JAVA_OPTS% -Dlog4j2.disable.jmx=true
+set JAVA_OPTS=%JAVA_OPTS% -Dlog4j.skipJansi=true
+
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDetails
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCTimeStamps
 if NOT "%FESS_USE_GC_LOGGING%" == "" set JAVA_OPTS=%JAVA_OPTS% -XX:+PrintGCDateStamps
