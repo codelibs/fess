@@ -62,8 +62,6 @@ public class CrawlJob {
 
     protected String[] dataConfigIds;
 
-    protected String operation;
-
     protected String logFilePath;
 
     protected String logLevel;
@@ -88,11 +86,6 @@ public class CrawlJob {
 
     public CrawlJob namespace(final String namespace) {
         this.namespace = namespace;
-        return this;
-    }
-
-    public CrawlJob operation(final String operation) {
-        this.operation = operation;
         return this;
     }
 
@@ -145,15 +138,16 @@ public class CrawlJob {
         return this;
     }
 
+    @Deprecated
     public String execute(final JobExecutor jobExecutor) {
         jobExecutor(jobExecutor);
         return execute();
     }
 
+    @Deprecated
     public String execute(final JobExecutor jobExecutor, final String[] webConfigIds, final String[] fileConfigIds,
             final String[] dataConfigIds, final String operation) {
         jobExecutor(jobExecutor);
-        operation(operation);
         webConfigIds(webConfigIds);
         fileConfigIds(fileConfigIds);
         dataConfigIds(dataConfigIds);
@@ -161,10 +155,10 @@ public class CrawlJob {
 
     }
 
+    @Deprecated
     public String execute(final JobExecutor jobExecutor, final String sessionId, final String[] webConfigIds, final String[] fileConfigIds,
             final String[] dataConfigIds, final String operation) {
         jobExecutor(jobExecutor);
-        operation(operation);
         webConfigIds(webConfigIds);
         fileConfigIds(fileConfigIds);
         dataConfigIds(dataConfigIds);
@@ -355,10 +349,6 @@ public class CrawlJob {
         if (dataConfigIds != null && dataConfigIds.length > 0) {
             cmdList.add("-d");
             cmdList.add(StringUtils.join(dataConfigIds, ','));
-        }
-        if (StringUtil.isNotBlank(operation)) {
-            cmdList.add("-o");
-            cmdList.add(operation);
         }
         if (documentExpires >= -1) {
             cmdList.add("-e");

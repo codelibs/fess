@@ -97,7 +97,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
     /** The key of the configuration. e.g. Data Crawler - {0} */
     String JOB_TEMPLATE_TITLE_DATA = "job.template.title.data";
 
-    /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); */
+    /** The key of the configuration. e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); */
     String JOB_TEMPLATE_SCRIPT = "job.template.script";
 
     /** The key of the configuration. e.g. java */
@@ -1287,7 +1287,7 @@ public interface FessConfig extends FessEnv, org.codelibs.fess.mylasta.direction
 
     /**
      * Get the value for the key 'job.template.script'. <br>
-     * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").execute(executor, [{0}] as String[],[{1}] as String[],[{2}] as String[], ""); <br>
+     * The value is, e.g. return container.getComponent("crawlJob").logLevel("info").sessionId("{3}").webConfigIds([{0}] as String[]).fileConfigIds([{1}] as String[]).dataConfigIds([{2}] as String[]).jobExecutor(executor).execute(); <br>
      * @return The value of found property. (NotNull: if not found, exception but basically no way)
      */
     String getJobTemplateScript();
