@@ -74,21 +74,25 @@ public class BsFavoriteLog extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (createdAt != null) {
-            sourceMap.put("createdAt", createdAt);
+            addFieldToSource(sourceMap, "createdAt", createdAt);
         }
         if (url != null) {
-            sourceMap.put("url", url);
+            addFieldToSource(sourceMap, "url", url);
         }
         if (docId != null) {
-            sourceMap.put("docId", docId);
+            addFieldToSource(sourceMap, "docId", docId);
         }
         if (queryId != null) {
-            sourceMap.put("queryId", queryId);
+            addFieldToSource(sourceMap, "queryId", queryId);
         }
         if (userInfoId != null) {
-            sourceMap.put("userInfoId", userInfoId);
+            addFieldToSource(sourceMap, "userInfoId", userInfoId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

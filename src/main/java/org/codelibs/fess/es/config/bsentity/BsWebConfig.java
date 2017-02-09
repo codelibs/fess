@@ -125,72 +125,76 @@ public class BsWebConfig extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (available != null) {
-            sourceMap.put("available", available);
+            addFieldToSource(sourceMap, "available", available);
         }
         if (boost != null) {
-            sourceMap.put("boost", boost);
+            addFieldToSource(sourceMap, "boost", boost);
         }
         if (configParameter != null) {
-            sourceMap.put("configParameter", configParameter);
+            addFieldToSource(sourceMap, "configParameter", configParameter);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (depth != null) {
-            sourceMap.put("depth", depth);
+            addFieldToSource(sourceMap, "depth", depth);
         }
         if (description != null) {
-            sourceMap.put("description", description);
+            addFieldToSource(sourceMap, "description", description);
         }
         if (excludedDocUrls != null) {
-            sourceMap.put("excludedDocUrls", excludedDocUrls);
+            addFieldToSource(sourceMap, "excludedDocUrls", excludedDocUrls);
         }
         if (excludedUrls != null) {
-            sourceMap.put("excludedUrls", excludedUrls);
+            addFieldToSource(sourceMap, "excludedUrls", excludedUrls);
         }
         if (includedDocUrls != null) {
-            sourceMap.put("includedDocUrls", includedDocUrls);
+            addFieldToSource(sourceMap, "includedDocUrls", includedDocUrls);
         }
         if (includedUrls != null) {
-            sourceMap.put("includedUrls", includedUrls);
+            addFieldToSource(sourceMap, "includedUrls", includedUrls);
         }
         if (intervalTime != null) {
-            sourceMap.put("intervalTime", intervalTime);
+            addFieldToSource(sourceMap, "intervalTime", intervalTime);
         }
         if (timeToLive != null) {
-            sourceMap.put("timeToLive", timeToLive);
+            addFieldToSource(sourceMap, "timeToLive", timeToLive);
         }
         if (maxAccessCount != null) {
-            sourceMap.put("maxAccessCount", maxAccessCount);
+            addFieldToSource(sourceMap, "maxAccessCount", maxAccessCount);
         }
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (numOfThread != null) {
-            sourceMap.put("numOfThread", numOfThread);
+            addFieldToSource(sourceMap, "numOfThread", numOfThread);
         }
         if (permissions != null) {
-            sourceMap.put("permissions", permissions);
+            addFieldToSource(sourceMap, "permissions", permissions);
         }
         if (sortOrder != null) {
-            sourceMap.put("sortOrder", sortOrder);
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         if (urls != null) {
-            sourceMap.put("urls", urls);
+            addFieldToSource(sourceMap, "urls", urls);
         }
         if (userAgent != null) {
-            sourceMap.put("userAgent", userAgent);
+            addFieldToSource(sourceMap, "userAgent", userAgent);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

@@ -75,11 +75,15 @@ public abstract class BsUserInfoBhv extends EsAbstractBehavior<UserInfo, UserInf
             final RESULT result = entityType.newInstance();
             result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
             result.setUpdatedAt(DfTypeUtil.toLocalDateTime(source.get("updatedAt")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends UserInfo> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

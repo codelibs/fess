@@ -98,45 +98,49 @@ public class BsScheduledJob extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (available != null) {
-            sourceMap.put("available", available);
+            addFieldToSource(sourceMap, "available", available);
         }
         if (crawler != null) {
-            sourceMap.put("crawler", crawler);
+            addFieldToSource(sourceMap, "crawler", crawler);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (cronExpression != null) {
-            sourceMap.put("cronExpression", cronExpression);
+            addFieldToSource(sourceMap, "cronExpression", cronExpression);
         }
         if (jobLogging != null) {
-            sourceMap.put("jobLogging", jobLogging);
+            addFieldToSource(sourceMap, "jobLogging", jobLogging);
         }
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (scriptData != null) {
-            sourceMap.put("scriptData", scriptData);
+            addFieldToSource(sourceMap, "scriptData", scriptData);
         }
         if (scriptType != null) {
-            sourceMap.put("scriptType", scriptType);
+            addFieldToSource(sourceMap, "scriptType", scriptType);
         }
         if (sortOrder != null) {
-            sourceMap.put("sortOrder", sortOrder);
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
         if (target != null) {
-            sourceMap.put("target", target);
+            addFieldToSource(sourceMap, "target", target);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

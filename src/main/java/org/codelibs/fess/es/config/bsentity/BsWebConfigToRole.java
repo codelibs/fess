@@ -65,12 +65,16 @@ public class BsWebConfigToRole extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (roleTypeId != null) {
-            sourceMap.put("roleTypeId", roleTypeId);
+            addFieldToSource(sourceMap, "roleTypeId", roleTypeId);
         }
         if (webConfigId != null) {
-            sourceMap.put("webConfigId", webConfigId);
+            addFieldToSource(sourceMap, "webConfigId", webConfigId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

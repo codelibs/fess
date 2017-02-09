@@ -75,11 +75,15 @@ public abstract class BsGroupBhv extends EsAbstractBehavior<Group, GroupCB> {
             final RESULT result = entityType.newInstance();
             result.setName(DfTypeUtil.toString(source.get("name")));
             result.setGidNumber(DfTypeUtil.toLong(source.get("gidNumber")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends Group> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

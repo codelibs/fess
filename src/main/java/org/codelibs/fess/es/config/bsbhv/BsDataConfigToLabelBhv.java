@@ -75,11 +75,15 @@ public abstract class BsDataConfigToLabelBhv extends EsAbstractBehavior<DataConf
             final RESULT result = entityType.newInstance();
             result.setDataConfigId(DfTypeUtil.toString(source.get("dataConfigId")));
             result.setLabelTypeId(DfTypeUtil.toString(source.get("labelTypeId")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends DataConfigToLabel> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

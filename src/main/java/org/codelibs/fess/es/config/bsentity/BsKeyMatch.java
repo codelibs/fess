@@ -83,30 +83,34 @@ public class BsKeyMatch extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (boost != null) {
-            sourceMap.put("boost", boost);
+            addFieldToSource(sourceMap, "boost", boost);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (maxSize != null) {
-            sourceMap.put("maxSize", maxSize);
+            addFieldToSource(sourceMap, "maxSize", maxSize);
         }
         if (query != null) {
-            sourceMap.put("query", query);
+            addFieldToSource(sourceMap, "query", query);
         }
         if (term != null) {
-            sourceMap.put("term", term);
+            addFieldToSource(sourceMap, "term", term);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

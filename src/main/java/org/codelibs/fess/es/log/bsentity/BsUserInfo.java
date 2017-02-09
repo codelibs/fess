@@ -65,12 +65,16 @@ public class BsUserInfo extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (createdAt != null) {
-            sourceMap.put("createdAt", createdAt);
+            addFieldToSource(sourceMap, "createdAt", createdAt);
         }
         if (updatedAt != null) {
-            sourceMap.put("updatedAt", updatedAt);
+            addFieldToSource(sourceMap, "updatedAt", updatedAt);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

@@ -113,11 +113,15 @@ public abstract class BsUserBhv extends EsAbstractBehavior<User, UserCB> {
             result.setHomeDirectory(DfTypeUtil.toString(source.get("homeDirectory")));
             result.setGroups(toStringArray(source.get("groups")));
             result.setRoles(toStringArray(source.get("roles")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends User> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

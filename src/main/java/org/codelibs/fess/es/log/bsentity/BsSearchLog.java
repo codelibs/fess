@@ -110,57 +110,61 @@ public class BsSearchLog extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (accessType != null) {
-            sourceMap.put("accessType", accessType);
+            addFieldToSource(sourceMap, "accessType", accessType);
         }
         if (user != null) {
-            sourceMap.put("user", user);
+            addFieldToSource(sourceMap, "user", user);
         }
         if (roles != null) {
-            sourceMap.put("roles", roles);
+            addFieldToSource(sourceMap, "roles", roles);
         }
         if (queryId != null) {
-            sourceMap.put("queryId", queryId);
+            addFieldToSource(sourceMap, "queryId", queryId);
         }
         if (clientIp != null) {
-            sourceMap.put("clientIp", clientIp);
+            addFieldToSource(sourceMap, "clientIp", clientIp);
         }
         if (hitCount != null) {
-            sourceMap.put("hitCount", hitCount);
+            addFieldToSource(sourceMap, "hitCount", hitCount);
         }
         if (queryOffset != null) {
-            sourceMap.put("queryOffset", queryOffset);
+            addFieldToSource(sourceMap, "queryOffset", queryOffset);
         }
         if (queryPageSize != null) {
-            sourceMap.put("queryPageSize", queryPageSize);
+            addFieldToSource(sourceMap, "queryPageSize", queryPageSize);
         }
         if (referer != null) {
-            sourceMap.put("referer", referer);
+            addFieldToSource(sourceMap, "referer", referer);
         }
         if (requestedAt != null) {
-            sourceMap.put("requestedAt", requestedAt);
+            addFieldToSource(sourceMap, "requestedAt", requestedAt);
         }
         if (responseTime != null) {
-            sourceMap.put("responseTime", responseTime);
+            addFieldToSource(sourceMap, "responseTime", responseTime);
         }
         if (queryTime != null) {
-            sourceMap.put("queryTime", queryTime);
+            addFieldToSource(sourceMap, "queryTime", queryTime);
         }
         if (searchWord != null) {
-            sourceMap.put("searchWord", searchWord);
+            addFieldToSource(sourceMap, "searchWord", searchWord);
         }
         if (userAgent != null) {
-            sourceMap.put("userAgent", userAgent);
+            addFieldToSource(sourceMap, "userAgent", userAgent);
         }
         if (userInfoId != null) {
-            sourceMap.put("userInfoId", userInfoId);
+            addFieldToSource(sourceMap, "userInfoId", userInfoId);
         }
         if (userSessionId != null) {
-            sourceMap.put("userSessionId", userSessionId);
+            addFieldToSource(sourceMap, "userSessionId", userSessionId);
         }
         if (languages != null) {
-            sourceMap.put("languages", languages);
+            addFieldToSource(sourceMap, "languages", languages);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

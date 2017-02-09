@@ -80,27 +80,31 @@ public class BsClickLog extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (queryRequestedAt != null) {
-            sourceMap.put("queryRequestedAt", queryRequestedAt);
+            addFieldToSource(sourceMap, "queryRequestedAt", queryRequestedAt);
         }
         if (requestedAt != null) {
-            sourceMap.put("requestedAt", requestedAt);
+            addFieldToSource(sourceMap, "requestedAt", requestedAt);
         }
         if (queryId != null) {
-            sourceMap.put("queryId", queryId);
+            addFieldToSource(sourceMap, "queryId", queryId);
         }
         if (docId != null) {
-            sourceMap.put("docId", docId);
+            addFieldToSource(sourceMap, "docId", docId);
         }
         if (userSessionId != null) {
-            sourceMap.put("userSessionId", userSessionId);
+            addFieldToSource(sourceMap, "userSessionId", userSessionId);
         }
         if (url != null) {
-            sourceMap.put("url", url);
+            addFieldToSource(sourceMap, "url", url);
         }
         if (order != null) {
-            sourceMap.put("order", order);
+            addFieldToSource(sourceMap, "order", order);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

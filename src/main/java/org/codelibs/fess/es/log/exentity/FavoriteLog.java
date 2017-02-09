@@ -15,6 +15,12 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsentity.BsFavoriteLog;
 
 /**
@@ -23,6 +29,8 @@ import org.codelibs.fess.es.log.bsentity.BsFavoriteLog;
 public class FavoriteLog extends BsFavoriteLog {
 
     private static final long serialVersionUID = 1L;
+
+    private Map<String, Object> fields;
 
     public String getId() {
         return asDocMeta().id();
@@ -38,6 +46,30 @@ public class FavoriteLog extends BsFavoriteLog {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public void addField(final String key, final Object value) {
+        fields.put(key, value);
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = super.toSource();
+        if (fields != null) {
+            sourceMap.putAll(fields);
+        }
+        return sourceMap;
+    }
+
+    @Override
+    protected void addFieldToSource(final Map<String, Object> sourceMap, final String field, final Object value) {
+        if (value instanceof LocalDateTime) {
+            final LocalDateTime ldt = (LocalDateTime) value;
+            final ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+            super.addFieldToSource(sourceMap, field, DateTimeFormatter.ISO_INSTANT.format(zdt));
+        } else {
+            super.addFieldToSource(sourceMap, field, value);
+        }
     }
 
     @Override

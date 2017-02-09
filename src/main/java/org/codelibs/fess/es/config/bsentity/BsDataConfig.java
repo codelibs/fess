@@ -98,45 +98,49 @@ public class BsDataConfig extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (available != null) {
-            sourceMap.put("available", available);
+            addFieldToSource(sourceMap, "available", available);
         }
         if (boost != null) {
-            sourceMap.put("boost", boost);
+            addFieldToSource(sourceMap, "boost", boost);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (description != null) {
-            sourceMap.put("description", description);
+            addFieldToSource(sourceMap, "description", description);
         }
         if (handlerName != null) {
-            sourceMap.put("handlerName", handlerName);
+            addFieldToSource(sourceMap, "handlerName", handlerName);
         }
         if (handlerParameter != null) {
-            sourceMap.put("handlerParameter", handlerParameter);
+            addFieldToSource(sourceMap, "handlerParameter", handlerParameter);
         }
         if (handlerScript != null) {
-            sourceMap.put("handlerScript", handlerScript);
+            addFieldToSource(sourceMap, "handlerScript", handlerScript);
         }
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (permissions != null) {
-            sourceMap.put("permissions", permissions);
+            addFieldToSource(sourceMap, "permissions", permissions);
         }
         if (sortOrder != null) {
-            sourceMap.put("sortOrder", sortOrder);
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

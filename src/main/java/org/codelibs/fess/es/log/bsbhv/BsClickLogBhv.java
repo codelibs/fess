@@ -80,11 +80,15 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setOrder(DfTypeUtil.toInteger(source.get("order")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends ClickLog> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================
