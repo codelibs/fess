@@ -82,7 +82,7 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
             result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
             result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
             result.setReferer(DfTypeUtil.toString(source.get("referer")));
-            result.setRequestedAt(DfTypeUtil.toLocalDateTime(source.get("requestedAt")));
+            result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
             result.setResponseTime(DfTypeUtil.toLong(source.get("responseTime")));
             result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
             result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));

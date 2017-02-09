@@ -15,11 +15,26 @@
  */
 package org.codelibs.fess.es.log.exbhv;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import org.codelibs.fess.es.log.bsbhv.BsUserInfoBhv;
+import org.dbflute.util.DfTypeUtil;
 
 /**
  * @author FreeGen
  */
 public class UserInfoBhv extends BsUserInfoBhv {
 
+    @Override
+    protected LocalDateTime toLocalDateTime(Object value) {
+        if (value != null) {
+            Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
+            LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+            return date;
+        }
+        return DfTypeUtil.toLocalDateTime(value);
+    }
 }
