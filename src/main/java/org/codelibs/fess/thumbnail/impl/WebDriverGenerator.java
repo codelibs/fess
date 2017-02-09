@@ -68,7 +68,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
 
     protected String imageFormatName = "png";
 
-    protected long unreachableCheckInterval = 10 * 60 * 1000L;
+    protected long keepAlive = 10 * 60 * 1000L;
 
     protected long previousCheckTime = 0;
 
@@ -96,6 +96,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                 }
             }
             webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
+            previousCheckTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("WebDriver is not available for generating thumbnails.", e);
@@ -152,11 +153,12 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("WebDriver is not available.", e);
                     }
+                    previousCheckTime = 0;
+                } finally {
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-                    if (now - previousCheckTime > unreachableCheckInterval) {
+                    if (now - previousCheckTime > keepAlive) {
                         destroy();
                         startWebDriver();
-                        previousCheckTime = now;
                     }
                 }
             }
@@ -284,7 +286,12 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         this.thumbnailHeight = thumbnailHeight;
     }
 
-    public void setUnreachableCheckInterval(final long unreachableCheckInterval) {
-        this.unreachableCheckInterval = unreachableCheckInterval;
+    @Deprecated
+    public void setUnreachableCheckInterval(final long keepAlive) {
+        this.keepAlive = keepAlive;
+    }
+
+    public void setKeepAlive(long keepAlive) {
+        this.keepAlive = keepAlive;
     }
 }
