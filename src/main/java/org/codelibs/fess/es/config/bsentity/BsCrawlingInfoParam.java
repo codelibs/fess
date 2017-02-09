@@ -71,18 +71,22 @@ public class BsCrawlingInfoParam extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (crawlingInfoId != null) {
-            sourceMap.put("crawlingInfoId", crawlingInfoId);
+            addFieldToSource(sourceMap, "crawlingInfoId", crawlingInfoId);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (key != null) {
-            sourceMap.put("key", key);
+            addFieldToSource(sourceMap, "key", key);
         }
         if (value != null) {
-            sourceMap.put("value", value);
+            addFieldToSource(sourceMap, "value", value);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

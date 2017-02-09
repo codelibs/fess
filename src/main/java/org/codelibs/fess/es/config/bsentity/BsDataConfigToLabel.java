@@ -65,12 +65,16 @@ public class BsDataConfigToLabel extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (dataConfigId != null) {
-            sourceMap.put("dataConfigId", dataConfigId);
+            addFieldToSource(sourceMap, "dataConfigId", dataConfigId);
         }
         if (labelTypeId != null) {
-            sourceMap.put("labelTypeId", labelTypeId);
+            addFieldToSource(sourceMap, "labelTypeId", labelTypeId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

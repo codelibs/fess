@@ -68,15 +68,19 @@ public class BsSearchFieldLog extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (searchLogId != null) {
-            sourceMap.put("searchLogId", searchLogId);
+            addFieldToSource(sourceMap, "searchLogId", searchLogId);
         }
         if (value != null) {
-            sourceMap.put("value", value);
+            addFieldToSource(sourceMap, "value", value);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

@@ -77,24 +77,28 @@ public class BsThumbnailQueue extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (target != null) {
-            sourceMap.put("target", target);
+            addFieldToSource(sourceMap, "target", target);
         }
         if (generator != null) {
-            sourceMap.put("generator", generator);
+            addFieldToSource(sourceMap, "generator", generator);
         }
         if (path != null) {
-            sourceMap.put("path", path);
+            addFieldToSource(sourceMap, "path", path);
         }
         if (url != null) {
-            sourceMap.put("url", url);
+            addFieldToSource(sourceMap, "url", url);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

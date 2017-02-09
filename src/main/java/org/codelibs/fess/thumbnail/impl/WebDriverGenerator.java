@@ -31,8 +31,10 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.codelibs.fess.mylasta.direction.FessConfig;
 import org.codelibs.fess.util.ComponentUtil;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.TakesScreenshot;
@@ -57,18 +59,6 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     protected WebDriver webDriver;
 
     protected Capabilities webDriverCapabilities;
-
-    protected int windowWidth = 1200;
-
-    protected int windowHeight = 800;
-
-    protected int thumbnailWidth = 160;
-
-    protected int thumbnailHeight = 160;
-
-    protected String imageFormatName = "png";
-
-    protected long unreachableCheckInterval = 10 * 60 * 1000L;
 
     protected long previousCheckTime = 0;
 
@@ -95,7 +85,14 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     webDriver = new PhantomJSDriver(createDriverService(webDriverCapabilities), webDriverCapabilities);
                 }
             }
-            webDriver.manage().window().setSize(new Dimension(windowWidth, windowHeight));
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
+            webDriver
+                    .manage()
+                    .window()
+                    .setSize(
+                            new Dimension(fessConfig.getThumbnailHtmlPhantomjsWindowWidthAsInteger(), fessConfig
+                                    .getThumbnailHtmlPhantomjsWindowHeightAsInteger()));
+            previousCheckTime = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
         } catch (final Exception e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("WebDriver is not available for generating thumbnails.", e);
@@ -142,9 +139,17 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         }
 
         if (webDriver instanceof TakesScreenshot) {
+            final FessConfig fessConfig = ComponentUtil.getFessConfig();
             synchronized (this) {
                 try {
                     webDriver.get(url);
+                    if (webDriver instanceof JavascriptExecutor) {
+                        Dimension dim = webDriver.findElement(By.tagName("body")).getSize();
+                        if (dim.height >= fessConfig.getThumbnailHtmlPhantomjsMaxHeightAsInteger()) {
+                            logger.warn("Skpped Thumbnail generation " + dim + " for " + url);
+                            return false;
+                        }
+                    }
                     final File thumbnail = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
                     convert(thumbnail, outputFile);
                     return true;
@@ -152,11 +157,12 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("WebDriver is not available.", e);
                     }
+                    previousCheckTime = 0;
+                } finally {
                     final long now = ComponentUtil.getSystemHelper().getCurrentTimeAsLong();
-                    if (now - previousCheckTime > unreachableCheckInterval) {
+                    if (now - previousCheckTime > fessConfig.getThumbnailHtmlPhantomjsKeepAliveAsInteger().longValue()) {
                         destroy();
                         startWebDriver();
-                        previousCheckTime = now;
                     }
                 }
             }
@@ -175,6 +181,7 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
     }
 
     protected void convert(final File inputFile, final File outputFile) {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
         try (ImageInputStream input = ImageIO.createImageInputStream(inputFile)) {
             final Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
             if (readers.hasNext()) {
@@ -182,12 +189,15 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
                 try {
                     reader.setInput(input);
                     final ImageReadParam param = reader.getDefaultReadParam();
-                    final int samplingWidth = reader.getWidth(0) / thumbnailWidth;
-                    final int samplingHeight = reader.getHeight(0) / thumbnailHeight;
+                    final int samplingWidth = reader.getWidth(0) / fessConfig.getThumbnailHtmlPhantomjsThumbnailWidthAsInteger();
+                    final int samplingHeight = reader.getHeight(0) / fessConfig.getThumbnailHtmlPhantomjsThumbnailHeightAsInteger();
                     param.setSourceSubsampling(samplingWidth, samplingHeight, 0, 0);
-                    param.setSourceRegion(new Rectangle(windowWidth, thumbnailHeight * reader.getHeight(0) / thumbnailWidth));
+                    param.setSourceRegion(new Rectangle(fessConfig.getThumbnailHtmlPhantomjsWindowWidthAsInteger(), fessConfig
+                            .getThumbnailHtmlPhantomjsThumbnailHeightAsInteger()
+                            * reader.getHeight(0)
+                            / fessConfig.getThumbnailHtmlPhantomjsThumbnailWidthAsInteger()));
                     final BufferedImage image = reader.read(0, param);
-                    ImageIO.write(image, imageFormatName, outputFile);
+                    ImageIO.write(image, fessConfig.getThumbnailHtmlPhantomjsFormat(), outputFile);
                     image.flush();
                 } finally {
                     reader.dispose();
@@ -264,27 +274,4 @@ public class WebDriverGenerator extends BaseThumbnailGenerator {
         this.webDriverCapabilities = webDriverCapabilities;
     }
 
-    public void setWindowWidth(final int windowWidth) {
-        this.windowWidth = windowWidth;
-    }
-
-    public void setWindowHeight(final int windowHeight) {
-        this.windowHeight = windowHeight;
-    }
-
-    public void setThumbnailWidth(final int thumbnailWidth) {
-        this.thumbnailWidth = thumbnailWidth;
-    }
-
-    public void setImageFormatName(final String imageFormatName) {
-        this.imageFormatName = imageFormatName;
-    }
-
-    public void setThumbnailHeight(final int thumbnailHeight) {
-        this.thumbnailHeight = thumbnailHeight;
-    }
-
-    public void setUnreachableCheckInterval(final long unreachableCheckInterval) {
-        this.unreachableCheckInterval = unreachableCheckInterval;
-    }
 }

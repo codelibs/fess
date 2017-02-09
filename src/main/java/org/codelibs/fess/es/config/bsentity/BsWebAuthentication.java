@@ -95,42 +95,46 @@ public class BsWebAuthentication extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (authRealm != null) {
-            sourceMap.put("authRealm", authRealm);
+            addFieldToSource(sourceMap, "authRealm", authRealm);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (hostname != null) {
-            sourceMap.put("hostname", hostname);
+            addFieldToSource(sourceMap, "hostname", hostname);
         }
         if (parameters != null) {
-            sourceMap.put("parameters", parameters);
+            addFieldToSource(sourceMap, "parameters", parameters);
         }
         if (password != null) {
-            sourceMap.put("password", password);
+            addFieldToSource(sourceMap, "password", password);
         }
         if (port != null) {
-            sourceMap.put("port", port);
+            addFieldToSource(sourceMap, "port", port);
         }
         if (protocolScheme != null) {
-            sourceMap.put("protocolScheme", protocolScheme);
+            addFieldToSource(sourceMap, "protocolScheme", protocolScheme);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         if (username != null) {
-            sourceMap.put("username", username);
+            addFieldToSource(sourceMap, "username", username);
         }
         if (webConfigId != null) {
-            sourceMap.put("webConfigId", webConfigId);
+            addFieldToSource(sourceMap, "webConfigId", webConfigId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

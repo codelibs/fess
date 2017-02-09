@@ -80,11 +80,15 @@ public abstract class BsFailureUrlBhv extends EsAbstractBehavior<FailureUrl, Fai
             result.setLastAccessTime(DfTypeUtil.toLong(source.get("lastAccessTime")));
             result.setThreadName(DfTypeUtil.toString(source.get("threadName")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends FailureUrl> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

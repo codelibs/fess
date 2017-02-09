@@ -179,126 +179,130 @@ public class BsUser extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (password != null) {
-            sourceMap.put("password", password);
+            addFieldToSource(sourceMap, "password", password);
         }
         if (surname != null) {
-            sourceMap.put("surname", surname);
+            addFieldToSource(sourceMap, "surname", surname);
         }
         if (givenName != null) {
-            sourceMap.put("givenName", givenName);
+            addFieldToSource(sourceMap, "givenName", givenName);
         }
         if (employeeNumber != null) {
-            sourceMap.put("employeeNumber", employeeNumber);
+            addFieldToSource(sourceMap, "employeeNumber", employeeNumber);
         }
         if (mail != null) {
-            sourceMap.put("mail", mail);
+            addFieldToSource(sourceMap, "mail", mail);
         }
         if (telephoneNumber != null) {
-            sourceMap.put("telephoneNumber", telephoneNumber);
+            addFieldToSource(sourceMap, "telephoneNumber", telephoneNumber);
         }
         if (homePhone != null) {
-            sourceMap.put("homePhone", homePhone);
+            addFieldToSource(sourceMap, "homePhone", homePhone);
         }
         if (homePostalAddress != null) {
-            sourceMap.put("homePostalAddress", homePostalAddress);
+            addFieldToSource(sourceMap, "homePostalAddress", homePostalAddress);
         }
         if (labeledURI != null) {
-            sourceMap.put("labeledURI", labeledURI);
+            addFieldToSource(sourceMap, "labeledURI", labeledURI);
         }
         if (roomNumber != null) {
-            sourceMap.put("roomNumber", roomNumber);
+            addFieldToSource(sourceMap, "roomNumber", roomNumber);
         }
         if (description != null) {
-            sourceMap.put("description", description);
+            addFieldToSource(sourceMap, "description", description);
         }
         if (title != null) {
-            sourceMap.put("title", title);
+            addFieldToSource(sourceMap, "title", title);
         }
         if (pager != null) {
-            sourceMap.put("pager", pager);
+            addFieldToSource(sourceMap, "pager", pager);
         }
         if (street != null) {
-            sourceMap.put("street", street);
+            addFieldToSource(sourceMap, "street", street);
         }
         if (postalCode != null) {
-            sourceMap.put("postalCode", postalCode);
+            addFieldToSource(sourceMap, "postalCode", postalCode);
         }
         if (physicalDeliveryOfficeName != null) {
-            sourceMap.put("physicalDeliveryOfficeName", physicalDeliveryOfficeName);
+            addFieldToSource(sourceMap, "physicalDeliveryOfficeName", physicalDeliveryOfficeName);
         }
         if (destinationIndicator != null) {
-            sourceMap.put("destinationIndicator", destinationIndicator);
+            addFieldToSource(sourceMap, "destinationIndicator", destinationIndicator);
         }
         if (internationaliSDNNumber != null) {
-            sourceMap.put("internationaliSDNNumber", internationaliSDNNumber);
+            addFieldToSource(sourceMap, "internationaliSDNNumber", internationaliSDNNumber);
         }
         if (state != null) {
-            sourceMap.put("state", state);
+            addFieldToSource(sourceMap, "state", state);
         }
         if (employeeType != null) {
-            sourceMap.put("employeeType", employeeType);
+            addFieldToSource(sourceMap, "employeeType", employeeType);
         }
         if (facsimileTelephoneNumber != null) {
-            sourceMap.put("facsimileTelephoneNumber", facsimileTelephoneNumber);
+            addFieldToSource(sourceMap, "facsimileTelephoneNumber", facsimileTelephoneNumber);
         }
         if (postOfficeBox != null) {
-            sourceMap.put("postOfficeBox", postOfficeBox);
+            addFieldToSource(sourceMap, "postOfficeBox", postOfficeBox);
         }
         if (initials != null) {
-            sourceMap.put("initials", initials);
+            addFieldToSource(sourceMap, "initials", initials);
         }
         if (carLicense != null) {
-            sourceMap.put("carLicense", carLicense);
+            addFieldToSource(sourceMap, "carLicense", carLicense);
         }
         if (mobile != null) {
-            sourceMap.put("mobile", mobile);
+            addFieldToSource(sourceMap, "mobile", mobile);
         }
         if (postalAddress != null) {
-            sourceMap.put("postalAddress", postalAddress);
+            addFieldToSource(sourceMap, "postalAddress", postalAddress);
         }
         if (city != null) {
-            sourceMap.put("city", city);
+            addFieldToSource(sourceMap, "city", city);
         }
         if (teletexTerminalIdentifier != null) {
-            sourceMap.put("teletexTerminalIdentifier", teletexTerminalIdentifier);
+            addFieldToSource(sourceMap, "teletexTerminalIdentifier", teletexTerminalIdentifier);
         }
         if (x121Address != null) {
-            sourceMap.put("x121Address", x121Address);
+            addFieldToSource(sourceMap, "x121Address", x121Address);
         }
         if (businessCategory != null) {
-            sourceMap.put("businessCategory", businessCategory);
+            addFieldToSource(sourceMap, "businessCategory", businessCategory);
         }
         if (registeredAddress != null) {
-            sourceMap.put("registeredAddress", registeredAddress);
+            addFieldToSource(sourceMap, "registeredAddress", registeredAddress);
         }
         if (displayName != null) {
-            sourceMap.put("displayName", displayName);
+            addFieldToSource(sourceMap, "displayName", displayName);
         }
         if (preferredLanguage != null) {
-            sourceMap.put("preferredLanguage", preferredLanguage);
+            addFieldToSource(sourceMap, "preferredLanguage", preferredLanguage);
         }
         if (departmentNumber != null) {
-            sourceMap.put("departmentNumber", departmentNumber);
+            addFieldToSource(sourceMap, "departmentNumber", departmentNumber);
         }
         if (uidNumber != null) {
-            sourceMap.put("uidNumber", uidNumber);
+            addFieldToSource(sourceMap, "uidNumber", uidNumber);
         }
         if (gidNumber != null) {
-            sourceMap.put("gidNumber", gidNumber);
+            addFieldToSource(sourceMap, "gidNumber", gidNumber);
         }
         if (homeDirectory != null) {
-            sourceMap.put("homeDirectory", homeDirectory);
+            addFieldToSource(sourceMap, "homeDirectory", homeDirectory);
         }
         if (groups != null) {
-            sourceMap.put("groups", groups);
+            addFieldToSource(sourceMap, "groups", groups);
         }
         if (roles != null) {
-            sourceMap.put("roles", roles);
+            addFieldToSource(sourceMap, "roles", roles);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

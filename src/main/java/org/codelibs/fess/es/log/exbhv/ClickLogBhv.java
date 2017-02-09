@@ -15,11 +15,35 @@
  */
 package org.codelibs.fess.es.log.exbhv;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import org.codelibs.fess.es.log.bsbhv.BsClickLogBhv;
+import org.dbflute.util.DfTypeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author FreeGen
  */
 public class ClickLogBhv extends BsClickLogBhv {
+    private static final Logger logger = LoggerFactory.getLogger(ClickLogBhv.class);
+
+    @Override
+    protected LocalDateTime toLocalDateTime(Object value) {
+        if (value != null) {
+            try {
+                Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(value.toString()));
+                LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                return date;
+            } catch (final DateTimeParseException e) {
+                logger.debug("Invalid date format: " + value, e);
+            }
+        }
+        return DfTypeUtil.toLocalDateTime(value);
+    }
 
 }

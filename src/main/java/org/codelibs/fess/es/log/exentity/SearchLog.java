@@ -15,9 +15,14 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.codelibs.core.lang.StringUtil;
 import org.codelibs.fess.Constants;
@@ -37,6 +42,8 @@ public class SearchLog extends BsSearchLog {
     private List<SearchFieldLog> searchFieldLogList;
 
     private OptionalEntity<UserInfo> userInfo;
+
+    private Map<String, Object> fields;
 
     public String getId() {
         return asDocMeta().id();
@@ -97,6 +104,30 @@ public class SearchLog extends BsSearchLog {
             });
         }
         return searchFieldLogList;
+    }
+
+    public void addField(final String key, final Object value) {
+        fields.put(key, value);
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = super.toSource();
+        if (fields != null) {
+            sourceMap.putAll(fields);
+        }
+        return sourceMap;
+    }
+
+    @Override
+    protected void addFieldToSource(final Map<String, Object> sourceMap, final String field, final Object value) {
+        if (value instanceof LocalDateTime) {
+            final LocalDateTime ldt = (LocalDateTime) value;
+            final ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+            super.addFieldToSource(sourceMap, field, DateTimeFormatter.ISO_INSTANT.format(zdt));
+        } else {
+            super.addFieldToSource(sourceMap, field, value);
+        }
     }
 
     @Override

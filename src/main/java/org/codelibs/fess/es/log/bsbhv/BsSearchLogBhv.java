@@ -82,7 +82,7 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
             result.setQueryOffset(DfTypeUtil.toInteger(source.get("queryOffset")));
             result.setQueryPageSize(DfTypeUtil.toInteger(source.get("queryPageSize")));
             result.setReferer(DfTypeUtil.toString(source.get("referer")));
-            result.setRequestedAt(DfTypeUtil.toLocalDateTime(source.get("requestedAt")));
+            result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
             result.setResponseTime(DfTypeUtil.toLong(source.get("responseTime")));
             result.setQueryTime(DfTypeUtil.toLong(source.get("queryTime")));
             result.setSearchWord(DfTypeUtil.toString(source.get("searchWord")));
@@ -90,11 +90,15 @@ public abstract class BsSearchLogBhv extends EsAbstractBehavior<SearchLog, Searc
             result.setUserInfoId(DfTypeUtil.toString(source.get("userInfoId")));
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             result.setLanguages(DfTypeUtil.toString(source.get("languages")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends SearchLog> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

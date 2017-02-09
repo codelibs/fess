@@ -65,12 +65,16 @@ public class BsDataConfigToRole extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (dataConfigId != null) {
-            sourceMap.put("dataConfigId", dataConfigId);
+            addFieldToSource(sourceMap, "dataConfigId", dataConfigId);
         }
         if (roleTypeId != null) {
-            sourceMap.put("roleTypeId", roleTypeId);
+            addFieldToSource(sourceMap, "roleTypeId", roleTypeId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

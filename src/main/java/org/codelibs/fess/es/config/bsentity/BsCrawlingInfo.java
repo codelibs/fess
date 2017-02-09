@@ -71,18 +71,22 @@ public class BsCrawlingInfo extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (expiredTime != null) {
-            sourceMap.put("expiredTime", expiredTime);
+            addFieldToSource(sourceMap, "expiredTime", expiredTime);
         }
         if (name != null) {
-            sourceMap.put("name", name);
+            addFieldToSource(sourceMap, "name", name);
         }
         if (sessionId != null) {
-            sourceMap.put("sessionId", sessionId);
+            addFieldToSource(sourceMap, "sessionId", sessionId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

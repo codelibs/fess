@@ -65,12 +65,16 @@ public class BsLabelToRole extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (labelTypeId != null) {
-            sourceMap.put("labelTypeId", labelTypeId);
+            addFieldToSource(sourceMap, "labelTypeId", labelTypeId);
         }
         if (roleTypeId != null) {
-            sourceMap.put("roleTypeId", roleTypeId);
+            addFieldToSource(sourceMap, "roleTypeId", roleTypeId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

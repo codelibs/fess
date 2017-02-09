@@ -31,7 +31,6 @@ import org.dbflute.cbean.result.ListResultBean;
 import org.dbflute.cbean.result.PagingResultBean;
 import org.dbflute.exception.IllegalBehaviorStateException;
 import org.dbflute.optional.OptionalEntity;
-import org.dbflute.util.DfTypeUtil;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -73,13 +72,17 @@ public abstract class BsUserInfoBhv extends EsAbstractBehavior<UserInfo, UserInf
     protected <RESULT extends UserInfo> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setCreatedAt(DfTypeUtil.toLocalDateTime(source.get("createdAt")));
-            result.setUpdatedAt(DfTypeUtil.toLocalDateTime(source.get("updatedAt")));
-            return result;
+            result.setCreatedAt(toLocalDateTime(source.get("createdAt")));
+            result.setUpdatedAt(toLocalDateTime(source.get("updatedAt")));
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends UserInfo> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

@@ -73,18 +73,22 @@ public abstract class BsClickLogBhv extends EsAbstractBehavior<ClickLog, ClickLo
     protected <RESULT extends ClickLog> RESULT createEntity(Map<String, Object> source, Class<? extends RESULT> entityType) {
         try {
             final RESULT result = entityType.newInstance();
-            result.setQueryRequestedAt(DfTypeUtil.toLocalDateTime(source.get("queryRequestedAt")));
-            result.setRequestedAt(DfTypeUtil.toLocalDateTime(source.get("requestedAt")));
+            result.setQueryRequestedAt(toLocalDateTime(source.get("queryRequestedAt")));
+            result.setRequestedAt(toLocalDateTime(source.get("requestedAt")));
             result.setQueryId(DfTypeUtil.toString(source.get("queryId")));
             result.setDocId(DfTypeUtil.toString(source.get("docId")));
             result.setUserSessionId(DfTypeUtil.toString(source.get("userSessionId")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
             result.setOrder(DfTypeUtil.toInteger(source.get("order")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends ClickLog> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

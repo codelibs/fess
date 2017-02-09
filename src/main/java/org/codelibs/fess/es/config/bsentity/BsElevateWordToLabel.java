@@ -65,12 +65,16 @@ public class BsElevateWordToLabel extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (elevateWordId != null) {
-            sourceMap.put("elevateWordId", elevateWordId);
+            addFieldToSource(sourceMap, "elevateWordId", elevateWordId);
         }
         if (labelTypeId != null) {
-            sourceMap.put("labelTypeId", labelTypeId);
+            addFieldToSource(sourceMap, "labelTypeId", labelTypeId);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

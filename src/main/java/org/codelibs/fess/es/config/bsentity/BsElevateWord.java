@@ -89,36 +89,40 @@ public class BsElevateWord extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (boost != null) {
-            sourceMap.put("boost", boost);
+            addFieldToSource(sourceMap, "boost", boost);
         }
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (reading != null) {
-            sourceMap.put("reading", reading);
+            addFieldToSource(sourceMap, "reading", reading);
         }
         if (suggestWord != null) {
-            sourceMap.put("suggestWord", suggestWord);
+            addFieldToSource(sourceMap, "suggestWord", suggestWord);
         }
         if (targetLabel != null) {
-            sourceMap.put("targetLabel", targetLabel);
+            addFieldToSource(sourceMap, "targetLabel", targetLabel);
         }
         if (targetRole != null) {
-            sourceMap.put("targetRole", targetRole);
+            addFieldToSource(sourceMap, "targetRole", targetRole);
         }
         if (permissions != null) {
-            sourceMap.put("permissions", permissions);
+            addFieldToSource(sourceMap, "permissions", permissions);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

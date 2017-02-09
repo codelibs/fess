@@ -86,33 +86,37 @@ public class BsPathMapping extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (createdBy != null) {
-            sourceMap.put("createdBy", createdBy);
+            addFieldToSource(sourceMap, "createdBy", createdBy);
         }
         if (createdTime != null) {
-            sourceMap.put("createdTime", createdTime);
+            addFieldToSource(sourceMap, "createdTime", createdTime);
         }
         if (processType != null) {
-            sourceMap.put("processType", processType);
+            addFieldToSource(sourceMap, "processType", processType);
         }
         if (regex != null) {
-            sourceMap.put("regex", regex);
+            addFieldToSource(sourceMap, "regex", regex);
         }
         if (replacement != null) {
-            sourceMap.put("replacement", replacement);
+            addFieldToSource(sourceMap, "replacement", replacement);
         }
         if (sortOrder != null) {
-            sourceMap.put("sortOrder", sortOrder);
+            addFieldToSource(sourceMap, "sortOrder", sortOrder);
         }
         if (userAgent != null) {
-            sourceMap.put("userAgent", userAgent);
+            addFieldToSource(sourceMap, "userAgent", userAgent);
         }
         if (updatedBy != null) {
-            sourceMap.put("updatedBy", updatedBy);
+            addFieldToSource(sourceMap, "updatedBy", updatedBy);
         }
         if (updatedTime != null) {
-            sourceMap.put("updatedTime", updatedTime);
+            addFieldToSource(sourceMap, "updatedTime", updatedTime);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

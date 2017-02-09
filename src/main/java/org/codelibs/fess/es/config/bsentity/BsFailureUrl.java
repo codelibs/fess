@@ -80,27 +80,31 @@ public class BsFailureUrl extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (configId != null) {
-            sourceMap.put("configId", configId);
+            addFieldToSource(sourceMap, "configId", configId);
         }
         if (errorCount != null) {
-            sourceMap.put("errorCount", errorCount);
+            addFieldToSource(sourceMap, "errorCount", errorCount);
         }
         if (errorLog != null) {
-            sourceMap.put("errorLog", errorLog);
+            addFieldToSource(sourceMap, "errorLog", errorLog);
         }
         if (errorName != null) {
-            sourceMap.put("errorName", errorName);
+            addFieldToSource(sourceMap, "errorName", errorName);
         }
         if (lastAccessTime != null) {
-            sourceMap.put("lastAccessTime", lastAccessTime);
+            addFieldToSource(sourceMap, "lastAccessTime", lastAccessTime);
         }
         if (threadName != null) {
-            sourceMap.put("threadName", threadName);
+            addFieldToSource(sourceMap, "threadName", threadName);
         }
         if (url != null) {
-            sourceMap.put("url", url);
+            addFieldToSource(sourceMap, "url", url);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

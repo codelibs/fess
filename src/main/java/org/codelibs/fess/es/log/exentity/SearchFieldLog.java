@@ -15,6 +15,8 @@
  */
 package org.codelibs.fess.es.log.exentity;
 
+import java.util.Map;
+
 import org.codelibs.fess.es.log.bsentity.BsSearchFieldLog;
 
 /**
@@ -23,6 +25,8 @@ import org.codelibs.fess.es.log.bsentity.BsSearchFieldLog;
 public class SearchFieldLog extends BsSearchFieldLog {
 
     private static final long serialVersionUID = 1L;
+
+    private Map<String, Object> fields;
 
     public String getId() {
         return asDocMeta().id();
@@ -38,6 +42,19 @@ public class SearchFieldLog extends BsSearchFieldLog {
 
     public void setVersionNo(final Long version) {
         asDocMeta().version(version);
+    }
+
+    public void addField(final String key, final Object value) {
+        fields.put(key, value);
+    }
+
+    @Override
+    public Map<String, Object> toSource() {
+        Map<String, Object> sourceMap = super.toSource();
+        if (fields != null) {
+            sourceMap.putAll(fields);
+        }
+        return sourceMap;
     }
 
     @Override

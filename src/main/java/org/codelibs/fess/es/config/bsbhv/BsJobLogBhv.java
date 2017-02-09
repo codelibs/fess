@@ -82,11 +82,15 @@ public abstract class BsJobLogBhv extends EsAbstractBehavior<JobLog, JobLogCB> {
             result.setStartTime(DfTypeUtil.toLong(source.get("startTime")));
             result.setTarget(DfTypeUtil.toString(source.get("target")));
             result.setLastUpdated(DfTypeUtil.toLong(source.get("lastUpdated")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends JobLog> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

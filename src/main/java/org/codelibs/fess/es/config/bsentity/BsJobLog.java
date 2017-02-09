@@ -86,33 +86,37 @@ public class BsJobLog extends EsAbstractEntity {
     public Map<String, Object> toSource() {
         Map<String, Object> sourceMap = new HashMap<>();
         if (endTime != null) {
-            sourceMap.put("endTime", endTime);
+            addFieldToSource(sourceMap, "endTime", endTime);
         }
         if (jobName != null) {
-            sourceMap.put("jobName", jobName);
+            addFieldToSource(sourceMap, "jobName", jobName);
         }
         if (jobStatus != null) {
-            sourceMap.put("jobStatus", jobStatus);
+            addFieldToSource(sourceMap, "jobStatus", jobStatus);
         }
         if (scriptData != null) {
-            sourceMap.put("scriptData", scriptData);
+            addFieldToSource(sourceMap, "scriptData", scriptData);
         }
         if (scriptResult != null) {
-            sourceMap.put("scriptResult", scriptResult);
+            addFieldToSource(sourceMap, "scriptResult", scriptResult);
         }
         if (scriptType != null) {
-            sourceMap.put("scriptType", scriptType);
+            addFieldToSource(sourceMap, "scriptType", scriptType);
         }
         if (startTime != null) {
-            sourceMap.put("startTime", startTime);
+            addFieldToSource(sourceMap, "startTime", startTime);
         }
         if (target != null) {
-            sourceMap.put("target", target);
+            addFieldToSource(sourceMap, "target", target);
         }
         if (lastUpdated != null) {
-            sourceMap.put("lastUpdated", lastUpdated);
+            addFieldToSource(sourceMap, "lastUpdated", lastUpdated);
         }
         return sourceMap;
+    }
+
+    protected void addFieldToSource(Map<String, Object> sourceMap, String field, Object value) {
+        sourceMap.put(field, value);
     }
 
     // ===================================================================================

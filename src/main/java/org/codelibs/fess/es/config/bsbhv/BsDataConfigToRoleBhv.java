@@ -75,11 +75,15 @@ public abstract class BsDataConfigToRoleBhv extends EsAbstractBehavior<DataConfi
             final RESULT result = entityType.newInstance();
             result.setDataConfigId(DfTypeUtil.toString(source.get("dataConfigId")));
             result.setRoleTypeId(DfTypeUtil.toString(source.get("roleTypeId")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends DataConfigToRole> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================

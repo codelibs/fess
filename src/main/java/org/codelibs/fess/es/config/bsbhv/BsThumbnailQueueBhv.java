@@ -79,11 +79,15 @@ public abstract class BsThumbnailQueueBhv extends EsAbstractBehavior<ThumbnailQu
             result.setGenerator(DfTypeUtil.toString(source.get("generator")));
             result.setPath(DfTypeUtil.toString(source.get("path")));
             result.setUrl(DfTypeUtil.toString(source.get("url")));
-            return result;
+            return updateEntity(source, result);
         } catch (InstantiationException | IllegalAccessException e) {
             final String msg = "Cannot create a new instance: " + entityType.getName();
             throw new IllegalBehaviorStateException(msg, e);
         }
+    }
+
+    protected <RESULT extends ThumbnailQueue> RESULT updateEntity(Map<String, Object> source, RESULT result) {
+        return result;
     }
 
     // ===================================================================================
